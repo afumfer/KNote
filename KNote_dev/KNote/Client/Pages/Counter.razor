@@ -6,6 +6,8 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+<NotesList Notes="GetNotes()"/>
+
 @code {
     private int currentCount = 0;
 
@@ -13,4 +15,15 @@
     {
         currentCount++;
     }
+
+    private List<NoteInfoDto> GetNotes()
+    {
+        return new List<NoteInfoDto>()
+    {
+            new NoteInfoDto() { Topic = "<b>My personal note 1</b>", NoteNumber = 1 },
+            new NoteInfoDto() { Topic = "<i>My personal note 2</i>", NoteNumber = 2 },
+            new NoteInfoDto() { Topic = "My personal note 3", NoteNumber = 3 }
+        };
+    }
+
 }

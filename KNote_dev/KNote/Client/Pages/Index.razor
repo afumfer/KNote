@@ -1,7 +1,84 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<div>
 
-Welcome to your new app.
+    @if (Folders == null)
+    {
+        <img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" />
+        <text>Cargando ... </text>
+    }
+    else if (Folders.Count == 0)
+    {
+        <text>Folderd not found ... </text>
+    }
+    else
+    {
+        <NotesList Notes="GetNotes()"/>
+
+        <!-- Folders -->
+        <h3>Folders</h3>
+
+        @for (int i = 0; i < Folders.Count; i++)
+        {
+            <div>
+                @if (i == Folders.Count - 1)
+                {
+                    <p>** Last Folder **</p>
+                }
+                <p>@(i + 1))Folder Number: @Folders[i].FolderNumber</p>
+                <p>Name:@((MarkupString)Folders[i].Name)</p>
+            </div>
+        }
+    }
+
+</div>
 
 <SurveyPrompt Title="How is Blazor working for you?" />
+
+@code {
+
+    string name = "Armando";
+
+    private UtilsString ss = new UtilsString();
+    
+    private List<FolderInfoDto> Folders;  
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await Task.Delay(3000);
+        Folders = GetFolders();
+        Notes = GetNotes();
+        //Folders = new List<FolderInfoDto>();
+    }
+
+
+    private List<FolderInfoDto> GetFolders()
+    {
+        return new List<FolderInfoDto>()
+        {
+            new FolderInfoDto() { Name = "<b>My personal folder 1</b>", FolderNumber = 1 },
+            new FolderInfoDto() { Name = "<i>My personal folder 2</i>", FolderNumber = 2 },
+            new FolderInfoDto() { Name = "My personal folder 3", FolderNumber = 3 }
+        };
+    }
+
+
+    private List<NoteInfoDto> Notes;
+
+    private List<NoteInfoDto> GetNotes()
+    {
+        return new List<NoteInfoDto>()
+    {
+            new NoteInfoDto() { Topic = "My personal note 1", NoteNumber = 1 },
+            new NoteInfoDto() { Topic = "My personal note 2", NoteNumber = 2 },
+            new NoteInfoDto() { Topic = "My personal note 3", NoteNumber = 3 }
+        };
+    }
+
+
+    private void MyClickHandle()
+    {
+        Console.WriteLine("HelloWorld 222 ....");
+    }
+
+}

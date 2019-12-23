@@ -1,0 +1,27 @@
+﻿<div>
+
+    @if (Notes == null)
+    {
+        <img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" />
+        <text>Loading ... </text>
+    }
+    else if (Notes.Count == 0)
+    {
+        <text>Notes not found ... </text>
+    }
+    else
+    {
+        <h3>Notes --</h3>
+        @foreach (var n in Notes)
+        {
+            <NoteItem Note="n" />
+        }
+    }
+
+</div>
+
+@code {
+
+    [Parameter] public List<NoteInfoDto> Notes { get; set; }
+
+}

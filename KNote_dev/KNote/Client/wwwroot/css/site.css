@@ -24,6 +24,7 @@ app {
     height: 3.5rem;
     display: flex;
     align-items: center;
+    z-index: 3;
 }
 
 .main {
@@ -46,8 +47,8 @@ app {
     text-overflow: ellipsis;
 }
 
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+.sidebar {    
+    background-color: dimgrey;
 }
 
     .sidebar .top-row {

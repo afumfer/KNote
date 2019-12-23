@@ -1,0 +1,10 @@
+﻿
+
+<div>
+    <p><b> Note Number: </b> @Note.NoteNumber.</p>
+    <p><b> Topic: </b>@((MarkupString)Note.Topic)</p>
+</div>
+
+@code {
+    [Parameter] public NoteInfoDto Note { get; set; }
+}

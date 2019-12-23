@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\KNote.Client.csproj" />
+    <ProjectReference Include="..\DomainModel\DomainModel.csproj" />
     <ProjectReference Include="..\Shared\KNote.Shared.csproj" />
   </ItemGroup>
 
