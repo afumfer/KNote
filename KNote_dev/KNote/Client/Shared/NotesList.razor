@@ -1,27 +1,42 @@
-﻿<div>
+﻿<input type="checkbox" @bind="ShowButtons" />
+<hr />
+<EntityList List="Notes">
+    <Items Context="note">
+        <NoteItem Note="note" ShowButton="ShowButtons" OnNoteDelete="DeleteNote" />
+    </Items>
+</EntityList>
 
-    @if (Notes == null)
-    {
-        <img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" />
-        <text>Loading ... </text>
-    }
-    else if (Notes.Count == 0)
-    {
-        <text>Notes not found ... </text>
-    }
-    else
-    {
-        <h3>Notes --</h3>
-        @foreach (var n in Notes)
-        {
-            <NoteItem Note="n" />
-        }
-    }
-
-</div>
+<ModalDialog @ref="confirm" Title="KNote dialog" onConfirm="DeleteNoteConfirm" onCancel="DeleteNoteCancel">
+    <dv>Delete note <b>@(noteForDelete.Topic)</b> ?</dv>
+</ModalDialog>
 
 @code {
+    bool ShowButtons = true;
+    ModalDialog confirm;
 
     [Parameter] public List<NoteInfoDto> Notes { get; set; }
 
+
+    NoteInfoDto noteForDelete;
+
+    void DeleteNote(NoteInfoDto note)
+    {
+        noteForDelete = note;
+        confirm.Show();        
+        //Notes.Remove(note);
+        //Console.WriteLine($"Deleted note: {note.NoteNumber} -");
+    }
+
+    void DeleteNoteConfirm()
+    {
+        Notes.Remove(noteForDelete);
+        noteForDelete = null;
+        confirm.Hide();
+    }
+
+    void DeleteNoteCancel()
+    {
+        confirm.Hide();
+        noteForDelete = null;
+    }
 }

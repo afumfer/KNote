@@ -1,11 +1,20 @@
 ﻿@page "/"
+@inject IKntClientDataService dataService
 
 <div>
+    <h3>Notes 3 !! </h3>
+    <NotesList Notes="Notes" />        
+</div>
 
-    @if (Folders == null)
+<button @onclick="NewNote">New Note</button>
+
+<hr />
+
+<div>    
+    @*@if (Folders == null)
     {
         <img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" />
-        <text>Cargando ... </text>
+        <text>Loading ... </text>
     }
     else if (Folders.Count == 0)
     {
@@ -13,11 +22,7 @@
     }
     else
     {
-        <NotesList Notes="GetNotes()"/>
-
-        <!-- Folders -->
         <h3>Folders</h3>
-
         @for (int i = 0; i < Folders.Count; i++)
         {
             <div>
@@ -29,56 +34,62 @@
                 <p>Name:@((MarkupString)Folders[i].Name)</p>
             </div>
         }
-    }
-
+    }*@    
 </div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+ @*<SurveyPrompt Title="How is Blazor working for you?" />*@
 
 @code {
 
-    string name = "Armando";
-
-    private UtilsString ss = new UtilsString();
-    
-    private List<FolderInfoDto> Folders;  
+    private List<NoteInfoDto> Notes;
+    private List<FolderInfoDto> Folders;
 
     protected override async Task OnInitializedAsync()
     {
-        //await Task.Delay(3000);
-        Folders = GetFolders();
-        Notes = GetNotes();
-        //Folders = new List<FolderInfoDto>();
+        // for demo ....
+
+        await Task.Delay(1000);
+        Notes = dataService.GetNotes();
+
+        //Folders = GetFolders();
     }
 
 
-    private List<FolderInfoDto> GetFolders()
+    private void NewNote()
     {
-        return new List<FolderInfoDto>()
-        {
-            new FolderInfoDto() { Name = "<b>My personal folder 1</b>", FolderNumber = 1 },
-            new FolderInfoDto() { Name = "<i>My personal folder 2</i>", FolderNumber = 2 },
-            new FolderInfoDto() { Name = "My personal folder 3", FolderNumber = 3 }
-        };
+        Notes.Add(new NoteInfoDto() { Topic = "My personal note 4", NoteNumber = 4 });
     }
 
 
-    private List<NoteInfoDto> Notes;
+    #region Tests ....
 
-    private List<NoteInfoDto> GetNotes()
-    {
-        return new List<NoteInfoDto>()
-    {
-            new NoteInfoDto() { Topic = "My personal note 1", NoteNumber = 1 },
-            new NoteInfoDto() { Topic = "My personal note 2", NoteNumber = 2 },
-            new NoteInfoDto() { Topic = "My personal note 3", NoteNumber = 3 }
-        };
-    }
+    //private UtilsString ss = new UtilsString();
 
+    //private List<NoteInfoDto> GetNotes()
+    //{
+    //    return new List<NoteInfoDto>()
+    //{
+    //        new NoteInfoDto() { Topic = "My personal note 1", NoteNumber = 1 },
+    //        new NoteInfoDto() { Topic = "My personal note 2", NoteNumber = 2 },
+    //        new NoteInfoDto() { Topic = "My personal note 3", NoteNumber = 3 }
+    //    };
+    //}
 
-    private void MyClickHandle()
-    {
-        Console.WriteLine("HelloWorld 222 ....");
-    }
+    //private List<FolderInfoDto> GetFolders()
+    //{
+    //    return new List<FolderInfoDto>()
+    //    {
+    //        new FolderInfoDto() { Name = "<b>My personal folder 1</b>", FolderNumber = 1 },
+    //        new FolderInfoDto() { Name = "<i>My personal folder 2</i>", FolderNumber = 2 },
+    //        new FolderInfoDto() { Name = "My personal folder 3", FolderNumber = 3 }
+    //    };
+    //}
+
+    //private void MyClickHandle()
+    //{
+    //    Console.WriteLine("HelloWorld 222 ....");
+    //}
+
+    #endregion
 
 }

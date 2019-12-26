@@ -1,10 +1,23 @@
-﻿
-
-<div>
+﻿<div>
     <p><b> Note Number: </b> @Note.NoteNumber.</p>
     <p><b> Topic: </b>@((MarkupString)Note.Topic)</p>
+    @if (ShowButton)
+    {
+    <div>
+        @*<button @onclick="Delete">Delete</button>*@
+        @*<button @onclick="OnNoteDelete">Delete</button>*@
+        <button @onclick="@(() => OnNoteDelete.InvokeAsync(Note))">Delete</button>
+    </div>
+    }
 </div>
 
 @code {
     [Parameter] public NoteInfoDto Note { get; set; }
+    [Parameter] public bool ShowButton { get; set; } = false;
+    [Parameter] public EventCallback<NoteInfoDto>OnNoteDelete {get; set;}
+
+    //private void Delete()
+    //{
+    //    Console.WriteLine($"Note deleted {Note.NoteNumber}");
+    //}
 }
