@@ -1,23 +1,55 @@
-﻿<div>
-    <p><b> Note Number: </b> @Note.NoteNumber.</p>
+﻿@*<div> </div>*@
+
+@*<p><b> Note Number: </b> @Note.NoteNumber.</p>
     <p><b> Topic: </b>@((MarkupString)Note.Topic)</p>
-    @if (ShowButton)
-    {
+
     <div>
-        @*<button @onclick="Delete">Delete</button>*@
-        @*<button @onclick="OnNoteDelete">Delete</button>*@
-        <button @onclick="@(() => OnNoteDelete.InvokeAsync(Note))">Delete</button>
+        <a class="btn btn-info">Edit</a>
+        <button type="button" class="btn btn-danger"
+                @onclick="@(() => OnNoteDelete.InvokeAsync(Note))">
+            Delete
+        </button>
+    </div>*@
+
+
+<div class="card m-1 p-1  bg-light">
+    <h5>
+        <span class="badge badge-pill badge-primary float-left ml-1">
+            @Note.NoteNumber
+        </span>
+
+        &nbsp; <a href="@urlNote">  @((MarkupString)Note.Topic)</a>
+
+        <span class="float-right">
+            <button class="btn btn-sm btn-warning mx-1"
+                    data-toggle="tooltip" title="Edit note">
+                <i class="fa fa-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-danger mx-1"
+                    @onclick="@(() => OnNoteDelete.InvokeAsync(Note))" data-toggle="tooltip" title="Delete note">
+                <i class="fa fa-minus"></i>
+            </button>
+        </span>
+    </h5>
+    <div class="card-text bg-white p-1">
+        <p>
+            <span>@((MarkupString)Note.Topic)</span>
+        </p>
     </div>
-    }
 </div>
+
 
 @code {
     [Parameter] public NoteInfoDto Note { get; set; }
     [Parameter] public bool ShowButton { get; set; } = false;
-    [Parameter] public EventCallback<NoteInfoDto>OnNoteDelete {get; set;}
+    [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
 
-    //private void Delete()
-    //{
-    //    Console.WriteLine($"Note deleted {Note.NoteNumber}");
-    //}
+    private string urlNote = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        urlNote = $"/notes/";
+        base.OnInitialized();
+    }
+
 }

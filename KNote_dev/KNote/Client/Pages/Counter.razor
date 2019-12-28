@@ -6,24 +6,45 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-<NotesList Notes="GetNotes()"/>
+<hr />
+
+<p>AppState (CascadingParameter): @appState.AppMode</p>
+
+<div style="display:flex;">
+    <div style="width: 150px">
+        <select @bind="@appState.AppMode" class="form-control" style="margin-top: 15px">
+            <option value="Task">Task</option>
+            <option value="Blog">Blog</option>
+            <option value="Wiki">Wiki</option>
+        </select>
+    </div>
+</div>
+
+<hr />
+
 
 @code {
     private int currentCount = 0;
 
+    [CascadingParameter] protected AppState appState { get; set; }
+    
     private void IncrementCount()
     {
         currentCount++;
     }
 
-    private List<NoteInfoDto> GetNotes()
+    #region  AppState changed subscription 
+
+    protected override void OnInitialized()
     {
-        return new List<NoteInfoDto>()
-    {
-            new NoteInfoDto() { Topic = "<b>My personal note 1</b>", NoteNumber = 1 },
-            new NoteInfoDto() { Topic = "<i>My personal note 2</i>", NoteNumber = 2 },
-            new NoteInfoDto() { Topic = "My personal note 3", NoteNumber = 3 }
-        };
+        appState.OnChange += StateHasChanged;
     }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    #endregion 
 
 }

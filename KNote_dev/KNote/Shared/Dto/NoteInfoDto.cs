@@ -36,5 +36,19 @@ namespace KNote.Shared.Dto
 
             set { }
         }
+
+        //public string ShortTopic
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrWhiteSpace(Topic))
+        //            return null;
+        //        if (Topic.Length > 60)
+        //            return Topic.Substring(0, 60) + "...";
+        //        else
+        //            return Topic;
+        //    }
+        //}
+
     }
 }

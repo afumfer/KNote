@@ -22,11 +22,20 @@
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
             </NavLink>
         </li>
+        <li class="nav-item px-3">
+            <select @bind="@appState.AppMode" class="form-control" style="margin-top: 15px">
+                <option value="Task">Task</option>
+                <option value="Blog">Blog</option>
+                <option value="Wiki">Wiki</option>
+            </select>
+        </li>
     </ul>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
+
+    [CascadingParameter] public AppState appState { get; set; }
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
@@ -34,4 +43,20 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
+
+
+    #region  AppState changed subscription 
+
+    protected override void OnInitialized()
+    {
+        appState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    #endregion 
+
 }

@@ -1,42 +1,25 @@
-﻿<input type="checkbox" @bind="ShowButtons" />
-<hr />
-<EntityList List="Notes">
-    <Items Context="note">
-        <NoteItem Note="note" ShowButton="ShowButtons" OnNoteDelete="DeleteNote" />
-    </Items>
-</EntityList>
+﻿@inject IJSRuntime js
 
-<ModalDialog @ref="confirm" Title="KNote dialog" onConfirm="DeleteNoteConfirm" onCancel="DeleteNoteCancel">
-    <dv>Delete note <b>@(noteForDelete.Topic)</b> ?</dv>
-</ModalDialog>
+<div>    
+    <EntityList List="Notes">
+        <Items Context="note">
+            <NoteItem Note="note" OnNoteDelete="DeleteNote" />
+        </Items>
+    </EntityList>    
+</div>
 
 @code {
-    bool ShowButtons = true;
-    ModalDialog confirm;
 
     [Parameter] public List<NoteInfoDto> Notes { get; set; }
 
-
-    NoteInfoDto noteForDelete;
-
-    void DeleteNote(NoteInfoDto note)
+    async Task DeleteNote(NoteInfoDto note)
     {
-        noteForDelete = note;
-        confirm.Show();        
-        //Notes.Remove(note);
-        //Console.WriteLine($"Deleted note: {note.NoteNumber} -");
+        var confirm = await js.Confirm("Delete note?");
+        if (confirm)
+        {
+            Notes.Remove(note);
+            Console.WriteLine($"Deleted note: {note.NoteNumber} -");
+        }
     }
 
-    void DeleteNoteConfirm()
-    {
-        Notes.Remove(noteForDelete);
-        noteForDelete = null;
-        confirm.Hide();
-    }
-
-    void DeleteNoteCancel()
-    {
-        confirm.Hide();
-        noteForDelete = null;
-    }
 }
