@@ -1,11 +1,11 @@
 ﻿<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">KNote</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+    <button class="navbar-toggler" @onclick="() => ToggleNavMenu(true)">
         <span class="navbar-toggler-icon"></span>
     </button>
 </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+<div class="@NavMenuCssClass" @onclick="() => ToggleNavMenu(false)">
     <ul class="nav flex-column">
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -15,46 +15,39 @@
 
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="notes/new">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> New note
+                <span class="oi oi-document" aria-hidden="true"></span> New note
             </NavLink>
         </li>
 
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="notes/tree">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> KNote tree
+            <NavLink class="nav-link" href="notes/scrum">
+                <span class="oi oi-task" aria-hidden="true"></span> Scrum panel
             </NavLink>
         </li>
 
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="notes/search">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Search
+                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Search
             </NavLink>
         </li>
 
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="folders">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Folders
+            <NavLink class="nav-link" href="notes/tree">
+                <span class="oi oi-caret-right" aria-hidden="true"></span> Tree panel
             </NavLink>
         </li>
 
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="attributes">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Attributes
+            <NavLink class="nav-link" href="admin">
+                <span class="oi oi-wrench" aria-hidden="true"></span> Admin
             </NavLink>
         </li>
 
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="users">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Users
+            <NavLink class="nav-link" href="separator">
+                <span class="oi oi-ellipses" aria-hidden="true"></span> -----
             </NavLink>
         </li>
-
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> -----
-            </NavLink>
-        </li>
-
 
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
@@ -66,26 +59,43 @@
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
             </NavLink>
         </li>
-        <li class="nav-item px-3">
+
+        @if (showUserOptions)
+        {
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="register">
+                    <span class="oi oi-wrench" aria-hidden="true"></span> Register
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="login">
+                    <span class="oi oi-wrench" aria-hidden="true"></span> Login 
+                </NavLink>
+            </li>
+        }
+
+        @*<li class="nav-item px-3">
             <select @bind="@appState.AppMode" class="form-control" style="margin-top: 15px">
                 <option value="Task">Task</option>
                 <option value="Blog">Blog</option>
                 <option value="Wiki">Wiki</option>
             </select>
-        </li>
+        </li>*@
     </ul>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
-
+    private bool showUserOptions = false;
+       
     [CascadingParameter] public AppState appState { get; set; }
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
-    private void ToggleNavMenu()
+    private void ToggleNavMenu(bool res)
     {
         collapseNavMenu = !collapseNavMenu;
+        showUserOptions = res;
     }
 
 
