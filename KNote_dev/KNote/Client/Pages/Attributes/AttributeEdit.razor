@@ -1,7 +1,19 @@
-﻿@page "/attributes/edit"
+﻿@page "/attributes/edit/{AttributeId}"
 
 <h3>AttributeEdit</h3>
 
+<p>AttributeId: @AttributeId.ToString()</p>
+<p>AttributeGuid: @AttributeGuid.ToString()</p>
+
 @code {
+    [Parameter] public string AttributeId { get; set; }
+
+    private Guid AttributeGuid;
+
+    protected override void OnInitialized()
+    {
+        AttributeGuid = Guid.Parse(AttributeId);
+        base.OnInitialized();
+    }
 
 }

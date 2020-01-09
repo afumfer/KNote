@@ -1,7 +1,18 @@
 ﻿@page "/notes/new"
 
-<h3>NoteNew</h3>
+@inject NavigationManager navigationManager
+
+<h3>Note New</h3>
+
+<button @onclick="NewNote">New Note</button>
 
 @code {
+
+    void NewNote()
+    {
+        Console.WriteLine(navigationManager.BaseUri);
+        Console.WriteLine(navigationManager.Uri);
+        navigationManager.NavigateTo($"/notes");
+    }
 
 }

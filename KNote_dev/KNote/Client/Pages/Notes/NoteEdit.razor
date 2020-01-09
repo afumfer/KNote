@@ -1,7 +1,10 @@
-﻿@page "/notes/edit"
+﻿@page "/notes/edit/{NoteId}"
 
 <h3>NoteEdit</h3>
 
+<p>NoteId: @NoteId</p>
+
 @code {
+    [Parameter] public string NoteId { get; set; }
 
 }

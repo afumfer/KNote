@@ -14,11 +14,13 @@
 
 <div class="card m-1 p-1  bg-light">
     <h5>
-        <span class="badge badge-pill badge-primary float-left ml-1">
-            @Note.NoteNumber
-        </span>
+        <a href="@urlNote">
+            <span class="badge badge-pill badge-primary float-left ml-1">
+                @Note.NoteNumber
+            </span>
+        </a>
 
-        &nbsp; <a href="@urlNote">  @((MarkupString)Note.Topic)</a>
+        <a href="@urlNote"> &nbsp; @((MarkupString)Note.Topic) </a>
 
         <span class="float-right">
             <button class="btn btn-sm btn-warning mx-1"

@@ -1,7 +1,10 @@
-﻿@page "/folders/edit"
+﻿@page "/folders/edit/{FolderId}"
 
 <h3>FolderEdit</h3>
 
+<p>FolderId: @FolderId.ToString()</p>
+
 @code {
+    [Parameter] public string FolderId { get; set; }
 
 }

@@ -1,7 +1,9 @@
-﻿@page "/folders/view"
+﻿@page "/folders/view/{FolderId}"
 
 <h3>FolderView</h3>
 
-@code {
+<p>FolderId: @FolderId.ToString()</p>
 
+@code {
+    [Parameter] public string FolderId { get; set; }
 }

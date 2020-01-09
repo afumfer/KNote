@@ -1,7 +1,10 @@
-﻿@page "/users/edit"
+﻿@page "/users/edit/{UserId}"
 
 <h3>UserEdit</h3>
 
+<p>UserId: @UserId</p>
+
 @code {
+    [Parameter] public string UserId { get; set; }
 
 }

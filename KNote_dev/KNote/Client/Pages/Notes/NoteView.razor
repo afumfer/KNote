@@ -1,7 +1,20 @@
-﻿@page "/notes/"
+﻿@page "/notes/{NoteId}"
+@page "/notes/{NoteIdInt:int}/{NoteTopic}"
 
 <h3>NoteView</h3>
 
+<p>NoteId: @NoteId</p>
+<p>Note Topic: @NoteTopic</p>
+
 @code {
+    [Parameter] public int NoteIdInt { get; set; }
+    [Parameter] public string NoteId { get; set; }
+    [Parameter] public string NoteTopic { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine($"Note Id = {NoteId}");
+        base.OnInitialized();
+    }
 
 }
