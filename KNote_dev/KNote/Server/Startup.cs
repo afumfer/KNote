@@ -32,6 +32,8 @@ namespace KNote.Server
                 app.UseBlazorDebugging();
             }
 
+            app.UsePathBase("/KNote");
+
             app.UseStaticFiles();
             app.UseClientSideBlazorFiles<Client.Startup>();
 
