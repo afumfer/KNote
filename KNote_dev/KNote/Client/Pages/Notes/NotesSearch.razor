@@ -1,7 +1,59 @@
 ﻿@page "/notes/search"
 
-<h3>NotesSearch</h3>
+<h3>Notes Search</h3>
+
+<div class="form-inline">
+
+    <div class="form-group mb-2">
+        <label for="topic" class="sr-only">Título</label>
+        <input @bind-value="topic" @bind-value:event="oninput"
+               @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))"
+               type="text" class="form-control" id="titulo" placeholder="Título Película" />
+    </div>
+
+    @*<div class="form-group mx-sm-3 mb-2">
+        <select class="form-control" @bind="generoSeleccionado">
+            <option value="0">--Seleccione un género--</option>
+            @foreach (var item in generos)
+            {
+                <option value="@item.Id">@item.Nombre</option>
+            }
+        </select>
+    </div>
+    <div class="form-group mx-sm-3 mb-2">
+        <input type="checkbox" class="form-check-input" id="estrenos" @bind="futurosEstrenos" />
+        <label class="form-check-label" for="estrenos">
+            Futuros Estrenos
+        </label>
+    </div>
+    <div class="form-group mx-sm-3 mb-2">
+        <input type="checkbox" class="form-check-input" id="cartelera" @bind="enCartelera" />
+        <label class="form-check-label" for="cartelera">
+            En Cartelera
+        </label>
+    </div>
+    <div class="form-group mx-sm-3 mb-2">
+        <input type="checkbox" class="form-check-input" id="masVotadas" @bind="masVotadas" />
+        <label class="form-check-label" for="masVotadas">
+            Más Votadas
+        </label>
+    </div>
+
+    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="CargarNuevasPeliculas">Filtrar</button>
+    <button type="button" class="btn btn-danger mb-2" @onclick="LimpiarOnClick">Limpiar</button>*@
+
+
+</div>
 
 @code {
 
+    string topic = "";
+
+    private void TopicKeyPress(KeyboardEventArgs e)
+    {
+        if(e.Key == "Enter")
+        {
+            // TODO .... 
+        }
+    }
 }

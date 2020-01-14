@@ -1,0 +1,29 @@
+﻿@page "/types/edit/{TypeId}"
+
+<h3>Type Edit</h3>
+
+<TypeForm OnValidSubmit="Edit" NoteType="NoteType" />
+
+@code {
+    [Parameter] public string TypeId { get; set; }
+
+    private Guid TypeGuid;
+    NoteTypeDto NoteType;
+
+
+    protected override void OnInitialized()
+    {
+        TypeGuid = Guid.Parse(TypeId);
+
+        NoteType = new NoteTypeDto() { NoteTypeId = TypeGuid, Key = "KEY1", Name = "Name 1" };
+
+        base.OnInitialized();
+    }
+
+    private void Edit()
+    {
+        Console.WriteLine("Editing attribute ....");
+        Console.WriteLine($"> {NoteType.Name}");
+    }
+
+}

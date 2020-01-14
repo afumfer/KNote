@@ -1,7 +1,17 @@
 ﻿@page "/attributes/new"
 
-<h3>AttributeNew</h3>
+<h3>New Attribute</h3>
+
+<AttributeForm OnValidSubmit="New" KAttribute="KAttribute"/>
+
 
 @code {
+    KAttributeDto KAttribute = new KAttributeDto();
+
+    private void New()
+    {
+        Console.WriteLine("Executing new method");
+        Console.WriteLine($"KAttribute.Name => {KAttribute.Name}");
+    }
 
 }

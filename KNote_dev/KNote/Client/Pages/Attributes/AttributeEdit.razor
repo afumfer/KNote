@@ -1,19 +1,29 @@
 ﻿@page "/attributes/edit/{AttributeId}"
 
-<h3>AttributeEdit</h3>
+<h3>Attribute Edit</h3>
 
-<p>AttributeId: @AttributeId.ToString()</p>
-<p>AttributeGuid: @AttributeGuid.ToString()</p>
+<AttributeForm OnValidSubmit="Edit" KAttribute="KAttribute" />
 
 @code {
     [Parameter] public string AttributeId { get; set; }
 
     private Guid AttributeGuid;
+    KAttributeDto KAttribute;
+
 
     protected override void OnInitialized()
     {
         AttributeGuid = Guid.Parse(AttributeId);
+
+        KAttribute = new KAttributeDto() { KAttributeId = AttributeGuid, Key = "KEY1", Name = "Name 1" };
+
         base.OnInitialized();
+    }
+
+    private void Edit()
+    {
+        Console.WriteLine("Editing attribute ....");
+        Console.WriteLine($"> {KAttribute.Name}");
     }
 
 }

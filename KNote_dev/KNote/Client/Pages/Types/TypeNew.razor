@@ -1,0 +1,16 @@
+﻿@page "/types/new"
+
+<h3>New Type</h3>
+
+<TypeForm OnValidSubmit="New" NoteType="NoteType" />
+
+@code {
+    NoteTypeDto NoteType = new NoteTypeDto();
+
+    private void New()
+    {
+        Console.WriteLine("Executing new method");
+        Console.WriteLine($"NoteType.Name => {NoteType.Name}");
+    }
+
+}

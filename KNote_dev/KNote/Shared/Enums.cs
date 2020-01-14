@@ -6,13 +6,13 @@ namespace KNote.Shared
 {
     public enum EnumKAttributeDataType
     {
-        dtTag,
-        dtBool,
+        dtString,
         dtInt,
         dtDouble,
-        dtString,
         dtDateTime,
+        dtBool,                              
         dtTabulate,
+        dtTag,
     }
 
     public enum EnumEventType

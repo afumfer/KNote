@@ -1,0 +1,49 @@
+﻿<EditForm Model="KAttribute" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <div class="form-group">
+        <label>Key:</label>
+        <InputText class="form-control" @bind-Value="@KAttribute.Key" />
+        <ValidationMessage For="@(() => KAttribute.Key)" />
+    </div>
+    <div class="form-group">
+        <label>Name:</label>
+        <InputText class="form-control" @bind-Value="@KAttribute.Name" />
+        <ValidationMessage For="@(() => KAttribute.Name)" />
+    </div>
+    <div class="form-group">
+        <label>Data Type:</label>
+        <select class="form-control" @bind="@KAttribute.KAttributeDataType">
+            <option value=@EnumKAttributeDataType.dtString>@EnumKAttributeDataType.dtString.ToString()</option>
+            <option value=@EnumKAttributeDataType.dtInt>@EnumKAttributeDataType.dtInt.ToString()</option>
+            <option value=@EnumKAttributeDataType.dtDouble>@EnumKAttributeDataType.dtDouble.ToString()</option>
+            <option value=@EnumKAttributeDataType.dtDateTime>@EnumKAttributeDataType.dtDateTime.ToString()</option>
+            <option value=@EnumKAttributeDataType.dtBool>@EnumKAttributeDataType.dtBool.ToString()</option>
+            <option value=@EnumKAttributeDataType.dtTabulate>@EnumKAttributeDataType.dtTabulate.ToString()</option>
+            <option value=@EnumKAttributeDataType.dtTag>@EnumKAttributeDataType.dtTag.ToString()</option>
+        </select>
+        <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
+    </div>
+    <div class="form-group">
+        <label>RequiredValue:</label>
+        <InputCheckbox class="form-control" @bind-Value="@KAttribute.RequiredValue" />
+        <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
+    </div>
+    <div class="form-group">
+        <label>Order:</label>
+        <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
+        <ValidationMessage For="@(() => KAttribute.Order)" />
+    </div>
+    <div class="form-group">
+        <label>NoteTypeId:</label>
+        <input class="form-control" @bind="@KAttribute.NoteTypeId" />
+        <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
+    </div>
+    <button class="btn btn-success" type="submit">Save changes</button>
+</EditForm>
+
+@code {
+
+    [Parameter] public KAttributeDto KAttribute { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+}
