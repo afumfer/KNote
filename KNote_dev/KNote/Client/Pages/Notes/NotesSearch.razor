@@ -1,6 +1,10 @@
 ﻿@page "/notes/search"
 
+@inject IKntClientDataService dataService
+
 <h3>Notes Search</h3>
+
+@*<div class="form-inline"></div>*@
 
 <div class="form-inline">
 
@@ -8,52 +12,70 @@
         <label for="topic" class="sr-only">Título</label>
         <input @bind-value="topic" @bind-value:event="oninput"
                @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))"
-               type="text" class="form-control" id="titulo" placeholder="Título Película" />
+               type="text" class="form-control" id="titulo" placeholder="Note topic ..." />
     </div>
 
-    @*<div class="form-group mx-sm-3 mb-2">
-        <select class="form-control" @bind="generoSeleccionado">
-            <option value="0">--Seleccione un género--</option>
-            @foreach (var item in generos)
+    <div class="form-group mx-sm-3 mb-2">
+        <select class="form-control" @bind="typeSelected">
+            <option value="0">--Select type--</option>
+            @foreach (var item in types)
             {
-                <option value="@item.Id">@item.Nombre</option>
+                <option value="@item.Key">@item.Name</option>
             }
         </select>
     </div>
     <div class="form-group mx-sm-3 mb-2">
-        <input type="checkbox" class="form-check-input" id="estrenos" @bind="futurosEstrenos" />
+        <input type="checkbox" class="form-check-input" id="mostRecent" @bind="onlyMostRecent" />
         <label class="form-check-label" for="estrenos">
-            Futuros Estrenos
-        </label>
-    </div>
-    <div class="form-group mx-sm-3 mb-2">
-        <input type="checkbox" class="form-check-input" id="cartelera" @bind="enCartelera" />
-        <label class="form-check-label" for="cartelera">
-            En Cartelera
-        </label>
-    </div>
-    <div class="form-group mx-sm-3 mb-2">
-        <input type="checkbox" class="form-check-input" id="masVotadas" @bind="masVotadas" />
-        <label class="form-check-label" for="masVotadas">
-            Más Votadas
+            Only the most recent
         </label>
     </div>
 
-    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="CargarNuevasPeliculas">Filtrar</button>
-    <button type="button" class="btn btn-danger mb-2" @onclick="LimpiarOnClick">Limpiar</button>*@
-
+    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="LoadFiltereNotes">Filter</button>
+    <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean</button>
 
 </div>
+
+<NotesList Notes="notes" />
 
 @code {
 
     string topic = "";
+    string typeSelected = "0";
+    List<NoteTypeDto> types = new List<NoteTypeDto>();
+    bool onlyMostRecent = false;
+
+    private List<NoteInfoDto> notes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(1000);
+        notes = dataService.GetNotes();
+    }
 
     private void TopicKeyPress(KeyboardEventArgs e)
     {
-        if(e.Key == "Enter")
+        if (e.Key == "Enter")
         {
-            // TODO .... 
+            LoadFiltereNotes();
         }
     }
+
+    private void LoadFiltereNotes()
+    {
+        notes = notes.Where(x => x.Topic.ToLower().Contains(topic.ToLower())).ToList();
+
+        Console.WriteLine($"topic: {topic}");
+        Console.WriteLine($"typeSelected: {typeSelected}");
+        Console.WriteLine($"onlyMostRecent: {onlyMostRecent}");
+    }
+
+    private void CleanOnClick()
+    {
+        notes = dataService.GetNotes();
+        topic = "";
+        typeSelected = "0";
+        onlyMostRecent = false;
+    }
+
 }

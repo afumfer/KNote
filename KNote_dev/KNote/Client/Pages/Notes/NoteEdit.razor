@@ -2,9 +2,35 @@
 
 <h3>NoteEdit</h3>
 
-<p>NoteId: @NoteId</p>
+<NoteForm Note="note" OnValidSubmit="Edit"></NoteForm>
 
 @code {
     [Parameter] public string NoteId { get; set; }
+
+    private NoteDto note;
+
+    protected override void OnInitialized()
+    {        
+        note = new NoteDto () { NoteId = Guid.Parse(NoteId), Topic = "Topic note 1", Description = "Description note 1", Tags = "tag1, tag2" };
+
+        note.KAttributes = new List<NoteKAttributeDto>()
+        {
+            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 1", Value = "aaa"},
+            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 2", Value = "bbb"},
+            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 3", Value = "ccc"},
+        };
+
+        base.OnInitialized();
+    }
+
+    private void Edit()
+    {
+        Console.WriteLine("Edit note");
+        Console.WriteLine(note.Topic);
+        foreach(var a in note.KAttributes)
+        {
+            Console.WriteLine($"Attrigute name - {a.KAttributeName}  - value {a.Value}");
+        }
+    }
 
 }

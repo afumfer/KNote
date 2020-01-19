@@ -1,7 +1,15 @@
 ﻿@page "/users/new"
 
-<h3>UserNew</h3>
+<h3>New User</h3>
+
+<UserForm OnValidSubmit="New" User="user"></UserForm>
 
 @code {
+    private UserDto user = new UserDto();
+
+    private void New()
+    {
+        Console.WriteLine(">>New user");
+    }
 
 }

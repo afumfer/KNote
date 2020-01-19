@@ -2,17 +2,38 @@
 
 @inject NavigationManager navigationManager
 
-<h3>Note New</h3>
+<h3>New note</h3>
 
-<button @onclick="NewNote">New Note</button>
+<NoteForm Note="note" OnValidSubmit="NewNote"></NoteForm>
 
 @code {
 
+    private NoteDto note = new NoteDto();
+
     void NewNote()
     {
-        Console.WriteLine(navigationManager.BaseUri);
-        Console.WriteLine(navigationManager.Uri);
-        navigationManager.NavigateTo($"index");
+        //Console.WriteLine($"ddddd: {navigationManager.BaseUri}");
+        Console.WriteLine($"URI: {navigationManager.Uri}");
+        // navigationManager.NavigateTo($"index");
+
+        foreach(var a in note.KAttributes)
+        {
+            Console.WriteLine($"Attrigute name - {a.KAttributeName}  - value {a.Value}");
+        }
+
+    }
+
+    protected override void OnInitialized()
+    {
+        note.NoteId = Guid.NewGuid();
+
+        note.KAttributes = new List<NoteKAttributeDto>()
+        {
+            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 1", Value = ""},
+            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 2", Value = ""},
+            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 3", Value = ""},
+        };
+        base.OnInitialized();
     }
 
 }

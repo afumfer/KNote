@@ -1,10 +1,21 @@
 ﻿@page "/users/edit/{UserId}"
 
-<h3>UserEdit</h3>
-
-<p>UserId: @UserId</p>
+<UserForm OnValidSubmit="Edit" User="user"></UserForm>
 
 @code {
     [Parameter] public string UserId { get; set; }
 
+    UserDto user;
+
+    protected override void OnInitialized()
+    {
+        user = new UserDto { UserName="afumfer", FullName="Armando Fumero", EMail="afumfer@gmail.com", UserId = Guid.Parse(UserId) };
+
+        base.OnInitialized();
+    }
+
+    private void Edit()
+    {
+        Console.WriteLine("Edit user");
+    }
 }
