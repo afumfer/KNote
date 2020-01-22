@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.Server", "KNote\Serve
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.Shared", "KNote\Shared\KNote.Shared.csproj", "{EDF4576E-ABA8-4745-9979-280CB601B195}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DomainModel", "KNote\DomainModel\DomainModel.csproj", "{4283E402-FCC3-4CC6-B58D-D1398CF807DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.DomainModel", "KNote\DomainModel\KNote.DomainModel.csproj", "{4283E402-FCC3-4CC6-B58D-D1398CF807DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

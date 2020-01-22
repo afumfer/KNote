@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using KNote.DomainModel.Services;
+using KNote.Shared.Dto;
 
 namespace KNote.Server.Controllers
 {
@@ -19,14 +21,21 @@ namespace KNote.Server.Controllers
 
         private readonly ILogger<WeatherForecastController> logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        IKntService service;
+
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IKntService service)
         {
             this.logger = logger;
+            this.service = service;
         }
 
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            //var notes = service.Notes.GetAll();
+
+            var folders = service.Folders.GetAll().Entity;
+
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -36,5 +45,15 @@ namespace KNote.Server.Controllers
             })
             .ToArray();
         }
+
+        [HttpGet("GetFolders")]
+        public IEnumerable<FolderInfoDto> GetFolders()
+        {
+            //var notes = service.Notes.GetAll();
+
+            return service.Folders.GetAll().Entity;
+
+        }
+
     }
 }

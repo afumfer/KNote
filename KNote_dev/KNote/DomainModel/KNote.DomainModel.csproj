@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <LangVersion>7.3</LangVersion>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>KNote.DomainModel</RootNamespace>
+    <AssemblyName>KNote.DomainModel</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.1.0-preview4.19579.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.1">
       <PrivateAssets>all</PrivateAssets>
@@ -15,9 +15,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Client\KNote.Client.csproj" />
-    <ProjectReference Include="..\DomainModel\KNote.DomainModel.csproj" />
     <ProjectReference Include="..\Shared\KNote.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Entities\" />
+    <Folder Include="Infrastructure\" />
+    <Folder Include="Services\" />
+    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>
