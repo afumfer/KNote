@@ -4,15 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-//using System.Data.Entity.Validation;
-//using System.Data.Entity;
-
 using Microsoft.EntityFrameworkCore;
 
 using System.Data.Common;
 using System.ComponentModel;
 using System.Linq.Expressions;
-
 
 using KNote.Shared;
 using KNote.DomainModel.Entities;

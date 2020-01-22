@@ -12,6 +12,11 @@
 }
 else
 {
+    foreach(var s in settings)
+    {
+        <p>@s</p>
+    }
+
     <table class="table">
         <thead>
             <tr>
@@ -64,12 +69,17 @@ else
 @code {
     private WeatherForecast[] forecasts;
     private List<FolderInfoDto> folders;
+    private string[] settings;
 
-    protected override async Task OnInitializedAsync()
+
+    protected override async Task OnInitializedAsync()    
     {
-        forecasts = await Http.GetJsonAsync<WeatherForecast[]>("WeatherForecast");
+         
+        settings = await Http.GetJsonAsync<string[]>("api/WeatherForecast/GetAppSettings");
 
-        folders = await Http.GetJsonAsync<List<FolderInfoDto>>("WeatherForecast/GetFolders");
+        forecasts = await Http.GetJsonAsync<WeatherForecast[]>("api/WeatherForecast");
+
+        folders = await Http.GetJsonAsync<List<FolderInfoDto>>("api/WeatherForecast/GetFolders");
 
     }
 

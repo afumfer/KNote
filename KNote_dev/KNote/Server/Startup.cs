@@ -1,5 +1,6 @@
 using KNote.DomainModel.Infrastructure;
 using KNote.DomainModel.Services;
+using KNote.Server.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -29,9 +30,12 @@ namespace KNote.Server
             //// Para pruebas de uso del DbContext directo 
             //services.AddDbContext<KntDbContext>(options =>
             //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
-            var connStri = configuration["ConnectionStrings:DefaultConnection"];
+            
             services.AddScoped<IKntService>(provider => new KntService(configuration["ConnectionStrings:DefaultConnection"]));
+            //services.AddSingleton<IConfiguration>(configuration);
+
+            var appSettingsSection = configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
 
             services.AddMvc();
           
