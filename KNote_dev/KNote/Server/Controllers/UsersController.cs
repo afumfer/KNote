@@ -27,16 +27,15 @@ namespace KNote.Server.Controllers
     public class UsersController : ControllerBase
     {
         private IKntService _service { get; set; }
+        private readonly AppSettings _appSettings;
 
         // TODO: !!! Esta propiedad estaba en la versión antiga. 
         //       en la versión actual.
         //public object SecurityAlgorithms { get; private set; }
 
-        private readonly AppSettings _appSettings;
-
-        public UsersController(IKntService Service, IOptions<AppSettings> appSettings)
+        public UsersController(IKntService service, IOptions<AppSettings> appSettings)
         {
-            _service = Service;
+            _service = service;
             _appSettings = appSettings.Value;
         }
 
