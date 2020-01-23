@@ -9,5 +9,6 @@ namespace KNote.Client.ClientDataServices
     public interface IKntClientDataService
     {
         List<NoteInfoDto> GetNotes();
+        Task<HttpResponseWrapper<object>> Post<T>(string url, T enviar);
     }
 }

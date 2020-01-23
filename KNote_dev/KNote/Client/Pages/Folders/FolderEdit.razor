@@ -2,9 +2,23 @@
 
 <h3>FolderEdit</h3>
 
-<p>FolderId: @FolderId.ToString()</p>
+<FolderForm OnValidSubmit="Edit" Folder="folder" />
 
 @code {
     [Parameter] public string FolderId { get; set; }
+
+    FolderDto folder;
+
+    protected override void OnInitialized()
+    {
+        folder = new FolderDto { Name="My folder 1", Tags="111", Order = 0, OrderNotes = "Desc Name", FolderId = Guid.Parse(FolderId) };
+
+        base.OnInitialized();
+    }
+
+    private void Edit()
+    {
+        Console.WriteLine("Edit folder");
+    }
 
 }

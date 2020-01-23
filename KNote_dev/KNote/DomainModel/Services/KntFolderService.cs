@@ -165,11 +165,12 @@ namespace KNote.DomainModel.Services
                 if (newFolder.FolderId == Guid.Empty)
                     newFolder.FolderId = Guid.NewGuid();
 
-                if (newFolder.CreationDateTime == DateTime.MinValue)
-                    newFolder.CreationDateTime = DateTime.Now;
+                // TODO: !!! repensar, se han eliminado estas fechas del dto de mantenimiento
+                //if (newFolder.CreationDateTime == DateTime.MinValue)
+                //    newFolder.CreationDateTime = DateTime.Now;
 
-                if (newFolder.ModificationDateTime == DateTime.MinValue)
-                    newFolder.ModificationDateTime = DateTime.Now;
+                //if (newFolder.ModificationDateTime == DateTime.MinValue)
+                //    newFolder.ModificationDateTime = DateTime.Now;
 
                 resService.Entity = newFolder;
             }

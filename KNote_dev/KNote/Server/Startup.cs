@@ -26,11 +26,12 @@ namespace KNote.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
 
             //// Para pruebas de uso del DbContext directo 
             //services.AddDbContext<KntDbContext>(options =>
             //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-            
+
             services.AddScoped<IKntService>(provider => new KntService(configuration["ConnectionStrings:DefaultConnection"]));
             //services.AddSingleton<IConfiguration>(configuration);
 

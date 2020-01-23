@@ -10,14 +10,22 @@ namespace KNote.Shared.Dto
     public class NoteDto : KntModelBase
     {
         public Guid NoteId { get; set; }
+
         public int NoteNumber { get; set; }
+
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         public string Topic { get; set; }
+
         public string Description { get; set; }
+
         public string ContentType { get; set; }        
+
         public string Tags { get; set; }
+
         public int Priority { get; set; }
+
         public Guid FolderId { get; set; }
+
         public Guid? NoteTypeId { get; set; }
 
         public List<NoteKAttributeDto> KAttributes { get; set; } = new List<NoteKAttributeDto>();

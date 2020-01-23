@@ -1,0 +1,37 @@
+﻿<EditForm Model="Folder" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <div class="form-group">
+        <label>Name:</label>
+        <InputText class="form-control" @bind-Value="@Folder.Name" />
+        <ValidationMessage For="@(() => Folder.Name)" />
+    </div>
+    <div class="form-group">
+        <label>Tags:</label>
+        <InputText class="form-control" @bind-Value="@Folder.Tags" />
+        <ValidationMessage For="@(() => Folder.Tags)" />
+    </div>
+    <div class="form-group">
+        <label>Order:</label>
+        <InputNumber class="form-control" @bind-Value="@Folder.Order" />
+        <ValidationMessage For="@(() => Folder.Order)" />
+    </div>
+    <div class="form-group">
+        <label>Order notes:</label>
+        <InputText class="form-control" @bind-Value="@Folder.OrderNotes" />
+        <ValidationMessage For="@(() => Folder.OrderNotes)" />
+    </div>
+    <div class="form-group">
+        <label>ParentId:</label>
+        <input class="form-control" @bind="@Folder.ParentId" />
+        <ValidationMessage For="@(() => Folder.ParentId)" />
+    </div>
+    <button class="btn btn-success" type="submit">Save changes</button>
+</EditForm>
+
+@code {
+
+    [Parameter] public FolderDto Folder { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+}
+

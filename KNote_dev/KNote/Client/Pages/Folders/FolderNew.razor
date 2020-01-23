@@ -1,7 +1,30 @@
 ﻿@page "/folders/new"
 
-<h3>FolderNew</h3>
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+
+<h3>New Folder</h3>
+
+<FolderForm OnValidSubmit="New" Folder="folder" />
 
 @code {
+
+    private FolderDto folder = new FolderDto();
+
+    private async Task New()
+    {
+        var httpResponse = await dataService.Post("api/folders", folder);
+        if (httpResponse.Error)
+        {
+            var body = await httpResponse.GetBody();
+            //await mostrarMensajes.MostrarMensajeError(body);
+            Console.WriteLine(body);
+        }
+        else
+        {
+            Console.WriteLine("User created !!");
+            navigationManger.NavigateTo("folders");
+        }        
+    }
 
 }

@@ -1,5 +1,8 @@
 ﻿@page "/users/new"
 
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger 
+
 <h3>New User</h3>
 
 <UserForm OnValidSubmit="New" User="user"></UserForm>
@@ -7,9 +10,20 @@
 @code {
     private UserDto user = new UserDto();
 
-    private void New()
+    private async Task New()
     {
-        Console.WriteLine(">>New user");
+        var httpResponse = await dataService.Post("api/users", user);
+        if (httpResponse.Error)
+        {
+            var body = await httpResponse.GetBody();
+            //await mostrarMensajes.MostrarMensajeError(body);
+            Console.WriteLine(body);
+        }
+        else
+        {
+            Console.WriteLine("User created !!");
+            navigationManger.NavigateTo("users");
+        }        
     }
 
 }
