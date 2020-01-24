@@ -7,11 +7,8 @@ using System.Threading.Tasks;
 using KNote.DomainModel.Repositories;
 using KNote.Shared;
 using KNote.DomainModel.Entities;
-// TODO: Pendiente de eliminar
-//using KNote.DomainModel.Dto;
 using KNote.Shared.Dto;
 using KNote.DomainModel.Infrastructure;
-//using System.Data.Entity.Validation;
 using Microsoft.EntityFrameworkCore;
 
 using System.Linq.Expressions;

@@ -117,8 +117,19 @@ namespace KNote.DomainModel.Services
             }
         }
 
-        #endregion 
-              
+        private IKntNoteTypeService _noteTypes;
+        public IKntNoteTypeService NoteTypes
+        {
+            get
+            {
+                if (_noteTypes == null)
+                    _noteTypes = new KntNoteTypeService(_repository);
+                return _noteTypes;
+            }
+        }
+
+        #endregion
+
         #region IDisposable member
 
         public void Dispose()

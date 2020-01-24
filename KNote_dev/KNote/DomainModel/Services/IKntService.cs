@@ -19,5 +19,6 @@ namespace KNote.DomainModel.Services
         IKntKEventService KEvents { get; }
         IKntFolderService Folders { get; }
         IKntNoteService Notes { get; }
+        IKntNoteTypeService NoteTypes { get; }
     }
 }
