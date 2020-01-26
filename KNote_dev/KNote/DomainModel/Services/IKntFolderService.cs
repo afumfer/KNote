@@ -13,13 +13,15 @@ namespace KNote.DomainModel.Services
     {
         Result<List<FolderInfoDto>> GetAll();
         Result<List<FolderInfoDto>> GetRoots();
-        Result<FolderInfoDto> Get(int folerNumber);
-        Result<FolderInfoDto> Get(Guid folderId);
-        Result<FolderDto> New(FolderInfoDto entity = null);
-        Task<Result<FolderInfoDto>> SaveAsync(FolderInfoDto entityInfo);
-        Result<FolderInfoDto> Save(FolderInfoDto entityInfo);                
-        int GetNextFolderNumber();
         Result<List<FolderInfoDto>> GetTree();
+        Result<FolderDto> Get(int folerNumber);
+        Result<FolderDto> Get(Guid folderId);
+        Result<FolderDto> New(FolderInfoDto entity = null);
+        Result<FolderDto> Save(FolderDto entityInfo);
+        Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo);
+                
+        int GetNextFolderNumber();
+        
         Result<FolderInfoDto> Delete(Guid id);
         Task<Result<FolderInfoDto>> DeleteAsync(Guid id);
 

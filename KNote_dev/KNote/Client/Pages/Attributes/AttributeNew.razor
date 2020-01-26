@@ -1,17 +1,31 @@
 ﻿@page "/attributes/new"
 
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
 <h3>New Attribute</h3>
 
-<AttributeForm OnValidSubmit="New" KAttribute="KAttribute"/>
-
+<AttributeForm OnValidSubmit="New" KAttribute="kattribute" />
 
 @code {
-    KAttributeDto KAttribute = new KAttributeDto();
+    KAttributeDto kattribute = new KAttributeDto();
 
-    private void New()
-    {
-        Console.WriteLine("Executing new method");
-        Console.WriteLine($"KAttribute.Name => {KAttribute.Name}");
+    private async Task  New()
+    {        
+        Console.WriteLine($"Executing new method - KAttribute.Name => {kattribute.Name}");
+                
+        var httpResponse = await dataService.Post("api/kattributes", kattribute);        
+        if (httpResponse.Error)
+        {                        
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());            
+        }
+        else
+        {
+            Console.WriteLine("Kattribute created !!");
+            //await showMessages.ShowOkMessage("User saved!");            
+            navigationManger.NavigateTo("attributes");
+        } 
     }
 
 }

@@ -130,11 +130,11 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/notes
         [HttpPut]    // PUT api/notes
-        public async Task<IActionResult> Post([FromBody]NoteInfoDto noteInfo)
+        public async Task<IActionResult> Post([FromBody]NoteDto note)
         {
             try
             {
-                var resApi = await _service.Notes.SaveAsync(noteInfo);
+                var resApi = await _service.Notes.SaveAsync(note);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else

@@ -1,16 +1,32 @@
 ﻿@page "/types/new"
 
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
 <h3>New Type</h3>
 
-<TypeForm OnValidSubmit="New" NoteType="NoteType" />
+<TypeForm OnValidSubmit="New" NoteType="noteType" />
 
 @code {
-    NoteTypeDto NoteType = new NoteTypeDto();
+    NoteTypeDto noteType = new NoteTypeDto();
 
-    private void New()
-    {
-        Console.WriteLine("Executing new method");
-        Console.WriteLine($"NoteType.Name => {NoteType.Name}");
+    private async Task New()
+    {        
+        Console.WriteLine($"Executing new method - NoteType.Name => {noteType.Name}");
+
+        var httpResponse = await dataService.Post("api/notetypes", noteType);
+        if (httpResponse.Error)
+        {                        
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());            
+        }
+        else
+        {
+            Console.WriteLine("NoteType created !!");
+            //await showMessages.ShowOkMessage("User saved!");            
+            navigationManger.NavigateTo("types");
+        }   
+
     }
 
 }

@@ -27,10 +27,10 @@ namespace KNote.Shared.Dto
 
         public EnumKAttributeDataType KAttributeDataType { get; set; }
 
-        public Guid? NoteTypeId;
+        public Guid? NoteTypeId { get; set; }
 
         public List<KAttributeTabulatedValueInfoDto> KAttributeTabulatedValuesInfo { get; set; }
 
-        public NoteTypeDto NoteType;
+        public NoteTypeDto NoteType { get; set; }
     }
 }

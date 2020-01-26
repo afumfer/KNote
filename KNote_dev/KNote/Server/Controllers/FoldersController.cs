@@ -145,11 +145,11 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/folders
         [HttpPut]    // PUT api/folders
-        public async Task<IActionResult> Post([FromBody]FolderInfoDto folderInfo)
+        public async Task<IActionResult> Post([FromBody]FolderDto folder)
         {
             try
             {
-                var resApi = await _service.Folders.SaveAsync(folderInfo);
+                var resApi = await _service.Folders.SaveAsync(folder);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else

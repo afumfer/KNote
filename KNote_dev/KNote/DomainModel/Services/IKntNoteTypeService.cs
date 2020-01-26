@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace KNote.DomainModel.Services
 {
     public interface IKntNoteTypeService
-    {
-        Task<Result<NoteTypeDto>> DeleteAsync(Guid id);
+    {        
         Result<List<NoteTypeInfoDto>> GetAll();
-        Task<Result<NoteTypeInfoDto>> GetAsync(Guid id);
+        Task<Result<NoteTypeDto>> GetAsync(Guid id);
         Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entityInfo);
+        Task<Result<NoteTypeInfoDto>> DeleteAsync(Guid id);
     }
 }

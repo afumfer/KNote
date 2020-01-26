@@ -2,6 +2,7 @@
 
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManger
+@inject IShowMessages showMessages
 
 <h3>New Folder</h3>
 
@@ -13,6 +14,8 @@
 
     private async Task New()
     {
+        Console.WriteLine($"Executing new method - folder.Name => {folder.Name}");
+
         var httpResponse = await dataService.Post("api/folders", folder);
         if (httpResponse.Error)
         {
@@ -22,9 +25,9 @@
         }
         else
         {
-            Console.WriteLine("User created !!");
+            Console.WriteLine("Folder created !!");
             navigationManger.NavigateTo("folders");
-        }        
+        }
     }
 
 }

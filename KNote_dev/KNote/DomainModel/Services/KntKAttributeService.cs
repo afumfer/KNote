@@ -53,13 +53,17 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<KAttributeInfoDto> Get(string key)
+        public Result<KAttributeDto> Get(string key)
         {
-            var resService = new Result<KAttributeInfoDto>();
+            var resService = new Result<KAttributeDto>();
             try
             {
                 var resRep = _repository.KAttributes.Get(ka => ka.Key == key);
-                resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeInfoDto>();
+
+                resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -69,13 +73,37 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<KAttributeInfoDto> Get(Guid id)
+        public Result<KAttributeDto> Get(Guid id)
         {
-            var resService = new Result<KAttributeInfoDto>();
+            var resService = new Result<KAttributeDto>();
             try
             {
                 var resRep = _repository.KAttributes.Get((object) id);
-                resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeInfoDto>();
+
+                resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
+                resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public async Task<Result<KAttributeDto>> GetAsync(Guid id)
+        {
+            var resService = new Result<KAttributeDto>();
+            try
+            {
+                var resRep = await _repository.KAttributes.GetAsync((object)id);
+                
+                resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -138,19 +166,19 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);            
         }
 
-        public Result<KAttributeInfoDto> Save(KAttributeInfoDto entityInfo)
+        public Result<KAttributeDto> Save(KAttributeDto entity)
         {
             Result<KAttribute> resRep = null;
-            var resService = new Result<KAttributeInfoDto>();
+            var resService = new Result<KAttributeDto>();
 
             try
             {
-                if (entityInfo.KAttributeId == Guid.Empty)
+                if (entity.KAttributeId == Guid.Empty)
                 {
-                    entityInfo.KAttributeId = Guid.NewGuid();
+                    entity.KAttributeId = Guid.NewGuid();
                     var newEntity = new KAttribute();
 
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
@@ -167,7 +195,7 @@ namespace KNote.DomainModel.Services
                         _repository.KAttributes.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.KAttributes.Get(entityInfo.KAttributeId).Entity;
+                    var entityForUpdate = _repository.KAttributes.Get(entity.KAttributeId).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.KAttributes.ThrowKntException = true;
@@ -176,13 +204,13 @@ namespace KNote.DomainModel.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
+                        entityForUpdate.SetSimpleDto(entity);
                         resRep = _repository.KAttributes.Update(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new KAttribute();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
@@ -195,12 +223,125 @@ namespace KNote.DomainModel.Services
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
             
-            resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
+        public async Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entity)
+        {
+            Result<KAttribute> resRep = null;
+            var resService = new Result<KAttributeDto>();
+
+            try
+            {
+                if (entity.KAttributeId == Guid.Empty)
+                {
+                    entity.KAttributeId = Guid.NewGuid();
+                    var newEntity = new KAttribute();
+
+                    newEntity.SetSimpleDto(entity);
+
+                    // TODO: update standard control values to newEntity
+                    // ...
+
+                    resRep = await _repository.KAttributes.AddAsync(newEntity);
+                }
+                else
+                {
+                    bool flagThrowKntException = false;
+
+                    if (_repository.KAttributes.ThrowKntException == true)
+                    {
+                        flagThrowKntException = true;
+                        _repository.KAttributes.ThrowKntException = false;
+                    }
+
+                    var entityForUpdate = (await _repository.KAttributes.GetAsync(entity.KAttributeId)).Entity;
+
+                    if (flagThrowKntException == true)
+                        _repository.KAttributes.ThrowKntException = true;
+
+                    if (entityForUpdate != null)
+                    {
+                        // TODO: update standard control values to entityForUpdate
+                        // ...
+                        entityForUpdate.SetSimpleDto(entity);
+                        resRep = await _repository.KAttributes.UpdateAsync(entityForUpdate);
+                    }
+                    else
+                    {
+                        var newEntity = new KAttribute();
+                        newEntity.SetSimpleDto(entity);
+
+                        // TODO: update standard control values to newEntity
+                        // ...
+                        resRep = await _repository.KAttributes.AddAsync(newEntity);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+
+            resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
+            resService.ErrorList = resRep.ErrorList;
+
+            return ResultDomainAction(resService);
+        }
+
+        public Result<KAttributeInfoDto> Delete(Guid id)
+        {
+            var resService = new Result<KAttributeInfoDto>();
+            try
+            {
+                var resRep = _repository.KAttributes.Get((object)id);
+                if (resRep.IsValid)
+                {
+                    resRep = _repository.KAttributes.Delete(resRep.Entity);
+                    if (resRep.IsValid)
+                        resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeInfoDto>();
+                    else
+                        resService.ErrorList = resRep.ErrorList;
+                }
+                else
+                    resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public async Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id)
+        {
+            var resService = new Result<KAttributeInfoDto>();
+            try
+            {
+                var resRep = await _repository.KAttributes.GetAsync((object)id);
+                if (resRep.IsValid)
+                {
+                    resRep = await _repository.KAttributes.DeleteAsync(resRep.Entity);
+                    if (resRep.IsValid)
+                        resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeInfoDto>();
+                    else
+                        resService.ErrorList = resRep.ErrorList;
+                }
+                else
+                    resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+
+        // TODO: Pendiente de refactorizar los tres siguientes métodos 
         public Result<KAttributeTabulatedValueInfoDto> SaveTabulateValue(Guid attributeId, KAttributeTabulatedValueInfoDto entityInfo)
         {
             Result<KAttributeTabulatedValue> resRep = null;
@@ -262,30 +403,6 @@ namespace KNote.DomainModel.Services
             resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueInfoDto>();
             resService.ErrorList = resRep.ErrorList;
 
-            return ResultDomainAction(resService);
-        }
-
-        public Result<KAttributeDto> Delete(Guid id)
-        {
-            var resService = new Result<KAttributeDto>();
-            try
-            {
-                var resRep = _repository.KAttributes.Get((object) id);
-                if (resRep.IsValid)
-                {
-                    resRep = _repository.KAttributes.Delete(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
             return ResultDomainAction(resService);
         }
 

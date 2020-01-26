@@ -51,13 +51,17 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<NoteTypeInfoDto>> GetAsync(Guid id)
+        public async Task<Result<NoteTypeDto>> GetAsync(Guid id)
         {
-            var resService = new Result<NoteTypeInfoDto>();
+            var resService = new Result<NoteTypeDto>();
             try
             {
                 var resRep = await _repository.NoteTypes.GetAsync((object)id);
-                resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeInfoDto>();
+                
+                resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -132,9 +136,9 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
+        public async Task<Result<NoteTypeInfoDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<NoteTypeDto>();
+            var resService = new Result<NoteTypeInfoDto>();
             try
             {
                 var resRep = await _repository.NoteTypes.GetAsync(id);
@@ -142,7 +146,7 @@ namespace KNote.DomainModel.Services
                 {
                     resRep = await _repository.NoteTypes.DeleteAsync(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeInfoDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }

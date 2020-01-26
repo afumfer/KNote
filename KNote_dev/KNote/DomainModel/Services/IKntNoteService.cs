@@ -17,20 +17,22 @@ namespace KNote.DomainModel.Services
     public interface IKntNoteService
     {
         Result<List<NoteInfoDto>> GetAll();
-        Result<NoteInfoDto> Get(int noteNumber);
-        Result<NoteInfoDto> Get(Guid noteId);
+        Result<NoteDto> Get(int noteNumber);
+        Result<NoteDto> Get(Guid noteId);
         int GetNextNoteNumber();
         Result<List<NoteInfoDto>> GetByFolder(Guid folderId);
         Result<List<NoteItemDto>> GetNoteItemList(Guid? folderId);
         Result<List<NoteInfoDto>> GetFilter(int _page, int _limit, Guid folderId, string query);
         Result<NoteDto> New(NoteInfoDto entity = null);
-        Result<NoteInfoDto> Save(NoteInfoDto entity);
+        Result<NoteDto> Save(NoteDto entity);
+        Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo);
+
         Result<NoteKAttributeInfoDto> SaveAttrtibute(NoteKAttributeInfoDto entityInfo);
         Result<ResourceInfoDto> SaveResource(ResourceInfoDto entityInfo);
         Result<NoteTaskInfoDto> SaveNoteTask(NoteTaskInfoDto entityInfo);
         Result<WindowInfoDto> SaveWindow(WindowInfoDto entityInfo);
         Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo);
-        Task<Result<NoteInfoDto>> SaveAsync(NoteInfoDto entityInfo);                
+        
         Result<NoteInfoDto> Delete(Guid id);
         Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
 

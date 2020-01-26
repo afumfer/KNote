@@ -50,13 +50,17 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<UserInfoDto> Get(string userName)
+        public Result<UserDto> Get(string userName)
         {
-            var resService = new Result<UserInfoDto>();
+            var resService = new Result<UserDto>();
             try
             {
                 var resRep = _repository.Users.Get(u => u.UserName == userName);
-                resService.Entity = resRep.Entity?.GetSimpleDto<UserInfoDto>();
+                
+                resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ...
+
                 resService.ErrorList = resRep.ErrorList;               
             }
             catch (Exception ex)
@@ -66,13 +70,17 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<UserInfoDto> Get(Guid userId)
+        public Result<UserDto> Get(Guid userId)
         {
-            var resService = new Result<UserInfoDto>();
+            var resService = new Result<UserDto>();
             try
             {                
                 var resRep = _repository.Users.Get((object) userId);
-                resService.Entity = resRep.Entity?.GetSimpleDto<UserInfoDto>();
+                
+                resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -131,18 +139,18 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<UserInfoDto> Save(UserInfoDto entityInfo)
+        public Result<UserDto> Save(UserDto entity)
         {
             Result<User> resRep = null;
-            var resService = new Result<UserInfoDto>();
+            var resService = new Result<UserDto>();
 
             try
             {
-                if (entityInfo.UserId == Guid.Empty)
+                if (entity.UserId == Guid.Empty)
                 {
-                    entityInfo.UserId = Guid.NewGuid();
+                    entity.UserId = Guid.NewGuid();
                     var newEntity = new User();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
                   
                     // TODO: update standard control values to newEntity
                     // ...
@@ -159,7 +167,7 @@ namespace KNote.DomainModel.Services
                         _repository.Users.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.Users.Get(entityInfo.UserId).Entity;
+                    var entityForUpdate = _repository.Users.Get(entity.UserId).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.Users.ThrowKntException = true;
@@ -168,13 +176,13 @@ namespace KNote.DomainModel.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
+                        entityForUpdate.SetSimpleDto(entity);
                         resRep = _repository.Users.Update(entityForUpdate);
                     }
                     else
                     {                        
                         var newEntity = new User();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
@@ -188,24 +196,24 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<UserInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<UserInfoDto>> SaveAsync(UserInfoDto entityInfo)
+        public async Task<Result<UserDto>> SaveAsync(UserDto entity)
         {
             Result<User> resRep = null;
-            var resService = new Result<UserInfoDto>();
+            var resService = new Result<UserDto>();
 
             try
             {
-                if (entityInfo.UserId == Guid.Empty)
+                if (entity.UserId == Guid.Empty)
                 {
-                    entityInfo.UserId = Guid.NewGuid();
+                    entity.UserId = Guid.NewGuid();
                     var newEntity = new User();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
@@ -223,7 +231,7 @@ namespace KNote.DomainModel.Services
                     }
 
                     //var entityForUpdate = _repository.Users.Get(entityInfo.UserId).Entity;
-                    resRep = await _repository.Users.GetAsync(entityInfo.UserId);
+                    resRep = await _repository.Users.GetAsync(entity.UserId);
                     var entityForUpdate = resRep.Entity;
 
                     if (flagThrowKntException == true)
@@ -233,13 +241,13 @@ namespace KNote.DomainModel.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
+                        entityForUpdate.SetSimpleDto(entity);
                         resRep = await _repository.Users.UpdateAsync(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new User();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
@@ -253,15 +261,15 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<UserInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public Result<UserInfoDto> Authenticate(string username, string password)
+        public Result<UserDto> Authenticate(string username, string password)
         {
-            var resService = new Result<UserInfoDto>();
+            var resService = new Result<UserDto>();
 
             // check if username and pwd is not null
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
@@ -290,13 +298,13 @@ namespace KNote.DomainModel.Services
             }
 
             // authentication successful
-            resService.Entity = resRep.Entity?.GetSimpleDto<UserInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
             return resService;
         }
                 
-        public Result<UserInfoDto> Create(UserRegisterInfoDto userRegisterInfo)
+        public Result<UserDto> Create(UserRegisterInfoDto userRegisterInfo)
         {
-            Result<UserInfoDto> resService = new Result<UserInfoDto>();
+            Result<UserDto> resService = new Result<UserDto>();
             
             var password = userRegisterInfo.Password;
 
@@ -319,7 +327,7 @@ namespace KNote.DomainModel.Services
                     newEntity.PasswordSalt = passwordSalt;
 
                     var resRep = _repository.Users.Add(newEntity);
-                    resService.Entity = resRep.Entity?.GetSimpleDto<UserInfoDto>();
+                    resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
                     if (!resRep.IsValid)
                         CopyErrorList(resRep.ErrorList, resService.ErrorList);
                 }
@@ -327,7 +335,7 @@ namespace KNote.DomainModel.Services
             catch (Exception ex)
             {
                 if (resService == null)
-                    resService = new Result<UserInfoDto>();
+                    resService = new Result<UserDto>();
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
             return ResultDomainAction(resService);

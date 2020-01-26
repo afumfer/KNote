@@ -52,13 +52,17 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<NoteInfoDto> Get(int noteNumber)
+        public Result<NoteDto> Get(int noteNumber)
         {
-            var resService = new Result<NoteInfoDto>();
+            var resService = new Result<NoteDto>();
             try
             {
                 var resRep = _repository.Notes.Get(n => n.NoteNumber == noteNumber);
-                resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
+                
+                resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -68,13 +72,17 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<NoteInfoDto> Get(Guid noteId)
+        public Result<NoteDto> Get(Guid noteId)
         {
-            var resService = new Result<NoteInfoDto>();
+            var resService = new Result<NoteDto>();
             try
             {
                 var resRep = _repository.Notes.Get((object)noteId);
-                resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
+                
+                resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -256,18 +264,18 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<NoteInfoDto> Save(NoteInfoDto entityInfo)
+        public Result<NoteDto> Save(NoteDto entity)
         {
             Result<Note> resRep = null;
-            var resService = new Result<NoteInfoDto>();
+            var resService = new Result<NoteDto>();
 
             try
             {
-                if (entityInfo.NoteId == Guid.Empty)
+                if (entity.NoteId == Guid.Empty)
                 {
-                    entityInfo.NoteId = Guid.NewGuid();
+                    entity.NoteId = Guid.NewGuid();
                     var newEntity = new Note();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
@@ -292,7 +300,7 @@ namespace KNote.DomainModel.Services
                         _repository.Notes.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.Notes.Get(entityInfo.NoteId).Entity;
+                    var entityForUpdate = _repository.Notes.Get(entity.NoteId).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.Notes.ThrowKntException = true;
@@ -301,13 +309,13 @@ namespace KNote.DomainModel.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
+                        entityForUpdate.SetSimpleDto(entity);
                         resRep = _repository.Notes.Update(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new Note();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
@@ -331,11 +339,90 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
+
+        public async Task<Result<NoteDto>> SaveAsync(NoteDto entity)
+        {
+            Result<Note> resRep = null;
+            var resService = new Result<NoteDto>();
+
+            try
+            {
+                if (entity.NoteId == Guid.Empty)
+                {
+                    entity.NoteId = Guid.NewGuid();
+                    var newEntity = new Note();
+                    newEntity.SetSimpleDto(entity);
+
+                    // TODO: update standard control values to newEntity
+                    // ...
+                    newEntity.NoteNumber = GetNextNoteNumber();
+                    if (newEntity.CreationDateTime == DateTime.MinValue)
+                        newEntity.CreationDateTime = DateTime.Now;
+
+                    if (newEntity.ModificationDateTime == DateTime.MinValue)
+                        newEntity.ModificationDateTime = DateTime.Now;
+                    // ...
+
+                    resRep = await _repository.Notes.AddAsync(newEntity);
+                }
+                else
+                {
+                    bool flagThrowKntException = false;
+
+                    if (_repository.Notes.ThrowKntException == true)
+                    {
+                        flagThrowKntException = true;
+                        _repository.Notes.ThrowKntException = false;
+                    }
+
+                    resRep = await _repository.Notes.GetAsync(entity.NoteId);
+                    var entityForUpdate = resRep.Entity;
+
+                    if (flagThrowKntException == true)
+                        _repository.Notes.ThrowKntException = true;
+
+                    if (entityForUpdate != null)
+                    {
+                        // TODO: update standard control values to entityForUpdate
+                        // ...
+                        entityForUpdate.SetSimpleDto(entity);
+                        resRep = await _repository.Notes.UpdateAsync(entityForUpdate);
+                    }
+                    else
+                    {
+                        var newEntity = new Note();
+                        newEntity.SetSimpleDto(entity);
+
+                        // TODO: update standard control values to newEntity
+                        // ...
+                        newEntity.NoteNumber = GetNextNoteNumber();
+                        if (newEntity.CreationDateTime == DateTime.MinValue)
+                            newEntity.CreationDateTime = DateTime.Now;
+
+                        if (newEntity.ModificationDateTime == DateTime.MinValue)
+                            newEntity.ModificationDateTime = DateTime.Now;
+                        // ...
+                        resRep = await _repository.Notes.AddAsync(newEntity);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+
+            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
+            resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+            resService.ErrorList = resRep.ErrorList;
+
+            return ResultDomainAction(resService);
+        }
+
 
         public Result<NoteKAttributeInfoDto> SaveAttrtibute(NoteKAttributeInfoDto entityInfo)
         {
@@ -658,83 +745,7 @@ namespace KNote.DomainModel.Services
         }
 
 
-        public async Task<Result<NoteInfoDto>> SaveAsync(NoteInfoDto entityInfo)
-        {
-            Result<Note> resRep = null;
-            var resService = new Result<NoteInfoDto>();
 
-            try
-            {
-                if (entityInfo.NoteId == Guid.Empty)
-                {
-                    entityInfo.NoteId = Guid.NewGuid();
-                    var newEntity = new Note();
-                    newEntity.SetSimpleDto(entityInfo);
-
-                    // TODO: update standard control values to newEntity
-                    // ...
-                    newEntity.NoteNumber = GetNextNoteNumber();
-                    if (newEntity.CreationDateTime == DateTime.MinValue)
-                        newEntity.CreationDateTime = DateTime.Now;
-
-                    if (newEntity.ModificationDateTime == DateTime.MinValue)
-                        newEntity.ModificationDateTime = DateTime.Now;
-                    // ...
-
-                    resRep = await _repository.Notes.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
-
-                    if (_repository.Notes.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _repository.Notes.ThrowKntException = false;
-                    }
-
-                    resRep = await _repository.Notes.GetAsync(entityInfo.NoteId);
-                    var entityForUpdate = resRep.Entity;
-
-                    if (flagThrowKntException == true)
-                        _repository.Notes.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
-                        resRep = await _repository.Notes.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new Note();
-                        newEntity.SetSimpleDto(entityInfo);
-
-                        // TODO: update standard control values to newEntity
-                        // ...
-                    newEntity.NoteNumber = GetNextNoteNumber();
-                    if (newEntity.CreationDateTime == DateTime.MinValue)
-                        newEntity.CreationDateTime = DateTime.Now;
-
-                    if (newEntity.ModificationDateTime == DateTime.MinValue)
-                        newEntity.ModificationDateTime = DateTime.Now;
-                    // ...
-                        resRep = await _repository.Notes.AddAsync(newEntity);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
-            resService.ErrorList = resRep.ErrorList;
-
-            return ResultDomainAction(resService);
-        }
 
         public Result<NoteInfoDto> Delete(Guid id)
         {

@@ -1,38 +1,48 @@
 ﻿@page "/notes/new"
 
-@inject NavigationManager navigationManager
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
 
 <h3>New note</h3>
 
-<NoteForm Note="note" OnValidSubmit="NewNote"></NoteForm>
+<NoteForm Note="note" OnValidSubmit="New"></NoteForm>
 
 @code {
 
     private NoteDto note = new NoteDto();
 
-    void NewNote()
+    private async Task New()
     {
-        //Console.WriteLine($"ddddd: {navigationManager.BaseUri}");
-        Console.WriteLine($"URI: {navigationManager.Uri}");
-        // navigationManager.NavigateTo($"index");
 
-        foreach(var a in note.KAttributes)
-        {
-            Console.WriteLine($"Attrigute name - {a.KAttributeName}  - value {a.Value}");
+        Console.WriteLine($"URI: {navigationManger.Uri}");
+        Console.WriteLine($"Executing new method - note.Topic => {note.Topic}");
+        
+        var httpResponse = await dataService.Post("api/notes", note);
+        if (httpResponse.Error)
+        {                        
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());            
         }
+        else
+        {
+            //Console.WriteLine("User created !!");
+            //await showMessages.ShowOkMessage("User saved!");            
+            navigationManger.NavigateTo("notes");
+        }   
 
     }
 
     protected override void OnInitialized()
     {
-        note.NoteId = Guid.NewGuid();
+        //note.NoteId = Guid.NewGuid();
 
-        note.KAttributes = new List<NoteKAttributeDto>()
-        {
-            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 1", Value = ""},
-            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 2", Value = ""},
-            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 3", Value = ""},
-        };
+        //note.KAttributes = new List<NoteKAttributeDto>()
+        //{
+        //    new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 1", Value = ""},
+        //    new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 2", Value = ""},
+        //    new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 3", Value = ""},
+        //};
+
         base.OnInitialized();
     }
 

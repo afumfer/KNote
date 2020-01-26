@@ -99,11 +99,11 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/users
         [HttpPut]    // PUT api/users
-        public async Task<IActionResult> Post([FromBody]UserInfoDto userInfo)
+        public async Task<IActionResult> Post([FromBody]UserDto userDto)
         {
             try
             {
-                var kresApi = await _service.Users.SaveAsync(userInfo);
+                var kresApi = await _service.Users.SaveAsync(userDto);
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -111,7 +111,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<UserInfoDto>();
+                var kresApi = new Result<UserDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }

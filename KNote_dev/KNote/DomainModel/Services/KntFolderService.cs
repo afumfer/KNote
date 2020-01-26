@@ -73,14 +73,17 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-
-        public Result<FolderInfoDto> Get(int folerNumber)
+        public Result<FolderDto> Get(int folerNumber)
         {
-            var resService = new Result<FolderInfoDto>();
+            var resService = new Result<FolderDto>();
             try
             {
                 var resRep = _repository.Folders.Get(f => f.FolderNumber == folerNumber);
-                resService.Entity = resRep.Entity?.GetSimpleDto<FolderInfoDto>();
+                
+                resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -90,13 +93,17 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
         
-        public Result<FolderInfoDto> Get(Guid folderId)
+        public Result<FolderDto> Get(Guid folderId)
         {
-            var resService = new Result<FolderInfoDto>();
+            var resService = new Result<FolderDto>();
             try
             {
                 var resRep = _repository.Folders.Get((object)folderId);
-                resService.Entity = resRep.Entity?.GetSimpleDto<FolderInfoDto>();
+                
+                resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
+                // KNote template ... load here aditionals properties for UserDto
+                // ... 
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -182,18 +189,18 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<FolderInfoDto> Save(FolderInfoDto entityInfo)
+        public Result<FolderDto> Save(FolderDto entity)
         {
             Result<Folder> resRep = null;
-            var resService = new Result<FolderInfoDto>();
+            var resService = new Result<FolderDto>();
 
             try
             {
-                if (entityInfo.FolderId == Guid.Empty)
+                if (entity.FolderId == Guid.Empty)
                 {
-                    entityInfo.FolderId = Guid.NewGuid();
+                    entity.FolderId = Guid.NewGuid();
                     var newEntity = new Folder();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
@@ -211,7 +218,7 @@ namespace KNote.DomainModel.Services
                         _repository.Folders.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.Folders.Get(entityInfo.FolderId).Entity;
+                    var entityForUpdate = _repository.Folders.Get(entity.FolderId).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.Folders.ThrowKntException = true;
@@ -220,13 +227,13 @@ namespace KNote.DomainModel.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
+                        entityForUpdate.SetSimpleDto(entity);
                         resRep = _repository.Folders.Update(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new Folder();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
@@ -240,24 +247,24 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<FolderInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<FolderInfoDto>> SaveAsync(FolderInfoDto entityInfo)
+        public async Task<Result<FolderDto>> SaveAsync(FolderDto entity)
         {
             Result<Folder> resRep = null;
-            var resService = new Result<FolderInfoDto>();
+            var resService = new Result<FolderDto>();
 
             try
             {
-                if (entityInfo.FolderId == Guid.Empty)
+                if (entity.FolderId == Guid.Empty)
                 {
-                    entityInfo.FolderId = Guid.NewGuid();
+                    entity.FolderId = Guid.NewGuid();
                     var newEntity = new Folder();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
@@ -275,7 +282,7 @@ namespace KNote.DomainModel.Services
                         ThrowKntException = false;
                     }
 
-                    resRep = await _repository.Folders.GetAsync(entityInfo.FolderId);
+                    resRep = await _repository.Folders.GetAsync(entity.FolderId);
                     var entityForUpdate = resRep.Entity;
 
                     if (flagThrowKntException == true)
@@ -285,13 +292,13 @@ namespace KNote.DomainModel.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
+                        entityForUpdate.SetSimpleDto(entity);
                         resRep = await _repository.Folders.UpdateAsync(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new Folder();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
@@ -305,7 +312,7 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<FolderInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);

@@ -27,14 +27,54 @@ namespace KNote.Server.Controllers
             _appSettings = appSettings.Value;
         }
 
+        [HttpGet]    // GET api/notetypes       
+        public IActionResult Get()
+        {
+            try
+            {
+                var kresApi = _service.NoteTypes.GetAll();
+                if (kresApi.IsValid)
+                    return Ok(kresApi);
+                else
+                    return BadRequest(kresApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<List<NoteTypeInfoDto>>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
+        [HttpGet("{id}")]    // GET api/notetypes/guidnotetype
+        public async Task<IActionResult> Get(Guid id)
+        {
+            try
+            {
+                var resApi = await _service.NoteTypes.GetAsync(id);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                {
+                    return BadRequest(resApi);
+                }
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<NoteTypeInfoDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
+
         [HttpPost]   // POST api/notetypes
         [HttpPut]    // PUT api/notetypes
         public async Task<IActionResult> Post([FromBody]NoteTypeDto noteType)
         {
             try
-            {
-                // TODO: Implementar _service.NoteTypes.xxxxx
-                var kresApi = new Result<NoteTypeDto>(); // await _service.N.SaveAsync(noteType);
+            {                                
+                var kresApi = await _service.NoteTypes.SaveAsync(noteType);
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -45,6 +85,25 @@ namespace KNote.Server.Controllers
                 var kresApi = new Result<NoteTypeDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
+            }
+        }
+
+        [HttpDelete("{id}")]    // DELETE api/notetypes/guid        
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                var resApi = await _service.NoteTypes.DeleteAsync(id);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var resApi = new Result<NoteTypeDto>();
+                resApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(resApi);
             }
         }
 
