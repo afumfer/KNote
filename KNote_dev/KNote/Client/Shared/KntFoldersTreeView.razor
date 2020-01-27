@@ -1,0 +1,52 @@
+﻿@*@using KNote.Shared*@
+
+@if (FoldersInfo != null)
+{
+    @if (FoldersInfo.Count > 0)
+    {
+        <ul>
+            @foreach (var folder in FoldersInfo)
+            {
+                <li>
+                    @if (folder.ChildFolders.Count > 0)
+                    {
+                        <span class="@folder.getIcon() mr-1" @onclick="@folder.Toggle"></span>
+                    }
+                    else
+                    {
+                        <span class="mr-3"></span>
+                    }
+
+                    @if (folder.Selected == true) { folderOldSelected = folder; }
+                    <span class="@folder.getColor()  px-2 pt-1 pb-1 rounded" @onclick="@(() => onFolderSelected(folder))"> @folder.ShortName</span>
+
+                    @if (folder.Expanded)
+                    {
+                        <div>
+                            <KntFoldersTreeView FoldersInfo="@folder.ChildFolders" FolderSelected="onFolderSelected"></KntFoldersTreeView>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
+    [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
+    private FolderInfoDto folderOldSelected;
+
+    protected async Task onFolderSelected(FolderInfoDto folder)
+    {
+        // Refresh component state (selected / no selected)
+
+        if (folderOldSelected != null)
+            folderOldSelected.Selected = false;
+
+        folder.Selected = true;
+        await FolderSelected.InvokeAsync(folder);
+        folderOldSelected = folder;
+    }
+
+}
