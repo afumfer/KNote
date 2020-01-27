@@ -12,12 +12,15 @@ namespace KNote.Shared.Dto
         public Guid UserId { get; set; }
 
         [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [MaxLength(32)]
         public string UserName { get; set; }
 
         [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [MaxLength(256)]
         public string EMail { get; set; }
 
         [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [MaxLength(256)]
         public string FullName { get; set; }
 
         [Required(ErrorMessage = "* Attribute {0} is required ")]

@@ -1,11 +1,82 @@
 ﻿@page "/attributes"
 
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
 <h3>Attributes Index</h3>
 
 <div class="form-group">
-    <a class="btn btn-info" href="attributes/new">New atrribute</a>
+    <a class="btn btn-info" href="attributes/new">New attribute</a>
 </div>
+
+<EntityList List="attributes">
+    <ItemsFull>
+        <table class="table table-sm table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Name</th>
+                    <th>Order</th>
+                    <th>DataType</th>
+                    <th width="100px" class="text-center">(Actions)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in attributes)
+                {
+                    <tr>
+                        <td>@item.Key</td>
+                        <td>@item.Name</td>
+                        <td>@item.Order</td>
+                        <td>@item.KAttributeDataType</td>
+                        <td>
+                            <span class="float-right">
+                                <a href="attributes/edit/@item.KAttributeId" class="btn btn-sm btn-warning mx-1"
+                                   data-toggle="tooltip" title="Edit user">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => Delete(item))"
+                                        data-toggle="tooltip" title="Delete user">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </ItemsFull>
+</EntityList>
 
 @code {
 
+    private List<KAttributeInfoDto> attributes { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var res = await dataService.Get<Result<List<KAttributeInfoDto>>>("api/kattributes");
+        attributes = res.Response.Entity;
+    }
+
+    private async Task Delete(KAttributeInfoDto item)
+    {
+        var httpResponse = await dataService.Delete($"api/kattributes/{item.KAttributeId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            await Load();
+        }
+    }
+
 }
+

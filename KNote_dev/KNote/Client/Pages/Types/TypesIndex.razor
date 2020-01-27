@@ -1,11 +1,77 @@
 ﻿@page "/types"
 
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
 <h3>Types Index</h3>
 
 <div class="form-group">
     <a class="btn btn-info" href="types/new">New type</a>
 </div>
 
+<EntityList List="noteTypes">
+    <ItemsFull>
+        <table class="table table-sm table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Name</th>
+                    <th width="100px" class="text-center">(Actions)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in noteTypes)
+                {
+                    <tr>
+                        <td>@item.Key</td>
+                        <td>@item.Name</td>
+                        <td>
+                            <span class="float-right">
+                                <a href="notetypes/edit/@item.NoteTypeId" class="btn btn-sm btn-warning mx-1"
+                                   data-toggle="tooltip" title="Edit user">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => Delete(item))"
+                                        data-toggle="tooltip" title="Delete user">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </ItemsFull>
+</EntityList>
+
 @code {
+
+    private List<NoteTypeInfoDto> noteTypes { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var res = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        noteTypes = res.Response.Entity;
+    }
+
+    private async Task Delete(NoteTypeInfoDto item)
+    {
+        var httpResponse = await dataService.Delete($"api/notetypes/{item.NoteTypeId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            await Load();
+        }
+    }
 
 }

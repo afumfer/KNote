@@ -15,16 +15,20 @@ namespace KNote.Shared.Dto
 
         //public DateTime CreationDateTime { get; set; }
         //public DateTime ModificationDateTime { get; set; }
-
+        
         [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [MaxLength(256)]
         public string Name { get; set; }
 
+        [MaxLength(1024)]
         public string Tags { get; set; }
 
+        [MaxLength(400)]
         public string PathFolder { get; set; }
 
         public int Order { get; set; }
 
+        [MaxLength(256)]
         public string OrderNotes { get; set; }
 
         public string Script { get; set; }

@@ -14,12 +14,15 @@ namespace KNote.Shared.Dto
         public int NoteNumber { get; set; }
 
         [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [MaxLength(1024)]
         public string Topic { get; set; }
 
         public string Description { get; set; }
 
-        public string ContentType { get; set; }        
+        [MaxLength(1024)]
+        public string ContentType { get; set; }
 
+        [MaxLength(1024)]
         public string Tags { get; set; }
 
         public int Priority { get; set; }
