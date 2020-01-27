@@ -25,13 +25,6 @@
             data-toggle="tooltip" title="Edit note">
         <i class="oi oi-person"></i> Users
     </button>
-
-    <button class="btn btn-sm btn-warning mx-1"
-            @onclick="GoNotesDemo"
-            data-toggle="tooltip" title="Edit note">
-        <i class="oi oi-person"></i> Notes Demo
-    </button>
-
 </span>
 
 
@@ -58,11 +51,5 @@
     {
         navigationManager.NavigateTo($"users");
     }
-
-    //
-    void GoNotesDemo()
-    {
-        navigationManager.NavigateTo($"notes");
-    }
-
+   
 }

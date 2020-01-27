@@ -12,15 +12,6 @@
 
 <hr />
 
-@*@if (folder == null)
-{
-    <h5>( ... no folder selected ...)</h5>
-}
-else
-{
-    <h5><span class="oi oi-folder pr-3"></span>@folder.Name</h5>    
-}*@
-
 @if (foldersTree == null)
 {
     <p><em>Loading tree folders ...</em></p>
@@ -36,21 +27,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //var responseHttp = await repositorio.Get<Result<IEnumerable<FolderInfoDto>>>("http://localhost:7010/api/folders/gettree");
-        //kresApi = responseHttp.Response;
-
-        //myFoldersInfo = kresApi.Entity.ToList();
-
-
         var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
         foldersTree = res.Response.Entity;
-
 
         if (foldersTree?.Count > 0)
         {
             var f = foldersTree.Select(x => x).FirstOrDefault();
-            f.Selected = true;
-            //await OnFolderSelected(f);
+            f.Selected = true;     
             OnFolderSelected(f);
         }
     }
@@ -59,17 +42,5 @@ else
     {
         folder = f;
     }
-
-    //private async Task OnFolderSelected(FolderInfoDto f)
-    //{
-    //    folder = f;
-
-    //    urlGetNotes = @"http://localhost:7010/api/notes/GetByFolder/" + folder.FolderId.ToString();
-
-    //    var responseHttp = await repositorio.Get<Result<IEnumerable<NoteInfoDto>>>(urlGetNotes);
-    //    kresApiNotes = responseHttp.Response;
-
-    //    myNotesInfo = kresApiNotes.Entity.ToList();
-    //}
 
 }

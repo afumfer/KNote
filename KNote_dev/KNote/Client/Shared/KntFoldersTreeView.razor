@@ -18,7 +18,7 @@
                     }
 
                     @if (folder.Selected == true) { folderOldSelected = folder; }
-                    <span class="@folder.getColor()  px-2 pt-1 pb-1 rounded" @onclick="@(() => onFolderSelected(folder))"> @folder.ShortName</span>
+                    <span class="@folder.getColor()  px-1 pt-1 pb-1 rounded" @onclick="@(() => onFolderSelected(folder))"> @folder.ShortName</span>
 
                     @if (folder.Expanded)
                     {

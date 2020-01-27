@@ -1,7 +1,126 @@
 ﻿@page "/notes/tree"
 
-<h3>NotesTree</h3>
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
+<h3>Notes tree</h3>
+<div class="form-group">
+    <a class="btn btn-info" href="notes/new">New note</a>
+</div>
+
+<div class="row">
+
+    <div class="col-lg-12 pt-2 bg-light border">
+        @if (folder == null)
+        {
+            <h5>( ... no folder selected ...)</h5>
+        }
+        else
+        {
+            <h5><span class="oi oi-folder pr-3"></span>@folder.Name</h5> @folder.FolderId
+        }
+    </div>
+    <div class="col-lg-3 pt-2 pb-2 bg-light border">
+        @if (foldersTree == null)
+        {
+            <p><em>Loading tree folders ...</em></p>
+        }
+        else
+        {
+            <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" />
+        }
+    </div>
+
+    <div class="col-lg-9 pt-2 pb-2 bg-light border">
+        @if (notes == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            @*<h5>Notes</h5>
+            <hr />
+            <p></p>*@
+            <table class="table table-sm table-bordered table-striped">
+            <!--   <table class="table pt-4">  -->
+                <thead>
+                    <tr>
+                        <th width="80px" class="text-right">#</th>
+                        <th>Topic</th>
+                        <th width="60px" class="text-right">Priority</th>
+                        <th width="80px" class="text-right">Date</th>
+                        <th width="100px" class="text-center">(Actions)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var note in notes)
+                    {
+                    <tr>
+                        <td class="text-right">@note.NoteNumber</td>
+                        <td>@note.Topic</td>
+                        <td class="text-right">@note.Priority</td>
+                        <td class="text-right">  @note.CreationDateTime.ToShortDateString()</td>
+                        <td>
+                            <span class="float-right">
+                                <a href="notes/edit/@note.NoteId" class="btn btn-sm btn-warning mx-1"
+                                   data-toggle="tooltip" title="Edit user">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => Delete(note))"
+                                        data-toggle="tooltip" title="Delete user">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+                }
+
+        </div>
+</div>
 
 @code {
+    List<FolderInfoDto> foldersTree;
+    FolderInfoDto folder;
+
+    List<NoteInfoDto> notes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
+        foldersTree = res.Response.Entity;
+
+        if (foldersTree?.Count > 0)
+        {
+            var f = foldersTree.Select(x => x).FirstOrDefault();
+            f.Selected = true;
+            await OnFolderSelected(f);            
+        }
+    }
+
+    private async Task OnFolderSelected(FolderInfoDto f)
+    {
+        notes = null;
+        folder = f;
+        var res = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/GetByFolder/" + folder.FolderId.ToString() );
+        notes = res.Response.Entity;
+    }
+
+    private async Task Delete(NoteInfoDto item)
+    {
+        var httpResponse = await dataService.Delete($"api/notes/{item.NoteId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            await OnFolderSelected(folder);
+        }
+    }
 
 }
