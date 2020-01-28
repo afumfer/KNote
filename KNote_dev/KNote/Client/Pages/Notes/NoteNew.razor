@@ -6,22 +6,35 @@
 
 <h3>New note</h3>
 
-<NoteForm Note="note" OnValidSubmit="New"></NoteForm>
+<NoteForm Note="note" OnValidSubmit="New" NoteTypes="noteTypes"></NoteForm>
 
 @code {
 
     private NoteDto note = new NoteDto();
+    private bool showForm = false;
+    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var res = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        noteTypes = res.Response.Entity;
+        showForm = true;
+
+        // TODO: !!! Load attributes ... ??
+
+        base.OnInitialized();
+    }
 
     private async Task New()
     {
 
         Console.WriteLine($"URI: {navigationManger.Uri}");
         Console.WriteLine($"Executing new method - note.Topic => {note.Topic}");
-        
+
         var httpResponse = await dataService.Post("api/notes", note);
         if (httpResponse.Error)
-        {                        
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());            
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
         {
@@ -29,22 +42,7 @@
             //await showMessages.ShowOkMessage("User saved!");            
             //navigationManger.NavigateTo("notes");
             navigationManger.NavigateTo("notes/tree");
-        }   
-
-    }
-
-    protected override void OnInitialized()
-    {
-        //note.NoteId = Guid.NewGuid();
-
-        //note.KAttributes = new List<NoteKAttributeDto>()
-        //{
-        //    new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 1", Value = ""},
-        //    new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 2", Value = ""},
-        //    new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 3", Value = ""},
-        //};
-
-        base.OnInitialized();
+        }
     }
 
 }

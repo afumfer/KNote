@@ -1,26 +1,12 @@
-﻿@*<div> </div>*@
-
-@*<p><b> Note Number: </b> @Note.NoteNumber.</p>
-    <p><b> Topic: </b>@((MarkupString)Note.Topic)</p>
-
-    <div>
-        <a class="btn btn-info">Edit</a>
-        <button type="button" class="btn btn-danger"
-                @onclick="@(() => OnNoteDelete.InvokeAsync(Note))">
-            Delete
-        </button>
-    </div>*@
-
-
-<div class="card m-1 p-1  bg-light">
+﻿<div class="card m-1 p-1  bg-light">
     <h5>
-        <a href="@(urlNote)74CB255C-022C-4E10-B190-565487927DE5">
+        <a href="@(urlNote)/@Note.NoteId">
             <span class="badge badge-pill badge-primary float-left ml-1">
                 @Note.NoteNumber
             </span>
         </a>
 
-        <a href="@urlNote"> &nbsp; @((MarkupString)Note.Topic) </a>
+         &nbsp; @((MarkupString)Note.Topic)
 
         <span class="float-right">
             <button class="btn btn-sm btn-warning mx-1"

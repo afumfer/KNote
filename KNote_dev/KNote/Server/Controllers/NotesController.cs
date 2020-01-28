@@ -65,6 +65,26 @@ namespace KNote.Server.Controllers
             }
         }
 
+        [HttpGet("recentnotes")]   // GET api/notes/recentnotes
+        public IActionResult RecentNotes()
+        {
+            try
+            {
+                var resApi = _service.Notes.RecentNotes();
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                    return BadRequest(resApi);
+
+            }
+            catch (Exception ex)
+            {
+                var resApi = new Result<List<NoteInfoDto>>();
+                resApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(resApi);
+            }
+        }
+
         [HttpGet("{noteId}")]    // GET api/notes/guidnote
         public IActionResult Get(Guid noteId)
         {

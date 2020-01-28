@@ -52,6 +52,23 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
+        //RecentNotes
+        public Result<List<NoteInfoDto>> RecentNotes()
+        {
+            var resService = new Result<List<NoteInfoDto>>();
+            try
+            {
+                // TODO: !!!AAA
+                var resRep = _repository.Notes.DbSet.OrderByDescending(n => n.NoteNumber).Take(25).ToList();
+                resService.Entity = resRep.Select(u => u.GetSimpleDto<NoteInfoDto>()).ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
         public Result<NoteDto> Get(int noteNumber)
         {
             var resService = new Result<NoteDto>();

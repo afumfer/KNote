@@ -3,12 +3,15 @@
 
 @using KNote.Client.Pages.Notes
 
-@inject IKntClientDataService dataService
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
 
 <div>
-    <h3>Notes 4 !! </h3>
+    <h3>Recent notes</h3>
     <p>Mode: @appState.AppMode</p>
-    <NotesList Notes="Notes" />
+    <NotesList Notes="notes" />
 </div>
 
 
@@ -16,12 +19,17 @@
 
     [CascadingParameter] private AppState appState { get; set; }
 
-    private List<NoteInfoDto> Notes;
+    private List<NoteInfoDto> notes;
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(1000);
-        Notes = dataService.GetNotes();
+        // TODO: !!! Delete
+        //await Task.Delay(1000);
+        //notes = dataService.GetNotes();
+
+        var res = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/recentnotes");
+        notes = res.Response.Entity;
+
     }
 
 }

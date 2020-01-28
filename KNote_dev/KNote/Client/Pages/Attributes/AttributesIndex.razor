@@ -15,10 +15,10 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th>Key</th>
+                    <th width="160px" >Key</th>
                     <th>Name</th>
-                    <th>Order</th>
-                    <th>DataType</th>
+                    <th width="60px" >Order</th>
+                    <th width="220px" >DataType</th>
                     <th width="100px" class="text-center">(Actions)</th>
                 </tr>
             </thead>
@@ -29,7 +29,7 @@
                         <td>@item.Key</td>
                         <td>@item.Name</td>
                         <td>@item.Order</td>
-                        <td>@item.KAttributeDataType</td>
+                        <td>@KntConst.KAttributes[item.KAttributeDataType]</td>
                         <td>
                             <span class="float-right">
                                 <a href="attributes/edit/@item.KAttributeId" class="btn btn-sm btn-warning mx-1"

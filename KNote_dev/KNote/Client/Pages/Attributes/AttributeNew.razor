@@ -6,10 +6,27 @@
 
 <h3>New Attribute</h3>
 
-<AttributeForm OnValidSubmit="New" KAttribute="kattribute" />
+@if(showForm)
+{
+    <AttributeForm OnValidSubmit="New" KAttribute="kattribute" NoteTypes="noteTypes" />
+}
+else
+{
+    <text>Loading ... </text>
+}
 
 @code {
-    KAttributeDto kattribute = new KAttributeDto();
+    private KAttributeDto kattribute = new KAttributeDto();
+    private bool showForm = false;
+    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var res = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        noteTypes = res.Response.Entity;
+        showForm = true;
+        base.OnInitialized();
+    }
 
     private async Task  New()
     {        
