@@ -33,6 +33,8 @@ namespace KNote.Shared.Dto
 
         public List<NoteKAttributeDto> KAttributesDto { get; set; } = new List<NoteKAttributeDto>();
 
+        public FolderDto FolderDto { get; set; }
+
         // TODO: Eliminar la siguiente propiedad, se deberá implementar en ContentType
         public bool HtmlFormat
         {

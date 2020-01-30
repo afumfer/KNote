@@ -13,6 +13,7 @@ using KNote.DomainModel.Entities;
 using System.Data.Common;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace KNote.DomainModel.Repositories
 {
@@ -498,25 +499,47 @@ namespace KNote.DomainModel.Repositories
             return ResultDomainAction<IEnumerable<TEntity>>(result);
         }
 
-        public Result<TEntity> LoadCollection<TCollection>(TEntity entity, Expression<Func<TEntity, ICollection<TCollection>>> colec)
+        public Result<TEntity> LoadCollection<TCollection>(TEntity entity, Expression<Func<TEntity, IEnumerable<TCollection>>> colec)
             where TCollection : ModelBase
         {
             var result = new Result<TEntity>();
+            
+            try
+            {
+                _context.Entry(entity).Collection<TCollection>(colec).Load();        
+                result.Entity = entity;
+            }
+            catch (KntEntityValidationException ex)
+            {
+                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
 
-            // TODO: problemas con cole y entityframeworkcore
-            //try
-            //{
-            //    _context.Entry(entity).Collection<TCollection>(colec).Load();
-            //    result.Entity = entity;
-            //}
-            //catch (KntEntityValidationException ex)
-            //{
-            //    AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
-            //}
-            //catch (Exception ex)
-            //{
-            //    AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            //}
+            return ResultDomainAction<TEntity>(result);
+        }
+
+        public Result<TEntity> LoadReference<TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> prop)
+            where TProperty : class
+        {
+            var result = new Result<TEntity>();
+
+            try
+            {
+                //_context.Entry(entity).Collection<TCollection>(colec).Load();
+                _context.Entry(entity).Reference(prop).Load();
+                result.Entity = entity;
+            }
+            catch (KntEntityValidationException ex)
+            {
+                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
 
             return ResultDomainAction<TEntity>(result);
         }
@@ -529,33 +552,6 @@ namespace KNote.DomainModel.Repositories
         public DbSet<TEntity> DbSet
         {
             get { return _dbSet; }
-        }
-
-        #endregion
-
-        #region Protected methods
-
-        protected Result<TEntity> LoadEntityColec<TCollection>(TEntity entity, Expression<Func<TEntity, ICollection<TCollection>>> colec)
-            where TCollection : ModelBase
-        {
-            var result = new Result<TEntity>();
-
-            // TODO: problemas con cole y EntityFrameworCore
-            //try
-            //{
-            //    _context.Entry(entity).Collection<TCollection>(colec).Load();
-            //    result.Entity = entity;
-            //}
-            //catch (KntEntityValidationException ex)
-            //{
-            //    AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
-            //}
-            //catch (Exception ex)
-            //{
-            //    AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            //}
-
-            return ResultDomainAction<TEntity>(result);
         }
 
         #endregion

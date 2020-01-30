@@ -6,7 +6,14 @@
 
 <h3>New note</h3>
 
-<NoteForm Note="note" OnValidSubmit="New" NoteTypes="noteTypes"></NoteForm>
+@if (showForm)
+{
+    <NoteForm Note="note" OnValidSubmit="New" NoteTypes="noteTypes"></NoteForm>
+}
+else
+{
+    <text>Loading ... </text>
+}
 
 @code {
 
@@ -39,7 +46,7 @@
         else
         {
             //Console.WriteLine("User created !!");
-            //await showMessages.ShowOkMessage("User saved!");            
+            //await showMessages.ShowOkMessage("User saved!");
             //navigationManger.NavigateTo("notes");
             navigationManger.NavigateTo("notes/tree");
         }

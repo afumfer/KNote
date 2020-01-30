@@ -1,19 +1,51 @@
 ﻿@page "/notes/{NoteId}"
-@page "/notes/{NoteIdInt:int}/{NoteTopic}"
+
+
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
 
 <h3>NoteView</h3>
 
-<p>NoteId: @NoteId</p>
-<p>Note Topic: @NoteTopic</p>
+@if (note != null)
+{
+    <h5>@note.Topic</h5>
+    <h6> >> @note.FolderDto.Name</h6>
+    <p>     >> NoteId: @NoteId / @note.NoteId</p>
+    <hr />
+    <p>Description:</p>
+    <p>@((MarkupString)note.Description)</p>
+    <hr />
+    <p>Tags:</p>
+    <p>@(note.Tags)</p>
+    <hr />
+}
+else
+{
+    <text>Loading ... </text>
+}
+
 
 @code {
-    [Parameter] public int NoteIdInt { get; set; }
     [Parameter] public string NoteId { get; set; }
-    [Parameter] public string NoteTopic { get; set; }
 
-    protected override void OnInitialized()
+    private NoteDto note;
+
+    protected async override Task OnInitializedAsync()
     {
-        Console.WriteLine($"Note Id = {NoteId}");
+        var httpResponse = await dataService.Get<Result<NoteDto>>($"api/notes/{NoteId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            navigationManger.NavigateTo("/");
+        }
+        else
+        {
+            note = httpResponse.Response.Entity;
+
+            Console.WriteLine("Note loaded!!");
+        }
+
         base.OnInitialized();
     }
 

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 using KNote.Shared;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace KNote.DomainModel.Repositories
 {
@@ -49,7 +50,9 @@ namespace KNote.DomainModel.Repositories
         Task<Result<TEntity>> DeleteAsync(TEntity entity);
         Result<IEnumerable<TEntity>> DeleteRange(IEnumerable<TEntity> entity);
         Task<Result<IEnumerable<TEntity>>> DeleteRangeAsync(IEnumerable<TEntity> entity);        
-        Result<TEntity> LoadCollection<TCollection>(TEntity entity, Expression<Func<TEntity, ICollection<TCollection>>> colec) where TCollection : ModelBase;
+        Result<TEntity> LoadCollection<TCollection>(TEntity entity, Expression<Func<TEntity, IEnumerable<TCollection>>> colec) where TCollection : ModelBase;
+        Result<TEntity> LoadReference<TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> prop) where TProperty : class;
+        //Result<TEntity> LoadReference<TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> prop) where TProperty : ReferenceEntry;
         #endregion
     }
 }

@@ -13,6 +13,7 @@ using KNote.Shared.Dto;
 
 using KNote.DomainModel.Infrastructure;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 //using System.Data.Entity.Validation;
 
 namespace KNote.DomainModel.Services
@@ -94,13 +95,31 @@ namespace KNote.DomainModel.Services
             var resService = new Result<NoteDto>();
             try
             {
+                // Option 1 -----------------------
                 var resRep = _repository.Notes.Get((object)noteId);
-                
-                resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
                 // KNote template ... load here aditionals properties for UserDto
-                // ... 
+                resRep = _repository.Notes.LoadCollection(resRep.Entity, u => u.KAttributes);
+                resRep = _repository.Notes.LoadReference(resRep.Entity, n => n.Folder);
+
+                // Map to dto
+                resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+                resService.Entity.KAttributesDto = resRep.Entity?.KAttributes.Select(_ => _.KAttribute.GetSimpleDto<NoteKAttributeDto>()).ToList() ;
+                resService.Entity.FolderDto = resRep.Entity?.Folder.GetSimpleDto<FolderDto>();
+                // ....
 
                 resService.ErrorList = resRep.ErrorList;
+
+                //// Option 2 ----------------------- 
+                //var entity = _repository.Notes.DbSet.Where(n => n.NoteId == noteId)
+                //    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                //    .Include(n => n.NoteTasks)
+                //    .Include(n => n.KMessages)
+                //    .Include(n => n.Resources)
+                //    .Include(n => n.Folder)
+                //    .Include(n => n.NoteType)
+                //    .FirstOrDefault();
+                //resService.Entity = entity?.GetSimpleDto<NoteDto>();
+
             }
             catch (Exception ex)
             {
