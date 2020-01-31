@@ -1,29 +1,59 @@
 ﻿@page "/types/edit/{TypeId}"
 
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
 <h3>Type Edit</h3>
 
-<TypeForm OnValidSubmit="Edit" NoteType="NoteType" />
+@if (noteType != null)
+{
+    <TypeForm OnValidSubmit="Edit" NoteType="noteType" />
+}
+else
+{
+    <text>Loading ... </text>
+}
+
 
 @code {
     [Parameter] public string TypeId { get; set; }
+    
+    private NoteTypeDto noteType;
 
-    private Guid TypeGuid;
-    NoteTypeDto NoteType;
-
-
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
-        TypeGuid = Guid.Parse(TypeId);
+        var httpResponse = await dataService.Get<Result<NoteTypeDto>>($"api/notetypes/{TypeId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            navigationManger.NavigateTo("/");
+        }
+        else
+        {
+            noteType = httpResponse.Response.Entity;
 
-        NoteType = new NoteTypeDto() { NoteTypeId = TypeGuid, Key = "KEY1", Name = "Name 1" };
+            Console.WriteLine($"NoteType loaded!! {noteType.NoteTypeId}");
+        }
 
         base.OnInitialized();
     }
 
-    private void Edit()
+    private async Task Edit()
     {
-        Console.WriteLine("Editing attribute ....");
-        Console.WriteLine($"> {NoteType.Name}");
+        Console.WriteLine("Edit user");
+
+        var httpResponse = await dataService.Put("api/NoteTypes", noteType);
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            //Console.WriteLine("Type created !!");
+            //await showMessages.ShowOkMessage("Types saved!");            
+            navigationManger.NavigateTo("types");
+        }
     }
 
 }

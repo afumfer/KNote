@@ -58,8 +58,8 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("{userName}")]    // GET api/users/afumfer2        
-        public IActionResult Get(string userName)
+        [HttpGet("[action]/{userName}")]    // GET api/users/afumfer2        
+        public IActionResult GetByName(string userName)
         {
             try
             {
@@ -77,6 +77,28 @@ namespace KNote.Server.Controllers
                 return BadRequest(kresApi);
             }
         }
+
+        [HttpGet("{id}")]    // GET api/kattributes/guidKAttribute
+        public async Task<IActionResult> Get(Guid id)
+        {
+            try
+            {
+                var resApi = await _service.Users.GetAsync(id);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                {
+                    return BadRequest(resApi);
+                }
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<KAttributeInfoDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
 
         [HttpGet("[action]/{userName}")]    // GET api/users/GetMessagesTo/afumfer2        
         public IActionResult GetMessages(Guid id)

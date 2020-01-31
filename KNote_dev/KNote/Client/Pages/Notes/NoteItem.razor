@@ -1,6 +1,6 @@
 ﻿<div class="card m-1 p-1  bg-light">
     <h5>
-        <a href="@(urlNote)/@Note.NoteId">
+        <a href="notes/@Note.NoteId">
             <span class="badge badge-pill badge-primary float-left ml-1">
                 @Note.NoteNumber
             </span>
@@ -8,20 +8,24 @@
 
          &nbsp; @((MarkupString)Note.Topic)
 
-        <span class="float-right">
-            <button class="btn btn-sm btn-warning mx-1"
-                    data-toggle="tooltip" title="Edit note">
-                <i class="fa fa-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-danger mx-1"
-                    @onclick="@(() => OnNoteDelete.InvokeAsync(Note))" data-toggle="tooltip" title="Delete note">
-                <i class="fa fa-minus"></i>
-            </button>
-        </span>
+    <span class="float-right">
+        <a href="notes/edit/@Note.NoteId" class="btn btn-sm btn-warning mx-1"
+           data-toggle="tooltip" title="Edit user">
+            <i class="fa fa-pencil"></i>
+        </a>
+        <button class="btn btn-sm btn-danger mx-1"
+                @onclick="@(() => OnNoteDelete.InvokeAsync(Note))" data-toggle="tooltip" title="Delete note">
+            <i class="fa fa-minus"></i>
+        </button>
+    </span>
     </h5>
     <div class="card-text bg-white p-1">
         <p>
-            <span>@((MarkupString)Note.Topic)</span>
+            <span>
+                @*@Note.Description*@
+                <ViewMarkdown MarkdownContent="@Note.Description" />
+            </span>
+
         </p>
     </div>
 </div>
@@ -30,14 +34,5 @@
 @code {
     [Parameter] public NoteInfoDto Note { get; set; }
     [Parameter] public bool ShowButton { get; set; } = false;
-    [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
-
-    private string urlNote = string.Empty;
-
-    protected override void OnInitialized()
-    {
-        urlNote = $"notes/";
-        base.OnInitialized();
-    }
-
+    [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }   
 }

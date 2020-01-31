@@ -23,9 +23,16 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var res = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
-        noteTypes = res.Response.Entity;
-        showForm = true;
+        var httpResponse = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            noteTypes = httpResponse.Response.Entity;
+            showForm = true;
+        }
 
         // TODO: !!! Load attributes ... ??
 

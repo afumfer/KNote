@@ -1,29 +1,73 @@
 ﻿@page "/attributes/edit/{AttributeId}"
 
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
 <h3>Attribute Edit</h3>
 
-<AttributeForm OnValidSubmit="Edit" KAttribute="KAttribute" />
+@if (kattribute != null && showForm)
+{
+    <AttributeForm OnValidSubmit="Edit" KAttribute="kattribute"  NoteTypes="noteTypes"/>
+}
+else
+{
+    <text>Loading ... </text>
+}
 
 @code {
     [Parameter] public string AttributeId { get; set; }
 
-    private Guid AttributeGuid;
-    KAttributeDto KAttribute;
+    private KAttributeDto kattribute;
+    private bool showForm = false;
+    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
 
-
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
-        AttributeGuid = Guid.Parse(AttributeId);
+        var httpResponse = await dataService.Get<Result<KAttributeDto>>($"api/kattributes/{AttributeId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            navigationManger.NavigateTo("/");
+        }
+        else
+        {
+            kattribute = httpResponse.Response.Entity;            
+        }
 
-        KAttribute = new KAttributeDto() { KAttributeId = AttributeGuid, Key = "KEY1", Name = "Name 1" };
+        var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        if (httpResponse2.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
+            navigationManger.NavigateTo("/");
+        }
+        else
+        {
+            noteTypes = httpResponse2.Response.Entity;
+            showForm = true;
+        }
+
+        Console.WriteLine($"Attribute loaded!! {kattribute.KAttributeId}");
 
         base.OnInitialized();
     }
 
-    private void Edit()
+    private async Task Edit()
     {
-        Console.WriteLine("Editing attribute ....");
-        Console.WriteLine($"> {KAttribute.Name}");
+        Console.WriteLine("Edit user");
+
+        var httpResponse = await dataService.Put("api/kattributes", kattribute);
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {        
+            //Console.WriteLine("Attribute created !!");
+            //await showMessages.ShowOkMessage("Attribute saved!");
+            navigationManger.NavigateTo("attributes");
+        }
     }
+
 
 }

@@ -1,4 +1,5 @@
 ﻿@page "/notes/tree"
+@page "/tree"
 
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManger
@@ -40,10 +41,10 @@
         else
         {
             @*<h5>Notes</h5>
-            <hr />
-            <p></p>*@
+                <hr />
+                <p></p>*@
             <table class="table table-sm table-bordered table-striped">
-            <!--   <table class="table pt-4">  -->
+                <!--   <table class="table pt-4">  -->
                 <thead>
                     <tr>
                         <th width="80px" class="text-right">#</th>
@@ -56,31 +57,31 @@
                 <tbody>
                     @foreach (var note in notes)
                     {
-                    <tr>
-                        <td class="text-right">@note.NoteNumber</td>
-                        <td>@note.Topic</td>
-                        <td class="text-right">@note.Priority</td>
-                        <td class="text-right">  @note.CreationDateTime.ToShortDateString()</td>
-                        <td>
-                            <span class="float-right">
-                                <a href="notes/edit/@note.NoteId" class="btn btn-sm btn-warning mx-1"
-                                   data-toggle="tooltip" title="Edit user">
-                                    <i class="fa fa-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => Delete(note))"
-                                        data-toggle="tooltip" title="Delete user">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </span>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td class="text-right">@note.NoteNumber</td>
+                            <td>@note.Topic</td>
+                            <td class="text-right">@note.Priority</td>
+                            <td class="text-right">  @note.CreationDateTime.ToShortDateString()</td>
+                            <td>
+                                <span class="float-right">
+                                    <a href="notes/edit/@note.NoteId" class="btn btn-sm btn-warning mx-1"
+                                       data-toggle="tooltip" title="Edit user">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger mx-1"
+                                            @onclick="@(() => Delete(note))"
+                                            data-toggle="tooltip" title="Delete user">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                </span>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
-                }
+        }
 
-        </div>
+    </div>
 </div>
 
 @code {
@@ -98,7 +99,7 @@
         {
             var f = foldersTree.Select(x => x).FirstOrDefault();
             f.Selected = true;
-            await OnFolderSelected(f);            
+            await OnFolderSelected(f);
         }
     }
 
@@ -106,7 +107,7 @@
     {
         notes = null;
         folder = f;
-        var res = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/GetByFolder/" + folder.FolderId.ToString() );
+        var res = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/GetByFolder/" + folder.FolderId.ToString());
         notes = res.Response.Entity;
     }
 

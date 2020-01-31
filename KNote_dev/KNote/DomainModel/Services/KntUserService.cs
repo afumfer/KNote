@@ -70,12 +70,12 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<UserDto> Get(Guid userId)
+        public async Task<Result<UserDto>> GetAsync(Guid userId)
         {
             var resService = new Result<UserDto>();
             try
             {                
-                var resRep = _repository.Users.Get((object) userId);
+                var resRep = await _repository.Users.GetAsync((object) userId);
                 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
                 // KNote template ... load here aditionals properties for UserDto

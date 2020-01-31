@@ -18,7 +18,7 @@ namespace KNote.DomainModel.Services
     {
         Result<List<NoteInfoDto>> GetAll();
         Result<NoteDto> Get(int noteNumber);
-        Result<NoteDto> Get(Guid noteId);
+        Task<Result<NoteDto>> GetAsync(Guid noteId);
         int GetNextNoteNumber();
         Result<List<NoteInfoDto>> GetByFolder(Guid folderId);
         Result<List<NoteItemDto>> GetNoteItemList(Guid? folderId);
@@ -36,6 +36,7 @@ namespace KNote.DomainModel.Services
         Result<NoteInfoDto> Delete(Guid id);
         Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
         Result<List<NoteInfoDto>> RecentNotes();
+        
 
         //Result<NoteDto> LoadAllCollections(Note note);
         //Result<List<NoteDto>> GetAllFull(Expression<Func<Note, bool>> predicate);

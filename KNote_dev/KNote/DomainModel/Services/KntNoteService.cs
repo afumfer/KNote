@@ -90,13 +90,13 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<NoteDto> Get(Guid noteId)
+        public async Task <Result<NoteDto>> GetAsync(Guid noteId)
         {
             var resService = new Result<NoteDto>();
             try
             {
                 // Option 1 -----------------------
-                var resRep = _repository.Notes.Get((object)noteId);
+                var resRep = await _repository.Notes.GetAsync((object)noteId);
                 // KNote template ... load here aditionals properties for UserDto
                 resRep = _repository.Notes.LoadCollection(resRep.Entity, u => u.KAttributes);
                 resRep = _repository.Notes.LoadReference(resRep.Entity, n => n.Folder);

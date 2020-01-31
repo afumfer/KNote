@@ -1,35 +1,78 @@
 ﻿@page "/notes/edit/{NoteId}"
 
-<h3>NoteEdit</h3>
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
 
-<NoteForm Note="note" OnValidSubmit="Edit"></NoteForm>
+<h3>Note edit</h3>
+
+@if (showForm)
+{
+    <NoteForm Note="note" OnValidSubmit="Edit" NoteTypes="noteTypes"></NoteForm>
+}
+else
+{
+    <text>Loading ... </text>
+}
 
 @code {
     [Parameter] public string NoteId { get; set; }
+    [Parameter] public string PageReturn { get; set; }
+
 
     private NoteDto note;
+    private bool showForm = false;
+    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
 
-    protected override void OnInitialized()
-    {        
-        note = new NoteDto () { NoteId = Guid.Parse(NoteId), Topic = "Topic note 1", Description = "Description note 1", Tags = "tag1, tag2" };
-
-        note.KAttributesDto = new List<NoteKAttributeDto>()
+    protected async override Task OnInitializedAsync()
+    {
+        var httpResponse = await dataService.Get<Result<NoteDto>>($"api/notes/{NoteId}");
+        if (httpResponse.Error)
         {
-            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 1", Value = "aaa"},
-            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 2", Value = "bbb"},
-            new NoteKAttributeDto {NoteKAttributeId = Guid.NewGuid(), KAttributeId = Guid.NewGuid(), NoteId = note.NoteId, KAttributeName = "Attribute Demo 3", Value = "ccc"},
-        };
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            navigationManger.NavigateTo("/");
+        }
+        else
+        {
+            note = httpResponse.Response.Entity;
+        }
+
+        var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        if (httpResponse2.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
+            navigationManger.NavigateTo("/");
+        }
+        else
+        {
+            noteTypes = httpResponse2.Response.Entity;
+            showForm = true;
+        }
+
+        if (PageReturn == null)
+            PageReturn = "index";
+        else if (PageReturn == "tree")
+            PageReturn = "notes/tree";
+
+        Console.WriteLine($"User loaded!! {note.NoteId}");
 
         base.OnInitialized();
     }
 
-    private void Edit()
+    private async Task Edit()
     {
         Console.WriteLine("Edit note");
-        Console.WriteLine(note.Topic);
-        foreach(var a in note.KAttributesDto)
+
+        var httpResponse = await dataService.Put("api/notes", note);
+        if (httpResponse.Error)
         {
-            Console.WriteLine($"Attrigute name - {a.KAttributeName}  - value {a.Value}");
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            //Console.WriteLine("User created !!");
+            //await showMessages.ShowOkMessage("User saved!");            
+            navigationManger.NavigateTo(PageReturn);
         }
     }
 

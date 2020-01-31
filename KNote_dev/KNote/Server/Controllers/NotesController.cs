@@ -86,11 +86,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("{noteId}")]    // GET api/notes/guidnote
-        public IActionResult Get(Guid noteId)
+        public async Task<IActionResult> Get(Guid noteId)
         {
             try
             {
-                var resApi = _service.Notes.Get(noteId);
+                var resApi = await _service.Notes.GetAsync(noteId);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
