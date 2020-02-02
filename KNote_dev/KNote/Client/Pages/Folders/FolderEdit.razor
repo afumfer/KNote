@@ -1,24 +1,75 @@
 ﻿@page "/folders/edit/{FolderId}"
 
-<h3>FolderEdit</h3>
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
 
-<FolderForm OnValidSubmit="Edit" Folder="folder" />
+<h3>Folder edit</h3>
+
+
+
+@if (folder != null)
+{
+    <p>@folder.FolderId</p>
+    <FolderForm OnValidSubmit="Edit" Folder="folder" />
+}
+else
+{
+    <text>Loading ... </text>
+}
+
 
 @code {
     [Parameter] public string FolderId { get; set; }
 
-    FolderDto folder;
+    private FolderDto folder;
 
-    protected override void OnInitialized()
+    //protected override void OnInitialized()
+    //{
+    //    folder = new FolderDto { Name = "My folder 1", Tags = "111", Order = 0, OrderNotes = "Desc Name", FolderId = Guid.Parse(FolderId) };
+
+    //    base.OnInitialized();
+    //}
+
+    //private void Edit()
+    //{
+    //    Console.WriteLine("Edit folder");
+    //    navigationManger.NavigateTo("folders");
+    //}
+
+    protected async override Task OnInitializedAsync()
     {
-        folder = new FolderDto { Name="My folder 1", Tags="111", Order = 0, OrderNotes = "Desc Name", FolderId = Guid.Parse(FolderId) };
+        var httpResponse = await dataService.Get<Result<FolderDto>>($"api/folders/{FolderId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            navigationManger.NavigateTo("folders");
+        }
+        else
+        {
+            folder = httpResponse.Response.Entity;
+
+            Console.WriteLine($"Folder loaded!! {folder.FolderId }");
+        }
 
         base.OnInitialized();
     }
 
-    private void Edit()
+    private async Task Edit()
     {
         Console.WriteLine("Edit folder");
+
+        var httpResponse = await dataService.Put("api/folders", folder);
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            //Console.WriteLine("User created !!");
+            //await showMessages.ShowOkMessage("User saved!");
+            navigationManger.NavigateTo("folders");
+        }
     }
 
 }

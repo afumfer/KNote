@@ -1,5 +1,9 @@
 ﻿@*@using KNote.Shared*@
 
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+@inject IShowMessages showMessages
+
 @if (FoldersInfo != null)
 {
     @if (FoldersInfo.Count > 0)
@@ -17,8 +21,27 @@
                         <span class="mr-3"></span>
                     }
 
-                    @if (folder.Selected == true) { folderOldSelected = folder; }
+                    @*@if (folder.Selected == true)
+                        {
+                            folderOldSelected = folder;
+                            <span >edit / delete </span>
+                        }*@
                     <span class="@folder.getColor()  px-1 pt-1 pb-1 rounded" @onclick="@(() => onFolderSelected(folder))"> @folder.ShortName</span>
+                    @if (folder.Selected == true)
+                    {
+                        folderOldSelected = folder;
+                        <span>
+                            <a href="folders/edit/@folder.FolderId" class="btn btn-sm btn-warning mx-1"
+                               data-toggle="tooltip" title="Edit user">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger mx-1"
+                                    @onclick="@(() => Delete(folder))"
+                                    data-toggle="tooltip" title="Delete user">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </span>
+                    }
 
                     @if (folder.Expanded)
                     {
@@ -47,6 +70,20 @@
         folder.Selected = true;
         await FolderSelected.InvokeAsync(folder);
         folderOldSelected = folder;
+    }
+
+    private async Task Delete(FolderInfoDto item)
+    {
+        var httpResponse = await dataService.Delete($"api/folders/{item.FolderId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            Console.WriteLine("---");
+            //await OnFolderSelected(folder);
+        }
     }
 
 }
