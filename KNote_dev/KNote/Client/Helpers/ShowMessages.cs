@@ -8,12 +8,15 @@ namespace KNote.Client.Helpers
 {
     public class ShowMessages : IShowMessages
     {
+        // <!-- sweetalert is required  // sweetalert2.github.io  -->
         private readonly IJSRuntime js;
 
         public ShowMessages(IJSRuntime js)
         {
             this.js = js;
         }
+
+        // TODO: implement messages for info  "info" type 
 
         public async Task ShowErrorMessage(string message)
         {
@@ -27,13 +30,13 @@ namespace KNote.Client.Helpers
 
         private async ValueTask ShowMessage(string title, string message, string messageType)
         {
+            // Console.WriteLine(message);
+            //await Task.FromResult(0);            
 
-            await Task.FromResult(0);
-            
-            //await js.InvokeAsync<bool>("alert", message);
+            // await js.InvokeAsync<bool>("alert", message);
 
             // messageType is a value of Swal.fire (error, success, info, ...=            
-            //await js.InvokeVoidAsync("Swal.fire", title, message, messageType);
+            await js.InvokeVoidAsync("Swal.fire", title, message, messageType);
         }
 
     }

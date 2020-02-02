@@ -46,9 +46,15 @@
     </ItemsFull>
 </EntityList>
 
+<ModalDialog @ref="modalDialog" Title="Delete type" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete type "@itemDelete.Name (@itemDelete.Key)" ?</p></div>
+</ModalDialog>
+
 @code {
 
     private List<NoteTypeInfoDto> noteTypes { get; set; }
+    private ModalDialog modalDialog;
+    private NoteTypeInfoDto itemDelete;
 
     protected async override Task OnInitializedAsync()
     {
@@ -61,17 +67,35 @@
         noteTypes = res.Response.Entity;
     }
 
-    private async Task Delete(NoteTypeInfoDto item)
+    private void Delete(NoteTypeInfoDto item)
     {
-        var httpResponse = await dataService.Delete($"api/notetypes/{item.NoteTypeId}");
+        modalDialog.Show();
+        itemDelete = item;        
+    }
+
+    private async Task OnConfirmDelete()
+    {
+        modalDialog.Hide();
+
+        var httpResponse = await dataService.Delete($"api/notetypes/{itemDelete.NoteTypeId}");
+        Console.WriteLine($"ERROR: {httpResponse.Error}");
         if (httpResponse.Error)
         {
+            Console.WriteLine(await httpResponse.GetBody());
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
         {
             await Load();
         }
+
+        itemDelete = null;
+    }
+
+    private void OnCancelDelete()
+    {
+        modalDialog.Hide();
+        itemDelete = null;        
     }
 
 }

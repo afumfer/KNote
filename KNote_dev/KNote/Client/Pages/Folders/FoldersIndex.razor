@@ -18,29 +18,81 @@
 }
 else
 {
-    <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" />
+    <KntFoldersTreeView FoldersInfo="foldersTree" 
+                        EditMode="true" 
+                        FolderSelected="OnFolderSelected" 
+                        FolderEdit="OnFolderEdit" 
+                        FolderDelete="OnFolderDelete" />
 }
 
+<ModalDialog @ref="modalDialog" Title="Delete folder" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete folder "@itemDelete.Name" ?</p></div>
+</ModalDialog>
+
 @code {
-    List<FolderInfoDto> foldersTree;
-    FolderInfoDto folder;
+    private List<FolderInfoDto> foldersTree;
+    private FolderInfoDto folder;
+    private ModalDialog modalDialog;
+    private FolderInfoDto itemDelete;
 
     protected override async Task OnInitializedAsync()
     {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        folder = null;
         var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
         foldersTree = res.Response.Entity;
 
         if (foldersTree?.Count > 0)
         {
             var f = foldersTree.Select(x => x).FirstOrDefault();
-            f.Selected = true;     
+            f.Selected = true;
             OnFolderSelected(f);
         }
     }
 
+
     private void OnFolderSelected(FolderInfoDto f)
     {
         folder = f;
+    }
+
+    private void OnFolderDelete(FolderInfoDto folder)
+    {
+        modalDialog.Show();
+        itemDelete = folder;
+    }
+
+    private async Task OnConfirmDelete()
+    {
+        modalDialog.Hide();
+
+        var httpResponse = await dataService.Delete($"api/folders/{itemDelete.FolderId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            foldersTree = null;
+            await Load();
+        }
+
+        itemDelete = null;
+    }
+
+    private void OnCancelDelete()
+    {
+        modalDialog.Hide();
+        itemDelete = null;
+    }
+
+    private void OnFolderEdit(FolderInfoDto folder)
+    {
+        navigationManger.NavigateTo($"folders/edit/{folder.FolderId}");
     }
 
 }

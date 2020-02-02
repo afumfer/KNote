@@ -21,32 +21,48 @@
                         <span class="mr-3"></span>
                     }
 
-                    @*@if (folder.Selected == true)
+                    <span class="@folder.getColor()  px-1 pt-1 pb-1 rounded" @onclick="@(() => onFolderSelected(folder))">
+                        @if (EditMode)
                         {
-                            folderOldSelected = folder;
-                            <span >edit / delete </span>
-                        }*@
-                    <span class="@folder.getColor()  px-1 pt-1 pb-1 rounded" @onclick="@(() => onFolderSelected(folder))"> @folder.ShortName</span>
+                            <text>@folder.Name</text>
+                        }
+
+                        else
+                        {
+                            <text>@folder.ShortName</text>
+                        }
+                    </span>
+
                     @if (folder.Selected == true)
                     {
                         folderOldSelected = folder;
-                        <span>
-                            <a href="folders/edit/@folder.FolderId" class="btn btn-sm btn-warning mx-1"
-                               data-toggle="tooltip" title="Edit user">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                            <button class="btn btn-sm btn-danger mx-1"
-                                    @onclick="@(() => Delete(folder))"
-                                    data-toggle="tooltip" title="Delete user">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                        </span>
+                        if (EditMode)
+                        {                        
+                            <span>
+                                <button class="btn btn-sm btn-warning mx-1"
+                                        @onclick="@(() => onFolderEdit(folder))"
+                                        data-toggle="tooltip" title="Edit folder">
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => onFolderDelete(folder))"
+                                        data-toggle="tooltip" title="Delete folder">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        }
                     }
 
                     @if (folder.Expanded)
                     {
                         <div>
-                            <KntFoldersTreeView FoldersInfo="@folder.ChildFolders" FolderSelected="onFolderSelected"></KntFoldersTreeView>
+                            <KntFoldersTreeView 
+                                                FoldersInfo="@folder.ChildFolders" 
+                                                FolderSelected="onFolderSelected" 
+                                                EditMode="EditMode" 
+                                                FolderDelete="FolderDelete"
+                                                FolderEdit="FolderEdit">
+                            </KntFoldersTreeView>
                         </div>
                     }
                 </li>
@@ -58,6 +74,10 @@
 @code {
     [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
+    [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
+    [Parameter] public EventCallback<FolderInfoDto> FolderEdit { get; set; }
+    [Parameter] public bool EditMode { get; set; } 
+
     private FolderInfoDto folderOldSelected;
 
     protected async Task onFolderSelected(FolderInfoDto folder)
@@ -72,18 +92,27 @@
         folderOldSelected = folder;
     }
 
-    private async Task Delete(FolderInfoDto item)
+    private async Task onFolderDelete(FolderInfoDto folder)
     {
-        var httpResponse = await dataService.Delete($"api/folders/{item.FolderId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            Console.WriteLine("---");
-            //await OnFolderSelected(folder);
-        }
+        await FolderDelete.InvokeAsync(folder);
+
+        // TODO: !!! Esto va al componente que usa a este. 
+        //var httpResponse = await dataService.Delete($"api/folders/{item.FolderId}");
+        //if (httpResponse.Error)
+        //{
+        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        //}
+        //else
+        //{
+        //    Console.WriteLine("---");
+        //    //await OnFolderSelected(folder);
+        //}
     }
+
+    private async Task onFolderEdit(FolderInfoDto folder)
+    {
+        await FolderEdit.InvokeAsync(folder);
+    }
+
 
 }

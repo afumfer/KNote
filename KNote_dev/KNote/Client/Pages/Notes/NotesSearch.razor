@@ -50,7 +50,8 @@
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(1000);
-        notes = dataService.GetNotes();
+        // TODO: !!! Borrar 
+        //notes = dataService.GetNotes();
     }
 
     private void TopicKeyPress(KeyboardEventArgs e)
@@ -72,7 +73,8 @@
 
     private void CleanOnClick()
     {
-        notes = dataService.GetNotes();
+        // TODO: !!! Borrar 
+        // notes = dataService.GetNotes();
         topic = "";
         typeSelected = "0";
         onlyMostRecent = false;

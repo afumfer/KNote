@@ -50,9 +50,15 @@
     </ItemsFull>
 </EntityList>
 
+<ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete user "@itemDelete.UserName (@itemDelete.FullName)" ?</p></div>
+</ModalDialog>
+
 @code {
 
     private List<UserInfoDto> users { get; set; }
+    private ModalDialog modalDialog;
+    private UserInfoDto itemDelete;
 
     protected async override Task OnInitializedAsync()
     {
@@ -64,18 +70,35 @@
         var res = await dataService.Get<Result<List<UserInfoDto>>>("api/users");
         users = res.Response.Entity;
     }
-
-    private async Task Delete(UserInfoDto item)
+    
+    private void Delete(UserInfoDto item)
     {
-        var httpResponse = await dataService.Delete($"api/users/{item.UserId}");
+        modalDialog.Show();
+        itemDelete = item;
+    }
+
+    private async Task OnConfirmDelete()
+    {
+        modalDialog.Hide();
+
+        var httpResponse = await dataService.Delete($"api/users/{itemDelete.UserId}");
         if (httpResponse.Error)
-        {            
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());    
+        {                        
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
         {
+            users = null;
             await Load();
         }
+
+        itemDelete = null;
+    }
+
+    private void OnCancelDelete()
+    {
+        modalDialog.Hide();
+        itemDelete = null;        
     }
 
 }

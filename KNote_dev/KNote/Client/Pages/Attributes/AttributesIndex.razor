@@ -50,9 +50,15 @@
     </ItemsFull>
 </EntityList>
 
+<ModalDialog @ref="modalDialog" Title="Delete attribute" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete attribute "@itemDelete.Name (@itemDelete.Key)" ?</p></div>
+</ModalDialog>
+
 @code {
 
     private List<KAttributeInfoDto> attributes { get; set; }
+    private ModalDialog modalDialog;
+    private KAttributeInfoDto itemDelete;
 
     protected async override Task OnInitializedAsync()
     {
@@ -65,9 +71,17 @@
         attributes = res.Response.Entity;
     }
 
-    private async Task Delete(KAttributeInfoDto item)
+    private void Delete(KAttributeInfoDto item)
     {
-        var httpResponse = await dataService.Delete($"api/kattributes/{item.KAttributeId}");
+        modalDialog.Show();
+        itemDelete = item;
+    }
+
+    private async Task OnConfirmDelete()
+    {
+        modalDialog.Hide();
+
+       var httpResponse = await dataService.Delete($"api/kattributes/{itemDelete.KAttributeId}");
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -76,6 +90,14 @@
         {
             await Load();
         }
+
+        itemDelete = null;
+    }
+
+    private void OnCancelDelete()
+    {
+        modalDialog.Hide();
+        itemDelete = null;        
     }
 
 }
