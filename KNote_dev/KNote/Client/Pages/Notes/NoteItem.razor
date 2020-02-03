@@ -8,11 +8,12 @@
 
          &nbsp; @((MarkupString)Note.Topic)
 
-    <span class="float-right">
-        <a href="notes/edit/@Note.NoteId/index" class="btn btn-sm btn-warning mx-1"
-           data-toggle="tooltip" title="Edit user">
+    <span class="float-right">        
+        <button class="btn btn-sm btn-warning mx-1"
+                @onclick="@(() => OnNoteEdit.InvokeAsync(Note.NoteId))" data-toggle="tooltip" title="Edit note">
             <i class="fa fa-pencil"></i>
-        </a>
+        </button>
+
         <button class="btn btn-sm btn-danger mx-1"
                 @onclick="@(() => OnNoteDelete.InvokeAsync(Note))" data-toggle="tooltip" title="Delete note">
             <i class="fa fa-minus"></i>
@@ -32,7 +33,9 @@
 
 
 @code {
-    [Parameter] public NoteInfoDto Note { get; set; }
-    [Parameter] public bool ShowButton { get; set; } = false;
+    [Parameter] public NoteInfoDto Note { get; set; }    
     [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }   
+    [Parameter] public EventCallback<Guid> OnNoteEdit { get; set; }   
+
+    // [Parameter] public bool ShowButton { get; set; } = false;
 }

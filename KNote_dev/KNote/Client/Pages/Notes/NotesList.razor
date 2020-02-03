@@ -1,25 +1,32 @@
 ﻿@inject IJSRuntime js
 
-<div>    
+<div>
     <EntityList List="Notes">
         <Items Context="note">
-            <NoteItem Note="note" OnNoteDelete="DeleteNote" />
+            <NoteItem Note="note" 
+                      OnNoteDelete="onNoteDelete" 
+                      OnNoteEdit="onNoteEdit"
+                      />
         </Items>
-    </EntityList>    
+    </EntityList>
 </div>
 
 @code {
-
     [Parameter] public List<NoteInfoDto> Notes { get; set; }
+    [Parameter] public EventCallback<NoteInfoDto> NoteDelete { get; set; }
+    [Parameter] public EventCallback<Guid> NoteEdit { get; set; }
 
-    async Task DeleteNote(NoteInfoDto note)
+    //[Parameter] public bool EditMode { get; set; } 
+
+
+    private async Task onNoteDelete(NoteInfoDto note)
     {
-        var confirm = await js.Confirm("Delete note?");
-        if (confirm)
-        {
-            Notes.Remove(note);
-            Console.WriteLine($"Deleted note: {note.NoteNumber} -");
-        }
+        await NoteDelete.InvokeAsync(note);
+    }
+
+    private async Task onNoteEdit(Guid noteId)
+    {
+        await NoteEdit.InvokeAsync(noteId);
     }
 
 }

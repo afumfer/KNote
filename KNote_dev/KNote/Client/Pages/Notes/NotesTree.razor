@@ -84,9 +84,15 @@
     </div>
 </div>
 
+<ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete user "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
+</ModalDialog>
+
 @code {
-    List<FolderInfoDto> foldersTree;
-    FolderInfoDto folder;
+    private List<FolderInfoDto> foldersTree;
+    private FolderInfoDto folder;
+    private ModalDialog modalDialog;
+    private NoteInfoDto itemDelete;
 
     List<NoteInfoDto> notes;
 
@@ -104,24 +110,45 @@
     }
 
     private async Task OnFolderSelected(FolderInfoDto f)
+    {        
+        folder = f;
+        await LoadNotes();
+    }
+
+    private async Task LoadNotes()
     {
         notes = null;
-        folder = f;
         var res = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/GetByFolder/" + folder.FolderId.ToString());
         notes = res.Response.Entity;
     }
 
-    private async Task Delete(NoteInfoDto item)
+    private void Delete(NoteInfoDto item)
     {
-        var httpResponse = await dataService.Delete($"api/notes/{item.NoteId}");
+        modalDialog.Show();
+        itemDelete = item;
+    }
+
+    private async Task OnConfirmDelete()
+    {
+        modalDialog.Hide();
+
+        var httpResponse = await dataService.Delete($"api/notes/{itemDelete.NoteId}");
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
         {
-            await OnFolderSelected(folder);
+            await LoadNotes();
         }
+
+        itemDelete = null;
+    }
+
+    private void OnCancelDelete()
+    {
+        modalDialog.Hide();
+        itemDelete = null;
     }
 
 }

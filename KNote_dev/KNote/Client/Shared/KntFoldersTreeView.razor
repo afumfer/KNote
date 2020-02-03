@@ -95,18 +95,6 @@
     private async Task onFolderDelete(FolderInfoDto folder)
     {
         await FolderDelete.InvokeAsync(folder);
-
-        // TODO: !!! Esto va al componente que usa a este. 
-        //var httpResponse = await dataService.Delete($"api/folders/{item.FolderId}");
-        //if (httpResponse.Error)
-        //{
-        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        //}
-        //else
-        //{
-        //    Console.WriteLine("---");
-        //    //await OnFolderSelected(folder);
-        //}
     }
 
     private async Task onFolderEdit(FolderInfoDto folder)
