@@ -41,7 +41,10 @@ namespace KNote.DomainModel.Services
             try
             {
                 var resRep = _repository.NoteTypes.GetAll();
-                resService.Entity = resRep.Entity?.Select(sv => sv.GetSimpleDto<NoteTypeInfoDto>()).ToList();
+                resService.Entity = resRep.Entity?
+                    .Select(t => t.GetSimpleDto<NoteTypeInfoDto>())
+                    .OrderBy(t => t.Key)
+                    .ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)

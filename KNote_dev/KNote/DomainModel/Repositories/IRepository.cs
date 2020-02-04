@@ -20,6 +20,8 @@ namespace KNote.DomainModel.Repositories
 
         DbSet<TEntity> DbSet { get; }
 
+        IQueryable<TEntity> Queryable { get; }
+
         #endregion
 
         #region Generics entity methods        
@@ -52,7 +54,7 @@ namespace KNote.DomainModel.Repositories
         Task<Result<IEnumerable<TEntity>>> DeleteRangeAsync(IEnumerable<TEntity> entity);        
         Result<TEntity> LoadCollection<TCollection>(TEntity entity, Expression<Func<TEntity, IEnumerable<TCollection>>> colec) where TCollection : ModelBase;
         Result<TEntity> LoadReference<TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> prop) where TProperty : class;
-        //Result<TEntity> LoadReference<TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> prop) where TProperty : ReferenceEntry;
+                
         #endregion
     }
 }

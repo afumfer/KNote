@@ -60,6 +60,7 @@ namespace KNote.DomainModel.Repositories
 
         #region Generics methods
         
+
         public Result<TEntity> Get(params object[] keyValues)
         {
             var result = new Result<TEntity>();
@@ -289,7 +290,7 @@ namespace KNote.DomainModel.Repositories
 
             try
             {
-                _context.Set<TEntity>().Add(entity);
+                await _context.Set<TEntity>().AddAsync(entity);
                 res = await _context.SaveChangesAsync();
                 result.Entity = _context.Entry<TEntity>(entity).Entity;
             }
@@ -554,8 +555,14 @@ namespace KNote.DomainModel.Repositories
             get { return _dbSet; }
         }
 
+        public IQueryable<TEntity> Queryable
+        {
+            get { return _context.Set<TEntity>().AsQueryable(); }
+
+        }
+
         #endregion
-      
+
         #region  IDisposable
 
         public virtual void Dispose()

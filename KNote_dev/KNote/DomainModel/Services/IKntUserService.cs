@@ -24,6 +24,8 @@ namespace KNote.DomainModel.Services
         Result<UserDto> Authenticate(string username, string password);
         Result<UserDto> Create(UserRegisterInfoDto userRegisterInfoDto);
         Task<Result<UserInfoDto>> DeleteAsync(Guid userId);
-        Result<UserInfoDto> Delete(Guid userId);        
+        Result<UserInfoDto> Delete(Guid userId);
+        Task<Result<int>> GetCount();
+        Task<Result<List<UserInfoDto>>> GetAllAsync(Pagination pagination);
     }
 }

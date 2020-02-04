@@ -10,6 +10,9 @@
     <a class="btn btn-info" href="users/new">New user</a>
 </div>
 
+<Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
+            TotalPages="totalPages"></Pagination>
+
 <EntityList List="users">
     <ItemsFull>
         <table class="table table-sm table-bordered table-striped">
@@ -59,18 +62,37 @@
     private List<UserInfoDto> users { get; set; }
     private ModalDialog modalDialog;
     private UserInfoDto itemDelete;
+    private int currentPage = 1;
+    private int totalPages;
+
 
     protected async override Task OnInitializedAsync()
     {
         await Load();
     }
 
-    private async Task Load()
+    private async Task onSelectedPage(int page)
     {
-        var res = await dataService.Get<Result<List<UserInfoDto>>>("api/users");
-        users = res.Response.Entity;
+        currentPage = page;
+        await Load(page);
     }
-    
+
+    private async Task Load(int page = 1)
+    {
+        var httpResponse = await dataService.Get<Result<List<UserInfoDto>>>($"api/users?page={page}");
+        if(!httpResponse.Error)
+        {
+            users = httpResponse.Response.Entity;
+            var count = httpResponse.HttpResponseMessage.Headers.GetValues("count").FirstOrDefault();
+            totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+            Console.WriteLine($"count={count}  -- totalPages={totalPages}");
+        }
+        else
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+    }
+
     private void Delete(UserInfoDto item)
     {
         modalDialog.Show();
@@ -83,7 +105,7 @@
 
         var httpResponse = await dataService.Delete($"api/users/{itemDelete.UserId}");
         if (httpResponse.Error)
-        {                        
+        {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
@@ -98,7 +120,7 @@
     private void OnCancelDelete()
     {
         modalDialog.Hide();
-        itemDelete = null;        
+        itemDelete = null;
     }
 
 }

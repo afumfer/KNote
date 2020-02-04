@@ -39,12 +39,35 @@ namespace KNote.Server.Controllers
             _appSettings = appSettings.Value;
         }
 
+        //[HttpGet]    // GET api/users        
+        //public IActionResult Get()
+        //{
+        //    try
+        //    {
+        //        var kresApi = _service.Users.GetAll();
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var kresApi = new Result<List<UserInfoDto>>();
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
+
         [HttpGet]    // GET api/users        
-        public IActionResult Get()
+        public async Task<IActionResult> Get([FromQuery] Pagination pagination)
         {
             try
             {
-                var kresApi = _service.Users.GetAll();
+                var count = (await _service.Users.GetCount()).Entity;
+                HttpContext.InsertPaginationParamInResponse(count, pagination.NumRecords);
+
+                var kresApi = await _service.Users.GetAllAsync(pagination);
+
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else

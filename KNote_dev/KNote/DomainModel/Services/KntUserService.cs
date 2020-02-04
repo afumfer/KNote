@@ -50,6 +50,40 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
+        public async Task<Result<List<UserInfoDto>>> GetAllAsync(Pagination pagination)
+        {
+            var resService = new Result<List<UserInfoDto>>();
+            try
+            {                
+                var query = _repository.Users.Queryable
+                    .OrderBy(u => u.UserName)
+                    .Pagination(pagination);
+                
+                resService.Entity = await query
+                    .Select(u => u.GetSimpleDto<UserInfoDto>())                    
+                    .ToListAsync();                
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public async Task<Result<int>> GetCount()
+        {
+            var resService = new Result<int>();
+            try
+            {                
+                resService.Entity = await _repository.Users.Queryable.CountAsync();                
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
         public Result<UserDto> Get(string userName)
         {
             var resService = new Result<UserDto>();
