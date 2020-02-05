@@ -26,6 +26,6 @@ namespace KNote.DomainModel.Services
         Task<Result<UserInfoDto>> DeleteAsync(Guid userId);
         Result<UserInfoDto> Delete(Guid userId);
         Task<Result<int>> GetCount();
-        Task<Result<List<UserInfoDto>>> GetAllAsync(Pagination pagination);
+        Task<Result<List<UserInfoDto>>> GetAllAsync(PaginationDto pagination);
     }
 }

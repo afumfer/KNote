@@ -1,6 +1,8 @@
 ﻿@page "/notes/search"
 
 @inject IKntClientDataService dataService
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
 
 <h3>Notes Search</h3>
 
@@ -15,23 +17,30 @@
                type="text" class="form-control" id="titulo" placeholder="Note topic ..." />
     </div>
 
+    @*<div class="form-group mb-2">
+        <label for="tags" class="sr-only">Tags</label>
+        <input @bind-value="tags" @bind-value:event="oninput"               
+               type="text" class="form-control" id="tags" placeholder="Tags ..." />
+    </div>*@
+
     <div class="form-group mx-sm-3 mb-2">
-        <select class="form-control" @bind="typeSelected">
+        <select class="form-control" @bind="noteTypeId">
             <option value="0">--Select type--</option>
-            @foreach (var item in types)
+            @foreach (var item in noteTypes)
             {
-                <option value="@item.Key">@item.Name</option>
+                <option value="@item.NoteTypeId.ToString()">@item.Name</option>
             }
         </select>
     </div>
-    <div class="form-group mx-sm-3 mb-2">
+
+    @*<div class="form-group mx-sm-3 mb-2">
         <input type="checkbox" class="form-check-input" id="mostRecent" @bind="onlyMostRecent" />
         <label class="form-check-label" for="estrenos">
             Only the most recent
         </label>
-    </div>
+    </div>*@
 
-    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="LoadFiltereNotes">Filter</button>
+    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="LoadListNotes">Filter</button>
     <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean</button>
 
 </div>
@@ -40,44 +49,143 @@
 
 @code {
 
-    string topic = "";
-    string typeSelected = "0";
-    List<NoteTypeDto> types = new List<NoteTypeDto>();
-    bool onlyMostRecent = false;
+    // NotesFilter ....
+    //public string Topic { get; set; }
+    //public Guid? FolderId { get; set; }
+    //public Guid? NoteTypeId { get; set; }
+    //public string Tags { get; set; }
+    //public string AttributeValue { get; set; }
 
-    private List<NoteInfoDto> notes;
+    private List<NoteInfoDto> notes = new List<NoteInfoDto>() ;
+    private string topic = "";
+    public Guid? folderId { get; set; }
+    public Guid? noteTypeId { get; set; }
+    public string tags { get; set; }
+    public string attributeValue { get; set; }
+
+    // private Guid? typeSelected = null;
+
+    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+
+    private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
+    private int currentPage = 1;
+    //private int numPages;
+
+
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(1000);
-        // TODO: !!! Borrar 
-        //notes = dataService.GetNotes();
+        await GetNoteTypes();
+
+        var url = navigationManager.Uri;
+        
+        Console.WriteLine("URL " + url);
+
+        var queries = navigationManager.GetQueryStrings(url);
+
+        Console.WriteLine("queries " + queries?.Count);
+
+        if (queries == null)
+        {
+            Console.WriteLine("todos ");
+            await GetFilteredNotes(string.Empty);
+        }
+        else
+        {
+            Console.WriteLine("filtrados ");
+            queryStringsDict = queries;
+            LoadFormControls();
+            var queryStrings = url.Split(new string[] { "?" }, StringSplitOptions.None)[1];
+            await GetFilteredNotes(queryStrings);
+            //Console.WriteLine("contenido de topic ");
+        }
+
+        //await GetFilteredNotes("folderId=73a55fe9-10af-4a4f-9938-306f4a5c2fdf");
     }
 
-    private void TopicKeyPress(KeyboardEventArgs e)
+    private void LoadFormControls()
     {
-        if (e.Key == "Enter")
+        if (queryStringsDict.ContainsKey("topic"))
         {
-            LoadFiltereNotes();
+            topic = queryStringsDict["topic"];
+        }
+
+        // TODO: !!! Llenar el resto de controles del formulario
+    }
+
+
+    private async Task GetNoteTypes()
+    {
+        var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        if (httpResponse2.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
+            //navigationManager.NavigateTo("/");
+        }
+        else
+        {
+            noteTypes = httpResponse2.Response.Entity;
         }
     }
 
-    private void LoadFiltereNotes()
+    private async Task LoadListNotes()
     {
-        notes = notes.Where(x => x.Topic.ToLower().Contains(topic.ToLower())).ToList();
+        
+        var queryStrings = BuildQueryStrings();
+        //Console.WriteLine("2222 " + queryStrings);
+        navigationManager.NavigateTo("notes/search?" + queryStrings);
+        //Console.WriteLine("3333");
+        await GetFilteredNotes(queryStrings);
+        //Console.WriteLine("4444");
+    }
 
-        Console.WriteLine($"topic: {topic}");
-        Console.WriteLine($"typeSelected: {typeSelected}");
-        Console.WriteLine($"onlyMostRecent: {onlyMostRecent}");
+    private string BuildQueryStrings()
+    {
+        if (queryStringsDict == null) { queryStringsDict = new Dictionary<string, string>(); }
+        //queryStringsDict["folderid"] = folderId?.ToString();
+        queryStringsDict["topic"] = topic?.ToString();
+        //queryStringsDict["notetypeId"] = noteTypeId?.ToString();
+        //queryStringsDict["tags"] = tags?.ToString();
+        //queryStringsDict["attributevalue"] = attributeValue?.ToString();
+        //queryStringsDict["currentpage"] = currentPage.ToString();
+
+        var defaultValues = new List<string>() { "false", "", "0", "null" };
+
+        // generoid=7&titulo=spider ...
+
+        return string.Join("&", queryStringsDict
+            .Where(x => !defaultValues.Contains(x.Value.ToLower()))
+            .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
+    }
+
+    private async Task TopicKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await GetFilteredNotes(topic);
+        }
+    }
+
+    private async Task GetFilteredNotes(string queryString)
+    {
+        notes = null;
+        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter2?" + queryString);
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            notes = httpResponse.Response.Entity;
+        }
+
     }
 
     private void CleanOnClick()
     {
-        // TODO: !!! Borrar 
-        // notes = dataService.GetNotes();
         topic = "";
-        typeSelected = "0";
-        onlyMostRecent = false;
+        noteTypeId = null;
+        // TODO: !!! falta el resto de campos ...
     }
 
 }

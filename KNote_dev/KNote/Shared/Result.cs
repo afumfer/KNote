@@ -9,6 +9,8 @@ namespace KNote.Shared
 
         public TEntity Entity { get; set; }
 
+        public int CountEntity { get; set; } = 1;
+
         #endregion
 
         #region Constructor

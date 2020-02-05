@@ -118,8 +118,15 @@
     private async Task LoadNotes()
     {
         notes = null;
-        var res = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/GetByFolder/" + folder.FolderId.ToString());
-        notes = res.Response.Entity;
+        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/GetByFolder/" + folder.FolderId.ToString());
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            notes = httpResponse.Response.Entity;
+        }        
     }
 
     private void Delete(NoteInfoDto item)

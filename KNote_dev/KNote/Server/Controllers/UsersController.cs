@@ -59,7 +59,7 @@ namespace KNote.Server.Controllers
         //}
 
         [HttpGet]    // GET api/users        
-        public async Task<IActionResult> Get([FromQuery] Pagination pagination)
+        public async Task<IActionResult> Get([FromQuery] PaginationDto pagination)
         {
             try
             {

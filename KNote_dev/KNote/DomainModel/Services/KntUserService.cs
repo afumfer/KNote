@@ -50,7 +50,7 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<List<UserInfoDto>>> GetAllAsync(Pagination pagination)
+        public async Task<Result<List<UserInfoDto>>> GetAllAsync(PaginationDto pagination)
         {
             var resService = new Result<List<UserInfoDto>>();
             try

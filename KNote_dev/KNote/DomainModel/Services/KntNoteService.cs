@@ -194,6 +194,48 @@ namespace KNote.DomainModel.Services
             }
         }
 
+        public async Task<Result<List<NoteInfoDto>>> GetFilter2(NotesFilterDto notesFilter)
+        {
+            var resService = new Result<List<NoteInfoDto>>();
+            try
+            {
+                var query = _repository.Notes.Queryable;
+
+                // Filters 
+                if (!string.IsNullOrEmpty(notesFilter.Topic))
+                    query = query.Where(n => n.Topic.ToLower().Contains(notesFilter.Topic.ToLower()));
+
+                if (!string.IsNullOrEmpty(notesFilter.Tags))
+                    query = query.Where(n => n.Tags.ToLower().Contains(notesFilter.Tags.ToLower()));
+
+                if(notesFilter.FolderId != null)
+                    query = query.Where(n => n.FolderId == notesFilter.FolderId);
+
+                if (notesFilter.NoteTypeId != null)
+                    query = query.Where(n => n.NoteTypeId == notesFilter.NoteTypeId);
+                
+                if (!string.IsNullOrEmpty(notesFilter.AttributeValue))
+                    query = query.Where(n => n.KAttributes.Select(a => a.Value).Contains(notesFilter.AttributeValue));
+
+                resService.CountEntity = await query.CountAsync();
+
+                // Order by and pagination
+                query = query
+                    .OrderBy(n => n.Topic)
+                    .Pagination(notesFilter.Pagination);
+
+                // Get content
+                resService.Entity = await query
+                    .Select(u => u.GetSimpleDto<NoteInfoDto>())
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
         // ==============
         // TODO: Sustituir esto por IQuerable
         // ==============

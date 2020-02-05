@@ -65,6 +65,28 @@ namespace KNote.Server.Controllers
             }
         }
 
+        [HttpGet("getfilter2")]   // GET api/notes/getfilter2
+        public async Task <IActionResult> GetFilter2([FromQuery] NotesFilterDto notesFilter )
+        {
+            try
+            {                
+                var kresApi = await _service.Notes.GetFilter2(notesFilter);
+
+                HttpContext.InsertPaginationParamInResponse(kresApi.CountEntity, notesFilter.NumRecords);
+                
+                if (kresApi.IsValid)
+                    return Ok(kresApi);
+                else
+                    return BadRequest(kresApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<List<NoteInfoDto>>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
         [HttpGet("recentnotes")]   // GET api/notes/recentnotes
         public IActionResult RecentNotes()
         {

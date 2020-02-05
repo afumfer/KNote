@@ -36,7 +36,8 @@ namespace KNote.DomainModel.Services
         Result<NoteInfoDto> Delete(Guid id);
         Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
         Result<List<NoteInfoDto>> RecentNotes();
-        
+        Task<Result<List<NoteInfoDto>>> GetFilter2(NotesFilterDto notesFilter);
+
 
         //Result<NoteDto> LoadAllCollections(Note note);
         //Result<List<NoteDto>> GetAllFull(Expression<Func<Note, bool>> predicate);

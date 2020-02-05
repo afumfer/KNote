@@ -4,7 +4,7 @@ using System.Text;
 
 namespace KNote.Shared.Dto
 {
-    public class Pagination
+    public class PaginationDto
     {
         public int Page { get; set; } = 1;
         public int NumRecords { get; set; } = 10;

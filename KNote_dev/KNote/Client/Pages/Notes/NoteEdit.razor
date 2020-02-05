@@ -1,7 +1,7 @@
 ﻿@page "/notes/edit/{NoteId}/{PageReturn}"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 <h3>Note edit</h3>
@@ -30,7 +30,7 @@ else
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-            navigationManger.NavigateTo("/");
+            navigationManager.NavigateTo("/");
         }
         else
         {
@@ -41,7 +41,7 @@ else
         if (httpResponse2.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
-            navigationManger.NavigateTo("/");
+            navigationManager.NavigateTo("/");
         }
         else
         {
@@ -72,7 +72,7 @@ else
         {
             //Console.WriteLine("User created !!");
             //await showMessages.ShowOkMessage("User saved!");            
-            navigationManger.NavigateTo(PageReturn);
+            navigationManager.NavigateTo(PageReturn);
         }
     }
 
