@@ -16,7 +16,8 @@
     [Parameter] public int TotalPages { get; set; }
     [Parameter] public int Radio { get; set; } = 3;
     [Parameter] public EventCallback<int> SelectedPage { get; set; }
-    List<PagesModel> Links = new List<PagesModel>();
+    
+    private List<PagesModel> Links = new List<PagesModel>();
 
     protected override void OnParametersSet()
     {

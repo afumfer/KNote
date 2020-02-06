@@ -40,37 +40,30 @@
         </label>
     </div>*@
 
-    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="LoadListNotes">Filter</button>
+    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="OnLoadListNotes">Filter</button>
     <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean</button>
 
 </div>
+
+<Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
+            TotalPages="totalPages"></Pagination>
 
 <NotesList Notes="notes" />
 
 @code {
 
-    // NotesFilter ....
-    //public string Topic { get; set; }
-    //public Guid? FolderId { get; set; }
-    //public Guid? NoteTypeId { get; set; }
-    //public string Tags { get; set; }
-    //public string AttributeValue { get; set; }
-
     private List<NoteInfoDto> notes = new List<NoteInfoDto>() ;
     private string topic = "";
-    public Guid? folderId { get; set; }
-    public Guid? noteTypeId { get; set; }
-    public string tags { get; set; }
-    public string attributeValue { get; set; }
-
-    // private Guid? typeSelected = null;
+    private Guid? folderId;
+    private Guid? noteTypeId;
+    private string tags;
+    private string attributeValue;
 
     private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
 
     private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
     private int currentPage = 1;
-    //private int numPages;
-
+    private int totalPages;
 
 
     protected override async Task OnInitializedAsync()
@@ -78,7 +71,7 @@
         await GetNoteTypes();
 
         var url = navigationManager.Uri;
-        
+
         Console.WriteLine("URL " + url);
 
         var queries = navigationManager.GetQueryStrings(url);
@@ -99,8 +92,6 @@
             await GetFilteredNotes(queryStrings);
             //Console.WriteLine("contenido de topic ");
         }
-
-        //await GetFilteredNotes("folderId=73a55fe9-10af-4a4f-9938-306f4a5c2fdf");
     }
 
     private void LoadFormControls()
@@ -110,9 +101,19 @@
             topic = queryStringsDict["topic"];
         }
 
-        // TODO: !!! Llenar el resto de controles del formulario
-    }
+        //if (queryStringsDict.ContainsKey("notetypeId"))
+        //{
+        //    noteTypeId = new Guid(queryStringsDict["notetypeId"]);
+        //}
 
+
+        // TODO: !!! Llenar el resto de controles del formulario
+
+        if (queryStringsDict.ContainsKey("page"))
+        {
+            int.TryParse(queryStringsDict["page"], out currentPage);
+        }
+    }
 
     private async Task GetNoteTypes()
     {
@@ -120,7 +121,6 @@
         if (httpResponse2.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
-            //navigationManager.NavigateTo("/");
         }
         else
         {
@@ -128,15 +128,17 @@
         }
     }
 
+    private async Task OnLoadListNotes()
+    {
+        currentPage = 1;
+        await LoadListNotes();
+    }
+
     private async Task LoadListNotes()
     {
-        
         var queryStrings = BuildQueryStrings();
-        //Console.WriteLine("2222 " + queryStrings);
         navigationManager.NavigateTo("notes/search?" + queryStrings);
-        //Console.WriteLine("3333");
         await GetFilteredNotes(queryStrings);
-        //Console.WriteLine("4444");
     }
 
     private string BuildQueryStrings()
@@ -147,15 +149,18 @@
         //queryStringsDict["notetypeId"] = noteTypeId?.ToString();
         //queryStringsDict["tags"] = tags?.ToString();
         //queryStringsDict["attributevalue"] = attributeValue?.ToString();
-        //queryStringsDict["currentpage"] = currentPage.ToString();
+        queryStringsDict["page"] = currentPage.ToString();
 
-        var defaultValues = new List<string>() { "false", "", "0", "null" };
+        var defaultValues = new List<string>() { "false", "", "0" };
 
         // generoid=7&titulo=spider ...
 
-        return string.Join("&", queryStringsDict
+        var strReturn = string.Join("&", queryStringsDict
             .Where(x => !defaultValues.Contains(x.Value.ToLower()))
             .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
+
+        Console.WriteLine("strReturm " + strReturn);
+        return strReturn;
     }
 
     private async Task TopicKeyPress(KeyboardEventArgs e)
@@ -170,6 +175,9 @@
     {
         notes = null;
         var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter2?" + queryString);
+
+        totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -186,6 +194,14 @@
         topic = "";
         noteTypeId = null;
         // TODO: !!! falta el resto de campos ...
+
+        currentPage = 1;
+    }
+
+    private async Task onSelectedPage(int page)
+    {
+        currentPage = page;
+        await LoadListNotes();
     }
 
 }
