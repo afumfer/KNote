@@ -20,4 +20,5 @@ namespace KNote.Server
                 .UseStartup<Startup>()
                 .Build();
     }
+
 }

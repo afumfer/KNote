@@ -10,17 +10,32 @@ using KNote.Client.Helpers;
 
 namespace KNote.Client
 {
+    // For Blazor 3.2.0
+    //public class Program
+    //{
+    //    public static async Task Main(string[] args)
+    //    {
+    //        var builder = WebAssemblyHostBuilder.CreateDefault(args);
+    //        builder.RootComponents.Add<App>("app");
+
+    //        builder.Services.AddScoped<IShowMessages, ShowMessages>();
+    //        builder.Services.AddScoped<IKntClientDataService, KntClientDataService>();
+
+    //        await builder.Build().RunAsync();
+    //    }
+    //}
+
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            var builder = WebAssemblyHostBuilder.CreateDefault(args);
-            builder.RootComponents.Add<App>("app");
-
-            builder.Services.AddScoped<IShowMessages, ShowMessages>();
-            builder.Services.AddScoped<IKntClientDataService, KntClientDataService>();
-
-            await builder.Build().RunAsync();
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IWebAssemblyHostBuilder CreateHostBuilder(string[] args) =>
+            BlazorWebAssemblyHost.CreateDefaultBuilder()
+            .UseBlazorStartup<Startup>();
+
     }
+
 }

@@ -64,14 +64,16 @@ namespace KNote.Server
             app.UsePathBase("/KNote");
 
             app.UseStaticFiles();
-            app.UseClientSideBlazorFiles<Client.Program>();            
+            //app.UseClientSideBlazorFiles<Client.Program>();
+            app.UseClientSideBlazorFiles<Client.Startup>();
 
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
-                endpoints.MapFallbackToClientSideBlazor<Client.Program>("index.html");
+                //endpoints.MapFallbackToClientSideBlazor<Client.Program>("index.html");
+                endpoints.MapFallbackToClientSideBlazor<Client.Startup>("index.html");
             });
         }
     }
