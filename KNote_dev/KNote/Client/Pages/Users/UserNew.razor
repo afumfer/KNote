@@ -1,8 +1,10 @@
 ﻿@page "/users/new"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger 
+@inject NavigationManager navigationManger
 @inject IShowMessages showMessages
+
+@attribute [Authorize(Roles = "Admin")]
 
 <h3>New User</h3>
 
@@ -15,15 +17,15 @@
     {
         var httpResponse = await dataService.Post("api/users", user);
         if (httpResponse.Error)
-        {                        
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());            
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
         {
             //Console.WriteLine("User created !!");
-            //await showMessages.ShowOkMessage("User saved!");            
+            //await showMessages.ShowOkMessage("User saved!");
             navigationManger.NavigateTo("users");
-        }        
+        }
     }
 
 }

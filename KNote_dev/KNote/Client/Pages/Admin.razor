@@ -2,6 +2,9 @@
 
 @inject NavigationManager navigationManager
 
+@attribute [Authorize(Roles = "Admin")]
+
+
 <h3>Admin</h3>
 
 <span class="float-left">
@@ -51,5 +54,5 @@
     {
         navigationManager.NavigateTo($"users");
     }
-   
+
 }

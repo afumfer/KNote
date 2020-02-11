@@ -4,11 +4,13 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Admin")]
+
 <h3>Attribute Edit</h3>
 
 @if (kattribute != null && showForm)
 {
-    <AttributeForm OnValidSubmit="Edit" KAttribute="kattribute"  NoteTypes="noteTypes"/>
+    <AttributeForm OnValidSubmit="Edit" KAttribute="kattribute" NoteTypes="noteTypes" />
 }
 else
 {
@@ -32,7 +34,7 @@ else
         }
         else
         {
-            kattribute = httpResponse.Response.Entity;            
+            kattribute = httpResponse.Response.Entity;
         }
 
         var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
@@ -62,7 +64,7 @@ else
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {        
+        {
             //Console.WriteLine("Attribute created !!");
             //await showMessages.ShowOkMessage("Attribute saved!");
             navigationManger.NavigateTo("attributes");

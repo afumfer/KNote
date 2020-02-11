@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
+
 <h3>New note</h3>
 
 @if (showForm)

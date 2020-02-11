@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Admin, ProjecManager")]
+
 <h3>New Folder</h3>
 
 <FolderForm OnValidSubmit="New" Folder="folder" />

@@ -1,12 +1,14 @@
 ﻿@inject IJSRuntime js
 
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
 <div>
     <EntityList List="Notes">
         <Items Context="note">
-            <NoteItem Note="note" 
-                      OnNoteDelete="onNoteDelete" 
+            <NoteItem Note="note"
+                      OnNoteDelete="onNoteDelete"
                       OnNoteEdit="onNoteEdit"
-                      @key="note.NoteId"/>
+                      @key="note.NoteId" />
         </Items>
     </EntityList>
 </div>
@@ -16,7 +18,7 @@
     [Parameter] public EventCallback<NoteInfoDto> NoteDelete { get; set; }
     [Parameter] public EventCallback<Guid> NoteEdit { get; set; }
 
-    //[Parameter] public bool EditMode { get; set; } 
+    //[Parameter] public bool EditMode { get; set; }
 
 
     private async Task onNoteDelete(NoteInfoDto note)

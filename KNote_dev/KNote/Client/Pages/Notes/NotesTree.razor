@@ -5,6 +5,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
 <h3>Notes tree</h3>
 <div class="form-group">
     <a class="btn btn-info" href="notes/new">New note</a>
@@ -110,7 +112,7 @@
     }
 
     private async Task OnFolderSelected(FolderInfoDto f)
-    {        
+    {
         folder = f;
         await LoadNotes();
     }
@@ -126,7 +128,7 @@
         else
         {
             notes = httpResponse.Response.Entity;
-        }        
+        }
     }
 
     private void Delete(NoteInfoDto item)

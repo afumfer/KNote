@@ -5,6 +5,8 @@
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
 <h3>Notes Search</h3>
 
 @*<div class="form-inline"></div>*@
@@ -106,7 +108,7 @@
         }
     }
 
-    #region Utils 
+    #region Utils
 
     private void LoadFormControls()
     {
@@ -183,7 +185,7 @@
         await LoadListNotes();
     }
 
-    #endregion 
+    #endregion
 
     #region Load data ....
 
@@ -225,7 +227,7 @@
 
     }
 
-    #endregion 
+    #endregion
 
     #region  Edit / Delete events ...
 
@@ -263,6 +265,6 @@
         itemDelete = null;
     }
 
-    #endregion 
+    #endregion
 
 }

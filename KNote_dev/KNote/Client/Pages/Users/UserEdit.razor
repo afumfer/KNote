@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Admin")]
+
 <h3>User Edit</h3>
 
 @if (user != null)
@@ -51,7 +53,7 @@ else
         else
         {
             //Console.WriteLine("User created !!");
-            //await showMessages.ShowOkMessage("User saved!");            
+            //await showMessages.ShowOkMessage("User saved!");
             navigationManger.NavigateTo("users");
         }
     }

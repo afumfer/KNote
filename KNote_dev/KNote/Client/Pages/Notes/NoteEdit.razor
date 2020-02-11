@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
+
 <h3>Note edit</h3>
 
 @if (showForm)
@@ -71,7 +73,7 @@ else
         else
         {
             //Console.WriteLine("User created !!");
-            //await showMessages.ShowOkMessage("User saved!");            
+            //await showMessages.ShowOkMessage("User saved!");
             navigationManager.NavigateTo(PageReturn);
         }
     }

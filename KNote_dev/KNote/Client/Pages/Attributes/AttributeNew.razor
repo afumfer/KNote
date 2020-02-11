@@ -4,9 +4,11 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Admin")]
+
 <h3>New Attribute</h3>
 
-@if(showForm)
+@if (showForm)
 {
     <AttributeForm OnValidSubmit="New" KAttribute="kattribute" NoteTypes="noteTypes" />
 }
@@ -35,7 +37,7 @@ else
         base.OnInitialized();
     }
 
-    private async Task  New()
+    private async Task New()
     {
         Console.WriteLine($"Executing new method - KAttribute.Name => {kattribute.Name}");
 
@@ -47,7 +49,7 @@ else
         else
         {
             Console.WriteLine("Kattribute created !!");
-            //await showMessages.ShowOkMessage("User saved!");            
+            //await showMessages.ShowOkMessage("User saved!");
             navigationManger.NavigateTo("attributes");
         }
     }

@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
 <h3>Folders Index</h3>
 
 <div class="form-group">
@@ -18,10 +20,10 @@
 }
 else
 {
-    <KntFoldersTreeView FoldersInfo="foldersTree" 
-                        EditMode="true" 
-                        FolderSelected="OnFolderSelected" 
-                        FolderEdit="OnFolderEdit" 
+    <KntFoldersTreeView FoldersInfo="foldersTree"
+                        EditMode="true"
+                        FolderSelected="OnFolderSelected"
+                        FolderEdit="OnFolderEdit"
                         FolderDelete="OnFolderDelete" />
 }
 

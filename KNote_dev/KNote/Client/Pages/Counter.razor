@@ -27,10 +27,18 @@
     private int currentCount = 0;
 
     [CascadingParameter] protected AppState appState { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> athenticationState { get; set; }
     
-    private void IncrementCount()
+    private async Task IncrementCount()
     {
-        currentCount++;
+        var authState = await athenticationState;
+
+        var user = authState.User;
+
+        if(user.Identity.IsAuthenticated)
+            currentCount++;
+        else 
+            currentCount--;
     }
 
     #region  AppState changed subscription 

@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Admin")]
+
 <h3>Types Index</h3>
 
 <div class="form-group">
@@ -15,7 +17,7 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th width="200px" >Key</th>
+                    <th width="200px">Key</th>
                     <th>Name</th>
                     <th width="100px" class="text-center">(Actions)</th>
                 </tr>
@@ -70,7 +72,7 @@
     private void Delete(NoteTypeInfoDto item)
     {
         modalDialog.Show();
-        itemDelete = item;        
+        itemDelete = item;
     }
 
     private async Task OnConfirmDelete()
@@ -95,7 +97,7 @@
     private void OnCancelDelete()
     {
         modalDialog.Hide();
-        itemDelete = null;        
+        itemDelete = null;
     }
 
 }

@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Admin")]
+
 <h3>Users Index</h3>
 
 <div class="form-group">
@@ -18,7 +20,7 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th width="140px" >User Name</th>
+                    <th width="140px">User Name</th>
                     <th>Full Name</th>
                     <th>Email</th>
                     <th>Roles</th>
@@ -28,25 +30,25 @@
             <tbody>
                 @foreach (var item in users)
                 {
-                <tr>
-                    <td>@item.UserName</td>
-                    <td>@item.FullName</td>
-                    <td>@item.EMail</td>
-                    <td>@item.RoleDefinition</td>
-                    <td>
-                        <span class="float-right">
-                            <a href="users/edit/@item.UserId" class="btn btn-sm btn-warning mx-1"
-                               data-toggle="tooltip" title="Edit user">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                            <button class="btn btn-sm btn-danger mx-1"
-                                    @onclick="@(() => Delete(item))"
-                                    data-toggle="tooltip" title="Delete user">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                        </span>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>@item.UserName</td>
+                        <td>@item.FullName</td>
+                        <td>@item.EMail</td>
+                        <td>@item.RoleDefinition</td>
+                        <td>
+                            <span class="float-right">
+                                <a href="users/edit/@item.UserId" class="btn btn-sm btn-warning mx-1"
+                                   data-toggle="tooltip" title="Edit user">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => Delete(item))"
+                                        data-toggle="tooltip" title="Delete user">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -80,7 +82,7 @@
     private async Task Load(int page = 1)
     {
         var httpResponse = await dataService.Get<Result<List<UserInfoDto>>>($"api/users?page={page}");
-        if(!httpResponse.Error)
+        if (!httpResponse.Error)
         {
             users = httpResponse.Response.Entity;
             var count = httpResponse.HttpResponseMessage.Headers.GetValues("count").FirstOrDefault();

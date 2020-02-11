@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Admin")]
+
 <h3>Type Edit</h3>
 
 @if (noteType != null)
@@ -18,7 +20,7 @@ else
 
 @code {
     [Parameter] public string TypeId { get; set; }
-    
+
     private NoteTypeDto noteType;
 
     protected async override Task OnInitializedAsync()
@@ -51,7 +53,7 @@ else
         else
         {
             //Console.WriteLine("Type created !!");
-            //await showMessages.ShowOkMessage("Types saved!");            
+            //await showMessages.ShowOkMessage("Types saved!");
             navigationManger.NavigateTo("types");
         }
     }

@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@attribute [Authorize(Roles = "Admin")]
+
 <h3>Attributes Index</h3>
 
 <div class="form-group">
@@ -15,10 +17,10 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th width="160px" >Key</th>
+                    <th width="160px">Key</th>
                     <th>Name</th>
-                    <th width="60px" >Order</th>
-                    <th width="220px" >DataType</th>
+                    <th width="60px">Order</th>
+                    <th width="220px">DataType</th>
                     <th width="100px" class="text-center">(Actions)</th>
                 </tr>
             </thead>
@@ -81,7 +83,7 @@
     {
         modalDialog.Hide();
 
-       var httpResponse = await dataService.Delete($"api/kattributes/{itemDelete.KAttributeId}");
+        var httpResponse = await dataService.Delete($"api/kattributes/{itemDelete.KAttributeId}");
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -97,7 +99,7 @@
     private void OnCancelDelete()
     {
         modalDialog.Hide();
-        itemDelete = null;        
+        itemDelete = null;
     }
 
 }
