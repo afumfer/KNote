@@ -22,7 +22,7 @@ namespace KNote.DomainModel.Services
         Result<UserDto> Save(UserDto entity);
         Task<Result<UserDto>> SaveAsync(UserDto entityInfo);        
         Result<UserDto> Authenticate(string username, string password);
-        Result<UserDto> Create(UserRegisterInfoDto userRegisterInfoDto);
+        Result<UserDto> Create(UserRegisterDto userRegisterInfoDto);
         Task<Result<UserInfoDto>> DeleteAsync(Guid userId);
         Result<UserInfoDto> Delete(Guid userId);
         Task<Result<int>> GetCount();

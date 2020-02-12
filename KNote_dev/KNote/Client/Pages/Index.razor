@@ -3,15 +3,80 @@
 
 @using KNote.Client.Pages.Notes
 
-@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
 
-<AuthorizeView Roles="Admin">
-    <Authorized>
-        <text>Estas autorizado ... @context.User.Identity.Name</text>
-    </Authorized>
-    <NotAuthorized>
-        <text>No estás autorizado //// </text>
-    </NotAuthorized>
-</AuthorizeView>
+@*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
-<NotesSearch />
+<div>
+    <h3>Recent notes</h3>
+    <p>Mode: @appState.AppMode</p>
+    <NotesList Notes="notes" NoteDelete="OnNoteDelete" NoteEdit="OnNoteEdit" />
+</div>
+
+<ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete user "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
+</ModalDialog>
+
+@code {
+    [CascadingParameter] private AppState appState { get; set; }
+
+    private List<NoteInfoDto> notes;
+
+    private ModalDialog modalDialog;
+    private NoteInfoDto itemDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNotes();
+    }
+
+    private async Task LoadNotes()
+    {
+        notes = null;
+        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/recentnotes");
+        if (httpResponse.Error)
+        {
+            Console.WriteLine(httpResponse.HttpResponseMessage.StatusCode);
+            //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+            notes = httpResponse.Response.Entity;
+    }
+
+    private void OnNoteEdit(Guid noteId)
+    {
+        navigationManager.NavigateTo($"notes/edit/{noteId}/index");
+    }
+
+    private void OnNoteDelete(NoteInfoDto item)
+    {
+        modalDialog.Show();
+        itemDelete = item;
+    }
+
+    private async Task OnConfirmDelete()
+    {
+        modalDialog.Hide();
+
+        var httpResponse = await dataService.Delete($"api/notes/{itemDelete.NoteId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            await LoadNotes();
+        }
+
+        itemDelete = null;
+    }
+
+    private void OnCancelDelete()
+    {
+        modalDialog.Hide();
+        itemDelete = null;
+    }
+
+}

@@ -24,7 +24,15 @@ namespace KNote.Client
             builder.Services.AddScoped<IKntClientDataService, KntClientDataService>();
             builder.Services.AddAuthorizationCore();
 
-            builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderTest>();
+            //builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderTest>();
+            
+            builder.Services.AddScoped<AuthenticationProviderJWT>();
+            builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderJWT>(
+                provider => provider.GetRequiredService<AuthenticationProviderJWT>()
+            );
+            builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(
+               provider => provider.GetRequiredService<AuthenticationProviderJWT>()
+            );
 
             await builder.Build().RunAsync();
         }

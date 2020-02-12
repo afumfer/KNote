@@ -1,6 +1,7 @@
 using KNote.DomainModel.Infrastructure;
 using KNote.DomainModel.Services;
 using KNote.Server.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -8,7 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Linq;
+using System.Text;
 
 namespace KNote.Server
 {
@@ -37,8 +41,24 @@ namespace KNote.Server
 
             var appSettingsSection = configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
+            
+            var appSettings = appSettingsSection.Get<AppSettings>();
 
-            //services.AddMvc();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                 options.TokenValidationParameters = new TokenValidationParameters
+                 {
+                     ValidateIssuer = false,
+                     ValidateAudience = false,
+                     ValidateLifetime = true,
+                     ValidateIssuerSigningKey = true,
+                     IssuerSigningKey = new SymmetricSecurityKey(
+                         // Encoding.UTF8.GetBytes(configuration["jwt:key"]) 
+                         Encoding.ASCII.GetBytes(appSettings.Secret)
+                        ),
+                     ClockSkew = TimeSpan.Zero
+                 });
+
 
             services.AddMvc().AddNewtonsoftJson(options =>
                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -67,6 +87,8 @@ namespace KNote.Server
             app.UseClientSideBlazorFiles<Client.Program>();
 
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

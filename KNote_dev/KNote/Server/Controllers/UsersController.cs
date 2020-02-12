@@ -184,7 +184,7 @@ namespace KNote.Server.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register([FromBody]UserRegisterInfoDto user)
+        public IActionResult Register([FromBody]UserRegisterDto user)
         {
             try
             {
@@ -213,33 +213,81 @@ namespace KNote.Server.Controllers
 
                 if (!kres.IsValid)
                 {
-                    return Ok(new { success = false, token = "" });
+                    return Ok(new UserTokenDto { success = false, token = "" });
                     //return BadRequest(kresApi);
                 }
 
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new Claim[]
-                    {
-                        new Claim(ClaimTypes.Name, user.UserId.ToString())
-                        // --------
+                // TODO: !!! Esto es código viejo eliminar ....
+                //var tokenHandler = new JwtSecurityTokenHandler();
+                //var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+                //var tokenDescriptor = new SecurityTokenDescriptor
+                //{
+                //    Subject = new ClaimsIdentity(new Claim[]
+                //    {                        
+                //        new Claim(JwtRegisteredClaimNames.UniqueName, user.EMail),
+                //        new Claim(ClaimTypes.Name, user.EMail),
+                //        new Claim(ClaimTypes.Role, user.RoleDefinition),
+                //        new Claim("KNTapp", "KNoteWeb" ),
+                //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 
-                    }),
-                    Expires = DateTime.UtcNow.AddDays(365),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)                    
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
+                //        // --------
 
-                return Ok(new { success = true, token = tokenString, uid = user.UserId.ToString() });
+                //    }),
+                //    Expires = DateTime.UtcNow.AddDays(365),
+                //    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)                    
+                //};
+                //var token = tokenHandler.CreateToken(tokenDescriptor);
+                //var tokenString = tokenHandler.WriteToken(token);
+
+                //return Ok(new UserTokenDto { success = true, token = tokenString, uid = user.UserId.ToString() });
+
+                return Ok(BuildToken(user));
             }
             catch
             {
-                return Ok(new { success = false, token = "", uid = "" });
+                return Ok(new UserTokenDto { success = false, token = "", uid = "" });
             }
         }
+
+        private UserTokenDto BuildToken(UserDto userDto)
+        {
+            var claims = new List<Claim>()
+            {
+                new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
+                new Claim(ClaimTypes.Name, userDto.UserName),
+                //new Claim("miValor", "Lo que yo quiera"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+
+            // TODO: Pendiente de transformar la cadena de roles un array de Claims
+            //foreach (var rol in roles)
+            //{
+            //    claims.Add(new Claim(ClaimTypes.Role, rol));
+            //}
+            claims.Add(new Claim(ClaimTypes.Role, userDto.RoleDefinition));
+
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_appSettings.Secret));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var expiration = DateTime.UtcNow.AddYears(1);
+
+            JwtSecurityToken token = new JwtSecurityToken(
+               issuer: null,
+               audience: null,
+               claims: claims,
+               expires: expiration,
+               signingCredentials: creds);
+
+            return new UserTokenDto()
+            {
+                success = true,
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                uid = userDto.UserId.ToString()
+            };
+        }
+
+
 
     }
 }

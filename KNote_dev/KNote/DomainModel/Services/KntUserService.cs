@@ -336,7 +336,7 @@ namespace KNote.DomainModel.Services
             return resService;
         }
                 
-        public Result<UserDto> Create(UserRegisterInfoDto userRegisterInfo)
+        public Result<UserDto> Create(UserRegisterDto userRegisterInfo)
         {
             Result<UserDto> resService = new Result<UserDto>();
             

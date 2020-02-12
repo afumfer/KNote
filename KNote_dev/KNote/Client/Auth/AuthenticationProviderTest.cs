@@ -13,9 +13,9 @@ namespace KNote.Client.Auth
         {
             //await Task.Delay(5000);
 
-            //var anonimo = new ClaimsIdentity();
+            //var anonimous = new ClaimsIdentity();
 
-            var anonimo = new ClaimsIdentity(new List<Claim>() {
+            var anonimous = new ClaimsIdentity(new List<Claim>() {
                 new Claim("llave1", "valor1")
                 ,new Claim(ClaimTypes.Name, "Armando")
                 ,new Claim(ClaimTypes.Role, "Admin")
@@ -23,9 +23,7 @@ namespace KNote.Client.Auth
                 ,new Claim(ClaimTypes.Role, "Staff")
             }, "test");
 
-            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(anonimo)));
-
-
+            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(anonimous)));
         }
     }
 }

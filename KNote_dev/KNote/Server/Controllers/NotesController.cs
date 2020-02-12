@@ -6,6 +6,8 @@ using KNote.DomainModel.Services;
 using KNote.Server.Helpers;
 using KNote.Shared;
 using KNote.Shared.Dto;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -64,7 +66,7 @@ namespace KNote.Server.Controllers
                 return BadRequest(resApi);
             }
         }
-
+        
         [HttpGet("getfilter2")]   // GET api/notes/getfilter2
         public async Task <IActionResult> GetFilter2([FromQuery] NotesFilterDto notesFilter )
         {
@@ -87,6 +89,7 @@ namespace KNote.Server.Controllers
             }
         }
 
+        //[Authorize]
         [HttpGet("recentnotes")]   // GET api/notes/recentnotes
         public IActionResult RecentNotes()
         {

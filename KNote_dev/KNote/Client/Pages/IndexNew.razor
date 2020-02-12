@@ -1,0 +1,16 @@
+﻿@page "/indexNew"
+
+@using KNote.Client.Pages.Notes
+
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <text>Estas autorizado ... @context.User.Identity.Name</text>
+    </Authorized>
+    <NotAuthorized>
+        <text>No estás autorizado //// </text>
+    </NotAuthorized>
+</AuthorizeView>
+
+<NotesSearch />

@@ -1,0 +1,18 @@
+﻿@page "/logout"
+
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
+@inject ILoginService loginService
+
+@using KNote.Client.Auth
+
+<text>Logout ....</text>
+
+@code {
+    protected async override Task OnInitializedAsync()
+    {
+        await loginService.Logout();
+        navigationManager.NavigateTo("");
+    }
+}
