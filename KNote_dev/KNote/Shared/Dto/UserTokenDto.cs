@@ -9,5 +9,6 @@ namespace KNote.Shared.Dto
         public bool success { get; set; }
         public string token { get; set; }
         public string uid { get; set; }
+        public string error { get; set; }
     }
 }

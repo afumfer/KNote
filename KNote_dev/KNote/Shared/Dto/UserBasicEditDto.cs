@@ -21,7 +21,7 @@ namespace KNote.Shared.Dto
         [MaxLength(256)]
         public string FullName { get; set; }
 
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        //[Required(ErrorMessage = "* Attribute {0} is required ")]
         public string RoleDefinition { get; set; }
 
         // TODO: descomentar y probar. 

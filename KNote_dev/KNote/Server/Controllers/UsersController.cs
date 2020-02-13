@@ -95,7 +95,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<UserInfoDto>>();
+                var kresApi = new Result<UserDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -116,7 +116,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<KAttributeInfoDto>();
+                var kresApi = new Result<UserDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -136,7 +136,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<UserInfoDto>>();
+                var kresApi = new Result<UserDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -163,7 +163,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpDelete("{id}")]    // DELETE api/users/guid
-        //[Authorize(Roles = "Administrators")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
@@ -176,7 +176,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<UserInfoDto>>();
+                var kresApi = new Result<UserInfoDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -188,64 +188,37 @@ namespace KNote.Server.Controllers
         {
             try
             {
-                var kresApi = _service.Users.Create(user);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
+                var kresRep = _service.Users.Create(user);
+                if (kresRep.IsValid)                    
+                    return Ok(BuildToken(kresRep.Entity));
+                else                    
+                    return BadRequest(new UserTokenDto { success = kresRep.IsValid, token = "", error = kresRep.Message });
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<UserInfoDto>>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
+                return BadRequest(new UserTokenDto { success = false, token = "", error = ex.Message });
             }
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult Login([FromBody]UserCredentialsDto credentials)
-        {
+        {            
             try
             {
-                var kres = _service.Users.Authenticate(credentials.Name, credentials.Password);
-                var user = kres.Entity;
+                var kresRep = _service.Users.Authenticate(credentials.Name, credentials.Password);
+                var user = kresRep.Entity;
 
-                if (!kres.IsValid)
-                {
-                    return Ok(new UserTokenDto { success = false, token = "" });
-                    //return BadRequest(kresApi);
+                if (!kresRep.IsValid)
+                {                    
+                    return BadRequest(new UserTokenDto { success = false, token = "", error = kresRep.Message });
                 }
-
-                // TODO: !!! Esto es código viejo eliminar ....
-                //var tokenHandler = new JwtSecurityTokenHandler();
-                //var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-                //var tokenDescriptor = new SecurityTokenDescriptor
-                //{
-                //    Subject = new ClaimsIdentity(new Claim[]
-                //    {                        
-                //        new Claim(JwtRegisteredClaimNames.UniqueName, user.EMail),
-                //        new Claim(ClaimTypes.Name, user.EMail),
-                //        new Claim(ClaimTypes.Role, user.RoleDefinition),
-                //        new Claim("KNTapp", "KNoteWeb" ),
-                //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-
-                //        // --------
-
-                //    }),
-                //    Expires = DateTime.UtcNow.AddDays(365),
-                //    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)                    
-                //};
-                //var token = tokenHandler.CreateToken(tokenDescriptor);
-                //var tokenString = tokenHandler.WriteToken(token);
-
-                //return Ok(new UserTokenDto { success = true, token = tokenString, uid = user.UserId.ToString() });
 
                 return Ok(BuildToken(user));
             }
-            catch
+            catch (Exception ex)
             {
-                return Ok(new UserTokenDto { success = false, token = "", uid = "" });
+                return BadRequest(new UserTokenDto { success = false, token = "", uid = "", error = ex.Message });
             }
         }
 
@@ -255,17 +228,15 @@ namespace KNote.Server.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
                 new Claim(ClaimTypes.Name, userDto.UserName),
-                //new Claim("miValor", "Lo que yo quiera"),
+                //new Claim("KNoteApp", "KNoteWeb"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
-
-            // TODO: Pendiente de transformar la cadena de roles un array de Claims
-            //foreach (var rol in roles)
-            //{
-            //    claims.Add(new Claim(ClaimTypes.Role, rol));
-            //}
-            claims.Add(new Claim(ClaimTypes.Role, userDto.RoleDefinition));
+                        
+            var roles = userDto.RoleDefinition.Split(',');
+            foreach (var rol in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, rol.Trim()));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_appSettings.Secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -286,8 +257,6 @@ namespace KNote.Server.Controllers
                 uid = userDto.UserId.ToString()
             };
         }
-
-
 
     }
 }

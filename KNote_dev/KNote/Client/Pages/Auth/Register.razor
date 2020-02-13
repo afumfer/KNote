@@ -51,44 +51,19 @@
 @code {
     private UserRegisterDto user = new UserRegisterDto();
 
-
     private async Task CreateUser()
     {
-        user.RoleDefinition = "admin";
+        user.RoleDefinition = "Public";
 
-        Console.WriteLine(user.UserName);
-        Console.WriteLine(user.EMail);
-        Console.WriteLine(user.RoleDefinition);
-        Console.WriteLine(user.FullName);
-
-        Console.WriteLine(user.Password);
-
-
-        // TODO: !!! Borrar esto ...
-        //var httpResponse = await repositorio.Post<UserInfo2, UserToken2>("api/cuentas/crear", userInfo2);
-
-        //if (httpResponse.Error)
-        //{
-        //    await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
-        //}
-        //else
-        //{
-        //    await loginService.Login(httpResponse.Response.Token);
-        //    navigationManager.NavigateTo("");
-        //}
-
-        var httpResponse = await dataService.Post<UserRegisterDto, Result<UserDto>>("api/users/register", user);
+        var httpResponse = await dataService.Post<UserRegisterDto, UserTokenDto>("api/users/register", user);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {
-            Console.WriteLine("user registred !!");
-            //await loginService.Login(httpResponse.Response.XXXX);
-            await showMessages.ShowOkMessage("User registred! Next you must login with your credentials.");
-            navigationManager.NavigateTo("login");
+        {            
+            await loginService.Login(httpResponse.Response.token);
+            navigationManager.NavigateTo("");
         }
-
     }
 }

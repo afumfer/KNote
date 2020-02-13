@@ -35,35 +35,17 @@
 @code {
     private UserCredentialsDto user = new UserCredentialsDto();
 
-
     private async Task LoginUser()
     {
-
-        // TODO: !!! Borrar esto ...
-        //var httpResponse = await repositorio.Post<UserInfo2, UserToken2>("api/cuentas/crear", userInfo2);
-
-        //if (httpResponse.Error)
-        //{
-        //    await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
-        //}
-        //else
-        //{
-        //    await loginService.Login(httpResponse.Response.Token);
-        //    navigationManager.NavigateTo("");
-        //}
-
         var httpResponse = await dataService.Post<UserCredentialsDto, UserTokenDto>("api/users/login", user);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {
-            Console.WriteLine("user login !!");
-            await loginService.Login(httpResponse.Response.token);
-            Console.WriteLine(httpResponse.Response.token);
+        {            
+            await loginService.Login(httpResponse.Response.token);            
             navigationManager.NavigateTo("");
         }
-
     }
 }
