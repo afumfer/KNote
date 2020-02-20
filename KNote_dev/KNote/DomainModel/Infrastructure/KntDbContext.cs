@@ -43,14 +43,6 @@ namespace KNote.DomainModel.Infrastructure
             Database.EnsureCreated();
         }
 
-        // TODO: !!! Pendiente de refactorizar o eliminar 
-        public KntDbContext(DbConnection conn)
-            //: base(conn, true)
-        {
-            //Database.SetInitializer<KntDbContext>(new DbInitializer());
-        }
-
-
         // TODO: !!! Pendiente de eliminar, ver si con Sqlite hace falta algo similar a esto  (Se usaba en compact SQL) 
         public int? KntCommandTimeout 
         {
@@ -163,6 +155,8 @@ namespace KNote.DomainModel.Infrastructure
             modelBuilder.Entity<TraceNoteType>().HasIndex(_ => _.Key).IsUnique(true);
             modelBuilder.Entity<User>().HasIndex(_ => _.UserName).IsUnique(true);
             modelBuilder.Entity<User>().HasIndex(u => u.EMail).IsUnique(true);
+
+            modelBuilder.Seed();
 
             base.OnModelCreating(modelBuilder);
         }

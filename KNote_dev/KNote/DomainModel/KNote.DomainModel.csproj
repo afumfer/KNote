@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Entities\" />
-    <Folder Include="Infrastructure\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 
