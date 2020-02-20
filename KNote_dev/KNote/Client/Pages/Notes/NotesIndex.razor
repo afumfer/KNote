@@ -1,5 +1,7 @@
 ﻿@page "/notes"
 
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
 <h3>Notes Index</h3>
 
 <div class="form-group">

@@ -65,17 +65,28 @@
                             <td class="text-right">@note.Priority</td>
                             <td class="text-right">  @note.CreationDateTime.ToShortDateString()</td>
                             <td>
-                                <span class="float-right">
-                                    <a href="notes/edit/@note.NoteId/tree" class="btn btn-sm btn-warning mx-1"
-                                       data-toggle="tooltip" title="Edit user">
-                                        <i class="fa fa-pencil"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-danger mx-1"
-                                            @onclick="@(() => Delete(note))"
-                                            data-toggle="tooltip" title="Delete user">
-                                        <i class="fa fa-minus"></i>
-                                    </button>
-                                </span>
+                                <AuthorizeView Roles="Admin, ProjecManager, Staff">
+                                    <Authorized>
+                                        <span class="float-right">
+                                            <a href="notes/edit/@note.NoteId/tree" class="btn btn-sm btn-warning mx-1"
+                                               data-toggle="tooltip" title="Edit user">
+                                                <i class="fa fa-pencil"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-danger mx-1"
+                                                    @onclick="@(() => Delete(note))"
+                                                    data-toggle="tooltip" title="Delete user">
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                        </span>
+                                    </Authorized>
+                                    <NotAuthorized>
+                                        <a href="notes/@note.NoteId">
+                                            <span class="badge badge-pill badge-primary float-right ml-1">
+                                                ...
+                                            </span>
+                                        </a>
+                                    </NotAuthorized>
+                                </AuthorizeView>
                             </td>
                         </tr>
                     }

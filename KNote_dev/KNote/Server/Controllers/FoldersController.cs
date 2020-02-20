@@ -6,6 +6,7 @@ using KNote.DomainModel.Services;
 using KNote.Server.Helpers;
 using KNote.Shared;
 using KNote.Shared.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -123,8 +124,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{folderId}")]    // GET api/folders/GetNotes/xxxxxxxxxx
-        //[Authorize(Roles = "Administrators")]
+        [HttpGet("[action]/{folderId}")]    // GET api/folders/GetNotes/xxxxxxxxxx        
         public IActionResult GetNotes(Guid folderId)
         {
             try
@@ -145,6 +145,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/folders
         [HttpPut]    // PUT api/folders
+        [Authorize(Roles = "Admin, ProjecManager")]
         public async Task<IActionResult> Post([FromBody]FolderDto folder)
         {
             try
@@ -163,7 +164,8 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpDelete("{id}")]    // DELETE api/folders/guid        
+        [HttpDelete("{id}")]    // DELETE api/folders/guid     
+        [Authorize(Roles = "Admin, ProjecManager")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try

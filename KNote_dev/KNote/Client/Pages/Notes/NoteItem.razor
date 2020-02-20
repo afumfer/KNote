@@ -1,25 +1,34 @@
-﻿<div class="card m-1 p-1  bg-light">
+﻿<div class="card m-1 p-1 bg-light">
+
     <h5>
-        <a href="notes/@Note.NoteId">
-            <span class="badge badge-pill badge-primary float-left ml-1">
-                @Note.NoteNumber
-            </span>
-        </a>
 
-         &nbsp; @((MarkupString)Note.Topic)
+        #@Note.NoteNumber - @((MarkupString)Note.Topic)
 
-    <span class="float-right">        
-        <button class="btn btn-sm btn-warning mx-1"
-                @onclick="@(() => OnNoteEdit.InvokeAsync(Note.NoteId))" data-toggle="tooltip" title="Edit note">
-            <i class="fa fa-pencil"></i>
-        </button>
+        <span class="float-right">
+            <AuthorizeView Roles="Admin, ProjecManager, Staff">
+                <Authorized>
+                    <button class="btn btn-sm btn-warning mx-1"
+                            @onclick="@(() => OnNoteEdit.InvokeAsync(Note.NoteId))" data-toggle="tooltip" title="Edit note">
+                        <i class="fa fa-pencil"></i>
+                    </button>
 
-        <button class="btn btn-sm btn-danger mx-1"
-                @onclick="@(() => OnNoteDelete.InvokeAsync(Note))" data-toggle="tooltip" title="Delete note">
-            <i class="fa fa-minus"></i>
-        </button>
-    </span>
+                    <button class="btn btn-sm btn-danger mx-1"
+                            @onclick="@(() => OnNoteDelete.InvokeAsync(Note))" data-toggle="tooltip" title="Delete note">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="notes/@Note.NoteId">
+                        <span class="badge badge-pill badge-primary float-left ml-1">
+                            ...
+                        </span>
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </span>
+
     </h5>
+
     <div class="card-text bg-white p-1">
         <p>
             <span>
@@ -29,6 +38,7 @@
 
         </p>
     </div>
+
 </div>
 
 

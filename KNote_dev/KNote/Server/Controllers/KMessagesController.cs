@@ -6,6 +6,7 @@ using KNote.DomainModel.Services;
 using KNote.Server.Helpers;
 using KNote.Shared;
 using KNote.Shared.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -110,6 +111,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/kmessages
         [HttpPut]    // PUT api/kmessages
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> Post([FromBody]KMessageInfoDto kmessageInfo)
         {
             var kresApi = new Result<KMessageInfoDto>();
@@ -129,8 +131,8 @@ namespace KNote.Server.Controllers
         }
 
 
-        [HttpDelete("{id}")]    // DELETE api/kmessages/guid
-        //[Authorize(Roles = "Administrators")]
+        [HttpDelete("{id}")]    // DELETE api/kmessages/guid        
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var kresApi = new Result<KMessageInfoDto>();

@@ -6,6 +6,7 @@ using KNote.DomainModel.Services;
 using KNote.Server.Helpers;
 using KNote.Shared;
 using KNote.Shared.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -70,6 +71,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/notetypes
         [HttpPut]    // PUT api/notetypes
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Post([FromBody]NoteTypeDto noteType)
         {
             try
@@ -88,7 +90,8 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpDelete("{id}")]    // DELETE api/notetypes/guid        
+        [HttpDelete("{id}")]    // DELETE api/notetypes/guid       
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try

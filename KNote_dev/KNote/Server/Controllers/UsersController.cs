@@ -144,6 +144,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/users
         [HttpPut]    // PUT api/users
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Post([FromBody]UserDto userDto)
         {
             try
@@ -163,7 +164,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpDelete("{id}")]    // DELETE api/users/guid
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try

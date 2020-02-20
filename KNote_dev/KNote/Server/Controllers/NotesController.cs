@@ -175,6 +175,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/notes
         [HttpPut]    // PUT api/notes
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> Post([FromBody]NoteDto note)
         {
             try
@@ -193,7 +194,8 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpDelete("{id}")]    // DELETE api/notes/guid        
+        [HttpDelete("{id}")]    // DELETE api/notes/guid
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
@@ -209,7 +211,6 @@ namespace KNote.Server.Controllers
                 var kresApi = new Result<NoteInfoDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
-
             }
         }
 

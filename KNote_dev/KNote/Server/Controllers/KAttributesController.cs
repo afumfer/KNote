@@ -70,6 +70,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/kattributes
         [HttpPut]    // PUT api/kattributes
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Post([FromBody]KAttributeDto entity)
         {
             try
@@ -89,6 +90,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpDelete("{id}")]    // DELETE api/kattributes/guid        
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try

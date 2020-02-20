@@ -1,5 +1,7 @@
 ﻿@page "/notes/scrum"
 
+@attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
+
 <h3>NotesScrum</h3>
 
 @code {
