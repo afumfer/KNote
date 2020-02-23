@@ -1,16 +1,25 @@
 ﻿@page "/types"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Types Index</h3>
-
-<div class="form-group">
-    <a class="btn btn-info" href="types/new">New type</a>
+<div class="kpage-header mb-0">
+    <div class="col-3">
+        <h3>Types Index</h3>
+    </div>
+    <div class="col-9 float-right">
+        <i class="oi oi-grid-three-up"></i>
+        <button class="btn btn-sm btn-warning mx-1"
+                @onclick="GoNewType"
+                data-toggle="tooltip" title="New type">
+            <i class="oi oi-tablet"></i> New type
+        </button>
+    </div>
 </div>
+<hr class="mt-0" />
 
 <EntityList List="noteTypes">
     <ItemsFull>
@@ -98,6 +107,11 @@
     {
         modalDialog.Hide();
         itemDelete = null;
+    }
+
+    void GoNewType()
+    {
+        navigationManager.NavigateTo($"types/new");
     }
 
 }

@@ -20,8 +20,8 @@
         </li>
 
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="notes/scrum">
-                <span class="oi oi-task" aria-hidden="true"></span> Scrum panel
+            <NavLink class="nav-link" href="notes/tree">
+                <span class="oi oi-caret-right" aria-hidden="true"></span> Tree panel
             </NavLink>
         </li>
 
@@ -32,37 +32,41 @@
         </li>
 
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="notes/tree">
-                <span class="oi oi-caret-right" aria-hidden="true"></span> Tree panel
+            <NavLink class="nav-link" href="notes/chat">
+                <span class="oi oi-task" aria-hidden="true"></span> Chat room
             </NavLink>
         </li>
 
-        <AuthorizeView Roles="Admin">        
+        <AuthorizeView Roles="Admin">
             <Authorized>
                 <li class="nav-item px-3">
                     <NavLink class="nav-link" href="admin">
                         <span class="oi oi-wrench" aria-hidden="true"></span> Admin
                     </NavLink>
-                </li>                
+                </li>
+
+                <!-- Basura -->
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="separator">
+                        <span class="oi oi-ellipses" aria-hidden="true"></span> -----
+                    </NavLink>
+                </li>
+
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="counter">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Counter
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="fetchdata">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+                    </NavLink>
+                </li>
+                <!-- /Basura -->
+
             </Authorized>
         </AuthorizeView>
 
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="separator">
-                <span class="oi oi-ellipses" aria-hidden="true"></span> -----
-            </NavLink>
-        </li>
-
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
 
         @if (showUserOptions)
         {
@@ -73,7 +77,7 @@
             </li>
             <li class="nav-item px-3">
                 <NavLink class="nav-link" href="login">
-                    <span class="oi oi-wrench" aria-hidden="true"></span> Login 
+                    <span class="oi oi-wrench" aria-hidden="true"></span> Login
                 </NavLink>
             </li>
         }

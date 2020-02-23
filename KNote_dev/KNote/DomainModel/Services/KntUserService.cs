@@ -436,6 +436,10 @@ namespace KNote.DomainModel.Services
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+                // TODO: remove (for debug and seed data).
+                //var strSalt = Convert.ToBase64String(passwordSalt);
+                //var strHash = Convert.ToBase64String(passwordHash);
             }
         }
 

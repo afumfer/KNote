@@ -1,16 +1,26 @@
 ﻿@page "/attributes"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Attributes Index</h3>
-
-<div class="form-group">
-    <a class="btn btn-info" href="attributes/new">New attribute</a>
+<div class="kpage-header mb-0">
+    <div class="col-3">
+        <h3>Attributes Index</h3>
+    </div>
+    <div class="col-9 float-right">
+        <i class="oi oi-grid-three-up"></i>
+        <button class="btn btn-sm btn-warning mx-1"
+                @onclick="GoNewAttribute"
+                data-toggle="tooltip" title="New attribute">
+            <i class="oi oi-bookmark"></i> New attribute
+        </button>
+    </div>
 </div>
+<hr class="mt-0" />
+
 
 <EntityList List="attributes">
     <ItemsFull>
@@ -100,6 +110,11 @@
     {
         modalDialog.Hide();
         itemDelete = null;
+    }
+
+    void GoNewAttribute()
+    {
+        navigationManager.NavigateTo($"attributes/new");
     }
 
 }

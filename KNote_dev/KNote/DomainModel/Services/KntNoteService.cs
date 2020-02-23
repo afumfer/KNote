@@ -60,7 +60,14 @@ namespace KNote.DomainModel.Services
             try
             {
                 // TODO: !!!AAA
-                var resRep = _repository.Notes.DbSet.OrderByDescending(n => n.NoteNumber).Take(25).ToList();
+                //var resRep = _repository.Notes.DbSet.OrderByDescending(n => n.NoteNumber).Take(25).ToList();
+                //var resRep2 = _repository.Notes.GetAll(n => n.Folder.FolderNumber == 1)
+
+                var resRep = _repository.Notes.DbSet
+                    .Include( n => n.Folder)
+                    .Where( n => n.Folder.FolderNumber == 1)
+                    .OrderBy(n => n.NoteNumber).Take(25).ToList();
+
                 resService.Entity = resRep.Select(u => u.GetSimpleDto<NoteInfoDto>()).ToList();
             }
             catch (Exception ex)

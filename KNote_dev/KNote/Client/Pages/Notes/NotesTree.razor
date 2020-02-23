@@ -2,15 +2,25 @@
 @page "/tree"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<h3>Notes tree</h3>
-<div class="form-group">
-    <a class="btn btn-info" href="notes/new">New note</a>
+<div class="kpage-header mb-0">
+    <div class="col-3">
+        <h3>Notes tree</h3>
+    </div>
+    <div class="col-9 float-right">
+        <i class="oi oi-grid-three-up"></i>
+        <button class="btn btn-sm btn-warning mx-1"
+                @onclick="GoNewNote"
+                data-toggle="tooltip" title="New note">
+            <i class="oi oi-document"></i> New note
+        </button>
+    </div>
 </div>
+<hr class="mt-0" />
 
 <div class="row">
 
@@ -169,6 +179,11 @@
     {
         modalDialog.Hide();
         itemDelete = null;
+    }
+
+    void GoNewNote()
+    {
+        navigationManager.NavigateTo($"notes/new");
     }
 
 }

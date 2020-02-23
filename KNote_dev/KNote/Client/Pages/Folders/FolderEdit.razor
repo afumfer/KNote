@@ -7,8 +7,7 @@
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
 <h3>Folder edit</h3>
-
-
+<hr />
 
 @if (folder != null)
 {
@@ -20,24 +19,10 @@ else
     <text>Loading ... </text>
 }
 
-
 @code {
     [Parameter] public string FolderId { get; set; }
 
     private FolderDto folder;
-
-    //protected override void OnInitialized()
-    //{
-    //    folder = new FolderDto { Name = "My folder 1", Tags = "111", Order = 0, OrderNotes = "Desc Name", FolderId = Guid.Parse(FolderId) };
-
-    //    base.OnInitialized();
-    //}
-
-    //private void Edit()
-    //{
-    //    Console.WriteLine("Edit folder");
-    //    navigationManger.NavigateTo("folders");
-    //}
 
     protected async override Task OnInitializedAsync()
     {

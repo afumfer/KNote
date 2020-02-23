@@ -14,6 +14,13 @@ namespace KNote.Client.Shared
             set { _appMode = value; NotifyStateChanged(); }
         }
 
+        private string _appName = "Other keynotes management for people's group (ver 0.0.1 alfa)";
+        public string AppName
+        {
+            get { return _appName; }
+            set { _appName = value; NotifyStateChanged(); }
+        }
+
         private Guid _selectedFolder;
         public Guid SelectedFolder
         {

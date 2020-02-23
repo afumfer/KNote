@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KNote.DomainModel.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,515 +8,201 @@ namespace KNote.DomainModel.Infrastructure
 {
     public static class ModelBuilderExtensions
     {
-        public static void Seed(this ModelBuilder modelBuilder)
+
+        public static void KNoteDbConfigure(this ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<Author>().HasData(
-            //    new Author
-            //    {
-            //        AuthorId = 1,
-            //        FirstName = "William",
-            //        LastName = "Shakespeare"
-            //    }
-            //);
-            //modelBuilder.Entity<Book>().HasData(
-            //    new Book { BookId = 1, AuthorId = 1, Title = "Hamlet" },
-            //    new Book { BookId = 2, AuthorId = 1, Title = "King Lear" },
-            //    new Book { BookId = 3, AuthorId = 1, Title = "Othello" }
-            //);
+            modelBuilder.Entity<Folder>()
+                .HasMany(_ => _.Notes)
+                .WithOne(_ => _.Folder)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<KAttribute>()
+                .HasMany(_ => _.NoteAttributes)
+                .WithOne(_ => _.KAttribute)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            //var personas = new List<Persona>();
-            //for (int i = 5; i < 100; i++)
-            //{
-            //    personas.Add(new Persona()
-            //    {
-            //        Id = i,
-            //        Nombre = $"Persona {i}",
-            //        FechaNacimiento = DateTime.Today
-            //    });
-            //}
-            //modelBuilder.Entity<Persona>().HasData(personas);
+            // -------------------------------
+            //modelBuilder.Entity<TraceNote>()
+            //    .WithOne(_ => _.To)
+            //    .HasMany(_ => _.From)                
+            //    .WillCascadeOnDelete(false);
 
-            //var roleAdmin = new IdentityRole()
-            ////{ Id = Guid.NewGuid().ToString(), Name = "admin", NormalizedName = "admin" };
-            //{ Id = "89086180-b978-4f90-9dbd-a7040bc93f41", Name = "admin", NormalizedName = "admin" };
-            //modelBuilder.Entity<IdentityRole>().HasData(roleAdmin);
+            //modelBuilder.Entity<TraceNote>()
+            //   .HasRequired(_ => _.From)
+            //   .WithMany(_ => _.To)
+            //   .WillCascadeOnDelete(false);               
+            modelBuilder.Entity<Note>()
+                .HasMany(_ => _.To)
+                .WithOne(_ => _.From)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Note>()
+                .HasMany(_ => _.From)
+                .WithOne(_ => _.To)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ---------------------------
+            //modelBuilder.Entity<Window>()
+            //   .HasRequired(_ => _.User)
+            //   .WithMany(_ => _.Windows)
+            //   .WillCascadeOnDelete(false);
+
+            //modelBuilder.Entity<Window>()
+            //   .HasRequired(_ => _.Note)
+            //   .WithMany(_ => _.Windows)
+            //   .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Window>()
+                .HasOne(_ => _.User)
+                .WithMany(_ => _.Windows)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Window>()
+                .HasOne(_ => _.Note)
+                .WithMany(_ => _.Windows)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --------------------
+            //modelBuilder.Entity<NoteTask>()
+            //   .HasRequired(_ => _.Note)
+            //   .WithMany(_ => _.Tasks)
+            //   .WillCascadeOnDelete(false);
+
+            //modelBuilder.Entity<NoteTask>()
+            //   .HasRequired(_ => _.User)
+            //   .WithMany(_ => _.Tasks)
+            //   .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Note>()
+               .HasMany(_ => _.NoteTasks)
+               .WithOne(_ => _.Note)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+               .HasMany(_ => _.Tasks)
+               .WithOne(_ => _.User)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Folder>().HasIndex(_ => _.FolderNumber).IsUnique(true);
+            modelBuilder.Entity<Folder>().HasIndex(_ => _.ParentId).IsUnique(false);
+            modelBuilder.Entity<Note>().HasIndex(_ => _.NoteNumber).IsUnique(true);
+            modelBuilder.Entity<Note>().HasIndex(_ => _.Topic).IsUnique(false);
+            modelBuilder.Entity<Note>().HasIndex(_ => _.InternalTags).IsUnique(false);
+            modelBuilder.Entity<KAttribute>().HasIndex(_ => _.Key).IsUnique(true);
+            modelBuilder.Entity<KAttributeTabulatedValue>().HasIndex(_ => _.Key).IsUnique(true);
+            modelBuilder.Entity<NoteKAttribute>().HasIndex(_ => new { _.KAttributeId, _.NoteId }).IsUnique(true);
+            modelBuilder.Entity<NoteType>().HasIndex(_ => _.Key).IsUnique(true);
+            modelBuilder.Entity<SystemValue>().HasIndex(_ => _.Key).IsUnique(true);
+            modelBuilder.Entity<TraceNote>().HasIndex(_ => new { _.FromId, _.ToId }).IsUnique(true);
+            modelBuilder.Entity<TraceNoteType>().HasIndex(_ => _.Key).IsUnique(true);
+            modelBuilder.Entity<User>().HasIndex(_ => _.UserName).IsUnique(true);
+            modelBuilder.Entity<User>().HasIndex(u => u.EMail).IsUnique(true);
         }
 
-
-        //public string TestCreateEntitiesWithContext(string conection, string provider)
-        //{
-        //    string res = "";
-
-        //    res += TestCreateSystemValuesWithContext(conection, provider) + Environment.NewLine;
-        //    res += TestCreateUsersWithContext(conection, provider) + Environment.NewLine;
-        //    res += TestCreateAttributesWithContext(conection, provider) + Environment.NewLine;
-        //    res += TestCreateFoldersWithContext(conection, provider) + Environment.NewLine;
-        //    res += TestCreateNotesWithContext(conection, provider) + Environment.NewLine;
-        //    res += TestCreateMessagesWithContext(conection, provider) + Environment.NewLine;
-        //    res += TestCreateEventsWithContext(conection, provider) + Environment.NewLine;
-
-        //    return res;
-        //}
-
-        //public string TestCreateSystemValuesWithContext(string conection, string provider)
-        //{
-        //    string res = "Create System Value OK (Context)";
-        //    var conn = DbProviderFactories.GetFactory(provider).CreateConnection();
-        //    conn.ConnectionString = conection;
-
-        //    try
-        //    {
-        //        using (KntDbContext context = new KntDbContext(conn))
-        //        {
-        //            SystemValue s1, s2;
-
-        //            s1 = new SystemValue
-        //            {
-        //                SystemValueId = NewGuid(),
-        //                Key = "OWNER",
-        //                Value = "afumfer"
-        //            };
-
-        //            s2 = new SystemValue
-        //            {
-        //                SystemValueId = NewGuid(),
-        //                Key = "VERSIONDB",
-        //                Value = "0.01"
-        //            };
-
-        //            context.SystemValues.Add(s1);
-        //            context.SystemValues.Add(s2);
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        res = ex.Message;
-        //    }
-        //    return res;
-        //}
-
-        //public string TestCreateUsersWithContext(string conection, string provider)
-        //{
-        //    string res = "Create User OK (Context)";
-        //    var conn = DbProviderFactories.GetFactory(provider).CreateConnection();
-        //    conn.ConnectionString = conection;
-
-        //    try
-        //    {
-        //        using (KntDbContext context = new KntDbContext(conn))
-        //        {
-        //            User u1 = null, u2 = null;
-
-        //            u1 = new User
-        //            {
-        //                UserId = NewGuid(),
-        //                UserName = "afumfer",
-        //                FullName = "afumfer",
-        //                EMail = "afumfer@gmail.com"
-        //            };
-
-        //            u2 = new User
-        //            {
-        //                UserId = NewGuid(),
-        //                UserName = "afumfer2",
-        //                FullName = "afumfer2",
-        //                EMail = "afumfer2@gmail.com"
-        //            };
-
-        //            context.Users.Add(u1);
-        //            context.Users.Add(u2);
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        res = ex.Message;
-        //    }
-        //    return res;
-        //}
-
-        //public string TestCreateAttributesWithContext(string conection, string provider)
-        //{
-        //    string res = "Create KAttributes OK (Context)";
-        //    var conn = DbProviderFactories.GetFactory(provider).CreateConnection();
-        //    conn.ConnectionString = conection;
-
-        //    try
-        //    {
-        //        using (KntDbContext context = new KntDbContext(conn))
-        //        {
-        //            KAttribute a1, a2;
-        //            KAttributeTabulatedValue v1, v2, v3;
-
-        //            a1 = new KAttribute
-        //            {
-        //                KAttributeId = NewGuid(),
-        //                Key = "SUBSISTEMA",
-        //                Name = "Subistema",
-        //                KAttributeDataType = EnumKAttributeDataType.dtTabulate,
-        //                Order = 1,
-        //            };
-
-        //            a2 = new KAttribute
-        //            {
-        //                KAttributeId = NewGuid(),
-        //                Key = "COMENTARIO",
-        //                Name = "Comentario",
-        //                KAttributeDataType = EnumKAttributeDataType.dtString,
-        //                Order = 2,
-        //            };
-
-        //            v1 = new KAttributeTabulatedValue
-        //            {
-        //                KAttributeTabulatedValueId = NewGuid(),
-        //                Key = "KEY1",
-        //                Value = "User managment",
-        //                Order = 1
-        //            };
-
-        //            v2 = new KAttributeTabulatedValue
-        //            {
-        //                KAttributeTabulatedValueId = NewGuid(),
-        //                Key = "KEY2",
-        //                Value = "Foders managment",
-        //                Order = 2
-        //            };
-
-        //            v3 = new KAttributeTabulatedValue
-        //            {
-        //                KAttributeTabulatedValueId = NewGuid(),
-        //                Key = "KEY3",
-        //                Value = "Notes managment",
-        //                Order = 3
-        //            };
-
-        //            a1.KAttributeTabulatedValues = new List<KAttributeTabulatedValue>();
-
-        //            a1.KAttributeTabulatedValues.Add(v1);
-        //            a1.KAttributeTabulatedValues.Add(v2);
-        //            a1.KAttributeTabulatedValues.Add(v3);
-
-        //            context.KAttributes.Add(a1);
-        //            context.KAttributes.Add(a2);
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        res = ex.Message;
-        //    }
-        //    return res;
-        //}
-
-        //public string TestCreateFoldersWithContext(string conection, string provider)
-        //{
-        //    string res = "Create Folder OK (Context)";
-        //    var conn = DbProviderFactories.GetFactory(provider).CreateConnection();
-        //    conn.ConnectionString = conection;
-
-        //    try
-        //    {
-        //        using (KntDbContext context = new KntDbContext(conn))
-        //        {
-        //            Folder f1, f2, f3;
-        //            KAttribute a1;
-        //            User u1;
-
-        //            a1 = context.KAttributes.Where(a => a.Key == "SUBSISTEMA").First();
-        //            u1 = context.Users.Where(u => u.UserName == "afumfer").First();
-
-        //            f1 = new Folder
-        //            {
-        //                FolderId = NewGuid(),
-        //                FolderNumber = 1,
-        //                CreationDateTime = DateTime.Now,
-        //                ModificationDateTime = DateTime.Now,
-        //                Name = "Parent Folder 1"
-        //            };
-
-        //            f2 = new Folder
-        //            {
-        //                FolderId = NewGuid(),
-        //                FolderNumber = 2,
-        //                CreationDateTime = DateTime.Now,
-        //                ModificationDateTime = DateTime.Now,
-        //                Name = "Child Folder 1",
-        //                ParentFolder = f1,
-        //            };
-
-        //            f3 = new Folder
-        //            {
-        //                FolderId = NewGuid(),
-        //                FolderNumber = 3,
-        //                CreationDateTime = DateTime.Now,
-        //                ModificationDateTime = DateTime.Now,
-        //                Name = "Child Folder 1",
-        //            };
-
-        //            context.Folders.Add(f1);
-        //            context.Folders.Add(f2);
-        //            context.Folders.Add(f3);
-
-        //            f1.ChildsFolders.Add(f3);
-
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        res = ex.Message;
-        //    }
-        //    return res;
-        //}
-
-        //public string TestCreateNotesWithContext(string conection, string provider)
-        //{
-        //    string res = "Create Notes OK (Context)";
-        //    var conn = DbProviderFactories.GetFactory(provider).CreateConnection();
-        //    conn.ConnectionString = conection;
-
-        //    try
-        //    {
-        //        using (KntDbContext context = new KntDbContext(conn))
-        //        {
-        //            Note n1, n2, n3;
-        //            User u1;
-        //            Folder f1, f2;
-        //            KAttribute a1, a2;
-
-
-        //            u1 = context.Users.Where(u => u.UserName == "afumfer").First();
-        //            f1 = context.Folders.Where(f => f.FolderNumber == 2).First();
-        //            f2 = context.Folders.Where(f => f.FolderNumber == 3).First();
-        //            a1 = context.KAttributes.Where(a => a.Key == "SUBSISTEMA").First();
-        //            a2 = context.KAttributes.Where(a => a.Key == "COMENTARIO").First();
-
-        //            n1 = new Note
-        //            {
-        //                NoteId = NewGuid(),
-        //                NoteNumber = 1,
-        //                Topic = "Note number 1",
-        //                CreationDateTime = DateTime.Now,
-        //                ModificationDateTime = DateTime.Now,
-        //                Description = "Description 111, note 1",
-        //                Folder = f1,
-        //                KAttributes = new List<NoteKAttribute>(),
-        //                Resources = new List<Resource>(),
-        //                Tasks = new List<NoteTask>(),
-        //                Windows = new List<Window>(),
-        //                KMessages = new List<KMessage>(),
-        //                From = new List<TraceNote>(),
-        //                To = new List<TraceNote>()
-        //            };
-        //            context.Notes.Add(n1);
-
-        //            n2 = new Note
-        //            {
-        //                NoteId = NewGuid(),
-        //                NoteNumber = 2,
-        //                Topic = "Note number 2",
-        //                CreationDateTime = DateTime.Now,
-        //                ModificationDateTime = DateTime.Now,
-        //                Description = "Description 222, note 2",
-        //                Folder = f1,
-        //                KAttributes = new List<NoteKAttribute>(),
-        //                Resources = new List<Resource>(),
-        //                Tasks = new List<NoteTask>(),
-        //                Windows = new List<Window>(),
-        //                KMessages = new List<KMessage>(),
-        //                From = new List<TraceNote>(),
-        //                To = new List<TraceNote>()
-        //            };
-        //            context.Notes.Add(n2);
-
-        //            n3 = new Note
-        //            {
-        //                NoteId = NewGuid(),
-        //                NoteNumber = 3,
-        //                Topic = "Note number 3",
-        //                Script = "printline Version();",
-        //                CreationDateTime = DateTime.Now,
-        //                ModificationDateTime = DateTime.Now,
-        //                Description = "Description 333, note 3",
-        //                Folder = f2,
-        //                KAttributes = new List<NoteKAttribute>(),
-        //                Resources = new List<Resource>(),
-        //                Tasks = new List<NoteTask>(),
-        //                Windows = new List<Window>(),
-        //                KMessages = new List<KMessage>(),
-        //                From = new List<TraceNote>(),
-        //                To = new List<TraceNote>()
-        //            };
-        //            context.Notes.Add(n3);
-
-        //            #region Colecs 
-
-        //            n1.KAttributes.Add(new NoteKAttribute
-        //            {
-        //                NoteKAttributeId = NewGuid(),
-        //                KAttribute = a1,
-        //                Value = "Valuer for atribute 1"
-        //            });
-
-        //            n1.KAttributes.Add(new NoteKAttribute
-        //            {
-        //                NoteKAttributeId = NewGuid(),
-        //                KAttribute = a2,
-        //                Value = "This is a comment"
-        //            });
-
-        //            n1.Resources.Add(new Resource
-        //            {
-        //                ResourceId = NewGuid(),
-        //                Description = "Resource 1 for note 1",
-        //                Path = @"C:\Tmp",
-        //                FileMimeType = "text"
-        //            });
-
-        //            n1.Tasks.Add(new NoteTask
-        //            {
-        //                NoteTaskId = NewGuid(),
-        //                CreationDateTime = DateTime.Now,
-        //                ModificationDateTime = DateTime.Now,
-        //                Description = "Task descripcion for note 1",
-        //                DifficultyLevel = 1,
-        //                User = u1,
-        //            });
-
-        //            n1.Windows.Add(new Window
-        //            {
-        //                WindowId = NewGuid(),
-        //                User = u1,
-        //                Width = 2000,
-        //                Height = 2000,
-        //                FontSize = 11,
-        //                Visible = true,
-        //                ForeColor = 12648447,
-        //                TitleColor = 8454143
-        //            });
-
-        //            #endregion
-
-        //            n1.To.Add(new TraceNote
-        //            {
-        //                TraceNoteId = NewGuid(),
-        //                To = n2,
-        //                Order = 1,
-        //                Weight = 0.1
-        //            });
-
-        //            n1.To.Add(new TraceNote
-        //            {
-        //                TraceNoteId = NewGuid(),
-        //                To = n3,
-        //                Order = 1,
-        //                Weight = 0.1
-        //            });
-
-        //            n2.To.Add(new TraceNote
-        //            {
-        //                TraceNoteId = NewGuid(),
-        //                To = n3,
-        //                Order = 1,
-        //                Weight = 0.1
-        //            });
-
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        res = ex.Message;
-        //    }
-        //    return res;
-        //}
-
-        //public string TestCreateMessagesWithContext(string conection, string provider)
-        //{
-        //    string res = "Create KMessages OK (Context)";
-        //    var conn = DbProviderFactories.GetFactory(provider).CreateConnection();
-        //    conn.ConnectionString = conection;
-
-        //    try
-        //    {
-        //        using (KntDbContext context = new KntDbContext(conn))
-        //        {
-        //            KMessage m1;
-        //            Note n1, n3;
-        //            User u1;
-
-        //            n1 = context.Notes.Where(n => n.NoteNumber == 1).First();
-        //            n3 = context.Notes.Where(n => n.NoteNumber == 3).First();
-        //            u1 = context.Users.Where(u => u.UserName == "afumfer").First();
-
-        //            m1 = new KMessage
-        //            {
-        //                KMessageId = NewGuid(),
-        //                AlarmDateTime = DateTime.Now.AddDays(20),
-        //                NotificationType = EnumNotificationType.PostIt,
-        //                AlarmType = EnumAlarmType.Standard,
-        //                Content = "This is a message for user 1",
-        //                AlarmActivated = true,
-        //                User = u1,
-        //                Note = n1
-        //            };
-
-        //            context.KMessages.Add(m1);
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        res = ex.Message;
-        //    }
-        //    return res;
-        //}
-
-        //public string TestCreateEventsWithContext(string conection, string provider)
-        //{
-        //    string res = "Create KEvents OK (Context)";
-        //    var conn = DbProviderFactories.GetFactory(provider).CreateConnection();
-        //    conn.ConnectionString = conection;
-
-        //    try
-        //    {
-        //        using (KntDbContext context = new KntDbContext(conn))
-        //        {
-        //            KEvent e1;
-        //            Note n1, n3;
-        //            User u1;
-
-        //            n1 = context.Notes.Where(n => n.NoteNumber == 1).First();
-        //            n3 = context.Notes.Where(n => n.NoteNumber == 3).First();
-        //            u1 = context.Users.Where(u => u.UserName == "afumfer").First();
-
-        //            e1 = new KEvent
-        //            {
-        //                KEventId = NewGuid(),
-        //                EntityId = n1.NoteId,
-        //                EntityName = "Note",
-        //                EventType = EnumEventType.OnSaveActionDefault,
-        //                NoteScriptId = n3.NoteId,
-        //                PropertyName = "",
-        //                PropertyValue = "",
-        //            };
-
-        //            context.KEvents.Add(e1);
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        res = ex.Message;
-        //    }
-        //    return res;
-        //}
-
-
-
-
+        public static void Seed(this ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<SystemValue>().HasData(
+                new SystemValue { SystemValueId = Guid.NewGuid(), Key = "APP_VERSION", Value = "0.0.1" },
+                new SystemValue { SystemValueId = Guid.NewGuid(), Key = "DB_VERSION", Value = "0.0.1" }
+            );
+
+            var idUser1 = Guid.NewGuid();
+            var idUser2 = Guid.NewGuid();
+
+            var passwordSaltDemo = Convert.FromBase64String("rS2A7TGIHC1wXYhvUIZYSAOa/AME+q77z2LMOfEAjw6oERZ3G0+LgrGA5ff+CbpjpwIrpMoyNmoVgTLlKl/KJ+BHMsd8ovMemsiEgS+FLGkPSzb/8kkOTcEgYDfDv9s1WTgAtduT5vgVWWz9XrsqbH6C4yE+I8rhBOc+i/Y3+B8=");
+            var passwordHashDemo = Convert.FromBase64String("+OJpwQUcwmvI9gnmyqJO7L1TGzX6CpyniZgFC1zFnTmeRfbTJJ6vZBVm3eo84YclL5mlhaqh7iGPHF2fEDZZxw==");
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    UserId = idUser1,
+                    UserName = "adminKNote",
+                    FullName = "Admin KNote",
+                    EMail = "admin@mydomain.com",
+                    RoleDefinition = "Admin",
+                    PasswordSalt = passwordSaltDemo,
+                    PasswordHash = passwordHashDemo
+                },
+                new User
+                {
+                    UserId = idUser2,
+                    UserName = "user1",
+                    FullName = "user1 KNote",
+                    EMail = "user1@mydomain.com",
+                    RoleDefinition = "Public",
+                    PasswordSalt = passwordSaltDemo,
+                    PasswordHash = passwordHashDemo
+                }
+            );
+
+            var idFolder1 = Guid.NewGuid();
+            var idFolder2 = Guid.NewGuid();
+            var idFolder3 = Guid.NewGuid();
+
+            modelBuilder.Entity<Folder>().HasData(
+                new Folder
+                {
+                    FolderId = idFolder1,
+                    FolderNumber = 1,
+                    CreationDateTime = DateTime.Now,
+                    ModificationDateTime = DateTime.Now,
+                    Name = "Home"
+                },
+                new Folder
+                {
+                    FolderId = idFolder2,
+                    FolderNumber = 2,
+                    CreationDateTime = DateTime.Now,
+                    ModificationDateTime = DateTime.Now,
+                    Name = "KNote Documentation",
+                    //ParentId = idFolder1
+                },
+                new Folder
+                {
+                    FolderId = idFolder3,
+                    FolderNumber = 3,
+                    CreationDateTime = DateTime.Now,
+                    ModificationDateTime = DateTime.Now,
+                    Name = "Temp",
+                }
+            );
+
+            modelBuilder.Entity<Note>().HasData(
+                new Note
+                {
+                    NoteId = Guid.NewGuid(),
+                    NoteNumber = 3,
+                    Topic = "Version History",
+                    Script = "printline Version();",
+                    CreationDateTime = DateTime.Now,
+                    ModificationDateTime = DateTime.Now,
+                    Description = "Version History .... TODO: ..... ",
+                    FolderId = idFolder2,
+                    Priority = 80
+                },
+                new Note
+                {
+                    NoteId = Guid.NewGuid(),
+                    NoteNumber = 2,
+                    Topic = "KNote documentation",
+                    CreationDateTime = DateTime.Now,
+                    ModificationDateTime = DateTime.Now,
+                    Description = "KNote documentation .... TODO: ....",
+                    FolderId = idFolder1,
+                    Priority = 90
+                },
+                new Note
+                {
+                    NoteId = Guid.NewGuid(),
+                    NoteNumber = 1,
+                    Topic = "Wellcome to KNote",
+                    CreationDateTime = DateTime.Now,
+                    ModificationDateTime = DateTime.Now,
+                    Description = "Wellcome to KNote .... TODO: ....",
+                    FolderId = idFolder1,
+                    Priority = 100
+                }
+            );
+        }
     }
 }
