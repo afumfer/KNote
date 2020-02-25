@@ -1,0 +1,75 @@
+﻿@inject IKntClientDataService  dataService
+
+@if (ShowDialog)
+{
+    <div class="modal-backdrop show"></div>
+
+    <div class="modal fade show" id="exampleModal" tabindex="-1"
+         role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true" style="display: block;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">@Title</h5>
+                    <button @onclick="OnCancel" type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="overflow-auto" style="height:350px">
+                        <KntFoldersTreeView FoldersInfo="@FoldersTree"
+                                            FolderSelected="OnFolderSelected">
+                        </KntFoldersTreeView>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @onclick="OnCancel" type="button" class="btn btn-secondary"
+                            data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button @onclick="_onConfirm" type="button" class="btn btn-primary">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Title { get; set; } = "KNote Folder selector";
+    [Parameter] public List<FolderInfoDto> FoldersTree { get; set; }    
+    [Parameter] public EventCallback<FolderInfoDto> OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private bool ShowDialog = false;
+    private FolderInfoDto folderSelected;
+
+    public void Show() => ShowDialog = true;
+    public void Hide() => ShowDialog = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (FoldersTree == null)
+        {
+            var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
+            FoldersTree = res.Response.Entity;
+
+            if (FoldersTree?.Count > 0)
+            {
+                var f = FoldersTree.Select(x => x).FirstOrDefault();
+                f.Selected = true;
+                OnFolderSelected(f);
+            }
+        }
+    }
+
+    private void OnFolderSelected(FolderInfoDto f)
+    {
+        folderSelected = f;
+    }
+
+    private async Task _onConfirm()
+    {
+        await OnConfirm.InvokeAsync(folderSelected);
+    }
+}

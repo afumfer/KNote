@@ -6,7 +6,14 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+<button class="btn btn-primary" @onclick="OnFolderSelectorTest">Folder selector test</button>
+
 <hr />
+
+@if(folderSelected != null)
+{
+    <p>@folderSelected.Name </p>
+}
 
 <p>AppState (CascadingParameter): @appState.AppMode</p>
 
@@ -22,23 +29,32 @@
 
 <hr />
 
+<KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancel" OnConfirm="onConfirm"></KntFolderSelector>
 
 @code {
-    private int currentCount = 0;
-
     [CascadingParameter] protected AppState appState { get; set; }
     [CascadingParameter] private Task<AuthenticationState> athenticationState { get; set; }
-    
+
+    private int currentCount = 0;
+    private KntFolderSelector kntFolderSelector;
+
+    private FolderInfoDto folderSelected;
+
     private async Task IncrementCount()
     {
         var authState = await athenticationState;
 
         var user = authState.User;
 
-        if(user.Identity.IsAuthenticated)
+        if (user.Identity.IsAuthenticated)
             currentCount++;
-        else 
+        else
             currentCount--;
+    }
+
+    private void OnFolderSelectorTest()
+    {
+        kntFolderSelector.Show();
     }
 
     #region  AppState changed subscription 
@@ -51,6 +67,17 @@
     public void Dispose()
     {
         appState.OnChange -= StateHasChanged;
+    }
+
+    private void onConfirm(FolderInfoDto f)
+    {
+        folderSelected = f;
+        kntFolderSelector.Hide();
+    }
+
+    private void onCancel()
+    {
+        kntFolderSelector.Hide();
     }
 
     #endregion 
