@@ -27,7 +27,7 @@ namespace KNote.Shared.Dto
 
         public int Priority { get; set; }
 
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = "* Folder is required ")]
         public Guid? FolderId { get; set; }
 
         public Guid? NoteTypeId { get; set; }
@@ -50,5 +50,8 @@ namespace KNote.Shared.Dto
 
             set { }
         }
+
+        [Required(ErrorMessage = "* Attribute {0} is required (for internal purpose)")]
+        public string ControlEdit { get; set; } = "Edit";
     }
 }

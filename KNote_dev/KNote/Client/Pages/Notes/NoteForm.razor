@@ -65,8 +65,8 @@
 
     <!-- Hide controls -->
     <div class="invisible">
-            <input type="hidden" class="form-control" @bind="@Note.FolderId" />
-            <ValidationMessage For="@(() => Note.FolderId)" />
+            <input type="hidden" class="form-control" @bind="@Note.ControlEdit" />
+            <ValidationMessage For="@(() => Note.ControlEdit)" />
     </div>
 
     <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
@@ -80,29 +80,28 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
 
-    private KntFolderSelector kntFolderSelector;
-    private Guid? folderIdOld;
+    private KntFolderSelector kntFolderSelector;    
 
     #region Managment FolderSelector
 
     private void OnFolderSelector()
     {
-        folderIdOld = Note?.FolderId;
-        Note.FolderId = null;
+        Note.ControlEdit = null;
         kntFolderSelector.Show();
     }
 
     private void onConfirmFolderSelector(FolderInfoDto f)
     {
+        Note.ControlEdit = "Edit";
         Note.FolderDto = f.GetSimpleDto<FolderDto>();
         Note.FolderId = f.FolderId;
         kntFolderSelector.Hide();
     }
 
     private void onCancelFolderSelector()
-    {        
+    {
         kntFolderSelector.Hide();
-        Note.FolderId = folderIdOld;
+        Note.ControlEdit = "Edit";
     }
 
     #endregion 

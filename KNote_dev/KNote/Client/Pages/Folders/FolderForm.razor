@@ -20,11 +20,30 @@
         <InputText class="form-control" @bind-Value="@Folder.OrderNotes" />
         <ValidationMessage For="@(() => Folder.OrderNotes)" />
     </div>
-    <div class="form-group">
+    @*<div class="form-group">
         <label>ParentId:</label>
         <input class="form-control" @bind="@Folder.ParentId" />
         <ValidationMessage For="@(() => Folder.ParentId)" />
+    </div>*@
+
+    <div class="form-group">
+        <label>Parent folder:</label>
+        <div class="input-group mb-3">
+            <input type="text" disabled class="form-control" @bind="@nameParent" />
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" @onclick="@OnResetParentFolder"
+                        data-toggle="tooltip" title="Reset parent folder">
+                    X
+                </button>
+                <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
+                        data-toggle="tooltip" title="Select folder">
+                    ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <ValidationMessage For="@(() => Folder.ParentId)" />
     </div>
+
 
     <button class="btn btn-success" type="submit">Save changes</button>
 
@@ -48,6 +67,23 @@
 
     private KntFolderSelector kntFolderSelector;
 
+    private string nameParent = "(root)";
+
+    protected override void OnInitialized()
+    {
+        if(Folder.ParentFolderDto != null)
+            nameParent = Folder.ParentFolderDto.Name;
+
+        base.OnInitialized();
+    }
+
+    private void OnResetParentFolder()
+    {
+        Folder.ParentId = null;
+        nameParent = "(root)";
+        //Folder.ParentFolderDto.Name = "";
+    }
+
     #region Managment FolderSelector
 
     private void OnFolderSelector()
@@ -58,9 +94,10 @@
 
     private void onConfirmFolderSelector(FolderInfoDto f)
     {
-        //Note.FolderDto = f.GetSimpleDto<FolderDto>();
-        //Note.FolderId = f.FolderId;
         Folder.ControlEdit = "Edit";
+        Folder.ParentId = f.FolderId;
+        Folder.ParentFolderDto = f.GetSimpleDto<FolderDto>();
+        nameParent = Folder.ParentFolderDto.Name;
         kntFolderSelector.Hide();
     }
 
@@ -71,7 +108,6 @@
     }
 
     #endregion 
-
 
 }
 
