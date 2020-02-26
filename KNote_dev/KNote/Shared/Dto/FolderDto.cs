@@ -35,9 +35,17 @@ namespace KNote.Shared.Dto
 
         public Guid? ParentId { get; set; }
 
+        public FolderDto ParentFolderDto { get; set; } // TODO: no hacer esto =>     = new FolderDto();
+
+        public List<FolderInfoDto> ChildFolders { get; set; } = new List<FolderInfoDto>();
+
+        #region Utils for views
         // TODO: Icon es provisional, 
         public string Icon { get; set; } = "fa-folder";
-        
-        public List<FolderInfoDto> ChildFolders { get; set; } = new List<FolderInfoDto>();
+
+        [Required(ErrorMessage = "* Attribute {0} is required (for internal purpose)")]
+        public string ControlEdit { get; set; } = "Edit";
+
+        #endregion 
     }
 }

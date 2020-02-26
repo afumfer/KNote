@@ -21,14 +21,11 @@
 
         var httpResponse = await dataService.Post("api/folders", folder);
         if (httpResponse.Error)
-        {
-            var body = await httpResponse.GetBody();
-            //await mostrarMensajes.MostrarMensajeError(body);
-            Console.WriteLine(body);
+        {            
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());             
         }
         else
-        {
-            Console.WriteLine("Folder created !!");
+        {            
             navigationManger.NavigateTo("folders");
         }
     }

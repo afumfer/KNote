@@ -99,9 +99,15 @@ namespace KNote.DomainModel.Services
             try
             {
                 var resRep = _repository.Folders.Get((object)folderId);
-                
+                // KNote template ... load here aditionals properties for FolderDto
+                resRep = _repository.Folders.LoadReference(resRep.Entity, n => n.ParentFolder);
+
+                // Map to dto
                 resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
-                // KNote template ... load here aditionals properties for UserDto
+                //resService.Entity.FolderDto = resRep.Entity?.Folder.GetSimpleDto<FolderDto>();
+                resService.Entity.ParentFolderDto = new FolderDto();
+                resService.Entity.ParentFolderDto = resRep.Entity?.ParentFolder?.GetSimpleDto<FolderDto>();
+
                 // ... 
 
                 resService.ErrorList = resRep.ErrorList;

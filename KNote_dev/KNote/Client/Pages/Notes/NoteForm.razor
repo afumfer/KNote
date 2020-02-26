@@ -1,30 +1,45 @@
 ﻿<EditForm Model="Note" OnValidSubmit="OnValidSubmit">
+    
     <DataAnnotationsValidator></DataAnnotationsValidator>
+
     <div class="form-group">
         <label>Topic:</label>
         <InputText class="form-control" @bind-Value="@Note.Topic" />
         <ValidationMessage For="@(() => Note.Topic)" />
     </div>
+
     <div class="form-group">
-        <label>Folder Id:</label>
-        <input class="form-control" @bind="@Note.FolderId" />
+        <label>Folder:</label>
+        <div class="input-group mb-3">
+            <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
+                        data-toggle="tooltip" title="Select folder">
+                    ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
         <ValidationMessage For="@(() => Note.FolderId)" />
     </div>
+
     <div class="form-group">
         <label>Tags:</label>
         <InputText class="form-control" @bind-Value="@Note.Tags" />
         <ValidationMessage For="@(() => Note.Tags)" />
     </div>
+
     <div class="form-group form-markdown">
         <InputMarkdown @bind-Value="@Note.Description"
                        For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
 
     </div>
+
     <div class="form-group">
         <label>Priority:</label>
         <InputNumber class="form-control" @bind-Value="@Note.Priority" />
         <ValidationMessage For="@(() => Note.Priority)" />
     </div>
+
     <div class="form-group">
         <label>Note type:</label>
         <select class="form-control" @bind="@Note.NoteTypeId">
@@ -44,11 +59,52 @@
     </div>
 
     <button class="btn btn-success" type="submit">Save changes</button>
+
+    <p> </p>
+    <hr />
+
+    <!-- Hide controls -->
+    <div class="invisible">
+            <input type="hidden" class="form-control" @bind="@Note.FolderId" />
+            <ValidationMessage For="@(() => Note.FolderId)" />
+    </div>
+
+    <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
+
 </EditForm>
+
+
 
 @code {
     [Parameter] public NoteDto Note { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
+
+    private KntFolderSelector kntFolderSelector;
+    private Guid? folderIdOld;
+
+    #region Managment FolderSelector
+
+    private void OnFolderSelector()
+    {
+        folderIdOld = Note?.FolderId;
+        Note.FolderId = null;
+        kntFolderSelector.Show();
+    }
+
+    private void onConfirmFolderSelector(FolderInfoDto f)
+    {
+        Note.FolderDto = f.GetSimpleDto<FolderDto>();
+        Note.FolderId = f.FolderId;
+        kntFolderSelector.Hide();
+    }
+
+    private void onCancelFolderSelector()
+    {        
+        kntFolderSelector.Hide();
+        Note.FolderId = folderIdOld;
+    }
+
+    #endregion 
 
 }

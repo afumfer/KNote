@@ -25,13 +25,53 @@
         <input class="form-control" @bind="@Folder.ParentId" />
         <ValidationMessage For="@(() => Folder.ParentId)" />
     </div>
+
     <button class="btn btn-success" type="submit">Save changes</button>
+
+    <p> </p>
+    <hr />
+
+    <!-- Hide controls -->
+    <div class="invisible">
+        <input type="hidden" class="form-control" @bind="@Folder.ControlEdit" />
+        <ValidationMessage For="@(() => Folder.ControlEdit)" />
+    </div>
+
+    <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
+
 </EditForm>
 
 @code {
 
     [Parameter] public FolderDto Folder { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    private KntFolderSelector kntFolderSelector;
+
+    #region Managment FolderSelector
+
+    private void OnFolderSelector()
+    {
+        Folder.ControlEdit = null;
+        kntFolderSelector.Show();
+    }
+
+    private void onConfirmFolderSelector(FolderInfoDto f)
+    {
+        //Note.FolderDto = f.GetSimpleDto<FolderDto>();
+        //Note.FolderId = f.FolderId;
+        Folder.ControlEdit = "Edit";
+        kntFolderSelector.Hide();
+    }
+
+    private void onCancelFolderSelector()
+    {
+        kntFolderSelector.Hide();
+        Folder.ControlEdit = "Edit";
+    }
+
+    #endregion 
+
 
 }
 

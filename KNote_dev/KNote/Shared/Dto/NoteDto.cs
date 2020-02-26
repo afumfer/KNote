@@ -27,13 +27,14 @@ namespace KNote.Shared.Dto
 
         public int Priority { get; set; }
 
-        public Guid FolderId { get; set; }
+        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        public Guid? FolderId { get; set; }
 
         public Guid? NoteTypeId { get; set; }
 
         public List<NoteKAttributeDto> KAttributesDto { get; set; } = new List<NoteKAttributeDto>();
 
-        public FolderDto FolderDto { get; set; }
+        public FolderDto FolderDto { get; set; } = new FolderDto();
 
         // TODO: Eliminar la siguiente propiedad, se deberá implementar en ContentType
         public bool HtmlFormat

@@ -101,10 +101,9 @@ namespace KNote.DomainModel.Services
         {
             var resService = new Result<NoteDto>();
             try
-            {
-                // Option 1 -----------------------
+            {                
                 var resRep = await _repository.Notes.GetAsync((object)noteId);
-                // KNote template ... load here aditionals properties for UserDto
+                // KNote template ... load here aditionals properties for NoteDto
                 resRep = _repository.Notes.LoadCollection(resRep.Entity, u => u.KAttributes);
                 resRep = _repository.Notes.LoadReference(resRep.Entity, n => n.Folder);
 
@@ -116,7 +115,8 @@ namespace KNote.DomainModel.Services
 
                 resService.ErrorList = resRep.ErrorList;
 
-                //// Option 2 ----------------------- 
+                #region Option 2 for load entities
+                // TODO: !!! eliminar este código de pruebas. 
                 //var entity = _repository.Notes.DbSet.Where(n => n.NoteId == noteId)
                 //    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
                 //    .Include(n => n.NoteTasks)
@@ -126,6 +126,7 @@ namespace KNote.DomainModel.Services
                 //    .Include(n => n.NoteType)
                 //    .FirstOrDefault();
                 //resService.Entity = entity?.GetSimpleDto<NoteDto>();
+                #endregion 
 
             }
             catch (Exception ex)
