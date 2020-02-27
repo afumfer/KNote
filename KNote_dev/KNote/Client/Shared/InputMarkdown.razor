@@ -3,19 +3,38 @@
 @typeparam TValue
 
 <div>
-    <label>@Label</label>
-    <div>
-        <InputTextArea @bind-Value="CurrentValue" />
-        <ValidationMessage For="For" />
-    </div>
-</div>
-<div>
-    <label>@Label (preview):</label>
-    <div class="markdown-container" style="overflow: auto;">
-        <ViewMarkdown MarkdownContent="@CurrentValue">
 
-        </ViewMarkdown>
-    </div>
+    <label>@labelMode</label>
+    <!-- <span class="float-left"> -->
+    <span>
+        <button class="btn btn-sm btn-light mx-1"
+                @onclick="EditMode"
+                data-toggle="tooltip" title="Show edit mode">
+            <i class="fa fa-edit">Edit</i>
+        </button>
+        <button class="btn btn-sm btn-light mx-1"
+                @onclick="ViewMode"
+                data-toggle="tooltip" title="Show view mode">
+            <i class="fa fa-edit">View</i>
+        </button>
+    </span>
+
+    @if (editMode)
+    {
+        <div>
+            <InputTextArea @bind-Value="CurrentValue" />
+            <ValidationMessage For="For" />
+        </div>
+    }
+    else
+    {
+        <div class="markdown-container" style="overflow: auto;">
+            <ViewMarkdown MarkdownContent="@CurrentValue">
+
+            </ViewMarkdown>
+        </div>
+    }
+
 </div>
 
 
@@ -23,4 +42,25 @@
 
     [Parameter] public Expression<Func<TValue>> For { get; set; }
     [Parameter] public string Label { get; set; }
+
+    private string labelMode;
+    private bool editMode = true;
+
+    protected override void OnInitialized()
+    {
+        labelMode = Label + " (edit mode): ";
+        base.OnInitialized();
+    }
+
+    private void EditMode()
+    {
+        editMode = true;
+        labelMode = Label + " (markdown edit mode): ";
+    }
+
+    private void ViewMode()
+    {
+        editMode = false;
+        labelMode = Label + " (preview mode): ";
+    }
 }

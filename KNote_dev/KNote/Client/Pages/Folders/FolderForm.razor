@@ -1,30 +1,39 @@
-﻿<EditForm Model="Folder" OnValidSubmit="OnValidSubmit">
+﻿@inject IShowMessages showMessages
+
+<EditForm Model="Folder" Context="formContext">
+
     <DataAnnotationsValidator></DataAnnotationsValidator>
+
     <div class="form-group">
-        <label>Name:</label>
-        <InputText class="form-control" @bind-Value="@Folder.Name" />
+        <label>Topic:</label>
+        <div class="input-group">
+            <InputText class="form-control" @bind-Value="@Folder.Name" />
+            <div class="input-group-append">
+                <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Folder number (automatically assigned)">
+                    #@Folder.FolderNumber
+                </label>
+            </div>
+        </div>
         <ValidationMessage For="@(() => Folder.Name)" />
     </div>
+
     <div class="form-group">
         <label>Tags:</label>
         <InputText class="form-control" @bind-Value="@Folder.Tags" />
         <ValidationMessage For="@(() => Folder.Tags)" />
     </div>
+
     <div class="form-group">
         <label>Order:</label>
         <InputNumber class="form-control" @bind-Value="@Folder.Order" />
         <ValidationMessage For="@(() => Folder.Order)" />
     </div>
+
     <div class="form-group">
         <label>Order notes:</label>
         <InputText class="form-control" @bind-Value="@Folder.OrderNotes" />
         <ValidationMessage For="@(() => Folder.OrderNotes)" />
     </div>
-    @*<div class="form-group">
-        <label>ParentId:</label>
-        <input class="form-control" @bind="@Folder.ParentId" />
-        <ValidationMessage For="@(() => Folder.ParentId)" />
-    </div>*@
 
     <div class="form-group">
         <label>Parent folder:</label>
@@ -43,18 +52,11 @@
         </div>
         <ValidationMessage For="@(() => Folder.ParentId)" />
     </div>
-
-
-    <button class="btn btn-success" type="submit">Save changes</button>
+    
+    <button class="btn btn-success" @onclick="(() => Save(formContext))">Save changes</button>
 
     <p> </p>
     <hr />
-
-    <!-- Hide controls -->
-    <div class="invisible">
-        <input type="hidden" class="form-control" @bind="@Folder.ControlEdit" />
-        <ValidationMessage For="@(() => Folder.ControlEdit)" />
-    </div>
 
     <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
 
@@ -71,30 +73,33 @@
 
     protected override void OnInitialized()
     {
-        if(Folder.ParentFolderDto != null)
+        if (Folder.ParentFolderDto != null)
             nameParent = Folder.ParentFolderDto.Name;
 
         base.OnInitialized();
     }
 
-    private void OnResetParentFolder()
+    protected async Task Save(EditContext formContext)
     {
-        Folder.ParentId = null;
-        nameParent = "(root)";
-        //Folder.ParentFolderDto.Name = "";
-    }
+        bool formIsValid = formContext.Validate();
+        if (formIsValid == false)
+        {
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+            return;
+        }
 
+        await OnValidSubmit.InvokeAsync(formContext);
+    }
+  
     #region Managment FolderSelector
 
     private void OnFolderSelector()
     {
-        Folder.ControlEdit = null;
         kntFolderSelector.Show();
     }
 
     private void onConfirmFolderSelector(FolderInfoDto f)
-    {
-        Folder.ControlEdit = "Edit";
+    {     
         Folder.ParentId = f.FolderId;
         Folder.ParentFolderDto = f.GetSimpleDto<FolderDto>();
         nameParent = Folder.ParentFolderDto.Name;
@@ -103,11 +108,16 @@
 
     private void onCancelFolderSelector()
     {
-        kntFolderSelector.Hide();
-        Folder.ControlEdit = "Edit";
+        kntFolderSelector.Hide();     
     }
 
-    #endregion 
+    private void OnResetParentFolder()
+    {
+        Folder.ParentId = null;
+        nameParent = "(root)";        
+    }
+
+    #endregion
 
 }
 

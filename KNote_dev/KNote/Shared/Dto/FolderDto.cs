@@ -43,8 +43,9 @@ namespace KNote.Shared.Dto
         // TODO: Icon es provisional, 
         public string Icon { get; set; } = "fa-folder";
 
-        [Required(ErrorMessage = "* Attribute {0} is required (for internal purpose)")]
-        public string ControlEdit { get; set; } = "Edit";
+        // !!! Basura
+        //[Required(ErrorMessage = "* Attribute {0} is required (for internal purpose)")]
+        //public string ControlEdit { get; set; } = "Edit";
 
         #endregion 
     }

@@ -50,8 +50,5 @@ namespace KNote.Shared.Dto
 
             set { }
         }
-
-        [Required(ErrorMessage = "* Attribute {0} is required (for internal purpose)")]
-        public string ControlEdit { get; set; } = "Edit";
     }
 }

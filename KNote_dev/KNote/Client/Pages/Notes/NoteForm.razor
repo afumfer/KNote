@@ -1,16 +1,25 @@
-﻿<EditForm Model="Note" OnValidSubmit="OnValidSubmit">
-    
+﻿@inject IShowMessages showMessages
+
+<EditForm Model="Note" Context="formContext">
+
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <div class="form-group">
-        <label>Topic:</label>
-        <InputText class="form-control" @bind-Value="@Note.Topic" />
+    <div class="form-group row">
+        <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
+        <div class="input-group col-sm-11" id="atrTopic">
+            <InputText class="form-control" @bind-Value="@Note.Topic" />
+            <div class="input-group-append">
+                <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Note number (automatically assigned)">
+                    #@Note.NoteNumber
+                </label>
+            </div>
+        </div>
         <ValidationMessage For="@(() => Note.Topic)" />
     </div>
 
-    <div class="form-group">
-        <label>Folder:</label>
-        <div class="input-group mb-3">
+    <div class="form-group row">
+        <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
+        <div class="input-group col-sm-11"  id="atrFolder">
             <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
@@ -30,7 +39,7 @@
 
     <div class="form-group form-markdown">
         <InputMarkdown @bind-Value="@Note.Description"
-                       For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
+                        For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
 
     </div>
 
@@ -58,41 +67,44 @@
         </div>
     </div>
 
-    <button class="btn btn-success" type="submit">Save changes</button>
+    <button class="btn btn-success" @onclick="(() => Save(formContext))">Save changes</button>
 
     <p> </p>
     <hr />
 
-    <!-- Hide controls -->
-    <div class="invisible">
-            <input type="hidden" class="form-control" @bind="@Note.ControlEdit" />
-            <ValidationMessage For="@(() => Note.ControlEdit)" />
-    </div>
-
     <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
 
 </EditForm>
-
-
 
 @code {
     [Parameter] public NoteDto Note { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
 
-    private KntFolderSelector kntFolderSelector;    
+    private KntFolderSelector kntFolderSelector;
+
+
+    protected async Task Save(EditContext formContext)
+    {
+        bool formIsValid = formContext.Validate();
+        if (formIsValid == false)
+        {
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+            return;
+        }
+
+        await OnValidSubmit.InvokeAsync(formContext);
+    }
 
     #region Managment FolderSelector
 
     private void OnFolderSelector()
-    {
-        Note.ControlEdit = null;
+    {        
         kntFolderSelector.Show();
     }
 
     private void onConfirmFolderSelector(FolderInfoDto f)
-    {
-        Note.ControlEdit = "Edit";
+    {     
         Note.FolderDto = f.GetSimpleDto<FolderDto>();
         Note.FolderId = f.FolderId;
         kntFolderSelector.Hide();
@@ -100,10 +112,9 @@
 
     private void onCancelFolderSelector()
     {
-        kntFolderSelector.Hide();
-        Note.ControlEdit = "Edit";
+        kntFolderSelector.Hide();     
     }
 
-    #endregion 
+    #endregion
 
 }

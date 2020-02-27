@@ -184,19 +184,19 @@ app {
 }
 
 .form-markdown {
-    display: flex;
+    /*display: flex;*/
 }
 
-    .form-markdown textarea {
-        width: 500px;
-        height: 500px;
+    .form-markdown textarea {        
+        width: 100%;
+        height: 400px;
         margin-right: 15px;
     }
 
     .form-markdown .markdown-container {
         border: 1px dashed black;
-        width: 500px;
-        height: 500px;
+        /*width: 500px;*/
+        height: 400px;
     }
 
 .kpage-header {
