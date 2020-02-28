@@ -1,0 +1,235 @@
+﻿@page "/testpage2"
+@using KNote.Shared
+@inject HttpClient Http
+
+<h1>Test page 2</h1>
+<hr />
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 1) ? "active" : "")" @onclick="@(() => ShowPanel(1))">
+            <span class="oi oi-terminal mr-2"></span>OnInitializedAsync
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 2) ? "active" : "")" @onclick="@(() => ShowPanel(2))">
+            <span class="oi oi-terminal mr-2"></span>Test api dummy
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 3) ? "active" : "")" @onclick="@(() => ShowPanel(3))">
+            <span class="oi oi-terminal mr-2"></span>Test api folders
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 4) ? "active" : "")" @onclick="@(() => ShowPanel(4))">
+            <span class="oi oi-terminal mr-2"></span>... panel 4
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
+            <span class="oi oi-terminal mr-2"></span> ... panel 5
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 6) ? "active" : "")" @onclick="@(() => ShowPanel(6))">
+            <span class="oi oi-terminal mr-2"></span>... panel 6
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 7) ? "active" : "")" @onclick="@(() => ShowPanel(7))">
+            <span class="oi oi-terminal mr-2"></span>... panel 7
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 8) ? "active" : "")" @onclick="@(() => ShowPanel(8))">
+            <span class="oi oi-terminal mr-2" aria-hidden="true"></span>... panel 8
+        </a>
+    </li>
+</ul>
+
+<div class="@((selectedPanel == 1) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-4"> Load data with OnInitializedAsync</h4>
+
+    @if (settings == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        foreach (var s in settings)
+        {
+            <p>@s</p>
+        }
+    }
+
+</div>
+
+<div class="@((selectedPanel == 2) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> Call demo api 1 </h4>
+    <p>This component demonstrates fetching data from the server.</p>
+    <button class="btn btn-primary" @onclick="LoadWeatherForecast">Load Weather Forecast</button>
+    <p>...</p>
+
+    @if (forecasts == null)
+    {
+        <p><em>there is no data ...</em></p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Temp. (C)</th>
+                    <th>Temp. (F)</th>
+                    <th>Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var forecast in forecasts)
+                {
+                    <tr>
+                        <td>@forecast.Date.ToShortDateString()</td>
+                        <td>@forecast.TemperatureC</td>
+                        <td>@forecast.TemperatureF</td>
+                        <td>@forecast.Summary</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</div>
+
+<div class="@((selectedPanel == 3) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> Call api 2, load folders (panel: @selectedPanel)</h4>
+    <p>This component demonstrates fetching data from the server.</p>
+
+    <button class="btn btn-primary" @onclick="LoadFolders">Load folders</button>
+    <p>...</p>
+
+    @if (folders == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>Name</th>
+                    <th>Creation</th>
+                    <th>Modification</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in folders)
+                {
+                    <tr>
+                        <td>@f.FolderNumber</td>
+                        <td>@f.Name</td>
+                        <td>@f.CreationDateTime</td>
+                        <td>@f.ModificationDateTime</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</div>
+
+<div class="@((selectedPanel == 4) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<div class="@((selectedPanel == 5) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<div class="@((selectedPanel == 6) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<div class="@((selectedPanel == 7) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<div class="@((selectedPanel == 8) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<hr />
+
+
+
+@code {
+    private WeatherForecast[] forecasts;
+    private List<FolderInfoDto> folders = new List<FolderInfoDto>();
+    private string[] settings;
+
+
+    private int selectedPanel = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        settings = await Http.GetJsonAsync<string[]>("api/WeatherForecast/GetAppSettings");
+    }
+
+    private async Task LoadWeatherForecast()
+    {
+        forecasts = null;
+        forecasts = await Http.GetJsonAsync<WeatherForecast[]>("api/WeatherForecast");
+    }
+
+    private async Task LoadFolders()
+    {
+        folders = null;
+        folders = await Http.GetJsonAsync<List<FolderInfoDto>>("api/WeatherForecast/GetFolders");
+    }
+
+    private void ShowPanel(int panel)
+    {
+        selectedPanel = panel;
+    }
+}
