@@ -1,30 +1,157 @@
 ﻿@page "/counter"
 
-<h1>Counter</h1>
-
-<p>Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
-<button class="btn btn-primary" @onclick="OnFolderSelectorTest">Folder selector test</button>
-
+<h3>Test page 1</h3>
 <hr />
 
-@if(folderSelected != null)
-{
-    <p>@folderSelected.Name </p>
-}
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 1) ? "active" : "")" @onclick="@(() => ShowPanel(1))">
+            <span class="oi oi-document mr-2"></span>Counter
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 2) ? "active" : "")" @onclick="@(() => ShowPanel(2))">
+            <span class="oi oi-bookmark mr-2"></span>Folder Selector
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 3) ? "active" : "")" @onclick="@(() => ShowPanel(3))">
+            <span class="oi oi-cloud-upload mr-2"></span>AppState
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 4) ? "active" : "")" @onclick="@(() => ShowPanel(4))">
+            <span class="oi oi-task mr-2"></span>... panel 4
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
+            <span class="oi oi-envelope-open mr-2"></span> ... panel 5
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 6) ? "active" : "")" @onclick="@(() => ShowPanel(6))">
+            <span class="oi oi-external-link mr-2"></span>... panel 6
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 7) ? "active" : "")" @onclick="@(() => ShowPanel(7))">
+            <span class="oi oi-flag mr-2"></span>... panel 7
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @((selectedPanel == 8) ? "active" : "")" @onclick="@(() => ShowPanel(8))">
+            <span class="oi oi-terminal mr-2" aria-hidden="true"></span>... panel 8
+        </a>
+    </li>
 
-<p>AppState (CascadingParameter): @appState.AppMode</p>
+    @*<li class="nav-item">
+                <a class="nav-link disabled" href="#">Script</a>
+        </li>*@
+</ul>
 
-<div style="display:flex;">
-    <div style="width: 150px">
-        <select @bind="@appState.AppMode" class="form-control" style="margin-top: 15px">
-            <option value="Task">Task</option>
-            <option value="Blog">Blog</option>
-            <option value="Wiki">Wiki</option>
-        </select>
+
+<div class="@((selectedPanel == 1) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-4"> Counter (panel: @selectedPanel)</h4>
+
+    <p>Data for panel @selectedPanel</p>
+
+    <p>Current count: @currentCount</p>
+
+    <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+</div>
+
+<div class="@((selectedPanel == 2) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> OnFolderSelectorTest (panel: @selectedPanel)</h4>
+
+    <p>Folder selector</p>
+
+    <button class="btn btn-primary" @onclick="OnFolderSelectorTest">Folder selector test</button>
+
+    @if (folderSelected != null)
+    {
+        <p>@folderSelected.Name </p>
+    }
+
+</div>
+
+<div class="@((selectedPanel == 3) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> AppState (panel: @selectedPanel)</h4>
+
+    <p>AppState with cascading parameter</p>
+
+    <p>appState.AppMode: @appState.AppMode</p>
+
+    <div style="display:flex;">
+        <div style="width: 150px">
+            <select @bind="@appState.AppMode" class="form-control" style="margin-top: 15px">
+                <option value="Task">Task</option>
+                <option value="Blog">Blog</option>
+                <option value="Wiki">Wiki</option>
+            </select>
+        </div>
     </div>
+
+</div>
+
+<div class="@((selectedPanel == 4) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<div class="@((selectedPanel == 5) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<div class="@((selectedPanel == 6) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<div class="@((selectedPanel == 7) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
+</div>
+
+<div class="@((selectedPanel == 8) ? "" : "d-none")">
+
+    <div class="mt-4"></div>
+
+    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+
+    Data for panel @selectedPanel
+
 </div>
 
 <hr />
@@ -39,6 +166,8 @@
     private KntFolderSelector kntFolderSelector;
 
     private FolderInfoDto folderSelected;
+
+    private int selectedPanel = 1;
 
     private async Task IncrementCount()
     {
@@ -57,7 +186,7 @@
         kntFolderSelector.Show();
     }
 
-    #region  AppState changed subscription 
+    #region  AppState changed subscription
 
     protected override void OnInitialized()
     {
@@ -80,6 +209,11 @@
         kntFolderSelector.Hide();
     }
 
-    #endregion 
+    #endregion
+
+    private void ShowPanel(int panel)
+    {
+        selectedPanel = panel;
+    }
 
 }
