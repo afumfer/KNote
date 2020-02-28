@@ -4,6 +4,8 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
+    <!-- TODO: Poner aqui un tab panel https://codepen.io/wizly/pen/BlKxo -->
+
     <div class="form-group row">
         <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
         <div class="input-group col-sm-11" id="atrTopic">
@@ -19,7 +21,7 @@
 
     <div class="form-group row">
         <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
-        <div class="input-group col-sm-11"  id="atrFolder">
+        <div class="input-group col-sm-11" id="atrFolder">
             <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
@@ -31,33 +33,37 @@
         <ValidationMessage For="@(() => Note.FolderId)" />
     </div>
 
-    <div class="form-group">
-        <label>Tags:</label>
-        <InputText class="form-control" @bind-Value="@Note.Tags" />
+    <div class="form-group row">
+        <label for="atrTags" class="col-sm-1 col-form-label">Tags:</label>
+        <div class="input-group col-sm-11" id="atrTags">
+            <InputText class="form-control" @bind-Value="@Note.Tags" />
+        </div>
         <ValidationMessage For="@(() => Note.Tags)" />
+    </div>
+
+    <div class="form-group row">
+        <label for="atrPriority" class="col-sm-1 col-form-label">Priority:</label>
+        <div class="input-group col-sm-5" id="atrPriority">
+            <InputNumber class="form-control col-sm-11" @bind-Value="@Note.Priority" />
+            <ValidationMessage For="@(() => Note.Priority)" />
+        </div>
+
+        <label for="atrNoteType" class="col-sm-1 col-form-label">Note type:</label>
+        <div class="input-group col-sm-5" id="atrNoteType">
+            <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">
+                @foreach (var ntype in NoteTypes)
+                {
+                    <option value=@ntype.NoteTypeId>@ntype.Name</option>
+                }
+            </select>
+            <ValidationMessage For="@(() => Note.NoteTypeId)" />
+        </div>
     </div>
 
     <div class="form-group form-markdown">
         <InputMarkdown @bind-Value="@Note.Description"
                         For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
 
-    </div>
-
-    <div class="form-group">
-        <label>Priority:</label>
-        <InputNumber class="form-control" @bind-Value="@Note.Priority" />
-        <ValidationMessage For="@(() => Note.Priority)" />
-    </div>
-
-    <div class="form-group">
-        <label>Note type:</label>
-        <select class="form-control" @bind="@Note.NoteTypeId">
-            @foreach (var ntype in NoteTypes)
-            {
-                <option value=@ntype.NoteTypeId>@ntype.Name</option>
-            }
-        </select>
-        <ValidationMessage For="@(() => Note.NoteTypeId)" />
     </div>
 
     <div class="form-group">

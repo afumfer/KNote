@@ -4,31 +4,29 @@
 
 <div>
 
-    <label>@labelMode</label>
-    <!-- <span class="float-left"> -->
-    <span>
-        <button class="btn btn-sm btn-light mx-1"
-                @onclick="EditMode"
-                data-toggle="tooltip" title="Show edit mode">
-            <i class="fa fa-edit">Edit</i>
+    <label>@labelMode&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    
+    <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-light" data-toggle="tooltip" title="Show edit mode" @onclick="EditMode">
+            <i class="fa fa-edit">&nbsp;&nbsp;Markdown edit mode</i>
+        </button>        
+    </div>
+    <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">        
+        <button type="button" class="btn btn-light" data-toggle="tooltip" title="Show view mode" @onclick="ViewMode">
+            <i class="fa fa-eye">&nbsp;&nbsp;Show view html</i>
         </button>
-        <button class="btn btn-sm btn-light mx-1"
-                @onclick="ViewMode"
-                data-toggle="tooltip" title="Show view mode">
-            <i class="fa fa-edit">View</i>
-        </button>
-    </span>
+    </div>
 
     @if (editMode)
     {
         <div>
-            <InputTextArea @bind-Value="CurrentValue" />
+            <InputTextArea @bind-Value="CurrentValue" class="p-2" />
             <ValidationMessage For="For" />
         </div>
     }
     else
     {
-        <div class="markdown-container" style="overflow: auto;">
+        <div class="markdown-container p-2" style="overflow: auto;">
             <ViewMarkdown MarkdownContent="@CurrentValue">
 
             </ViewMarkdown>
@@ -48,19 +46,20 @@
 
     protected override void OnInitialized()
     {
-        labelMode = Label + " (edit mode): ";
+        //labelMode = Label + " (markdown edit mode): ";
+        labelMode = Label;
         base.OnInitialized();
     }
 
     private void EditMode()
     {
         editMode = true;
-        labelMode = Label + " (markdown edit mode): ";
+        //labelMode = Label + " (markdown edit mode): ";
     }
 
     private void ViewMode()
     {
         editMode = false;
-        labelMode = Label + " (preview mode): ";
+        //labelMode = Label + " (preview mode): ";
     }
 }
