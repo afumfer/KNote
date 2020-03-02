@@ -6,12 +6,9 @@
 
 @attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
 
-<h3>New note</h3>
-<hr />
-
 @if (showForm)
 {
-    <NoteForm Note="note" OnValidSubmit="New" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Title="Note new"  Note="note" OnValidSubmit="New" NoteTypes="noteTypes"></NoteForm>
 }
 else
 {

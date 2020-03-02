@@ -4,8 +4,20 @@
 
         <DataAnnotationsValidator></DataAnnotationsValidator>
 
-        <!-- TODO: Poner aqui un tab panel https://codepen.io/wizly/pen/BlKxo -->
+        <!-- Title -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    <h3>@Title</h3>
+                </div>
+                <div class="col-6 float-right">
+                    <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+                </div>
+            </div>
+        </div>
+        <hr class="mt-0" />
 
+        <!-- Tab -->
         <ul class="nav nav-tabs">
             <li class="nav-item">
                 <a class="nav-link @((selectedPanel == 1) ? "active" : "")" @onclick="@(() => ShowPanel(1))">
@@ -53,8 +65,9 @@
             </li>*@
         </ul>
 
+        <!-- Panels -->
         <div class="@((selectedPanel == 1) ? "" : "d-none")">
-            
+
             <div class="mt-4"></div>
 
             <div class="form-group row">
@@ -99,7 +112,7 @@
                     <ValidationMessage For="@(() => Note.Priority)" />
                 </div>
 
-                <label for="atrNoteType" class="col-sm-1 col-form-label">Note type:</label>
+                <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
                 <div class="input-group col-sm-5" id="atrNoteType">
                     <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">
                         @foreach (var ntype in NoteTypes)
@@ -120,7 +133,7 @@
         </div>
 
         <div class="@((selectedPanel == 2) ? "" : "d-none")">
-            
+
             <div class="mt-4"></div>
 
             <div class="form-group">
@@ -191,16 +204,25 @@
 
         </div>
 
-        <button class="btn btn-success" @onclick="(() => Save(formContext))">Save changes</button>
-
-        <p> </p>
-        <hr />
+        <!-- Footer -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    &nbsp;
+                </div>
+                <div class="col-6 float-right">
+                    <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+                </div>
+            </div>
+        </div>
+        <hr class="mt-1"/>
 
         <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
 
     </EditForm>
 
 @code {
+    [Parameter] public string Title { get; set; } = "---";
     [Parameter] public NoteDto Note { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
@@ -228,12 +250,12 @@
     #region Managment FolderSelector
 
     private void OnFolderSelector()
-    {        
+    {
         kntFolderSelector.Show();
     }
 
     private void onConfirmFolderSelector(FolderInfoDto f)
-    {     
+    {
         Note.FolderDto = f.GetSimpleDto<FolderDto>();
         Note.FolderId = f.FolderId;
         kntFolderSelector.Hide();
@@ -241,7 +263,7 @@
 
     private void onCancelFolderSelector()
     {
-        kntFolderSelector.Hide();     
+        kntFolderSelector.Hide();
     }
 
     #endregion
