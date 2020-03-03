@@ -7,7 +7,7 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="kpage-header mb-0">
+@*<div class="kpage-header mb-0">
     <div class="col-3">
         <h3>Notes tree</h3>
     </div>
@@ -18,6 +18,22 @@
                 data-toggle="tooltip" title="New note">
             <i class="oi oi-document"></i> New note
         </button>
+    </div>
+</div>
+<hr class="mt-0" />*@
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <h3>Notes tree</h3>
+        </div>
+        <div class="col-6 float-right">
+            <button class="btn btn-sm btn-warning mx-1 float-right"
+                    @onclick="GoNewNote"
+                    data-toggle="tooltip" title="New note">
+                <i class="oi oi-bookmark"></i> New note
+            </button>
+        </div>
     </div>
 </div>
 <hr class="mt-0" />

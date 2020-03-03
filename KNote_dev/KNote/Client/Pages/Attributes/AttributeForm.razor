@@ -1,15 +1,19 @@
 ﻿<EditForm Model="KAttribute" OnValidSubmit="OnValidSubmit">
+
     <DataAnnotationsValidator></DataAnnotationsValidator>
+
     <div class="form-group">
         <label>Key:</label>
         <InputText class="form-control" @bind-Value="@KAttribute.Key" />
         <ValidationMessage For="@(() => KAttribute.Key)" />
     </div>
+
     <div class="form-group">
         <label>Name:</label>
         <InputText class="form-control" @bind-Value="@KAttribute.Name" />
         <ValidationMessage For="@(() => KAttribute.Name)" />
     </div>
+
     <div class="form-group">
         <label>Data Type:</label>
         <select class="form-control" @bind="@KAttribute.KAttributeDataType">
@@ -20,16 +24,19 @@
         </select>
         <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
     </div>
+
     <div class="form-group">
         <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <!-- TODO Refactor-->
         <InputCheckbox class="form-check-input" @bind-Value="@KAttribute.RequiredValue" />
         <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
     </div>
+
     <div class="form-group">
         <label>Order:</label>
         <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
         <ValidationMessage For="@(() => KAttribute.Order)" />
     </div>
+
     <div class="form-group">
         <label>Note type:</label>
         <select class="form-control" @bind="@KAttribute.NoteTypeId">
@@ -40,8 +47,21 @@
         </select>
         <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
     </div>
+   
+    <!-- Footer -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">
+                &nbsp;
+            </div>
+            <div class="col-6 float-right">                
+                <button class="btn btn-success float-right" type="submit">Save changes</button>
+            </div>
+        </div>
+    </div>
+    <hr class="mt-1" />
 
-    <button class="btn btn-success" type="submit">Save changes</button>
+
 </EditForm>
 
 @code {

@@ -6,10 +6,7 @@
 
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
-<h3>New Folder</h3>
-<hr />
-
-<FolderForm OnValidSubmit="New" Folder="folder" />
+<FolderForm Title="New folder" OnValidSubmit="New" Folder="folder" />
 
 @code {
 

@@ -6,12 +6,9 @@
 
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
-<h3>Folder edit</h3>
-<hr />
-
 @if (folder != null)
 {    
-    <FolderForm OnValidSubmit="Edit" Folder="folder" />
+    <FolderForm Title="Folder edit" OnValidSubmit="Edit" Folder="folder" />
 }
 else
 {

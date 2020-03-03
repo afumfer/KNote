@@ -4,8 +4,21 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
+    <!-- Title -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">
+                <h3>@Title</h3>
+            </div>
+            <div class="col-6 float-right">
+                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+            </div>
+        </div>
+    </div>
+    <hr class="mt-0" />
+
     <div class="form-group">
-        <label>Topic:</label>
+        <label>Name:</label>
         <div class="input-group">
             <InputText class="form-control" @bind-Value="@Folder.Name" />
             <div class="input-group-append">
@@ -52,18 +65,26 @@
         </div>
         <ValidationMessage For="@(() => Folder.ParentId)" />
     </div>
-    
-    <button class="btn btn-success" @onclick="(() => Save(formContext))">Save changes</button>
 
-    <p> </p>
-    <hr />
+    <!-- Footer -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">
+                &nbsp;
+            </div>
+            <div class="col-6 float-right">
+                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+            </div>
+        </div>
+    </div>
+    <hr class="mt-1" />
 
     <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
 
 </EditForm>
 
 @code {
-
+    [Parameter] public string Title { get; set; } = "---";
     [Parameter] public FolderDto Folder { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
 
