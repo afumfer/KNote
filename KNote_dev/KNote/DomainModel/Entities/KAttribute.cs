@@ -237,18 +237,20 @@ namespace KNote.DomainModel.Entities
         #endregion
     }
 
-    #region Enums
 
-    public enum EnumKAttributeDataType
-    {
-        dtTag,
-        dtBool,
-        dtInt,
-        dtDouble,
-        dtString,
-        dtDateTime,
-        dtTabulate,
-    }
+    // TODO: !!! Borrar 
+    //#region Enums
 
-    #endregion
+    //public enum EnumKAttributeDataType
+    //{
+    //    dtTag,
+    //    dtBool,
+    //    dtInt,
+    //    dtDouble,
+    //    dtString,
+    //    dtDateTime,
+    //    dtTabulate,
+    //}
+
+    //#endregion
 }

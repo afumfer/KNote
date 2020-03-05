@@ -102,6 +102,8 @@ namespace KNote.DomainModel.Services
             var resService = new Result<NoteDto>();
             try
             {
+
+                // TODO: borrar, old. 
                 //var resRep = await _repository.Notes.GetAsync((object)noteId);
                 //// Load here aditionals properties for NoteDto
                 //resRep = _repository.Notes.LoadReference(resRep.Entity, n => n.Folder);
@@ -116,21 +118,26 @@ namespace KNote.DomainModel.Services
 
                 //resService.ErrorList = resRep.ErrorList;
 
-                var entity = _repository.Notes.DbSet.Where(n => n.NoteId == noteId)
+                var entity = await _repository.Notes.DbSet.Where(n => n.NoteId == noteId)
                     .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
                     .Include(n => n.Resources)
                     .Include(n => n.Folder)
                     .Include(n => n.NoteType)
-                    .FirstOrDefault();
+                    .SingleOrDefaultAsync();
 
                 // Map to dto
                 resService.Entity = entity?.GetSimpleDto<NoteDto>();
-                resService.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
-                resService.Entity.KAttributesDto = entity?.KAttributes.Select(_ => _.KAttribute.GetSimpleDto<NoteKAttributeDto>()).ToList();
+                resService.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();                
+                resService.Entity.KAttributesDto = entity?.KAttributes.Select(_ => _.GetSimpleDto<NoteKAttributeDto>()).ToList();
+                //foreach(var x in entity?.KAttributes)
+                //{
+                //    resService.Entity.KAttributesDto.
+                //}
+
                 resService.Entity.ResourcesDto = entity?.Resources.Select(_ => _.GetSimpleDto<ResourceDto>()).ToList();
 
                 // Complete Attributes list
-                var attributes = _repository.KAttributes.GetAll().Entity;
+                var attributes = _repository.KAttributes.GetAll().Entity;  // .OrderBy(_ => _.Order);
                 var attributesNotes = resService.Entity.KAttributesDto;
 
                 foreach(KAttribute a in attributes)
@@ -142,20 +149,28 @@ namespace KNote.DomainModel.Services
                             KAttributeId  = a.KAttributeId,
                             NoteId = entity.NoteId,
                             Value = "",
-                            KAttributeName = a.Name
+                            KAttributeName = a.Name,
+                            Key = a.Key,
+                            KAttributeDataType = a.KAttributeDataType,
+                            RequiredValue = a.RequiredValue,
+                            Order = a.Order,
+                            Script = a.Script,
+                            Disabled = a.Disabled
                         });
                     }
                     else
                     {
                         atrTmp.KAttributeName = a.Name;
+                        atrTmp.Key = a.Key;
+                        atrTmp.KAttributeDataType = a.KAttributeDataType;
+                        atrTmp.RequiredValue = a.RequiredValue;
+                        atrTmp.Order = a.Order;
+                        atrTmp.Script = a.Script;
+                        atrTmp.Disabled = a.Disabled;
                     }                     
                 }
 
-
-
-                // ....
-
-                    //resService.ErrorList = resRep.ErrorList;
+                resService.Entity.KAttributesDto = attributesNotes.OrderBy(_ => _.Order).ToList();
 
                 #region Option 2 for load entities
                 // TODO: !!! eliminar este código de pruebas. 
@@ -352,37 +367,16 @@ namespace KNote.DomainModel.Services
                 if (entityInfo != null)
                     newNote.SetSimpleDto(entityInfo);
 
-                // TODO: load default values
+                // Load default values
                 // for newNote
 
                 if (newNote.NoteId == Guid.Empty)
                     newNote.NoteId = Guid.NewGuid();
 
-                // TODO: Pensar mejor de lo 
-                //if (newNote.CreationDateTime == DateTime.MinValue)
-                //    newNote.CreationDateTime = DateTime.Now;
-
-                //if (newNote.ModificationDateTime == DateTime.MinValue)
-                //    newNote.ModificationDateTime = DateTime.Now;
-
-                // TODO: Cargar entidades dependientes
+                // 
                 //if (newNote.KAttributes == null)
                 //    newNote.KAttributes = new List<NoteKAttribute>();
 
-                //if (newNote.Resources == null)
-                //    newNote.Resources = new List<Resource>();
-
-                //if (newNote.Tasks == null)
-                //    newNote.Tasks = new List<NoteTask>();
-
-                //if (newNote.Windows == null)
-                //    newNote.Windows = new List<Window>();
-
-                //if (newNote.To == null)
-                //    newNote.To = new List<TraceNote>();
-
-                //if (newNote.From == null)
-                //    newNote.From = new List<TraceNote>();
 
                 resService.Entity = newNote;
             }
@@ -462,6 +456,9 @@ namespace KNote.DomainModel.Services
                         resRep = _repository.Notes.Add(newEntity);
                     }
                 }
+
+                // Save atributes
+
             }
             catch (Exception ex)
             {
@@ -539,6 +536,14 @@ namespace KNote.DomainModel.Services
                         // ...
                         resRep = await _repository.Notes.AddAsync(newEntity);
                     }
+
+                    foreach(NoteKAttributeDto atr in entity.KAttributesDto)
+                    {
+                        var atrInfo = atr.GetSimpleDto<NoteKAttributeInfoDto>();
+                        var res = SaveAttrtibute(atrInfo);
+                        // TODO: pendiente de volcar errores en resRep
+                    }
+
                 }
             }
             catch (Exception ex)

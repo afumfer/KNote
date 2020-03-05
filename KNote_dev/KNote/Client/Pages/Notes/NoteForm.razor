@@ -41,7 +41,7 @@
                 <span class="oi oi-task mr-2"></span>Task
             </a>
         </li>
-        <li class="nav-item">
+        @*<li class="nav-item">
             <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
                 <span class="oi oi-envelope-open mr-2"></span>Messages
             </a>
@@ -60,7 +60,7 @@
             <a class="nav-link @((selectedPanel == 8) ? "active" : "")" @onclick="@(() => ShowPanel(8))">
                 <span class="oi oi-terminal mr-2" aria-hidden="true"></span>Script
             </a>
-        </li>
+        </li>*@
 
         @*<li class="nav-item">
                 <a class="nav-link disabled" href="#">Script</a>
@@ -135,16 +135,8 @@
     </div>
 
     <div class="@((selectedPanel == 2) ? "" : "d-none")">
-
         <div class="mt-4"></div>
-
-        <div class="form-group">
-            <label>Attributes:</label>
-            <div>
-                <NoteKAttributes Attributes="Note.KAttributesDto"></NoteKAttributes>
-            </div>
-        </div>
-
+        <NoteKAttributes Attributes="Note.KAttributesDto"></NoteKAttributes>
     </div>
 
     <div class="@((selectedPanel == 3) ? "" : "d-none")">

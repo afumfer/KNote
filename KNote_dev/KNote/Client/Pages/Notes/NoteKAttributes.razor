@@ -1,15 +1,14 @@
-﻿@foreach( var KAttribute in Attributes)
-{        
-    <div class="form-group">
-        <label>@KAttribute.KAttributeName:</label>
-        <InputText class="form-control" @bind-Value="@KAttribute.Value" />
+﻿@foreach (var KAttribute in Attributes)
+{    
+    <div class="form-group row">
+        <label for="atrTags" class="col-sm-4 col-form-label">@KAttribute.KAttributeName:</label>
+        <div class="input-group col-sm-8" id="atrTags">
+            <InputText class="form-control" @bind-Value="@KAttribute.Value" />
+        </div>
         <ValidationMessage For="@(() => KAttribute.Value)" />
-    </div>        
+    </div>
 }
-
 
 @code {
     [Parameter] public List<NoteKAttributeDto> Attributes { get; set; }
-
-
 }
