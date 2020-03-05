@@ -101,19 +101,61 @@ namespace KNote.DomainModel.Services
         {
             var resService = new Result<NoteDto>();
             try
-            {                
-                var resRep = await _repository.Notes.GetAsync((object)noteId);
-                // KNote template ... load here aditionals properties for NoteDto
-                resRep = _repository.Notes.LoadCollection(resRep.Entity, u => u.KAttributes);
-                resRep = _repository.Notes.LoadReference(resRep.Entity, n => n.Folder);
+            {
+                //var resRep = await _repository.Notes.GetAsync((object)noteId);
+                //// Load here aditionals properties for NoteDto
+                //resRep = _repository.Notes.LoadReference(resRep.Entity, n => n.Folder);
+                //resRep = _repository.Notes.LoadCollection(resRep.Entity, u => u.KAttributes);
+                //resRep = _repository.Notes.LoadCollection(resRep.Entity, u => u.Resources);
+
+                //// Map to dto
+                //resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+                //resService.Entity.FolderDto = resRep.Entity?.Folder.GetSimpleDto<FolderDto>();
+                //resService.Entity.KAttributesDto = resRep.Entity?.KAttributes.Select(_ => _.KAttribute.GetSimpleDto<NoteKAttributeDto>()).ToList();
+                //resService.Entity.ResourcesDto = resRep.Entity?.Resources.Select(_ => _.GetSimpleDto<ResourceDto>()).ToList();
+
+                //resService.ErrorList = resRep.ErrorList;
+
+                var entity = _repository.Notes.DbSet.Where(n => n.NoteId == noteId)
+                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                    .Include(n => n.Resources)
+                    .Include(n => n.Folder)
+                    .Include(n => n.NoteType)
+                    .FirstOrDefault();
 
                 // Map to dto
-                resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
-                resService.Entity.KAttributesDto = resRep.Entity?.KAttributes.Select(_ => _.KAttribute.GetSimpleDto<NoteKAttributeDto>()).ToList() ;
-                resService.Entity.FolderDto = resRep.Entity?.Folder.GetSimpleDto<FolderDto>();
+                resService.Entity = entity?.GetSimpleDto<NoteDto>();
+                resService.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
+                resService.Entity.KAttributesDto = entity?.KAttributes.Select(_ => _.KAttribute.GetSimpleDto<NoteKAttributeDto>()).ToList();
+                resService.Entity.ResourcesDto = entity?.Resources.Select(_ => _.GetSimpleDto<ResourceDto>()).ToList();
+
+                // Complete Attributes list
+                var attributes = _repository.KAttributes.GetAll().Entity;
+                var attributesNotes = resService.Entity.KAttributesDto;
+
+                foreach(KAttribute a in attributes)
+                {
+                    var atrTmp = attributesNotes.Where(na => na.KAttributeId == a.KAttributeId).Select(at => at).SingleOrDefault();                    
+                    if (atrTmp == null)
+                    {
+                        attributesNotes.Add(new NoteKAttributeDto { 
+                            KAttributeId  = a.KAttributeId,
+                            NoteId = entity.NoteId,
+                            Value = "",
+                            KAttributeName = a.Name
+                        });
+                    }
+                    else
+                    {
+                        atrTmp.KAttributeName = a.Name;
+                    }                     
+                }
+
+
+
                 // ....
 
-                resService.ErrorList = resRep.ErrorList;
+                    //resService.ErrorList = resRep.ErrorList;
 
                 #region Option 2 for load entities
                 // TODO: !!! eliminar este código de pruebas. 
@@ -126,6 +168,8 @@ namespace KNote.DomainModel.Services
                 //    .Include(n => n.NoteType)
                 //    .FirstOrDefault();
                 //resService.Entity = entity?.GetSimpleDto<NoteDto>();
+
+
                 #endregion 
 
             }
