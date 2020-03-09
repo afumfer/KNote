@@ -131,6 +131,27 @@ namespace KNote.Server.Controllers
             }
         }
 
+        [HttpGet("new")]    // GET api/notes/new
+        public IActionResult New()
+        {
+            try
+            {
+                var resApi = _service.Notes.New();
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                {
+                    return BadRequest(resApi);
+                }
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<NoteInfoDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
         [HttpGet("[action]/{noteNumber}")]    // GET api/notes/GetByNumber/xx        
         public IActionResult GetByNumber(int noteNumber)
         {

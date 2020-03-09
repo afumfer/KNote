@@ -17,7 +17,7 @@ else
 
 @code {
 
-    private NoteDto note = new NoteDto();
+    private NoteDto note; // !!! = new NoteDto();
     private bool showForm = false;
     private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
 
@@ -31,11 +31,19 @@ else
         else
         {
             noteTypes = httpResponse.Response.Entity;
-            showForm = true;
+            
+            var httpResponseNote = await dataService.Get<Result<NoteDto>>("api/notes/new");
+            if (httpResponseNote.Error)
+            {
+                await showMessages.ShowErrorMessage(await httpResponseNote.GetBody());
+            }
+            else
+            {
+                note = httpResponseNote.Response.Entity;
+                showForm = true;
+            }
         }
-
-        // TODO: !!! Load attributes ... ??
-
+        
         base.OnInitialized();
     }
 
