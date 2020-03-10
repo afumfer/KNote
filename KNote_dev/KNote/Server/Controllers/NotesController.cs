@@ -20,8 +20,9 @@ namespace KNote.Server.Controllers
     {
         private IKntService _service { get; set; }
         private readonly AppSettings _appSettings;
+        private readonly IFileStore _fileStore;
 
-        public NotesController(IKntService service, IOptions<AppSettings> appSettings)
+        public NotesController(IKntService service, IOptions<AppSettings> appSettings, IFileStore fileStore)
         {
             _service = service;
             _appSettings = appSettings.Value;
@@ -233,6 +234,24 @@ namespace KNote.Server.Controllers
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
+        }
+
+        [HttpPost("savefile")]    // POST api/notes/savefile
+        [HttpPut("savefile")]    // PUT api/notes/savefile
+        public async Task<IActionResult> SaveFile(ResourceDto resource)
+        {
+            if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
+            {
+                var resourceAB = Convert.FromBase64String(resource.ContentBase64);
+                resource.Path = await _fileStore.SaveFile(resourceAB, "jpg", "Notes");
+                //persona.Foto = await almacenadorDeArchivos.GuardarArchivo(fotoPersona, "jpg", "personas");
+            }
+
+            // Grabar la entidad ResourceDTO
+            //context.Add(persona);
+            //await context.SaveChangesAsync();
+            //return persona.Id;
+            return Ok(resource.Path);
         }
 
     }

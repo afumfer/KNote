@@ -59,6 +59,8 @@ namespace KNote.Server
                      ClockSkew = TimeSpan.Zero
                  });
 
+            services.AddScoped<IFileStore, LocalFileStore>();
+            services.AddHttpContextAccessor();
 
             services.AddMvc().AddNewtonsoftJson(options =>
                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

@@ -135,6 +135,11 @@ namespace KNote.DomainModel.Infrastructure
                 }
             );
 
+            // TODO: Añadir NoteTypes
+            //Documentation
+            //Work order
+            //Reminder
+
             var idFolder1 = Guid.NewGuid();
             var idFolder2 = Guid.NewGuid();
             var idFolder3 = Guid.NewGuid();

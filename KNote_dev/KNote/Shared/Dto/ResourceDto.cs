@@ -25,6 +25,8 @@ namespace KNote.Shared.Dto
         public bool ContentInDB { get; set; }
 
         public byte[] ContentDB { get; set; }
+        
+        public string ContentBase64 { get; set; }
 
         public Guid NoteId { get; set; }
     }
