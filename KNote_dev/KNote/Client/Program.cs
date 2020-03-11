@@ -9,6 +9,7 @@ using KNote.Client.ClientDataServices;
 using KNote.Client.Helpers;
 using Microsoft.AspNetCore.Components.Authorization;
 using KNote.Client.Auth;
+using Blazor.FileReader;
 
 namespace KNote.Client
 {    
@@ -33,6 +34,8 @@ namespace KNote.Client
             builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(
                provider => provider.GetRequiredService<AuthenticationProviderJWT>()
             );
+
+            builder.Services.AddFileReaderService(options => options.InitializeOnFirstCall = true);
 
             await builder.Build().RunAsync();
         }

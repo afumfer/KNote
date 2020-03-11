@@ -26,6 +26,7 @@ namespace KNote.Server.Controllers
         {
             _service = service;
             _appSettings = appSettings.Value;
+            _fileStore = fileStore;
         }
 
         [HttpGet]   // GET api/notes
@@ -240,18 +241,26 @@ namespace KNote.Server.Controllers
         [HttpPut("savefile")]    // PUT api/notes/savefile
         public async Task<IActionResult> SaveFile(ResourceDto resource)
         {
-            if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
+            try
             {
-                var resourceAB = Convert.FromBase64String(resource.ContentBase64);
-                resource.Path = await _fileStore.SaveFile(resourceAB, "jpg", "Notes");
-                //persona.Foto = await almacenadorDeArchivos.GuardarArchivo(fotoPersona, "jpg", "personas");
-            }
+                if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
+                {
+                    var resourceAB = Convert.FromBase64String(resource.ContentBase64);
+                    resource.Path = await _fileStore.SaveFile(resourceAB, "jpg", "Notes");
+                    //persona.Foto = await almacenadorDeArchivos.GuardarArchivo(fotoPersona, "jpg", "personas");
+                }
 
-            // Grabar la entidad ResourceDTO
-            //context.Add(persona);
-            //await context.SaveChangesAsync();
-            //return persona.Id;
-            return Ok(resource.Path);
+                // Grabar la entidad ResourceDTO
+                //context.Add(persona);
+                //await context.SaveChangesAsync();
+                //return persona.Id;
+                return Ok(resource.Path);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);                
+            }
         }
 
     }
