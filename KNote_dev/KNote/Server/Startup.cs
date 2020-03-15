@@ -80,13 +80,13 @@ namespace KNote.Server
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBlazorDebugging();
+                app.UseWebAssemblyDebugging();
             }
 
             app.UsePathBase("/KNote");
 
-            app.UseStaticFiles();
-            app.UseClientSideBlazorFiles<Client.Program>();
+            app.UseStaticFiles();            
+            app.UseBlazorFrameworkFiles();
 
             app.UseRouting();
             app.UseAuthentication();
@@ -94,8 +94,8 @@ namespace KNote.Server
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDefaultControllerRoute();
-                endpoints.MapFallbackToClientSideBlazor<Client.Program>("index.html");
+                endpoints.MapDefaultControllerRoute();                
+                endpoints.MapFallbackToFile("index.html");
             });
         }
     }
