@@ -15,6 +15,8 @@ namespace KNote.Shared.Dto
         [MaxLength(1024)]
         public string Path { get; set; }
 
+        public string FullPath { get; set; }
+
         public string Description { get; set; }
 
         public int Order { get; set; }

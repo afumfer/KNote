@@ -241,12 +241,35 @@ namespace KNote.Server.Controllers
         [HttpPut("savefile")]    // PUT api/notes/savefile
         public async Task<IActionResult> SaveFile(ResourceDto resource)
         {
+            Result<ResourceDto> resApi = new Result<ResourceDto>();
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
+                {
+                    var resourceArrBytes = Convert.FromBase64String(resource.ContentBase64);
+                    resource.FullPath = await _fileStore.SaveFile(resourceArrBytes, resource.Path, "NotesFiles");                    
+                }
+                resApi.Entity = resource;
+                return Ok(resApi);
+            }
+            catch (Exception ex)
+            {
+                resApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(resApi);                
+            }
+        }
+
+        [HttpPost("savefile2")]    // POST api/notes/savefile
+        [HttpPut("savefile2")]    // PUT api/notes/savefile
+        public async Task<IActionResult> SaveFile2(ResourceDto resource)
+        {
             try
             {
                 if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
                 {
                     var resourceAB = Convert.FromBase64String(resource.ContentBase64);
-                    resource.Path = await _fileStore.SaveFile(resourceAB, "jpg", "Notes");
+                    resource.Path = await _fileStore.SaveFile(resourceAB, resource.FileMimeType, "NotesFiles");
+
                     //persona.Foto = await almacenadorDeArchivos.GuardarArchivo(fotoPersona, "jpg", "personas");
                 }
 
@@ -259,7 +282,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);                
+                return BadRequest(ex.Message);
             }
         }
 

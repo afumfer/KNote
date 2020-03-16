@@ -41,7 +41,26 @@ namespace KNote.Server.Helpers
             return Task.FromResult(0);
         }
 
-        public async Task<string> SaveFile(byte[] content, string extension, string container)
+        public async Task<string> SaveFile(byte[] content, string filename, string container)
+        {            
+            string folder = Path.Combine(env.WebRootPath, container);
+
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            string pathSaved = Path.Combine(folder, filename);
+            await File.WriteAllBytesAsync(pathSaved, content);
+
+            // TODO: !!! Aquí falta el nombre de la subaplicación IIS e invertir las barras de las rutas \
+
+            var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
+            var fullPath = Path.Combine(actualUrl, container, filename);
+            return fullPath;
+        }
+
+        public async Task<string> SaveFile2(byte[] content, string extension, string container)
         {
             var filename = $"{Guid.NewGuid()}.{extension}";
             string folder = Path.Combine(env.WebRootPath, container);

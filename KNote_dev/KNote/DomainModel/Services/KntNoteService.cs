@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 //using System.Data.Entity.Validation;
 
+
 namespace KNote.DomainModel.Services
 {
     public class KntNoteService : DomainActionBase, IKntNoteService

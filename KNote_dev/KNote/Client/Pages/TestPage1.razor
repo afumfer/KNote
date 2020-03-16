@@ -111,9 +111,9 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2"> Upload file (panel: @selectedPanel)</h4>
+    <h4 class="mt-2"> Upload image (panel: @selectedPanel)</h4>
 
-    <InputImg Label="Upload" ImageBase64="@fileTemp" OnSelectedImage="OnFileSelected" />
+    <InputImg Label="Upload image file" ImageBase64="@fileTemp" OnSelectedImage="OnImgSelected" />
 
 </div>
 
@@ -121,10 +121,13 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+    <h4 class="mt-2"> File upload (panel: @selectedPanel)</h4>
 
-    Data for panel @selectedPanel
+    <InputFileUpload Label="Upload generic file" OnSelectedFile="OnFileSelected" />
 
+    <p>@resource.Path</p>
+    <p>@resource.FullPath</p>
+    <p>@resource.Description</p>
 </div>
 
 <div class="@((selectedPanel == 6) ? "" : "d-none")">
@@ -222,13 +225,14 @@
         selectedPanel = panel;
     }
 
-    private async Task OnFileSelected(string fileBase64)
+    private async Task OnImgSelected(string fileBase64)
     {
         resource.ContentBase64 = fileBase64;
         resource.Path = "KNote";
+        resource.FileMimeType = "jpg";
         resource.Path = "Description resource";
 
-        var httpResponse = await dataService.Post("api/notes/savefile", resource);
+        var httpResponse = await dataService.Post("api/notes/savefile2", resource);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -240,5 +244,25 @@
         }
         fileTemp = "";
     }
+
+    private async Task OnFileSelected(KntFileInfo file)
+    {
+        resource.ContentBase64 = file.FileBase64;
+        resource.Path = file.Name;
+        resource.FileMimeType = file.Type;
+        resource.Description = file.Type + " - " + file.LastModifiedDate.ToString() + " - " + file.Size.ToString();
+
+        var httpResponse = await dataService.Post<ResourceDto, Result<ResourceDto>>("api/notes/savefile", resource);
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {            
+            resource = httpResponse.Response.Entity;
+            await showMessages.ShowOkMessage("File upload!");
+        }        
+    }
+
 
 }

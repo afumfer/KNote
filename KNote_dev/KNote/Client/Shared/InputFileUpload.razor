@@ -1,0 +1,65 @@
+﻿@using System.IO
+@inject IFileReaderService fileReaderService
+@using Blazor.FileReader
+
+<div>
+    <label>@Label</label>
+    <div>
+        <input type="file" @ref="inputElement" @onchange="FileSelected" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.odt" />
+    </div>
+</div>
+<div>
+    <p>Aquí una representación gráfica del contenido en función del tipo</p>
+    @*<div>
+        <div style="margin:10px">
+            <img src="@imgSrc" style="width: 400px;" />
+        </div>
+    </div>*@
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "Image";
+    [Parameter] public EventCallback<KntFileInfo> OnSelectedFile { get; set; }
+    [Parameter] public string FileBase64 { get; set; }
+
+    private string imgSrc;
+    private ElementReference inputElement;
+
+    private KntFileInfo fileSelected;
+
+    protected override void OnInitialized()
+    {
+        //if (!string.IsNullOrEmpty(ImageBase64))
+        //{
+        //    imgSrc = "data:image/jpeg;base64, " + ImageBase64;
+        //}
+        base.OnInitialized();
+    }
+
+    async Task FileSelected()
+    {
+        foreach (var file in await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync())
+        {
+            using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync(4 * 1024))
+            {
+                //var fileInfo = await file.ReadFileInfoAsync();
+
+                var imageBytes = new byte[memoryStream.Length];
+                memoryStream.Read(imageBytes, 0, (int)memoryStream.Length);
+                FileBase64 = Convert.ToBase64String(imageBytes);
+                //imgSrc = "data:image/jpeg;base64, " + FileBase64;
+                var fileInfo = await file.ReadFileInfoAsync();
+                fileSelected = new KntFileInfo
+                {
+                    Name = fileInfo.Name,
+                    Type = fileInfo.Type,
+                    Size = fileInfo.Size,
+                    LastModifiedDate = fileInfo.LastModifiedDate,
+                    FileBase64 = FileBase64
+                };
+                await OnSelectedFile.InvokeAsync(fileSelected);
+                StateHasChanged();
+            }
+        }
+    }
+}
