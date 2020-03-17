@@ -125,9 +125,17 @@
 
     <InputFileUpload Label="Upload generic file" OnSelectedFile="OnFileSelected" />
 
-    <p>@resource.Path</p>
-    <p>@resource.FullPath</p>
-    <p>@resource.Description</p>
+    @if(resourceControl == null)
+    {
+        <p>Subiendo fichero .... </p>
+    }
+    else
+    {
+        <p>Name: @resource.Name</p>
+        <p>FullPath: @resource.FullPath</p>
+        <p>Description: @resource.Description</p>
+    }
+
 </div>
 
 <div class="@((selectedPanel == 6) ? "" : "d-none")">
@@ -177,6 +185,7 @@
 
     private string fileTemp;
     private ResourceDto resource = new ResourceDto();
+    private string resourceControl = "0";
 
     private async Task IncrementCount()
     {
@@ -226,11 +235,11 @@
     }
 
     private async Task OnImgSelected(string fileBase64)
-    {
+    {        
         resource.ContentBase64 = fileBase64;
-        resource.Path = "KNote";
-        resource.FileMimeType = "jpg";
-        resource.Path = "Description resource";
+        resource.Name = "KNote";
+        resource.FileType = "jpg";
+        resource.Description = "Description resource";
 
         var httpResponse = await dataService.Post("api/notes/savefile2", resource);
         if (httpResponse.Error)
@@ -247,9 +256,11 @@
 
     private async Task OnFileSelected(KntFileInfo file)
     {
-        resource.ContentBase64 = file.FileBase64;
-        resource.Path = file.Name;
-        resource.FileMimeType = file.Type;
+        resourceControl = null;
+
+        resource.ContentBase64 = file.ContentBase64;
+        resource.Name = file.Name;
+        resource.FileType = file.Type;
         resource.Description = file.Type + " - " + file.LastModifiedDate.ToString() + " - " + file.Size.ToString();
 
         var httpResponse = await dataService.Post<ResourceDto, Result<ResourceDto>>("api/notes/savefile", resource);
@@ -262,6 +273,8 @@
             resource = httpResponse.Response.Entity;
             await showMessages.ShowOkMessage("File upload!");
         }        
+
+        resourceControl = "1";
     }
 
 

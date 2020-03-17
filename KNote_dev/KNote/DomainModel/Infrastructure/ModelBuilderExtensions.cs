@@ -97,6 +97,7 @@ namespace KNote.DomainModel.Infrastructure
             modelBuilder.Entity<TraceNoteType>().HasIndex(_ => _.Key).IsUnique(true);
             modelBuilder.Entity<User>().HasIndex(_ => _.UserName).IsUnique(true);
             modelBuilder.Entity<User>().HasIndex(u => u.EMail).IsUnique(true);
+            modelBuilder.Entity<Resource>().HasIndex(_ => new { _.NoteId, _.Name }).IsUnique(true);
         }
 
         public static void Seed(this ModelBuilder modelBuilder)

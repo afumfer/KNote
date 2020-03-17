@@ -64,8 +64,8 @@
     private async Task OnFileSelected(string fileBase64)
     {
         resource.ContentBase64 = fileBase64;
-        resource.Path = "KNote";
-        resource.Path = "Description resource";
+        resource.Name = "KNote";
+        resource.Description = "Description resource";
 
         var httpResponse = await dataService.Post("api/notes/savefile", resource);
         if (httpResponse.Error)

@@ -9,12 +9,13 @@ namespace KNote.Shared.Dto
     public class ResourceInfoDto : KntModelBase
     {
         public Guid ResourceId { get; set; }
-        public string Path { get; set; }
+        public string Name { get; set; }
+        public string Container { get; set; }
         public string Description { get; set; }
         public int Order { get; set; }
-        public string FileMimeType { get; set; }
+        public string FileType { get; set; }
         public bool ContentInDB { get; set; }
-        public byte[] ContentDB { get; set; }
+        public byte[] ContentArrayBytes { get; set; }
         public Guid NoteId { get; set; }
     }
 }

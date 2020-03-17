@@ -247,7 +247,7 @@ namespace KNote.Server.Controllers
                 if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
                 {
                     var resourceArrBytes = Convert.FromBase64String(resource.ContentBase64);
-                    resource.FullPath = await _fileStore.SaveFile(resourceArrBytes, resource.Path, "NotesFiles");                    
+                    resource.FullPath = await _fileStore.SaveFile(resourceArrBytes, resource.Name, "NotesFiles");                    
                 }
                 resApi.Entity = resource;
                 return Ok(resApi);
@@ -268,7 +268,7 @@ namespace KNote.Server.Controllers
                 if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
                 {
                     var resourceAB = Convert.FromBase64String(resource.ContentBase64);
-                    resource.Path = await _fileStore.SaveFile(resourceAB, resource.FileMimeType, "NotesFiles");
+                    resource.FullPath = await _fileStore.SaveFile(resourceAB, resource.FileType, "NotesFiles");
 
                     //persona.Foto = await almacenadorDeArchivos.GuardarArchivo(fotoPersona, "jpg", "personas");
                 }
@@ -277,7 +277,7 @@ namespace KNote.Server.Controllers
                 //context.Add(persona);
                 //await context.SaveChangesAsync();
                 //return persona.Id;
-                return Ok(resource.Path);
+                return Ok(resource.FullPath);
 
             }
             catch (Exception ex)

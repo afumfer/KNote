@@ -13,7 +13,9 @@ namespace KNote.Shared.Dto
 
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         [MaxLength(1024)]
-        public string Path { get; set; }
+        public string Name { get; set; }
+
+        public string Container { get; set; }
 
         public string FullPath { get; set; }
 
@@ -22,11 +24,11 @@ namespace KNote.Shared.Dto
         public int Order { get; set; }
 
         [MaxLength(64)]
-        public string FileMimeType { get; set; }
+        public string FileType { get; set; }
 
         public bool ContentInDB { get; set; }
 
-        public byte[] ContentDB { get; set; }
+        public byte[] ContentArrayBytes { get; set; }
         
         public string ContentBase64 { get; set; }
 

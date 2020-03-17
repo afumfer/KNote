@@ -10,6 +10,6 @@ namespace KNote.Shared.Dto
         public long Size { get; set; }
         public string Type { get; set; }
         public DateTime? LastModifiedDate { get; set; }
-        public string FileBase64 { get; set; }
+        public string ContentBase64 { get; set; }
     }
 }

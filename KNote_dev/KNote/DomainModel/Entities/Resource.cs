@@ -32,18 +32,32 @@ namespace KNote.DomainModel.Entities
             }
         }
 
-        private string _path;
+        private string _name;
         [Required(ErrorMessage = "KMSG: El nombre del recurso es requerido")]
         [MaxLength(1024)]        
-        public string Path
+        public string Name
         {
-            get { return _path; }
+            get { return _name; }
             set
             {
-                if (_path != value)
+                if (_name != value)
                 {
-                    _path = value;
-                    OnPropertyChanged("Path");
+                    _name = value;
+                    OnPropertyChanged("Name");
+                }
+            }
+        }
+
+        private string _container;
+        public string Container
+        {
+            get { return _container; }
+            set
+            {
+                if (_container != value)
+                {
+                    _container = value;
+                    OnPropertyChanged("Container");
                 }
             }
         }
@@ -76,17 +90,17 @@ namespace KNote.DomainModel.Entities
             }
         }
 
-        private string _fileMimeType;
+        private string _fileType;
         [MaxLength(64)]
-        public string FileMimeType
+        public string FileType
         {
-            get { return _fileMimeType; }
+            get { return _fileType; }
             set
             {
-                if (_fileMimeType != value)
+                if (_fileType != value)
                 {
-                    _fileMimeType = value;
-                    OnPropertyChanged("FileMimeType");
+                    _fileType = value;
+                    OnPropertyChanged("FileType");
                 }
             }
         }
@@ -105,16 +119,16 @@ namespace KNote.DomainModel.Entities
             }
         }
 
-        private byte[] _contentDB;
-        public byte[] ContentDB
+        private byte[] _contentArrayBytes;
+        public byte[] ContentArrayBytes
         {
-            get { return _contentDB; }
+            get { return _contentArrayBytes; }
             set
             {
-                if (_contentDB != value)
+                if (_contentArrayBytes != value)
                 {
-                    _contentDB = value;
-                    OnPropertyChanged("ContentDB");
+                    _contentArrayBytes = value;
+                    OnPropertyChanged("ContentArrayBytes");
                 }
             }
         }
@@ -163,8 +177,8 @@ namespace KNote.DomainModel.Entities
             // Capturar las validaciones implementadas vía atributos.
             // ---
 
-            Validator.TryValidateProperty(this.Path,
-               new ValidationContext(this, null, null) { MemberName = "Path" },
+            Validator.TryValidateProperty(this.Name,
+               new ValidationContext(this, null, null) { MemberName = "Name" },
                results);
 
             //----
