@@ -25,12 +25,12 @@
     </li>
     <li class="nav-item">
         <a class="nav-link @((selectedPanel == 4) ? "active" : "")" @onclick="@(() => ShowPanel(4))">
-            <span class="oi oi-task mr-2"></span>Upload file
+            <span class="oi oi-task mr-2"></span>KntResource upload
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
-            <span class="oi oi-envelope-open mr-2"></span> ... panel 5
+            <span class="oi oi-envelope-open mr-2"></span>File upload
         </a>
     </li>
     <li class="nav-item">
@@ -111,9 +111,34 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2"> Upload image (panel: @selectedPanel)</h4>
+    <h4 class="mt-2"> KntResource upload  (panel: @selectedPanel)</h4>
 
-    <InputImg Label="Upload image file" ImageBase64="@fileTemp" OnSelectedImage="OnImgSelected" />
+    <button class="btn btn-primary" @onclick="OnKntResourceTest">KntResource selector test</button>
+
+    @if (resourceSelected != null)
+    {
+        <p>Name: @resourceSelected.Name</p>
+        <p>FullPath: @resourceSelected.FullPath</p>
+        <p>Description: @resourceSelected.Description</p>
+        <p>Container: @resourceSelected.Container</p>
+        <p>FileType: @resourceSelected.FileType</p>
+        <p>Order: @resourceSelected.Order </p>
+        <p>ResourceId: @resourceSelected.ResourceId </p>
+        <p>NoteId: @resourceSelected.NoteId </p>
+
+        @if (resourceSelected.FileType == "image/jpeg")
+        {            
+            <hr />
+            <div>
+                <div style="margin:10px">
+                    <img src="data:image/jpeg;base64, @resourceSelected.ContentBase64" style="width: 400px;" />
+                </div>
+            </div>
+            <hr />
+        }
+
+    }
+
 
 </div>
 
@@ -172,6 +197,8 @@
 
 <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancel" OnConfirm="onConfirm"></KntFolderSelector>
 
+<KntResourceSelector @ref="kntResourceSelector" OnCancel="onCancelResource" OnConfirm="onConfirmResource"></KntResourceSelector>
+
 @code {
     [CascadingParameter] protected AppState appState { get; set; }
     [CascadingParameter] private Task<AuthenticationState> athenticationState { get; set; }
@@ -180,12 +207,16 @@
 
     private int currentCount = 0;
     private KntFolderSelector kntFolderSelector;
+    private KntResourceSelector kntResourceSelector;
 
     private FolderInfoDto folderSelected;
+    private ResourceDto resourceSelected;
 
     private string fileTemp;
     private ResourceDto resource = new ResourceDto();
     private string resourceControl = "0";
+
+    #region Test incremente count
 
     private async Task IncrementCount()
     {
@@ -199,10 +230,7 @@
             currentCount--;
     }
 
-    private void OnFolderSelectorTest()
-    {
-        kntFolderSelector.Show();
-    }
+    #endregion 
 
     #region  AppState changed subscription
 
@@ -216,6 +244,15 @@
         appState.OnChange -= StateHasChanged;
     }
 
+    #endregion
+
+    #region Test Folder Selector
+
+    private void OnFolderSelectorTest()
+    {
+        kntFolderSelector.Show();
+    }
+
     private void onConfirm(FolderInfoDto f)
     {
         folderSelected = f;
@@ -227,32 +264,39 @@
         kntFolderSelector.Hide();
     }
 
+    #endregion 
+
+    #region Test Resource Selector
+
+    private void OnKntResourceTest()
+    {
+        kntResourceSelector.Show();
+    }
+
+    private async Task onConfirmResource(ResourceDto r)
+    {
+        resourceSelected = r;
+        kntResourceSelector.Hide();
+        await showMessages.ShowOkMessage("File upload!");
+    }
+
+    private void onCancelResource()
+    {
+        kntResourceSelector.Hide();
+    }
+
     #endregion
+
+    #region Show Panel Method
 
     private void ShowPanel(int panel)
     {
         selectedPanel = panel;
     }
 
-    private async Task OnImgSelected(string fileBase64)
-    {        
-        resource.ContentBase64 = fileBase64;
-        resource.Name = "KNote";
-        resource.FileType = "jpg";
-        resource.Description = "Description resource";
+    #endregion 
 
-        var httpResponse = await dataService.Post("api/notes/savefile2", resource);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            Console.WriteLine("File upload created !!");
-            await showMessages.ShowOkMessage("File upload!");
-        }
-        fileTemp = "";
-    }
+    #region Test file upload
 
     private async Task OnFileSelected(KntFileInfo file)
     {
@@ -269,13 +313,13 @@
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {            
+        {
             resource = httpResponse.Response.Entity;
             await showMessages.ShowOkMessage("File upload!");
-        }        
+        }
 
         resourceControl = "1";
     }
 
-
+    #endregion 
 }
