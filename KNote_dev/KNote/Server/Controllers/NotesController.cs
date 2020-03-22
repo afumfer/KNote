@@ -205,7 +205,17 @@ namespace KNote.Server.Controllers
             {
                 var resApi = await _service.Notes.SaveAsync(note);
                 if (resApi.IsValid)
+                {
+                    foreach(var resource in resApi.Entity.ResourcesDto)
+                    {
+                        if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
+                        {                            
+                            resource.FullPath = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
+                        }
+                    }
                     return Ok(resApi);
+                }
+
                 else
                     return BadRequest(resApi);
             }
@@ -245,10 +255,8 @@ namespace KNote.Server.Controllers
             try
             {
                 if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
-                {
-                    var resourceArrBytes = Convert.FromBase64String(resource.ContentBase64);
-                    resource.Container = "NotesFiles";
-                    resource.FullPath = await _fileStore.SaveFile(resourceArrBytes, resource.Name, resource.Container);
+                {                                                            
+                    resource.FullPath = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
                 }
                 resApi.Entity = resource;
                 return Ok(resApi);

@@ -19,14 +19,14 @@ namespace KNote.Server.Helpers
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<string> EditFile(byte[] content, string extension, string container, string pathFile)
+        public async Task<string> EditFile(string contentBase64, string extension, string container, string pathFile)
         {
             if (!string.IsNullOrEmpty(pathFile))
             {
                 await DeleteFile(pathFile, container);
             }
 
-            return await SaveFile(content, extension, container);
+            return await SaveFile(contentBase64, extension, container);
         }
 
         public Task DeleteFile(string path, string container)
@@ -41,9 +41,10 @@ namespace KNote.Server.Helpers
             return Task.FromResult(0);
         }
 
-        public async Task<string> SaveFile(byte[] content, string filename, string container)
-        {            
-            string folder = Path.Combine(env.WebRootPath, container);
+        public async Task<string> SaveFile(string contentBase64, string filename, string container)
+        {
+            var folder = Path.Combine(env.WebRootPath, container);
+            var content = Convert.FromBase64String(contentBase64);
 
             if (!Directory.Exists(folder))
             {
@@ -55,27 +56,46 @@ namespace KNote.Server.Helpers
 
             // TODO: !!! Aquí falta el nombre de la subaplicación IIS e invertir las barras de las rutas \
 
-            var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
+            var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}/{httpContextAccessor.HttpContext.Request.PathBase}";
             var fullPath = Path.Combine(actualUrl, container, filename);
             return fullPath;
         }
 
-        public async Task<string> SaveFile2(byte[] content, string extension, string container)
-        {
-            var filename = $"{Guid.NewGuid()}.{extension}";
-            string folder = Path.Combine(env.WebRootPath, container);
+        //public async Task<string> SaveFile(byte[] content, string filename, string container)
+        //{            
+        //    string folder = Path.Combine(env.WebRootPath, container);
 
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
+        //    if (!Directory.Exists(folder))
+        //    {
+        //        Directory.CreateDirectory(folder);
+        //    }
 
-            string pathSaved = Path.Combine(folder, filename);
-            await File.WriteAllBytesAsync(pathSaved, content);
+        //    string pathSaved = Path.Combine(folder, filename);
+        //    await File.WriteAllBytesAsync(pathSaved, content);
 
-            var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
-            var pathForBD = Path.Combine(actualUrl, container, filename);
-            return pathForBD;
-        }
+        //    // TODO: !!! Aquí falta el nombre de la subaplicación IIS e invertir las barras de las rutas \
+
+        //    var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}/{httpContextAccessor.HttpContext.Request.PathBase}";
+        //    var fullPath = Path.Combine(actualUrl, container, filename);
+        //    return fullPath;
+        //}
+
+        //public async Task<string> SaveFile2(byte[] content, string extension, string container)
+        //{
+        //    var filename = $"{Guid.NewGuid()}.{extension}";
+        //    string folder = Path.Combine(env.WebRootPath, container);
+
+        //    if (!Directory.Exists(folder))
+        //    {
+        //        Directory.CreateDirectory(folder);
+        //    }
+
+        //    string pathSaved = Path.Combine(folder, filename);
+        //    await File.WriteAllBytesAsync(pathSaved, content);
+
+        //    var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
+        //    var pathForBD = Path.Combine(actualUrl, container, filename);
+        //    return pathForBD;
+        //}
     }
 }

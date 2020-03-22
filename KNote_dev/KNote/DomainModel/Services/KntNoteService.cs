@@ -502,21 +502,28 @@ namespace KNote.DomainModel.Services
                         // ...
                         resRep = await _repository.Notes.AddAsync(newEntity);
                     }
-
-                    foreach(NoteKAttributeDto atr in entity.KAttributesDto)
-                    {
-                        var atrInfo = atr.GetSimpleDto<NoteKAttributeInfoDto>();
-                        var res = SaveAttrtibute(atrInfo);
-                        // TODO: !!! pendiente de volcar errores en resRep
-                    }
-
-                    foreach (ResourceDto resource in entity.ResourcesDto)
-                    {
-                        var resInfo = resource.GetSimpleDto<ResourceInfoDto>();
-                        var res = SaveResource(resInfo);
-                        // TODO: !!! pendiente de volcar errores en resRep
-                    }
                 }
+
+                resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+
+                foreach (NoteKAttributeDto atr in entity.KAttributesDto)
+                {                    
+                    var res = SaveAttrtibute(atr);
+                    resService.Entity.KAttributesDto.Add(res.Entity);
+
+                    // TODO: !!! pendiente de volcar errores en resRep
+                }
+
+                foreach (ResourceDto resource in entity.ResourcesDto)
+                {                                        
+                    resource.ContentArrayBytes = Convert.FromBase64String(resource.ContentBase64);
+                    var res = SaveResource(resource);
+                    res.Entity.ContentBase64 = resource.ContentBase64;
+                    resService.Entity.ResourcesDto.Add(res.Entity);
+
+                    // TODO: !!! pendiente de volcar errores en resRep
+                }
+
             }
             catch (Exception ex)
             {
@@ -524,24 +531,25 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+            
+
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public Result<NoteKAttributeInfoDto> SaveAttrtibute(NoteKAttributeInfoDto entityInfo)
+        public Result<NoteKAttributeDto> SaveAttrtibute(NoteKAttributeDto entity)
         {
             Result<NoteKAttribute> resRep = null;
-            var resService = new Result<NoteKAttributeInfoDto>();
+            var resService = new Result<NoteKAttributeDto>();
 
             try
             {
-                if (entityInfo.NoteKAttributeId == Guid.Empty)
+                if (entity.NoteKAttributeId == Guid.Empty)
                 {
-                    entityInfo.NoteKAttributeId = Guid.NewGuid();
+                    entity.NoteKAttributeId = Guid.NewGuid();
                     var newEntity = new NoteKAttribute();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
@@ -558,7 +566,7 @@ namespace KNote.DomainModel.Services
                         _repository.NoteKAttributes.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.NoteKAttributes.Get(entityInfo.NoteKAttributeId).Entity;
+                    var entityForUpdate = _repository.NoteKAttributes.Get(entity.NoteKAttributeId).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.NoteKAttributes.ThrowKntException = true;
@@ -567,13 +575,13 @@ namespace KNote.DomainModel.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
+                        entityForUpdate.SetSimpleDto(entity);
                         resRep = _repository.NoteKAttributes.Update(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new NoteKAttribute();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
@@ -588,27 +596,28 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteKAttributeInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<NoteKAttributeDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public Result<ResourceInfoDto> SaveResource(ResourceInfoDto entityInfo)
+        public Result<ResourceDto> SaveResource(ResourceDto entity)
         {
             Result<Resource> resRep = null;
-            var resService = new Result<ResourceInfoDto>();
+            var resService = new Result<ResourceDto>();
 
             try
             {
-                if (entityInfo.ResourceId == Guid.Empty)
+                if (entity.ResourceId == Guid.Empty)
                 {
-                    entityInfo.ResourceId = Guid.NewGuid();
+                    entity.ResourceId = Guid.NewGuid();
                     var newEntity = new Resource();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
+                    newEntity.Container = @"NotesFiles\" + DateTime.Now.Year.ToString();
 
                     resRep = _repository.Resources.Add(newEntity);
                 }
@@ -622,7 +631,7 @@ namespace KNote.DomainModel.Services
                         _repository.Resources.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.Resources.Get(entityInfo.ResourceId).Entity;
+                    var entityForUpdate = _repository.Resources.Get(entity.ResourceId).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.Resources.ThrowKntException = true;
@@ -631,16 +640,17 @@ namespace KNote.DomainModel.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
+                        entityForUpdate.SetSimpleDto(entity);
                         resRep = _repository.Resources.Update(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new Resource();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
+                        newEntity.Container = @"NotesFiles\" + DateTime.Now.Year.ToString();
 
                         resRep = _repository.Resources.Add(newEntity);
                     }
@@ -652,7 +662,7 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<ResourceInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<ResourceDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
