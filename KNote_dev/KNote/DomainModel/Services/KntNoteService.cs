@@ -507,9 +507,15 @@ namespace KNote.DomainModel.Services
                     {
                         var atrInfo = atr.GetSimpleDto<NoteKAttributeInfoDto>();
                         var res = SaveAttrtibute(atrInfo);
-                        // TODO: pendiente de volcar errores en resRep
+                        // TODO: !!! pendiente de volcar errores en resRep
                     }
 
+                    foreach (ResourceDto resource in entity.ResourcesDto)
+                    {
+                        var resInfo = resource.GetSimpleDto<ResourceInfoDto>();
+                        var res = SaveResource(resInfo);
+                        // TODO: !!! pendiente de volcar errores en resRep
+                    }
                 }
             }
             catch (Exception ex)

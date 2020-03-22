@@ -65,36 +65,47 @@
 
 @code {
     [Parameter] public string Title { get; set; } = "KNote resource selector";
-    [Parameter] public ResourceDto Resource { get; set; }
+    //[Parameter] public ResourceDto Resource { get; set; }
     [Parameter] public EventCallback<ResourceDto> OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 
     private bool ShowDialog = false;
-    private ResourceDto resource = new ResourceDto();
+    private ResourceDto resource;
     private string resourceFlowControl = "0";
 
-    public void Show() => ShowDialog = true;
+    public void Show()
+    {
+        resource = new ResourceDto();
+
+        //if (Resource != null)
+        //{
+        //    // TODO: Pendiente refactorizar con Map
+        //    resource.ResourceId = Resource.ResourceId;
+        //    resource.Name = Resource.Name;
+        //    resource.Container = Resource.Container;
+        //    resource.FullPath = Resource.FullPath;
+        //    resource.Description = Resource.Description;
+        //    resource.Order = Resource.Order;
+        //    resource.FileType = Resource.FileType;
+        //    resource.ContentInDB = Resource.ContentInDB;
+        //    resource.ContentArrayBytes = Resource.ContentArrayBytes;
+        //    resource.ContentBase64 = Resource.ContentBase64;
+        //    resource.NoteId = Resource.NoteId;
+        //}
+
+        ShowDialog = true;
+    }
+
     public void Hide() => ShowDialog = false;
 
     protected override void OnInitialized()
     {
-        if (Resource != null)
-        {
-            // TODO: Pendiente refactorizar con Map
-            resource.ResourceId = Resource.ResourceId;
-            resource.Name = Resource.Name;
-            resource.Container = Resource.Container;
-            resource.FullPath = Resource.FullPath;
-            resource.Description = Resource.Description;
-            resource.Order = Resource.Order;
-            resource.FileType = Resource.FileType;
-            resource.ContentInDB = Resource.ContentInDB;
-            resource.ContentArrayBytes = Resource.ContentArrayBytes;
-            resource.ContentBase64 = Resource.ContentBase64;
-            resource.NoteId = Resource.NoteId;
-        }
-
         base.OnInitialized();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
     }
 
     private async Task OnFileSelected(KntFileInfo file)
@@ -104,7 +115,7 @@
         resource.ContentBase64 = file.ContentBase64;
         resource.Name = file.Name;
         resource.FileType = file.Type;
-        
+
         var httpResponse = await dataService.Post<ResourceDto, Result<ResourceDto>>("api/notes/savefile", resource);
         if (httpResponse.Error)
         {
@@ -112,7 +123,7 @@
         }
         else
         {
-            resource = httpResponse.Response.Entity;            
+            resource = httpResponse.Response.Entity;
         }
 
         resourceFlowControl = "1";
@@ -120,24 +131,26 @@
 
     private async Task _onConfirm()
     {
-        if (Resource == null)
-        {
-            Resource = new ResourceDto();
-        }
+        //if (Resource == null)
+        //{
+        //    Resource = new ResourceDto();
+        //}
 
-        // TODO: Pendiente refactorizar con Map
-        Resource.ResourceId = resource.ResourceId;
-        Resource.Name = resource.Name;
-        Resource.Container = resource.Container;
-        Resource.FullPath = resource.FullPath;
-        Resource.Description = resource.Description;
-        Resource.Order = resource.Order;
-        Resource.FileType = resource.FileType;
-        Resource.ContentInDB = resource.ContentInDB;
-        Resource.ContentArrayBytes = resource.ContentArrayBytes;
-        Resource.ContentBase64 = resource.ContentBase64;
-        Resource.NoteId = resource.NoteId;
+        //// TODO: Pendiente refactorizar con Map
+        //Resource.ResourceId = resource.ResourceId;
+        //Resource.Name = resource.Name;
+        //Resource.Container = resource.Container;
+        //Resource.FullPath = resource.FullPath;
+        //Resource.Description = resource.Description;
+        //Resource.Order = resource.Order;
+        //Resource.FileType = resource.FileType;
+        //Resource.ContentInDB = resource.ContentInDB;
+        //Resource.ContentArrayBytes = resource.ContentArrayBytes;
+        //Resource.ContentBase64 = resource.ContentBase64;
+        //Resource.NoteId = resource.NoteId;
 
-        await OnConfirm.InvokeAsync(Resource);
+        //await OnConfirm.InvokeAsync(Resource);
+
+        await OnConfirm.InvokeAsync(resource);
     }
 }
