@@ -119,7 +119,15 @@ namespace KNote.Server.Controllers
             {
                 var resApi = await _service.Notes.GetAsync(noteId);
                 if (resApi.IsValid)
+                {
+                    foreach (var r in resApi.Entity.ResourcesDto)
+                    {
+                        r.ContentBase64 = Convert.ToBase64String(r.ContentArrayBytes);
+                        r.ContentArrayBytes = null;
+                        r.FullUrl = _fileStore.GetFullUrl(r.Name, r.Container);
+                    }
                     return Ok(resApi);
+                }
                 else
                 {
                     return BadRequest(resApi);
@@ -210,7 +218,7 @@ namespace KNote.Server.Controllers
                     {
                         if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
                         {                            
-                            resource.FullPath = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
+                            resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
                         }
                     }
                     return Ok(resApi);
@@ -256,7 +264,7 @@ namespace KNote.Server.Controllers
             {
                 if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
                 {                                                            
-                    resource.FullPath = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
+                    resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
                 }
                 resApi.Entity = resource;
                 return Ok(resApi);

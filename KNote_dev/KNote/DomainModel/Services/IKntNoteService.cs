@@ -24,15 +24,12 @@ namespace KNote.DomainModel.Services
         Result<List<NoteItemDto>> GetNoteItemList(Guid? folderId);
         Result<List<NoteInfoDto>> GetFilter(int _page, int _limit, Guid folderId, string query);
         Result<NoteDto> New(NoteInfoDto entity = null);
-        Result<NoteDto> Save(NoteDto entity);
         Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo);
-
         Result<NoteKAttributeDto> SaveAttrtibute(NoteKAttributeDto entity);
-        Result<ResourceDto> SaveResource(ResourceDto entity);
+        Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity);
         Result<NoteTaskInfoDto> SaveNoteTask(NoteTaskInfoDto entityInfo);
         Result<WindowInfoDto> SaveWindow(WindowInfoDto entityInfo);
-        Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo);
-        
+        Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo);        
         Result<NoteInfoDto> Delete(Guid id);
         Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
         Result<List<NoteInfoDto>> RecentNotes();

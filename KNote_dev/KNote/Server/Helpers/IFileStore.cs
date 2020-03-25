@@ -10,5 +10,6 @@ namespace KNote.Server.Helpers
         Task<string> EditFile(string contentBase64, string extension, string container, string path);
         Task DeleteFile(string path, string container);
         Task<string> SaveFile(string contentBase64, string extension, string container);
+        string GetFullUrl(string filename, string container);
     }
 }

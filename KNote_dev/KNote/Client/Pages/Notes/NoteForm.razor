@@ -142,7 +142,13 @@
         <div class="@((selectedPanel == 3) ? "" : "d-none")">
             <div class="mt-4"></div>
             <button class="btn btn-primary" @onclick="OnResourceSelector">KntResource selector test</button>
-            <NoteKResources Resources="Note.ResourcesDto"></NoteKResources>
+            <NoteKResources 
+                Resources="Note.ResourcesDto"
+                OnDelete="DeleteResource" 
+                OnInsertInDesription="InsertInDescription"
+                            >
+
+            </NoteKResources>
         </div>
 
         <div class="@((selectedPanel == 4) ? "" : "d-none")">
@@ -286,6 +292,28 @@
         kntResourceSelector.Hide();
     }
 
-    #endregion 
+    private async Task DeleteResource(ResourceDto resource)
+    {
+
+        //var httpResponse = await dataService.Delete($"api/users/{itemDelete.UserId}");
+        //if (httpResponse.Error)
+        //{
+        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        //}
+        //else
+        //{
+        //    users = null;
+        //    await Load();
+        //}
+
+        Note.ResourcesDto.Remove(resource);
+    }
+
+    private void InsertInDescription(ResourceDto resource)
+    {
+
+    }
+
+    #endregion
 
 }

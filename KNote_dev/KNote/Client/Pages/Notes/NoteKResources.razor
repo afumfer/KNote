@@ -18,13 +18,13 @@
                         <td>@item.Order</td>                        
                         <td>
                             <span class="float-right">
-                                <button class="btn btn-sm btn-warning mx-1"
-                                        @onclick="@(() => ActionX(item))"
-                                        data-toggle="tooltip" title="Edit user">
-                                    <i class="fa fa-minus"></i>
+                                <button class="btn btn-sm btn-info mx-1"
+                                        @onclick="@(() => onInsertInDesription(item))"
+                                        data-toggle="tooltip" title="Insert in description">
+                                    <i class="fa fa-clipboard"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => ActionX(item))"
+                                        @onclick="@(() => onDelete(item))"
                                         data-toggle="tooltip" title="Delete resource">
                                     <i class="fa fa-minus"></i>
                                 </button>
@@ -39,11 +39,17 @@
 
 @code {
     [Parameter] public List<ResourceDto> Resources { get; set; }
+    [Parameter] public EventCallback<ResourceDto> OnDelete { get; set; }
+    [Parameter] public EventCallback<ResourceDto> OnInsertInDesription { get; set; }
 
-
-    private void ActionX(ResourceDto r)
+    private async Task onInsertInDesription(ResourceDto resource)
     {
+        await OnInsertInDesription.InvokeAsync(resource);
+    }
 
+    private async Task onDelete(ResourceDto resource)
+    {
+        await OnDelete.InvokeAsync(resource);
     }
 
 }

@@ -17,7 +17,7 @@ namespace KNote.Shared.Dto
 
         public string Container { get; set; }
 
-        public string FullPath { get; set; }
+        public string FullUrl { get; set; }
 
         public string Description { get; set; }
 
