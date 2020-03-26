@@ -27,6 +27,7 @@ namespace KNote.DomainModel.Services
         Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo);
         Result<NoteKAttributeDto> SaveAttrtibute(NoteKAttributeDto entity);
         Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity);
+        Task<Result<ResourceDto>> DeleteResourceAsync(Guid id);
         Result<NoteTaskInfoDto> SaveNoteTask(NoteTaskInfoDto entityInfo);
         Result<WindowInfoDto> SaveWindow(WindowInfoDto entityInfo);
         Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo);        

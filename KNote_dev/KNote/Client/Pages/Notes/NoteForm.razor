@@ -1,47 +1,49 @@
 ﻿@inject IShowMessages showMessages
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManager
 
 <!-- -->
 
-    <EditForm Model="Note" Context="formContext">
+<EditForm Model="Note" Context="formContext">
 
-        <DataAnnotationsValidator></DataAnnotationsValidator>
+    <DataAnnotationsValidator></DataAnnotationsValidator>
 
-        <!-- Title -->
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-6">
-                    <h3>@Title</h3>
-                </div>
-                <div class="col-6 float-right">
-                    <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
-                </div>
+    <!-- Title -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">
+                <h3>@Title</h3>
+            </div>
+            <div class="col-6 float-right">
+                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
             </div>
         </div>
-        <hr class="mt-0" />
+    </div>
+    <hr class="mt-0" />
 
-        <!-- Tab -->
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link @((selectedPanel == 1) ? "active" : "")" @onclick="@(() => ShowPanel(1))">
-                    <span class="oi oi-document mr-2"></span>Overview
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @((selectedPanel == 2) ? "active" : "")" @onclick="@(() => ShowPanel(2))">
-                    <span class="oi oi-bookmark mr-2"></span>Attributes
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @((selectedPanel == 3) ? "active" : "")" @onclick="@(() => ShowPanel(3))">
-                    <span class="oi oi-cloud-upload mr-2"></span>Resources
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @((selectedPanel == 4) ? "active" : "")" @onclick="@(() => ShowPanel(4))">
-                    <span class="oi oi-task mr-2"></span>Task
-                </a>
-            </li>
-            @*<li class="nav-item">
+    <!-- Tab -->
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link @((selectedPanel == 1) ? "active" : "")" @onclick="@(() => ShowPanel(1))">
+                <span class="oi oi-document mr-2"></span>Overview
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @((selectedPanel == 2) ? "active" : "")" @onclick="@(() => ShowPanel(2))">
+                <span class="oi oi-bookmark mr-2"></span>Attributes
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @((selectedPanel == 3) ? "active" : "")" @onclick="@(() => ShowPanel(3))">
+                <span class="oi oi-cloud-upload mr-2"></span>Resources
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @((selectedPanel == 4) ? "active" : "")" @onclick="@(() => ShowPanel(4))">
+                <span class="oi oi-task mr-2"></span>Task
+            </a>
+        </li>
+        @*<li class="nav-item">
                 <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
                     <span class="oi oi-envelope-open mr-2"></span>Messages
                 </a>
@@ -62,147 +64,145 @@
                 </a>
             </li>*@
 
-            @*<li class="nav-item">
+        @*<li class="nav-item">
                     <a class="nav-link disabled" href="#">Script</a>
             </li>*@
-        </ul>
+    </ul>
 
-        <!-- Panels -->
-        <div class="@((selectedPanel == 1) ? "" : "d-none")">
+    <!-- Panels -->
+    <div class="@((selectedPanel == 1) ? "" : "d-none")">
 
-            <div class="mt-4"></div>
+        <div class="mt-4"></div>
 
-            <div class="form-group row">
-                <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
-                <div class="input-group col-sm-11" id="atrTopic">
-                    <InputText class="form-control" @bind-Value="@Note.Topic" />
-                    <div class="input-group-append">
-                        <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Note number (automatically assigned)">
-                            #@Note.NoteNumber
-                        </label>
-                    </div>
-                </div>
-                <ValidationMessage For="@(() => Note.Topic)" />
-            </div>
-
-            <div class="form-group row">
-                <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
-                <div class="input-group col-sm-11" id="atrFolder">
-                    <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
-                                data-toggle="tooltip" title="Select folder">
-                            ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
-                <ValidationMessage For="@(() => Note.FolderId)" />
-            </div>
-
-            <div class="form-group row">
-                <label for="atrTags" class="col-sm-1 col-form-label">Tags:</label>
-                <div class="input-group col-sm-11" id="atrTags">
-                    <InputText class="form-control" @bind-Value="@Note.Tags" />
-                </div>
-                <ValidationMessage For="@(() => Note.Tags)" />
-            </div>
-
-            <div class="form-group row">
-                <label for="atrPriority" class="col-sm-1 col-form-label">Priority:</label>
-                <div class="input-group col-sm-5" id="atrPriority">
-                    <InputNumber class="form-control col-sm-11" @bind-Value="@Note.Priority" />
-                    <ValidationMessage For="@(() => Note.Priority)" />
-                </div>
-
-                <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
-                <div class="input-group col-sm-5" id="atrNoteType">
-                    <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">
-                        @foreach (var ntype in NoteTypes)
-                        {
-                            <option value=@ntype.NoteTypeId>@ntype.Name</option>
-                        }
-                    </select>
-                    <ValidationMessage For="@(() => Note.NoteTypeId)" />
+        <div class="form-group row">
+            <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
+            <div class="input-group col-sm-11" id="atrTopic">
+                <InputText class="form-control" @bind-Value="@Note.Topic" />
+                <div class="input-group-append">
+                    <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Note number (automatically assigned)">
+                        #@Note.NoteNumber
+                    </label>
                 </div>
             </div>
+            <ValidationMessage For="@(() => Note.Topic)" />
+        </div>
 
-            <div class="form-group form-markdown">
-                <InputMarkdown @bind-Value="@Note.Description"
-                               For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
+        <div class="form-group row">
+            <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
+            <div class="input-group col-sm-11" id="atrFolder">
+                <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
+                            data-toggle="tooltip" title="Select folder">
+                        ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <ValidationMessage For="@(() => Note.FolderId)" />
+        </div>
 
+        <div class="form-group row">
+            <label for="atrTags" class="col-sm-1 col-form-label">Tags:</label>
+            <div class="input-group col-sm-11" id="atrTags">
+                <InputText class="form-control" @bind-Value="@Note.Tags" />
+            </div>
+            <ValidationMessage For="@(() => Note.Tags)" />
+        </div>
+
+        <div class="form-group row">
+            <label for="atrPriority" class="col-sm-1 col-form-label">Priority:</label>
+            <div class="input-group col-sm-5" id="atrPriority">
+                <InputNumber class="form-control col-sm-11" @bind-Value="@Note.Priority" />
+                <ValidationMessage For="@(() => Note.Priority)" />
             </div>
 
+            <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
+            <div class="input-group col-sm-5" id="atrNoteType">
+                <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">
+                    @foreach (var ntype in NoteTypes)
+                    {
+                        <option value=@ntype.NoteTypeId>@ntype.Name</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Note.NoteTypeId)" />
+            </div>
         </div>
 
-        <div class="@((selectedPanel == 2) ? "" : "d-none")">
-            <div class="mt-4"></div>
-            <NoteKAttributes Attributes="Note.KAttributesDto"></NoteKAttributes>
-        </div>
-
-        <div class="@((selectedPanel == 3) ? "" : "d-none")">
-            <div class="mt-4"></div>
-            <button class="btn btn-primary" @onclick="OnResourceSelector">KntResource selector test</button>
-            <NoteKResources 
-                Resources="Note.ResourcesDto"
-                OnDelete="DeleteResource" 
-                OnInsertInDesription="InsertInDescription"
-                            >
-
-            </NoteKResources>
-        </div>
-
-        <div class="@((selectedPanel == 4) ? "" : "d-none")">
-
-            <div class="mt-4"></div>
-
-            <h4 class="mt-2"> Tasks (panel: @selectedPanel)</h4>
-
-            Data for panel @selectedPanel
+        <div class="form-group form-markdown">
+            <InputMarkdown @bind-Value="@Note.Description"
+                           For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
 
         </div>
 
-        <div class="@((selectedPanel == 5) ? "" : "d-none")">
+    </div>
 
-            <div class="mt-4"></div>
+    <div class="@((selectedPanel == 2) ? "" : "d-none")">
+        <div class="mt-4"></div>
+        <NoteKAttributes Attributes="Note.KAttributesDto"></NoteKAttributes>
+    </div>
 
-            <h4 class="mt-2"> Messages (panel: @selectedPanel)</h4>
+    <div class="@((selectedPanel == 3) ? "" : "d-none")">
+        <div class="mt-4"></div>
+        <NoteKResources Resources="Note.ResourcesDto"
+                        OnDelete="DeleteResource"
+                        OnInsertInDesription="InsertInDescription"
+                        OnNewResource="OnResourceSelector">
 
-            Data for panel @selectedPanel
+        </NoteKResources>
+    </div>
 
-        </div>
+    <div class="@((selectedPanel == 4) ? "" : "d-none")">
 
-        <div class="@((selectedPanel == 6) ? "" : "d-none")">
+        <div class="mt-4"></div>
 
-            <div class="mt-4"></div>
+        <h4 class="mt-2"> Tasks (panel: @selectedPanel)</h4>
 
-            <h4 class="mt-2"> Trace notes (panel: @selectedPanel)</h4>
+        Data for panel @selectedPanel
 
-            Data for panel @selectedPanel
+    </div>
 
-        </div>
+    <div class="@((selectedPanel == 5) ? "" : "d-none")">
 
-        <div class="@((selectedPanel == 7) ? "" : "d-none")">
+        <div class="mt-4"></div>
 
-            <div class="mt-4"></div>
+        <h4 class="mt-2"> Messages (panel: @selectedPanel)</h4>
 
-            <h4 class="mt-2"> KEvents (panel: @selectedPanel)</h4>
+        Data for panel @selectedPanel
 
-            Data for panel @selectedPanel
+    </div>
 
-        </div>
+    <div class="@((selectedPanel == 6) ? "" : "d-none")">
 
-        <div class="@((selectedPanel == 8) ? "" : "d-none")">
+        <div class="mt-4"></div>
 
-            <div class="mt-4"></div>
+        <h4 class="mt-2"> Trace notes (panel: @selectedPanel)</h4>
 
-            <h4 class="mt-2"> Script (panel: @selectedPanel)</h4>
+        Data for panel @selectedPanel
 
-            Data for panel @selectedPanel
+    </div>
 
-        </div>
+    <div class="@((selectedPanel == 7) ? "" : "d-none")">
 
-        <!-- Footer -->
-        @*<div class="container-fluid">
+        <div class="mt-4"></div>
+
+        <h4 class="mt-2"> KEvents (panel: @selectedPanel)</h4>
+
+        Data for panel @selectedPanel
+
+    </div>
+
+    <div class="@((selectedPanel == 8) ? "" : "d-none")">
+
+        <div class="mt-4"></div>
+
+        <h4 class="mt-2"> Script (panel: @selectedPanel)</h4>
+
+        Data for panel @selectedPanel
+
+    </div>
+
+    <!-- Footer -->
+    @*<div class="container-fluid">
             <div class="row">
                 <div class="col-6">
                     &nbsp;
@@ -214,11 +214,11 @@
         </div>
         <hr class="mt-1" />*@
 
-        <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
+    <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
 
-        <KntResourceSelector @ref="kntResourceSelector" OnCancel="onCancelResourceSelector" OnConfirm="onConfirmResourceSelector"></KntResourceSelector>
+    <KntResourceSelector @ref="kntResourceSelector" OnCancel="onCancelResourceSelector" OnConfirm="onConfirmResourceSelector"></KntResourceSelector>
 
-    </EditForm>
+</EditForm>
 
 @code {
     [Parameter] public string Title { get; set; } = "---";
@@ -276,13 +276,20 @@
         kntResourceSelector.Show();
     }
 
-    private void onConfirmResourceSelector(ResourceDto r)
+    private async Task onConfirmResourceSelector(ResourceDto resource)
     {
-        //TODO: !!! Pendiente controlar si es nuevo o edición. 
+        resource.NoteId = Note.NoteId;
+        resource.ResourceId = Guid.NewGuid();
 
-        r.NoteId = Note.NoteId;
-        r.ResourceId = new Guid();
-        Note.ResourcesDto.Add(r);
+        var httpResponse = await dataService.Post<ResourceDto>($"api/notes/saveresource", resource);
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            Note.ResourcesDto.Add(resource);            
+        }
 
         kntResourceSelector.Hide();
     }
@@ -295,18 +302,15 @@
     private async Task DeleteResource(ResourceDto resource)
     {
 
-        //var httpResponse = await dataService.Delete($"api/users/{itemDelete.UserId}");
-        //if (httpResponse.Error)
-        //{
-        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        //}
-        //else
-        //{
-        //    users = null;
-        //    await Load();
-        //}
-
-        Note.ResourcesDto.Remove(resource);
+        var httpResponse = await dataService.Delete($"api/notes/deleteresource/{resource.ResourceId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            Note.ResourcesDto.Remove(resource);
+        }
     }
 
     private void InsertInDescription(ResourceDto resource)

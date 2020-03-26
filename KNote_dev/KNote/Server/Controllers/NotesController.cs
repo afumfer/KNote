@@ -235,6 +235,47 @@ namespace KNote.Server.Controllers
             }
         }
 
+        [HttpPost("[action]")]
+        [HttpPut("[action]")]
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public async Task<IActionResult> SaveResource([FromBody]ResourceDto entity)
+        {
+            try
+            {
+                var resApi = await _service.Notes.SaveResourceAsync(entity);
+                if (resApi.IsValid)                                    
+                    return Ok(resApi);                
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<ResourceDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
+        [HttpDelete("[action]/{id}")]    // DELETE api/notes/guid
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public async Task<IActionResult> DeleteResource(Guid id)
+        {
+            try
+            {
+                var resApi = await _service.Notes.DeleteResourceAsync(id);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<NoteInfoDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
         [HttpDelete("{id}")]    // DELETE api/notes/guid
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> Delete(Guid id)

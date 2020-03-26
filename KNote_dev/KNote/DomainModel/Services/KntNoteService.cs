@@ -430,8 +430,7 @@ namespace KNote.DomainModel.Services
                 }
 
                 foreach (ResourceDto resource in entity.ResourcesDto)
-                {                                        
-                    resource.ContentArrayBytes = Convert.FromBase64String(resource.ContentBase64);
+                {                                                            
                     var res = await SaveResourceAsync(resource);
                     res.Entity.ContentBase64 = resource.ContentBase64;
                     resService.Entity.ResourcesDto.Add(res.Entity);
@@ -533,6 +532,7 @@ namespace KNote.DomainModel.Services
                     // TODO: update standard control values to newEntity
                     // ...
                     newEntity.Container = @"NotesFiles\" + DateTime.Now.Year.ToString();
+                    newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                     resRep = await _repository.Resources.AddAsync(newEntity);
                 }
@@ -566,6 +566,7 @@ namespace KNote.DomainModel.Services
                         // TODO: update standard control values to newEntity
                         // ...
                         newEntity.Container = @"NotesFiles\" + DateTime.Now.Year.ToString();
+                        newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                         resRep = await _repository.Resources.AddAsync(newEntity);
                     }
@@ -583,6 +584,31 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
+        public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
+        {
+            var resService = new Result<ResourceDto>();
+            try
+            {
+                var resRep = await _repository.Resources.GetAsync(id);
+                if (resRep.IsValid)
+                {
+                    resRep = await _repository.Resources.DeleteAsync(resRep.Entity);
+                    if (resRep.IsValid)
+                        resService.Entity = resRep.Entity?.GetSimpleDto<ResourceDto>();
+                    else
+                        resService.ErrorList = resRep.ErrorList;
+                }
+                else
+                    resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        // TODO: Pendiente de estandarizar
         public Result<NoteTaskInfoDto> SaveNoteTask(NoteTaskInfoDto entityInfo)
         {
             Result<NoteTask> resRep = null;
@@ -647,6 +673,7 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
+        // TODO: Pendiente de estandarizar
         public Result<WindowInfoDto> SaveWindow(WindowInfoDto entityInfo)
         {
             Result<Window> resRep = null;
@@ -711,6 +738,7 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
+        // TODO: Pendiente de estandarizar
         public Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo)
         {
             Result<TraceNote> resRep = null;
