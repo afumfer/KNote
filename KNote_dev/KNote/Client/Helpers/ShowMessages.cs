@@ -30,11 +30,13 @@ namespace KNote.Client.Helpers
 
         private async ValueTask ShowMessage(string title, string message, string messageType)
         {
-            // Console.WriteLine(message);
-            //await Task.FromResult(0);            
+            // dummy
+            // await Task.FromResult(0);            
 
+            // version 1
             // await js.InvokeAsync<bool>("alert", message);
 
+            // version 2
             // messageType is a value of Swal.fire (error, success, info, ...=            
             await js.InvokeVoidAsync("Swal.fire", title, message, messageType);
         }

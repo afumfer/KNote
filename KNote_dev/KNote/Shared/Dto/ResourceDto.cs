@@ -19,6 +19,8 @@ namespace KNote.Shared.Dto
 
         public string FullUrl { get; set; }
 
+        public string RelativeUrl {get; set; }
+
         public string Description { get; set; }
 
         public int Order { get; set; }

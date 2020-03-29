@@ -279,16 +279,17 @@
     private async Task onConfirmResourceSelector(ResourceDto resource)
     {
         resource.NoteId = Note.NoteId;
+        resource.Name = Note.NoteId.ToString() + "_" + resource.Name;
         resource.ResourceId = Guid.NewGuid();
 
-        var httpResponse = await dataService.Post<ResourceDto>($"api/notes/saveresource", resource);
+        var httpResponse = await dataService.Post<ResourceDto, Result<ResourceDto>>($"api/notes/saveresource", resource);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
         {
-            Note.ResourcesDto.Add(resource);            
+            Note.ResourcesDto.Add(httpResponse.Response.Entity);
         }
 
         kntResourceSelector.Hide();

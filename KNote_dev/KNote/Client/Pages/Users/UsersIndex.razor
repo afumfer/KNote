@@ -95,8 +95,7 @@
         {
             users = httpResponse.Response.Entity;
             var count = httpResponse.HttpResponseMessage.Headers.GetValues("count").FirstOrDefault();
-            totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
-            Console.WriteLine($"count={count}  -- totalPages={totalPages}");
+            totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());            
         }
         else
         {

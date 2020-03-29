@@ -15,21 +15,16 @@
     NoteTypeDto noteType = new NoteTypeDto();
 
     private async Task New()
-    {
-        Console.WriteLine($"Executing new method - NoteType.Name => {noteType.Name}");
-
+    {        
         var httpResponse = await dataService.Post("api/notetypes", noteType);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {
-            Console.WriteLine("NoteType created !!");
-            //await showMessages.ShowOkMessage("User saved!");
+        {     
             navigationManger.NavigateTo("types");
         }
-
     }
 
 }

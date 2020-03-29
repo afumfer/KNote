@@ -124,7 +124,8 @@ namespace KNote.Server.Controllers
                     {
                         r.ContentBase64 = Convert.ToBase64String(r.ContentArrayBytes);
                         r.ContentArrayBytes = null;
-                        r.FullUrl = _fileStore.GetFullUrl(r.Name, r.Container);
+                        r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container, noteId);                        
+                        r.FullUrl = await _fileStore.SaveFile(r.ContentBase64, r.Name, r.Container, noteId);
                     }
                     return Ok(resApi);
                 }
@@ -162,26 +163,26 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{noteNumber}")]    // GET api/notes/GetByNumber/xx        
-        public IActionResult GetByNumber(int noteNumber)
-        {
-            try
-            {
-                var resApi = _service.Notes.Get(noteNumber);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                {
-                    return BadRequest(resApi);
-                }
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<NoteInfoDto>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //[HttpGet("[action]/{noteNumber}")]    // GET api/notes/GetByNumber/xx        
+        //public IActionResult GetByNumber(int noteNumber)
+        //{
+        //    try
+        //    {
+        //        var resApi = _service.Notes.Get(noteNumber);
+        //        if (resApi.IsValid)
+        //            return Ok(resApi);
+        //        else
+        //        {
+        //            return BadRequest(resApi);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var kresApi = new Result<NoteInfoDto>();
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
         [HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/xxxxxxxxxx        
         public IActionResult GetByFolder(Guid folderId)
@@ -218,7 +219,8 @@ namespace KNote.Server.Controllers
                     {
                         if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
                         {                            
-                            resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
+                            resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container, resource.NoteId);
+                            resource.RelativeUrl = _fileStore.GetRelativeUrl(resource.Name, resource.Container, resource.NoteId);
                         }
                     }
                     return Ok(resApi);
@@ -243,8 +245,12 @@ namespace KNote.Server.Controllers
             try
             {
                 var resApi = await _service.Notes.SaveResourceAsync(entity);
-                if (resApi.IsValid)                                    
+                if (resApi.IsValid)
+                {
+                    resApi.Entity.FullUrl = await _fileStore.SaveFile(resApi.Entity.ContentBase64, resApi.Entity.Name, resApi.Entity.Container, resApi.Entity.NoteId);
+                    resApi.Entity.RelativeUrl = _fileStore.GetRelativeUrl(resApi.Entity.Name, resApi.Entity.Container, resApi.Entity.NoteId);
                     return Ok(resApi);                
+                }
                 else
                     return BadRequest(resApi);
             }
@@ -305,7 +311,7 @@ namespace KNote.Server.Controllers
             {
                 if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
                 {                                                            
-                    resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
+                    resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container, resource.NoteId);
                 }
                 resApi.Entity = resource;
                 return Ok(resApi);

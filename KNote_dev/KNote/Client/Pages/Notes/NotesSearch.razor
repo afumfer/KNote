@@ -85,26 +85,18 @@
         await GetNoteTypes();
 
         var url = navigationManager.Uri;
-
-        Console.WriteLine("URL " + url);
-
         var queries = navigationManager.GetQueryStrings(url);
-
-        Console.WriteLine("queries " + queries?.Count);
-
+       
         if (queries == null)
         {
-            Console.WriteLine("todos ");
             await GetFilteredNotes(string.Empty);
         }
         else
-        {
-            Console.WriteLine("filtrados ");
+        {         
             queryStringsDict = queries;
             LoadFormControls();
             var queryStrings = url.Split(new string[] { "?" }, StringSplitOptions.None)[1];
-            await GetFilteredNotes(queryStrings);
-            //Console.WriteLine("contenido de topic ");
+            await GetFilteredNotes(queryStrings);            
         }
     }
 
@@ -139,16 +131,13 @@
         //queryStringsDict["tags"] = tags?.ToString();
         //queryStringsDict["attributevalue"] = attributeValue?.ToString();
         queryStringsDict["page"] = currentPage.ToString();
-
-        //Console.WriteLine("NoteType queryString" + queryStringsDict["notetypeId"]);
-
+        
         var defaultValues = new List<string>() { "false", "", "0" };
 
         var strReturn = string.Join("&", queryStringsDict
             .Where(x => !defaultValues.Contains(x.Value.ToLower()))
             .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
-
-        Console.WriteLine("strReturm " + strReturn);
+        
         return strReturn;
     }
 

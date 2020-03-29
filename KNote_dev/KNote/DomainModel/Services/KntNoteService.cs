@@ -431,8 +431,7 @@ namespace KNote.DomainModel.Services
 
                 foreach (ResourceDto resource in entity.ResourcesDto)
                 {                                                            
-                    var res = await SaveResourceAsync(resource);
-                    res.Entity.ContentBase64 = resource.ContentBase64;
+                    var res = await SaveResourceAsync(resource);                    
                     resService.Entity.ResourcesDto.Add(res.Entity);
 
                     // TODO: !!! pendiente de volcar errores en resRep
@@ -529,9 +528,9 @@ namespace KNote.DomainModel.Services
                     var newEntity = new Resource();
                     newEntity.SetSimpleDto(entity);
 
-                    // TODO: update standard control values to newEntity
+                    // TODO: update standard control values to newEntity (refactor ...)
                     // ...
-                    newEntity.Container = @"NotesFiles\" + DateTime.Now.Year.ToString();
+                    newEntity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
                     newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                     resRep = await _repository.Resources.AddAsync(newEntity);
@@ -556,6 +555,7 @@ namespace KNote.DomainModel.Services
                         // TODO: update standard control values to entityForUpdate
                         // ...
                         entityForUpdate.SetSimpleDto(entity);
+                        entityForUpdate.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
                         resRep = await _repository.Resources.UpdateAsync(entityForUpdate);
                     }
                     else
@@ -563,9 +563,9 @@ namespace KNote.DomainModel.Services
                         var newEntity = new Resource();
                         newEntity.SetSimpleDto(entity);
 
-                        // TODO: update standard control values to newEntity
+                        // TODO: update standard control values to newEntity  (refactor ...)
                         // ...
-                        newEntity.Container = @"NotesFiles\" + DateTime.Now.Year.ToString();
+                        newEntity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
                         newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                         resRep = await _repository.Resources.AddAsync(newEntity);
@@ -579,6 +579,9 @@ namespace KNote.DomainModel.Services
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
             resService.Entity = resRep.Entity?.GetSimpleDto<ResourceDto>();
+            if(resService.Entity != null)
+                resService.Entity.ContentBase64 = entity.ContentBase64;
+
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);

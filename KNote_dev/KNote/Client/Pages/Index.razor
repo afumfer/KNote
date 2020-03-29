@@ -38,9 +38,8 @@
         notes = null;
         var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/recentnotes");
         if (httpResponse.Error)
-        {
-            Console.WriteLine(httpResponse.HttpResponseMessage.StatusCode);
-            //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        {            
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
             notes = httpResponse.Response.Entity;

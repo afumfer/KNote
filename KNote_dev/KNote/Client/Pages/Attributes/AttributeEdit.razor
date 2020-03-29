@@ -49,16 +49,12 @@ else
             noteTypes = httpResponse2.Response.Entity;
             showForm = true;
         }
-
-        Console.WriteLine($"Attribute loaded!! {kattribute.KAttributeId}");
-
+        
         base.OnInitialized();
     }
 
     private async Task Edit()
-    {
-        Console.WriteLine("Edit user");
-
+    {        
         var httpResponse = await dataService.Put("api/kattributes", kattribute);
         if (httpResponse.Error)
         {
@@ -66,8 +62,6 @@ else
         }
         else
         {
-            //Console.WriteLine("Attribute created !!");
-            //await showMessages.ShowOkMessage("Attribute saved!");
             navigationManger.NavigateTo("attributes");
         }
     }

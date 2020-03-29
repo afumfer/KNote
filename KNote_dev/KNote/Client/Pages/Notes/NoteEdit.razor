@@ -64,16 +64,12 @@ else
             PageReturn = "index";
         else if (PageReturn == "tree")
             PageReturn = "notes/tree";
-
-        Console.WriteLine($"User loaded!! {note.NoteId}");
-
+        
         base.OnInitialized();
     }
 
     private async Task Edit()
-    {
-        Console.WriteLine("Edit note");
-
+    {        
         var httpResponse = await dataService.Put("api/notes", note);
         if (httpResponse.Error)
         {
@@ -81,8 +77,6 @@ else
         }
         else
         {
-            //Console.WriteLine("User created !!");
-            //await showMessages.ShowOkMessage("User saved!");
             navigationManager.NavigateTo(PageReturn);
         }
     }

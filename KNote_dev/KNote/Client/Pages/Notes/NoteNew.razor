@@ -49,9 +49,6 @@ else
 
     private async Task New()
     {
-        Console.WriteLine($"URI: {navigationManger.Uri}");
-        Console.WriteLine($"Executing new method - note.Topic => {note.Topic}");
-
         var httpResponse = await dataService.Post("api/notes", note);
         if (httpResponse.Error)
         {
@@ -59,9 +56,6 @@ else
         }
         else
         {
-            //Console.WriteLine("User created !!");
-            //await showMessages.ShowOkMessage("User saved!");
-            //navigationManger.NavigateTo("notes");
             navigationManger.NavigateTo("notes/tree");
         }
     }

@@ -34,18 +34,14 @@ else
         }
         else
         {
-            user = httpResponse.Response.Entity;
-
-            Console.WriteLine($"User loaded!! {user.UserId}");
+            user = httpResponse.Response.Entity;            
         }
 
         base.OnInitialized();
     }
 
     private async Task Edit()
-    {
-        Console.WriteLine("Edit user");
-
+    {        
         var httpResponse = await dataService.Put("api/users", user);
         if (httpResponse.Error)
         {
@@ -53,8 +49,6 @@ else
         }
         else
         {
-            //Console.WriteLine("User created !!");
-            //await showMessages.ShowOkMessage("User saved!");
             navigationManger.NavigateTo("users");
         }
     }

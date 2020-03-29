@@ -39,9 +39,7 @@ else
     }
 
     private async Task New()
-    {
-        Console.WriteLine($"Executing new method - KAttribute.Name => {kattribute.Name}");
-
+    {        
         var httpResponse = await dataService.Post("api/kattributes", kattribute);
         if (httpResponse.Error)
         {
@@ -49,8 +47,6 @@ else
         }
         else
         {
-            Console.WriteLine("Kattribute created !!");
-            //await showMessages.ShowOkMessage("User saved!");
             navigationManger.NavigateTo("attributes");
         }
     }

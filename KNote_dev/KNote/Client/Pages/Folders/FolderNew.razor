@@ -13,9 +13,7 @@
     private FolderDto folder = new FolderDto();
 
     private async Task New()
-    {
-        Console.WriteLine($"Executing new method - folder.Name => {folder.Name}");
-
+    {        
         var httpResponse = await dataService.Post("api/folders", folder);
         if (httpResponse.Error)
         {            

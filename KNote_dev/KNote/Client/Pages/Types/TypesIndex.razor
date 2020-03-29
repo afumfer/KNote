@@ -89,11 +89,9 @@
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/notetypes/{itemDelete.NoteTypeId}");
-        Console.WriteLine($"ERROR: {httpResponse.Error}");
+        var httpResponse = await dataService.Delete($"api/notetypes/{itemDelete.NoteTypeId}");        
         if (httpResponse.Error)
-        {
-            Console.WriteLine(await httpResponse.GetBody());
+        {            
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else

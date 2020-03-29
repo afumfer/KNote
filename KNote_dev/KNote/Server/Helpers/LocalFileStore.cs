@@ -19,18 +19,19 @@ namespace KNote.Server.Helpers
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<string> EditFile(string contentBase64, string extension, string container, string pathFile)
+        public async Task<string> EditFile(string contentBase64, string extension, string container, string pathFile, Guid noteId)
         {
             if (!string.IsNullOrEmpty(pathFile))
             {
-                await DeleteFile(pathFile, container);
+                await DeleteFile(pathFile, container, noteId);
             }
 
-            return await SaveFile(contentBase64, extension, container);
+            return await SaveFile(contentBase64, extension, container, noteId);
         }
-
-        public Task DeleteFile(string path, string container)
-        {
+        
+        public Task DeleteFile(string path, string container, Guid noteId)
+        { 
+            // TODO: !!! pendiente         {
             var filename = Path.GetFileName(path);
             string fileDirectory = Path.Combine(env.WebRootPath, container, filename);
             if (File.Exists(fileDirectory))
@@ -41,7 +42,7 @@ namespace KNote.Server.Helpers
             return Task.FromResult(0);
         }
 
-        public async Task<string> SaveFile(string contentBase64, string filename, string container)
+        public async Task<string> SaveFile(string contentBase64, string filename, string container, Guid noteId)
         {
             var folder = Path.Combine(env.WebRootPath, container);
             var content = Convert.FromBase64String(contentBase64);
@@ -50,24 +51,24 @@ namespace KNote.Server.Helpers
             {
                 Directory.CreateDirectory(folder);
             }
-
+            
             string pathSaved = Path.Combine(folder, filename);
-            await File.WriteAllBytesAsync(pathSaved, content);
-
-            // TODO: arreglar path /\
-
+            if (!File.Exists(pathSaved))
+                await File.WriteAllBytesAsync(pathSaved, content);
+           
             var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}{httpContextAccessor.HttpContext.Request.PathBase}";
             var fullUrl = Path.Combine(actualUrl, container, filename);
             return fullUrl.Replace(@"\", @"/");
         }
 
-        public string GetFullUrl(string filename, string container)
-        {
-            // TODO: arreglar path /\
-            var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}{httpContextAccessor.HttpContext.Request.PathBase}";
-            var fullUrl = Path.Combine(actualUrl, container, filename);
-            return fullUrl.Replace(@"\", @"/");
+        public string GetRelativeUrl(string filename, string container, Guid noteId)
+        {            
+            var relativeUrl = Path.Combine(container, filename);
+            return relativeUrl.Replace(@"\", @"/");
         }
+
+
+        // TODO: !!! Pendiente de eliminar 
 
         //public async Task<string> SaveFile(byte[] content, string filename, string container)
         //{            

@@ -30,18 +30,14 @@ else
         }
         else
         {
-            folder = httpResponse.Response.Entity;
-
-            Console.WriteLine($"Folder loaded!! {folder.FolderId }");
+            folder = httpResponse.Response.Entity;            
         }
 
         base.OnInitialized();
     }
 
     private async Task Edit()
-    {
-        Console.WriteLine("Edit folder");
-
+    {        
         var httpResponse = await dataService.Put("api/folders", folder);
         if (httpResponse.Error)
         {
@@ -49,8 +45,6 @@ else
         }
         else
         {
-            //Console.WriteLine("User created !!");
-            //await showMessages.ShowOkMessage("User saved!");
             navigationManger.NavigateTo("folders");
         }
     }

@@ -1,7 +1,6 @@
 ﻿<div class="container-fluid">
     <div class="row">
-        <div class="col-6">
-            &nbsp;
+        <div class="col-6">            
         </div>
         <div class="col-6 float-right">
             <button class="btn btn-sm btn-warning mx-1 float-right"
@@ -12,7 +11,6 @@
         </div>
     </div>
 </div>
-<hr class="mt-0" />
 
 <EntityList List="Resources">
     <ItemsFull>
@@ -20,6 +18,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Container</th>
                     <th>Description</th>
                     <th>Order</th>
                     <th width="100px" class="text-center">(Actions)</th>
@@ -28,25 +27,31 @@
             <tbody>
                 @foreach (var item in Resources)
                 {
-                    <tr>
-                        <td>@item.Name</td>
-                        <td>@item.Description</td>
-                        <td>@item.Order</td>
-                        <td>
-                            <span class="float-right">
-                                <button class="btn btn-sm btn-info mx-1"
-                                        @onclick="@(() => OnInsertInDesription.InvokeAsync(item))"
-                                        data-toggle="tooltip" title="Insert in description">
-                                    <i class="fa fa-clipboard"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => OnDelete.InvokeAsync(item))"
-                                        data-toggle="tooltip" title="Delete resource">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </span>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>@item.Name</td>
+                    <td>
+                        @*@item.Container <br /> @item.RelativeUrl <br /> @item.FullUrl*@
+                        <center>
+                            <img style="width: @(ImgWidth(item))px" src="@ImgPreview(item)" />
+                        </center>
+                    </td>
+                    <td>@item.Description</td>
+                    <td>@item.Order</td>
+                    <td>
+                        <span class="float-right">
+                            <button class="btn btn-sm btn-info mx-1"
+                                    @onclick="@(() => OnInsertInDesription.InvokeAsync(item))"
+                                    data-toggle="tooltip" title="Insert in description">
+                                <i class="fa fa-clipboard"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger mx-1"
+                                    @onclick="@(() => OnDelete.InvokeAsync(item))"
+                                    data-toggle="tooltip" title="Delete resource">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </span>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>
@@ -57,5 +62,28 @@
     [Parameter] public List<ResourceDto> Resources { get; set; }
     [Parameter] public EventCallback<ResourceDto> OnDelete { get; set; }
     [Parameter] public EventCallback<ResourceDto> OnInsertInDesription { get; set; }
-    [Parameter] public EventCallback OnNewResource { get; set; }   
+    [Parameter] public EventCallback OnNewResource { get; set; }
+
+    private string ImgPreview(ResourceDto resource)
+    {
+        var imgSrc = "";
+        if (resource.FileType == "image/jpeg")
+            imgSrc = "data:image/jpeg;base64, " + resource.ContentBase64;
+        else if (resource.FileType == "application/pdf")
+            imgSrc = @"https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg";
+        else
+            imgSrc = "";
+
+        return imgSrc;
+    }
+
+    private int ImgWidth(ResourceDto resource)
+    {
+        var imgW = 50;
+        if (resource.FileType == "image/jpeg")
+            imgW = 100;
+
+        return imgW;
+    }
+
 }
