@@ -348,4 +348,4 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-/KNote_dev/KNote/Server/wwwroot/NotesResources/2020
+/KNote_dev/KNote/Server/wwwroot/NotesResources
