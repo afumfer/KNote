@@ -14,6 +14,25 @@ namespace KNote.Shared.Dto
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         [MaxLength(1024)]
         public string Name { get; set; }
+        
+        public string NameOut 
+        {
+            get 
+            {
+                if (string.IsNullOrEmpty(Name))
+                    return Name;
+                else
+                {
+                    // Ehurística para descartar el prefijo (guid) del nombre del fichero
+                    var i = Name.IndexOf("_") + 1;
+                    if (i == 37)
+                        return Name.Substring(i, Name.Length - i);
+                    else
+                        return Name;
+                }                
+            }
+            set { } 
+        }
 
         public string Container { get; set; }
 

@@ -1,5 +1,5 @@
 ﻿<div class="container-fluid">
-    <div class="row">
+    <div class="row mb-2" >
         <div class="col-6">            
         </div>
         <div class="col-6 float-right">
@@ -17,10 +17,10 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Container</th>
+                    <th width="200px">Name</th>
                     <th>Description</th>
-                    <th>Order</th>
+                    <th width="120px" class="text-center">Content</th>
+                    <th width="40px" class="text-center">Order</th>
                     <th width="100px" class="text-center">(Actions)</th>
                 </tr>
             </thead>
@@ -28,15 +28,17 @@
                 @foreach (var item in Resources)
                 {
                 <tr>
-                    <td>@item.Name</td>
+                    <td>@item.NameOut</td>
+                    <td>@item.Description</td>
                     <td>
                         @*@item.Container <br /> @item.RelativeUrl <br /> @item.FullUrl*@
                         <center>
                             <img style="width: @(ImgWidth(item))px" src="@ImgPreview(item)" />
                         </center>
                     </td>
-                    <td>@item.Description</td>
-                    <td>@item.Order</td>
+                    <td>
+                        <center>@item.Order</center>                        
+                    </td>
                     <td>
                         <span class="float-right">
                             <button class="btn btn-sm btn-info mx-1"
@@ -72,7 +74,7 @@
         else if (resource.FileType == "application/pdf")
             imgSrc = @"https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg";
         else
-            imgSrc = "";
+            imgSrc = @"https://img.icons8.com/ios/50/000000/document-1.png";
 
         return imgSrc;
     }
