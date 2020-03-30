@@ -5,13 +5,13 @@
 <div>
 
     <label>@labelMode&nbsp;&nbsp;&nbsp;&nbsp;</label>
-    
+
     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
         <button type="button" class="btn btn-light" data-toggle="tooltip" title="Show edit mode" @onclick="EditMode">
             <i class="fa fa-edit">&nbsp;&nbsp;Markdown edit mode</i>
-        </button>        
+        </button>
     </div>
-    <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">        
+    <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
         <button type="button" class="btn btn-light" data-toggle="tooltip" title="Show view mode" @onclick="ViewMode">
             <i class="fa fa-eye">&nbsp;&nbsp;Show view html</i>
         </button>
@@ -26,10 +26,19 @@
     }
     else
     {
-        <div class="markdown-container p-2" style="overflow: auto;">
+        // TODO: Opcionalmente encuadrar el html en un contenedor, pendiente.
+
+        @*<div class="markdown-container p-2" style="overflow: auto;">
             <ViewMarkdown MarkdownContent="@CurrentValue">
 
             </ViewMarkdown>
+        </div>*@
+
+        <div>
+            <hr />
+            <ViewMarkdown MarkdownContent="@CurrentValue">
+            </ViewMarkdown>
+            <hr />
         </div>
     }
 

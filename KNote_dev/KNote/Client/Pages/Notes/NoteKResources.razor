@@ -17,7 +17,7 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th width="200px">Name</th>
+                    <th width="240px">Resource name</th>
                     <th>Description</th>
                     <th width="120px" class="text-center">Content</th>
                     <th width="40px" class="text-center">Order</th>
@@ -28,13 +28,18 @@
                 @foreach (var item in Resources)
                 {
                 <tr>
-                    <td>@item.NameOut</td>
-                    <td>@item.Description</td>
                     <td>
-                        @*@item.Container <br /> @item.RelativeUrl <br /> @item.FullUrl*@
-                        <center>
-                            <img style="width: @(ImgWidth(item))px" src="@ImgPreview(item)" />
-                        </center>
+                        <a href="@item.RelativeUrl" target="_blank">
+                            @item.NameOut
+                        </a>
+                    </td>
+                    <td>@item.Description</td>
+                    <td>                        
+                        <a href="@item.FullUrl" target="_blank" rel="noopener noreferrer">
+                            <center>
+                                <img style="width: @(ImgWidth(item))px" src="@ImgPreview(item)" />
+                            </center>
+                        </a>
                     </td>
                     <td>
                         <center>@item.Order</center>                        

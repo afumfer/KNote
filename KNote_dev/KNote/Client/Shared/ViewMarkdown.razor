@@ -22,7 +22,12 @@ else
     {
         if (MarkdownContent != null)
         {
-            HtmlContent = Markdown.ToHtml(MarkdownContent);
+
+            var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();            
+            HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
+
+            // Versión simple
+            //HtmlContent = Markdown.ToHtml(MarkdownContent);
         }
     }
 

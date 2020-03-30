@@ -196,7 +196,7 @@ app {
     .form-markdown .markdown-container {
         border: 1px dashed black;
         /*width: 500px;*/
-        height: 400px;
+        height: 350px;
     }
 
 .kpage-header {
