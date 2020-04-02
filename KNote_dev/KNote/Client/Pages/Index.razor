@@ -36,7 +36,7 @@
     private async Task LoadNotes()
     {
         notes = null;
-        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/recentnotes");
+        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/homenotes");
         if (httpResponse.Error)
         {            
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());

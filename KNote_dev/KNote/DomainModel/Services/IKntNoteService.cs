@@ -34,7 +34,7 @@ namespace KNote.DomainModel.Services
         Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo);        
         Result<NoteInfoDto> Delete(Guid id);
         Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
-        Result<List<NoteInfoDto>> RecentNotes();
+        Result<List<NoteInfoDto>> HomeNotes();
         Task<Result<List<NoteInfoDto>>> GetFilter2(NotesFilterDto notesFilter);
 
 

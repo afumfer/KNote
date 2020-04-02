@@ -3,19 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using KNote.DomainModel.Repositories;
 using KNote.Shared;
 using KNote.DomainModel.Entities;
-// TODO: Pendiente de eliminar
-//using KNote.DomainModel.Dto;
 using KNote.Shared.Dto;
-
 using KNote.DomainModel.Infrastructure;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-//using System.Data.Entity.Validation;
-
 
 namespace KNote.DomainModel.Services
 {
@@ -53,17 +47,12 @@ namespace KNote.DomainModel.Services
             }
             return ResultDomainAction(resService);
         }
-
-        //RecentNotes
-        public Result<List<NoteInfoDto>> RecentNotes()
+        
+        public Result<List<NoteInfoDto>> HomeNotes()
         {
             var resService = new Result<List<NoteInfoDto>>();
             try
             {
-                // TODO: !!!AAA
-                //var resRep = _repository.Notes.DbSet.OrderByDescending(n => n.NoteNumber).Take(25).ToList();
-                //var resRep2 = _repository.Notes.GetAll(n => n.Folder.FolderNumber == 1)
-
                 var resRep = _repository.Notes.DbSet
                     .Include( n => n.Folder)
                     .Where( n => n.Folder.FolderNumber == 1)

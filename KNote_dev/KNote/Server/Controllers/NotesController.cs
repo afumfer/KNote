@@ -92,12 +92,12 @@ namespace KNote.Server.Controllers
         }
 
         //[Authorize]
-        [HttpGet("recentnotes")]   // GET api/notes/recentnotes
-        public IActionResult RecentNotes()
+        [HttpGet("homenotes")]   // GET api/notes/homenotes
+        public IActionResult HomeNotes()
         {
             try
             {
-                var resApi = _service.Notes.RecentNotes();
+                var resApi = _service.Notes.HomeNotes();
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
