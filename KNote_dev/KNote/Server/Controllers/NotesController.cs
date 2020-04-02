@@ -120,13 +120,6 @@ namespace KNote.Server.Controllers
                 var resApi = await _service.Notes.GetAsync(noteId);
                 if (resApi.IsValid)
                 {
-                    foreach (var r in resApi.Entity.ResourcesDto)
-                    {
-                        r.ContentBase64 = Convert.ToBase64String(r.ContentArrayBytes);
-                        r.ContentArrayBytes = null;
-                        r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container, noteId);                        
-                        r.FullUrl = await _fileStore.SaveFile(r.ContentBase64, r.Name, r.Container, noteId);
-                    }
                     return Ok(resApi);
                 }
                 else
@@ -215,14 +208,6 @@ namespace KNote.Server.Controllers
                 var resApi = await _service.Notes.SaveAsync(note);
                 if (resApi.IsValid)
                 {
-                    foreach(var resource in resApi.Entity.ResourcesDto)
-                    {
-                        if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
-                        {                            
-                            resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container, resource.NoteId);
-                            resource.RelativeUrl = _fileStore.GetRelativeUrl(resource.Name, resource.Container, resource.NoteId);
-                        }
-                    }
                     return Ok(resApi);
                 }
 
@@ -277,6 +262,35 @@ namespace KNote.Server.Controllers
             catch (Exception ex)
             {
                 var kresApi = new Result<NoteInfoDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
+        [HttpGet("[action]/{id}")]    // GET api/notes/getnoteresources
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public async Task<IActionResult> GetNoteResources(Guid id)
+        {
+            try
+            {
+                var resApi = _service.Notes.GetNoteResources(id);
+                if (resApi.IsValid)
+                {
+                    foreach (var r in resApi.Entity)
+                    {
+                        r.ContentBase64 = Convert.ToBase64String(r.ContentArrayBytes);
+                        r.ContentArrayBytes = null;
+                        r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container, id);
+                        r.FullUrl = await _fileStore.SaveFile(r.ContentBase64, r.Name, r.Container, id);
+                    }
+                    return Ok(resApi);
+                }
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<List<ResourceDto>>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }

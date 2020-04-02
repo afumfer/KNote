@@ -104,8 +104,7 @@ namespace KNote.DomainModel.Services
             try
             {               
                 var entity = await _repository.Notes.DbSet.Where(n => n.NoteId == noteId)
-                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
-                    .Include(n => n.Resources)
+                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)                    
                     .Include(n => n.Folder)
                     .Include(n => n.NoteType)
                     .SingleOrDefaultAsync();
@@ -113,8 +112,7 @@ namespace KNote.DomainModel.Services
                 // Map to dto
                 resService.Entity = entity?.GetSimpleDto<NoteDto>();
                 resService.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();                
-                resService.Entity.KAttributesDto = entity?.KAttributes.Select(_ => _.GetSimpleDto<NoteKAttributeDto>()).ToList();
-                resService.Entity.ResourcesDto = entity?.Resources.Select(_ => _.GetSimpleDto<ResourceDto>()).ToList();
+                resService.Entity.KAttributesDto = entity?.KAttributes.Select(_ => _.GetSimpleDto<NoteKAttributeDto>()).ToList();                
 
                 // Complete Attributes list
                 resService.Entity.KAttributesDto = CompleteNoteAttributes(resService.Entity.KAttributesDto, entity.NoteId);
@@ -428,26 +426,14 @@ namespace KNote.DomainModel.Services
 
                     // TODO: !!! pendiente de volcar errores en resRep
                 }
-
-                foreach (ResourceDto resource in entity.ResourcesDto)
-                {                                                            
-                    var res = await SaveResourceAsync(resource);                    
-                    resService.Entity.ResourcesDto.Add(res.Entity);
-
-                    // TODO: !!! pendiente de volcar errores en resRep
-                }
-
             }
             catch (Exception ex)
             {
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
 
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            
-
+            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.            
             resService.ErrorList = resRep.ErrorList;
-
             return ResultDomainAction(resService);
         }
 
@@ -603,6 +589,22 @@ namespace KNote.DomainModel.Services
                 }
                 else
                     resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public Result<List<ResourceDto>> GetNoteResources(Guid idNote)
+        {
+            var resService = new Result<List<ResourceDto>>();
+            try
+            {
+                var resRep = _repository.Resources.GetAll( r => r.NoteId == idNote);
+                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<ResourceDto>()).ToList();
+                resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
             {

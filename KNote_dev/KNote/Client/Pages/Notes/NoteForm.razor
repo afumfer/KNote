@@ -143,12 +143,19 @@
 
     <div class="@((selectedPanel == 3) ? "" : "d-none")">
         <div class="mt-2"></div>
-        <NoteKResources Resources="Note.ResourcesDto"
-                        OnDelete="DeleteResource"
-                        OnInsertInDesription="InsertInDescription"
-                        OnNewResource="OnResourceSelector">
+        @if (resources == null)
+        {
+            <p>Loading resources ...</p>
+        }
+        else
+        {
+            <NoteKResources Resources="resources"
+                            OnDelete="DeleteResource"
+                            OnInsertInDesription="InsertInDescription"
+                            OnNewResource="OnResourceSelector">
 
-        </NoteKResources>
+            </NoteKResources>
+        }
     </div>
 
     <div class="@((selectedPanel == 4) ? "" : "d-none")">
@@ -226,6 +233,8 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
 
+    private List<ResourceDto> resources { get; set; }
+
     private KntFolderSelector kntFolderSelector;
     private KntResourceSelector kntResourceSelector;
 
@@ -243,9 +252,23 @@
         await OnValidSubmit.InvokeAsync(formContext);
     }
 
-    private void ShowPanel(int panel)
+    private async Task ShowPanel(int panel)
     {
         selectedPanel = panel;
+
+        if (panel == 3 && resources == null)
+        {
+            var httpResponse = await dataService.Get<Result<List<ResourceDto>>>($"api/notes/getnoteresources/{Note.NoteId}");
+            if (httpResponse.Error)
+            {
+                await showMessages.ShowErrorMessage(await httpResponse.GetBody());                
+            }
+            else
+            {
+                resources = httpResponse.Response.Entity;
+            }
+        }
+
     }
 
     #region Managment FolderSelector
@@ -288,8 +311,8 @@
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {
-            Note.ResourcesDto.Add(httpResponse.Response.Entity);
+        {            
+            resources.Add(httpResponse.Response.Entity);
         }
 
         kntResourceSelector.Hide();
@@ -310,7 +333,8 @@
         }
         else
         {
-            Note.ResourcesDto.Remove(resource);
+            // Note.ResourcesDto.Remove(resource);
+            resources.Remove(resource);
         }
     }
 
