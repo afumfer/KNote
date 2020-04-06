@@ -67,26 +67,6 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<NoteDto> Get(int noteNumber)
-        {
-            var resService = new Result<NoteDto>();
-            try
-            {
-                var resRep = _repository.Notes.Get(n => n.NoteNumber == noteNumber);
-                
-                resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
-                // KNote template ... load here aditionals properties for UserDto
-                // ... 
-
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
         public async Task <Result<NoteDto>> GetAsync(Guid noteId)
         {
             var resService = new Result<NoteDto>();
@@ -173,49 +153,7 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        // ==============
-        // TODO: Sustituir esto por IQuerable
-        // ==============
-        public Result<List<NoteInfoDto>> GetFilter(int _page, int _limit, Guid folderId, string q) 
-        {
-            var resService = new Result<List<NoteInfoDto>>();
-            Expression<Func<Note, bool>> predicate;
-
-            if (folderId == new Guid("00000000-0000-0000-0000-000000000000"))
-                if (string.IsNullOrEmpty(q))                    
-                    predicate = null;
-                else                    
-                    predicate = (n) => (n.Topic.Contains(q) || n.Description.Contains(q));
-            else
-                if (string.IsNullOrEmpty(q))
-                predicate = (n) => n.FolderId == folderId;
-            else
-                predicate = (n) => (n.FolderId == folderId) && (n.Topic.Contains(q) || n.Description.Contains(q));
-
-            try
-            {
-                var totalEntities = _repository.Notes.GetAll(predicate).Entity.Count;
-                var resRep = _repository.Notes.GetAllWithPagination(_page, _limit, predicate);
-                if (resRep.IsValid)
-                {                    
-                    resService.Entity = resRep.Entity.Select(n => n.GetSimpleDto<NoteInfoDto>()).ToList();
-                    resService.Tag = totalEntities.ToString();
-                    return resService;
-                }
-                else
-                {
-                    resService.ErrorList = resRep.ErrorList;
-                    return resService;
-                }
-            }
-            catch (Exception ex)
-            {
-                resService.AddErrorMessage("Generic error: " + ex.Message);
-                return resService;
-            }
-        }
-
-        public async Task<Result<List<NoteInfoDto>>> GetFilter2(NotesFilterDto notesFilter)
+        public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
         {
             var resService = new Result<List<NoteInfoDto>>();
             try
@@ -255,59 +193,6 @@ namespace KNote.DomainModel.Services
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
             return ResultDomainAction(resService);
-        }
-
-        // ==============
-        // TODO: Sustituir esto por IQuerable
-        // ==============
-        public Result<List<NoteItemDto>> GetNoteItemList(Guid? folderId)
-        {            
-            var result = new Result<List<NoteItemDto>>();
-
-            try
-            {
-                if (folderId != null)
-                {
-                    result.Entity = _repository.Notes.DbSet
-                        .Where(n => n.FolderId == folderId).Select(n => new NoteItemDto
-                        {
-                            NoteId = n.NoteId,
-                            NoteNumber = n.NoteNumber,
-                            Topic = n.Topic,
-                            Priority = n.Priority,
-                            Tags = n.Tags,
-                            CreationDateTime = n.CreationDateTime,
-                            ModificationDateTime = n.ModificationDateTime,
-                            FolderId = n.FolderId
-                        }).ToList();
-                }
-                else
-                {
-                    result.Entity = _repository.Notes.DbSet
-                        .Select(n => new NoteItemDto
-                        {
-                            NoteId = n.NoteId,
-                            NoteNumber = n.NoteNumber,
-                            Topic = n.Topic,
-                            Priority = n.Priority,
-                            Tags = n.Tags,
-                            CreationDateTime = n.CreationDateTime,
-                            ModificationDateTime = n.ModificationDateTime,
-                            FolderId = n.FolderId
-                        }).ToList();
-                }
-
-            }
-            catch (KntEntityValidationException ex)
-            {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-
-            return ResultDomainAction<List<NoteItemDto>>(result);
         }
 
         public Result<NoteDto> New(NoteInfoDto entityInfo = null)
@@ -410,7 +295,7 @@ namespace KNote.DomainModel.Services
 
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {                    
-                    var res = SaveAttrtibute(atr);
+                    var res = await SaveAttrtibuteAsync(atr);
                     resService.Entity.KAttributesDto.Add(res.Entity);
 
                     // TODO: !!! pendiente de volcar errores en resRep
@@ -426,7 +311,31 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<NoteKAttributeDto> SaveAttrtibute(NoteKAttributeDto entity)
+        public async Task<Result<NoteInfoDto>> DeleteAsync(Guid id)
+        {
+            var resService = new Result<NoteInfoDto>();
+            try
+            {
+                var resRep = await _repository.Notes.GetAsync(id);
+                if (resRep.IsValid)
+                {
+                    resRep = await _repository.Notes.DeleteAsync(resRep.Entity);
+                    if (resRep.IsValid)
+                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
+                    else
+                        resService.ErrorList = resRep.ErrorList;
+                }
+                else
+                    resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public async Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity)
         {
             Result<NoteKAttribute> resRep = null;
             var resService = new Result<NoteKAttributeDto>();
@@ -442,7 +351,7 @@ namespace KNote.DomainModel.Services
                     // TODO: update standard control values to newEntity
                     // ...
                                         
-                    resRep = _repository.NoteKAttributes.Add(newEntity);
+                    resRep = await _repository.NoteKAttributes.AddAsync(newEntity);
                 }
                 else
                 {
@@ -454,7 +363,7 @@ namespace KNote.DomainModel.Services
                         _repository.NoteKAttributes.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.NoteKAttributes.Get(entity.NoteKAttributeId).Entity;
+                    var entityForUpdate = (await _repository.NoteKAttributes.GetAsync(entity.NoteKAttributeId)).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.NoteKAttributes.ThrowKntException = true;
@@ -464,7 +373,7 @@ namespace KNote.DomainModel.Services
                         // TODO: update standard control values to entityForUpdate
                         // ...
                         entityForUpdate.SetSimpleDto(entity);
-                        resRep = _repository.NoteKAttributes.Update(entityForUpdate);
+                        resRep = await _repository.NoteKAttributes.UpdateAsync(entityForUpdate);
                     }
                     else
                     {
@@ -474,7 +383,7 @@ namespace KNote.DomainModel.Services
                         // TODO: update standard control values to newEntity
                         // ...
 
-                        resRep = _repository.NoteKAttributes.Add(newEntity);
+                        resRep = await _repository.NoteKAttributes.AddAsync(newEntity);
                     }
                 }
             }
@@ -562,6 +471,22 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
+        public Result<List<ResourceDto>> GetNoteResources(Guid idNote)
+        {
+            var resService = new Result<List<ResourceDto>>();
+            try
+            {
+                var resRep = _repository.Resources.GetAll(r => r.NoteId == idNote);
+                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<ResourceDto>()).ToList();
+                resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
         public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
         {
             var resService = new Result<ResourceDto>();
@@ -586,27 +511,11 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<List<ResourceDto>> GetNoteResources(Guid idNote)
-        {
-            var resService = new Result<List<ResourceDto>>();
-            try
-            {
-                var resRep = _repository.Resources.GetAll( r => r.NoteId == idNote);
-                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<ResourceDto>()).ToList();
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
         // TODO: Pendiente de estandarizar
-        public Result<NoteTaskInfoDto> SaveNoteTask(NoteTaskInfoDto entityInfo)
+        public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo)
         {
             Result<NoteTask> resRep = null;
-            var resService = new Result<NoteTaskInfoDto>();
+            var resService = new Result<NoteTaskDto>();
 
             try
             {
@@ -617,9 +526,11 @@ namespace KNote.DomainModel.Services
                     newEntity.SetSimpleDto(entityInfo);
 
                     // TODO: update standard control values to newEntity
+                    newEntity.CreationDateTime = DateTime.Now;
+                    newEntity.ModificationDateTime = DateTime.Now;
                     // ...
 
-                    resRep = _repository.NoteTasks.Add(newEntity);
+                    resRep = await _repository.NoteTasks.AddAsync(newEntity);
                 }
                 else
                 {
@@ -638,10 +549,12 @@ namespace KNote.DomainModel.Services
 
                     if (entityForUpdate != null)
                     {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
+                        // TODO: update standard control values to entityForUpdate                                                
                         entityForUpdate.SetSimpleDto(entityInfo);
-                        resRep = _repository.NoteTasks.Update(entityForUpdate);
+                        entityForUpdate.ModificationDateTime = DateTime.Now;
+                        // ...
+
+                        resRep = await _repository.NoteTasks.UpdateAsync(entityForUpdate);
                     }
                     else
                     {
@@ -649,9 +562,11 @@ namespace KNote.DomainModel.Services
                         newEntity.SetSimpleDto(entityInfo);
 
                         // TODO: update standard control values to newEntity
+                        newEntity.CreationDateTime = DateTime.Now;
+                        newEntity.ModificationDateTime = DateTime.Now;
                         // ...
 
-                        resRep = _repository.NoteTasks.Add(newEntity);
+                        resRep = await _repository.NoteTasks.AddAsync(newEntity);
                     }
                 }
             }
@@ -661,13 +576,55 @@ namespace KNote.DomainModel.Services
             }
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteTaskInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<NoteTaskDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        // TODO: Pendiente de estandarizar
+        public Result<List<NoteTaskDto>> GetNoteTasks(Guid idNote)
+        {
+            var resService = new Result<List<NoteTaskDto>>();
+            try
+            {
+                var resRep = _repository.NoteTasks.GetAll(r => r.NoteId == idNote);
+                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<NoteTaskDto>()).ToList();
+                resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public async Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid id)
+        {
+            var resService = new Result<NoteTaskDto>();
+            try
+            {
+                var resRep = await _repository.NoteTasks.GetAsync(id);
+                if (resRep.IsValid)
+                {
+                    resRep = await _repository.NoteTasks.DeleteAsync(resRep.Entity);
+                    if (resRep.IsValid)
+                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteTaskDto>();
+                    else
+                        resService.ErrorList = resRep.ErrorList;
+                }
+                else
+                    resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+
+        #region // TODO: !!! Pendiente de estandarizar / Implementar
+
         public Result<WindowInfoDto> SaveWindow(WindowInfoDto entityInfo)
         {
             Result<Window> resRep = null;
@@ -731,8 +688,7 @@ namespace KNote.DomainModel.Services
 
             return ResultDomainAction(resService);
         }
-
-        // TODO: Pendiente de estandarizar
+        
         public Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo)
         {
             Result<TraceNote> resRep = null;
@@ -797,58 +753,158 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<NoteInfoDto> Delete(Guid id)
-        {
-            var resService = new Result<NoteInfoDto>();
-            try
-            {
-                var resRep = _repository.Notes.Get(id);
-                if (resRep.IsValid)
-                {
-                    resRep = _repository.Notes.Delete(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<NoteInfoDto>> DeleteAsync(Guid id)
-        {
-            var resService = new Result<NoteInfoDto>();
-            try
-            {
-                var resRep = await _repository.Notes.GetAsync(id);
-                if (resRep.IsValid)
-                {
-                    resRep = await _repository.Notes.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
+        #endregion
 
         #endregion
 
-        #region Recortes de código provisional .... 
+        #region Código provisional, pendiente de eliminación 
 
+        #region Get (int noteNumber)  (Old)
+        // TODO: !!! Valorar la eliminación de este método.
+        //      la búsqueda por noteNumber se podría desplazar a la búsqueda por filtro. 
+
+        //public Result<NoteDto> Get(int noteNumber)
+        //{
+        //    var resService = new Result<NoteDto>();
+        //    try
+        //    {
+        //        var resRep = _repository.Notes.Get(n => n.NoteNumber == noteNumber);
+
+        //        resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+        //        // KNote template ... load here aditionals properties for UserDto
+        //        // ... 
+
+        //        resService.ErrorList = resRep.ErrorList;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //    }
+        //    return ResultDomainAction(resService);
+        //}
+        #endregion
+
+        #region GetFilter (old)
+        //public Result<List<NoteInfoDto>> GetFilter(int _page, int _limit, Guid folderId, string q) 
+        //{
+        //    var resService = new Result<List<NoteInfoDto>>();
+        //    Expression<Func<Note, bool>> predicate;
+
+        //    if (folderId == new Guid("00000000-0000-0000-0000-000000000000"))
+        //        if (string.IsNullOrEmpty(q))                    
+        //            predicate = null;
+        //        else                    
+        //            predicate = (n) => (n.Topic.Contains(q) || n.Description.Contains(q));
+        //    else
+        //        if (string.IsNullOrEmpty(q))
+        //        predicate = (n) => n.FolderId == folderId;
+        //    else
+        //        predicate = (n) => (n.FolderId == folderId) && (n.Topic.Contains(q) || n.Description.Contains(q));
+
+        //    try
+        //    {
+        //        var totalEntities = _repository.Notes.GetAll(predicate).Entity.Count;
+        //        var resRep = _repository.Notes.GetAllWithPagination(_page, _limit, predicate);
+        //        if (resRep.IsValid)
+        //        {                    
+        //            resService.Entity = resRep.Entity.Select(n => n.GetSimpleDto<NoteInfoDto>()).ToList();
+        //            resService.Tag = totalEntities.ToString();
+        //            return resService;
+        //        }
+        //        else
+        //        {
+        //            resService.ErrorList = resRep.ErrorList;
+        //            return resService;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        resService.AddErrorMessage("Generic error: " + ex.Message);
+        //        return resService;
+        //    }
+        //}
+        #endregion
+
+        #region GetNoteItemList  (old, aplicación de escritorio)
+        //// TODO: eliminar, esto se usaba en la aplicación de escritorio
+        //public Result<List<NoteItemDto>> GetNoteItemList(Guid? folderId)
+        //{            
+        //    var result = new Result<List<NoteItemDto>>();
+
+        //    try
+        //    {
+        //        if (folderId != null)
+        //        {
+        //            result.Entity = _repository.Notes.DbSet
+        //                .Where(n => n.FolderId == folderId).Select(n => new NoteItemDto
+        //                {
+        //                    NoteId = n.NoteId,
+        //                    NoteNumber = n.NoteNumber,
+        //                    Topic = n.Topic,
+        //                    Priority = n.Priority,
+        //                    Tags = n.Tags,
+        //                    CreationDateTime = n.CreationDateTime,
+        //                    ModificationDateTime = n.ModificationDateTime,
+        //                    FolderId = n.FolderId
+        //                }).ToList();
+        //        }
+        //        else
+        //        {
+        //            result.Entity = _repository.Notes.DbSet
+        //                .Select(n => new NoteItemDto
+        //                {
+        //                    NoteId = n.NoteId,
+        //                    NoteNumber = n.NoteNumber,
+        //                    Topic = n.Topic,
+        //                    Priority = n.Priority,
+        //                    Tags = n.Tags,
+        //                    CreationDateTime = n.CreationDateTime,
+        //                    ModificationDateTime = n.ModificationDateTime,
+        //                    FolderId = n.FolderId
+        //                }).ToList();
+        //        }
+
+        //    }
+        //    catch (KntEntityValidationException ex)
+        //    {
+        //        AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+        //    }
+
+        //    return ResultDomainAction<List<NoteItemDto>>(result);
+        //}
+        #endregion
+
+        #region Delete (no async)
+        //public Result<NoteInfoDto> Delete(Guid id)
+        //{
+        //    var resService = new Result<NoteInfoDto>();
+        //    try
+        //    {
+        //        var resRep = _repository.Notes.Get(id);
+        //        if (resRep.IsValid)
+        //        {
+        //            resRep = _repository.Notes.Delete(resRep.Entity);
+        //            if (resRep.IsValid)
+        //                resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
+        //            else
+        //                resService.ErrorList = resRep.ErrorList;
+        //        }
+        //        else
+        //            resService.ErrorList = resRep.ErrorList;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //    }
+        //    return ResultDomainAction(resService);
+        //}
+        #endregion 
+
+        #region Pruebas acceso colecciones 
         //private void PruebaBasura()
         //{
         //    // TODO: borrar, old. 
@@ -866,9 +922,10 @@ namespace KNote.DomainModel.Services
 
         //    //resService.ErrorList = resRep.ErrorList;
         //}
+        #endregion
 
 
-        #endregion 
+        #endregion
 
     }
 }

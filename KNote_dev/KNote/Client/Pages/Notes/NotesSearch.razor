@@ -201,7 +201,7 @@
     private async Task GetFilteredNotes(string queryString)
     {
         notes = null;
-        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter2?" + queryString);
+        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter?" + queryString);
 
         totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
 

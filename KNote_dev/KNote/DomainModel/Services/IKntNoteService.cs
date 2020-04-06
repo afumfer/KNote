@@ -17,28 +17,32 @@ namespace KNote.DomainModel.Services
     public interface IKntNoteService
     {
         Result<List<NoteInfoDto>> GetAll();
-        Result<NoteDto> Get(int noteNumber);
+        Result<List<NoteInfoDto>> HomeNotes();
+        Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);
         Task<Result<NoteDto>> GetAsync(Guid noteId);
         int GetNextNoteNumber();
-        Result<List<NoteInfoDto>> GetByFolder(Guid folderId);
-        Result<List<NoteItemDto>> GetNoteItemList(Guid? folderId);
-        Result<List<NoteInfoDto>> GetFilter(int _page, int _limit, Guid folderId, string query);
+        Result<List<NoteInfoDto>> GetByFolder(Guid folderId);        
         Result<NoteDto> New(NoteInfoDto entity = null);
         Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo);
-        Result<NoteKAttributeDto> SaveAttrtibute(NoteKAttributeDto entity);
+        Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
+        Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity);
         Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity);
         Task<Result<ResourceDto>> DeleteResourceAsync(Guid id);
-        Result<List<ResourceDto>> GetNoteResources(Guid idNote);
-        Result<NoteTaskInfoDto> SaveNoteTask(NoteTaskInfoDto entityInfo);
+        Result<List<ResourceDto>> GetNoteResources(Guid idNote);        
+        Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo);
+        Result<List<NoteTaskDto>> GetNoteTasks(Guid idNote);
+        Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid id);
+        
         Result<WindowInfoDto> SaveWindow(WindowInfoDto entityInfo);
         Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo);        
-        Result<NoteInfoDto> Delete(Guid id);
-        Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
-        Result<List<NoteInfoDto>> HomeNotes();
-        Task<Result<List<NoteInfoDto>>> GetFilter2(NotesFilterDto notesFilter);
-
-
+        
+        //Result<List<NoteInfoDto>> GetFilter(int _page, int _limit, Guid folderId, string query);
+        //Result<NoteDto> Get(int noteNumber);
         //Result<NoteDto> LoadAllCollections(Note note);
         //Result<List<NoteDto>> GetAllFull(Expression<Func<Note, bool>> predicate);
+        //Result<List<NoteItemDto>> GetNoteItemList(Guid? folderId);
+        //Result<NoteInfoDto> Delete(Guid id);
+        //Result<NoteKAttributeDto> SaveAttrtibute(NoteKAttributeDto entity);
+        //Task<Result<NoteTaskInfoDto>> SaveNoteTask(NoteTaskInfoDto entityInfo);
     }
 }

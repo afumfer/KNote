@@ -15,10 +15,6 @@ namespace KNote.Shared.Dto
 
         public Guid UserId { get; set; }
 
-        public DateTime CreationDateTime { get; set; }
-
-        public DateTime ModificationDateTime { get; set; }
-
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         public string Description { get; set; }
 
@@ -42,5 +38,8 @@ namespace KNote.Shared.Dto
         public DateTime? StartDate { get; set; }
 
         public DateTime? ResolvedDate { get; set; }
+
+        public NoteDto NoteDto { get; set; }
+        public UserDto UserDto { get; set; }
     }
 }

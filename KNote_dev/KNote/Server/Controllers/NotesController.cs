@@ -48,33 +48,13 @@ namespace KNote.Server.Controllers
                 return BadRequest(resApi);
             }
         }
-
-        [HttpGet("getfilter")]   // GET api/notes/getfilter
-        public IActionResult GetFilter(int _page, int _limit, Guid folderId, string q)
-        {
-            try
-            {
-                var resApi = _service.Notes.GetFilter(_page, _limit, folderId, q);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-
-            }
-            catch (Exception ex)
-            {
-                var resApi = new Result<List<NoteInfoDto>>();
-                resApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(resApi);
-            }
-        }
         
-        [HttpGet("getfilter2")]   // GET api/notes/getfilter2
-        public async Task <IActionResult> GetFilter2([FromQuery] NotesFilterDto notesFilter )
+        [HttpGet("getfilter")]   // GET api/notes/getfilter
+        public async Task <IActionResult> GetFilter([FromQuery] NotesFilterDto notesFilter )
         {
             try
             {                
-                var kresApi = await _service.Notes.GetFilter2(notesFilter);
+                var kresApi = await _service.Notes.GetFilter(notesFilter);
 
                 HttpContext.InsertPaginationParamInResponse(kresApi.CountEntity, notesFilter.NumRecords);
                 
@@ -156,27 +136,6 @@ namespace KNote.Server.Controllers
             }
         }
 
-        //[HttpGet("[action]/{noteNumber}")]    // GET api/notes/GetByNumber/xx        
-        //public IActionResult GetByNumber(int noteNumber)
-        //{
-        //    try
-        //    {
-        //        var resApi = _service.Notes.Get(noteNumber);
-        //        if (resApi.IsValid)
-        //            return Ok(resApi);
-        //        else
-        //        {
-        //            return BadRequest(resApi);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var kresApi = new Result<NoteInfoDto>();
-        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
-        //        return BadRequest(kresApi);
-        //    }
-        //}
-
         [HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/xxxxxxxxxx        
         public IActionResult GetByFolder(Guid folderId)
         {
@@ -222,6 +181,26 @@ namespace KNote.Server.Controllers
             }
         }
 
+        [HttpDelete("{id}")]    // DELETE api/notes/guid
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                var resApi = await _service.Notes.DeleteAsync(id);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<NoteInfoDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
         [HttpPost("[action]")]
         [HttpPut("[action]")]
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
@@ -242,26 +221,6 @@ namespace KNote.Server.Controllers
             catch (Exception ex)
             {
                 var kresApi = new Result<ResourceDto>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
-
-        [HttpDelete("[action]/{id}")]    // DELETE api/notes/guid
-        [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> DeleteResource(Guid id)
-        {
-            try
-            {
-                var resApi = await _service.Notes.DeleteResourceAsync(id);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<NoteInfoDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -296,13 +255,13 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpDelete("{id}")]    // DELETE api/notes/guid
+        [HttpDelete("[action]/{id}")]    // DELETE api/notes/guid
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteResource(Guid id)
         {
             try
             {
-                var resApi = await _service.Notes.DeleteAsync(id);
+                var resApi = await _service.Notes.DeleteResourceAsync(id);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -336,5 +295,102 @@ namespace KNote.Server.Controllers
                 return BadRequest(resApi);                
             }
         }
+
+        [HttpPost("[action]")]
+        [HttpPut("[action]")]
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public async Task<IActionResult> SaveNoteTask([FromBody]NoteTaskDto entity)
+        {
+            try
+            {
+                var resApi = await _service.Notes.SaveNoteTaskAsync(entity);
+                if (resApi.IsValid)
+                {
+                    return Ok(resApi);
+                }
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<NoteTaskDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
+        [HttpGet("[action]/{id}")]    // GET api/notes/getnoteresources
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public IActionResult GetNoteTasks(Guid id)
+        {
+            try
+            {
+                var resApi = _service.Notes.GetNoteTasks(id);
+                if (resApi.IsValid)
+                {
+                    return Ok(resApi);
+                }
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<List<NoteTaskDto>>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
+
+
+
+        #region Código candidato a eliminar
+
+        #region GetByNumber
+        //[HttpGet("[action]/{noteNumber}")]    // GET api/notes/GetByNumber/xx        
+        //public IActionResult GetByNumber(int noteNumber)
+        //{
+        //    try
+        //    {
+        //        var resApi = _service.Notes.Get(noteNumber);
+        //        if (resApi.IsValid)
+        //            return Ok(resApi);
+        //        else
+        //        {
+        //            return BadRequest(resApi);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var kresApi = new Result<NoteInfoDto>();
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
+        #endregion
+
+        #region GetFilter (old)
+        //[HttpGet("getfilter")]   // GET api/notes/getfilter
+        //public IActionResult GetFilter(int _page, int _limit, Guid folderId, string q)
+        //{
+        //    try
+        //    {
+        //        var resApi = _service.Notes.GetFilter(_page, _limit, folderId, q);
+        //        if (resApi.IsValid)
+        //            return Ok(resApi);
+        //        else
+        //            return BadRequest(resApi);
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var resApi = new Result<List<NoteInfoDto>>();
+        //        resApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(resApi);
+        //    }
+        //}
+        #endregion 
+
+        #endregion
     }
 }
