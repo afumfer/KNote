@@ -301,6 +301,8 @@ namespace KNote.Server.Controllers
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> SaveNoteTask([FromBody]NoteTaskDto entity)
         {
+            var basura = "zzz";
+
             try
             {
                 var resApi = await _service.Notes.SaveNoteTaskAsync(entity);

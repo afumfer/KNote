@@ -38,8 +38,7 @@ namespace KNote.Shared.Dto
         public DateTime? StartDate { get; set; }
 
         public DateTime? ResolvedDate { get; set; }
-
-        public NoteDto NoteDto { get; set; }
-        public UserDto UserDto { get; set; }
+        
+        //public UserDto UserDto { get; set; } = new UserDto();
     }
 }

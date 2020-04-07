@@ -43,7 +43,9 @@
                 <span class="oi oi-task mr-2"></span>Task
             </a>
         </li>
-        @*<li class="nav-item">
+        @*
+            //TODO: !!! pendiente de implementar 
+            <li class="nav-item">
                 <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
                     <span class="oi oi-envelope-open mr-2"></span>Messages
                 </a>
@@ -150,22 +152,27 @@
         else
         {
             <NoteKResources Resources="resources"
-                            OnDelete="DeleteResource"
+                            OnDelete="OnDeleteResource"
                             OnInsertInDesription="InsertInDescription"
-                            OnNewResource="OnResourceSelector">
-
+                            OnNew="OnNewResource">
             </NoteKResources>
         }
     </div>
 
     <div class="@((selectedPanel == 4) ? "" : "d-none")">
-
-        <div class="mt-4"></div>
-
-        <h4 class="mt-2"> Tasks (panel: @selectedPanel)</h4>
-
-        Data for panel @selectedPanel
-
+        <div class="mt-2"></div>
+        @if (tasks == null)
+        {
+            <p>Loading tasks ...</p>
+        }
+        else
+        {
+            <NoteKTasks Tasks="tasks"
+                        OnDelete="OnDeleteTask"                        
+                        OnNew="OnNewTask"
+                        OnEdit="OnEditTask">
+            </NoteKTasks>
+        }
     </div>
 
     <div class="@((selectedPanel == 5) ? "" : "d-none")">
@@ -221,10 +228,11 @@
         </div>
         <hr class="mt-1" />*@
 
-    <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
+    <KntFolderSelector @ref="kntFolderSelector" OnCancel="OnCancelFolderSelector" OnConfirm="OnConfirmFolderSelector"></KntFolderSelector>
 
-    <KntResourceSelector @ref="kntResourceSelector" OnCancel="onCancelResourceSelector" OnConfirm="onConfirmResourceSelector"></KntResourceSelector>
+    <KntResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelector>
 
+    <KntTaskEditor @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" ></KntTaskEditor>
 </EditForm>
 
 @code {
@@ -234,9 +242,11 @@
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
 
     private List<ResourceDto> resources { get; set; }
+    private List<NoteTaskDto> tasks { get; set; }
 
     private KntFolderSelector kntFolderSelector;
     private KntResourceSelector kntResourceSelector;
+    private KntTaskEditor kntTaskEditor;
 
     private int selectedPanel = 1;
 
@@ -261,7 +271,7 @@
             var httpResponse = await dataService.Get<Result<List<ResourceDto>>>($"api/notes/getnoteresources/{Note.NoteId}");
             if (httpResponse.Error)
             {
-                await showMessages.ShowErrorMessage(await httpResponse.GetBody());                
+                await showMessages.ShowErrorMessage(await httpResponse.GetBody());
             }
             else
             {
@@ -269,6 +279,18 @@
             }
         }
 
+        if (panel == 4 && tasks == null)
+        {
+            var httpResponse = await dataService.Get<Result<List<NoteTaskDto>>>($"api/notes/GetNoteTasks/{Note.NoteId}");
+            if (httpResponse.Error)
+            {
+                await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            }
+            else
+            {
+                tasks = httpResponse.Response.Entity;
+            }
+        }
     }
 
     #region Managment FolderSelector
@@ -278,14 +300,14 @@
         kntFolderSelector.Show();
     }
 
-    private void onConfirmFolderSelector(FolderInfoDto f)
+    private void OnConfirmFolderSelector(FolderInfoDto f)
     {
         Note.FolderDto = f.GetSimpleDto<FolderDto>();
         Note.FolderId = f.FolderId;
         kntFolderSelector.Hide();
     }
 
-    private void onCancelFolderSelector()
+    private void OnCancelFolderSelector()
     {
         kntFolderSelector.Hide();
     }
@@ -294,12 +316,12 @@
 
     #region Managment ResourceSelector
 
-    private void OnResourceSelector()
+    private void OnNewResource()
     {
         kntResourceSelector.Show();
     }
 
-    private async Task onConfirmResourceSelector(ResourceDto resource)
+    private async Task OnConfirmResourceSelector(ResourceDto resource)
     {
         resource.NoteId = Note.NoteId;
         resource.Name = Note.NoteId.ToString() + "_" + resource.Name;
@@ -311,21 +333,20 @@
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {            
+        {
             resources.Add(httpResponse.Response.Entity);
         }
 
         kntResourceSelector.Hide();
     }
 
-    private void onCancelResourceSelector()
+    private void OnCancelResourceSelector()
     {
         kntResourceSelector.Hide();
     }
 
-    private async Task DeleteResource(ResourceDto resource)
+    private async Task OnDeleteResource(ResourceDto resource)
     {
-
         var httpResponse = await dataService.Delete($"api/notes/deleteresource/{resource.ResourceId}");
         if (httpResponse.Error)
         {
@@ -351,4 +372,67 @@
 
     #endregion
 
+    #region Tasks managment
+
+    private void OnNewTask()
+    {
+        kntTaskEditor.Show();
+    }
+
+    private async Task OnConfirmTaskEditor(NoteTaskDto task)
+    {
+        task.NoteId = Note.NoteId;
+        // TODO: Hack para pruebas ....
+        task.UserId = new Guid("1491134A-6655-4FE8-BA88-0E2E5C09A37E");
+
+        Console.WriteLine("Api call!");
+
+        var httpResponse = await dataService.Post<NoteTaskDto, Result<NoteTaskDto>>($"api/notes/savenotetask", task);
+        if (httpResponse.Error)
+        {
+            Console.WriteLine("Api error!");
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            Console.WriteLine("Api OK!");
+            tasks.Add(httpResponse.Response.Entity);
+        }
+
+        Console.WriteLine(task.Description);
+        Console.WriteLine(task.StartDate);
+        Console.WriteLine(task.ResolvedDate);
+        Console.WriteLine(task.NoteId);
+        Console.WriteLine(task.UserId);
+
+        kntTaskEditor.Hide();
+    }
+
+    private void OnCancelTaskEditor()
+    {
+        kntTaskEditor.Hide();
+    }
+
+    private async Task OnDeleteTask(NoteTaskDto task)
+    {
+        var httpResponse = await dataService.Delete($"api/notes/deletetask/{task.NoteTaskId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            tasks.Remove(task);
+        }
+    }
+
+    private void OnEditTask(NoteTaskDto task)
+    {
+
+    }
+
+    #endregion
+
+
 }
+

@@ -4,7 +4,7 @@
         </div>
         <div class="col-6 float-right">
             <button class="btn btn-sm btn-warning mx-1 float-right"
-                    @onclick="@(() => OnNewResource.InvokeAsync(null))"
+                    @onclick="@(() => OnNew.InvokeAsync(null))"
                     data-toggle="tooltip" title="New resource for this note">
                     Upload new resource
             </button>
@@ -69,7 +69,7 @@
     [Parameter] public List<ResourceDto> Resources { get; set; }
     [Parameter] public EventCallback<ResourceDto> OnDelete { get; set; }
     [Parameter] public EventCallback<ResourceDto> OnInsertInDesription { get; set; }
-    [Parameter] public EventCallback OnNewResource { get; set; }
+    [Parameter] public EventCallback OnNew { get; set; }
 
     private string ImgPreview(ResourceDto resource)
     {
