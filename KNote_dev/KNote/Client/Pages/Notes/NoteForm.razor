@@ -233,6 +233,7 @@
     <KntResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelector>
 
     <KntTaskEditor @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" ></KntTaskEditor>
+
 </EditForm>
 
 @code {
@@ -243,6 +244,7 @@
 
     private List<ResourceDto> resources { get; set; }
     private List<NoteTaskDto> tasks { get; set; }
+    private NoteTaskDto taskEdit { get; set; }
 
     private KntFolderSelector kntFolderSelector;
     private KntResourceSelector kntResourceSelector;
@@ -376,7 +378,8 @@
 
     private void OnNewTask()
     {
-        kntTaskEditor.Show();
+        taskEdit = null;
+        kntTaskEditor.Show(null);
     }
 
     private async Task OnConfirmTaskEditor(NoteTaskDto task)
@@ -385,25 +388,26 @@
         // TODO: Hack para pruebas ....
         task.UserId = new Guid("1491134A-6655-4FE8-BA88-0E2E5C09A37E");
 
-        Console.WriteLine("Api call!");
-
         var httpResponse = await dataService.Post<NoteTaskDto, Result<NoteTaskDto>>($"api/notes/savenotetask", task);
         if (httpResponse.Error)
         {
-            Console.WriteLine("Api error!");
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
         {
-            Console.WriteLine("Api OK!");
-            tasks.Add(httpResponse.Response.Entity);
-        }
+            var taskUpdated = httpResponse.Response.Entity;
 
-        Console.WriteLine(task.Description);
-        Console.WriteLine(task.StartDate);
-        Console.WriteLine(task.ResolvedDate);
-        Console.WriteLine(task.NoteId);
-        Console.WriteLine(task.UserId);
+            var taskOld = tasks.Where(t => t.NoteTaskId == taskUpdated.NoteTaskId).SingleOrDefault();
+
+            if (taskOld == null)
+                tasks.Add(taskUpdated);
+            else
+            {
+                var i = tasks.IndexOf(taskOld);
+                tasks.RemoveAt(i);
+                tasks.Insert(i, taskUpdated);
+            }
+        }
 
         kntTaskEditor.Hide();
     }
@@ -415,7 +419,7 @@
 
     private async Task OnDeleteTask(NoteTaskDto task)
     {
-        var httpResponse = await dataService.Delete($"api/notes/deletetask/{task.NoteTaskId}");
+        var httpResponse = await dataService.Delete($"api/notes/deletenotetask/{task.NoteTaskId}");
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -428,7 +432,9 @@
 
     private void OnEditTask(NoteTaskDto task)
     {
-
+        taskEdit = task;
+        Console.WriteLine("edit : " + taskEdit.Description);
+        kntTaskEditor.Show(taskEdit);
     }
 
     #endregion

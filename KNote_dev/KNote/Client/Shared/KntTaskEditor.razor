@@ -55,16 +55,16 @@
     [Parameter] public string Title { get; set; } = "KNote task editor";
     [Parameter] public EventCallback<NoteTaskDto> OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
-    [Parameter] public NoteTaskDto Task { get; set; }
+    //[Parameter] public NoteTaskDto Task { get; set; }
 
-    private NoteTaskDto task { get; set; } = new NoteTaskDto();
+    private NoteTaskDto task; // { get; set; } = new NoteTaskDto();
 
     private bool ShowDialog = false;
 
-    public void Show()
+    public void Show(NoteTaskDto taskEdit)
     {
-        if (Task != null)
-            task = Task.GetSimpleDto<NoteTaskDto>();
+        if (taskEdit != null)
+            task = taskEdit.GetSimpleDto<NoteTaskDto>();
         else
         {
             task = new NoteTaskDto();

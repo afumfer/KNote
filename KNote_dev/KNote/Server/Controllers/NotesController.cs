@@ -255,7 +255,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpDelete("[action]/{id}")]    // DELETE api/notes/guid
+        [HttpDelete("[action]/{id}")]    // DELETE api/notes/deleteresource/guid
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> DeleteResource(Guid id)
         {
@@ -269,7 +269,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<NoteInfoDto>();
+                var kresApi = new Result<ResourceDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -300,9 +300,7 @@ namespace KNote.Server.Controllers
         [HttpPut("[action]")]
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> SaveNoteTask([FromBody]NoteTaskDto entity)
-        {
-            var basura = "zzz";
-
+        {            
             try
             {
                 var resApi = await _service.Notes.SaveNoteTaskAsync(entity);
@@ -343,7 +341,25 @@ namespace KNote.Server.Controllers
             }
         }
 
-
+        [HttpDelete("[action]/{id}")]    // DELETE api/notes/deletenotetask/guid
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public async Task<IActionResult> DeleteNoteTask(Guid id)
+        {
+            try
+            {
+                var resApi = await _service.Notes.DeleteNoteTaskAsync(id);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<NoteTaskDto>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
 
 
         #region Código candidato a eliminar
