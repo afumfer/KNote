@@ -5,21 +5,21 @@
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
-
 @*<div class="kpage-header mb-0">
-    <div class="col-3">
-        <h3>Note edit</h3>
+        <div class="col-3">
+            <h3>Note edit</h3>
+        </div>
+        <div class="col-9 float-right">
+            &nbsp;
+        </div>
     </div>
-    <div class="col-9 float-right">
-        &nbsp;
-    </div>
-</div>
 
-<hr class="mt-0" />*@
+    <hr class="mt-0" />*@
 
 @if (showForm)
 {
     <NoteForm Title="Note edit" Note="note" OnValidSubmit="Edit" NoteTypes="noteTypes"></NoteForm>
+    @*<NoteForm Title="Note edit" Note="note" OnValidSubmit="Edit" ></NoteForm>*@
 }
 else
 {
@@ -33,7 +33,7 @@ else
 
     private NoteDto note;
     private bool showForm = false;
-    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+    private List<NoteTypeInfoDto> noteTypes;
 
     protected async override Task OnInitializedAsync()
     {
@@ -46,6 +46,7 @@ else
         else
         {
             note = httpResponse.Response.Entity;
+            showForm = true;
         }
 
         var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
@@ -64,12 +65,12 @@ else
             PageReturn = "index";
         else if (PageReturn == "tree")
             PageReturn = "notes/tree";
-        
-        base.OnInitialized();
+
+        await base.OnInitializedAsync();
     }
 
     private async Task Edit()
-    {        
+    {
         var httpResponse = await dataService.Put("api/notes", note);
         if (httpResponse.Error)
         {

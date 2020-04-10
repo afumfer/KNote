@@ -13,6 +13,7 @@ namespace KNote.Shared.Dto
 
         public Guid NoteId { get; set; }
 
+        [Required(ErrorMessage = "* Attribute user is required ")]
         public Guid UserId { get; set; }
 
         [Required(ErrorMessage = "* Attribute {0} is required ")]
@@ -30,15 +31,15 @@ namespace KNote.Shared.Dto
         public double? SpentTime { get; set; }
 
         public double? DifficultyLevel { get; set; }
-
+        
         public DateTime? ExpectedStartDate { get; set; }
-
+        
         public DateTime? ExpectedEndDate { get; set; }
 
         public DateTime? StartDate { get; set; }
 
         public DateTime? ResolvedDate { get; set; }
-        
-        //public UserDto UserDto { get; set; } = new UserDto();
+                
+        public string UserFullName { get; set; }
     }
 }

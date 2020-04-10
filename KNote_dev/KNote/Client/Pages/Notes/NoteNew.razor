@@ -8,7 +8,7 @@
 
 @if (showForm)
 {
-    <NoteForm Title="Note new"  Note="note" OnValidSubmit="New" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Title="Note new" Note="note" OnValidSubmit="New" NoteTypes="noteTypes"></NoteForm>    
 }
 else
 {
@@ -31,7 +31,7 @@ else
         else
         {
             noteTypes = httpResponse.Response.Entity;
-            
+
             var httpResponseNote = await dataService.Get<Result<NoteDto>>("api/notes/new");
             if (httpResponseNote.Error)
             {
@@ -43,8 +43,8 @@ else
                 showForm = true;
             }
         }
-        
-        base.OnInitialized();
+
+        await base.OnInitializedAsync();
     }
 
     private async Task New()

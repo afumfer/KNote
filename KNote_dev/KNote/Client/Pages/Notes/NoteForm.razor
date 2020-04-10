@@ -120,10 +120,13 @@
 
             <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
             <div class="input-group col-sm-5" id="atrNoteType">
-                <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">
-                    @foreach (var ntype in NoteTypes)
+                <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">                    
+                    @if(NoteTypes != null)
                     {
-                        <option value=@ntype.NoteTypeId>@ntype.Name</option>
+                        @foreach (var ntype in NoteTypes)
+                        {
+                            <option value=@ntype.NoteTypeId>@ntype.Name</option>
+                        }
                     }
                 </select>
                 <ValidationMessage For="@(() => Note.NoteTypeId)" />
@@ -232,7 +235,7 @@
 
     <KntResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelector>
 
-    <KntTaskEditor @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" ></KntTaskEditor>
+    <KntTaskEditor @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" Users="users" ></KntTaskEditor>
 
 </EditForm>
 
@@ -240,17 +243,35 @@
     [Parameter] public string Title { get; set; } = "---";
     [Parameter] public NoteDto Note { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
-    [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
+    [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; }  //  = new List<NoteTypeInfoDto>();
 
-    private List<ResourceDto> resources { get; set; }
-    private List<NoteTaskDto> tasks { get; set; }
-    private NoteTaskDto taskEdit { get; set; }
+    private List<ResourceDto> resources; // { get; set; }
+    private List<NoteTaskDto> tasks  { get; set; }
+    private NoteTaskDto taskEdit; // { get; set; }
+    private List<UserInfoDto> users;
 
     private KntFolderSelector kntFolderSelector;
     private KntResourceSelector kntResourceSelector;
     private KntTaskEditor kntTaskEditor;
 
     private int selectedPanel = 1;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpResponse = await dataService.Get<Result<List<UserInfoDto>>>($"api/users/getall");
+        if (!httpResponse.Error)
+        {
+            users = httpResponse.Response.Entity;
+        }
+        else
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+
+        await base.OnInitializedAsync();
+    }
+
 
     protected async Task Save(EditContext formContext)
     {
@@ -289,8 +310,8 @@
                 await showMessages.ShowErrorMessage(await httpResponse.GetBody());
             }
             else
-            {
-                tasks = httpResponse.Response.Entity;
+            {                
+                tasks = httpResponse.Response.Entity;                
             }
         }
     }
@@ -385,8 +406,6 @@
     private async Task OnConfirmTaskEditor(NoteTaskDto task)
     {
         task.NoteId = Note.NoteId;
-        // TODO: Hack para pruebas ....
-        task.UserId = new Guid("1491134A-6655-4FE8-BA88-0E2E5C09A37E");
 
         var httpResponse = await dataService.Post<NoteTaskDto, Result<NoteTaskDto>>($"api/notes/savenotetask", task);
         if (httpResponse.Error)

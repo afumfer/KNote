@@ -28,10 +28,10 @@
                 @foreach (var item in Tasks)
                 {
                     <tr>
-                        <td>@item.UserId</td>
+                        <td>@item.UserFullName</td>
                         <td>@item.Description</td>
-                        <td>@item.StartDate</td>
-                        <td>@item.ResolvedDate</td>
+                        <td>@(ToShortDate(item.StartDate))</td>
+                        <td>@(ToShortDate(item.ResolvedDate))</td>
                         <td>
                             <span class="float-right">
                                 <button class="btn btn-sm btn-warning mx-1"
@@ -58,4 +58,12 @@
     [Parameter] public EventCallback<NoteTaskDto> OnDelete { get; set; }
     [Parameter] public EventCallback<NoteTaskDto> OnEdit { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
+
+    private string ToShortDate(DateTime? dt)
+    {
+        if (dt == null)
+            return "";
+        else
+            return dt.Value.ToShortDateString();
+    }
 }

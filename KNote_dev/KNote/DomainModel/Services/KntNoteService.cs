@@ -517,6 +517,8 @@ namespace KNote.DomainModel.Services
             Result<NoteTask> resRep = null;
             var resService = new Result<NoteTaskDto>();
 
+            var userFullName = entityInfo.UserFullName;
+
             try
             {
                 if (entityInfo.NoteTaskId == Guid.Empty)
@@ -577,6 +579,7 @@ namespace KNote.DomainModel.Services
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
             resService.Entity = resRep.Entity?.GetSimpleDto<NoteTaskDto>();
+            resService.Entity.UserFullName = userFullName;
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
@@ -587,9 +590,21 @@ namespace KNote.DomainModel.Services
             var resService = new Result<List<NoteTaskDto>>();
             try
             {
-                var resRep = _repository.NoteTasks.GetAll(r => r.NoteId == idNote);
-                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<NoteTaskDto>()).ToList();
-                resService.ErrorList = resRep.ErrorList;
+                // TODO: !!! Borrar ...
+                //var resRep = _repository.NoteTasks.GetAll(r => r.NoteId == idNote);
+                //resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<NoteTaskDto>()).ToList();
+                //resService.ErrorList = resRep.ErrorList;
+
+                var listTasks = _repository.NoteTasks.DbSet.Where(n => n.NoteId == idNote)                    
+                    .Include(t => t.User)                    
+                    .ToList();
+                resService.Entity = new List<NoteTaskDto>();
+                foreach (var e in listTasks)
+                {
+                    var nt = e.GetSimpleDto<NoteTaskDto>();
+                    nt.UserFullName = e.User.FullName;
+                    resService.Entity.Add(nt);
+                }                                
             }
             catch (Exception ex)
             {
