@@ -310,8 +310,8 @@
                 await showMessages.ShowErrorMessage(await httpResponse.GetBody());
             }
             else
-            {                
-                tasks = httpResponse.Response.Entity;                
+            {
+                tasks = httpResponse.Response.Entity;
             }
         }
     }
@@ -426,9 +426,10 @@
                 tasks.RemoveAt(i);
                 tasks.Insert(i, taskUpdated);
             }
+            kntTaskEditor.Hide();
         }
 
-        kntTaskEditor.Hide();
+        //kntTaskEditor.Hide();
     }
 
     private void OnCancelTaskEditor()

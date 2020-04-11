@@ -17,36 +17,43 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th width="240px">User name</th>
+                    <th width="180px">User name</th>
                     <th>Description</th>
+                    <th width="50px" class="text-center">Priority</th>
                     <th width="100px" class="text-center">Start date</th>
                     <th width="100px" class="text-center">End date</th>
+                    <th width="50px" class="text-center">Resolved</th>
                     <th width="100px" class="text-center">(Actions)</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Tasks)
                 {
-                    <tr>
-                        <td>@item.UserFullName</td>
-                        <td>@item.Description</td>
-                        <td>@(ToShortDate(item.StartDate))</td>
-                        <td>@(ToShortDate(item.ResolvedDate))</td>
-                        <td>
-                            <span class="float-right">
-                                <button class="btn btn-sm btn-warning mx-1"
-                                        @onclick="@(() => OnEdit.InvokeAsync(item))"
-                                        data-toggle="tooltip" title="Edit task">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => OnDelete.InvokeAsync(item))"
-                                        data-toggle="tooltip" title="Delete task">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </span>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>@item.UserFullName</td>
+                    <td data-toggle="tooltip" title="Tags: @item.Tags">@item.Description</td>
+                    <td><center>@item.Priority</center></td>
+                    <td data-toggle="tooltip" title="Expected start: @(ToShortDate(item.ExpectedStartDate))">@(ToShortDate(item.StartDate))</td>
+                    <td data-toggle="tooltip" title="Expected end: @(ToShortDate(item.ExpectedEndDate))">@(ToShortDate(item.ResolvedDate))</td>
+                    <td data-toggle="tooltip" title="Spent time: @item.SpentTime">
+                        @*<center>@item.Resolved</center>*@
+                        <center><input type="checkbox" disabled @bind="@item.Resolved" /></center>
+                    </td>
+                    <td>
+                        <span class="float-right">
+                            <button class="btn btn-sm btn-warning mx-1"
+                                    @onclick="@(() => OnEdit.InvokeAsync(item))"
+                                    data-toggle="tooltip" title="Edit task">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger mx-1"
+                                    @onclick="@(() => OnDelete.InvokeAsync(item))"
+                                    data-toggle="tooltip" title="Delete task">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </span>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>

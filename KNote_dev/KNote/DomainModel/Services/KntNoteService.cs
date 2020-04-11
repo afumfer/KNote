@@ -579,7 +579,8 @@ namespace KNote.DomainModel.Services
 
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
             resService.Entity = resRep.Entity?.GetSimpleDto<NoteTaskDto>();
-            resService.Entity.UserFullName = userFullName;
+            if(resRep.Entity != null)
+                resService.Entity.UserFullName = userFullName;
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
