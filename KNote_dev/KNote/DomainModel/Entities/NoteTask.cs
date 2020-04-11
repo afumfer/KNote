@@ -232,16 +232,16 @@ namespace KNote.DomainModel.Entities
             }
         }
 
-        private DateTime? _resolvedDate;
-        public DateTime? ResolvedDate
+        private DateTime? _endDate;
+        public DateTime? EndDate
         {
-            get { return _resolvedDate; }
+            get { return _endDate; }
             set
             {
-                if (_resolvedDate != value)
+                if (_endDate != value)
                 {
-                    _resolvedDate = value;
-                    OnPropertyChanged("ResolvedDate");
+                    _endDate = value;
+                    OnPropertyChanged("EndDate");
                 }
             }
         }
@@ -318,19 +318,19 @@ namespace KNote.DomainModel.Entities
                      , new[] { "ExpectedStartDate", "ExpectedEndDate" }));
                 }
 
-            if (StartDate != null && ResolvedDate != null)
-                if (StartDate > ResolvedDate)
+            if (StartDate != null && EndDate != null)
+                if (StartDate > EndDate)
                 {
                     results.Add(new ValidationResult
                      ("KMSG: La fecha de inicio no puede ser superior a la fecha de resolución"
-                     , new[] { "StartDate", "ResolvedDate" }));
+                     , new[] { "StartDate", "EndDate" }));
                 }
 
-            if (Resolved == true && ResolvedDate == null)
+            if (Resolved == true && EndDate == null)
             {
                 results.Add(new ValidationResult
                  ("KMSG: Se el inidcador de resuelto está activo debe introducir una fecha de resolución"
-                 , new[] { "Resolved", "ResolvedDate" }));
+                 , new[] { "Resolved", "EndDate" }));
             }
 
             // ---

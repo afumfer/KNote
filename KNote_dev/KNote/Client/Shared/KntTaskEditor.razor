@@ -74,8 +74,8 @@
                                     <InputDate type="text" class="form-control" @bind-Value="@task.ExpectedStartDate" />
                                     <ValidationMessage For="@(() => task.ExpectedStartDate)" />
                                 </div>
-                                <label for="atrExpResolvedDate" class="col-sm-2 col-form-label">Exp. End:</label>
-                                <div class="input-group col-sm-4" id="atrExpResolvedDate">
+                                <label for="atrExpEndDate" class="col-sm-2 col-form-label">Exp. End:</label>
+                                <div class="input-group col-sm-4" id="atrExpEndDate">
                                     <InputDate class="form-control" @bind-Value="@task.ExpectedEndDate" />
                                     <ValidationMessage For="@(() => task.ExpectedEndDate)" />
                                 </div>
@@ -87,10 +87,10 @@
                                     <InputDate type="text" class="form-control" @bind-Value="@task.StartDate" />
                                     <ValidationMessage For="@(() => task.StartDate)" />
                                 </div>
-                                <label for="atrResolvedDate" class="col-sm-2 col-form-label">Resolv:</label>
-                                <div class="input-group col-sm-4" id="atrResolvedDate">
-                                    <InputDate type="text" class="form-control" @bind-Value="@task.ResolvedDate" />
-                                    <ValidationMessage For="@(() => task.ResolvedDate)" />
+                                <label for="atrEndDate" class="col-sm-2 col-form-label">Resolv:</label>
+                                <div class="input-group col-sm-4" id="atrEndDate">
+                                    <InputDate type="text" class="form-control" @bind-Value="@task.EndDate" />
+                                    <ValidationMessage For="@(() => task.EndDate)" />
                                 </div>
                             </div>
 

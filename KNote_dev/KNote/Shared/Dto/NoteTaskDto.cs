@@ -38,7 +38,7 @@ namespace KNote.Shared.Dto
 
         public DateTime? StartDate { get; set; }
 
-        public DateTime? ResolvedDate { get; set; }
+        public DateTime? EndDate { get; set; }
                 
         public string UserFullName { get; set; }
     }

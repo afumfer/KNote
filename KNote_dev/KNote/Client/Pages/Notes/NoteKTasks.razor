@@ -34,7 +34,7 @@
                     <td data-toggle="tooltip" title="Tags: @item.Tags">@item.Description</td>
                     <td><center>@item.Priority</center></td>
                     <td data-toggle="tooltip" title="Expected start: @(ToShortDate(item.ExpectedStartDate))">@(ToShortDate(item.StartDate))</td>
-                    <td data-toggle="tooltip" title="Expected end: @(ToShortDate(item.ExpectedEndDate))">@(ToShortDate(item.ResolvedDate))</td>
+                    <td data-toggle="tooltip" title="Expected end: @(ToShortDate(item.ExpectedEndDate))">@(ToShortDate(item.EndDate))</td>
                     <td data-toggle="tooltip" title="Spent time: @item.SpentTime">
                         @*<center>@item.Resolved</center>*@
                         <center><input type="checkbox" disabled @bind="@item.Resolved" /></center>

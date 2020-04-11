@@ -23,6 +23,6 @@ namespace KNote.Shared.Dto
         public DateTime? ExpectedStartDate { get; set; }
         public DateTime? ExpectedEndDate { get; set; }
         public DateTime? StartDate { get; set; }
-        public DateTime? ResolvedDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }
