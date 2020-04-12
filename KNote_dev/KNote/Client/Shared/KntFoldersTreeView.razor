@@ -37,7 +37,7 @@
                     {
                         folderOldSelected = folder;
                         if (EditMode)
-                        {                        
+                        {
                             <span>
                                 <button class="btn btn-sm btn-warning mx-1"
                                         @onclick="@(() => onFolderEdit(folder))"
@@ -56,10 +56,9 @@
                     @if (folder.Expanded)
                     {
                         <div>
-                            <KntFoldersTreeView 
-                                                FoldersInfo="@folder.ChildFolders" 
-                                                FolderSelected="onFolderSelected" 
-                                                EditMode="EditMode" 
+                            <KntFoldersTreeView FoldersInfo="@folder.ChildFolders"
+                                                FolderSelected="onFolderSelected"
+                                                EditMode="EditMode"
                                                 FolderDelete="FolderDelete"
                                                 FolderEdit="FolderEdit">
                             </KntFoldersTreeView>
@@ -70,13 +69,17 @@
         </ul>
     }
 }
+else
+{
+    <p><em>Loading tree folders...</em></p>
+}
 
 @code {
     [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderEdit { get; set; }
-    [Parameter] public bool EditMode { get; set; } 
+    [Parameter] public bool EditMode { get; set; }
 
     private FolderInfoDto folderOldSelected;
 

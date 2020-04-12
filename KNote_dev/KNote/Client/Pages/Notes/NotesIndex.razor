@@ -1,14 +1,64 @@
-﻿@page "/notes"
+﻿@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
-
-<h3>Notes Index</h3>
-<hr />
-
-<div class="form-group">
-    <a class="btn btn-info" href="notes/new">New atrribute</a>
-</div>
+<EntityList List="Notes">
+    <ItemsFull>
+        <table class="table table-sm table-bordered table-striped">
+            <!--   <table class="table pt-4">  -->
+            <thead>
+                <tr>
+                    <th width="80px" class="text-right">#</th>
+                    <th>Topic</th>
+                    <th width="60px" class="text-right">Priority</th>
+                    <th width="80px" class="text-right">Date</th>
+                    <th width="100px" class="text-center">(Actions)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var note in Notes)
+                {
+                    <tr>
+                        <td class="text-right">@note.NoteNumber</td>
+                        <td>@note.Topic</td>
+                        <td class="text-right">@note.Priority</td>
+                        <td class="text-right">  @note.CreationDateTime.ToShortDateString()</td>
+                        <td>
+                            <AuthorizeView Roles="Admin, ProjecManager, Staff">
+                                <Authorized>
+                                    <span class="float-right">
+                                        <button class="btn btn-sm btn-warning mx-1"
+                                                @onclick="@(() => OnNoteEdit.InvokeAsync(note))" 
+                                                data-toggle="tooltip" title="Edit note">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger mx-1"
+                                                @onclick="@(() => OnNoteDelete.InvokeAsync(note))"
+                                                data-toggle="tooltip" title="Delete note">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </span>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <span class="float-right">
+                                        <button class="badge badge-pill badge-primary"
+                                                @onclick="@(() => OnNoteView.InvokeAsync(note))"
+                                                data-toggle="tooltip" title="View note">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </span>
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </ItemsFull>
+</EntityList>
 
 @code {
+    [Parameter] public List<NoteInfoDto> Notes { get; set; }
+    [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
+    [Parameter] public EventCallback<NoteInfoDto> OnNoteEdit { get; set; }
+    [Parameter] public EventCallback<NoteInfoDto> OnNoteView { get; set; }
 
 }

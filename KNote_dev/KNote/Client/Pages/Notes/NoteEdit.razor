@@ -5,21 +5,10 @@
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
-@*<div class="kpage-header mb-0">
-        <div class="col-3">
-            <h3>Note edit</h3>
-        </div>
-        <div class="col-9 float-right">
-            &nbsp;
-        </div>
-    </div>
-
-    <hr class="mt-0" />*@
 
 @if (showForm)
 {
     <NoteForm Title="Note edit" Note="note" OnValidSubmit="Edit" NoteTypes="noteTypes"></NoteForm>
-    @*<NoteForm Title="Note edit" Note="note" OnValidSubmit="Edit" ></NoteForm>*@
 }
 else
 {

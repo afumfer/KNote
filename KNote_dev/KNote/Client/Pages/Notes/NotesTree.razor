@@ -32,79 +32,46 @@
         }
         else
         {
-            <h5><span class="oi oi-folder pr-3"></span>@folder.Name</h5>
+            <div class="row">
+                <div class="col-10">
+                    <h5><span class="oi oi-folder pr-3"></span>@folder.Name</h5>
+                </div>
+                <div class="col-2">
+                    <span class="float-right">
+                        @if (viewMode == 0)
+                        {
+                            <button class="btn btn-sm btn-dark mx-1"
+                                    @onclick="ToggleView"
+                                    data-toggle="tooltip" title="View item mode">
+                                <i class="fa fa-file-text-o"></i>
+                            </button>
+                        }
+                        else 
+                        { 
+                            <button class="btn btn-sm btn-dark mx-1"
+                                    @onclick="ToggleView"
+                                    data-toggle="tooltip" title="View table mode" >
+                                <i class="fa fa-table"></i>
+                            </button>                        
+                        }
+                    </span>
+                </div>
+            </div>                
         }
     </div>
+
     <div class="col-lg-3 pt-2 pb-2 bg-light border">
-        @if (foldersTree == null)
-        {
-            <p><em>Loading tree folders ...</em></p>
-        }
-        else
-        {
-            <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" />
-        }
+        <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" />
     </div>
-
-    <div class="col-lg-9 pt-2 pb-2 bg-light border">
-        @if (notes == null)
+    <div class="col-lg-9 pt-2 pb-2 border">
+        @if (viewMode == 0)
         {
-            <p><em>Loading...</em></p>
+            <NotesIndex Notes="notes" OnNoteDelete="Delete" OnNoteEdit="GoEditNote" OnNoteView="GoViewNote"></NotesIndex>
         }
         else
         {
-            @*<h5>Notes</h5>
-                <hr />
-                <p></p>*@
-            <table class="table table-sm table-bordered table-striped">
-                <!--   <table class="table pt-4">  -->
-                <thead>
-                    <tr>
-                        <th width="80px" class="text-right">#</th>
-                        <th>Topic</th>
-                        <th width="60px" class="text-right">Priority</th>
-                        <th width="80px" class="text-right">Date</th>
-                        <th width="100px" class="text-center">(Actions)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var note in notes)
-                    {
-                        <tr>
-                            <td class="text-right">@note.NoteNumber</td>
-                            <td>@note.Topic</td>
-                            <td class="text-right">@note.Priority</td>
-                            <td class="text-right">  @note.CreationDateTime.ToShortDateString()</td>
-                            <td>
-                                <AuthorizeView Roles="Admin, ProjecManager, Staff">
-                                    <Authorized>
-                                        <span class="float-right">
-                                            <a href="notes/edit/@note.NoteId/tree" class="btn btn-sm btn-warning mx-1"
-                                               data-toggle="tooltip" title="Edit user">
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
-                                            <button class="btn btn-sm btn-danger mx-1"
-                                                    @onclick="@(() => Delete(note))"
-                                                    data-toggle="tooltip" title="Delete user">
-                                                <i class="fa fa-minus"></i>
-                                            </button>
-                                        </span>
-                                    </Authorized>
-                                    <NotAuthorized>
-                                        <a href="notes/@note.NoteId">
-                                            <span class="badge badge-pill badge-primary float-right ml-1">
-                                                ...
-                                            </span>
-                                        </a>
-                                    </NotAuthorized>
-                                </AuthorizeView>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <NotesList Notes="notes" OnNoteDelete="Delete" OnNoteEdit="GoEditNote" OnNoteView="GoViewNote"/>
         }
-
     </div>
 </div>
 
@@ -117,6 +84,7 @@
     private FolderInfoDto folder;
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
+    private int viewMode = 0;
 
     List<NoteInfoDto> notes;
 
@@ -131,6 +99,11 @@
             f.Selected = true;
             await OnFolderSelected(f);
         }
+    }
+
+    private void ToggleView()
+    {
+        viewMode = (viewMode == 0) ? 1 : 0;
     }
 
     private async Task OnFolderSelected(FolderInfoDto f)
@@ -185,6 +158,16 @@
     void GoNewNote()
     {
         navigationManager.NavigateTo($"notes/new");
+    }
+
+    void GoViewNote(NoteInfoDto note)
+    {
+        navigationManager.NavigateTo($"notes/{note.NoteId}");
+    }
+
+    void GoEditNote(NoteInfoDto note)
+    {
+        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/tree");
     }
 
 }

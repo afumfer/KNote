@@ -13,7 +13,7 @@
     <h3>KNote home page</h3>
     <p><i>(@appState.AppName)</i></p>
     <hr />
-    <NotesList Notes="notes" NoteDelete="OnNoteDelete" NoteEdit="OnNoteEdit" />
+    <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
 </div>
 
 <ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
@@ -38,19 +38,24 @@
         notes = null;
         var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/homenotes");
         if (httpResponse.Error)
-        {            
+        {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
             notes = httpResponse.Response.Entity;
     }
 
-    private void OnNoteEdit(Guid noteId)
+    private void GoNoteView(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/edit/{noteId}/index");
+        navigationManager.NavigateTo($"notes/{note.NoteId}");
     }
 
-    private void OnNoteDelete(NoteInfoDto item)
+    private void GoNoteEdit(NoteInfoDto note)
+    {
+        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/index");
+    }
+
+    private void GoNoteDelete(NoteInfoDto item)
     {
         modalDialog.Show();
         itemDelete = item;
