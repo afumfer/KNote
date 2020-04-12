@@ -7,7 +7,7 @@ namespace KNote.Shared.Dto
     public class NotesFilterDto
     {
         public int Page { get; set; } = 1;
-        public int NumRecords { get; set; } = 10;
+        public int NumRecords { get; set; } = 25;
 
         public PaginationDto Pagination
         {

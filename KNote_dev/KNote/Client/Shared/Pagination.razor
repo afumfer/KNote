@@ -1,5 +1,5 @@
 ﻿<nav aria-label="Page navigation example">
-    <ul class="pagination justify-content-center">
+    <ul class="pagination justify-content-left">
         @foreach (var link in Links)
         {
             <li @onclick="@(() => OnSelectedPage(link))"
@@ -9,23 +9,40 @@
             </li>
         }
     </ul>
+    
 </nav>
 
 @code {
     [Parameter] public int CurrentPage { get; set; } = 1;
     [Parameter] public int TotalPages { get; set; }
-    [Parameter] public int Radio { get; set; } = 3;
+    [Parameter] public int Radio { get; set; } = 2;
     [Parameter] public EventCallback<int> SelectedPage { get; set; }
-    
+
     private List<PagesModel> Links = new List<PagesModel>();
 
     protected override void OnParametersSet()
     {
         Links = new List<PagesModel>();
-        
+
         var previousLinkEnabled = CurrentPage != 1;
         var previousLink = CurrentPage - 1;
         Links.Add(new PagesModel(previousLink, previousLinkEnabled, "Previous"));
+
+        var iniP = CurrentPage - Radio;
+        if (iniP == 2)
+        {
+            Links.Add(new PagesModel(1) { Active = false });
+        }
+        else if (iniP == 3)
+        {
+            Links.Add(new PagesModel(1) { Active = false });
+            Links.Add(new PagesModel(2) { Active = false });
+        }
+        else  if (iniP > 3)
+        {
+            Links.Add(new PagesModel(1) { Active = false });
+            Links.Add(new PagesModel(1) { Enabled = false, Active = false, Text = "..." });
+        }
 
         for (int i = 1; i <= TotalPages; i++)
         {
@@ -34,7 +51,21 @@
                 Links.Add(new PagesModel(i) { Active = CurrentPage == i });
             }
         }
-        
+     
+        var finP = CurrentPage + Radio;
+        if (CurrentPage + Radio < TotalPages - 2)
+        {
+            Links.Add(new PagesModel(TotalPages-2) { Enabled = false, Active = false, Text="..." });
+        }
+        else if (CurrentPage + Radio < TotalPages - 1)
+        {
+            Links.Add(new PagesModel(TotalPages -1 ) { Active = false });
+        }
+        if (CurrentPage + Radio < TotalPages)
+        {
+            Links.Add(new PagesModel(TotalPages) { Active = false });
+        }
+
         var nextLinkEnabled = CurrentPage != TotalPages;
         var nextLink = CurrentPage + 1;
         Links.Add(new PagesModel(nextLink, nextLinkEnabled, "Next"));

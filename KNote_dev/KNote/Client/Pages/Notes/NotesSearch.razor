@@ -7,9 +7,21 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<h3>Notes Search</h3>
-<hr />
-@*<div class="form-inline"></div>*@
+<div class="row">
+    <div class="col-9">
+        <h3>Notes Search</h3>
+    </div>
+    <div class="col-3">
+        <span class="float-right">
+            <button type="button" class="btn btn-primary mb-2 mx-sm-3" 
+                    @onclick="OnLoadListNotes">
+                Apply filter
+            </button>
+        </span>
+    </div>
+</div>
+
+<hr class="mt-0" />
 
 <div class="form-inline">
 
@@ -43,17 +55,55 @@
             </label>
         </div>*@
 
-    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="OnLoadListNotes">Filter</button>
-    <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean</button>
+    @*<button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="OnLoadListNotes">Filter</button>*@
+    <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean filter</button>
 
 </div>
 
 <hr />
 
-<Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
-            TotalPages="totalPages"></Pagination>
+<div class="row">
+    <div class="col-9">
+        <Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
+                    TotalPages="totalPages"></Pagination>
+    </div>
+    <div class="col-3">
+        @if (notes != null && notes.Count > 0)
+        {
+            <span class="float-right mt-1">
+                @if (viewMode == 0)
+                {
+                    <button class="btn btn-sm btn-dark mx-1"
+                            @onclick="ToggleView"
+                            data-toggle="tooltip" title="Item mode view">
+                        <i class="fa fa-file-text-o"></i> Item mode view
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-sm btn-dark mx-1"
+                            @onclick="ToggleView"
+                            data-toggle="tooltip" title="Table mode view">
+                        <i class="fa fa-table"></i> Table mode view
+                    </button>
+                }
+            </span>
+        }
+        else
+        {
+            <span>&nbsp;</span>
+        }
+    </div>
+</div>
 
-<NotesList Notes="notes" OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" />
+@if (viewMode == 0)
+{
+    <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView"></NotesIndex>
+}
+else
+{
+    <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+}
 
 <ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
     <div><p>Are you sure you want to delete user "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
@@ -67,6 +117,8 @@
 
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
+
+    private int viewMode = 0;
 
     private string topic = "";
     private Guid? folderId;
@@ -86,21 +138,26 @@
 
         var url = navigationManager.Uri;
         var queries = navigationManager.GetQueryStrings(url);
-       
+
         if (queries == null)
         {
             await GetFilteredNotes(string.Empty);
         }
         else
-        {         
+        {
             queryStringsDict = queries;
             LoadFormControls();
             var queryStrings = url.Split(new string[] { "?" }, StringSplitOptions.None)[1];
-            await GetFilteredNotes(queryStrings);            
+            await GetFilteredNotes(queryStrings);
         }
     }
 
     #region Utils
+
+    private void ToggleView()
+    {
+        viewMode = (viewMode == 0) ? 1 : 0;
+    }
 
     private void LoadFormControls()
     {
@@ -131,13 +188,13 @@
         //queryStringsDict["tags"] = tags?.ToString();
         //queryStringsDict["attributevalue"] = attributeValue?.ToString();
         queryStringsDict["page"] = currentPage.ToString();
-        
+
         var defaultValues = new List<string>() { "false", "", "0" };
 
         var strReturn = string.Join("&", queryStringsDict
             .Where(x => !defaultValues.Contains(x.Value.ToLower()))
             .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
-        
+
         return strReturn;
     }
 
@@ -220,12 +277,17 @@
 
     #region  Edit / Delete events ...
 
-    private void OnNoteEdit(NoteInfoDto note)
+    private void GoNoteView(NoteInfoDto note)
+    {
+        navigationManager.NavigateTo($"notes/{note.NoteId}");
+    }
+
+    private void GoNoteEdit(NoteInfoDto note)
     {
         navigationManager.NavigateTo($"notes/edit/{note.NoteId}/notessearch");
     }
 
-    private void OnNoteDelete(NoteInfoDto item)
+    private void GoNoteDelete(NoteInfoDto item)
     {
         modalDialog.Show();
         itemDelete = item;
