@@ -33,13 +33,31 @@
         else
         {
             <div class="row">
-                <div class="col-10">
+                <div class="col-8">
                     <h5><span class="oi oi-folder pr-3"></span>@folder.Name</h5>
                 </div>
-                <div class="col-2">
+                <div class="col-4">
                     @if(notes != null && notes.Count > 0)
                     {
                         <span class="float-right">
+                            @if (viewPagination == 1)
+                            {
+                                <button class="btn btn-sm btn-dark mx-1"
+                                        @onclick="TogglePagination"
+                                        data-toggle="tooltip" title="Disable paging">
+                                    <i class="fa fa-list"></i> Disable paging
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-dark mx-1"
+                                        @onclick="TogglePagination"
+                                        data-toggle="tooltip" title="Activate paging">
+                                    <i class="fa fa-list-ol"></i> Activate paging
+                                </button>
+                            }
+
+
                             @if (viewMode == 0)
                             {
                                 <button class="btn btn-sm btn-dark mx-1"
@@ -48,8 +66,8 @@
                                     <i class="fa fa-file-text-o"></i> Item mode view
                                 </button>
                             }
-                            else 
-                            { 
+                            else
+                            {
                                 <button class="btn btn-sm btn-dark mx-1"
                                         @onclick="ToggleView"
                                         data-toggle="tooltip" title="Table mode view">
@@ -70,17 +88,31 @@
     <div class="col-lg-3 pt-2 pb-2 bg-light border">
         <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" />
     </div>
+
     <div class="col-lg-9 pt-2 pb-2 border">
+        @if(notes != null && notes.Count > 0 && viewPagination == 1)
+        {
+            <Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
+                        TotalPages="totalPages"></Pagination>
+        }
         @if (viewMode == 0)
         {
             <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView"></NotesIndex>
         }
         else
         {
-            <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView"/>
+            <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+        }
+
+        @if (notes != null && notes.Count > 15 && viewPagination == 1)
+        {
+            <Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
+                        TotalPages="totalPages"></Pagination>
         }
     </div>
 </div>
+
+
 
 <ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
     <div><p>Are you sure you want to delete user "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
@@ -88,12 +120,18 @@
 
 @code {
     private List<FolderInfoDto> foldersTree;
-    private FolderInfoDto folder;
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
+
     private int viewMode = 0;
+    private int viewPagination = 1;
+
 
     List<NoteInfoDto> notes;
+
+    private FolderInfoDto folder;
+    private int currentPage = 1;
+    private int totalPages;
 
     protected override async Task OnInitializedAsync()
     {
@@ -113,10 +151,26 @@
         viewMode = (viewMode == 0) ? 1 : 0;
     }
 
+    private async Task TogglePagination()
+    {
+        viewPagination = (viewPagination == 0) ? 1 : 0;
+        await OnFolderSelected(folder);
+    }
+
     private async Task OnFolderSelected(FolderInfoDto f)
     {
         folder = f;
-        await LoadNotes();
+
+        if (viewPagination == 0)
+            await LoadNotes();
+        else
+            await onSelectedPage(1);
+    }
+
+    private async Task onSelectedPage(int page)
+    {
+        currentPage = page;
+        await LoadNotesWithPagination();
     }
 
     private async Task LoadNotes()
@@ -132,6 +186,26 @@
             notes = httpResponse.Response.Entity;
         }
     }
+
+    private async Task LoadNotesWithPagination()
+    {
+        var queryString = $"folderid={folder.FolderId}&page={currentPage}";
+
+        notes = null;
+        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter?" + queryString);
+
+        totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            notes = httpResponse.Response.Entity;
+        }
+    }
+
 
     private async Task OnConfirmDelete()
     {
