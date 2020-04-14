@@ -8,13 +8,13 @@
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.18.3" />
 
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="3.2.0-preview2.20160.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Build" Version="3.2.0-preview2.20160.5" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="3.2.0-preview2.20160.5" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.2.0-preview2.20160.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="3.2.0-preview3.20168.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Build" Version="3.2.0-preview3.20168.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="3.2.0-preview3.20168.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.2.0-preview3.20168.3" />
     
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="3.1.2" />
-    <PackageReference Include="Tewr.Blazor.FileReader" Version="1.3.0.20049" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="3.1.3" />
+    <PackageReference Include="Tewr.Blazor.FileReader" Version="1.5.0.20093" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\KNote.Shared.csproj" />

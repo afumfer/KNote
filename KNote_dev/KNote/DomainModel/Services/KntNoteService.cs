@@ -53,9 +53,17 @@ namespace KNote.DomainModel.Services
             var resService = new Result<List<NoteInfoDto>>();
             try
             {
+                // TODO: Repensar esto 
+
+                var idFolderHome = _repository.Folders.DbSet
+                    .Where(f => f.FolderNumber == 1)
+                    .Select(f => f.FolderId)
+                    .SingleOrDefault();
+
                 var resRep = _repository.Notes.DbSet
-                    .Include( n => n.Folder)
-                    .Where( n => n.Folder.FolderNumber == 1)
+                    .Include(n => n.Folder)
+                    //.Where( n => n.Folder.FolderNumber == 1)
+                    .Where(n => n.FolderId == idFolderHome)
                     .OrderBy(n => n.NoteNumber).Take(25).ToList();
 
                 resService.Entity = resRep.Select(u => u.GetSimpleDto<NoteInfoDto>()).ToList();

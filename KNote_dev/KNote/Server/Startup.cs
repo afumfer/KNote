@@ -62,7 +62,7 @@ namespace KNote.Server
             services.AddScoped<IFileStore, LocalFileStore>();
             services.AddHttpContextAccessor();
 
-            services.AddMvc().AddNewtonsoftJson(options =>
+            services.AddControllersWithViews().AddNewtonsoftJson(options =>
                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddResponseCompression(opts =>
