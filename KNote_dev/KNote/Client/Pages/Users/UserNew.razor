@@ -6,10 +6,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>New User</h3>
-<hr />
-
-<UserForm OnValidSubmit="New" User="user"></UserForm>
+<UserForm Title="New User" OnValidSubmit="New" User="user"></UserForm>
 
 @code {
     private UserDto user = new UserDto();

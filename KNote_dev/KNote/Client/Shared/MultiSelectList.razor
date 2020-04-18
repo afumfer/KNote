@@ -1,0 +1,36 @@
+﻿@*<div class="multiselect">*@
+    <div id="MultiSelectCheck">
+        @foreach (var item in Items)
+        {
+            <div>
+                <label for="@item.Value">
+                    @if (item.Selected)
+                    {
+                        <input type="checkbox" id="@item.Key" checked="checked" @onchange="@((e) => CheckboxChanged(e, item.Key))" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" id="@item.Key" @onchange="@((e) => CheckboxChanged(e, item.Key))" />
+                    }
+                    @item.Value
+                </label>
+            </div>
+        }
+    </div>
+@*</div>*@
+
+@code
+{
+    [Parameter]
+    public List<MultiSelectListDto> Items { get; set; } = null!;
+
+    private void CheckboxChanged(ChangeEventArgs e, string key)
+    {
+        var i = this.Items.FirstOrDefault(i => i.Key == key);
+        if (i != null)
+        {
+            //i.Selected = (bool)e.Value;
+            i.Selected = !i.Selected;
+        }
+    }
+}

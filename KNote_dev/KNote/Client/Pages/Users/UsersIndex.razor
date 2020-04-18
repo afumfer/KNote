@@ -44,7 +44,7 @@
                         <td>@item.UserName</td>
                         <td>@item.FullName</td>
                         <td>@item.EMail</td>
-                        <td>@item.RoleDefinition</td>
+                        <td>@(RolesDescriptions(item.RoleDefinition))</td>
                         <td>
                             <span class="float-right">
                                 <a href="users/edit/@item.UserId" class="btn btn-sm btn-warning mx-1"
@@ -95,12 +95,33 @@
         {
             users = httpResponse.Response.Entity;
             var count = httpResponse.HttpResponseMessage.Headers.GetValues("count").FirstOrDefault();
-            totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());            
+            totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
         }
         else
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
+    }
+
+    private string RolesDescriptions(string rolesString)
+    {
+        if (rolesString == null)
+            return "";
+
+        string rolesDes = "";
+        var rolesCole = rolesString.Split(", ");
+        foreach (var r in rolesCole)
+        {
+            Enum.TryParse(r, out EnumRoles myRol);
+            var z = KntConst.Roles.Where(_ => _.Key == myRol).Select(_ => _.Value).FirstOrDefault();
+            if (z != null)
+            {
+                if (rolesDes != "")
+                    rolesDes += ", ";
+                rolesDes += z;
+            }
+        }
+        return rolesDes;
     }
 
     private void Delete(UserInfoDto item)

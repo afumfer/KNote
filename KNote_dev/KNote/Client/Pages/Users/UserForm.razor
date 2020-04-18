@@ -1,54 +1,101 @@
-﻿<EditForm Model="User" OnValidSubmit="OnValidSubmit">
+﻿@inject IShowMessages showMessages
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManager
 
-    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <EditForm Model="User" Context="formContext">
 
-    <div class="form-group">
-        <label>User name:</label>
-        <InputText class="form-control" @bind-Value="@User.UserName" />
-        <ValidationMessage For="@(() => User.UserName)" />
-    </div>
+        <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <div class="form-group">
-        <label>Email:</label>
-        <InputText class="form-control" @bind-Value="@User.EMail" />
-        <ValidationMessage For="@(() => User.EMail)" />
-    </div>
-
-    <div class="form-group">
-        <label>Full name:</label>
-        <InputText class="form-control" @bind-Value="@User.FullName" />
-        <ValidationMessage For="@(() => User.FullName)" />
-    </div>
-
-    <div class="form-group">
-        <label>Roles:</label>
-        <InputText class="form-control" @bind-Value="@User.RoleDefinition" />
-        <ValidationMessage For="@(() => User.RoleDefinition)" />
-    </div>
-
-    <!-- TODO: ... -->
-    @*<div class="form-group">
-            <label>Disabled:</label>
-            <InputCheckbox class="form-control" @bind-value="User.Disabled" />
-            <ValidationMessage For="@(() => User.Disabled)" />
-        </div>*@
-
-    <!-- Footer -->
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-6">
-                &nbsp;
-            </div>
-            <div class="col-6 float-right">
-                <button class="btn btn-success float-right" type="submit">Save changes</button>
+        <!-- Title -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    <h3>@Title</h3>
+                </div>
+                <div class="col-6 float-right">
+                    <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+                </div>
             </div>
         </div>
-    </div>
-    <hr class="mt-1" />
+        <hr class="mt-1" />
 
-</EditForm>
+        <div class="form-group row">
+            <label for="atrUserName" class="col-sm-2 col-form-label">User name:</label>
+            <div class="input-group col-sm-10" id="atrUserName">
+                <InputText class="form-control" @bind-Value="@User.UserName" />
+            </div>
+            <ValidationMessage For="@(() => User.UserName)" />
+        </div>
+
+        <div class="form-group row">
+            <label for="atrEmail" class="col-sm-2 col-form-label">Email:</label>
+            <div class="input-group col-sm-10" id="atrEmail">
+                <InputText class="form-control" @bind-Value="@User.EMail" />
+            </div>
+            <ValidationMessage For="@(() => User.EMail)" />
+        </div>
+
+        <div class="form-group row">
+            <label for="atrFullName" class="col-sm-2 col-form-label">Full name:</label>
+            <div class="input-group col-sm-10" id="atrFullName">
+                <InputText class="form-control" @bind-Value="@User.FullName" />
+            </div>
+            <ValidationMessage For="@(() => User.FullName)" />
+        </div>
+
+        <div class="form-group row">
+            <label for="atrRoles" class="col-sm-2 col-form-label">Roles:</label>
+            <div class="input-group col-sm-10" id="atrRoles">                
+                <MultiSelectList Items="roles" />
+            </div>
+            <ValidationMessage For="@(() => User.RoleDefinition)" />
+        </div>
+
+        <hr class="mt-1" />
+
+    </EditForm>
 
 @code {
+    [Parameter] public string Title { get; set; } = "---";
     [Parameter] public UserDto User { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    private List<MultiSelectListDto> roles = new List<MultiSelectListDto>();
+
+    protected override void OnInitialized()
+    {
+        foreach (var r in KntConst.Roles)
+        {
+            var selected = false;
+            if (User.RoleDefinition?.IndexOf(r.Key.ToString()) >= 0)
+                selected = true;
+
+            roles.Add(new MultiSelectListDto(selected, r.Key.ToString(), r.Value));
+        }
+
+        base.OnInitialized();
+    }
+
+    protected async Task Save(EditContext formContext)
+    {
+        User.RoleDefinition = GetRolesDefinition();
+
+        bool formIsValid = formContext.Validate();
+        if (formIsValid == false)
+        {
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+            return;
+        }
+
+        await OnValidSubmit.InvokeAsync(formContext);
+    }
+
+    private string GetRolesDefinition()
+    {
+        var strReturn = string.Join(", ", roles
+            .Where(x => x.Selected == true)
+            .Select(_ => _.Key).ToArray());
+
+        return strReturn;
+    }
 }

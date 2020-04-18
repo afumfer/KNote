@@ -6,12 +6,9 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>User Edit</h3>
-<hr />
-
 @if (user != null)
 {
-    <UserForm OnValidSubmit="Edit" User="user"></UserForm>
+    <UserForm Title="User Edit" OnValidSubmit="Edit" User="user"></UserForm>
 }
 else
 {
