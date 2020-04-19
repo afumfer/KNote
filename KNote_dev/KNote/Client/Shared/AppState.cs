@@ -14,7 +14,7 @@ namespace KNote.Client.Shared
             set { _appMode = value; NotifyStateChanged(); }
         }
 
-        private string _appName = "Other keynotes management for people's group (ver 0.0.3.3)";
+        private string _appName = "Other keynotes management for people's group (ver 0.0.3.4)";
         public string AppName
         {
             get { return _appName; }
@@ -28,7 +28,18 @@ namespace KNote.Client.Shared
             set { _selectedFolder = value; NotifyStateChanged(); }
         }
 
+        // TODO: !!! pendiente de eliminar 
+        private string _textSearch;
+        public string TextSearch
+        {
+            get { return _textSearch; }
+            set { _textSearch = value; NotifyStateChanged(); }
+        }
+
         public event Action OnChange;
         private void NotifyStateChanged() => OnChange?.Invoke();
+
+        
+
     }
 }

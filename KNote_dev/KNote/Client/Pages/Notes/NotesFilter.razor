@@ -1,63 +1,62 @@
-﻿@page "/notes/search"
-@page "/notessearch"
+﻿@page "/notes/filter"
+@page "/notesfilter"
 
 @inject IKntClientDataService dataService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
-@inject HttpClient Http
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
-@*<div class="row">
-        <div class="col-9">
-            <h3>Notes Search</h3>
-        </div>
-        <div class="col-3">
-            <span class="float-right">
 
-            </span>
-        </div>
-    </div>*@
-
-<div>
-    <h3>Notes Search</h3>
-    <hr class="mt-0" />
+<div class="row">
+    <div class="col-9">
+        <h3>Notes Filter</h3>
+    </div>
+    <div class="col-3">
+        <span class="float-right">
+            <button type="button" class="btn btn-primary mb-2 mx-sm-3"
+                    @onclick="OnLoadListNotes">
+                Apply filter
+            </button>
+        </span>
+    </div>
 </div>
 
-@*<div class="form-inline">
+<hr class="mt-0" />
 
-    <div class="form-group">
-        <input @bind-value="textSearch" @bind-value:event="oninput"
-               type="text" class="form-control" id="topic" placeholder="Text search  ..." />
-    </div>
+<div class="form-inline">
 
-    &nbsp;&nbsp;
-    <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean filter</button>
-
-    <button type="button" class="btn btn-primary mb-2 mx-sm-3"
-            @onclick="OnLoadListNotes">
-        Apply search
-    </button>
-
-</div>*@
-
-<div class="form-group row">
-
-    <div class="input-group col-sm-11 mb-2" id="atrText">
-        <input type="text" class="form-control" @bind-value="textSearch" @bind-value:event="oninput"
+    <div class="form-group mb-2">
+        <label for="topic" class="col-form-label">Topic:&nbsp;&nbsp;</label>
+        <input @bind-value="topic" @bind-value:event="oninput"
                @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))"
-               placeholder="Text search  ..." />
-        <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" @onclick="@CleanOnClick"
-                    data-toggle="tooltip" title="Clean search"> X </button>
-        </div>
+               type="text" class="form-control" id="topic" />
     </div>
 
-    <div class="col-1 float-left">
-        <button type="button" class="btn btn-primary mb-2 mx-sm-3"
-                @onclick="OnLoadListNotes">
-            <span class="oi oi-magnifying-glass" aria-hidden="true"></span> 
-        </button>
+    @*<div class="form-group mb-2">
+            <label for="tags" class="sr-only">Tags</label>
+            <input @bind-value="tags" @bind-value:event="oninput"
+                   type="text" class="form-control" id="tags" placeholder="Tags ..." />
+        </div>*@
+
+    <div class="form-group mx-sm-3 mb-2">
+        <select class="form-control" @bind="noteTypeId">
+            <option value="0">--Select type--</option>
+            @foreach (var item in noteTypes)
+            {
+                <option value="@item.NoteTypeId.ToString()">@item.Name</option>
+            }
+        </select>
     </div>
+
+    @*<div class="form-group mx-sm-3 mb-2">
+            <input type="checkbox" class="form-check-input" id="mostRecent" @bind="onlyMostRecent" />
+            <label class="form-check-label" for="estrenos">
+                Only the most recent
+            </label>
+        </div>*@
+
+    @*<button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="OnLoadListNotes">Filter</button>*@
+    <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean filter</button>
 
 </div>
 
@@ -114,14 +113,20 @@ else
 @code {
     [CascadingParameter] private AppState appState { get; set; }
 
-    private List<NoteInfoDto> notes;
+    private List<NoteInfoDto> notes; //  = new List<NoteInfoDto>();
 
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
 
     private int viewMode = 0;
 
-    private string textSearch = "";
+    private string topic = "";
+    private Guid? folderId;
+    private string noteTypeId = "";
+    private string tags = "";
+    private string attributeValue = "";
+
+    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
 
     private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
     private int currentPage = 1;
@@ -129,7 +134,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        appState.OnChange += AppStateHasChanged;
+        await GetNoteTypes();
 
         var url = navigationManager.Uri;
         var queries = navigationManager.GetQueryStrings(url);
@@ -147,30 +152,6 @@ else
         }
     }
 
-    public void Dispose()
-    {
-        appState.OnChange -= AppStateHasChanged;
-    }
-
-    private void AppStateHasChanged()
-    {
-        Console.WriteLine("AppStateHasChanged");
-
-        // TODO: Limpiar basura ...
-
-        //currentPage = 1;
-        //textSearch = appState.TextSearch;
-
-        //LoadListNotes();
-
-        //notes = new List<NoteInfoDto>
-        //{
-        //    new NoteInfoDto {Topic = "xxx" },
-        //    new NoteInfoDto {Topic = "xxx1" },
-        //    new NoteInfoDto {Topic = "xxx2" },
-        //};
-    }
-
     #region Utils
 
     private void ToggleView()
@@ -180,10 +161,17 @@ else
 
     private void LoadFormControls()
     {
-        if (queryStringsDict.ContainsKey("textSearch"))
+        if (queryStringsDict.ContainsKey("topic"))
         {
-            textSearch = queryStringsDict["textSearch"];
+            topic = queryStringsDict["topic"];
         }
+
+        if (queryStringsDict.ContainsKey("notetypeId"))
+        {
+            noteTypeId = queryStringsDict["notetypeId"];
+        }
+
+        // TODO: !!! Llenar el resto de controles del formulario
 
         if (queryStringsDict.ContainsKey("page"))
         {
@@ -194,7 +182,11 @@ else
     private string BuildQueryStrings()
     {
         if (queryStringsDict == null) { queryStringsDict = new Dictionary<string, string>(); }
-        queryStringsDict["textSearch"] = textSearch?.ToString();
+        //queryStringsDict["folderid"] = folderId?.ToString();
+        queryStringsDict["topic"] = topic?.ToString();
+        queryStringsDict["notetypeId"] = noteTypeId?.ToString();
+        //queryStringsDict["tags"] = tags?.ToString();
+        //queryStringsDict["attributevalue"] = attributeValue?.ToString();
         queryStringsDict["page"] = currentPage.ToString();
 
         var defaultValues = new List<string>() { "false", "", "0" };
@@ -217,18 +209,20 @@ else
     }
 
     private async Task TopicKeyPress(KeyboardEventArgs e)
-    {        
+    {
         if (e.Key == "Enter")
         {
-            await LoadListNotes();
+            await GetFilteredNotes(topic);
         }
     }
 
-    private async Task CleanOnClick()
+    private void CleanOnClick()
     {
-        textSearch = "";
+        topic = "";
+        noteTypeId = "";
+        // TODO: !!! falta el resto de campos ...
+
         currentPage = 1;
-        await LoadListNotes();
     }
 
     private async Task onSelectedPage(int page)
@@ -241,6 +235,19 @@ else
 
     #region Load data ....
 
+    private async Task GetNoteTypes()
+    {
+        var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        if (httpResponse2.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
+        }
+        else
+        {
+            noteTypes = httpResponse2.Response.Entity;
+        }
+    }
+
     private async Task LoadListNotes()
     {
         var queryStrings = BuildQueryStrings();
@@ -251,7 +258,7 @@ else
     private async Task GetFilteredNotes(string queryString)
     {
         notes = null;
-        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getsearch?" + queryString);
+        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter?" + queryString);
 
         totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
 
@@ -263,25 +270,8 @@ else
         {
             notes = httpResponse.Response.Entity;
         }
+
     }
-
-    private void GetFilteredNotes2(string queryString)
-    {
-        notes = null;
-        var httpResponse = dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getsearch?" + queryString).Result;
-
-        totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
-
-        if (httpResponse.Error)
-        {
-            //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            notes = httpResponse.Response.Entity;
-        }
-    }
-
 
     #endregion
 
@@ -294,7 +284,7 @@ else
 
     private void GoNoteEdit(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/notessearch");
+        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/notesfilter");
     }
 
     private void GoNoteDelete(NoteInfoDto item)

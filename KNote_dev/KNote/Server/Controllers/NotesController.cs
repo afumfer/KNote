@@ -71,6 +71,28 @@ namespace KNote.Server.Controllers
             }
         }
 
+        [HttpGet("getsearch")]   // GET api/notes/getfilter
+        public async Task<IActionResult> GetSearch([FromQuery] NotesSearchDto notesSearch)
+        {
+            try
+            {
+                var kresApi = await _service.Notes.GetSearch(notesSearch);
+
+                HttpContext.InsertPaginationParamInResponse(kresApi.CountEntity, notesSearch.NumRecords);
+
+                if (kresApi.IsValid)
+                    return Ok(kresApi);
+                else
+                    return BadRequest(kresApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<List<NoteInfoDto>>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
         //[Authorize]
         [HttpGet("homenotes")]   // GET api/notes/homenotes
         public IActionResult HomeNotes()

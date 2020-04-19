@@ -1,0 +1,57 @@
+﻿@inject IKntClientDataService dataService
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
+
+<AuthorizeView>
+    <Authorized>
+        <div class="form-inline">
+
+            <div class="form-group mb-2">
+                <input @bind-value="textSearch" @bind-value:event="oninput"
+                       type="text" class="form-control" id="topic" placeholder="Text search  ..." />
+            </div>
+            &nbsp;&nbsp;
+            <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean filter</button>
+
+            <button type="button" class="btn btn-primary mb-2 mx-sm-3"
+                    @onclick="OnLoadListNotes">
+                Apply filter
+            </button>
+
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        &nbsp;
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    [CascadingParameter] protected AppState appState { get; set; }
+
+    private string textSearch;
+
+    protected override void OnInitialized()
+    {
+        appState.OnChange += StateHasChanged;
+        base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    private void OnLoadListNotes()
+    {
+        appState.TextSearch = textSearch;
+        var queryStrings = "textSearch=" + textSearch + "&page=1";        
+        navigationManager.NavigateTo("notes/search?" + queryStrings);
+        textSearch = "";
+    }
+
+    private void CleanOnClick()
+    {
+        textSearch = "";
+    }
+}

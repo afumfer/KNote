@@ -237,6 +237,7 @@
     protected override void OnInitialized()
     {
         appState.OnChange += StateHasChanged;
+        base.OnInitialized();
     }
 
     public void Dispose()

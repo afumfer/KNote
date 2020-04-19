@@ -163,6 +163,8 @@ namespace KNote.DomainModel.Services
 
         public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
         {
+            // TODO: !!! pendiente de completar
+
             var resService = new Result<List<NoteInfoDto>>();
             try
             {
@@ -190,6 +192,41 @@ namespace KNote.DomainModel.Services
                 query = query
                     .OrderBy(n => n.Topic)
                     .Pagination(notesFilter.Pagination);
+
+                // Get content
+                resService.Entity = await query
+                    .Select(u => u.GetSimpleDto<NoteInfoDto>())
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
+        {
+            var resService = new Result<List<NoteInfoDto>>();
+            try
+            {
+                var query = _repository.Notes.Queryable;
+                
+                // TODO: !!! pendiente de analizar la cadéna de búsqueda para aplicar la lógica.
+
+                //if (notesSearch.NoteNumber > 0 )
+                //    query = query.Where(n => n.NoteNumber == notesSearch.NoteNumber);
+                //else 
+                
+                if (!string.IsNullOrEmpty(notesSearch.TextSearch))
+                    query = query.Where(n => n.Topic.ToLower().Contains(notesSearch.TextSearch.ToLower()));
+
+                resService.CountEntity = await query.CountAsync();
+
+                // Order by and pagination
+                query = query
+                    .OrderBy(n => n.Topic)
+                    .Pagination(notesSearch.Pagination);
 
                 // Get content
                 resService.Entity = await query
