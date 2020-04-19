@@ -2,58 +2,58 @@
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManager
 
-    <EditForm Model="User" Context="formContext">
+<EditForm Model="User" Context="formContext">
 
-        <DataAnnotationsValidator></DataAnnotationsValidator>
+    <DataAnnotationsValidator></DataAnnotationsValidator>
 
-        <!-- Title -->
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-6">
-                    <h3>@Title</h3>
-                </div>
-                <div class="col-6 float-right">
-                    <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
-                </div>
+    <!-- Title -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">
+                <h3>@Title</h3>
+            </div>
+            <div class="col-6 float-right">
+                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
             </div>
         </div>
-        <hr class="mt-1" />
+    </div>
+    <hr class="mt-1" />
 
-        <div class="form-group row">
-            <label for="atrUserName" class="col-sm-2 col-form-label">User name:</label>
-            <div class="input-group col-sm-10" id="atrUserName">
-                <InputText class="form-control" @bind-Value="@User.UserName" />
-            </div>
-            <ValidationMessage For="@(() => User.UserName)" />
+    <div class="form-group row">
+        <label for="atrUserName" class="col-sm-2 col-form-label">User name:</label>
+        <div class="input-group col-sm-10" id="atrUserName">
+            <InputText class="form-control" @bind-Value="@User.UserName" />
         </div>
+        <ValidationMessage For="@(() => User.UserName)" />
+    </div>
 
-        <div class="form-group row">
-            <label for="atrEmail" class="col-sm-2 col-form-label">Email:</label>
-            <div class="input-group col-sm-10" id="atrEmail">
-                <InputText class="form-control" @bind-Value="@User.EMail" />
-            </div>
-            <ValidationMessage For="@(() => User.EMail)" />
+    <div class="form-group row">
+        <label for="atrEmail" class="col-sm-2 col-form-label">Email:</label>
+        <div class="input-group col-sm-10" id="atrEmail">
+            <InputText class="form-control" @bind-Value="@User.EMail" />
         </div>
+        <ValidationMessage For="@(() => User.EMail)" />
+    </div>
 
-        <div class="form-group row">
-            <label for="atrFullName" class="col-sm-2 col-form-label">Full name:</label>
-            <div class="input-group col-sm-10" id="atrFullName">
-                <InputText class="form-control" @bind-Value="@User.FullName" />
-            </div>
-            <ValidationMessage For="@(() => User.FullName)" />
+    <div class="form-group row">
+        <label for="atrFullName" class="col-sm-2 col-form-label">Full name:</label>
+        <div class="input-group col-sm-10" id="atrFullName">
+            <InputText class="form-control" @bind-Value="@User.FullName" />
         </div>
+        <ValidationMessage For="@(() => User.FullName)" />
+    </div>
 
-        <div class="form-group row">
-            <label for="atrRoles" class="col-sm-2 col-form-label">Roles:</label>
-            <div class="input-group col-sm-10" id="atrRoles">                
-                <MultiSelectList Items="roles" />
-            </div>
-            <ValidationMessage For="@(() => User.RoleDefinition)" />
+    <div class="form-group row">
+        <label for="atrRoles" class="col-sm-2 col-form-label">Roles:</label>
+        <div class="input-group col-sm-10" id="atrRoles">                
+            <MultiSelectList Items="roles" />
         </div>
+        <ValidationMessage For="@(() => User.RoleDefinition)" />
+    </div>
 
-        <hr class="mt-1" />
+    <hr class="mt-1" />
 
-    </EditForm>
+</EditForm>
 
 @code {
     [Parameter] public string Title { get; set; } = "---";

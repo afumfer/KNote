@@ -26,10 +26,10 @@
 <div class="form-inline">
 
     <div class="form-group mb-2">
-        <label for="topic" class="sr-only">Título</label>
+        <label for="topic" class="col-form-label">Topic:&nbsp;&nbsp;</label>
         <input @bind-value="topic" @bind-value:event="oninput"
                @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))"
-               type="text" class="form-control" id="titulo" placeholder="Note topic ..." />
+               type="text" class="form-control" id="topic" />
     </div>
 
     @*<div class="form-group mb-2">
