@@ -1,0 +1,88 @@
+﻿@inject IShowMessages showMessages
+@inject IKntClientDataService  dataService
+
+<EditForm Model="notesFilter" Context="formContext">
+
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <!-- Title -->
+    <div class="container-fluid">
+        <div class="row">
+            @*<div class="col-6">
+                Filter criteria
+            </div>*@
+            <div class="col-12">
+                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Apply filter</button>
+            </div>
+        </div>
+    </div>
+    <hr class="mt-1" />
+
+    <div class="form-group">
+        <label>Topic:</label>
+        <InputText class="form-control" @bind-Value="@notesFilter.Topic" />        
+    </div>
+
+    <div class="form-group">
+        <label>Description:</label>
+        <InputText class="form-control" @bind-Value="@notesFilter.Description" />
+        
+    </div>
+
+
+    @*<div class="form-group">
+        <label>Data Type:</label>
+        <select class="form-control" @bind="@KAttribute.KAttributeDataType">
+            @foreach (var item in KntConst.KAttributes.Keys)
+            {
+                <option value=@item>@KntConst.KAttributes[item]</option>
+            }
+        </select>
+        <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
+    </div>
+
+    <div class="form-group">
+        <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+        <InputCheckbox class="form-check-input" @bind-Value="@KAttribute.RequiredValue" />
+        <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
+    </div>
+
+    <div class="form-group">
+        <label>Order:</label>
+        <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
+        <ValidationMessage For="@(() => KAttribute.Order)" />
+    </div>*@
+
+    @*<div class="form-group">
+        <label>Note type:</label>
+        <select class="form-control" @bind="@KAttribute.NoteTypeId">
+            @foreach (var ntype in NoteTypes)
+            {
+                <option value=@ntype.NoteTypeId>@ntype.Name</option>
+            }
+        </select>
+        <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
+    </div>*@
+
+
+</EditForm>
+
+@code {
+    [Parameter] public EventCallback<NotesFilterDto> FilterSelected { get; set; }
+
+    private NotesFilterDto notesFilter = new NotesFilterDto();
+
+
+    protected async Task Save(EditContext formContext)
+    {        
+
+        bool formIsValid = formContext.Validate();
+        if (formIsValid == false)
+        {
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+            return;
+        }
+
+        await FilterSelected.InvokeAsync(notesFilter);
+    }
+}

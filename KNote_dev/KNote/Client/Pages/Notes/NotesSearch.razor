@@ -7,38 +7,11 @@
 @inject HttpClient Http
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
-@*<div class="row">
-        <div class="col-9">
-            <h3>Notes Search</h3>
-        </div>
-        <div class="col-3">
-            <span class="float-right">
-
-            </span>
-        </div>
-    </div>*@
 
 <div>
     <h3>Notes Search</h3>
     <hr class="mt-0" />
 </div>
-
-@*<div class="form-inline">
-
-    <div class="form-group">
-        <input @bind-value="textSearch" @bind-value:event="oninput"
-               type="text" class="form-control" id="topic" placeholder="Text search  ..." />
-    </div>
-
-    &nbsp;&nbsp;
-    <button type="button" class="btn btn-danger mb-2" @onclick="CleanOnClick">Clean filter</button>
-
-    <button type="button" class="btn btn-primary mb-2 mx-sm-3"
-            @onclick="OnLoadListNotes">
-        Apply search
-    </button>
-
-</div>*@
 
 <div class="form-group row">
 

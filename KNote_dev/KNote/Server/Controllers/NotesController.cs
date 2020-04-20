@@ -48,9 +48,17 @@ namespace KNote.Server.Controllers
                 return BadRequest(resApi);
             }
         }
-        
-        [HttpGet("getfilter")]   // GET api/notes/getfilter
-        public async Task <IActionResult> GetFilter([FromQuery] NotesFilterDto notesFilter )
+
+
+        //[HttpPost]   // POST api/notes
+        //[HttpPut]    // PUT api/notes
+        //[Authorize(Roles = "Admin, Staff, ProjecManager")]
+        //public async Task<IActionResult> Post([FromBody]NoteDto note)
+
+
+        [HttpPost("getfilter")]   // PUT api/notes/getfilter
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public async Task <IActionResult> GetFilter([FromBody] NotesFilterDto notesFilter )
         {
             try
             {                
@@ -70,6 +78,29 @@ namespace KNote.Server.Controllers
                 return BadRequest(kresApi);
             }
         }
+
+        //// TODO: !!! Eliminar 
+        //[HttpGet("getfilter")]   // GET api/notes/getfilter
+        //public async Task<IActionResult> GetFilter([FromQuery] NotesFilterDto notesFilter)
+        //{
+        //    try
+        //    {
+        //        var kresApi = await _service.Notes.GetFilter(notesFilter);
+
+        //        HttpContext.InsertPaginationParamInResponse(kresApi.CountEntity, notesFilter.NumRecords);
+
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var kresApi = new Result<List<NoteInfoDto>>();
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
         [HttpGet("getsearch")]   // GET api/notes/getfilter
         public async Task<IActionResult> GetSearch([FromQuery] NotesSearchDto notesSearch)
