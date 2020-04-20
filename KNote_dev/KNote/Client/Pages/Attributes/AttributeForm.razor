@@ -16,7 +16,7 @@
 
     <div class="form-group">
         <label>Data Type:</label>
-        <select class="form-control" @bind="@KAttribute.KAttributeDataType">
+        <select class="form-control" @bind="@KAttribute.KAttributeDataType">            
             @foreach (var item in KntConst.KAttributes.Keys)
             {
                 <option value=@item>@KntConst.KAttributes[item]</option>
@@ -40,6 +40,7 @@
     <div class="form-group">
         <label>Note type:</label>
         <select class="form-control" @bind="@KAttribute.NoteTypeId">
+            <option></option>
             @foreach (var ntype in NoteTypes)
             {
                 <option value=@ntype.NoteTypeId>@ntype.Name</option>
@@ -68,5 +69,4 @@
     [Parameter] public KAttributeDto KAttribute { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
-
 }

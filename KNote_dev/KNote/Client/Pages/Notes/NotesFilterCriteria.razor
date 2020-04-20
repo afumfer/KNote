@@ -1,5 +1,7 @@
 ﻿@inject IShowMessages showMessages
 @inject IKntClientDataService  dataService
+@inject NavigationManager navigationManger
+
 
 <EditForm Model="notesFilter" Context="formContext">
 
@@ -9,10 +11,11 @@
     <div class="container-fluid">
         <div class="row">
             @*<div class="col-6">
-                Filter criteria
-            </div>*@
-            <div class="col-12">
-                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Apply filter</button>
+                    Filter criteria
+                </div>*@
+            <div class="col-12 mb-2">
+                <button class="btn btn-success float-right mx-1 mt-1" @onclick="(() => ApplyFilter(formContext))">Apply filter</button>
+                <button class="btn btn-info float-right mx-1 mt-1" @onclick="(() => ClearFilter(formContext))">Clear filter</button>
             </div>
         </div>
     </div>
@@ -20,49 +23,55 @@
 
     <div class="form-group">
         <label>Topic:</label>
-        <InputText class="form-control" @bind-Value="@notesFilter.Topic" />        
+        <InputText class="form-control" @bind-Value="@notesFilter.Topic" />
     </div>
 
     <div class="form-group">
         <label>Description:</label>
         <InputText class="form-control" @bind-Value="@notesFilter.Description" />
-        
-    </div>
-
-
-    @*<div class="form-group">
-        <label>Data Type:</label>
-        <select class="form-control" @bind="@KAttribute.KAttributeDataType">
-            @foreach (var item in KntConst.KAttributes.Keys)
-            {
-                <option value=@item>@KntConst.KAttributes[item]</option>
-            }
-        </select>
-        <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
     </div>
 
     <div class="form-group">
-        <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-        <InputCheckbox class="form-check-input" @bind-Value="@KAttribute.RequiredValue" />
-        <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
+        <label>Tags:</label>
+        <InputText class="form-control" @bind-Value="@notesFilter.Tags" />
     </div>
 
     <div class="form-group">
-        <label>Order:</label>
-        <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
-        <ValidationMessage For="@(() => KAttribute.Order)" />
-    </div>*@
-
-    @*<div class="form-group">
         <label>Note type:</label>
-        <select class="form-control" @bind="@KAttribute.NoteTypeId">
-            @foreach (var ntype in NoteTypes)
+        <select class="form-control" @bind="@notesFilter.NoteTypeId">
+            <option></option>
+            @foreach (var ntype in noteTypes)
             {
                 <option value=@ntype.NoteTypeId>@ntype.Name</option>
             }
         </select>
-        <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
-    </div>*@
+    </div>
+
+
+    @*<div class="form-group">
+            <label>Data Type:</label>
+            <select class="form-control" @bind="@KAttribute.KAttributeDataType">
+                @foreach (var item in KntConst.KAttributes.Keys)
+                {
+                    <option value=@item>@KntConst.KAttributes[item]</option>
+                }
+            </select>
+            <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
+        </div>
+
+        <div class="form-group">
+            <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <InputCheckbox class="form-check-input" @bind-Value="@KAttribute.RequiredValue" />
+            <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
+        </div>
+
+        <div class="form-group">
+            <label>Order:</label>
+            <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
+            <ValidationMessage For="@(() => KAttribute.Order)" />
+        </div>*@
+
+
 
 
 </EditForm>
@@ -71,11 +80,27 @@
     [Parameter] public EventCallback<NotesFilterDto> FilterSelected { get; set; }
 
     private NotesFilterDto notesFilter = new NotesFilterDto();
+    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var httpResponse = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            navigationManger.NavigateTo("/");
+        }
+        else
+        {
+            noteTypes = httpResponse.Response.Entity;            
+        }
+
+        await base.OnInitializedAsync();
+    }
 
 
-    protected async Task Save(EditContext formContext)
-    {        
-
+    protected async Task ApplyFilter(EditContext formContext)
+    {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {
@@ -85,4 +110,18 @@
 
         await FilterSelected.InvokeAsync(notesFilter);
     }
+
+    protected async Task ClearFilter(EditContext formContext)
+    {
+        notesFilter.Topic = null;
+        notesFilter.NoteTypeId = null;
+        notesFilter.Tags = null;
+        notesFilter.FolderId = null;
+        notesFilter.Description = null;
+        notesFilter.AttributeValue = null;
+
+        await FilterSelected.InvokeAsync(notesFilter);
+    }
+
+
 }

@@ -171,18 +171,22 @@ namespace KNote.DomainModel.Services
                 var query = _repository.Notes.Queryable;
 
                 // Filters 
+
+                if (notesFilter.FolderId != null)
+                    query = query.Where(n => n.FolderId == notesFilter.FolderId);
+
+                if (notesFilter.NoteTypeId != null)
+                    query = query.Where(n => n.NoteTypeId == notesFilter.NoteTypeId);
+
                 if (!string.IsNullOrEmpty(notesFilter.Topic))
                     query = query.Where(n => n.Topic.ToLower().Contains(notesFilter.Topic.ToLower()));
 
                 if (!string.IsNullOrEmpty(notesFilter.Tags))
                     query = query.Where(n => n.Tags.ToLower().Contains(notesFilter.Tags.ToLower()));
 
-                if(notesFilter.FolderId != null)
-                    query = query.Where(n => n.FolderId == notesFilter.FolderId);
+                if (!string.IsNullOrEmpty(notesFilter.Description))
+                    query = query.Where(n => n.Description.ToLower().Contains(notesFilter.Description.ToLower()));
 
-                if (notesFilter.NoteTypeId != null)
-                    query = query.Where(n => n.NoteTypeId == notesFilter.NoteTypeId);
-                
                 if (!string.IsNullOrEmpty(notesFilter.AttributeValue))
                     query = query.Where(n => n.KAttributes.Select(a => a.Value).Contains(notesFilter.AttributeValue));
 

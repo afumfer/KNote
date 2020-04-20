@@ -29,7 +29,7 @@
 
         <div class="row">
             <div class="col-8">
-                <h5><span class="oi oi-basket pr-3"></span>Notes filter</h5>
+                <h5><span class="oi oi-pin pr-3"></span>Notes filter</h5>
             </div>
             <div class="col-4">
                 @if (notes != null && notes.Count > 0)
@@ -70,8 +70,8 @@
     <div class="col-lg-9 pt-2 pb-2 border">
         @if (notes != null && notes.Count > 0)
         {
-            <Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
-                        TotalPages="totalPages"></Pagination>
+            <Pagination CurrentPage="filter.Page" SelectedPage="onSelectedPage"
+                        TotalPages="filter.TotalPages"></Pagination>
         }
 
         @if (viewMode == 0)
@@ -85,8 +85,8 @@
        
         @if (notes != null && notes.Count > 15)
         {
-            <Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
-                        TotalPages="totalPages"></Pagination>
+            <Pagination CurrentPage="filter.Page" SelectedPage="onSelectedPage"
+                        TotalPages="filter.TotalPages"></Pagination>
         }
     </div>
 </div>
@@ -104,12 +104,11 @@
 
     List<NoteInfoDto> notes = new List<NoteInfoDto>();
 
-    private NotesFilterDto filter;
-    private int currentPage = 1;
-    private int totalPages;
+    private NotesFilterDto filter = new NotesFilterDto();
 
     protected override async Task OnInitializedAsync()
     {
+        await onSelectedPage(1);
         await base.OnInitializedAsync();
     }
 
@@ -121,25 +120,22 @@
     private async Task OnFilterSelected(NotesFilterDto f)
     {
         filter = f;
-
-        Console.WriteLine("Filter: " + filter.Topic);
-
         await onSelectedPage(1);
     }
 
     private async Task onSelectedPage(int page)
     {
-        currentPage = page;
+        filter.Page = page;
         await LoadNotesWithPagination();
     }
 
     private async Task LoadNotesWithPagination()
-    {        
+    {
         notes = null;
 
         var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter );
 
-        totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+        filter.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
 
         if (httpResponse.Error)
         {

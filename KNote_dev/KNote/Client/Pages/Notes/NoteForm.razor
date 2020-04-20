@@ -120,7 +120,8 @@
 
             <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
             <div class="input-group col-sm-5" id="atrNoteType">
-                <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">                    
+                <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">     
+                    <option></option>
                     @if(NoteTypes != null)
                     {
                         @foreach (var ntype in NoteTypes)

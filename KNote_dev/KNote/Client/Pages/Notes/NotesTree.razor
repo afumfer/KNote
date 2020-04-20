@@ -92,8 +92,8 @@
     <div class="col-lg-9 pt-2 pb-2 border">
         @if(notes != null && notes.Count > 0 && viewPagination == 1)
         {
-            <Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
-                        TotalPages="totalPages"></Pagination>
+            <Pagination CurrentPage="filter.Page" SelectedPage="onSelectedPage"
+                        TotalPages="filter.TotalPages"></Pagination>
         }
         @if (viewMode == 0)
         {
@@ -106,12 +106,11 @@
 
         @if (notes != null && notes.Count > 15 && viewPagination == 1)
         {
-            <Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
-                        TotalPages="totalPages"></Pagination>
+            <Pagination CurrentPage="filter.Page" SelectedPage="onSelectedPage"
+                        TotalPages="filter.TotalPages"></Pagination>
         }
     </div>
 </div>
-
 
 
 <ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
@@ -130,8 +129,10 @@
     List<NoteInfoDto> notes;
 
     private FolderInfoDto folder;
-    private int currentPage = 1;
-    private int totalPages;
+
+    private NotesFilterDto filter = new NotesFilterDto();
+    //private int currentPage = 1;
+    //private int totalPages;
 
     protected override async Task OnInitializedAsync()
     {
@@ -169,7 +170,7 @@
 
     private async Task onSelectedPage(int page)
     {
-        currentPage = page;
+        filter.Page = page;
         await LoadNotesWithPagination();
     }
 
@@ -189,12 +190,16 @@
 
     private async Task LoadNotesWithPagination()
     {
-        var queryString = $"folderid={folder.FolderId}&page={currentPage}";
-
         notes = null;
-        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter?" + queryString);
 
-        totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+        //var queryString = $"folderid={folder.FolderId}&page={currentPage}";
+        //var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter?" + queryString);
+
+        filter.FolderId = folder.FolderId;
+
+        var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter);
+
+        filter.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
 
         if (httpResponse.Error)
         {
