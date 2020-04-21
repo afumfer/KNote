@@ -187,8 +187,9 @@ namespace KNote.DomainModel.Services
                 if (!string.IsNullOrEmpty(notesFilter.Description))
                     query = query.Where(n => n.Description.ToLower().Contains(notesFilter.Description.ToLower()));
 
-                if (!string.IsNullOrEmpty(notesFilter.AttributeValue))
-                    query = query.Where(n => n.KAttributes.Select(a => a.Value).Contains(notesFilter.AttributeValue));
+                // TODO: !!! Pendiente de implementar el fitro de atributos.
+                //if (!string.IsNullOrEmpty(notesFilter.AttributeValue))
+                //    query = query.Where(n => n.KAttributes.Select(a => a.Value).Contains(notesFilter.AttributeValue));
 
                 resService.CountEntity = await query.CountAsync();
 

@@ -7,7 +7,7 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-@*<div class="container-fluid">
+<div class="container-fluid">
     <div class="row">
         <div class="col-6">
             <h3>Notes filter</h3>
@@ -16,12 +16,12 @@
             <button class="btn btn-sm btn-warning mx-1 float-right"
                     @onclick="GoNoteNew"
                     data-toggle="tooltip" title="New note">
-                <i class="oi oi-bookmark"></i> New note
+                <i class="oi oi-document"></i> New note                
             </button>
         </div>
     </div>
 </div>
-<hr class="mt-0" />*@
+<hr class="mt-0" />
 
 <div class="row">
 
@@ -29,7 +29,10 @@
 
         <div class="row">
             <div class="col-8">
-                <h5><span class="oi oi-pin pr-3"></span>Notes filter</h5>
+                <h5>
+                    <span class="oi oi-pin pr-3"></span>
+                    @*New notes filter*@
+                </h5>
             </div>
             <div class="col-4">
                 @if (notes != null && notes.Count > 0)
@@ -37,7 +40,7 @@
                     <span class="float-right">
                         @if (viewMode == 0)
                         {
-                            <button class="btn btn-sm btn-dark mx-1"
+                            <button class="btn btn-sm btn-dark mx-1 mb-2"
                                     @onclick="ToggleView"
                                     data-toggle="tooltip" title="Item mode view">
                                 <i class="fa fa-file-text-o"></i> Item mode view
@@ -45,7 +48,7 @@
                         }
                         else
                         {
-                            <button class="btn btn-sm btn-dark mx-1"
+                            <button class="btn btn-sm btn-dark mx-1 mb-2"
                                     @onclick="ToggleView"
                                     data-toggle="tooltip" title="Table mode view">
                                 <i class="fa fa-table"></i> Table mode view
@@ -177,10 +180,10 @@
         itemDelete = item;
     }
 
-    //void GoNoteNew()
-    //{
-    //    navigationManager.NavigateTo($"notes/new");
-    //}
+    void GoNoteNew()
+    {
+        navigationManager.NavigateTo($"notes/new");
+    }
 
     void GoNoteView(NoteInfoDto note)
     {

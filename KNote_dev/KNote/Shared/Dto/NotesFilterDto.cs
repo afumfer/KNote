@@ -22,12 +22,18 @@ namespace KNote.Shared.Dto
         public string Tags { get; set; }        
         public string Description { get; set; }
 
-        public string AttributeValue { get; set; }
+        public List<AtrFilterDto> AttributesFilter { get; set; } = new List<AtrFilterDto>();
 
         //public string Resource { get; set; }
         //public string Task { get; set; }
         //public string Message { get; set; }
     }
 
+    public class AtrFilterDto
+    {
+        public string AtrKey { get; set; }
+        public string AtrName { get; set; }
+        public string Value { get; set; }
+    }
 
 }

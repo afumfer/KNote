@@ -3,7 +3,7 @@
 @inject NavigationManager navigationManger
 
 
-<EditForm Model="notesFilter" Context="formContext">
+<EditForm Model="notesFilter" Context="formContext" class="mb-3">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
@@ -11,11 +11,11 @@
     <div class="container-fluid">
         <div class="row">
             @*<div class="col-6">
-                    Filter criteria
-                </div>*@
+                Filter criteria
+            </div>*@
             <div class="col-12 mb-2">
-                <button class="btn btn-success float-right mx-1 mt-1" @onclick="(() => ApplyFilter(formContext))">Apply filter</button>
-                <button class="btn btn-info float-right mx-1 mt-1" @onclick="(() => ClearFilter(formContext))">Clear filter</button>
+                <button class="btn btn-success float-right mx-1 mt-1" @onclick="(() => ApplyFilter(formContext))">Apply</button>
+                <button class="btn btn-info float-right mx-1 mt-1" @onclick="(() => ClearFilter(formContext))">Clear</button>
             </div>
         </div>
     </div>
@@ -47,40 +47,67 @@
         </select>
     </div>
 
+    <div class="form-group">
+        <label>Folder:</label>
+        <div class="input-group mb-3">
+            <input type="text" disabled class="form-control" @bind="@folderName" />
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" @onclick="@OnResetFolder"
+                        data-toggle="tooltip" title="Reset parent folder">
+                    X
+                </button>
+                <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
+                        data-toggle="tooltip" title="Select folder">
+                    ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
-    @*<div class="form-group">
-            <label>Data Type:</label>
-            <select class="form-control" @bind="@KAttribute.KAttributeDataType">
-                @foreach (var item in KntConst.KAttributes.Keys)
+    <div class="form-group">
+        <label>Atributes:</label>
+        <table class="table table-sm table-bordered table-striped">
+            @*<thead>
+                <tr>
+                    <th>Atribute</th>
+                    <th>Value</th>
+                    <th width="50px" class="text-center"></th>
+                </tr>
+            </thead>*@
+            <tbody>
+                @foreach (var atr in notesFilter.AttributesFilter)
                 {
-                    <option value=@item>@KntConst.KAttributes[item]</option>
+                    <tr>
+                        <td>@atr.AtrName</td>
+                        <td>@atr.Value</td>
+                        <td>
+                            <span class="float-right">
+                                <button class="btn btn-sm btn-dark mx-1"
+                                        @onclick="@(() => OnAtrDelete(atr))"
+                                        data-toggle="tooltip" title="Delete note">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
                 }
-            </select>
-            <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
-        </div>
-
-        <div class="form-group">
-            <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <InputCheckbox class="form-check-input" @bind-Value="@KAttribute.RequiredValue" />
-            <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
-        </div>
-
-        <div class="form-group">
-            <label>Order:</label>
-            <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
-            <ValidationMessage For="@(() => KAttribute.Order)" />
-        </div>*@
-
-
-
+            </tbody>
+        </table>
+    </div>
 
 </EditForm>
+
+<KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
+
 
 @code {
     [Parameter] public EventCallback<NotesFilterDto> FilterSelected { get; set; }
 
     private NotesFilterDto notesFilter = new NotesFilterDto();
     private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+    private string folderName = "";
+
+    private KntFolderSelector kntFolderSelector;
 
     protected async override Task OnInitializedAsync()
     {
@@ -92,12 +119,16 @@
         }
         else
         {
-            noteTypes = httpResponse.Response.Entity;            
+            noteTypes = httpResponse.Response.Entity;
         }
+
+        // TODO: !!! basura para pruebas
+        notesFilter.AttributesFilter.Add(new AtrFilterDto { AtrKey = "Key1", AtrName = "Name1", Value = "Value1" });
+        notesFilter.AttributesFilter.Add(new AtrFilterDto { AtrKey = "Key2", AtrName = "Name2", Value = "Value2" });
+        notesFilter.AttributesFilter.Add(new AtrFilterDto { AtrKey = "Key3", AtrName = "Name3", Value = "Value3" });
 
         await base.OnInitializedAsync();
     }
-
 
     protected async Task ApplyFilter(EditContext formContext)
     {
@@ -118,9 +149,46 @@
         notesFilter.Tags = null;
         notesFilter.FolderId = null;
         notesFilter.Description = null;
-        notesFilter.AttributeValue = null;
+        notesFilter.AttributesFilter = new List<AtrFilterDto>();
 
         await FilterSelected.InvokeAsync(notesFilter);
+    }
+
+    #region Managment FolderSelector
+
+    private void OnFolderSelector()
+    {
+        kntFolderSelector.Show();
+    }
+
+    private void onConfirmFolderSelector(FolderInfoDto f)
+    {
+        notesFilter.FolderId = f.FolderId;
+        folderName = f.Name;
+        kntFolderSelector.Hide();
+    }
+
+    private void onCancelFolderSelector()
+    {
+        kntFolderSelector.Hide();
+    }
+
+    private void OnResetFolder()
+    {
+        notesFilter.FolderId = null;
+        folderName = "";
+    }
+
+    #endregion
+
+    private void OnAtrDelete(AtrFilterDto atr)
+    {
+        notesFilter.AttributesFilter.Remove(atr);
+
+        //foreach (var a in notesFilter.AttributesFilter)
+        //{
+        //    if (a.AtrKey == key ...
+        //}
     }
 
 
