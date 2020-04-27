@@ -27,25 +27,19 @@
                             <div class="form-group row">
                                 <label for="atrUserId" class="col-sm-2 col-form-label">Attribute:</label>
                                 <div class="input-group  col-sm-10" id="atrUserId">
-                                    <select class="form-control col-sm-11" @bind="@atrSelected.AtrKey">
+                                    <select class="form-control col-sm-11" @bind="@atrSelected.AtrId">
                                         <option></option>
                                         @if (listAtr != null)
                                         {
                                             @foreach (var atr in listAtr)
                                             {
-                                                <option value=@atr.Key>@atr.Name</option>
+                                                <option value=@atr.KAttributeId>@atr.Name</option>
                                             }
                                         }
                                     </select>
-                                    <ValidationMessage For="@(() => atrSelected.AtrKey)" />
                                 </div>
+                                <ValidationMessage For="@(() => atrSelected.AtrId)" />
                             </div>
-
-                            @*<div class="form-group">
-                                    <label>AtrKey:</label>
-                                    <InputTextArea class="form-control p-2" @bind-Value="@task.Description" />
-                                    <ValidationMessage For="@(() => task.Description)" />
-                                </div>*@
 
                             <div class="form-group row">
                                 <label for="atrTags" class="col-sm-2 col-form-label">Value:</label>
@@ -116,7 +110,7 @@
             return;
         }
 
-        atrSelected.AtrName = listAtr.Where(_ => _.Key == atrSelected.AtrKey).Select(_ => _.Name).FirstOrDefault();
+        atrSelected.AtrName = listAtr.Where(_ => _.KAttributeId == atrSelected.AtrId).Select(_ => _.Name).FirstOrDefault();
 
         await OnConfirm.InvokeAsync(atrSelected);
     }

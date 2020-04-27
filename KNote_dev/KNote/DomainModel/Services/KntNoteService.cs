@@ -187,9 +187,11 @@ namespace KNote.DomainModel.Services
                 if (!string.IsNullOrEmpty(notesFilter.Description))
                     query = query.Where(n => n.Description.ToLower().Contains(notesFilter.Description.ToLower()));
 
-                // TODO: !!! Pendiente de implementar el fitro de atributos.
-                //if (!string.IsNullOrEmpty(notesFilter.AttributeValue))
-                //    query = query.Where(n => n.KAttributes.Select(a => a.Value).Contains(notesFilter.AttributeValue));
+                foreach(var f in notesFilter.AttributesFilter)
+                {
+                    //query = query.Where(n => n.KAttributes.Select(a => a.Value).Contains(f.Value));
+                    query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
+                }
 
                 resService.CountEntity = await query.CountAsync();
 
@@ -994,4 +996,10 @@ namespace KNote.DomainModel.Services
         #endregion
 
     }
+
+    //public class kv
+    //{
+    //    public Guid Id { get; set; }
+    //    public string KValue { get; set; }
+    //}
 }

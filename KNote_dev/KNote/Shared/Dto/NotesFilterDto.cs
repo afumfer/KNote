@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace KNote.Shared.Dto
@@ -31,8 +32,14 @@ namespace KNote.Shared.Dto
 
     public class AtrFilterDto
     {
-        public string AtrKey { get; set; }
+        
+        //public string AtrKey { get; set; }
+        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        public Guid AtrId { get; set; }
+
         public string AtrName { get; set; }
+        
+        [Required(ErrorMessage = "* Attribute {0} is required ")]
         public string Value { get; set; }
     }
 

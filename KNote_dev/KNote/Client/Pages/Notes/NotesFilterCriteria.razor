@@ -131,11 +131,6 @@
             noteTypes = httpResponse.Response.Entity;
         }
 
-        // TODO: !!! basura para pruebas
-        notesFilter.AttributesFilter.Add(new AtrFilterDto { AtrKey = "Key1", AtrName = "Name1", Value = "Value1" });
-        notesFilter.AttributesFilter.Add(new AtrFilterDto { AtrKey = "Key2", AtrName = "Name2", Value = "Value2" });
-        notesFilter.AttributesFilter.Add(new AtrFilterDto { AtrKey = "Key3", AtrName = "Name3", Value = "Value3" });
-
         await base.OnInitializedAsync();
     }
 
@@ -195,11 +190,6 @@
     private void OnAtrDelete(AtrFilterDto atr)
     {
         notesFilter.AttributesFilter.Remove(atr);
-
-        //foreach (var a in notesFilter.AttributesFilter)
-        //{
-        //    if (a.AtrKey == key ...
-        //}
     }
 
     private void OnAtrNew()
