@@ -997,9 +997,4 @@ namespace KNote.DomainModel.Services
 
     }
 
-    //public class kv
-    //{
-    //    public Guid Id { get; set; }
-    //    public string KValue { get; set; }
-    //}
 }

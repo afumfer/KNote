@@ -11,7 +11,7 @@
     <div class="container-fluid">
         <div class="row">
             @*<div class="col-6">
-                Filter criteria
+                /// TODO: selector criteria saved
             </div>*@
             <div class="col-12 mb-2">
                 <button class="btn btn-success float-right mx-1 mt-1" @onclick="(() => ApplyFilter(formContext))">Apply</button>
@@ -74,13 +74,6 @@
             </button>
         </span>
         <table class="table table-sm table-bordered table-striped">
-            @*<thead>
-                <tr>
-                    <th>Atribute</th>
-                    <th>Value</th>
-                    <th width="50px" class="text-center"></th>
-                </tr>
-            </thead>*@
             <tbody>
                 @foreach (var atr in notesFilter.AttributesFilter)
                 {
