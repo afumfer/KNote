@@ -66,6 +66,13 @@
 
     <div class="form-group">
         <label>Atributes:</label>
+        <span class="float-right">
+            <button class="btn btn-sm btn-light mr-2"
+                    @onclick="@(() => OnAtrNew())"
+                    data-toggle="tooltip" title="Add new attribute filter">
+                <i class="fa fa-plus"></i>
+            </button>
+        </span>
         <table class="table table-sm table-bordered table-striped">
             @*<thead>
                 <tr>
@@ -82,9 +89,9 @@
                         <td>@atr.Value</td>
                         <td>
                             <span class="float-right">
-                                <button class="btn btn-sm btn-dark mx-1"
+                                <button class="btn btn-sm btn-light mx-1"
                                         @onclick="@(() => OnAtrDelete(atr))"
-                                        data-toggle="tooltip" title="Delete note">
+                                        data-toggle="tooltip" title="Delete attribute filter">
                                     <i class="fa fa-minus"></i>
                                 </button>
                             </span>
@@ -97,8 +104,9 @@
 
 </EditForm>
 
-<KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
+<KntFolderSelector @ref="kntFolderSelector" OnCancel="OnCancelFolderSelector" OnConfirm="OnConfirmFolderSelector"></KntFolderSelector>
 
+<KntAttributeFilterSelector @ref="kntAttributeFilterSelector" OnCancel="OnCancelAtrFilterSelector" OnConfirm="OnConfirmAtrFilterSelector" />
 
 @code {
     [Parameter] public EventCallback<NotesFilterDto> FilterSelected { get; set; }
@@ -108,6 +116,7 @@
     private string folderName = "";
 
     private KntFolderSelector kntFolderSelector;
+    private KntAttributeFilterSelector kntAttributeFilterSelector;
 
     protected async override Task OnInitializedAsync()
     {
@@ -161,14 +170,14 @@
         kntFolderSelector.Show();
     }
 
-    private void onConfirmFolderSelector(FolderInfoDto f)
+    private void OnConfirmFolderSelector(FolderInfoDto f)
     {
         notesFilter.FolderId = f.FolderId;
         folderName = f.Name;
         kntFolderSelector.Hide();
     }
 
-    private void onCancelFolderSelector()
+    private void OnCancelFolderSelector()
     {
         kntFolderSelector.Hide();
     }
@@ -181,6 +190,8 @@
 
     #endregion
 
+    #region Attribute filter selector 
+
     private void OnAtrDelete(AtrFilterDto atr)
     {
         notesFilter.AttributesFilter.Remove(atr);
@@ -191,5 +202,22 @@
         //}
     }
 
+    private void OnAtrNew()
+    {
+        kntAttributeFilterSelector.Show();
+    }
+
+    private void OnConfirmAtrFilterSelector(AtrFilterDto atr)
+    {
+        notesFilter.AttributesFilter.Add(atr);
+        kntAttributeFilterSelector.Hide();
+    }
+
+    private void OnCancelAtrFilterSelector()
+    {
+        kntAttributeFilterSelector.Hide();
+    }
+
+    #endregion
 
 }
