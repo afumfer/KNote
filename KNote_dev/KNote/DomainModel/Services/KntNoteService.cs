@@ -215,18 +215,24 @@ namespace KNote.DomainModel.Services
         public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
         {
             var resService = new Result<List<NoteInfoDto>>();
+            int searchNumber;
+            
             try
             {
                 var query = _repository.Notes.Queryable;
-                
-                // TODO: !!! pendiente de analizar la cadéna de búsqueda para aplicar la lógica.
 
-                //if (notesSearch.NoteNumber > 0 )
-                //    query = query.Where(n => n.NoteNumber == notesSearch.NoteNumber);
-                //else 
-                
-                if (!string.IsNullOrEmpty(notesSearch.TextSearch))
-                    query = query.Where(n => n.Topic.ToLower().Contains(notesSearch.TextSearch.ToLower()));
+                searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
+                if (searchNumber > 0)
+                    query = query.Where(n => n.NoteNumber == searchNumber);
+                else
+                {
+                    var listTokens = ExtractListTokensSearch(notesSearch.TextSearch);
+                    foreach(var token in listTokens)
+                    {
+                        if (!string.IsNullOrEmpty(token))
+                            query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()));
+                    }
+                }
 
                 resService.CountEntity = await query.CountAsync();
 
@@ -825,6 +831,101 @@ namespace KNote.DomainModel.Services
 
         #endregion
 
+        #region Utils methods 
+
+        private int ExtractNoteNumberSearch(string textSearch)
+        {
+            if (textSearch == null)
+                return 0;
+
+            var n = 0;
+            string strStartNumber = "";
+
+            if (textSearch[0] == '#')
+            {
+                var i = textSearch.IndexOf(' ', 0);
+                if (i > 0)
+                    strStartNumber = textSearch.Substring(1, i - 1);
+                else
+                    strStartNumber = textSearch.Substring(1, textSearch.Length - 1);
+                int.TryParse(strStartNumber, out n);
+            }
+
+            return n;
+        }
+
+        private List<string> ExtractListTokensSearch(string textIn)
+        {
+            List<string> tokens = new List<string>();
+            int i = 0, lenString = 0;
+            int state = 0;
+            char c;
+            string word = "";
+            char action = 'a';
+            string especialToken = "";
+
+            if (textIn == null)
+                return tokens;
+
+            lenString = textIn.Length;
+
+            while (i < lenString)
+            {
+                c = textIn[i];
+
+                switch (c)
+                {
+                    case '\"':
+                        if (state == 0)
+                        {
+                            state = 1;
+                            action = 'p';
+                        }
+                        else
+                        {
+                            state = 0;
+                            action = 'p';
+                        }
+                        break;
+                    case ' ':
+                        if (state == 0 || state == 2)
+                            action = 'p';
+                        break;
+                    default:
+                        action = 'a';
+                        break;
+                }
+
+                if (action == 'p')
+                {
+                    if (word != "")
+                    {
+                        // Si es un Token especial => va con la siguiente palabra
+                        if (word == "!")
+                            especialToken = word;
+                        else
+                        {
+                            word = especialToken + word;
+                            especialToken = "";
+                            tokens.Add(word);
+                        }
+                    }
+                    word = "";
+                }
+                if (action == 'a')
+                    word += c;
+
+                i++;
+            }
+
+            if (word != "")
+                tokens.Add(word);
+
+            return tokens;
+        }
+
+        #endregion
+
         #region Código provisional, pendiente de eliminación 
 
         #region Get (int noteNumber)  (Old)
@@ -970,7 +1071,7 @@ namespace KNote.DomainModel.Services
         //    }
         //    return ResultDomainAction(resService);
         //}
-        #endregion 
+        #endregion
 
         #region Pruebas acceso colecciones 
         //private void PruebaBasura()
@@ -994,6 +1095,16 @@ namespace KNote.DomainModel.Services
 
 
         #endregion
+
+    }
+
+    public class SearchTokens
+    {
+        public int NoteNumber { get; set; }
+
+        public List<string> TextTokens { get; set; } = new List<string>();
+
+        public bool SearchInDescription { get; set; }
 
     }
 

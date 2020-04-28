@@ -49,13 +49,6 @@ namespace KNote.Server.Controllers
             }
         }
 
-
-        //[HttpPost]   // POST api/notes
-        //[HttpPut]    // PUT api/notes
-        //[Authorize(Roles = "Admin, Staff, ProjecManager")]
-        //public async Task<IActionResult> Post([FromBody]NoteDto note)
-
-
         [HttpPost("getfilter")]   // PUT api/notes/getfilter
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task <IActionResult> GetFilter([FromBody] NotesFilterDto notesFilter )
