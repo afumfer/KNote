@@ -222,15 +222,47 @@ namespace KNote.DomainModel.Services
                 var query = _repository.Notes.Queryable;
 
                 searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
+                
                 if (searchNumber > 0)
                     query = query.Where(n => n.NoteNumber == searchNumber);
+
                 else
                 {
-                    var listTokens = ExtractListTokensSearch(notesSearch.TextSearch);
-                    foreach(var token in listTokens)
+                    var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
+                    var listTokens = listTokensAll.Where(t => t != "***").Select( t => t).ToList();
+                    var flagSearchDescription = listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault();
+
+                    if (flagSearchDescription != "***")
                     {
-                        if (!string.IsNullOrEmpty(token))
-                            query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()));
+                        foreach (var token in listTokens)
+                        {
+                            if (!string.IsNullOrEmpty(token))
+                            {
+                                if (token[0] != '!')
+                                    query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()));
+                                else
+                                {
+                                    var tokenNot = token.Substring(1, token.Length - 1);
+                                    query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()));
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var token in listTokens)
+                        {
+                            if (!string.IsNullOrEmpty(token))
+                            {
+                                if (token[0] != '!')
+                                    query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Description.ToLower().Contains(token.ToLower()));
+                                else
+                                {
+                                    var tokenNot = token.Substring(1, token.Length - 1);
+                                    query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Description.ToLower().Contains(tokenNot.ToLower()));
+                                }
+                            }
+                        }
                     }
                 }
 
