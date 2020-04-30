@@ -11,6 +11,7 @@ using KNote.Client.Helpers;
 using Microsoft.AspNetCore.Components.Authorization;
 using KNote.Client.Auth;
 using Blazor.FileReader;
+using System.Net.Http;
 
 namespace KNote.Client
 {    
@@ -21,7 +22,8 @@ namespace KNote.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
-            builder.Services.AddBaseAddressHttpClient();
+            //builder.Services.AddBaseAddressHttpClient();
+            builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             builder.Services.AddOptions();
             builder.Services.AddScoped<IShowMessages, ShowMessages>();

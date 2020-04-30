@@ -213,19 +213,19 @@
 
     protected override async Task OnInitializedAsync()
     {
-        settings = await Http.GetJsonAsync<string[]>("api/WeatherForecast/GetAppSettings");
+        settings = await Http.GetFromJsonAsync<string[]>("api/WeatherForecast/GetAppSettings");
     }
 
     private async Task LoadWeatherForecast()
     {
         forecasts = null;
-        forecasts = await Http.GetJsonAsync<WeatherForecast[]>("api/WeatherForecast");
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("api/WeatherForecast");
     }
 
     private async Task LoadFolders()
     {
         folders = null;
-        folders = await Http.GetJsonAsync<List<FolderInfoDto>>("api/WeatherForecast/GetFolders");
+        folders = await Http.GetFromJsonAsync<List<FolderInfoDto>>("api/WeatherForecast/GetFolders");
     }
 
     private void ShowPanel(int panel)
