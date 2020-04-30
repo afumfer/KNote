@@ -87,8 +87,9 @@ namespace KNote.Server
 
             app.UsePathBase("/KNote");
 
-            app.UseStaticFiles();            
+            app.UseHttpsRedirection();   //   new  rc 1
             app.UseBlazorFrameworkFiles();
+            app.UseStaticFiles();
 
             app.UseRouting();
             app.UseAuthentication();
@@ -96,7 +97,9 @@ namespace KNote.Server
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDefaultControllerRoute();                
+                // endpoints.MapDefaultControllerRoute();   // old 
+                endpoints.MapRazorPages();  // new rc 1
+                endpoints.MapControllers();  // new rc 1
                 endpoints.MapFallbackToFile("index.html");
             });
         }

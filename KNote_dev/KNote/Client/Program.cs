@@ -22,14 +22,16 @@ namespace KNote.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
-            //builder.Services.AddBaseAddressHttpClient();
-            builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            // builder.Services.AddBaseAddressHttpClient();  // old 1
+            builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });  // old 2
+            //builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });    // rc 1 OJO ESTO NO FUNCIONA
 
             builder.Services.AddOptions();
             builder.Services.AddScoped<IShowMessages, ShowMessages>();
             builder.Services.AddScoped<IKntClientDataService, KntClientDataService>();
             builder.Services.AddAuthorizationCore();
 
+            // Test ...
             //builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderTest>();
             
             builder.Services.AddScoped<AuthenticationProviderJWT>();
