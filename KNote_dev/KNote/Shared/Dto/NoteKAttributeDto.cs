@@ -27,6 +27,6 @@ namespace KNote.Shared.Dto
         public double? ValueDouble { get; set; }
         public bool ValueBool { get; set; }
         public string ValueTabulate { get; set; }
-        
+        public string ValueTags { get; set; }
     }
 }

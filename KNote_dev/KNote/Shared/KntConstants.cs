@@ -31,7 +31,7 @@ namespace KNote.Shared
                 { EnumKAttributeDataType.DateTime, "Date Time"},
                 { EnumKAttributeDataType.Bool, "Boolean"},
                 { EnumKAttributeDataType.TabulatedValue, "Tabulated value"},
-                { EnumKAttributeDataType.Tag, "Tag"}
+                { EnumKAttributeDataType.TagsValue, "Tags value"}
             };
 
             Roles = new Dictionary<EnumRoles, string>
@@ -55,7 +55,7 @@ namespace KNote.Shared
         DateTime,
         Bool,
         TabulatedValue,
-        Tag
+        TagsValue
     }
 
     public enum EnumRoles

@@ -88,13 +88,13 @@ namespace KNote.DomainModel.Infrastructure
             modelBuilder.Entity<Note>().HasIndex(_ => _.NoteNumber).IsUnique(true);
             modelBuilder.Entity<Note>().HasIndex(_ => _.Topic).IsUnique(false);
             modelBuilder.Entity<Note>().HasIndex(_ => _.InternalTags).IsUnique(false);
-            modelBuilder.Entity<KAttribute>().HasIndex(_ => _.Key).IsUnique(true);
-            modelBuilder.Entity<KAttributeTabulatedValue>().HasIndex(_ => _.Key).IsUnique(true);
+            modelBuilder.Entity<KAttribute>().HasIndex(_ => _.Key).IsUnique(true);                                    // **
+            modelBuilder.Entity<KAttributeTabulatedValue>().HasIndex(_ => _.Key).IsUnique(true);                                 // **
             modelBuilder.Entity<NoteKAttribute>().HasIndex(_ => new { _.KAttributeId, _.NoteId }).IsUnique(true);
-            modelBuilder.Entity<NoteType>().HasIndex(_ => _.Key).IsUnique(true);
+            modelBuilder.Entity<NoteType>().HasIndex(_ => _.Key).IsUnique(true);                                  // **
             modelBuilder.Entity<SystemValue>().HasIndex(_ => _.Key).IsUnique(true);
             modelBuilder.Entity<TraceNote>().HasIndex(_ => new { _.FromId, _.ToId }).IsUnique(true);
-            modelBuilder.Entity<TraceNoteType>().HasIndex(_ => _.Key).IsUnique(true);
+            modelBuilder.Entity<TraceNoteType>().HasIndex(_ => _.Key).IsUnique(true);                               // **
             modelBuilder.Entity<User>().HasIndex(_ => _.UserName).IsUnique(true);
             modelBuilder.Entity<User>().HasIndex(u => u.EMail).IsUnique(true);
             modelBuilder.Entity<Resource>().HasIndex(_ => new { _.NoteId, _.Name }).IsUnique(true);

@@ -302,9 +302,12 @@
                 case EnumKAttributeDataType.TabulatedValue:
                     KAttribute.Value = KAttribute.ValueTabulate;
                     break;
+                case EnumKAttributeDataType.TagsValue:
+                    KAttribute.Value = KAttribute.ValueTags;
+                    break;
                 default:
                     break;
-            }            
+            }
 
             if (KAttribute.RequiredValue == true && string.IsNullOrEmpty(KAttribute.Value))
             {
