@@ -19,5 +19,14 @@ namespace KNote.Shared.Dto
         public int Order { get; set; }
         public string Script { get; set; }
         public bool Disabled { get; set; }
+
+        // For view
+        public string ValueString { get; set; }
+        public DateTime? ValueDateTime { get; set; }
+        public int? ValueInt { get; set; }
+        public double? ValueDouble { get; set; }
+        public bool ValueBool { get; set; }
+        public string ValueTabulate { get; set; }
+        
     }
 }

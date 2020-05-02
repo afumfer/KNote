@@ -1,14 +1,81 @@
 ﻿@foreach (var KAttribute in Attributes)
-{    
+{
     <div class="form-group row">
         <label for="atrTags" class="col-sm-4 col-form-label">@KAttribute.KAttributeName:</label>
+
         <div class="input-group col-sm-8" id="atrTags">
-            <InputText class="form-control" @bind-Value="@KAttribute.Value" />
+            @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.String)
+            {
+                <InputText class="form-control" @bind-Value="@KAttribute.ValueString" />
+            }
+            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.DateTime)
+            {
+                <InputDate class="form-control" @bind-Value="@KAttribute.ValueDateTime" />
+                @*<ValidationMessage For="@(() => KAttribute.ValueDateTime)" />*@
+            }
+            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Int)
+            {
+                <InputNumber class="form-control" @bind-Value="@KAttribute.ValueInt" />
+            }
+            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Double)
+            {
+                <InputNumber class="form-control" @bind-Value="@KAttribute.ValueDouble" />
+            }
+            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Bool)
+            {
+                <InputCheckbox class="form-control" @bind-Value="@KAttribute.ValueBool" />
+            }
+            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
+            {
+                <!-- TODO: pendiente -->
+                <InputText class="form-control" @bind-Value="@KAttribute.ValueTabulate" />
+            }
         </div>
-        <ValidationMessage For="@(() => KAttribute.Value)" />
+
+        
     </div>
 }
 
 @code {
     [Parameter] public List<NoteKAttributeDto> Attributes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        foreach (var KAttribute in Attributes)
+        {
+            switch (KAttribute.KAttributeDataType)
+            {
+                case EnumKAttributeDataType.String:
+                    KAttribute.ValueString = KAttribute.Value;
+                    break;
+                case EnumKAttributeDataType.Int:
+                    int val;
+                    if (int.TryParse(KAttribute.Value, out val))
+                        KAttribute.ValueInt = val;
+                    break;
+                case EnumKAttributeDataType.Double:
+                    double valD;
+                    if (double.TryParse(KAttribute.Value, out valD))
+                        KAttribute.ValueDouble = valD;
+                    break;
+                case EnumKAttributeDataType.DateTime:
+                    DateTime valDT;
+                    if (DateTime.TryParse(KAttribute.Value, out valDT))
+                        KAttribute.ValueDateTime = valDT;
+                    break;
+                case EnumKAttributeDataType.Bool:
+                    bool valB;
+                    if (bool.TryParse(KAttribute.Value, out valB))
+                        KAttribute.ValueBool = valB;
+                    break;
+                case EnumKAttributeDataType.TabulatedValue:
+                    KAttribute.ValueTabulate = KAttribute.Value;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        base.OnInitialized();
+    }
 }

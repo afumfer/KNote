@@ -276,10 +276,47 @@
 
     protected async Task Save(EditContext formContext)
     {
+        string addMessage = "";
+
         bool formIsValid = formContext.Validate();
+
+        foreach (var KAttribute in Note.KAttributesDto)
+        {
+            switch (KAttribute.KAttributeDataType)
+            {
+                case EnumKAttributeDataType.String:
+                    KAttribute.Value = KAttribute.ValueString;
+                    break;
+                case EnumKAttributeDataType.Int:
+                    KAttribute.Value = KAttribute.ValueInt.ToString();
+                    break;
+                case EnumKAttributeDataType.Double:
+                    KAttribute.Value = KAttribute.ValueDouble.ToString();
+                    break;
+                case EnumKAttributeDataType.DateTime:
+                    KAttribute.Value = KAttribute.ValueDateTime.ToString();
+                    break;
+                case EnumKAttributeDataType.Bool:
+                    KAttribute.Value = KAttribute.ValueBool.ToString();
+                    break;
+                case EnumKAttributeDataType.TabulatedValue:
+                    KAttribute.Value = KAttribute.ValueTabulate;
+                    break;
+                default:
+                    break;
+            }            
+
+            if (KAttribute.RequiredValue == true && string.IsNullOrEmpty(KAttribute.Value))
+            {
+                formIsValid = false;
+                addMessage += $" {KAttribute.KAttributeName} is required.";
+
+            }
+        }
+
         if (formIsValid == false)
         {
-            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes. " + addMessage);
             return;
         }
 
