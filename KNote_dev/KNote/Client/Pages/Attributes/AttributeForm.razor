@@ -20,25 +20,47 @@
 
     <hr class="mt-1" />
 
-    <div class="form-group">
+    @*<div class="form-group">
         <label>Name:</label>
         <InputText class="form-control" @bind-Value="@KAttribute.Name" />
         <ValidationMessage For="@(() => KAttribute.Name)" />
+    </div>*@
+    <div class="form-group row">
+        <label for="atrName" class="col-sm-2 col-form-label">Name:</label>
+        <div class="input-group col-sm-10" id="atrName">
+            <InputText class="form-control" @bind-Value="@KAttribute.Name" />
+        </div>
+        <ValidationMessage For="@(() => KAttribute.Name)" />
     </div>
 
-    <div class="form-group">
+    @*<div class="form-group">
         <label>Description:</label>
         <InputText class="form-control" @bind-Value="@KAttribute.Description" />
         <ValidationMessage For="@(() => KAttribute.Description)" />
+    </div>*@
+    <div class="form-group row">
+        <label for="atrDescription" class="col-sm-2 col-form-label">Description:</label>
+        <div class="input-group col-sm-10" id="atrDescription">
+            <InputText class="form-control" @bind-Value="@KAttribute.Description" />
+        </div>
+        <ValidationMessage For="@(() => KAttribute.Description)" />
     </div>
 
-    <div class="form-group">
-        <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <!-- TODO Refactor-->
+    @*<div class="form-group">
+        <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
         <InputCheckbox class="form-check-input" @bind-Value="@KAttribute.RequiredValue" />
+        <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
+    </div>*@
+    <div class="form-group row">
+        <label for="atrRequired" class="col-sm-2 col-form-label">Required Value::</label>
+        <div class="input-group col-sm-10" id="atrRequired">
+            <InputCheckbox  @bind-Value="@KAttribute.RequiredValue" />
+        </div>
         <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
     </div>
 
-    <div class="form-group">
+
+    @*<div class="form-group">
         <label>Data Type:</label>
         <select class="form-control" @bind="@KAttribute.KAttributeDataType">
             @foreach (var item in KntConst.KAttributes.Keys)
@@ -47,13 +69,25 @@
             }
         </select>
         <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
+    </div>*@
+    <div class="form-group row">
+        <label for="atrDataType" class="col-sm-2 col-form-label">Data Type:</label>
+        <div class="input-group col-sm-10" id="atrDataType">
+            <select class="form-control" @bind="@KAttribute.KAttributeDataType">
+                @foreach (var item in KntConst.KAttributes.Keys)
+                {
+                    <option value=@item>@KntConst.KAttributes[item]</option>
+                }
+            </select>
+        </div>
+        <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
     </div>
 
     <!--   -->
 
     @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue || KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
     {
-        <div class="form-group">
+        @*<div class="form-group">
             <label class="float-left">Tabulated values for this attribute:</label>
             <span class="float-left ml-3">
                 <button class="btn btn-sm btn-light mr-2"
@@ -96,19 +130,74 @@
                     }
                 </tbody>
             </table>
-        </div>
-        <hr />
+        </div>*@
+        <div class="form-group row">
+            <label for="atrValues" class="col-sm-2 col-form-label">&nbsp;</label>
+            <div class="input-group col-sm-10" id="atrDescription">
+                <label class="float-left">Tabulated values for this attribute:</label>
+                <span class="float-left ml-3">
+                    <button class="btn btn-sm btn-light mr-2"
+                            @onclick="@(() => OnAtrValueNew())"
+                            data-toggle="tooltip" title="Add new value">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </span>
+                <table class="table table-sm table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th width="180px">Order</th>
+                            <th width="100px" class="text-center">(Actions)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var value in KAttribute.KAttributeValues)
+                        {
+                            <tr>
+                                <td>@value.Value</td>
+                                <td width="100px">@value.Order</td>
+                                <td width="100px">
+                                    <span class="float-right">
+                                        <button class="btn btn-sm btn-light mx-1"
+                                                @onclick="@(() => OnAtrValueDelete(value))"
+                                                data-toggle="tooltip" title="Delete value">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </span>
+                                    <span class="float-right">
+                                        <button class="btn btn-sm btn-light mx-1"
+                                                @onclick="@(() => OnAtrValueEdit(value))"
+                                                data-toggle="tooltip" title="Edit value">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+
+            </div>            
+        </div>        
     }
 
     <!--   -->
 
-    <div class="form-group">
-        <label>Order:</label>
+    @*<div class="form-group">
+        <label>:</label>
         <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
+        <ValidationMessage For="@(() => KAttribute.Order)" />
+    </div>*@
+    <div class="form-group row">
+        <label for="atrOrder" class="col-sm-2 col-form-label">Order:</label>
+        <div class="input-group col-sm-10" id="atrOrder">
+            <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
+        </div>
         <ValidationMessage For="@(() => KAttribute.Order)" />
     </div>
 
-    <div class="form-group">
+    @*<div class="form-group">
         <label>Note type:</label>
         <select class="form-control" @bind="@KAttribute.NoteTypeId">
             <option></option>
@@ -117,6 +206,19 @@
                 <option value=@ntype.NoteTypeId>@ntype.Name</option>
             }
         </select>
+        <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
+    </div>*@
+    <div class="form-group row">
+        <label for="atrType" class="col-sm-2 col-form-label">Note teype:</label>
+        <div class="input-group col-sm-10" id="atrType">
+            <select class="form-control" @bind="@KAttribute.NoteTypeId">
+                <option></option>
+                @foreach (var ntype in NoteTypes)
+                {
+                    <option value=@ntype.NoteTypeId>@ntype.Name</option>
+                }
+            </select>
+        </div>
         <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
     </div>
 
