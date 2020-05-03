@@ -1,6 +1,24 @@
-﻿<EditForm Model="KAttribute" OnValidSubmit="OnValidSubmit">
+﻿@inject IShowMessages showMessages
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManager
+
+<EditForm Model="KAttribute" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <!-- Title -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">
+                <h3>@Title</h3>
+            </div>
+            <div class="col-6 float-right">
+                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+            </div>
+        </div>
+    </div>
+
+    <hr class="mt-1" />
 
     <div class="form-group">
         <label>Name:</label>
@@ -15,6 +33,12 @@
     </div>
 
     <div class="form-group">
+        <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <!-- TODO Refactor-->
+        <InputCheckbox class="form-check-input" @bind-Value="@KAttribute.RequiredValue" />
+        <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
+    </div>
+
+    <div class="form-group">
         <label>Data Type:</label>
         <select class="form-control" @bind="@KAttribute.KAttributeDataType">
             @foreach (var item in KntConst.KAttributes.Keys)
@@ -25,11 +49,58 @@
         <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
     </div>
 
-    <div class="form-group">
-        <label>Required Value:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <!-- TODO Refactor-->
-        <InputCheckbox class="form-check-input" @bind-Value="@KAttribute.RequiredValue" />
-        <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
-    </div>
+    <!--   -->
+
+    @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue || KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
+    {
+        <div class="form-group">
+            <label class="float-left">Tabulated values for this attribute:</label>
+            <span class="float-left ml-3">
+                <button class="btn btn-sm btn-light mr-2"
+                        @onclick="@(() => OnAtrValueNew())"
+                        data-toggle="tooltip" title="Add new value">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </span>
+            <table class="table table-sm table-bordered table-striped">
+                <thead>
+                    <tr>                        
+                        <th>Name</th>                        
+                        <th width="180px">Order</th>
+                        <th width="100px" class="text-center">(Actions)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var value in KAttribute.KAttributeValues)
+                    {
+                        <tr>
+                            <td>@value.Value</td>
+                            <td width="100px">@value.Order</td>
+                            <td width="100px">
+                                <span class="float-right">
+                                    <button class="btn btn-sm btn-light mx-1"
+                                            @onclick="@(() => OnAtrValueDelete(value))"
+                                            data-toggle="tooltip" title="Delete value">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                </span>
+                                <span class="float-right">
+                                    <button class="btn btn-sm btn-light mx-1"
+                                            @onclick="@(() => OnAtrValueEdit(value))"
+                                            data-toggle="tooltip" title="Edit value">
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <hr />
+    }
+
+    <!--   -->
 
     <div class="form-group">
         <label>Order:</label>
@@ -49,24 +120,77 @@
         <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
     </div>
 
-    <!-- Footer -->
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-6">
-                &nbsp;
-            </div>
-            <div class="col-6 float-right">
-                <button class="btn btn-success float-right" type="submit">Save changes</button>
-            </div>
-        </div>
-    </div>
-    <hr class="mt-1" />
-
+    <AttributeValueEditor @ref="attributeValueEditor" OnCancel="OnCancelAtrValueEditor" OnConfirm="OnConfirmAtrValueEditor"></AttributeValueEditor>
 
 </EditForm>
 
 @code {
+    [Parameter] public string Title { get; set; } = "---";
     [Parameter] public KAttributeDto KAttribute { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; } = new List<NoteTypeInfoDto>();
+
+    private AttributeValueEditor attributeValueEditor;
+
+    protected async Task Save(EditContext formContext)
+    {
+        bool formIsValid = formContext.Validate();
+
+        if (formIsValid == false)
+        {
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes. ");
+            return;
+        }
+
+        await OnValidSubmit.InvokeAsync(formContext);
+    }
+
+    private void OnAtrValueNew()
+    {
+        attributeValueEditor.Show(null);
+    }
+
+    private async Task OnAtrValueDelete(KAttributeTabulatedValueDto atrValue)
+    {
+        var httpResponse = await dataService.Delete($"api/kattributes/deletetabulatedvalue/{atrValue.KAttributeTabulatedValueId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            //var i = KAttribute.KAttributeValues.IndexOf(atrOld);
+            KAttribute.KAttributeValues.Remove(atrValue);
+        }
+    }
+
+    private void OnAtrValueEdit(KAttributeTabulatedValueDto atrEdit)
+    {
+        attributeValueEditor.Show(atrEdit);
+    }
+
+    private void OnCancelAtrValueEditor()
+    {
+        attributeValueEditor.Hide();
+    }
+
+    private void OnConfirmAtrValueEditor(KAttributeTabulatedValueDto atrValue)
+    {
+
+        var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
+
+        if(atrOld == null)
+        {
+            atrValue.KAttributeId = KAttribute.KAttributeId;
+            KAttribute.KAttributeValues.Add(atrValue);
+        }
+        else
+        {
+            var i = KAttribute.KAttributeValues.IndexOf(atrOld);
+            KAttribute.KAttributeValues.RemoveAt(i);
+            KAttribute.KAttributeValues.Insert(i, atrValue);
+        }
+
+        attributeValueEditor.Hide();
+    }
 }

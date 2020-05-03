@@ -29,7 +29,9 @@ namespace KNote.Shared.Dto
 
         public Guid? NoteTypeId { get; set; }
 
-        public List<KAttributeTabulatedValueInfoDto> KAttributeTabulatedValuesInfo { get; set; }
+        //public List<KAttributeTabulatedValueInfoDto> KAttributeTabulatedValuesInfo { get; set; }
+
+        public List<KAttributeTabulatedValueDto> KAttributeValues { get; set; } = new List<KAttributeTabulatedValueDto>();
 
         public NoteTypeDto NoteType { get; set; }
     }

@@ -108,6 +108,26 @@ namespace KNote.Server.Controllers
                 return BadRequest(resApi);
             }
         }
+
+        [HttpDelete("[action]/{id}")]    // DELETE api/kattributes/deleterabulatedvalue/guid        
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteTabulatedValue(Guid id)
+        {
+            try
+            {
+                var resApi = await _service.KAttributes.DeleteKAttributeTabulatedValueAsync(id);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var resApi = new Result<NoteTypeDto>();
+                resApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(resApi);
+            }
+        }
     }
 
 }

@@ -6,12 +6,9 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Attribute Edit</h3>
-<hr />
-
 @if (kattribute != null && showForm)
 {
-    <AttributeForm OnValidSubmit="Edit" KAttribute="kattribute" NoteTypes="noteTypes" />
+    <AttributeForm Title="Attribute Edit" OnValidSubmit="Edit" KAttribute="kattribute" NoteTypes="noteTypes" />
 }
 else
 {

@@ -18,19 +18,12 @@ namespace KNote.DomainModel.Services
     public interface IKntKAttributeService
     {
         Result<List<KAttributeInfoDto>> GetAll();        
-        Result<KAttributeDto> Get(Guid id);
-        Result<KAttributeDto> GetFull(Guid id);
         Task<Result<KAttributeDto>> GetAsync(Guid id);
         Result<KAttributeDto> New(KAttributeInfoDto entity = null);
-        Result<KAttributeDto> Save(KAttributeDto entity);
         Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entityInfo);
-        Result<KAttributeInfoDto> Delete(Guid id);
-        Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id);
-
-        // TODO: Pendiente de refactorizar los tres siguientes métodos 
-        Result<KAttributeTabulatedValueInfoDto> SaveTabulateValue(Guid attributeId, KAttributeTabulatedValueInfoDto entityInfo);        
+        Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id);        
+        Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entityInfo);        
         Result<KAttributeTabulatedValueInfoDto> AddNewKAttributeTabulatedValue(Guid id, KAttributeTabulatedValueInfoDto entityInfo);
-        Result<KAttributeTabulatedValueInfoDto> DeleteKAttributeTabulatedValue(Guid id);       
-        
+        Task<Result<KAttributeTabulatedValueInfoDto>> DeleteKAttributeTabulatedValueAsync(Guid id);               
     }
 }
