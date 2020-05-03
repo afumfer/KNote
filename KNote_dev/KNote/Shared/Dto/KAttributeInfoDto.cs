@@ -8,9 +8,9 @@ namespace KNote.Shared.Dto
 {
     public class KAttributeInfoDto : KntModelBase
     {
-        public Guid KAttributeId { get; set; }
-        public string Key { get; set; }
+        public Guid KAttributeId { get; set; }        
         public string Name { get; set; }
+        public string Description { get; set; }
         public EnumKAttributeDataType KAttributeDataType { get; set; }
         public bool RequiredValue { get; set; }
         public int Order { get; set; }

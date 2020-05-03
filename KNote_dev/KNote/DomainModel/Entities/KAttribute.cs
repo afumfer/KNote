@@ -33,22 +33,6 @@ namespace KNote.DomainModel.Entities
             }
         }
 
-        private string _key;
-        [Required(ErrorMessage = "KMSG: La clave del atributo requerida")]
-        [MaxLength(16)]        
-        public string Key
-        {
-            get { return _key; }
-            set
-            {
-                if (_key != value)
-                {
-                    _key = value;
-                    OnPropertyChanged("Key");
-                }
-            }
-        }
-
         private string _name;
         [Required(ErrorMessage = "KMSG: La descripción del atributo es requerida")]
         [MaxLength(256)]
@@ -61,6 +45,20 @@ namespace KNote.DomainModel.Entities
                 {
                     _name = value;
                     OnPropertyChanged("Name");
+                }
+            }
+        }
+
+        private string _description;
+        public string Description
+        {
+            get { return _description; }
+            set
+            {
+                if (_description != value)
+                {
+                    _description = value;
+                    OnPropertyChanged("Description");
                 }
             }
         }
@@ -211,9 +209,6 @@ namespace KNote.DomainModel.Entities
                new ValidationContext(this, null, null) { MemberName = "Name" },
                results);
 
-            Validator.TryValidateProperty(this.Key,
-               new ValidationContext(this, null, null) { MemberName = "Key" },
-               results);
 
             //----
             // Validaciones específicas
@@ -237,20 +232,4 @@ namespace KNote.DomainModel.Entities
         #endregion
     }
 
-
-    // TODO: !!! Borrar 
-    //#region Enums
-
-    //public enum EnumKAttributeDataType
-    //{
-    //    dtTag,
-    //    dtBool,
-    //    dtInt,
-    //    dtDouble,
-    //    dtString,
-    //    dtDateTime,
-    //    dtTabulate,
-    //}
-
-    //#endregion
 }

@@ -32,23 +32,6 @@ namespace KNote.DomainModel.Entities
             }
         }
 
-        private string _key;
-        [Required(ErrorMessage = "KMSG: La clave es requerida")]
-        [MaxLength(32)]
-        
-        public string Key
-        {
-            get { return _key; }
-            set
-            {
-                if (_key != value)
-                {
-                    _key = value;
-                    OnPropertyChanged("Key");
-                }
-            }
-        }
-
         private string _name;
         [Required(ErrorMessage = "KMSG: El nombre del tipo es requerido")]
         [MaxLength(256)]
@@ -65,6 +48,20 @@ namespace KNote.DomainModel.Entities
             }
         }
 
+        private string _description;
+        public string Description
+        {
+            get { return _description; }
+            set
+            {
+                if (_description != value)
+                {
+                    _description = value;
+                    OnPropertyChanged("Description");
+                }
+            }
+        }
+
         #endregion
 
         #region Validations
@@ -76,10 +73,6 @@ namespace KNote.DomainModel.Entities
             // ---
             // Capturar las validaciones implementadas vía atributos.
             // ---
-
-            Validator.TryValidateProperty(this.Key,
-                new ValidationContext(this, null, null) { MemberName = "Key" },
-                results);
 
             Validator.TryValidateProperty(this.Name,
                new ValidationContext(this, null, null) { MemberName = "Name" },

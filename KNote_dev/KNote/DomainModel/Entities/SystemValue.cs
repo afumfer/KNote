@@ -32,6 +32,22 @@ namespace KNote.DomainModel.Entities
             }
         }
 
+        private string _scope;
+        [Required(ErrorMessage = "KMSG: La clave es requerida")]
+        [MaxLength(256)]
+        public string Scope
+        {
+            get { return _scope; }
+            set
+            {
+                if (_scope != value)
+                {
+                    _scope = value;
+                    OnPropertyChanged("Scope");
+                }
+            }
+        }
+
         private string _key;
         [Required(ErrorMessage = "KMSG: La clave es requerida")]
         [MaxLength(256)]        

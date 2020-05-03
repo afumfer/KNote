@@ -10,14 +10,12 @@ namespace KNote.Shared.Dto
     public class KAttributeDto : KntModelBase
     {
         public Guid KAttributeId { get; set; }
-
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
-        [MaxLength(16)]
-        public string Key { get; set; }
-
+        
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         [MaxLength(256)]
         public string Name { get; set; }
+
+        public string Description { get; set; }
 
         public bool RequiredValue { get; set; }
 

@@ -13,12 +13,9 @@ namespace KNote.Shared.Dto
 
         public Guid KAttributeId { get; set; }
 
-        //[Required(ErrorMessage = "* Attribute {0} is required ")]
-        //[MaxLength(32)]
-        //public string Key { get; set; }
-
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         public string Value { get; set; }
+        public string Description { get; set; }
 
         public int Order { get; set; }
     }

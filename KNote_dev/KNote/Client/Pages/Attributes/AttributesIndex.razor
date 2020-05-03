@@ -27,8 +27,8 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th width="160px">Key</th>
-                    <th>Name</th>
+                    <th width="160px">Name</th>
+                    <th>Description</th>
                     <th width="60px">Order</th>
                     <th width="220px">DataType</th>
                     <th width="100px" class="text-center">(Actions)</th>
@@ -37,9 +37,9 @@
             <tbody>
                 @foreach (var item in attributes)
                 {
-                    <tr>
-                        <td>@item.Key</td>
+                    <tr>                        
                         <td>@item.Name</td>
+                        <td>@item.Description</td>
                         <td>@item.Order</td>
                         <td>@KntConst.KAttributes[item.KAttributeDataType]</td>
                         <td>
@@ -63,7 +63,7 @@
 </EntityList>
 
 <ModalDialog @ref="modalDialog" Title="Delete attribute" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
-    <div><p>Are you sure you want to delete attribute "@itemDelete.Name (@itemDelete.Key)" ?</p></div>
+    <div><p>Are you sure you want to delete attribute "@itemDelete.Name" ?</p></div>
 </ModalDialog>
 
 @code {
@@ -79,8 +79,15 @@
 
     private async Task Load()
     {
-        var res = await dataService.Get<Result<List<KAttributeInfoDto>>>("api/kattributes");
-        attributes = res.Response.Entity;
+        var httpResponse = await dataService.Get<Result<List<KAttributeInfoDto>>>("api/kattributes");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            attributes = httpResponse.Response.Entity;
+        }
     }
 
     private void Delete(KAttributeInfoDto item)

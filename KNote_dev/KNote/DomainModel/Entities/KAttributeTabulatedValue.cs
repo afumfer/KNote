@@ -47,22 +47,6 @@ namespace KNote.DomainModel.Entities
             }
         }
 
-        private string _key;
-        [Required(ErrorMessage = "KMSG: El valor para la clave del atributo es requerida")]
-        [MaxLength(32)]        
-        public string Key
-        {
-            get { return _key; }
-            set
-            {
-                if (_key != value)
-                {
-                    _key = value;
-                    OnPropertyChanged("Key");
-                }
-            }
-        }
-
         private string _value;
         [Required(ErrorMessage = "KMSG: El valor para el atributo es requerido")]
         public string Value
@@ -74,6 +58,20 @@ namespace KNote.DomainModel.Entities
                 {
                     _value = value;
                     OnPropertyChanged("Value");
+                }
+            }
+        }
+
+        private string _description;
+        public string Description
+        {
+            get { return _description; }
+            set
+            {
+                if (_description != value)
+                {
+                    _description = value;
+                    OnPropertyChanged("Description");
                 }
             }
         }

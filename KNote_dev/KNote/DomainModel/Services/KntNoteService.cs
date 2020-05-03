@@ -115,7 +115,7 @@ namespace KNote.DomainModel.Services
                         NoteId = noteId,
                         Value = "",
                         KAttributeName = a.Name,
-                        Key = a.Key,
+                        Description = a.Description,
                         KAttributeDataType = a.KAttributeDataType,
                         RequiredValue = a.RequiredValue,
                         Order = a.Order,
@@ -126,7 +126,7 @@ namespace KNote.DomainModel.Services
                 else
                 {
                     atrTmp.KAttributeName = a.Name;
-                    atrTmp.Key = a.Key;
+                    atrTmp.Description = a.Description;
                     atrTmp.KAttributeDataType = a.KAttributeDataType;
                     atrTmp.RequiredValue = a.RequiredValue;
                     atrTmp.Order = a.Order;

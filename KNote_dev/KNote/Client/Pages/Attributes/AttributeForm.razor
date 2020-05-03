@@ -3,20 +3,20 @@
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
     <div class="form-group">
-        <label>Key:</label>
-        <InputText class="form-control" @bind-Value="@KAttribute.Key" />
-        <ValidationMessage For="@(() => KAttribute.Key)" />
-    </div>
-
-    <div class="form-group">
         <label>Name:</label>
         <InputText class="form-control" @bind-Value="@KAttribute.Name" />
         <ValidationMessage For="@(() => KAttribute.Name)" />
     </div>
 
     <div class="form-group">
+        <label>Description:</label>
+        <InputText class="form-control" @bind-Value="@KAttribute.Description" />
+        <ValidationMessage For="@(() => KAttribute.Description)" />
+    </div>
+
+    <div class="form-group">
         <label>Data Type:</label>
-        <select class="form-control" @bind="@KAttribute.KAttributeDataType">            
+        <select class="form-control" @bind="@KAttribute.KAttributeDataType">
             @foreach (var item in KntConst.KAttributes.Keys)
             {
                 <option value=@item>@KntConst.KAttributes[item]</option>
@@ -48,14 +48,14 @@
         </select>
         <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
     </div>
-   
+
     <!-- Footer -->
     <div class="container-fluid">
         <div class="row">
             <div class="col-6">
                 &nbsp;
             </div>
-            <div class="col-6 float-right">                
+            <div class="col-6 float-right">
                 <button class="btn btn-success float-right" type="submit">Save changes</button>
             </div>
         </div>

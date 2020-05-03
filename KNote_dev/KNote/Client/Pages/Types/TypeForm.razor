@@ -1,17 +1,17 @@
 ﻿<EditForm Model="NoteType" OnValidSubmit="OnValidSubmit">
-    
+
     <DataAnnotationsValidator></DataAnnotationsValidator>
-    
-    <div class="form-group">
-        <label>Key:</label>
-        <InputText class="form-control" @bind-Value="@NoteType.Key" />
-        <ValidationMessage For="@(() => NoteType.Key)" />
-    </div>
-    
+
     <div class="form-group">
         <label>Name:</label>
         <InputText class="form-control" @bind-Value="@NoteType.Name" />
         <ValidationMessage For="@(() => NoteType.Name)" />
+    </div>
+
+    <div class="form-group">
+        <label>Description:</label>
+        <InputText class="form-control" @bind-Value="@NoteType.Description" />
+        <ValidationMessage For="@(() => NoteType.Description)" />
     </div>
 
     <!-- Footer -->

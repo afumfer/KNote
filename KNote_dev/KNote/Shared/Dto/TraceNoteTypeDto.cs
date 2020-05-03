@@ -11,12 +11,10 @@ namespace KNote.Shared.Dto
     {
         public Guid TraceNoteTypeId { get; set; }
 
-        //[Required(ErrorMessage = "* Attribute {0} is required ")]
-        //[MaxLength(32)]
-        //public string Key { get; set; }
-
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         [MaxLength(256)]
         public string Name { get; set; }
+
+        public string Description { get; set; }
     }
 }

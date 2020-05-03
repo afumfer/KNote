@@ -27,31 +27,31 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th width="200px">Key</th>
-                    <th>Name</th>
+                    <th width="200px">Name</th>
+                    <th>Description</th>
                     <th width="100px" class="text-center">(Actions)</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in noteTypes)
                 {
-                    <tr>
-                        <td>@item.Key</td>
-                        <td>@item.Name</td>
-                        <td>
-                            <span class="float-right">
-                                <a href="types/edit/@item.NoteTypeId" class="btn btn-sm btn-warning mx-1"
-                                   data-toggle="tooltip" title="Edit user">
-                                    <i class="fa fa-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => Delete(item))"
-                                        data-toggle="tooltip" title="Delete user">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </span>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <span class="float-right">
+                            <a href="types/edit/@item.NoteTypeId" class="btn btn-sm btn-warning mx-1"
+                               data-toggle="tooltip" title="Edit user">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger mx-1"
+                                    @onclick="@(() => Delete(item))"
+                                    data-toggle="tooltip" title="Delete user">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </span>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>
@@ -59,7 +59,7 @@
 </EntityList>
 
 <ModalDialog @ref="modalDialog" Title="Delete type" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
-    <div><p>Are you sure you want to delete type "@itemDelete.Name (@itemDelete.Key)" ?</p></div>
+    <div><p>Are you sure you want to delete type "@itemDelete.Name" ?</p></div>
 </ModalDialog>
 
 @code {

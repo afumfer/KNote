@@ -8,8 +8,8 @@ namespace KNote.Shared.Dto
 {
     public class NoteTypeInfoDto : KntModelBase
     {
-        public Guid NoteTypeId { get; set; }
-        public string Key { get; set; }
+        public Guid NoteTypeId { get; set; }        
         public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

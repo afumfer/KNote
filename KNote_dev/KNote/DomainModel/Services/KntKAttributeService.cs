@@ -43,29 +43,11 @@ namespace KNote.DomainModel.Services
             try
             {
                 var resRep = _repository.KAttributes.GetAll();
+                
                 resService.Entity = resRep.Entity?
                     .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
-                    .OrderBy(a => a.Key)
+                    .OrderBy(a => a.Order )
                     .ToList();
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public Result<KAttributeDto> Get(string key)
-        {
-            var resService = new Result<KAttributeDto>();
-            try
-            {
-                var resRep = _repository.KAttributes.Get(ka => ka.Key == key);
-
-                resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
-                // KNote template ... load here aditionals properties for UserDto
-                // ... 
 
                 resService.ErrorList = resRep.ErrorList;
             }
