@@ -128,6 +128,26 @@ namespace KNote.Server.Controllers
                 return BadRequest(resApi);
             }
         }
+
+        [HttpGet("[action]/{idAttribute}")]    // GET api/kattributes/getattributetabulatedvalues/guid 
+        public IActionResult GetAttributeTabulatedValues(Guid idAttribute)
+        {
+            try
+            {
+                var resApi = _service.KAttributes.GetKAttributeTabulatedValues(idAttribute);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var resApi = new Result<NoteTypeDto>();
+                resApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(resApi);
+            }
+        }
+
     }
 
 }

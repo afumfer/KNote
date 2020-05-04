@@ -1,4 +1,9 @@
-﻿@foreach (var KAttribute in Attributes)
+﻿@inject IShowMessages showMessages
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManager
+
+
+@foreach (var KAttribute in Attributes)
 {
     <div class="form-group row">
         <label for="atrTags" class="col-sm-4 col-form-label">@KAttribute.KAttributeName:</label>
@@ -25,26 +30,37 @@
             {
                 <InputCheckbox class="form-control" @bind-Value="@KAttribute.ValueBool" />
             }
-            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
-            {
-                <!-- TODO: pendiente -->
-                <InputText class="form-control" @bind-Value="@KAttribute.ValueTabulate" />
-            }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
             {
-                <!-- TODO: pendiente -->
-                <InputText class="form-control" @bind-Value="@KAttribute.ValueTabulate" />
+                <select class="form-control" @bind="@KAttribute.ValueTags">
+                    <option></option>
+                    @foreach (var item in KAttribute.TabulatedValues)
+                    {
+                        <option value=@item.Value @key="item.KAttributeTabulatedValueId">@item.Value</option>
+                    }
+                </select>
+            }
+            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
+            {
+                <select class="form-control" @bind="@KAttribute.ValueTabulate">
+                    <option></option>
+                    @foreach (var item in KAttribute.TabulatedValues)
+                    {
+                        <option value=@item.Value @key="item.KAttributeTabulatedValueId">@item.Value</option>
+                    }
+                </select>
             }
         </div>
 
-        
+
     </div>
 }
 
 @code {
     [Parameter] public List<NoteKAttributeDto> Attributes { get; set; }
 
-    protected override void OnInitialized()
+
+    protected override async Task OnInitializedAsync()
     {
         foreach (var KAttribute in Attributes)
         {
@@ -74,9 +90,11 @@
                         KAttribute.ValueBool = valB;
                     break;
                 case EnumKAttributeDataType.TabulatedValue:
+                    KAttribute.TabulatedValues = await GetValues(KAttribute.KAttributeId);
                     KAttribute.ValueTabulate = KAttribute.Value;
                     break;
                 case EnumKAttributeDataType.TagsValue:
+                    KAttribute.TabulatedValues = await GetValues(KAttribute.KAttributeId);
                     KAttribute.ValueTags = KAttribute.Value;
                     break;
                 default:
@@ -84,6 +102,21 @@
             }
         }
 
-        base.OnInitialized();
+        await base.OnInitializedAsync();
     }
+
+    private async Task<List<KAttributeTabulatedValueDto>> GetValues(Guid idAttribute)
+    {
+        var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            return new List<KAttributeTabulatedValueDto>();
+        }
+        else
+        {
+            return httpResponse.Response.Entity.ToList();
+        }
+    }
+
 }

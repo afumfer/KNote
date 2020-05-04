@@ -28,5 +28,7 @@ namespace KNote.Shared.Dto
         public bool ValueBool { get; set; }
         public string ValueTabulate { get; set; }
         public string ValueTags { get; set; }
+
+        public List<KAttributeTabulatedValueDto> TabulatedValues = new List<KAttributeTabulatedValueDto>();
     }
 }

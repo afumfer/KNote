@@ -317,6 +317,28 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
+        public Result<List<KAttributeTabulatedValueDto>> GetKAttributeTabulatedValues(Guid attributeId)
+        {
+            var resService = new Result<List<KAttributeTabulatedValueDto>>();
+            try
+            {
+                var resRep = _repository.KAttributeTabulatedValues.GetAll(tv => tv.KAttributeId == attributeId);
+
+                if (resRep.IsValid)
+                {
+                    resService.Entity = resRep.Entity.Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
+                }
+                else
+                    resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+
         #endregion 
     }
 }
