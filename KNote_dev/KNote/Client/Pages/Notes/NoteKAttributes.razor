@@ -32,13 +32,7 @@
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
             {
-                <select class="form-control" @bind="@KAttribute.ValueTags">
-                    <option></option>
-                    @foreach (var item in KAttribute.TabulatedValues)
-                    {
-                        <option value=@item.Value @key="item.KAttributeTabulatedValueId">@item.Value</option>
-                    }
-                </select>
+                <MultiSelectList Items="KAttribute.TagsValues" OnItemChange="(() => onItemChange(KAttribute))"/>
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
             {
@@ -90,11 +84,11 @@
                         KAttribute.ValueBool = valB;
                     break;
                 case EnumKAttributeDataType.TabulatedValue:
-                    KAttribute.TabulatedValues = await GetValues(KAttribute.KAttributeId);
+                    KAttribute.TabulatedValues = await GetTabulatedValues(KAttribute.KAttributeId);
                     KAttribute.ValueTabulate = KAttribute.Value;
                     break;
                 case EnumKAttributeDataType.TagsValue:
-                    KAttribute.TabulatedValues = await GetValues(KAttribute.KAttributeId);
+                    KAttribute.TagsValues = await GetTagsValues(KAttribute.KAttributeId, KAttribute.Value);
                     KAttribute.ValueTags = KAttribute.Value;
                     break;
                 default:
@@ -105,18 +99,55 @@
         await base.OnInitializedAsync();
     }
 
-    private async Task<List<KAttributeTabulatedValueDto>> GetValues(Guid idAttribute)
+    private async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(Guid idAttribute)
     {
         var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
         if (httpResponse.Error)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            // TODO: !!! Pendiente de pensar cómo se muestran los errores
+            //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
             return new List<KAttributeTabulatedValueDto>();
         }
         else
         {
             return httpResponse.Response.Entity.ToList();
         }
+    }
+
+    private async Task<List<MultiSelectListDto>> GetTagsValues(Guid idAttribute, string tags)
+    {
+        List<MultiSelectListDto> tagsSel;
+
+        var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
+        if (httpResponse.Error)
+        {
+            // TODO: !!! Pendiente de pensar cómo se muestran los errores
+            //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            tagsSel = new List<MultiSelectListDto>();
+        }
+        else
+        {
+            var tagsList = httpResponse.Response.Entity.ToList();
+            tagsSel = new List<MultiSelectListDto>();
+
+            foreach (var t in tagsList)
+            {
+                var selected = false;
+                if (tags?.IndexOf(t.Value.ToString()) >= 0)
+                    selected = true;
+
+                tagsSel.Add(new MultiSelectListDto(selected, t.Value.ToString(), t.Value.ToString()));
+            }
+        }
+
+        return tagsSel;
+    }
+
+    private void onItemChange(NoteKAttributeDto item)
+    {
+        item.ValueTags = string.Join(", ", item.TagsValues
+            .Where(x => x.Selected == true)
+            .Select(_ => _.Key).ToArray());
     }
 
 }

@@ -21,10 +21,10 @@
 
 @code
 {
-    [Parameter]
-    public List<MultiSelectListDto> Items { get; set; } = null!;
+    [Parameter] public List<MultiSelectListDto> Items { get; set; } = null!;
+    [Parameter] public EventCallback<MultiSelectListDto> OnItemChange { get; set; }
 
-    private void CheckboxChanged(ChangeEventArgs e, string key)
+    private async Task CheckboxChanged(ChangeEventArgs e, string key)
     {
         var i = this.Items.FirstOrDefault(i => i.Key == key);
         if (i != null)
@@ -32,5 +32,6 @@
             //i.Selected = (bool)e.Value;
             i.Selected = !i.Selected;
         }
+        await OnItemChange.InvokeAsync(i);
     }
 }

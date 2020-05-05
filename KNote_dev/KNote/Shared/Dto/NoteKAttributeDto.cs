@@ -30,5 +30,7 @@ namespace KNote.Shared.Dto
         public string ValueTags { get; set; }
 
         public List<KAttributeTabulatedValueDto> TabulatedValues = new List<KAttributeTabulatedValueDto>();
+        public List<MultiSelectListDto> TagsValues = new List<MultiSelectListDto>();
+
     }
 }
