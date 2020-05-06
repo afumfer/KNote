@@ -5,10 +5,10 @@
 @attribute [Authorize(Roles = "Admin")]
 
 <h3>Admin</h3>
-
 <hr />
 
-<span class="float-left">
+@*class="float-left"*@
+@*<span>
     <button class="btn btn-sm btn-warning mx-1"
             @onclick="GoFoldersAdmin"
             data-toggle="tooltip" title="Folders managment">
@@ -31,6 +31,51 @@
     </button>
 </span>
 
+<hr />*@
+
+<div class="row mt-3">
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Folders managment</h5>
+                <p class="card-text">Manage the folders where you can structure the information. You can create, edit and update the system's folder tree.</p>
+                <a href="folders" class="btn btn-warning"><i class="oi oi-folder mr-2"></i>Go folders</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Users managment</h5>
+                <p class="card-text">Manage the users of the system and the roles to which it belongs. You can create, edit and delete users as well as roles.</p>
+                <a href="users" class="btn btn-warning"><i class="oi oi-person mr-2"></i>Go user</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Types notes managment</h5>
+                <p class="card-text">Manage types of notes in the system. Types for notes and types for attributes</p>
+                <a href="types" class="btn btn-warning"><i class="oi oi-tablet mr-2"></i>Go types</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Attributes managment</h5>
+                <p class="card-text">Manage attributes of notes. You can create and modify new attributes for your notes.</p>
+                <a href="attributes" class="btn btn-warning"><i class="oi oi-bookmark mr-2"></i>Go attributes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
 
 @code {
 
