@@ -15,6 +15,7 @@ namespace KNote.Shared.Dto
         public string KAttributeName { get; set; }        
         public string Description { get; set; }        
         public EnumKAttributeDataType KAttributeDataType { get; set; }
+        public Guid? KAttributeNoteTypeId { get; set; }
         public bool RequiredValue { get; set; }
         public int Order { get; set; }
         public string Script { get; set; }

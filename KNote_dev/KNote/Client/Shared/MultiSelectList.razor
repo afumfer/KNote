@@ -1,23 +1,21 @@
-﻿@*<div class="multiselect">*@
-    <div id="MultiSelectCheck">
-        @foreach (var item in Items)
-        {
-            <div>
-                <label for="@item.Value">
-                    @if (item.Selected)
-                    {
-                        <input type="checkbox" id="@item.Key" checked="checked" @onchange="@((e) => CheckboxChanged(e, item.Key))" />
-                    }
-                    else
-                    {
-                        <input type="checkbox" id="@item.Key" @onchange="@((e) => CheckboxChanged(e, item.Key))" />
-                    }
-                    @item.Value
-                </label>
-            </div>
-        }
-    </div>
-@*</div>*@
+﻿<div id="MultiSelectCheck">
+    @foreach (var item in Items)
+    {
+        <div>
+            <label for="@item.Value">
+                @if (item.Selected)
+                {
+                    <input type="checkbox" id="@item.Key" checked="checked" @onchange="@((e) => CheckboxChanged(e, item.Key))" />
+                }
+                else
+                {
+                    <input type="checkbox" id="@item.Key" @onchange="@((e) => CheckboxChanged(e, item.Key))" />
+                }
+                @item.Value
+            </label>
+        </div>
+    }
+</div>
 
 @code
 {

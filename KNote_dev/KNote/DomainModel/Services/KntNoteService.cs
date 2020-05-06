@@ -81,7 +81,7 @@ namespace KNote.DomainModel.Services
             try
             {               
                 var entity = await _repository.Notes.DbSet.Where(n => n.NoteId == noteId)
-                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)                    
+                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
                     .Include(n => n.Folder)
                     .Include(n => n.NoteType)
                     .SingleOrDefaultAsync();
@@ -89,10 +89,13 @@ namespace KNote.DomainModel.Services
                 // Map to dto
                 resService.Entity = entity?.GetSimpleDto<NoteDto>();
                 resService.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();                
-                resService.Entity.KAttributesDto = entity?.KAttributes.Select(_ => _.GetSimpleDto<NoteKAttributeDto>()).ToList();                
+                resService.Entity.KAttributesDto = entity?.KAttributes
+                    .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
+                    .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == resService.Entity.NoteTypeId)
+                    .ToList();                
 
                 // Complete Attributes list
-                resService.Entity.KAttributesDto = CompleteNoteAttributes(resService.Entity.KAttributesDto, entity.NoteId);
+                resService.Entity.KAttributesDto = CompleteNoteAttributes(resService.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
             }
             catch (Exception ex)
             {
@@ -101,12 +104,14 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
         
-        private List<NoteKAttributeDto> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId)
+        private List<NoteKAttributeDto> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null )
         {
-            var attributes = _repository.KAttributes.GetAll().Entity;
+            var attributes = _repository.KAttributes.GetAll(_ => _.NoteTypeId == null || _.NoteTypeId == noteTypeId).Entity;
             foreach (KAttribute a in attributes)
             {
-                var atrTmp = attributesNotes.Where(na => na.KAttributeId == a.KAttributeId).Select(at => at).SingleOrDefault();
+                var atrTmp = attributesNotes
+                    .Where(na => na.KAttributeId == a.KAttributeId)
+                    .Select(at => at).SingleOrDefault();
                 if (atrTmp == null)
                 {
                     attributesNotes.Add(new NoteKAttributeDto
@@ -116,7 +121,8 @@ namespace KNote.DomainModel.Services
                         Value = "",
                         KAttributeName = a.Name,
                         Description = a.Description,
-                        KAttributeDataType = a.KAttributeDataType,
+                        KAttributeDataType = a.KAttributeDataType,                        
+                        KAttributeNoteTypeId = a.NoteTypeId,
                         RequiredValue = a.RequiredValue,
                         Order = a.Order,
                         Script = a.Script,
@@ -128,6 +134,7 @@ namespace KNote.DomainModel.Services
                     atrTmp.KAttributeName = a.Name;
                     atrTmp.Description = a.Description;
                     atrTmp.KAttributeDataType = a.KAttributeDataType;
+                    atrTmp.KAttributeNoteTypeId = a.NoteTypeId;
                     atrTmp.RequiredValue = a.RequiredValue;
                     atrTmp.Order = a.Order;
                     atrTmp.Script = a.Script;
