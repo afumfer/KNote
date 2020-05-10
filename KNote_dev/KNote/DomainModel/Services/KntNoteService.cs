@@ -333,17 +333,8 @@ namespace KNote.DomainModel.Services
                 {
                     entity.NoteId = Guid.NewGuid();
                     var newEntity = new Note();
-                    newEntity.SetSimpleDto(entity);
-
-                    // TODO: update standard control values to newEntity
-                    // ...
-                    newEntity.NoteNumber = GetNextNoteNumber();
-                    if (newEntity.CreationDateTime == DateTime.MinValue)
-                        newEntity.CreationDateTime = DateTime.Now;
-
-                    if (newEntity.ModificationDateTime == DateTime.MinValue)
-                        newEntity.ModificationDateTime = DateTime.Now;
-                    // ...
+                    newEntity.SetSimpleDto(entity);                    
+                    UpdateStandardValuesToNewEntity(newEntity);
 
                     resRep = await _repository.Notes.AddAsync(newEntity);
                 }
@@ -357,31 +348,22 @@ namespace KNote.DomainModel.Services
                         _repository.Notes.ThrowKntException = false;
                     }
 
-                    resRep = await _repository.Notes.GetAsync(entity.NoteId);
-                    var entityForUpdate = resRep.Entity;
-
-                    //var entityU = await _repository.Notes.DbSet.Where(n => n.NoteId == entity.NoteId)
-                    //    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
-                    //    .Include(n => n.Folder)
-                    //    .Include(n => n.NoteType)
-                    //    .SingleOrDefaultAsync();
-                    //var entityForUpdate = entityU;
+                    var entityU = await _repository.Notes.DbSet.Where(n => n.NoteId == entity.NoteId)
+                        .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                        .Include(n => n.Folder)
+                        .Include(n => n.NoteType)
+                        .SingleOrDefaultAsync();
+                    var entityForUpdate = entityU;
 
                     if (flagThrowKntException == true)
                         _repository.Notes.ThrowKntException = true;
 
                     if (entityForUpdate != null)
                     {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
                         entityForUpdate.SetSimpleDto(entity);
-                        
-                        // !!!!!!!!!!!!!!!!!!!
-                        //entityForUpdate.KAttributes.RemoveAll(_ => _.KAttribute.NoteTypeId != entityForUpdate.NoteTypeId);                        
-                        //foreach(var a in entityForUpdate.KAttributes)
-                        //{
-                            
-                        //}
+                        entityForUpdate.ModificationDateTime = DateTime.Now;
+                        // Delete deprecated atttibutes
+                        entityForUpdate.KAttributes.RemoveAll(_ => _.KAttribute.NoteTypeId != entityForUpdate.NoteTypeId && _.KAttribute.NoteTypeId != null);                        
 
                         resRep = await _repository.Notes.UpdateAsync(entityForUpdate);
                     }
@@ -389,24 +371,16 @@ namespace KNote.DomainModel.Services
                     {
                         var newEntity = new Note();
                         newEntity.SetSimpleDto(entity);
+                        UpdateStandardValuesToNewEntity(newEntity);
 
-                        // TODO: update standard control values to newEntity
-                        // ...
-                        newEntity.NoteNumber = GetNextNoteNumber();
-                        if (newEntity.CreationDateTime == DateTime.MinValue)
-                            newEntity.CreationDateTime = DateTime.Now;
-
-                        if (newEntity.ModificationDateTime == DateTime.MinValue)
-                            newEntity.ModificationDateTime = DateTime.Now;
-                        // ...
                         resRep = await _repository.Notes.AddAsync(newEntity);
                     }
                 }
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
-
+               
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
-                {                    
+                {                                        
                     var res = await SaveAttrtibuteAsync(atr);
                     resService.Entity.KAttributesDto.Add(res.Entity);
 
@@ -422,6 +396,16 @@ namespace KNote.DomainModel.Services
             // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.            
             resService.ErrorList = resRep.ErrorList;
             return ResultDomainAction(resService);
+        }
+
+        private void UpdateStandardValuesToNewEntity(Note newEntity)
+        {
+            newEntity.NoteNumber = GetNextNoteNumber();
+            if (newEntity.CreationDateTime == DateTime.MinValue)
+                newEntity.CreationDateTime = DateTime.Now;
+
+            if (newEntity.ModificationDateTime == DateTime.MinValue)
+                newEntity.ModificationDateTime = DateTime.Now;
         }
 
         public async Task<Result<NoteInfoDto>> DeleteAsync(Guid id)
@@ -511,24 +495,6 @@ namespace KNote.DomainModel.Services
 
             return ResultDomainAction(resService);
         }
-
-        //// TODO: !!! Eliminar esta prueba. 
-        //public int DeleteOldBadAtributes(Guid noteId, Guid? noteTypeId)
-        //{
-        //    int n = 0; 
-
-        //    var basura = _repository.NoteKAttributes.DbSet
-        //        .Include(_ => _.KAttribute)
-        //        .Where(_ => _.NoteId == noteId && (_.KAttribute.NoteTypeId != noteTypeId && _.KAttribute.NoteTypeId != null))
-        //        .Select(_ => _);
-
-        //    n = basura.Count();
-
-        //    foreach (var x in basura)
-        //        _repository.NoteKAttributes.DeleteAsync(x);
-
-        //    return n;
-        //}
 
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
         {
