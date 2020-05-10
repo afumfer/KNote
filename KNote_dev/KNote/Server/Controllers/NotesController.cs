@@ -212,7 +212,7 @@ namespace KNote.Server.Controllers
             {
                 var resApi = await _service.Notes.SaveAsync(note);
                 if (resApi.IsValid)
-                {
+                {                    
                     return Ok(resApi);
                 }
 
@@ -351,7 +351,7 @@ namespace KNote.Server.Controllers
             {
                 var resApi = await _service.Notes.SaveNoteTaskAsync(entity);
                 if (resApi.IsValid)
-                {
+                {                    
                     return Ok(resApi);
                 }
                 else
@@ -372,12 +372,14 @@ namespace KNote.Server.Controllers
             try
             {
                 var resApi = _service.Notes.GetNoteTasks(id);
-                if (resApi.IsValid)
-                {
+                if (resApi.IsValid)                
+                {                    
                     return Ok(resApi);
                 }
                 else
                     return BadRequest(resApi);
+
+                
             }
             catch (Exception ex)
             {

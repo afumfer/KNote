@@ -58,6 +58,27 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
+        public Result<List<KAttributeInfoDto>> GetAll(Guid? typeId)
+        {
+            var resService = new Result<List<KAttributeInfoDto>>();
+            try
+            {
+                var resRep = _repository.KAttributes.GetAll(_ => _.NoteTypeId == typeId);
+
+                resService.Entity = resRep.Entity?
+                    .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
+                    .OrderBy(a => a.Order)
+                    .ToList();
+
+                resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
         public async Task<Result<KAttributeDto>> GetAsync(Guid id)
         {
             var resService = new Result<KAttributeDto>();

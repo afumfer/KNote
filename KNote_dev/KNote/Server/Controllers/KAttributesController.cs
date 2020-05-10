@@ -46,6 +46,25 @@ namespace KNote.Server.Controllers
             }
         }
 
+        [HttpGet("[action]/{typeId}")]    // GET api/kattributes/getfornotetype/typeId      
+        public IActionResult GetForNoteType(Guid? typeId)
+        {
+            try
+            {
+                var kresApi = _service.KAttributes.GetAll(typeId);
+                if (kresApi.IsValid)
+                    return Ok(kresApi);
+                else
+                    return BadRequest(kresApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<List<NoteTypeInfoDto>>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
         [HttpGet("{id}")]    // GET api/kattributes/guidKAttribute
         public async Task<IActionResult> Get(Guid id)
         {

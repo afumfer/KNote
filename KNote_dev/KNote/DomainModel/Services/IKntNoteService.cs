@@ -35,7 +35,7 @@ namespace KNote.DomainModel.Services
         
         Result<WindowInfoDto> SaveWindow(WindowInfoDto entityInfo);
         Result<TraceNoteInfoDto> SaveTraceNote(TraceNoteInfoDto entityInfo);
-        Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);
+        Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);        
 
         //Result<List<NoteInfoDto>> GetFilter(int _page, int _limit, Guid folderId, string query);
         //Result<NoteDto> Get(int noteNumber);

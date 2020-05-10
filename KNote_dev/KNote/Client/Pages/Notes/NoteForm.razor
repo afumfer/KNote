@@ -119,10 +119,11 @@
             </div>
 
             <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
-            <div class="input-group col-sm-5" id="atrNoteType">
-                <select class="form-control col-sm-11" @bind="@Note.NoteTypeId">     
+            <div class="input-group col-sm-5" id="atrNoteType">                
+                @*<select class="form-control col-sm-11" @bind="@Note.NoteTypeId">*@
+                <select class="form-control col-sm-11" @bind="@NoteTypeControl">
                     <option></option>
-                    @if(NoteTypes != null)
+                    @if (NoteTypes != null)
                     {
                         @foreach (var ntype in NoteTypes)
                         {
@@ -144,7 +145,7 @@
 
     <div class="@((selectedPanel == 2) ? "" : "d-none")">
         <div class="mt-4"></div>
-        <NoteKAttributes Attributes="Note.KAttributesDto"></NoteKAttributes>
+        <NoteKAttributes @ref="noteKAttributes" Attributes="Note.KAttributesDto"></NoteKAttributes>
     </div>
 
     <div class="@((selectedPanel == 3) ? "" : "d-none")">
@@ -254,8 +255,11 @@
     private KntFolderSelector kntFolderSelector;
     private KntResourceSelector kntResourceSelector;
     private KntTaskEditor kntTaskEditor;
+    private NoteKAttributes noteKAttributes;
 
     private int selectedPanel = 1;
+
+    private Guid? oldNoteType = null;
 
 
     protected override async Task OnInitializedAsync()
@@ -269,6 +273,8 @@
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
+
+        oldNoteType = Note.NoteTypeId;
 
         await base.OnInitializedAsync();
     }
@@ -312,7 +318,7 @@
             if (KAttribute.RequiredValue == true && string.IsNullOrEmpty(KAttribute.Value))
             {
                 formIsValid = false;
-                addMessage += $" {KAttribute.KAttributeName} is required.";
+                addMessage += $" {KAttribute.Name} is required.";
 
             }
         }
@@ -493,11 +499,73 @@
 
     private void OnEditTask(NoteTaskDto task)
     {
-        taskEdit = task;        
+        taskEdit = task;
         kntTaskEditor.Show(taskEdit);
     }
 
     #endregion
+
+
+    public Guid? NoteTypeControl
+    {
+        get {
+            return Note.NoteTypeId;
+        }
+        set
+        {
+            Note.NoteTypeId = value;
+            OnChangeNoteTypeActions();
+        }
+    }
+
+    private async Task OnChangeNoteTypeActions()
+    {
+        //Console.WriteLine($"1oldNoteType {oldNoteType}");
+
+        if (Note.NoteTypeId == null)
+        {
+            if (oldNoteType != null)
+                Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
+            oldNoteType = null;
+            return;
+        }
+
+        if (Note.NoteTypeId == oldNoteType)
+            return;
+
+        var httpResponse = await dataService.Get<Result<List<KAttributeDto>>>($"api/kattributes/getfornotetype/{Note.NoteTypeId}");
+        if (httpResponse.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        }
+        else
+        {
+            var listA = httpResponse.Response.Entity;
+
+            if (oldNoteType != null)
+                Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
+
+            foreach (var a in listA)
+            {
+                var newA = a.GetSimpleDto<NoteKAttributeDto>();
+                newA.NoteId = Note.NoteId;
+                newA.KAttributeNoteTypeId = Note.NoteTypeId;
+                Note.KAttributesDto.Add(newA);
+            }
+
+            foreach(var a in Note.KAttributesDto)
+            {
+                if (a.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
+                    a.TabulatedValues = await noteKAttributes.GetTabulatedValues(a.KAttributeId);
+                if (a.KAttributeDataType == EnumKAttributeDataType.TagsValue)
+                    a.TagsValues = await noteKAttributes.GetTagsValues(a.KAttributeId, "");
+                Console.WriteLine($"Name: {a.Name} NoteType: {a.KAttributeNoteTypeId}");
+            }
+
+            oldNoteType = Note.NoteTypeId;
+        }
+
+    }
 
 
 }

@@ -17,7 +17,8 @@ namespace KNote.DomainModel.Services
 {
     public interface IKntKAttributeService
     {
-        Result<List<KAttributeInfoDto>> GetAll();        
+        Result<List<KAttributeInfoDto>> GetAll();
+        Result<List<KAttributeInfoDto>> GetAll(Guid? typeId);
         Task<Result<KAttributeDto>> GetAsync(Guid id);
         Result<KAttributeDto> New(KAttributeInfoDto entity = null);
         Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entityInfo);

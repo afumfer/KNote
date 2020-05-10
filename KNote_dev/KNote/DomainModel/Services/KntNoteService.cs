@@ -119,7 +119,7 @@ namespace KNote.DomainModel.Services
                         KAttributeId = a.KAttributeId,
                         NoteId = noteId,
                         Value = "",
-                        KAttributeName = a.Name,
+                        Name = a.Name,
                         Description = a.Description,
                         KAttributeDataType = a.KAttributeDataType,                        
                         KAttributeNoteTypeId = a.NoteTypeId,
@@ -131,7 +131,7 @@ namespace KNote.DomainModel.Services
                 }
                 else
                 {
-                    atrTmp.KAttributeName = a.Name;
+                    atrTmp.Name = a.Name;
                     atrTmp.Description = a.Description;
                     atrTmp.KAttributeDataType = a.KAttributeDataType;
                     atrTmp.KAttributeNoteTypeId = a.NoteTypeId;
@@ -360,6 +360,13 @@ namespace KNote.DomainModel.Services
                     resRep = await _repository.Notes.GetAsync(entity.NoteId);
                     var entityForUpdate = resRep.Entity;
 
+                    //var entityU = await _repository.Notes.DbSet.Where(n => n.NoteId == entity.NoteId)
+                    //    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                    //    .Include(n => n.Folder)
+                    //    .Include(n => n.NoteType)
+                    //    .SingleOrDefaultAsync();
+                    //var entityForUpdate = entityU;
+
                     if (flagThrowKntException == true)
                         _repository.Notes.ThrowKntException = true;
 
@@ -368,6 +375,14 @@ namespace KNote.DomainModel.Services
                         // TODO: update standard control values to entityForUpdate
                         // ...
                         entityForUpdate.SetSimpleDto(entity);
+                        
+                        // !!!!!!!!!!!!!!!!!!!
+                        //entityForUpdate.KAttributes.RemoveAll(_ => _.KAttribute.NoteTypeId != entityForUpdate.NoteTypeId);                        
+                        //foreach(var a in entityForUpdate.KAttributes)
+                        //{
+                            
+                        //}
+
                         resRep = await _repository.Notes.UpdateAsync(entityForUpdate);
                     }
                     else
@@ -396,7 +411,8 @@ namespace KNote.DomainModel.Services
                     resService.Entity.KAttributesDto.Add(res.Entity);
 
                     // TODO: !!! pendiente de volcar errores en resRep
-                }
+                }                                           
+
             }
             catch (Exception ex)
             {
@@ -495,6 +511,24 @@ namespace KNote.DomainModel.Services
 
             return ResultDomainAction(resService);
         }
+
+        //// TODO: !!! Eliminar esta prueba. 
+        //public int DeleteOldBadAtributes(Guid noteId, Guid? noteTypeId)
+        //{
+        //    int n = 0; 
+
+        //    var basura = _repository.NoteKAttributes.DbSet
+        //        .Include(_ => _.KAttribute)
+        //        .Where(_ => _.NoteId == noteId && (_.KAttribute.NoteTypeId != noteTypeId && _.KAttribute.NoteTypeId != null))
+        //        .Select(_ => _);
+
+        //    n = basura.Count();
+
+        //    foreach (var x in basura)
+        //        _repository.NoteKAttributes.DeleteAsync(x);
+
+        //    return n;
+        //}
 
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
         {

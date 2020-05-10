@@ -12,7 +12,9 @@ namespace KNote.Shared.Dto
         public Guid NoteId { get; set; }
         public Guid KAttributeId { get; set; }
         public string Value { get; set; }
-        public string KAttributeName { get; set; }        
+        
+        public string Name { get; set; }        
+
         public string Description { get; set; }        
         public EnumKAttributeDataType KAttributeDataType { get; set; }
         public Guid? KAttributeNoteTypeId { get; set; }

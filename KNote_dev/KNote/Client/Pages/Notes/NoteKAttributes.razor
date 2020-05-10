@@ -7,7 +7,7 @@
 {
     <div class="form-group row">
         <label for="atrTags" class="col-sm-4 col-form-label">
-            @KAttribute.KAttributeName 
+            @KAttribute.Name 
             @if (KAttribute.RequiredValue)
             {
                <span>(*)</span>
@@ -106,7 +106,7 @@
         await base.OnInitializedAsync();
     }
 
-    private async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(Guid idAttribute)
+    public async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(Guid idAttribute)
     {
         var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
         if (httpResponse.Error)
@@ -121,7 +121,7 @@
         }
     }
 
-    private async Task<List<MultiSelectListDto>> GetTagsValues(Guid idAttribute, string tags)
+    public async Task<List<MultiSelectListDto>> GetTagsValues(Guid idAttribute, string tags)
     {
         List<MultiSelectListDto> tagsSel;
 
