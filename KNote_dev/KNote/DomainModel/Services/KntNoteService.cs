@@ -308,7 +308,9 @@ namespace KNote.DomainModel.Services
 
                 if (newNote.NoteId == Guid.Empty)
                     newNote.NoteId = Guid.NewGuid();
-                               
+
+                newNote.IsNew = true;
+
                 newNote.KAttributesDto = new List<NoteKAttributeDto>();
                 newNote.KAttributesDto = CompleteNoteAttributes(newNote.KAttributesDto, newNote.NoteId);
 
@@ -381,10 +383,9 @@ namespace KNote.DomainModel.Services
                
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {                                        
-                    var res = await SaveAttrtibuteAsync(atr);
-                    resService.Entity.KAttributesDto.Add(res.Entity);
-
-                    // TODO: !!! pendiente de volcar errores en resRep
+                    var res = await SaveAttrtibuteAsync(atr);                    
+                    // TODO: !!! Importante !!! pendiente de capturar y volcar errores de res en resService
+                    resService.Entity.KAttributesDto.Add(res.Entity);                    
                 }                                           
 
             }

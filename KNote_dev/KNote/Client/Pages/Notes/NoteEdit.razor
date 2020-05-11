@@ -8,7 +8,7 @@
 
 @if (showForm)
 {
-    <NoteForm Title="Note edit" Note="note" OnValidSubmit="Edit" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Title="Note edit" Note="note" OnValidSubmit="OnEdit"  OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
 }
 else
 {
@@ -58,7 +58,7 @@ else
         await base.OnInitializedAsync();
     }
 
-    private async Task Edit()
+    private async Task OnEdit()
     {
         var httpResponse = await dataService.Put("api/notes", note);
         if (httpResponse.Error)
@@ -67,8 +67,13 @@ else
         }
         else
         {
-            navigationManager.NavigateTo(PageReturn);
+            await showMessages.ShowOkMessage("Note successfully updated.");            
         }
+    }
+
+    private void OnExit()
+    {
+        navigationManager.NavigateTo(PageReturn);
     }
 
 }

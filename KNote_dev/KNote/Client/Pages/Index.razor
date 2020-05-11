@@ -16,8 +16,8 @@
     <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
-    <div><p>Are you sure you want to delete user "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
+<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
 </ModalDialog>
 
 @code {

@@ -14,7 +14,8 @@
             <div class="col-6">
                 <h3>@Title</h3>
             </div>
-            <div class="col-6 float-right">
+            <div class="col-6 float-right">                
+                <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))"><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
                 <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
             </div>
         </div>
@@ -245,6 +246,7 @@
     [Parameter] public string Title { get; set; } = "---";
     [Parameter] public NoteDto Note { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnExit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; }  //  = new List<NoteTypeInfoDto>();
 
     private List<ResourceDto> resources; // { get; set; }
@@ -388,7 +390,12 @@
 
     private void OnNewResource()
     {
-        kntResourceSelector.Show();
+        if (Note.IsNew == true)
+        {
+            showMessages.ShowErrorMessage("You must save the note before assigning resources to it.");
+        }
+        else
+            kntResourceSelector.Show();
     }
 
     private async Task OnConfirmResourceSelector(ResourceDto resource)
@@ -446,8 +453,15 @@
 
     private void OnNewTask()
     {
-        taskEdit = null;
-        kntTaskEditor.Show(null);
+        if (Note.IsNew == true)
+        {
+            showMessages.ShowErrorMessage("You must save the note before assigning tasks to it.");
+        }
+        else
+        {
+            taskEdit = null;
+            kntTaskEditor.Show(null);
+        }
     }
 
     private async Task OnConfirmTaskEditor(NoteTaskDto task)

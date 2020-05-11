@@ -8,7 +8,7 @@
 
 @if (showForm)
 {
-    <NoteForm Title="Note new" Note="note" OnValidSubmit="New" NoteTypes="noteTypes"></NoteForm>    
+    <NoteForm Title=@title Note="note" OnValidSubmit="OnNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>    
 }
 else
 {
@@ -20,6 +20,8 @@ else
     private NoteDto note; // !!! = new NoteDto();
     private bool showForm = false;
     private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+
+    private string title = "Note new";
 
     protected async override Task OnInitializedAsync()
     {
@@ -47,17 +49,60 @@ else
         await base.OnInitializedAsync();
     }
 
-    private async Task New()
+    private async Task OnNew()
     {
-        var httpResponse = await dataService.Post("api/notes", note);
-        if (httpResponse.Error)
+        if (note.IsNew)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            var httpResponse = await dataService.Post<NoteDto, Result<NoteDto>>("api/notes", note);
+
+            if (httpResponse.Error)
+            {
+                await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            }
+            else
+            {
+                var xx = httpResponse.Response.Entity;
+
+                // TODO: !!! hack ... repensar lo siguiente.
+                //       Se refrescan valores asignados automáticamente 
+                //       en la capa de negocio.
+                foreach(var x in xx.KAttributesDto)
+                {
+                    foreach(var n in note.KAttributesDto)
+                    {
+                        if (n.KAttributeId == x.KAttributeId)
+                        {
+                            n.NoteKAttributeId = x.NoteKAttributeId;
+                            //break;
+                        }
+                    }
+                }
+                note.NoteNumber = xx.NoteNumber;
+                note.IsNew = false;
+
+                await showMessages.ShowOkMessage("Note successfully updated.");
+                title = "Note edit";
+            }
         }
         else
         {
-            navigationManger.NavigateTo("notes/tree");
+            var httpResponse = await dataService.Put<NoteDto>("api/notes", note);
+
+            if (httpResponse.Error)
+            {
+                await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            }
+            else
+            {
+                await showMessages.ShowOkMessage("Note successfully updated.");
+            }
         }
+
+    }
+
+    private void OnExit()
+    {
+        navigationManger.NavigateTo("notes/tree");
     }
 
 }
