@@ -20,6 +20,10 @@
             {
                 <InputText class="form-control" @bind-Value="@KAttribute.ValueString" />
             }
+            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TextArea)
+            {
+                <InputTextArea class="form-control p-2" @bind-Value="@KAttribute.ValueString" />                                
+            }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.DateTime)
             {
                 <InputDate class="form-control" @bind-Value="@KAttribute.ValueDateTime" />
@@ -38,7 +42,7 @@
                 <InputCheckbox class="form-control" @bind-Value="@KAttribute.ValueBool" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-            {                
+            {
                 <MultiSelectList Items="KAttribute.TagsValues" OnItemChange="(() => onItemChange(KAttribute))" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
@@ -68,6 +72,9 @@
             switch (KAttribute.KAttributeDataType)
             {
                 case EnumKAttributeDataType.String:
+                    KAttribute.ValueString = KAttribute.Value;
+                    break;
+                case EnumKAttributeDataType.TextArea:
                     KAttribute.ValueString = KAttribute.Value;
                     break;
                 case EnumKAttributeDataType.Int:

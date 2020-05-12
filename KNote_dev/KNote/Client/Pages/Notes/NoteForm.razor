@@ -120,8 +120,7 @@
             </div>
 
             <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
-            <div class="input-group col-sm-5" id="atrNoteType">                
-                @*<select class="form-control col-sm-11" @bind="@Note.NoteTypeId">*@
+            <div class="input-group col-sm-5" id="atrNoteType">                                
                 <select class="form-control col-sm-11" @bind="@NoteTypeControl">
                     <option></option>
                     @if (NoteTypes != null)
@@ -293,6 +292,9 @@
             switch (KAttribute.KAttributeDataType)
             {
                 case EnumKAttributeDataType.String:
+                    KAttribute.Value = KAttribute.ValueString;
+                    break;
+                case EnumKAttributeDataType.TextArea:
                     KAttribute.Value = KAttribute.ValueString;
                     break;
                 case EnumKAttributeDataType.Int:

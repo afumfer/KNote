@@ -10,8 +10,8 @@
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
 <div>
-    <h3>KNote home page</h3>
-    <p><i>(@appState.AppName)</i></p>
+    <h3>@appState.AppName home page</h3>
+    <p><i>(@appState.AppDescription)</i></p>
     <hr />
     <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
 </div>

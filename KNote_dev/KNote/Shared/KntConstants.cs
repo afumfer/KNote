@@ -26,12 +26,13 @@ namespace KNote.Shared
             KAttributes = new Dictionary<EnumKAttributeDataType, string>
             {
                 { EnumKAttributeDataType.String, "String"},
+                { EnumKAttributeDataType.TextArea, "Text Area"},
                 { EnumKAttributeDataType.Int, "Integer"},
                 { EnumKAttributeDataType.Double, "Double"},
                 { EnumKAttributeDataType.DateTime, "Date Time"},
                 { EnumKAttributeDataType.Bool, "Boolean"},
-                { EnumKAttributeDataType.TabulatedValue, "Tabulated value"},
-                { EnumKAttributeDataType.TagsValue, "Tags value"}
+                { EnumKAttributeDataType.TabulatedValue, "Tabulated Value"},
+                { EnumKAttributeDataType.TagsValue, "Tags Value"}
             };
 
             Roles = new Dictionary<EnumRoles, string>
@@ -50,6 +51,7 @@ namespace KNote.Shared
     public enum EnumKAttributeDataType
     {
         String,
+        TextArea,
         Int,
         Double,
         DateTime,
