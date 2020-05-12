@@ -1,5 +1,5 @@
 ﻿@page "/notes/filter"
-@page "/notesfilter"
+@page "/filter"
 
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManager
@@ -43,7 +43,7 @@
                             <button class="btn btn-sm btn-dark mx-1 mb-2"
                                     @onclick="ToggleView"
                                     data-toggle="tooltip" title="Item mode view">
-                                <i class="fa fa-file-text-o"></i> Item mode view
+                                <i class="fa fa-file-text-o"></i> @*Item mode view*@
                             </button>
                         }
                         else
@@ -51,7 +51,7 @@
                             <button class="btn btn-sm btn-dark mx-1 mb-2"
                                     @onclick="ToggleView"
                                     data-toggle="tooltip" title="Table mode view">
-                                <i class="fa fa-table"></i> Table mode view
+                                <i class="fa fa-table"></i> @*Table mode view*@
                             </button>
                         }
                     </span>
@@ -182,19 +182,17 @@
 
     void GoNoteNew()
     {
-        navigationManager.NavigateTo($"notes/new");
+        navigationManager.NavigateTo($"notes/new/filter");
     }
 
     void GoNoteView(NoteInfoDto note)
-    {
-        // TODO: !!! note edit hay que modificarlo para permitir el regreso a este componente
-        navigationManager.NavigateTo($"notes/{note.NoteId}");
+    {        
+        navigationManager.NavigateTo($"notes/{note.NoteId}/filter");
     }
 
     void GoNoteEdit(NoteInfoDto note)
-    {
-        // TODO: !!! modificar la edición para contemplar el regreso a este componente
-        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/tree");
+    {        
+        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/filter");
     }
 
 }

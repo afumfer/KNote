@@ -1,4 +1,4 @@
-﻿@page "/notes/new"
+﻿@page "/notes/new/{PageReturn}"
 
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManger
@@ -16,6 +16,7 @@ else
 }
 
 @code {
+    [Parameter] public string PageReturn { get; set; }
 
     private NoteDto note; // !!! = new NoteDto();
     private bool showForm = false;
@@ -102,7 +103,8 @@ else
 
     private void OnExit()
     {
-        navigationManger.NavigateTo("notes/tree");
+        //navigationManger.NavigateTo("notes/tree");
+        navigationManger.NavigateTo(PageReturn);
     }
 
 }

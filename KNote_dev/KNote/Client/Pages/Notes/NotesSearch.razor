@@ -1,5 +1,5 @@
 ﻿@page "/notes/search"
-@page "/notessearch"
+@page "/search"
 
 @inject IKntClientDataService dataService
 @inject NavigationManager navigationManager
@@ -8,10 +8,23 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div>
-    <h3>Notes Search</h3>
-    <hr class="mt-0" />
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <h3>Notes search</h3>
+        </div>
+        <div class="col-6 float-right">
+            <button class="btn btn-sm btn-warning float-right"
+                    @onclick="GoNoteNew"
+                    data-toggle="tooltip" title="New note">
+                <i class="oi oi-document"></i> New note
+            </button>
+        </div>
+    </div>
 </div>
+<hr class="mt-0" />
+
 
 <div class="form-group row">
     <div class="input-group col-sm-11 mb-2" id="atrText">
@@ -20,14 +33,16 @@
                placeholder="Text search  ..." />
         <div class="input-group-append">
             <button class="btn btn-outline-secondary" type="button" @onclick="@CleanOnClick"
-                    data-toggle="tooltip" title="Clean search"> X </button>
+                    data-toggle="tooltip" title="Clean search">
+                X
+            </button>
         </div>
     </div>
 
     <div class="col-1 float-left">
-        <button type="button" class="btn btn-primary mb-2 mx-sm-3"  @onclick="OnLoadListNotes"
+        <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="OnLoadListNotes"
                 data-toggle="tooltip" title="Apply search">
-            <span class="oi oi-magnifying-glass" aria-hidden="true"></span> 
+            <span class="oi oi-magnifying-glass" aria-hidden="true"></span>
         </button>
     </div>
 </div>
@@ -48,7 +63,7 @@
                     <button class="btn btn-sm btn-dark mx-1"
                             @onclick="ToggleView"
                             data-toggle="tooltip" title="Item mode view">
-                        <i class="fa fa-file-text-o"></i> Item mode view
+                        <i class="fa fa-file-text-o"></i> @*Item mode view*@
                     </button>
                 }
                 else
@@ -56,7 +71,7 @@
                     <button class="btn btn-sm btn-dark mx-1"
                             @onclick="ToggleView"
                             data-toggle="tooltip" title="Table mode view">
-                        <i class="fa fa-table"></i> Table mode view
+                        <i class="fa fa-table"></i> @*Table mode view*@
                     </button>
                 }
             </span>
@@ -100,7 +115,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        appState.OnChange += AppStateHasChanged;
+        //appState.OnChange += AppStateHasChanged;
 
         var url = navigationManager.Uri;
         var queries = navigationManager.GetQueryStrings(url);
@@ -118,29 +133,15 @@ else
         }
     }
 
-    public void Dispose()
-    {
-        appState.OnChange -= AppStateHasChanged;
-    }
+    //public void Dispose()
+    //{
+    //    appState.OnChange -= AppStateHasChanged;
+    //}
 
-    private void AppStateHasChanged()
-    {
-        Console.WriteLine("AppStateHasChanged");
-
-        // TODO: Limpiar basura ...
-
-        //currentPage = 1;
-        //textSearch = appState.TextSearch;
-
-        //LoadListNotes();
-
-        //notes = new List<NoteInfoDto>
-        //{
-        //    new NoteInfoDto {Topic = "xxx" },
-        //    new NoteInfoDto {Topic = "xxx1" },
-        //    new NoteInfoDto {Topic = "xxx2" },
-        //};
-    }
+    //private void AppStateHasChanged()
+    //{
+    //    Console.WriteLine("AppStateHasChanged");
+    //}
 
     #region Utils
 
@@ -188,7 +189,7 @@ else
     }
 
     private async Task TopicKeyPress(KeyboardEventArgs e)
-    {        
+    {
         if (e.Key == "Enter")
         {
             await LoadListNotes();
@@ -236,36 +237,23 @@ else
         }
     }
 
-    private void GetFilteredNotes2(string queryString)
-    {
-        notes = null;
-        var httpResponse = dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getsearch?" + queryString).Result;
-
-        totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
-
-        if (httpResponse.Error)
-        {
-            //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            notes = httpResponse.Response.Entity;
-        }
-    }
-
-
     #endregion
 
     #region  Edit / Delete events ...
 
     private void GoNoteView(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/{note.NoteId}");
+        navigationManager.NavigateTo($"notes/{note.NoteId}/search");
+    }
+
+    void GoNoteNew()
+    {
+        navigationManager.NavigateTo($"notes/new/search");
     }
 
     private void GoNoteEdit(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/notessearch");
+        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/search");
     }
 
     private void GoNoteDelete(NoteInfoDto item)

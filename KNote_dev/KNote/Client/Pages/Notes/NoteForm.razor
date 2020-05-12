@@ -438,11 +438,9 @@
 
     private void InsertInDescription(ResourceDto resource)
     {
-        //[I'm an inline-style link](https://www.google.com)
         if (resource.FileType == "image/jpeg")
             Note.Description += "\n\n![alt text](" + resource?.RelativeUrl + " '" + resource?.Description + "' )";
         else
-            //[I'm an inline-style link](https://www.google.com)  .... or 
             Note.Description += "\n\n<a href=" + resource?.RelativeUrl + " target='_blank'>" + resource?.Description + "</a>";
         selectedPanel = 1;
     }
@@ -519,6 +517,7 @@
 
     #endregion
 
+    #region NoteType change control
 
     public Guid? NoteTypeControl
     {
@@ -581,6 +580,7 @@
 
     }
 
+    #endregion
 
 }
 

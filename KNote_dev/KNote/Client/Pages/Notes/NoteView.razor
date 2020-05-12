@@ -1,5 +1,4 @@
-﻿@page "/notes/{NoteId}"
-
+﻿@page "/notes/{NoteId}/{PageReturn}"
 
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManger
@@ -7,8 +6,17 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<h3>NoteView</h3>
-<hr />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <h3>Note view</h3>
+        </div>
+        <div class="col-6 float-right">
+            <button class="btn btn-success float-right ml-2" @onclick="OnExit"><i class="fa fa-arrow-right" aria-hidden="true"></i></button>            
+        </div>
+    </div>
+</div>
+<hr class="mt-1" />
 
 @if (note != null)
 {
@@ -31,6 +39,7 @@ else
 
 @code {
     [Parameter] public string NoteId { get; set; }
+    [Parameter] public string PageReturn { get; set; }
 
     private NoteDto note;
 
@@ -44,10 +53,15 @@ else
         }
         else
         {
-            note = httpResponse.Response.Entity;            
+            note = httpResponse.Response.Entity;
         }
 
         base.OnInitialized();
     }
-    
+
+    private void OnExit()
+    {        
+        navigationManger.NavigateTo(PageReturn);
+    }
+
 }
