@@ -66,18 +66,7 @@
         <ValidationMessage For="@(() => Folder.ParentId)" />
     </div>
 
-    <!-- Footer -->
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-6">
-                &nbsp;
-            </div>
-            <div class="col-6 float-right">
-                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
-            </div>
-        </div>
-    </div>
-    <hr class="mt-1" />
+    <hr />
 
     <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
 

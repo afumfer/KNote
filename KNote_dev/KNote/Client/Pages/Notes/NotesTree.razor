@@ -145,6 +145,16 @@
         }
     }
 
+    private async Task OnFolderSelected(FolderInfoDto f)
+    {
+        folder = f;
+
+        if (viewPagination == 0)
+            await LoadNotes();
+        else
+            await onSelectedPage(1);
+    }
+
     private void ToggleView()
     {
         viewMode = (viewMode == 0) ? 1 : 0;
@@ -154,16 +164,6 @@
     {
         viewPagination = (viewPagination == 0) ? 1 : 0;
         await OnFolderSelected(folder);
-    }
-
-    private async Task OnFolderSelected(FolderInfoDto f)
-    {
-        folder = f;
-
-        if (viewPagination == 0)
-            await LoadNotes();
-        else
-            await onSelectedPage(1);
     }
 
     private async Task onSelectedPage(int page)

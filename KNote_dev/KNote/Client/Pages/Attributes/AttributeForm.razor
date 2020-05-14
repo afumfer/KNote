@@ -31,7 +31,7 @@
     <div class="form-group row">
         <label for="atrDescription" class="col-sm-2 col-form-label">Description:</label>
         <div class="input-group col-sm-10" id="atrDescription">
-            <InputText class="form-control" @bind-Value="@KAttribute.Description" />
+            <InputTextArea class="form-control" @bind-Value="@KAttribute.Description" />
         </div>
         <ValidationMessage For="@(() => KAttribute.Description)" />
     </div>
@@ -118,7 +118,7 @@
     </div>
 
     <div class="form-group row">
-        <label for="atrType" class="col-sm-2 col-form-label">Note teype:</label>
+        <label for="atrType" class="col-sm-2 col-form-label">Note type:</label>
         <div class="input-group col-sm-10" id="atrType">
             <select class="form-control" @bind="@KAttribute.NoteTypeId">
                 <option></option>
