@@ -77,24 +77,23 @@ namespace KNote.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseResponseCompression();
+            //app.UseResponseCompression();
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseWebAssemblyDebugging();
             }
-            // TODO: !!! Pendiente para la versión fe producción
-            //else
-            //{
-            //    app.UseExceptionHandler("/Error");
-            //    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            //    app.UseHsts();
-            //}
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
 
             app.UsePathBase("/KNote");
 
-            app.UseHttpsRedirection();   //   new  rc 1
+            app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
@@ -103,10 +102,9 @@ namespace KNote.Server
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
-            {
-                // endpoints.MapDefaultControllerRoute();   // old 
-                endpoints.MapRazorPages();  // new rc 1
-                endpoints.MapControllers();  // new rc 1
+            {                
+                endpoints.MapRazorPages();
+                endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
             });
         }

@@ -10,6 +10,7 @@ using KNote.Shared.Dto;
 using Microsoft.Extensions.Configuration;
 using KNote.Server.Helpers;
 using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization;
 
 namespace KNote.Server.Controllers
 {
@@ -67,4 +68,5 @@ namespace KNote.Server.Controllers
 
 
     }
+
 }

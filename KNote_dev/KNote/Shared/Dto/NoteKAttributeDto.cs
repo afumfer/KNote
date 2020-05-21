@@ -23,8 +23,8 @@ namespace KNote.Shared.Dto
         public string Script { get; set; }
         public bool Disabled { get; set; }
 
-        // For view
-        public string ValueString { get; set; }
+        // For view                
+        public string ValueString { get; set; }        
         public DateTime? ValueDateTime { get; set; }
         public int? ValueInt { get; set; }
         public double? ValueDouble { get; set; }
