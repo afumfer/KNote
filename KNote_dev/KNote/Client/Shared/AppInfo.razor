@@ -1,0 +1,20 @@
+﻿<h5>@appState.SelectedFolder?.Name</h5>
+
+@code {
+    [CascadingParameter] public AppState appState { get; set; }
+
+    #region  AppState changed subscription 
+
+    protected override void OnInitialized()
+    {
+        appState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    #endregion
+
+}

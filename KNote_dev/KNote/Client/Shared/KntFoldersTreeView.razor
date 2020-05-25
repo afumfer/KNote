@@ -1,8 +1,8 @@
 ﻿@*@using KNote.Shared*@
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
 @inject IShowMessages showMessages
+@inject NavigationManager navigationManger
 
 @if (FoldersInfo != null)
 {
@@ -75,6 +75,8 @@ else
 }
 
 @code {
+    [CascadingParameter] public AppState appState { get; set; }
+
     [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
@@ -85,12 +87,13 @@ else
 
     protected async Task onFolderSelected(FolderInfoDto folder)
     {
-        // Refresh component state (selected / no selected)
-
         if (folderOldSelected != null)
             folderOldSelected.Selected = false;
 
         folder.Selected = true;
+
+        appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
+
         await FolderSelected.InvokeAsync(folder);
         folderOldSelected = folder;
     }
@@ -104,5 +107,19 @@ else
     {
         await FolderEdit.InvokeAsync(folder);
     }
+
+    #region  AppState changed subscription 
+
+    protected override void OnInitialized()
+    {
+        appState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    #endregion
 
 }
