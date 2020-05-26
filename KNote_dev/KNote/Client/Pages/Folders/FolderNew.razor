@@ -9,18 +9,31 @@
 <FolderForm Title="New folder" OnValidSubmit="New" Folder="folder" />
 
 @code {
+    [CascadingParameter] public AppState appState { get; set; }
 
-    private FolderDto folder = new FolderDto();
+    private FolderDto folder;
+
+    protected override void OnInitialized()
+    {
+        folder = new FolderDto();
+        if(appState != null)
+        {
+            folder.ParentId = appState.SelectedFolder.FolderId;
+            folder.ParentFolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
+        }
+
+        base.OnInitialized();
+    }
 
     private async Task New()
-    {        
+    {
         var httpResponse = await dataService.Post("api/folders", folder);
         if (httpResponse.Error)
-        {            
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());             
+        {
+            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {            
+        {
             navigationManger.NavigateTo("folders");
         }
     }

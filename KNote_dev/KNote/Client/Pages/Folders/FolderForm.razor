@@ -73,6 +73,8 @@
 </EditForm>
 
 @code {
+    [CascadingParameter] public AppState appState { get; set; }
+
     [Parameter] public string Title { get; set; } = "---";
     [Parameter] public FolderDto Folder { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
@@ -100,7 +102,7 @@
 
         await OnValidSubmit.InvokeAsync(formContext);
     }
-  
+
     #region Managment FolderSelector
 
     private void OnFolderSelector()
@@ -109,7 +111,7 @@
     }
 
     private void onConfirmFolderSelector(FolderInfoDto f)
-    {     
+    {
         Folder.ParentId = f.FolderId;
         Folder.ParentFolderDto = f.GetSimpleDto<FolderDto>();
         nameParent = Folder.ParentFolderDto.Name;
@@ -118,13 +120,13 @@
 
     private void onCancelFolderSelector()
     {
-        kntFolderSelector.Hide();     
+        kntFolderSelector.Hide();
     }
 
     private void OnResetParentFolder()
     {
         Folder.ParentId = null;
-        nameParent = "(root)";        
+        nameParent = "(root)";
     }
 
     #endregion

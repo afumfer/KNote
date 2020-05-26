@@ -16,6 +16,8 @@ else
 }
 
 @code {
+    [CascadingParameter] public AppState appState { get; set; }
+
     [Parameter] public string PageReturn { get; set; }
 
     private NoteDto note; // !!! = new NoteDto();
@@ -43,6 +45,11 @@ else
             else
             {
                 note = httpResponseNote.Response.Entity;
+                if (appState.SelectedFolder != null)
+                {
+                    note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
+                    note.FolderId = appState.SelectedFolder.FolderId;
+                }
                 showForm = true;
             }
         }

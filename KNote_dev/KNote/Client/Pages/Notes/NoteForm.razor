@@ -237,11 +237,11 @@
 
     <KntResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelector>
 
-    <KntTaskEditor @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" Users="users" ></KntTaskEditor>
+    <KntTaskEditor @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" Users="users"></KntTaskEditor>
 
 </EditForm>
 
-@code {
+@code {    
     [Parameter] public string Title { get; set; } = "---";
     [Parameter] public NoteDto Note { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
