@@ -48,8 +48,8 @@ namespace KNote.Client.Shared
 
         public List<FolderInfoDto> FoldersTree { get; set; }
 
-
-
+        public Dictionary<Guid, FolderInfoDto> FoldersIndex { get; set; } = new Dictionary<Guid, FolderInfoDto>();
+        
         public event Action OnChange;
         private void NotifyStateChanged() => OnChange?.Invoke();
 

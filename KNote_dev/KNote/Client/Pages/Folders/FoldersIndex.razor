@@ -122,8 +122,7 @@ else
     }
 
     private void OnFolderEdit(FolderInfoDto folder)
-    {
-        // TODO: 2 !!! refrescar appState después de la edición
+    {        
         navigationManager.NavigateTo($"folders/edit/{folder.FolderId}");
     }
 

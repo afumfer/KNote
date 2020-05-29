@@ -16,12 +16,16 @@ else
 }
 
 @code {
+    [CascadingParameter] public AppState appState { get; set; }
+
     [Parameter] public string FolderId { get; set; }
 
     private FolderDto folder;
 
     protected async override Task OnInitializedAsync()
     {
+        appState.OnChange += StateHasChanged;
+        
         var httpResponse = await dataService.Get<Result<FolderDto>>($"api/folders/{FolderId}");
         if (httpResponse.Error)
         {
@@ -30,10 +34,15 @@ else
         }
         else
         {
-            folder = httpResponse.Response.Entity;            
+            folder = httpResponse.Response.Entity;
         }
 
         base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
     }
 
     private async Task Edit()
@@ -45,6 +54,14 @@ else
         }
         else
         {
+            if(appState.FoldersTree != null)
+            {
+                FolderInfoDto toUpdate;
+                if (appState.FoldersIndex.TryGetValue(folder.FolderId, out toUpdate))
+                if (toUpdate != null)
+                    toUpdate.Name = folder.Name;
+            }
+
             navigationManger.NavigateTo("folders");
         }
     }

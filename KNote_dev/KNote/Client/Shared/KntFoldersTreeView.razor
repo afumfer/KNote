@@ -10,7 +10,8 @@
     {    
         <ul>
             @foreach (var folder in FoldersInfo)
-            {
+            {                                
+                appState.FoldersIndex[folder.FolderId] = folder;                
                 <li>
                     @if (folder.ChildFolders.Count > 0)
                     {
@@ -75,11 +76,13 @@ else
 }
 
 @code {    
+    [CascadingParameter] public AppState appState { get; set; }
+
     [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderEdit { get; set; }
-    [Parameter] public bool EditMode { get; set; }
+    [Parameter] public bool EditMode { get; set; }    
 
     private FolderInfoDto folderOldSelected;
 
