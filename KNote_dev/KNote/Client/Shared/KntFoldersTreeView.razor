@@ -7,7 +7,7 @@
 @if (FoldersInfo != null)
 {
     @if (FoldersInfo.Count > 0)
-    {
+    {    
         <ul>
             @foreach (var folder in FoldersInfo)
             {
@@ -74,9 +74,7 @@ else
     <p><em>Loading tree folders...</em></p>
 }
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
-
+@code {    
     [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
@@ -85,14 +83,15 @@ else
 
     private FolderInfoDto folderOldSelected;
 
+    private Guid? folderIdInit;
+    private string msg;
+
     protected async Task onFolderSelected(FolderInfoDto folder)
     {
         if (folderOldSelected != null)
             folderOldSelected.Selected = false;
 
         folder.Selected = true;
-
-        appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
 
         await FolderSelected.InvokeAsync(folder);
         folderOldSelected = folder;
@@ -107,19 +106,5 @@ else
     {
         await FolderEdit.InvokeAsync(folder);
     }
-
-    #region  AppState changed subscription 
-
-    protected override void OnInitialized()
-    {
-        appState.OnChange += StateHasChanged;
-    }
-
-    public void Dispose()
-    {
-        appState.OnChange -= StateHasChanged;
-    }
-
-    #endregion
 
 }

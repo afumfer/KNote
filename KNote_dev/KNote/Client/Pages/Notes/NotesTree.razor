@@ -118,6 +118,8 @@
 </ModalDialog>
 
 @code {
+    [CascadingParameter] public AppState appState { get; set; }
+
     private List<FolderInfoDto> foldersTree;
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
@@ -125,29 +127,46 @@
     private int viewMode = 0;
     private int viewPagination = 1;
 
-    List<NoteInfoDto> notes;
+    private List<NoteInfoDto> notes;
 
     private FolderInfoDto folder;
 
     private NotesFilterDto filter = new NotesFilterDto();
 
-
     protected override async Task OnInitializedAsync()
     {
-        var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
-        foldersTree = res.Response.Entity;
+        appState.OnChange += StateHasChanged;
 
-        if (foldersTree?.Count > 0)
+        if (appState.FoldersTree == null)
         {
-            var f = foldersTree.Select(x => x).FirstOrDefault();
-            f.Selected = true;
-            await OnFolderSelected(f);
+            var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
+            foldersTree = res.Response.Entity;
+            appState.FoldersTree = foldersTree;
+
+            if (foldersTree?.Count > 0)
+            {
+                var f = foldersTree.Select(x => x).FirstOrDefault();
+                f.Selected = true;
+                await OnFolderSelected(f);
+            }
         }
+        else
+        {
+            foldersTree = appState.FoldersTree;
+            await OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderInfoDto>());
+        }
+
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
     }
 
     private async Task OnFolderSelected(FolderInfoDto f)
     {
         folder = f;
+        appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
 
         if (viewPagination == 0)
             await LoadNotes();
@@ -189,10 +208,6 @@
     private async Task LoadNotesWithPagination()
     {
         notes = null;
-
-        //var queryString = $"folderid={folder.FolderId}&page={currentPage}";
-        //var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getfilter?" + queryString);
-
         filter.FolderId = folder.FolderId;
 
         var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter);

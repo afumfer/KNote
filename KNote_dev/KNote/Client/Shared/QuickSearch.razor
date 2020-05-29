@@ -27,25 +27,28 @@
 
 
 @code {
+
+    // TODO: !!! Pendiente de borrar código basura ...
+
     // [CascadingParameter] protected AppState appState { get; set; }
 
     private string textSearch;
 
-    protected override void OnInitialized()
-    {
-        //appState.OnChange += StateHasChanged;
-        base.OnInitialized();
-    }
+    //protected override void OnInitialized()
+    //{
+    //    //appState.OnChange += StateHasChanged;
+    //    base.OnInitialized();
+    //}
 
-    public void Dispose()
-    {
-        //appState.OnChange -= StateHasChanged;
-    }
+    //public void Dispose()
+    //{
+    //    //appState.OnChange -= StateHasChanged;
+    //}
 
     private void OnLoadListNotes()
     {
         //appState.TextSearch = textSearch;
-        var queryStrings = "textSearch=" + textSearch + "&page=1";        
+        var queryStrings = "textSearch=" + textSearch + "&page=1";
         navigationManager.NavigateTo("notes/search?" + queryStrings);
         textSearch = "";
     }

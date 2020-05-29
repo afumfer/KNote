@@ -41,6 +41,8 @@ else
 </ModalDialog>
 
 @code {   
+    [CascadingParameter] public AppState appState { get; set; }
+
     private List<FolderInfoDto> foldersTree;
     private FolderInfoDto folder;
     private ModalDialog modalDialog;
@@ -48,26 +50,44 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        appState.OnChange += StateHasChanged;
+
         await Load();
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
     }
 
     private async Task Load()
     {
         folder = null;
-        var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
-        foldersTree = res.Response.Entity;
 
-        if (foldersTree?.Count > 0)
+        if (appState.FoldersTree == null)
         {
-            var f = foldersTree.Select(x => x).FirstOrDefault();
-            f.Selected = true;
-            OnFolderSelected(f);
+            var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
+            foldersTree = res.Response.Entity;
+            appState.FoldersTree = foldersTree;
+
+            if (foldersTree?.Count > 0)
+            {
+                var f = foldersTree.Select(x => x).FirstOrDefault();
+                f.Selected = true;
+                OnFolderSelected(f);
+            }
+        }
+        else
+        {
+            foldersTree = appState.FoldersTree;
+            OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderInfoDto>());
         }
     }
 
     private void OnFolderSelected(FolderInfoDto f)
     {
         folder = f;
+        appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
     }
 
     private void OnFolderDelete(FolderInfoDto folder)
@@ -87,6 +107,7 @@ else
         }
         else
         {
+            // TODO: 1 !!! Pendiente de refrescar appState y foldersTree (quitar = null)
             foldersTree = null;
             await Load();
         }
@@ -102,11 +123,13 @@ else
 
     private void OnFolderEdit(FolderInfoDto folder)
     {
+        // TODO: 2 !!! refrescar appState después de la edición
         navigationManager.NavigateTo($"folders/edit/{folder.FolderId}");
     }
 
     void GoNewFolder()
     {
+        // TODO: 3 !!! refrescar appState después de la edición
         navigationManager.NavigateTo($"folders/new");
     }
 

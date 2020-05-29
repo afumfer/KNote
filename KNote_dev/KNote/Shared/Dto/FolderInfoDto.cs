@@ -34,20 +34,18 @@ namespace KNote.Shared.Dto
             }
         }
 
-        private bool _expanded = false;
-        public bool Expanded
-        {
-            get { return _expanded; }
-        }
+        public bool Selected { get; set; } = false;
+
+        public bool Expanded { get; set; } = false;
 
         public void Toggle()
         {
-            _expanded = !_expanded;
+            Expanded = !Expanded;
         }
 
         public string getIcon()
         {
-            if (_expanded)
+            if (Expanded)
             {
                 //return "-";
                 return "oi oi-caret-bottom";
@@ -58,15 +56,12 @@ namespace KNote.Shared.Dto
             return "oi oi-caret-right";
             //return "oi oi-chevron-right";
         }
-
-        public bool Selected { get; set; } = false;
-
+       
         public string getColor()
         {
             if (Selected)
                 return "text-light bg-dark";
             return "text-dark";
-
         }
     }
 }
