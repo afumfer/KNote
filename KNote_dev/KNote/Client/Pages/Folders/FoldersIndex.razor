@@ -107,9 +107,25 @@ else
         }
         else
         {
-            // TODO: 1 !!! Pendiente de refrescar appState y foldersTree (quitar = null)
-            foldersTree = null;
-            await Load();
+            FolderInfoDto toUpdate;
+            if(itemDelete.ParentId == null)
+            {                
+                if(appState.FoldersTree != null)
+                    appState.FoldersTree.Remove(itemDelete);
+            }
+            else
+            {
+                if (appState.FoldersIndex.TryGetValue((Guid)itemDelete.ParentId, out toUpdate))
+                {
+                    if (toUpdate != null)
+                    {
+                        toUpdate.ChildFolders.Remove(itemDelete);
+                        toUpdate.Selected = true;
+                        toUpdate.Expanded = true;
+                        OnFolderSelected(toUpdate);
+                    }
+                }
+            }
         }
 
         itemDelete = null;
@@ -122,13 +138,12 @@ else
     }
 
     private void OnFolderEdit(FolderInfoDto folder)
-    {        
+    {
         navigationManager.NavigateTo($"folders/edit/{folder.FolderId}");
     }
 
     void GoNewFolder()
     {
-        // TODO: 3 !!! refrescar appState después de la edición
         navigationManager.NavigateTo($"folders/new");
     }
 

@@ -36,7 +36,8 @@
 
                     @if (folder.Selected == true)
                     {
-                        folderOldSelected = folder;
+                        //folderOldSelected = folder;
+                        appState.folderOldSelected = folder;
                         if (EditMode)
                         {
                             <span>
@@ -61,7 +62,7 @@
                                                 FolderSelected="onFolderSelected"
                                                 EditMode="EditMode"
                                                 FolderDelete="FolderDelete"
-                                                FolderEdit="FolderEdit">
+                                                FolderEdit="FolderEdit" >
                             </KntFoldersTreeView>
                         </div>
                     }
@@ -82,22 +83,32 @@ else
     [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderEdit { get; set; }
-    [Parameter] public bool EditMode { get; set; }    
-
-    private FolderInfoDto folderOldSelected;
-
+    [Parameter] public bool EditMode { get; set; }
+   
     private Guid? folderIdInit;
     private string msg;
 
+    protected override void OnInitialized()
+    {
+        appState.OnChange += StateHasChanged;
+
+        base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
     protected async Task onFolderSelected(FolderInfoDto folder)
     {
-        if (folderOldSelected != null)
-            folderOldSelected.Selected = false;
+        if (appState.folderOldSelected != null)
+            appState.folderOldSelected.Selected = false;
 
         folder.Selected = true;
 
         await FolderSelected.InvokeAsync(folder);
-        folderOldSelected = folder;
+        appState.folderOldSelected = folder;
     }
 
     private async Task onFolderDelete(FolderInfoDto folder)

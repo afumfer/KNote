@@ -29,7 +29,6 @@ namespace KNote.Client.Shared
             set { _appDescription = value; NotifyStateChanged(); }
         }
 
-
         private FolderDto _selectedFolder;
         public FolderDto SelectedFolder
         {
@@ -46,9 +45,34 @@ namespace KNote.Client.Shared
             }
         }
 
-        public List<FolderInfoDto> FoldersTree { get; set; }
+        // Only use in KntFoldersTreeView  (hack)
+        public FolderInfoDto folderOldSelected { get; set; }
 
-        public Dictionary<Guid, FolderInfoDto> FoldersIndex { get; set; } = new Dictionary<Guid, FolderInfoDto>();
+        private List<FolderInfoDto> _foldersTree;
+        public List<FolderInfoDto> FoldersTree 
+        { 
+            get
+            {
+                return _foldersTree;
+            }
+            set
+            {
+                _foldersTree = value;
+                if(_foldersIndex != null)
+                    _foldersIndex = null;
+            } 
+        }
+
+        private Dictionary<Guid, FolderInfoDto> _foldersIndex;
+        public Dictionary<Guid, FolderInfoDto> FoldersIndex 
+        {
+            get
+            {
+                if(_foldersIndex == null)
+                    _foldersIndex = new Dictionary<Guid, FolderInfoDto>();
+                return _foldersIndex;
+            }
+        } 
         
         public event Action OnChange;
         private void NotifyStateChanged() => OnChange?.Invoke();

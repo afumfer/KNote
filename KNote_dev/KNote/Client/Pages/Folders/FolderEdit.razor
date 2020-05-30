@@ -25,7 +25,7 @@ else
     protected async override Task OnInitializedAsync()
     {
         appState.OnChange += StateHasChanged;
-        
+
         var httpResponse = await dataService.Get<Result<FolderDto>>($"api/folders/{FolderId}");
         if (httpResponse.Error)
         {
@@ -46,8 +46,8 @@ else
     }
 
     private async Task Edit()
-    {        
-        var httpResponse = await dataService.Put("api/folders", folder);
+    {
+        var httpResponse = await dataService.Put<FolderDto>("api/folders", folder);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -57,9 +57,18 @@ else
             if(appState.FoldersTree != null)
             {
                 FolderInfoDto toUpdate;
-                if (appState.FoldersIndex.TryGetValue(folder.FolderId, out toUpdate))
+                appState.FoldersIndex.TryGetValue(folder.FolderId, out toUpdate);
                 if (toUpdate != null)
-                    toUpdate.Name = folder.Name;
+                {
+                    if(toUpdate.ParentId == folder.ParentId)
+                        toUpdate.Name = folder.Name;
+                    else
+                        appState.FoldersTree = null;
+                }
+                else
+                {
+                    appState.FoldersTree = null;
+                }
             }
 
             navigationManger.NavigateTo("folders");
