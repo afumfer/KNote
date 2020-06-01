@@ -18,7 +18,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="overflow-auto" style="height:350px">
-                        <KntFoldersTreeView FoldersInfo="@FoldersTree"
+                        <KntFoldersTreeView FoldersInfo="@foldersTree"
                                             FolderSelected="OnFolderSelected">
                         </KntFoldersTreeView>
                     </div>
@@ -36,11 +36,13 @@
 }
 
 @code {
+    [CascadingParameter] public AppState appState { get; set; }
+
     [Parameter] public string Title { get; set; } = "KNote folder selector";
-    [Parameter] public List<FolderInfoDto> FoldersTree { get; set; }    
     [Parameter] public EventCallback<FolderInfoDto> OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 
+    private List<FolderInfoDto> foldersTree;
     private bool ShowDialog = false;
     private FolderInfoDto folderSelected;
 
@@ -49,18 +51,33 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (FoldersTree == null)
+        appState.OnChange += StateHasChanged;
+        if (foldersTree == null)
         {
-            var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
-            FoldersTree = res.Response.Entity;
-
-            if (FoldersTree?.Count > 0)
+            if (appState.FoldersTree == null)
             {
-                var f = FoldersTree.Select(x => x).FirstOrDefault();
-                f.Selected = true;
-                OnFolderSelected(f);
+                var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
+                foldersTree = res.Response.Entity;
+                appState.FoldersTree = foldersTree;
+
+                if (foldersTree?.Count > 0)
+                {
+                    var f = foldersTree.Select(x => x).FirstOrDefault();
+                    f.Selected = true;
+                    OnFolderSelected(f);
+                }
+            }
+            else
+            {
+                foldersTree = appState.FoldersTree;
+                OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderInfoDto>());
             }
         }
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
     }
 
     private void OnFolderSelected(FolderInfoDto f)

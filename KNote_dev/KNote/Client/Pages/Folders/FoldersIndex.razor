@@ -33,7 +33,9 @@ else
                         EditMode="true"
                         FolderSelected="OnFolderSelected"
                         FolderEdit="OnFolderEdit"
-                        FolderDelete="OnFolderDelete" />
+                        FolderDelete="OnFolderDelete" 
+                        ShowRefreshTree="true" 
+                        RefreshTreeFolders="OnRefreshTreeFolders"/>
 }
 
 <ModalDialog @ref="modalDialog" Title="Delete folder" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
@@ -109,7 +111,7 @@ else
         {
             FolderInfoDto toUpdate;
             if(itemDelete.ParentId == null)
-            {                
+            {
                 if(appState.FoldersTree != null)
                     appState.FoldersTree.Remove(itemDelete);
             }
@@ -147,4 +149,10 @@ else
         navigationManager.NavigateTo($"folders/new");
     }
 
+    private async Task OnRefreshTreeFolders()
+    {
+        foldersTree = null;
+        appState.FoldersTree = null;
+        await Load();
+    }
 }

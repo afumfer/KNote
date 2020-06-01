@@ -1,0 +1,118 @@
+﻿@inject IKntClientDataService  dataService
+@inject IShowMessages showMessages
+@inject NavigationManager navigationManger
+
+@if (FoldersInfo != null)
+{
+    @if (FoldersInfo?.Count > 0)
+    {
+        <ul>
+            @foreach (var folder in FoldersInfo)
+            {
+                appState.FoldersIndex[folder.FolderId] = folder;
+                <li>
+                    @if (folder.ChildFolders.Count > 0)
+                    {
+                        <span class="@folder.getIcon() mr-1" @onclick="@folder.Toggle"></span>
+                    }
+                    else
+                    {
+                        <span class="mr-3"></span>
+                    }
+
+                    <span class="@folder.getColor()  px-1 pt-1 pb-1 rounded" @onclick="@(() => onFolderSelected(folder))">
+                        @if (EditMode)
+                        {
+                            <text>@folder.Name</text>
+                        }
+
+                        else
+                        {
+                            <text>@folder.ShortName</text>
+                        }
+                    </span>
+
+                    @if (folder.Selected == true)
+                    {
+                        appState.folderOldSelected = folder;                        
+                        if (EditMode)
+                        {
+                            <span>
+                                <button class="btn btn-sm btn-warning mx-1"
+                                        @onclick="@(() => onFolderEdit(folder))"
+                                        data-toggle="tooltip" title="Edit folder">
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => onFolderDelete(folder))"
+                                        data-toggle="tooltip" title="Delete folder">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        }
+                    }
+
+                    @if (folder.Expanded)
+                    {
+                        <div>
+                            <KntFoldersTreeNode FoldersInfo="@folder.ChildFolders"
+                                                FolderSelected="onFolderSelected"
+                                                EditMode="EditMode"
+                                                FolderDelete="FolderDelete"
+                                                FolderEdit="FolderEdit">
+                            </KntFoldersTreeNode>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+}
+else
+{
+    <p><em>Loading tree folders...</em></p>
+}
+
+@code {
+    [CascadingParameter] public AppState appState { get; set; }
+
+    [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
+    [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
+    [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
+    [Parameter] public EventCallback<FolderInfoDto> FolderEdit { get; set; }    
+    [Parameter] public bool EditMode { get; set; }
+
+    protected override void OnInitialized()
+    {
+        appState.OnChange += StateHasChanged;
+
+        base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    protected async Task onFolderSelected(FolderInfoDto folder)
+    {
+        if (appState.folderOldSelected != null)
+            appState.folderOldSelected.Selected = false;
+
+        folder.Selected = true;
+
+        await FolderSelected.InvokeAsync(folder);
+        appState.folderOldSelected = folder;
+    }
+
+    private async Task onFolderDelete(FolderInfoDto folder)
+    {
+        await FolderDelete.InvokeAsync(folder);
+    }
+
+    private async Task onFolderEdit(FolderInfoDto folder)
+    {
+        await FolderEdit.InvokeAsync(folder);
+    }
+
+}

@@ -1,92 +1,44 @@
-﻿@*@using KNote.Shared*@
-
-@inject IKntClientDataService  dataService
+﻿@inject IKntClientDataService  dataService
 @inject IShowMessages showMessages
 @inject NavigationManager navigationManger
 
-@if (FoldersInfo != null)
+@if (ShowRefreshTree)
 {
-    @if (FoldersInfo.Count > 0)
-    {    
-        <ul>
-            @foreach (var folder in FoldersInfo)
-            {                                
-                appState.FoldersIndex[folder.FolderId] = folder;                
-                <li>
-                    @if (folder.ChildFolders.Count > 0)
-                    {
-                        <span class="@folder.getIcon() mr-1" @onclick="@folder.Toggle"></span>
-                    }
-                    else
-                    {
-                        <span class="mr-3"></span>
-                    }
-
-                    <span class="@folder.getColor()  px-1 pt-1 pb-1 rounded" @onclick="@(() => onFolderSelected(folder))">
-                        @if (EditMode)
-                        {
-                            <text>@folder.Name</text>
-                        }
-
-                        else
-                        {
-                            <text>@folder.ShortName</text>
-                        }
-                    </span>
-
-                    @if (folder.Selected == true)
-                    {
-                        //folderOldSelected = folder;
-                        appState.folderOldSelected = folder;
-                        if (EditMode)
-                        {
-                            <span>
-                                <button class="btn btn-sm btn-warning mx-1"
-                                        @onclick="@(() => onFolderEdit(folder))"
-                                        data-toggle="tooltip" title="Edit folder">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => onFolderDelete(folder))"
-                                        data-toggle="tooltip" title="Delete folder">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </span>
-                        }
-                    }
-
-                    @if (folder.Expanded)
-                    {
-                        <div>
-                            <KntFoldersTreeView FoldersInfo="@folder.ChildFolders"
-                                                FolderSelected="onFolderSelected"
-                                                EditMode="EditMode"
-                                                FolderDelete="FolderDelete"
-                                                FolderEdit="FolderEdit" >
-                            </KntFoldersTreeView>
-                        </div>
-                    }
-                </li>
-            }
-        </ul>
-    }
-}
-else
-{
-    <p><em>Loading tree folders...</em></p>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-10">
+                <h5>Folders catalog</h5>
+            </div>
+            <div class="col-2 float-right">
+                <button class="btn btn-sm btn-success mb-0 float-right"
+                        @onclick="OnRefreshTreeFolders"
+                        data-toggle="tooltip" title="Refresh tree folders">
+                    <i class="fa fa-refresh"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <hr class="mt-1" />
 }
 
-@code {    
+<KntFoldersTreeNode FoldersInfo="@FoldersInfo"
+                    FolderSelected="OnFolderSelected"
+                    EditMode="EditMode"
+                    FolderDelete="OnFolderDelete"
+                    FolderEdit="OnFolderEdit">
+</KntFoldersTreeNode>
+
+@code {
     [CascadingParameter] public AppState appState { get; set; }
 
     [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
     [Parameter] public EventCallback<FolderInfoDto> FolderEdit { get; set; }
+    [Parameter] public EventCallback RefreshTreeFolders { get; set; }
     [Parameter] public bool EditMode { get; set; }
-   
-    private Guid? folderIdInit;
-    private string msg;
+    [Parameter] public bool ShowRefreshTree { get; set; }
+
 
     protected override void OnInitialized()
     {
@@ -100,25 +52,24 @@ else
         appState.OnChange -= StateHasChanged;
     }
 
-    protected async Task onFolderSelected(FolderInfoDto folder)
+    protected async Task OnFolderSelected(FolderInfoDto folder)
     {
-        if (appState.folderOldSelected != null)
-            appState.folderOldSelected.Selected = false;
-
-        folder.Selected = true;
-
         await FolderSelected.InvokeAsync(folder);
-        appState.folderOldSelected = folder;
     }
 
-    private async Task onFolderDelete(FolderInfoDto folder)
+    private async Task OnFolderDelete(FolderInfoDto folder)
     {
         await FolderDelete.InvokeAsync(folder);
     }
 
-    private async Task onFolderEdit(FolderInfoDto folder)
+    private async Task OnFolderEdit(FolderInfoDto folder)
     {
         await FolderEdit.InvokeAsync(folder);
+    }
+
+    private async Task OnRefreshTreeFolders()
+    {
+        await RefreshTreeFolders.InvokeAsync(null);
     }
 
 }

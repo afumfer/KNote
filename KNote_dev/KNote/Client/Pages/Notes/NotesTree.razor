@@ -86,7 +86,7 @@
     </div>
 
     <div class="col-lg-3 pt-2 pb-2 bg-light border">
-        <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" />
+        <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" ShowRefreshTree="true" RefreshTreeFolders="OnRefreshTreeFolders"/>
     </div>
 
     <div class="col-lg-9 pt-2 pb-2 border">
@@ -137,6 +137,11 @@
     {
         appState.OnChange += StateHasChanged;
 
+        await Load();
+    }
+
+    private async Task Load()
+    {
         if (appState.FoldersTree == null)
         {
             var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
@@ -155,7 +160,6 @@
             foldersTree = appState.FoldersTree;
             await OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderInfoDto>());
         }
-
     }
 
     public void Dispose()
@@ -268,4 +272,11 @@
         navigationManager.NavigateTo($"notes/edit/{note.NoteId}/tree");
     }
 
+    private async Task OnRefreshTreeFolders()
+    {
+        foldersTree = null;
+        notes = null;
+        appState.FoldersTree = null;
+        await Load();
+    }
 }
