@@ -8,7 +8,7 @@
 
 @if (showForm)
 {
-    <NoteForm Title="Note edit" Note="note" OnValidSubmit="OnEdit"  OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Title="Note edit" Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
 }
 else
 {
@@ -16,15 +16,59 @@ else
 }
 
 @code {
+
+    // TODO: 
+    // Pendiente de refactorizar, el comportamiento de este caso de uso 
+    // se puede generalizar y unificarlo con el caso de uso Nueva Nota. 
+
+    [CascadingParameter] public AppState appState { get; set; }
+
     [Parameter] public string NoteId { get; set; }
     [Parameter] public string PageReturn { get; set; }
-
 
     private NoteDto note;
     private bool showForm = false;
     private List<NoteTypeInfoDto> noteTypes;
 
+    #region Initialize and Dispose
+
     protected async override Task OnInitializedAsync()
+    {
+        appState.OnChange += StateHasChanged;
+
+        var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        if (httpResponse2.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
+            navigationManager.NavigateTo("/");
+        }
+        else
+        {
+            noteTypes = httpResponse2.Response.Entity;
+
+            await GetNote();
+
+            showForm = true;
+        }
+
+        if (PageReturn == null)
+            PageReturn = "index";
+        else if (PageReturn == "tree")
+            PageReturn = "notes/tree";
+
+        await base.OnInitializedAsync();
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    #endregion
+
+    #region Data methods
+
+    private async Task GetNote()
     {
         var httpResponse = await dataService.Get<Result<NoteDto>>($"api/notes/{NoteId}");
         if (httpResponse.Error)
@@ -37,28 +81,9 @@ else
             note = httpResponse.Response.Entity;
             showForm = true;
         }
-
-        var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
-        if (httpResponse2.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
-            navigationManager.NavigateTo("/");
-        }
-        else
-        {
-            noteTypes = httpResponse2.Response.Entity;
-            showForm = true;
-        }
-
-        if (PageReturn == null)
-            PageReturn = "index";
-        else if (PageReturn == "tree")
-            PageReturn = "notes/tree";
-
-        await base.OnInitializedAsync();
     }
 
-    private async Task OnEdit()
+    private async Task SaveNote()
     {
         var httpResponse = await dataService.Put("api/notes", note);
         if (httpResponse.Error)
@@ -67,13 +92,49 @@ else
         }
         else
         {
-            await showMessages.ShowOkMessage("Note successfully updated.");            
+            await showMessages.ShowOkMessage("Note successfully updated.");
         }
+    }
+
+    private async Task GetNewNote()
+    {
+        var httpResponseNote = await dataService.Get<Result<NoteDto>>("api/notes/new");
+        if (httpResponseNote.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponseNote.GetBody());
+        }
+        else
+        {
+            note = httpResponseNote.Response.Entity;
+            if (appState.SelectedFolder != null)
+            {
+                note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
+                note.FolderId = appState.SelectedFolder.FolderId;
+            }
+            showForm = true;
+        }
+    }
+
+    #endregion
+
+    #region Events managment
+
+    private async Task OnSave()
+    {
+        await SaveNote();
+    }
+
+    private async Task OnSaveAndNew()
+    {
+        await SaveNote();
+        await GetNewNote();
     }
 
     private void OnExit()
     {
         navigationManager.NavigateTo(PageReturn);
     }
+
+    #endregion 
 
 }

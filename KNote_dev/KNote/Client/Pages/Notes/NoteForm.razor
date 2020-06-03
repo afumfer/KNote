@@ -14,9 +14,16 @@
             <div class="col-6">
                 <h3>@Title</h3>
             </div>
-            <div class="col-6 float-right">                
-                <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))"><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
-                <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+            <div class="col-6 float-right">
+                <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))" data-toggle="tooltip" title="Exit without save">
+                    <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-success float-right ml-2" @onclick="(() => Save(formContext, false))">
+                    Save changes
+                </button>
+                <button class="btn btn-success float-right" @onclick="(() => Save(formContext, true))">
+                    Save changes and new
+                </button>
             </div>
         </div>
     </div>
@@ -220,19 +227,6 @@
 
     </div>
 
-    <!-- Footer -->
-    @*<div class="container-fluid">
-            <div class="row">
-                <div class="col-6">
-                    &nbsp;
-                </div>
-                <div class="col-6 float-right">
-                    <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
-                </div>
-            </div>
-        </div>
-        <hr class="mt-1" />*@
-
     <KntFolderSelector @ref="kntFolderSelector" OnCancel="OnCancelFolderSelector" OnConfirm="OnConfirmFolderSelector"></KntFolderSelector>
 
     <KntResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelector>
@@ -245,6 +239,7 @@
     [Parameter] public string Title { get; set; } = "---";
     [Parameter] public NoteDto Note { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
     [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; }  //  = new List<NoteTypeInfoDto>();
 
@@ -262,6 +257,7 @@
 
     private Guid? oldNoteType = null;
 
+    #region Initialized
 
     protected override async Task OnInitializedAsync()
     {
@@ -280,8 +276,11 @@
         await base.OnInitializedAsync();
     }
 
+    #endregion
 
-    protected async Task Save(EditContext formContext)
+    #region Data managment
+
+    protected async Task Save(EditContext formContext, bool saveAndNew)
     {
         string addMessage = "";
 
@@ -333,8 +332,15 @@
             return;
         }
 
-        await OnValidSubmit.InvokeAsync(formContext);
+        if(saveAndNew)
+            await OnValidSubmitWithNew.InvokeAsync(formContext);
+        else
+            await OnValidSubmit.InvokeAsync(formContext);
     }
+
+    #endregion
+
+    #region Panel managment
 
     private async Task ShowPanel(int panel)
     {
@@ -366,6 +372,8 @@
             }
         }
     }
+
+    #endregion 
 
     #region Managment FolderSelector
 
@@ -433,7 +441,6 @@
         }
         else
         {
-            // Note.ResourcesDto.Remove(resource);
             resources.Remove(resource);
         }
     }
@@ -535,8 +542,6 @@
 
     private async Task OnChangeNoteTypeActions()
     {
-        //Console.WriteLine($"1oldNoteType {oldNoteType}");
-
         if (Note.NoteTypeId == null)
         {
             if (oldNoteType != null)

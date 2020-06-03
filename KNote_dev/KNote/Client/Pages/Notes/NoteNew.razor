@@ -8,7 +8,7 @@
 
 @if (showForm)
 {
-    <NoteForm Title=@title Note="note" OnValidSubmit="OnNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>    
+    <NoteForm Title=@title Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>    
 }
 else
 {
@@ -20,14 +20,18 @@ else
 
     [Parameter] public string PageReturn { get; set; }
 
-    private NoteDto note; // !!! = new NoteDto();
+    private NoteDto note;
     private bool showForm = false;
     private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
 
     private string title = "Note new";
 
+    #region Initialize and dispose
+
     protected async override Task OnInitializedAsync()
     {
+        appState.OnChange += StateHasChanged;
+
         var httpResponse = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
         if (httpResponse.Error)
         {
@@ -37,27 +41,46 @@ else
         {
             noteTypes = httpResponse.Response.Entity;
 
-            var httpResponseNote = await dataService.Get<Result<NoteDto>>("api/notes/new");
-            if (httpResponseNote.Error)
-            {
-                await showMessages.ShowErrorMessage(await httpResponseNote.GetBody());
-            }
-            else
-            {
-                note = httpResponseNote.Response.Entity;
-                if (appState.SelectedFolder != null)
-                {
-                    note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
-                    note.FolderId = appState.SelectedFolder.FolderId;
-                }
-                showForm = true;
-            }
+            await GetNewNote();
         }
+
+        if (PageReturn == null)
+            PageReturn = "index";
+        else if (PageReturn == "tree")
+            PageReturn = "notes/tree";
 
         await base.OnInitializedAsync();
     }
 
-    private async Task OnNew()
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    #endregion
+
+    #region Data methods
+
+    private async Task GetNewNote()
+    {
+        var httpResponseNote = await dataService.Get<Result<NoteDto>>("api/notes/new");
+        if (httpResponseNote.Error)
+        {
+            await showMessages.ShowErrorMessage(await httpResponseNote.GetBody());
+        }
+        else
+        {
+            note = httpResponseNote.Response.Entity;
+            if (appState.SelectedFolder != null)
+            {
+                note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
+                note.FolderId = appState.SelectedFolder.FolderId;
+            }
+            showForm = true;
+        }
+    }
+
+    private async Task SaveNote()
     {
         if (note.IsNew)
         {
@@ -69,23 +92,22 @@ else
             }
             else
             {
-                var xx = httpResponse.Response.Entity;
+                var entitySaved = httpResponse.Response.Entity;
 
-                // TODO: !!! hack ... repensar lo siguiente.
+                // TODO: !!! hack ... bucar una implementación más eficiente.
                 //       Se refrescan valores asignados automáticamente 
                 //       en la capa de negocio.
-                foreach(var x in xx.KAttributesDto)
+                foreach (var atrSaved in entitySaved.KAttributesDto)
                 {
-                    foreach(var n in note.KAttributesDto)
+                    foreach (var atrEdit in note.KAttributesDto)
                     {
-                        if (n.KAttributeId == x.KAttributeId)
+                        if (atrEdit.KAttributeId == atrSaved.KAttributeId)
                         {
-                            n.NoteKAttributeId = x.NoteKAttributeId;
-                            //break;
+                            atrEdit.NoteKAttributeId = atrSaved.NoteKAttributeId;
                         }
                     }
                 }
-                note.NoteNumber = xx.NoteNumber;
+                note.NoteNumber = entitySaved.NoteNumber;
                 note.IsNew = false;
 
                 await showMessages.ShowOkMessage("Note successfully updated.");
@@ -105,13 +127,28 @@ else
                 await showMessages.ShowOkMessage("Note successfully updated.");
             }
         }
+    }
 
+    #endregion 
+
+    #region Events managment
+
+    private async Task OnSave()
+    {
+        await SaveNote();
+    }
+
+    private async Task OnSaveAndNew()
+    {
+        await SaveNote();
+        await GetNewNote();
     }
 
     private void OnExit()
     {
-        //navigationManger.NavigateTo("notes/tree");
         navigationManger.NavigateTo(PageReturn);
     }
+
+    #endregion 
 
 }
