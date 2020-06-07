@@ -1,7 +1,7 @@
 ﻿@page "/types/edit/{TypeId}"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
@@ -9,7 +9,7 @@
 
 @if (noteType != null)
 {
-    <TypeForm Title="Note type edit"  OnValidSubmit="OnSave" NoteType="noteType" />
+    <TypeForm Title="Note type edit"  OnValidSubmit="OnSave" OnExit="OnExit"  NoteType="noteType" />
 }
 else
 {
@@ -28,18 +28,18 @@ else
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-            navigationManger.NavigateTo("/");
+            navigationManager.NavigateTo("/");
         }
         else
         {
-            noteType = httpResponse.Response.Entity;            
+            noteType = httpResponse.Response.Entity;
         }
 
         base.OnInitialized();
     }
 
     private async Task OnSave()
-    {        
+    {
         var httpResponse = await dataService.Put("api/NoteTypes", noteType);
         if (httpResponse.Error)
         {
@@ -47,8 +47,12 @@ else
         }
         else
         {
-            navigationManger.NavigateTo("types");
+            navigationManager.NavigateTo("types");
         }
     }
 
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("types");
+    }
 }

@@ -1,14 +1,14 @@
 ﻿@page "/attributes/edit/{AttributeId}"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
 
 @if (kattribute != null && showForm)
 {
-    <AttributeForm Title="Attribute Edit" OnValidSubmit="Edit" KAttribute="kattribute" NoteTypes="noteTypes" />
+    <AttributeForm Title="Attribute Edit" OnValidSubmit="OnEdit" OnExit="OnExit"  KAttribute="kattribute" NoteTypes="noteTypes" />
 }
 else
 {
@@ -28,7 +28,7 @@ else
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-            navigationManger.NavigateTo("/");
+            navigationManager.NavigateTo("/");
         }
         else
         {
@@ -39,19 +39,19 @@ else
         if (httpResponse2.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
-            navigationManger.NavigateTo("/");
+            navigationManager.NavigateTo("/");
         }
         else
         {
             noteTypes = httpResponse2.Response.Entity;
             showForm = true;
         }
-        
+
         await base.OnInitializedAsync();
     }
 
-    private async Task Edit()
-    {        
+    private async Task OnEdit()
+    {
         var httpResponse = await dataService.Put("api/kattributes", kattribute);
         if (httpResponse.Error)
         {
@@ -59,9 +59,13 @@ else
         }
         else
         {
-            navigationManger.NavigateTo("attributes");
+            navigationManager.NavigateTo("attributes");
         }
     }
 
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("attributes");
+    }
 
 }

@@ -1,12 +1,12 @@
 ﻿@page "/folders/new"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
-<FolderForm Title="New folder" OnValidSubmit="New" Folder="folder" />
+<FolderForm Title="New folder" OnValidSubmit="OnNew" OnExit="OnExit" Folder="folder" />
 
 @code {
     [CascadingParameter] public AppState appState { get; set; }
@@ -32,7 +32,7 @@
         appState.OnChange -= StateHasChanged;
     }
 
-    private async Task New()
+    private async Task OnNew()
     {
         var httpResponse = await dataService.Post<FolderDto,Result<FolderDto>>("api/folders", folder);
         if (httpResponse.Error)
@@ -78,8 +78,13 @@
                 }
             }
 
-            navigationManger.NavigateTo("folders");
+            navigationManager.NavigateTo("folders");
         }
+    }
+
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("folders");
     }
 
 }

@@ -1,12 +1,12 @@
 ﻿@page "/users/new"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
 
-<UserForm Title="New User" OnValidSubmit="OnNew" User="user"></UserForm>
+<UserForm Title="New User" OnValidSubmit="OnNew" OnExit="OnExit"  User="user"></UserForm>
 
 @code {
     private UserDto user = new UserDto();
@@ -20,8 +20,13 @@
         }
         else
         {
-            navigationManger.NavigateTo("users");
+            navigationManager.NavigateTo("users");
         }
+    }
+
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("users");
     }
 
 }

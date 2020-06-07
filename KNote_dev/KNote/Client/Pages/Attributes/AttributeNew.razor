@@ -1,14 +1,14 @@
 ﻿@page "/attributes/new"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
 
 @if (showForm)
 {
-    <AttributeForm Title="New Attribute" OnValidSubmit="New" KAttribute="kattribute" NoteTypes="noteTypes" />
+    <AttributeForm Title="New Attribute" OnValidSubmit="OnNew" OnExit="OnExit" KAttribute="kattribute" NoteTypes="noteTypes" />
 }
 else
 {
@@ -35,8 +35,8 @@ else
         base.OnInitialized();
     }
 
-    private async Task New()
-    {        
+    private async Task OnNew()
+    {
         var httpResponse = await dataService.Post("api/kattributes", kattribute);
         if (httpResponse.Error)
         {
@@ -44,8 +44,12 @@ else
         }
         else
         {
-            navigationManger.NavigateTo("attributes");
+            navigationManager.NavigateTo("attributes");
         }
     }
 
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("attributes");
+    }
 }

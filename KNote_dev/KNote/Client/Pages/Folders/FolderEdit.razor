@@ -1,14 +1,14 @@
 ﻿@page "/folders/edit/{FolderId}"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
 @if (folder != null)
 {    
-    <FolderForm Title="Folder edit" OnValidSubmit="Edit" Folder="folder" />
+    <FolderForm Title="Folder edit" OnValidSubmit="OnEdit" OnExit="OnExit"  Folder="folder" />
 }
 else
 {
@@ -30,7 +30,7 @@ else
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-            navigationManger.NavigateTo("folders");
+            navigationManager.NavigateTo("folders");
         }
         else
         {
@@ -45,7 +45,7 @@ else
         appState.OnChange -= StateHasChanged;
     }
 
-    private async Task Edit()
+    private async Task OnEdit()
     {
         var httpResponse = await dataService.Put<FolderDto>("api/folders", folder);
         if (httpResponse.Error)
@@ -71,8 +71,13 @@ else
                 }
             }
 
-            navigationManger.NavigateTo("folders");
+            navigationManager.NavigateTo("folders");
         }
+    }
+
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("folders");
     }
 
 }

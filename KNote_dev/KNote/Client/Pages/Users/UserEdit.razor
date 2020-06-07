@@ -1,14 +1,14 @@
 ﻿@page "/users/edit/{UserId}"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
 
 @if (user != null)
 {
-    <UserForm Title="User Edit" OnValidSubmit="OnEdit" User="user"></UserForm>
+    <UserForm Title="User Edit" OnValidSubmit="OnEdit" OnExit="OnExit" User="user"></UserForm>
 }
 else
 {
@@ -27,18 +27,18 @@ else
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-            navigationManger.NavigateTo("/");
+            navigationManager.NavigateTo("/");
         }
         else
         {
-            user = httpResponse.Response.Entity;            
+            user = httpResponse.Response.Entity;
         }
 
         base.OnInitialized();
     }
 
     private async Task OnEdit()
-    {        
+    {
         var httpResponse = await dataService.Put("api/users", user);
         if (httpResponse.Error)
         {
@@ -46,7 +46,13 @@ else
         }
         else
         {
-            navigationManger.NavigateTo("users");
+            navigationManager.NavigateTo("users");
         }
     }
+
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("users");
+    }
+
 }

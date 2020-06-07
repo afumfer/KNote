@@ -7,6 +7,9 @@
     <!-- Title -->
     <ToolingHeader Title="@Title">
         <Buttons>
+            <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))" data-toggle="tooltip" title="Exit without save">
+                <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </button>
             <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
         </Buttons>
     </ToolingHeader>
@@ -72,6 +75,7 @@
     [Parameter] public string Title { get; set; } = "---";
     [Parameter] public FolderDto Folder { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnExit { get; set; }
 
     private KntFolderSelector kntFolderSelector;
 

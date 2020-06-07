@@ -1,27 +1,31 @@
 ﻿@page "/types/new"
 
 @inject IKntClientDataService  dataService
-@inject NavigationManager navigationManger
+@inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
 
-<TypeForm Title="New type edit"  OnValidSubmit="OnNew" NoteType="noteType" />
+<TypeForm Title="New type edit"  OnValidSubmit="OnNew" OnExit="OnExit" NoteType="noteType" />
 
 @code {
     NoteTypeDto noteType = new NoteTypeDto();
 
     private async Task OnNew()
-    {        
+    {
         var httpResponse = await dataService.Post("api/notetypes", noteType);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {     
-            navigationManger.NavigateTo("types");
+        {
+            navigationManager.NavigateTo("types");
         }
     }
 
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("types");
+    }
 }
