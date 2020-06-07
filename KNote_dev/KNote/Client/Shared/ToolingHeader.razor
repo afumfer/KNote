@@ -1,0 +1,16 @@
+﻿<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <h3>@Title</h3>
+        </div>
+        <div class="col-6 float-right">            
+            @Buttons
+        </div>
+    </div>
+</div>
+<hr class="mt-1" />
+
+@code {
+    [Parameter] public string Title { get; set; } = "---";
+    [Parameter] public RenderFragment Buttons { get; set; }
+}

@@ -6,12 +6,12 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<UserForm Title="New User" OnValidSubmit="New" User="user"></UserForm>
+<UserForm Title="New User" OnValidSubmit="OnNew" User="user"></UserForm>
 
 @code {
     private UserDto user = new UserDto();
 
-    private async Task New()
+    private async Task OnNew()
     {
         var httpResponse = await dataService.Post("api/users", user);
         if (httpResponse.Error)

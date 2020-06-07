@@ -6,12 +6,10 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Type Edit</h3>
-<hr />
 
 @if (noteType != null)
 {
-    <TypeForm OnValidSubmit="Edit" NoteType="noteType" />
+    <TypeForm Title="Note type edit"  OnValidSubmit="OnSave" NoteType="noteType" />
 }
 else
 {
@@ -40,7 +38,7 @@ else
         base.OnInitialized();
     }
 
-    private async Task Edit()
+    private async Task OnSave()
     {        
         var httpResponse = await dataService.Put("api/NoteTypes", noteType);
         if (httpResponse.Error)

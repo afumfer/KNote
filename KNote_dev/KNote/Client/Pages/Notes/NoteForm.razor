@@ -9,25 +9,19 @@
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
     <!-- Title -->
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-6">
-                <h3>@Title</h3>
-            </div>
-            <div class="col-6 float-right">
-                <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))" data-toggle="tooltip" title="Exit without save">
-                    <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                </button>
-                <button class="btn btn-success float-right ml-2" @onclick="(() => Save(formContext, false))">
-                    Save changes
-                </button>
-                <button class="btn btn-success float-right" @onclick="(() => Save(formContext, true))">
-                    Save changes and new
-                </button>
-            </div>
-        </div>
-    </div>
-    <hr class="mt-1" />
+    <ToolingHeader Title="@Title">
+        <Buttons>
+            <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))" data-toggle="tooltip" title="Exit without save">
+                <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-success float-right ml-2" @onclick="(() => Save(formContext, false))">
+                Save changes
+            </button>
+            <button class="btn btn-success float-right" @onclick="(() => Save(formContext, true))">
+                Save changes and new
+            </button>
+        </Buttons>
+    </ToolingHeader>
 
     <!-- Tab -->
     <ul class="nav nav-tabs">

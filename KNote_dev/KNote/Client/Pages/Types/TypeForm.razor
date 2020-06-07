@@ -1,6 +1,17 @@
-﻿<EditForm Model="NoteType" OnValidSubmit="OnValidSubmit">
+﻿@inject IShowMessages showMessages
+@inject IKntClientDataService  dataService
+@inject NavigationManager navigationManager
+
+<EditForm Model="NoteType" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <!-- Title -->
+    <ToolingHeader Title="@Title">
+        <Buttons>
+            <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+        </Buttons>
+    </ToolingHeader>
 
     <div class="form-group">
         <label>Name:</label>
@@ -14,24 +25,23 @@
         <ValidationMessage For="@(() => NoteType.Description)" />
     </div>
 
-    <!-- Footer -->
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-6">
-                &nbsp;
-            </div>
-            <div class="col-6 float-right">
-                <button class="btn btn-success float-right" type="submit">Save changes</button>
-            </div>
-        </div>
-    </div>
-    <hr class="mt-1" />
-
 </EditForm>
 
 @code {
-
+    [Parameter] public string Title { get; set; } = "---";
     [Parameter] public NoteTypeDto NoteType { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    protected async Task Save(EditContext formContext)
+    {
+        bool formIsValid = formContext.Validate();
+        if (formIsValid == false)
+        {
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+            return;
+        }
+
+        await OnValidSubmit.InvokeAsync(formContext);
+    }
 
 }

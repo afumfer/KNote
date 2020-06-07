@@ -6,15 +6,12 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>New Type</h3>
-<hr />
-
-<TypeForm OnValidSubmit="New" NoteType="noteType" />
+<TypeForm Title="New type edit"  OnValidSubmit="OnNew" NoteType="noteType" />
 
 @code {
     NoteTypeDto noteType = new NoteTypeDto();
 
-    private async Task New()
+    private async Task OnNew()
     {        
         var httpResponse = await dataService.Post("api/notetypes", noteType);
         if (httpResponse.Error)

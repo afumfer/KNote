@@ -8,7 +8,7 @@
 
 @if (user != null)
 {
-    <UserForm Title="User Edit" OnValidSubmit="Edit" User="user"></UserForm>
+    <UserForm Title="User Edit" OnValidSubmit="OnEdit" User="user"></UserForm>
 }
 else
 {
@@ -37,7 +37,7 @@ else
         base.OnInitialized();
     }
 
-    private async Task Edit()
+    private async Task OnEdit()
     {        
         var httpResponse = await dataService.Put("api/users", user);
         if (httpResponse.Error)
