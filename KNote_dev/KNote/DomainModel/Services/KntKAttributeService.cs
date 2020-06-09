@@ -7,14 +7,12 @@ using System.Threading.Tasks;
 using KNote.DomainModel.Repositories;
 using KNote.Shared;
 using KNote.DomainModel.Entities;
-
-// TODO: Pendiente de eliminar
-//using KNote.DomainModel.Dto;
 using KNote.Shared.Dto;
-
+using KNote.Shared.Dto.Info;
 
 using KNote.DomainModel.Infrastructure;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace KNote.DomainModel.Services
 {
@@ -37,19 +35,26 @@ namespace KNote.DomainModel.Services
 
         #region IKntAttributeService
 
-        public Result<List<KAttributeInfoDto>> GetAll()
-        {
-            var resService = new Result<List<KAttributeInfoDto>>();
+        public Result<List<KAttributeDto>> GetAll()
+        {            
+            var resService = new Result<List<KAttributeDto>>();
             try
             {
-                var resRep = _repository.KAttributes.GetAll();
-                
-                resService.Entity = resRep.Entity?
-                    .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
-                    .OrderBy(a => a.Order )
+                var listAtr = _repository.KAttributes.DbSet
+                    .Include(a => a.NoteType)
+                    .OrderBy(a => a.Order)
                     .ToList();
 
-                resService.ErrorList = resRep.ErrorList;
+                List<KAttributeDto> listDto = new List<KAttributeDto>();
+
+                foreach(var a in listAtr)
+                {
+                    var dto = a.GetSimpleDto<KAttributeDto>();                    
+                    dto.NoteTypeDto = a.NoteType?.GetSimpleDto<NoteTypeDto>(); ;
+                    listDto.Add(dto);
+                }
+
+                resService.Entity = listDto;
             }
             catch (Exception ex)
             {

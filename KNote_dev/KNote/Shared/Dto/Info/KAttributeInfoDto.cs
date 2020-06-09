@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Shared.Dto
+namespace KNote.Shared.Dto.Info
 {
     public class KAttributeInfoDto : KntModelBase
     {
@@ -16,5 +16,6 @@ namespace KNote.Shared.Dto
         public int Order { get; set; }
         public string Script { get; set; }
         public bool Disabled { get; set; }
+        public Guid? NoteTypeId { get; set; }
     }
 }

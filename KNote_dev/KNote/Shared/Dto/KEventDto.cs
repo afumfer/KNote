@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+// TODO: pendiente de susituir info por dto
+using KNote.Shared.Dto.Info;
 
 namespace KNote.Shared.Dto
 {
@@ -27,6 +28,7 @@ namespace KNote.Shared.Dto
 
         public EnumEventType EventType { get; set; }
 
+        // TODO: pendiente de susituir info por dto
         public NoteInfoDto NoteScriptInfoDto { get; set; }
     }
 }

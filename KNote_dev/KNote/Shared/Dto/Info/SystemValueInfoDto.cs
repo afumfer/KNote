@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Shared.Dto
+namespace KNote.Shared.Dto.Info
 {
     public class SystemValueInfoDto : KntModelBase 
     {

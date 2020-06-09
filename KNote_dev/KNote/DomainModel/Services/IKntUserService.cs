@@ -1,7 +1,6 @@
 ﻿using KNote.Shared;
-// TODO: Pendiente de eliminar
-//using KNote.DomainModel.Dto;
 using KNote.Shared.Dto;
+using KNote.Shared.Dto.Info;
 using KNote.DomainModel.Entities;
 using System;
 using System.Collections.Generic;

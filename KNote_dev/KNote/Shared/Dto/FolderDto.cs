@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KNote.Shared.Dto.Info;
 
 namespace KNote.Shared.Dto
 {
@@ -37,6 +38,7 @@ namespace KNote.Shared.Dto
 
         public FolderDto ParentFolderDto { get; set; }   // TODO: no hacer esto =>     = new FolderDto();
 
+        // TODO: !!! pendiente de refactorizar la lista siguiente debe ser FolderDto
         public List<FolderInfoDto> ChildFolders { get; set; } = new List<FolderInfoDto>();
 
         #region Utils for views

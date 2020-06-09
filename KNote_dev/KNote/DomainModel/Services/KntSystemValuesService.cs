@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using KNote.DomainModel.Repositories;
 using KNote.Shared;
 using KNote.DomainModel.Entities;
 using KNote.Shared.Dto;
+using KNote.Shared.Dto.Info;
 
 
 namespace KNote.DomainModel.Services

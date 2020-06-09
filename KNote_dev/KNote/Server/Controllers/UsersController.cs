@@ -5,18 +5,17 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
-
 using KNote.DomainModel.Services;
 using KNote.Server.Helpers;
 using KNote.Shared;
 using KNote.Shared.Dto;
+using KNote.Shared.Dto.Info;
 
 
 namespace KNote.Server.Controllers

@@ -1,4 +1,5 @@
 ﻿using KNote.Shared.Dto;
+using KNote.Shared.Dto.Info;
 using System;
 using System.Collections.Generic;
 using System.Linq;

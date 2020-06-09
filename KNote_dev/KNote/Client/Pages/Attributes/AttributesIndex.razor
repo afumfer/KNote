@@ -27,9 +27,10 @@
         <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th width="250px">Name</th>
-                    <th>Description</th>
                     <th width="60px" class="text-center">Order</th>
+                    <th width="250px">Name</th>
+                    <th>For note type ...</th>
+                    <th width="90px">Required</th>
                     <th width="180px">DataType</th>
                     <th width="100px" class="text-center">(Actions)</th>
                 </tr>
@@ -37,25 +38,35 @@
             <tbody>
                 @foreach (var item in attributes)
                 {
-                    <tr>                        
-                        <td>@item.Name</td>
-                        <td>@item.Description</td>
-                        <td class="text-right">@item.Order</td>
-                        <td>@KntConst.KAttributes[item.KAttributeDataType]</td>
-                        <td>
-                            <span class="float-right">
-                                <a href="attributes/edit/@item.KAttributeId" class="btn btn-sm btn-warning mx-1"
-                                   data-toggle="tooltip" title="Edit user">
-                                    <i class="fa fa-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => Delete(item))"
-                                        data-toggle="tooltip" title="Delete user">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </span>
-                        </td>
-                    </tr>
+                <tr>
+                    <td class="text-right">@item.Order</td>
+                    <td>@item.Name</td>
+                    <td>
+                        @if (item.NoteTypeDto == null)
+                        {
+                            <span>(All)</span>
+                        }
+                        else
+                        {
+                            <span>@item.NoteTypeDto?.Name</span>
+                        }
+                    </td>
+                    <td>@item.RequiredValue</td>
+                    <td>@KntConst.KAttributes[item.KAttributeDataType]</td>
+                    <td>
+                        <span class="float-right">
+                            <a href="attributes/edit/@item.KAttributeId" class="btn btn-sm btn-warning mx-1"
+                               data-toggle="tooltip" title="Edit user">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger mx-1"
+                                    @onclick="@(() => Delete(item))"
+                                    data-toggle="tooltip" title="Delete user">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </span>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>
@@ -67,10 +78,10 @@
 </ModalDialog>
 
 @code {
-
-    private List<KAttributeInfoDto> attributes { get; set; }
+    
+    private List<KAttributeDto> attributes { get; set; }
     private ModalDialog modalDialog;
-    private KAttributeInfoDto itemDelete;
+    private KAttributeDto itemDelete;
 
     protected async override Task OnInitializedAsync()
     {
@@ -78,8 +89,8 @@
     }
 
     private async Task Load()
-    {
-        var httpResponse = await dataService.Get<Result<List<KAttributeInfoDto>>>("api/kattributes");
+    {        
+        var httpResponse = await dataService.Get<Result<List<KAttributeDto>>>("api/kattributes");
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -89,8 +100,8 @@
             attributes = httpResponse.Response.Entity;
         }
     }
-
-    private void Delete(KAttributeInfoDto item)
+    
+    private void Delete(KAttributeDto item)
     {
         modalDialog.Show();
         itemDelete = item;

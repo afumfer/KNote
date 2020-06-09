@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using KNote.Shared.Dto.Info;
 using KNote.Shared.Dto;
 using KNote.Shared;
 

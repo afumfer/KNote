@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Shared.Dto
+namespace KNote.Shared.Dto.Info
 {
-    public class TraceNoteTypeInfoDto : KntModelBase
+    public class NoteTypeInfoDto : KntModelBase
     {
-        public Guid TraceNoteTypeId { get; set; }
-        
+        public Guid NoteTypeId { get; set; }        
         public string Name { get; set; }
-
         public string Description { get; set; }
     }
 }

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-
-using KNote.Shared;
-// TODO: Pendiente de eliminar
-//using KNote.DomainModel.Dto;
+using KNote.Shared.Dto.Info;
 using KNote.Shared.Dto;
+using KNote.Shared;
 using KNote.DomainModel.Entities;
 
 
@@ -16,8 +14,8 @@ using KNote.DomainModel.Entities;
 namespace KNote.DomainModel.Services
 {
     public interface IKntKAttributeService
-    {
-        Result<List<KAttributeInfoDto>> GetAll();
+    {        
+        Result<List<KAttributeDto>> GetAll();
         Result<List<KAttributeInfoDto>> GetAll(Guid? typeId);
         Task<Result<KAttributeDto>> GetAsync(Guid id);
         Result<KAttributeDto> New(KAttributeInfoDto entity = null);
@@ -27,6 +25,7 @@ namespace KNote.DomainModel.Services
         Result<KAttributeTabulatedValueInfoDto> AddNewKAttributeTabulatedValue(Guid id, KAttributeTabulatedValueInfoDto entityInfo);
         Task<Result<KAttributeTabulatedValueInfoDto>> DeleteKAttributeTabulatedValueAsync(Guid id);
         Result<List<KAttributeTabulatedValueDto>> GetKAttributeTabulatedValues(Guid attributeId);
+        
     }
 
 }

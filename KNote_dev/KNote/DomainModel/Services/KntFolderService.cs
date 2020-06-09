@@ -3,21 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using KNote.DomainModel.Repositories;
-//using KNote.Shared;
 using KNote.DomainModel.Entities;
-// TODO: Pendiente de eliminar
-//using KNote.DomainModel.Dto;
+using KNote.Shared.Dto.Info;
 using KNote.Shared.Dto;
 using KNote.Shared;
-
 using KNote.DomainModel.Infrastructure;
 using System.Linq.Expressions;
-
-// TODO: Pendiente de eliminar
-//using System.Data.Entity.Validation;
-//using System.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace KNote.DomainModel.Services

@@ -6,6 +6,7 @@ using KNote.DomainModel.Services;
 using KNote.Server.Helpers;
 using KNote.Shared;
 using KNote.Shared.Dto;
+using KNote.Shared.Dto.Info;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

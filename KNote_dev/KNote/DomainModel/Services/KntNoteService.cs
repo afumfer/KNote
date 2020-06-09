@@ -7,6 +7,7 @@ using KNote.DomainModel.Repositories;
 using KNote.Shared;
 using KNote.DomainModel.Entities;
 using KNote.Shared.Dto;
+using KNote.Shared.Dto.Info;
 using KNote.DomainModel.Infrastructure;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;

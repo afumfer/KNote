@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using KNote.DomainModel.Services;
 using KNote.Shared.Dto;
+using KNote.Shared.Dto.Info;
 using Microsoft.Extensions.Configuration;
 using KNote.Server.Helpers;
 using Microsoft.Extensions.Options;
