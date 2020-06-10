@@ -39,12 +39,12 @@
     [CascadingParameter] public AppState appState { get; set; }
 
     [Parameter] public string Title { get; set; } = "KNote folder selector";
-    [Parameter] public EventCallback<FolderInfoDto> OnConfirm { get; set; }
+    [Parameter] public EventCallback<FolderDto> OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 
-    private List<FolderInfoDto> foldersTree;
+    private List<FolderDto> foldersTree;
     private bool ShowDialog = false;
-    private FolderInfoDto folderSelected;
+    private FolderDto folderSelected;
 
     public void Show() => ShowDialog = true;
     public void Hide() => ShowDialog = false;
@@ -56,7 +56,7 @@
         {
             if (appState.FoldersTree == null)
             {
-                var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
+                var res = await dataService.Get<Result<List<FolderDto>>>("api/folders/gettree");
                 foldersTree = res.Response.Entity;
                 appState.FoldersTree = foldersTree;
 
@@ -70,7 +70,7 @@
             else
             {
                 foldersTree = appState.FoldersTree;
-                OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderInfoDto>());
+                OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
             }
         }
     }
@@ -80,7 +80,7 @@
         appState.OnChange -= StateHasChanged;
     }
 
-    private void OnFolderSelected(FolderInfoDto f)
+    private void OnFolderSelected(FolderDto f)
     {
         folderSelected = f;
     }

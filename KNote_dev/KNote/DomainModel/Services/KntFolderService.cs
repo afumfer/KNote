@@ -33,13 +33,13 @@ namespace KNote.DomainModel.Services
 
         #region IKntFolderService
 
-        public Result<List<FolderInfoDto>> GetAll()
+        public Result<List<FolderDto>> GetAll()
         {
-            var resService = new Result<List<FolderInfoDto>>();
+            var resService = new Result<List<FolderDto>>();
             try
             {
                 var resRep = _repository.Folders.GetAll();
-                resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderInfoDto>()).ToList();
+                resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -49,13 +49,13 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<List<FolderInfoDto>> GetRoots()
+        public Result<List<FolderDto>> GetRoots()
         {
-            var resService = new Result<List<FolderInfoDto>>();
+            var resService = new Result<List<FolderDto>>();
             try
             {
                 var resRep = _repository.Folders.GetAll(f => f.ParentId == null);
-                resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderInfoDto>()).ToList();
+                resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -119,23 +119,23 @@ namespace KNote.DomainModel.Services
             return lastFolder != null ? lastFolder.FolderNumber + 1 : 1;
         }
 
-        public Result<List<FolderInfoDto>> GetTree()
+        public Result<List<FolderDto>> GetTree()
         {
-            var result = new Result<List<FolderInfoDto>>();
+            var result = new Result<List<FolderDto>>();
 
-            var treeFolders = new List<FolderInfoDto>();
+            var treeFolders = new List<FolderDto>();
 
             try
-            {                
+            {
                 var allFolders = _repository.Folders
                     .DbSet.ToList();
 
-                var allFoldersInfo = allFolders.Select(f => f.GetSimpleDto<FolderInfoDto>()).ToList();
+                var allFoldersInfo = allFolders.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
 
                 treeFolders = allFoldersInfo.Where(fi => fi.ParentId == null)
                     .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
 
-                foreach (FolderInfoDto f in treeFolders)
+                foreach (FolderDto f in treeFolders)
                     LoadChilds(f, allFoldersInfo);
 
                 result.Entity = treeFolders;
@@ -150,7 +150,7 @@ namespace KNote.DomainModel.Services
                 AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
 
-            return ResultDomainAction<List<FolderInfoDto>>(result);
+            return ResultDomainAction<List<FolderDto>>(result);
         }
 
         public Result<FolderDto> New(FolderInfoDto entityInfo = null)
@@ -316,9 +316,9 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<FolderInfoDto> Delete(Guid id)
+        public Result<FolderDto> Delete(Guid id)
         {
-            var resService = new Result<FolderInfoDto>();
+            var resService = new Result<FolderDto>();
             try
             {
                 var resRep = _repository.Folders.Get(id);
@@ -326,7 +326,7 @@ namespace KNote.DomainModel.Services
                 {
                     resRep = _repository.Folders.Delete(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<FolderInfoDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }
@@ -340,9 +340,9 @@ namespace KNote.DomainModel.Services
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<FolderInfoDto>> DeleteAsync(Guid id)
+        public async Task<Result<FolderDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<FolderInfoDto>();
+            var resService = new Result<FolderDto>();
             try
             {
                 var resRep = await _repository.Folders.GetAsync(id);
@@ -350,7 +350,7 @@ namespace KNote.DomainModel.Services
                 {
                     resRep = await _repository.Folders.DeleteAsync(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<FolderInfoDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }
@@ -368,44 +368,16 @@ namespace KNote.DomainModel.Services
 
         #region Private methods
 
-        private void LoadChilds(FolderInfoDto folder, List<FolderInfoDto> allFolders)
+        private void LoadChilds(FolderDto folder, List<FolderDto> allFolders)
         {
             folder.ChildFolders = allFolders.Where(fi => fi.ParentId == folder.FolderId)
                 .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
 
-            foreach (FolderInfoDto f in folder.ChildFolders)
+            foreach (FolderDto f in folder.ChildFolders)
                 LoadChilds(f, allFolders);
         }
 
         #endregion
-
-        #region TODO
-
-        //public Result<List<Folder>> GetAllFull(Expression<Func<Folder, bool>> predicate)
-        //{
-        //    var result = new Result<List<Folder>>();
-
-        //    try
-        //    {
-        //        result.Entity = _repository.Context.Folders
-        //            .Where(predicate)
-        //            .Include(f => f.ChildsFolders)
-        //            .Include(f => f.Notes)
-        //            .ToList();
-        //    }
-        //    catch (KntEntityValidationException ex)
-        //    {
-        //        AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-        //    }
-
-        //    return ResultDomainAction<List<Folder>>(result);
-        //}
-
-        #endregion 
 
     }
 }

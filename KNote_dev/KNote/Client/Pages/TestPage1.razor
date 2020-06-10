@@ -209,7 +209,7 @@
     private KntFolderSelector kntFolderSelector;
     private KntResourceSelector kntResourceSelector;
 
-    private FolderInfoDto folderSelected;
+    private FolderDto folderSelected;
     private ResourceDto resourceSelected;
     
     private ResourceDto resource = new ResourceDto();
@@ -253,7 +253,7 @@
         kntFolderSelector.Show();
     }
 
-    private void onConfirm(FolderInfoDto f)
+    private void onConfirm(FolderDto f)
     {
         folderSelected = f;
         kntFolderSelector.Hide();

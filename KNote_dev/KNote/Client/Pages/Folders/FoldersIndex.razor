@@ -44,11 +44,11 @@ else
 
 @code {   
     [CascadingParameter] public AppState appState { get; set; }
-
-    private List<FolderInfoDto> foldersTree;
-    private FolderInfoDto folder;
+    
+    private List<FolderDto> foldersTree;
+    private FolderDto folder;
     private ModalDialog modalDialog;
-    private FolderInfoDto itemDelete;
+    private FolderDto itemDelete;
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,7 +68,7 @@ else
 
         if (appState.FoldersTree == null)
         {
-            var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
+            var res = await dataService.Get<Result<List<FolderDto>>>("api/folders/gettree");
             foldersTree = res.Response.Entity;
             appState.FoldersTree = foldersTree;
 
@@ -82,17 +82,17 @@ else
         else
         {
             foldersTree = appState.FoldersTree;
-            OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderInfoDto>());
+            OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
         }
     }
 
-    private void OnFolderSelected(FolderInfoDto f)
+    private void OnFolderSelected(FolderDto f)
     {
         folder = f;
         appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
     }
 
-    private void OnFolderDelete(FolderInfoDto folder)
+    private void OnFolderDelete(FolderDto folder)
     {
         modalDialog.Show();
         itemDelete = folder;
@@ -109,7 +109,7 @@ else
         }
         else
         {
-            FolderInfoDto toUpdate;
+            FolderDto toUpdate;
             if(itemDelete.ParentId == null)
             {
                 if(appState.FoldersTree != null)
@@ -139,7 +139,7 @@ else
         itemDelete = null;
     }
 
-    private void OnFolderEdit(FolderInfoDto folder)
+    private void OnFolderEdit(FolderDto folder)
     {
         navigationManager.NavigateTo($"folders/edit/{folder.FolderId}");
     }

@@ -120,7 +120,7 @@
 @code {
     [CascadingParameter] public AppState appState { get; set; }
 
-    private List<FolderInfoDto> foldersTree;
+    private List<FolderDto> foldersTree;
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
 
@@ -129,7 +129,7 @@
 
     private List<NoteInfoDto> notes;
 
-    private FolderInfoDto folder;
+    private FolderDto folder;
 
     private NotesFilterDto filter = new NotesFilterDto();
 
@@ -144,7 +144,7 @@
     {
         if (appState.FoldersTree == null)
         {
-            var res = await dataService.Get<Result<List<FolderInfoDto>>>("api/folders/gettree");
+            var res = await dataService.Get<Result<List<FolderDto>>>("api/folders/gettree");
             foldersTree = res.Response.Entity;
             appState.FoldersTree = foldersTree;
 
@@ -158,7 +158,7 @@
         else
         {
             foldersTree = appState.FoldersTree;
-            await OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderInfoDto>());
+            await OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
         }
     }
 
@@ -167,7 +167,7 @@
         appState.OnChange -= StateHasChanged;
     }
 
-    private async Task OnFolderSelected(FolderInfoDto f)
+    private async Task OnFolderSelected(FolderDto f)
     {
         folder = f;
         appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();

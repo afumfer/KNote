@@ -76,10 +76,10 @@ else
 @code {
     [CascadingParameter] public AppState appState { get; set; }
 
-    [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
-    [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
-    [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
-    [Parameter] public EventCallback<FolderInfoDto> FolderEdit { get; set; }    
+    [Parameter] public List<FolderDto> FoldersInfo { get; set; }
+    [Parameter] public EventCallback<FolderDto> FolderSelected { get; set; }
+    [Parameter] public EventCallback<FolderDto> FolderDelete { get; set; }
+    [Parameter] public EventCallback<FolderDto> FolderEdit { get; set; }
     [Parameter] public bool EditMode { get; set; }
 
     protected override void OnInitialized()
@@ -94,7 +94,7 @@ else
         appState.OnChange -= StateHasChanged;
     }
 
-    protected async Task onFolderSelected(FolderInfoDto folder)
+    protected async Task onFolderSelected(FolderDto folder)
     {
         if (appState.folderOldSelected != null)
             appState.folderOldSelected.Selected = false;
@@ -105,12 +105,12 @@ else
         appState.folderOldSelected = folder;
     }
 
-    private async Task onFolderDelete(FolderInfoDto folder)
+    private async Task onFolderDelete(FolderDto folder)
     {
         await FolderDelete.InvokeAsync(folder);
     }
 
-    private async Task onFolderEdit(FolderInfoDto folder)
+    private async Task onFolderEdit(FolderDto folder)
     {
         await FolderEdit.InvokeAsync(folder);
     }

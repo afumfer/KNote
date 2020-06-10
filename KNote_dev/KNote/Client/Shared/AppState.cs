@@ -47,10 +47,10 @@ namespace KNote.Client.Shared
         }
 
         // Only use in KntFoldersTreeView  (hack)
-        public FolderInfoDto folderOldSelected { get; set; }
+        public FolderDto folderOldSelected { get; set; }
 
-        private List<FolderInfoDto> _foldersTree;
-        public List<FolderInfoDto> FoldersTree 
+        private List<FolderDto> _foldersTree;
+        public List<FolderDto> FoldersTree 
         { 
             get
             {
@@ -64,13 +64,13 @@ namespace KNote.Client.Shared
             } 
         }
 
-        private Dictionary<Guid, FolderInfoDto> _foldersIndex;
-        public Dictionary<Guid, FolderInfoDto> FoldersIndex 
+        private Dictionary<Guid, FolderDto> _foldersIndex;
+        public Dictionary<Guid, FolderDto> FoldersIndex 
         {
             get
             {
                 if(_foldersIndex == null)
-                    _foldersIndex = new Dictionary<Guid, FolderInfoDto>();
+                    _foldersIndex = new Dictionary<Guid, FolderDto>();
                 return _foldersIndex;
             }
         } 

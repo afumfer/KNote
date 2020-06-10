@@ -376,7 +376,7 @@
         kntFolderSelector.Show();
     }
 
-    private void OnConfirmFolderSelector(FolderInfoDto f)
+    private void OnConfirmFolderSelector(FolderDto f)
     {
         Note.FolderDto = f.GetSimpleDto<FolderDto>();
         Note.FolderId = f.FolderId;

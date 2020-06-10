@@ -31,10 +31,10 @@
 @code {
     [CascadingParameter] public AppState appState { get; set; }
 
-    [Parameter] public List<FolderInfoDto> FoldersInfo { get; set; }
-    [Parameter] public EventCallback<FolderInfoDto> FolderSelected { get; set; }
-    [Parameter] public EventCallback<FolderInfoDto> FolderDelete { get; set; }
-    [Parameter] public EventCallback<FolderInfoDto> FolderEdit { get; set; }
+    [Parameter] public List<FolderDto> FoldersInfo { get; set; }
+    [Parameter] public EventCallback<FolderDto> FolderSelected { get; set; }
+    [Parameter] public EventCallback<FolderDto> FolderDelete { get; set; }
+    [Parameter] public EventCallback<FolderDto> FolderEdit { get; set; }
     [Parameter] public EventCallback RefreshTreeFolders { get; set; }
     [Parameter] public bool EditMode { get; set; }
     [Parameter] public bool ShowRefreshTree { get; set; }
@@ -52,17 +52,17 @@
         appState.OnChange -= StateHasChanged;
     }
 
-    protected async Task OnFolderSelected(FolderInfoDto folder)
+    protected async Task OnFolderSelected(FolderDto folder)
     {
         await FolderSelected.InvokeAsync(folder);
     }
 
-    private async Task OnFolderDelete(FolderInfoDto folder)
+    private async Task OnFolderDelete(FolderDto folder)
     {
         await FolderDelete.InvokeAsync(folder);
     }
 
-    private async Task OnFolderEdit(FolderInfoDto folder)
+    private async Task OnFolderEdit(FolderDto folder)
     {
         await FolderEdit.InvokeAsync(folder);
     }

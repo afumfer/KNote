@@ -12,9 +12,9 @@ namespace KNote.DomainModel.Services
 {
     public interface IKntFolderService
     {
-        Result<List<FolderInfoDto>> GetAll();
-        Result<List<FolderInfoDto>> GetRoots();
-        Result<List<FolderInfoDto>> GetTree();
+        Result<List<FolderDto>> GetAll();
+        Result<List<FolderDto>> GetRoots();
+        Result<List<FolderDto>> GetTree();
         Result<FolderDto> Get(int folerNumber);
         Result<FolderDto> Get(Guid folderId);
         Result<FolderDto> New(FolderInfoDto entity = null);
@@ -23,8 +23,8 @@ namespace KNote.DomainModel.Services
                 
         int GetNextFolderNumber();
         
-        Result<FolderInfoDto> Delete(Guid id);
-        Task<Result<FolderInfoDto>> DeleteAsync(Guid id);
+        Result<FolderDto> Delete(Guid id);
+        Task<Result<FolderDto>> DeleteAsync(Guid id);
 
         // TODO: 
         // Result<List<Folder>> GetAllFull(Expression<Func<Folder, bool>> predicate)

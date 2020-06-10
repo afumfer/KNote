@@ -50,7 +50,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("GetFolders")]
-        public IEnumerable<FolderInfoDto> GetFolders()
+        public IEnumerable<FolderDto> GetFolders()
         {            
             return service.Folders.GetAll().Entity;
         }

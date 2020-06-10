@@ -108,7 +108,7 @@
         kntFolderSelector.Show();
     }
 
-    private void onConfirmFolderSelector(FolderInfoDto f)
+    private void onConfirmFolderSelector(FolderDto f)
     {
         Folder.ParentId = f.FolderId;
         Folder.ParentFolderDto = f.GetSimpleDto<FolderDto>();

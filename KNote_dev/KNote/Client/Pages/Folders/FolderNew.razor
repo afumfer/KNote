@@ -43,15 +43,15 @@
         {
             if (appState.FoldersTree != null)
             {
-                FolderInfoDto toUpdate;
-                var newFolder = httpResponse.Response.Entity.GetSimpleDto<FolderInfoDto>();
+                FolderDto toUpdate;
+                var newFolder = httpResponse.Response.Entity.GetSimpleDto<FolderDto>();
                 newFolder.Selected = true;
                 appState.folderOldSelected.Selected = false;
 
                 if (newFolder.ParentId == null)
                 {
                     if (appState.FoldersTree != null)
-                        appState.FoldersTree.Add(newFolder.GetSimpleDto<FolderInfoDto>());
+                        appState.FoldersTree.Add(newFolder.GetSimpleDto<FolderDto>());
                 }
                 else
                 {
