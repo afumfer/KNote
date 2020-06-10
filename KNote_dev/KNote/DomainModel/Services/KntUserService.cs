@@ -136,7 +136,7 @@ namespace KNote.DomainModel.Services
                     CopyErrorList(resRep.ErrorList, resService.ErrorList);
                 //
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();                                
-                resService.Entity.MessagesInfo = resRep.Entity.KMessages.Select(m => m.GetSimpleDto<KMessageInfoDto>()).ToList();                                
+                resService.Entity.MessagesInfo = resRep.Entity.KMessages.Select(m => m.GetSimpleDto<KMessageDto>()).ToList();                                
             }
             catch (Exception ex)
             {

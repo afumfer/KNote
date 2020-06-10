@@ -12,9 +12,6 @@ namespace KNote.Shared.Dto
         public Guid FolderId { get; set; }
 
         public int FolderNumber { get; set; }
-
-        //public DateTime CreationDateTime { get; set; }
-        //public DateTime ModificationDateTime { get; set; }
         
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         [MaxLength(256)]
@@ -22,9 +19,6 @@ namespace KNote.Shared.Dto
 
         [MaxLength(1024)]
         public string Tags { get; set; }
-
-        //[MaxLength(400)]
-        //public string PathFolder { get; set; }
 
         public int Order { get; set; }
 
@@ -35,7 +29,7 @@ namespace KNote.Shared.Dto
 
         public Guid? ParentId { get; set; }
 
-        public FolderDto ParentFolderDto { get; set; }   // TODO: no hacer esto =>     = new FolderDto();
+        public FolderDto ParentFolderDto { get; set; }  
 
         public List<FolderDto> ChildFolders { get; set; } = new List<FolderDto>();
 

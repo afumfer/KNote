@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-// TODO: !!! pendiente de quitar
-using KNote.Shared.Dto.Info;
 
 namespace KNote.Shared.Dto
 {
@@ -24,8 +22,7 @@ namespace KNote.Shared.Dto
         public int? AlarmMinutes { get; set; }
         public bool? AlarmOk { get; set; }
 
-        // TODO: !!! pendiente de refactorizar (sustituir los info por lo dto). 
-        public UserInfoDto UserInfoDto { get; set; }
-        public NoteInfoDto NoteInfoDto { get; set; }
+        public UserDto UserDto { get; set; }
+        public NoteDto NoteDto { get; set; }
     }
 }
