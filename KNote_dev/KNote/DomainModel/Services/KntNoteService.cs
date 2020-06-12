@@ -39,7 +39,10 @@ namespace KNote.DomainModel.Services
             try
             {
                 var resRep = _repository.Notes.GetAll();
-                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<NoteInfoDto>()).ToList();
+                resService.Entity = resRep.Entity?
+                    .Select(_ => _.GetSimpleDto<NoteInfoDto>())
+                    .OrderByDescending(_ => _.Priority).ThenBy(_ => _.Topic)
+                    .ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -64,7 +67,8 @@ namespace KNote.DomainModel.Services
                 var resRep = _repository.Notes.DbSet
                     .Include(n => n.Folder)                    
                     .Where(n => n.FolderId == idFolderHome)
-                    .OrderByDescending(n => n.Priority).Take(25).ToList();
+                    .OrderByDescending(n => n.Priority).ThenBy(n => n.Topic)
+                    .Take(25).ToList();
 
                 resService.Entity = resRep.Select(u => u.GetSimpleDto<NoteInfoDto>()).ToList();
             }

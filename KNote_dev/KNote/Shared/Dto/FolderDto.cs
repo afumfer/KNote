@@ -41,7 +41,7 @@ namespace KNote.Shared.Dto
         {
             get
             {
-                if (Name.Length > 45)
+                if (Name?.Length > 45)
                     return Name.Substring(0, 42) + "...";
                 else
                     return Name;
