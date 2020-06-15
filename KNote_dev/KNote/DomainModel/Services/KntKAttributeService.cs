@@ -42,7 +42,7 @@ namespace KNote.DomainModel.Services
             {
                 var listAtr = _repository.KAttributes.DbSet
                     .Include(a => a.NoteType)
-                    .OrderBy(a => a.Order)
+                    .OrderBy(a => a.Order).ThenBy(a => a.Name)
                     .ToList();
 
                 List<KAttributeDto> listDto = new List<KAttributeDto>();
@@ -72,7 +72,7 @@ namespace KNote.DomainModel.Services
 
                 resService.Entity = resRep.Entity?
                     .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
-                    .OrderBy(a => a.Order)
+                    .OrderBy(a => a.Order).ThenBy(a => a.Name)
                     .ToList();
 
                 resService.ErrorList = resRep.ErrorList;

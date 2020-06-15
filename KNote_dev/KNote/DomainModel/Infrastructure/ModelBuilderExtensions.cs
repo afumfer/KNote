@@ -85,10 +85,13 @@ namespace KNote.DomainModel.Infrastructure
 
             modelBuilder.Entity<Folder>().HasIndex(_ => _.FolderNumber).IsUnique(true);
             modelBuilder.Entity<Folder>().HasIndex(_ => _.ParentId).IsUnique(false);
+            modelBuilder.Entity<Folder>().HasIndex(_ => new { _.Order, _.Name}).IsUnique(false);
             modelBuilder.Entity<Note>().HasIndex(_ => _.NoteNumber).IsUnique(true);
-            modelBuilder.Entity<Note>().HasIndex(_ => _.Topic).IsUnique(false);            
+            modelBuilder.Entity<Note>().HasIndex(_ => _.Topic).IsUnique(false);
+            modelBuilder.Entity<Note>().HasIndex(_ => new {_.Priority, _.Topic }).IsUnique(false);
             modelBuilder.Entity<Note>().HasIndex(_ => _.InternalTags).IsUnique(false);
-            modelBuilder.Entity<KAttribute>().HasIndex(_ => _.Name).IsUnique(true); 
+            modelBuilder.Entity<KAttribute>().HasIndex(_ => _.Name).IsUnique(true);
+            modelBuilder.Entity<KAttribute>().HasIndex(_ => new { _.Order, _.Name }).IsUnique(false);
             modelBuilder.Entity<KAttributeTabulatedValue>().HasIndex(_ => new { _.KAttributeId, _.Value }).IsUnique(true);
             modelBuilder.Entity<NoteKAttribute>().HasIndex(_ => new { _.KAttributeId, _.NoteId }).IsUnique(true);
             modelBuilder.Entity<NoteType>().HasIndex(_ => _.Name).IsUnique(true);

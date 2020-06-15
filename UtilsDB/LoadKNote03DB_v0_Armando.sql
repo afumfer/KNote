@@ -1,4 +1,4 @@
-USE [KNote03DesaDB]
+USE [KNote02DesaDB]
 GO 
 
 --------------------------------------------------
@@ -286,7 +286,7 @@ go
 
 INSERT INTO [dbo].[KAttributes] (
 	[KAttributeId] 
-	,[Key]
+	,[Description]
 	,[Name] 
 	,[Script] 
 	,[KAttributeDataType] 
@@ -328,13 +328,13 @@ go
 INSERT INTO [dbo].KAttributeTabulatedValues (
 	[KAttributeTabulatedValueId]
 	,[KAttributeId] 
-	,[Key]
+	,[Description] 
 	,[Value] 
 	,[Order]	
 )
 SELECT  
 	  newid() as nid 
-      ,(select distinct [KAttributeId] from [dbo].[KAttributes] as ATt Where ATt.[Key] COLLATE Modern_Spanish_CI_AI = SYS.Variable COLLATE Modern_Spanish_CI_AI) as AttrID
+      ,(select distinct [KAttributeId] from [dbo].[KAttributes] as ATt Where ATt.[Description] COLLATE Modern_Spanish_CI_AI = SYS.Variable COLLATE Modern_Spanish_CI_AI) as AttrID
       ,[Seccion]
 	  ,[Valor] 
 	  ,0 as OrdenX  

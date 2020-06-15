@@ -41,7 +41,7 @@ namespace KNote.DomainModel.Services
                 var resRep = _repository.Notes.GetAll();
                 resService.Entity = resRep.Entity?
                     .Select(_ => _.GetSimpleDto<NoteInfoDto>())
-                    .OrderByDescending(_ => _.Priority).ThenBy(_ => _.Topic)
+                    .OrderBy(_ => _.Priority).ThenBy(_ => _.Topic)
                     .ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
@@ -67,7 +67,7 @@ namespace KNote.DomainModel.Services
                 var resRep = _repository.Notes.DbSet
                     .Include(n => n.Folder)                    
                     .Where(n => n.FolderId == idFolderHome)
-                    .OrderByDescending(n => n.Priority).ThenBy(n => n.Topic)
+                    .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
                     .Take(25).ToList();
 
                 resService.Entity = resRep.Select(u => u.GetSimpleDto<NoteInfoDto>()).ToList();
@@ -145,14 +145,14 @@ namespace KNote.DomainModel.Services
                     atrTmp.Disabled = a.Disabled;
                 }
             }
-            return attributesNotes.OrderBy(_ => _.Order).ToList();
+            return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
         }
 
         public int GetNextNoteNumber()
         {
             //var lastNote = _repository.Context.Notes.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
             var lastNote = _repository.Notes
-                .DbSet.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
+                .DbSet.OrderBy(n => n.NoteNumber).FirstOrDefault();
             return lastNote != null ? lastNote.NoteNumber + 1 : 1;
         }
 
@@ -208,7 +208,7 @@ namespace KNote.DomainModel.Services
 
                 // Order by and pagination
                 query = query
-                    .OrderBy(n => n.Topic)
+                    .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
                     .Pagination(notesFilter.Pagination);
 
                 // Get content
@@ -281,7 +281,7 @@ namespace KNote.DomainModel.Services
 
                 // Order by and pagination
                 query = query
-                    .OrderBy(n => n.Topic)
+                    .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
                     .Pagination(notesSearch.Pagination);
 
                 // Get content
