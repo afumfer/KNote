@@ -152,7 +152,7 @@ namespace KNote.DomainModel.Services
         {
             //var lastNote = _repository.Context.Notes.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
             var lastNote = _repository.Notes
-                .DbSet.OrderBy(n => n.NoteNumber).FirstOrDefault();
+                .DbSet.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
             return lastNote != null ? lastNote.NoteNumber + 1 : 1;
         }
 

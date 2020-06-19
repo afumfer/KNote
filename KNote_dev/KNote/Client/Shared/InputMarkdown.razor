@@ -4,19 +4,57 @@
 
 <div>
 
-    <label>@labelMode&nbsp;&nbsp;&nbsp;&nbsp;</label>
-
-    <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-light" data-toggle="tooltip" title="Show edit mode" @onclick="EditMode">
-            <i class="fa fa-edit">&nbsp;&nbsp;Markdown edit mode</i>
-        </button>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-3">
+                <label class="mt-2">@labelMode&nbsp;&nbsp;&nbsp;&nbsp;</label>
+            </div>
+            <div class="col-9 float-right">            
+                <div class="btn-toolbar mb-1" role="toolbar" aria-label="Toolbar with button groups">
+                    <div class="btn-group mr-2" role="group" aria-label="First group">
+                        @if (editMode)
+                        {
+                            <button type="button" class="btn btn-light" data-toggle="tooltip" title="Preview html mode" @onclick="ViewMode">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-light" data-toggle="tooltip" title="Show markdown edit mode" @onclick="EditMode">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        }
+                    </div>
+                    @if (editMode)
+                    {
+                        <div class="btn-group mr-2" role="group" aria-label="Group 1">
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Bold))"><b>B</b></button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Strikethrough))"><del>S</del></button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Italic))"><i>I</i></button>
+                        </div>
+                        <div class="btn-group mr-2" role="group" aria-label="Group 2">
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H1))">H1</button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H2))">H2</button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H3))">H3</button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H4))">H3</button>
+                        </div>
+                        <div class="btn-group mr-2" role="group" aria-label="Group 1">
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.List))"><i class="fa fa-list"></i></button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.ListOrdered))"><i class="fa fa-list-ol"></i></button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Line))"><b>-</b></button>
+                        </div>
+                        <div class="btn-group mr-2" role="group" aria-label="Group 3">
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Link))"><i class="fa fa-link"></i></button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Image))"><i class="fa fa-image"></i></button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Code))"><i class="fa fa-code"></i></button>
+                            <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Table))"><i class="fa fa-table"></i></button>
+                        </div>
+                    }
+                </div>                
+            </div>
+        </div>
     </div>
-    <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-light" data-toggle="tooltip" title="Show view mode" @onclick="ViewMode">
-            <i class="fa fa-eye">&nbsp;&nbsp;Show view html</i>
-        </button>
-    </div>
-
+      
     @if (editMode)
     {
         <div>
@@ -26,16 +64,8 @@
     }
     else
     {
-        // TODO: Opcionalmente encuadrar el html en un contenedor, pendiente.
-
-        @*<div class="markdown-container p-2" style="overflow: auto;">
-            <ViewMarkdown MarkdownContent="@CurrentValue">
-
-            </ViewMarkdown>
-        </div>*@
-
         <div>
-            <hr />
+            <hr class="mt-0"/>
             <ViewMarkdown MarkdownContent="@CurrentValue">
             </ViewMarkdown>
             <hr />
@@ -55,7 +85,6 @@
 
     protected override void OnInitialized()
     {
-        //labelMode = Label + " (markdown edit mode): ";
         labelMode = Label;
         base.OnInitialized();
     }
@@ -63,12 +92,92 @@
     private void EditMode()
     {
         editMode = true;
-        //labelMode = Label + " (markdown edit mode): ";
     }
 
     private void ViewMode()
     {
         editMode = false;
-        //labelMode = Label + " (preview mode): ";
     }
+
+    private void InsertMarkDownCommand(enumMarkDownCommand command)
+    {
+        switch (command)
+        {
+            case enumMarkDownCommand.Bold:
+                CurrentValue += " **_**";
+                break;
+            case enumMarkDownCommand.Strikethrough:
+                CurrentValue += " ~~_~~";
+                break;
+            case enumMarkDownCommand.Italic:
+                CurrentValue += " *_*";
+                break;
+            case enumMarkDownCommand.H1:
+                CurrentValue += "\n\n#";
+                break;
+            case enumMarkDownCommand.H2:
+                CurrentValue += "\n\n##";
+                break;
+            case enumMarkDownCommand.H3:
+                CurrentValue += "\n\n###";
+                break;
+            case enumMarkDownCommand.H4:
+                CurrentValue += "\n\n####";
+                break;
+            case enumMarkDownCommand.List:
+                CurrentValue += "\n\n-_";
+                break;
+            case enumMarkDownCommand.ListOrdered:
+                CurrentValue += "\n\n1._";
+                break;
+            case enumMarkDownCommand.Line:
+                CurrentValue += "\n\n------------\n\n\n";
+                break;
+            case enumMarkDownCommand.Link:
+                CurrentValue += "\n\n[xx](http://xx 'xx')";
+                break;
+            case enumMarkDownCommand.Image:
+                CurrentValue += "\n\n[![Title](Address 'Title')](http://url 'Title')";
+                break;
+            case enumMarkDownCommand.Code:
+                CurrentValue += "\n\n```_```";
+                break;
+            case enumMarkDownCommand.Table:
+                CurrentValue += "\n\n|   |   |\n";
+                CurrentValue += "| ------------ | ------------ |\n";
+                CurrentValue += "|   |   |\n";
+                CurrentValue += "|   |   |\n";
+                break;
+            default:
+                break;
+        }
+
+        // DOC
+        // Imagen empotrada
+        //    Note.Description += "\n\n![alt text](" + resource?.RelativeUrl + " '" + resource?.Description + "' )";
+        // enlace externo 
+        //    Note.Description += "\n\n<a href=" + resource?.RelativeUrl + " target='_blank'>" + resource?.Description + "</a>";
+    }
+
+    #region Private enums
+
+    private enum enumMarkDownCommand
+    {
+        Bold,
+        Strikethrough,
+        Italic,
+        H1,
+        H2,
+        H3,
+        H4,
+        List,
+        ListOrdered,
+        Line,
+        Link,
+        Image,
+        Code,
+        Table
+    }
+
+    #endregion 
 }
