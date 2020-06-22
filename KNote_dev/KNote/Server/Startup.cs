@@ -101,6 +101,8 @@ namespace KNote.Server
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseCors();
+
             app.UseEndpoints(endpoints =>
             {                
                 endpoints.MapRazorPages();
