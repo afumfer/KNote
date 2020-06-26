@@ -22,8 +22,9 @@
                         <td class="text-right">@note.Priority</td>
                         <td class="text-right">  @note.CreationDateTime.ToShortDateString()</td>
                         <td>
-                            <AuthorizeView Roles="Admin, ProjecManager, Staff">
-                                <Authorized>
+                            <!-- Estudiar la autorización, provoca retardo en el evento keypress de la página de búsqueda -->
+                            @*<AuthorizeView Roles="Admin, ProjecManager, Staff">
+                                <Authorized>*@
                                     <span class="float-right">
                                         <button class="btn btn-sm btn-warning mx-1"
                                                 @onclick="@(() => OnNoteEdit.InvokeAsync(note))" 
@@ -36,7 +37,7 @@
                                             <i class="fa fa-minus"></i>
                                         </button>
                                     </span>
-                                </Authorized>
+                                @*</Authorized>
                                 <NotAuthorized>
                                     <span class="float-right">
                                         <button class="badge badge-pill badge-primary"
@@ -46,7 +47,7 @@
                                         </button>
                                     </span>
                                 </NotAuthorized>
-                            </AuthorizeView>
+                            </AuthorizeView>*@
                         </td>
                     </tr>
                 }

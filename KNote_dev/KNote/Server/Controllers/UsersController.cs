@@ -11,11 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
-using KNote.DomainModel.Services;
+using KNote.Model.Services;
 using KNote.Server.Helpers;
-using KNote.Shared;
-using KNote.Shared.Dto;
-using KNote.Shared.Dto.Info;
+using KNote.Model;
+using KNote.Model.Dto;
+using KNote.Model.Dto.Info;
 
 
 namespace KNote.Server.Controllers

@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KNote.DomainModel.Services;
 using KNote.Server.Helpers;
-using KNote.Shared;
-using KNote.Shared.Dto;
-using KNote.Shared.Dto.Info;
+using KNote.Model;
+using KNote.Model.Dto;
+using KNote.Model.Dto.Info;
+using KNote.Model.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+
 
 namespace KNote.Server.Controllers
 {    

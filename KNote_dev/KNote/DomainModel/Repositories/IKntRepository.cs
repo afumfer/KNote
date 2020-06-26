@@ -1,5 +1,5 @@
 ﻿using KNote.Shared;
-using KNote.DomainModel.Entities;
+using KNote.Shared.Entities;
 using KNote.DomainModel.Infrastructure;
 using System;
 using Microsoft.EntityFrameworkCore;

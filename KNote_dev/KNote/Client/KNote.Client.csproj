@@ -16,8 +16,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="3.1.5" />
     <PackageReference Include="Tewr.Blazor.FileReader" Version="1.6.0.20166" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Shared\KNote.Shared.csproj" />
+    <ProjectReference Include="..\Model\KNote.Model.csproj" />
   </ItemGroup>
 
 </Project>

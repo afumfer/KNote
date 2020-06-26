@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using KNote.DomainModel.Repositories;
-using KNote.DomainModel.Entities;
+using KNote.Shared.Entities;
 using KNote.Shared.Dto.Info;
 using KNote.Shared.Dto;
 using KNote.Shared;
 using KNote.DomainModel.Infrastructure;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using KNote.Shared.Services;
 
 namespace KNote.DomainModel.Services
 {

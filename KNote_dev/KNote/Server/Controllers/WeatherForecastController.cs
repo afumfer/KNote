@@ -1,13 +1,13 @@
-﻿using KNote.Shared;
+﻿using KNote.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using KNote.DomainModel.Services;
-using KNote.Shared.Dto;
-using KNote.Shared.Dto.Info;
+using KNote.Model.Services;
+using KNote.Model.Dto;
+using KNote.Model.Dto.Info;
 using Microsoft.Extensions.Configuration;
 using KNote.Server.Helpers;
 using Microsoft.Extensions.Options;

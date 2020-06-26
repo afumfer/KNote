@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 using KNote.Shared;
 using KNote.DomainModel.Infrastructure;
-using KNote.DomainModel.Entities;
+using KNote.Shared.Entities;
 using System.Data.Common;
 using System.ComponentModel;
 using System.Linq.Expressions;
