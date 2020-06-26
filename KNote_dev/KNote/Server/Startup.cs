@@ -30,7 +30,14 @@ namespace KNote.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
+            //services.AddCors();
+            services.AddCors( o => o.AddPolicy("KntPolicy", buider =>
+            {
+                buider.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }));
+
 
             //// Para pruebas de uso del DbContext directo 
             //services.AddDbContext<KntDbContext>(options =>
@@ -101,7 +108,16 @@ namespace KNote.Server
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseCors();
+            //app.UseCors();
+            
+            // global cors policy
+            //app.UseCors(x => x
+            //    .AllowAnyOrigin()
+            //    .AllowAnyMethod()
+            //    .AllowAnyHeader()
+            //    .AllowCredentials());
+            
+            app.UseCors("KntPolicy");
 
             app.UseEndpoints(endpoints =>
             {                
