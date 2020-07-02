@@ -12,19 +12,13 @@ using System.Threading.Tasks;
 namespace KNote.Model.Services
 {
     public interface IKntUserService
-    {
-        Result<List<UserInfoDto>> GetAll();
-        Result<UserDto> Get(string userName);
-        Task<Result<UserDto>> GetAsync(Guid userId);
-        Result<UserDto> GetMessages(Guid id);
-        Result<UserDto> New(UserInfoDto entity = null);
-        Result<UserDto> Save(UserDto entity);
-        Task<Result<UserDto>> SaveAsync(UserDto entityInfo);        
+    {        
+        Task<Result<List<UserInfoDto>>> GetAllAsync(PaginationDto pagination = null);
+        Task<Result<UserDto>> GetAsync(Guid userId);   
+        Task<Result<UserDto>> SaveAsync(UserDto entityInfo);
+        Task<Result<UserInfoDto>> DeleteAsync(Guid userId);
+        Task<Result<int>> GetCount();
         Result<UserDto> Authenticate(string username, string password);
         Result<UserDto> Create(UserRegisterDto userRegisterInfoDto);
-        Task<Result<UserInfoDto>> DeleteAsync(Guid userId);
-        Result<UserInfoDto> Delete(Guid userId);
-        Task<Result<int>> GetCount();
-        Task<Result<List<UserInfoDto>>> GetAllAsync(PaginationDto pagination);
     }
 }

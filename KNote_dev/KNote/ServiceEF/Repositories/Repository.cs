@@ -2,14 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-//using System.Data.Entity.Validation;
-//using System.Data.Entity;
 using Microsoft.EntityFrameworkCore;
-
 using KNote.Model;
-using KNote.ServiceEF.Infrastructure;
-using KNote.Model.Entities;
 using System.Data.Common;
 using System.ComponentModel;
 using System.Linq.Expressions;
@@ -59,7 +53,16 @@ namespace KNote.ServiceEF.Repositories
         #endregion
 
         #region Generics methods
-        
+
+        public bool IsAttached(Func<TEntity, bool> predicate)
+        {
+            return _context.Set<TEntity>().Local.Any(predicate);
+        }
+
+        public void RemoveLocal(TEntity entity)
+        {
+            _context.Set<TEntity>().Local.Remove(entity);
+        }
 
         public Result<TEntity> Get(params object[] keyValues)
         {
@@ -93,9 +96,7 @@ namespace KNote.ServiceEF.Repositories
             TEntity dbEntry = null;
 
             try
-            {
-                // FirstOrDefault or SingleOrDefault ?
-                
+            {                                
                 dbEntry = _context.Set<TEntity>().Where(predicate)
                     .FirstOrDefault();
 
@@ -116,64 +117,34 @@ namespace KNote.ServiceEF.Repositories
             return ResultDomainAction<TEntity>(result);
         }
 
-
-        // TODO: Método pendiente de probar. 
-        //public virtual Result<IEnumerable<TEntity>> GetWithRawSql(string query, params object[] parameters)
-        public Result<IEnumerable<TEntity>> GetWithRawSql(string query, params object[] parameters)
+        public async Task<Result<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            var result = new Result<IEnumerable<TEntity>>();
-            // TODO: SqlQuery no existe en entityframeworkcore
-            //result.Entity = _dbSet.SqlQuery(query, parameters).ToList();
-            return result;            
-        }
+            var result = new Result<TEntity>();
+            TEntity dbEntry = null;
 
-        // TODO: Método pendiente de probar (Igual que el anterior, ¿debería ser virtual?)
-        public Result<IEnumerable<TEntity>> GetV2(
-            Expression<Func<TEntity, bool>> filter = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            string includeProperties = "")
-        {
-            var result = new Result<IEnumerable<TEntity>>();
-
-            IQueryable<TEntity> query = _dbSet;
-
-            if (filter != null)
+            try
             {
-                query = query.Where(filter);
-            }
+                // FirstOrDefault or SingleOrDefault ?
 
-            if (includeProperties != null)
+                dbEntry = await _context.Set<TEntity>().Where(predicate)
+                    .FirstOrDefaultAsync();
+
+                if (dbEntry == null)
+                    result.AddErrorMessage("Entity not found.");
+
+                result.Entity = dbEntry;
+            }
+            catch (KntEntityValidationException ex)
             {
-                foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    query = query.Include(includeProperty);
-                }
+                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
 
-            if (orderBy != null)
-            {                
-                result.Entity = orderBy(query).ToList();
-            }
-            else
-            {                
-                result.Entity = query.ToList();
-            }
-
-            return result;
+            return ResultDomainAction<TEntity>(result);
         }
-
-
-        public bool IsAttached(Func<TEntity, bool> predicate)
-        {
-            return _context.Set<TEntity>().Local.Any(predicate);
-        }
-
-        public void RemoveLocal(TEntity entity)
-        {
-            _context.Set<TEntity>().Local.Remove(entity);
-        }
-
 
         public async Task<Result<TEntity>> GetAsync(params object[] keyValues)
         {
@@ -224,6 +195,68 @@ namespace KNote.ServiceEF.Repositories
             }
 
             return ResultDomainAction<List<TEntity>>(result);
+        }
+
+        public async Task<Result<List<TEntity>>> GetAllAsync(Expression<Func<TEntity, bool>> predicate = null)
+        {
+            var result = new Result<List<TEntity>>();
+
+            try
+            {
+                if (predicate == null)
+                    // TODO... quitar el take(500), sólo para pruebas
+                    result.Entity = await _context.Set<TEntity>()
+                        .ToListAsync();
+                else
+                    result.Entity = await _context.Set<TEntity>().Where(predicate)
+                        .ToListAsync();
+            }
+            catch (KntEntityValidationException ex)
+            {
+                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+
+            return ResultDomainAction<List<TEntity>>(result);
+        }
+
+        // TODO: Método pendiente de probar.         
+        public async Task<Result<IEnumerable<TEntity>>> GetAllAsyncExt(
+            Expression<Func<TEntity, bool>> filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+            string includeProperties = "")
+        {
+            var result = new Result<IEnumerable<TEntity>>();
+
+            IQueryable<TEntity> query = _dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (includeProperties != null)
+            {
+                foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            if (orderBy != null)
+            {
+                result.Entity = await orderBy(query).ToListAsync();
+            }
+            else
+            {
+                result.Entity = await query.ToListAsync();
+            }
+
+            return result;
         }
 
         public Result<List<TEntity>> GetAllWithPagination(int page, int limit, Expression<Func<TEntity, bool>> predicate = null)

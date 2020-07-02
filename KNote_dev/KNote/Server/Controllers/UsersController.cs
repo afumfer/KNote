@@ -28,9 +28,6 @@ namespace KNote.Server.Controllers
         private IKntService _service { get; set; }
         private readonly AppSettings _appSettings;
 
-        // TODO: !!! Esta propiedad estaba en la versión antiga. 
-        //       en la versión actual.
-        //public object SecurityAlgorithms { get; private set; }
 
         public UsersController(IKntService service, IOptions<AppSettings> appSettings)
         {
@@ -39,11 +36,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("[action]")]    // GET api/users/getall        
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
-                var kresApi = _service.Users.GetAll();
+                var kresApi = await _service.Users.GetAllAsync();
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -80,26 +77,6 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{userName}")]    // GET api/users/afumfer2        
-        public IActionResult GetByName(string userName)
-        {
-            try
-            {
-                var kresApi = _service.Users.Get(userName);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<UserDto>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
-
         [HttpGet("{id}")]    // GET api/kattributes/guidKAttribute
         public async Task<IActionResult> Get(Guid id)
         {
@@ -112,26 +89,6 @@ namespace KNote.Server.Controllers
                 {
                     return BadRequest(resApi);
                 }
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<UserDto>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
-
-
-        [HttpGet("[action]/{userName}")]    // GET api/users/GetMessagesTo/afumfer2        
-        public IActionResult GetMessages(Guid id)
-        {
-            try
-            {
-                var kresApi = _service.Users.GetMessages(id);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
             }
             catch (Exception ex)
             {
@@ -222,6 +179,8 @@ namespace KNote.Server.Controllers
             }
         }
 
+        #region Private methods
+
         private UserTokenDto BuildToken(UserDto userDto)
         {
             var claims = new List<Claim>()
@@ -257,6 +216,8 @@ namespace KNote.Server.Controllers
                 uid = userDto.UserId.ToString()
             };
         }
+
+        #endregion 
 
     }
 }

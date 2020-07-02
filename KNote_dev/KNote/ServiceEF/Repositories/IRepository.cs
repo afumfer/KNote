@@ -26,21 +26,21 @@ namespace KNote.ServiceEF.Repositories
 
         #region Generics entity methods        
 
+        bool IsAttached(Func<TEntity, bool> predicate);
+        void RemoveLocal(TEntity entity);
+
         Result<TEntity> Get(params object[] keyValues);
         Result<TEntity> Get(Expression<Func<TEntity, bool>> predicate);        
         Task<Result<TEntity>> GetAsync(params object[] keyValues);
+        Task<Result<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate);
         Result<List<TEntity>> GetAll(Expression<Func<TEntity, bool>> predicate = null);
+        Task<Result<List<TEntity>>> GetAllAsync(Expression<Func<TEntity, bool>> predicate = null);
         Result<List<TEntity>> GetAllWithPagination(int page, int limit, Expression<Func<TEntity, bool>> predicate = null);
-
-        // ....
-        Result<IEnumerable<TEntity>> GetV2 (Expression<Func<TEntity, bool>> filter = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,  string includeProperties = "");
         
-        Result<IEnumerable<TEntity>> GetWithRawSql(string query, params object[] parameters);
-        // ....
-
-        bool IsAttached(Func<TEntity, bool> predicate);
-        void RemoveLocal(TEntity entity);
+        Task<Result<IEnumerable<TEntity>>> GetAllAsyncExt(
+            Expression<Func<TEntity, bool>> filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,  
+            string includeProperties = "");                        
         
         Result<TEntity> Add(TEntity entity);
         Result<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entity);

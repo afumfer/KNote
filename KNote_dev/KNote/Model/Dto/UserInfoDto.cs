@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Model.Dto.Info
+namespace KNote.Model.Dto
 {
     public class UserInfoDto : KntModelBase
     {
