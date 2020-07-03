@@ -5,7 +5,7 @@ using System.Text;
 
 namespace KNote.Model.Dto
 {
-    public class UserBasicEditDto : KntModelBase
+    public class UserBaseDto : KntModelBase
     {
         public Guid UserId { get; set; }
 

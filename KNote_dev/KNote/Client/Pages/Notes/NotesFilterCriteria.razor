@@ -105,7 +105,7 @@
     [Parameter] public EventCallback<NotesFilterDto> FilterSelected { get; set; }
 
     private NotesFilterDto notesFilter = new NotesFilterDto();
-    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+    private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
     private string folderName = "";
 
     private KntFolderSelector kntFolderSelector;
@@ -113,7 +113,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        var httpResponse = await dataService.Get<Result<List<NoteTypeDto>>>("api/notetypes");
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());

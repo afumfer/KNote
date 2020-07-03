@@ -32,13 +32,13 @@ namespace KNote.ServiceEF.Services
 
         #region IKntKEventService
 
-        public Result<List<KEventInfoDto>> GetAll()
+        public async Task<Result<List<KEventDto>>> GetAllAsync()
         {
-            var resService = new Result<List<KEventInfoDto>>();
+            var resService = new Result<List<KEventDto>>();
             try
             {
-                var resRep = _repository.KEvents.GetAll();
-                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KEventInfoDto>()).ToList();
+                var resRep = await _repository.KEvents.GetAllAsync();
+                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KEventDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -48,65 +48,39 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<KEventInfoDto> Get(Guid eventId)
-        {
-            var resService = new Result<KEventInfoDto>();
-            try
-            {
-                var resRep = _repository.KEvents.Get((object)eventId);
-                resService.Entity = resRep.Entity?.GetSimpleDto<KEventInfoDto>();
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public Result<KEventDto> New(KEventInfoDto entityInfo = null)
+        public async Task<Result<KEventDto>> GetAsync(Guid eventId)
         {
             var resService = new Result<KEventDto>();
-            KEventDto newKEvent;
             try
             {
-                newKEvent = new KEventDto();
-                if (entityInfo != null)
-                    newKEvent.SetSimpleDto(entityInfo);
-
-                // TODO: load default values
-                // for newKEvent
-
-                if (newKEvent.KEventId == Guid.Empty)
-                    newKEvent.KEventId = Guid.NewGuid();
-
-                resService.Entity = newKEvent;
+                var resRep = await _repository.KEvents.GetAsync((object)eventId);
+                resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
+                resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
             {
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
-
             return ResultDomainAction(resService);
         }
 
-        public Result<KEventInfoDto> Save(KEventInfoDto entityInfo)
+        public async Task<Result<KEventDto>> SaveAsync(KEventDto entity)
         {
             Result<KEvent> resRep = null;
-            var resService = new Result<KEventInfoDto>();
+            var resService = new Result<KEventDto>();
 
             try
             {
-                if (entityInfo.KEventId == Guid.Empty)
+                if (entity.KEventId == Guid.Empty)
                 {
-                    entityInfo.KEventId = Guid.NewGuid();
+                    entity.KEventId = Guid.NewGuid();
                     var newEntity = new KEvent();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
 
-                    resRep = _repository.KEvents.Add(newEntity);
+                    resRep = await _repository.KEvents.AddAsync(newEntity);
                 }
                 else
                 {
@@ -118,7 +92,7 @@ namespace KNote.ServiceEF.Services
                         _repository.KEvents.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.KEvents.Get(entityInfo.KEventId).Entity;
+                    var entityForUpdate = (await _repository.KEvents.GetAsync(entity.KEventId)).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.KEvents.ThrowKntException = true;
@@ -127,17 +101,17 @@ namespace KNote.ServiceEF.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
-                        resRep = _repository.KEvents.Update(entityForUpdate);
+                        entityForUpdate.SetSimpleDto(entity);
+                        resRep = await  _repository.KEvents.UpdateAsync(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new KEvent();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
-                        resRep = _repository.KEvents.Add(newEntity);
+                        resRep = await _repository.KEvents.AddAsync(newEntity);
                     }
                 }
             }
@@ -146,23 +120,23 @@ namespace KNote.ServiceEF.Services
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
             
-            resService.Entity = resRep.Entity?.GetSimpleDto<KEventInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public Result<KEventInfoDto> Delete(Guid id)
+        public async Task<Result<KEventDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<KEventInfoDto>();
+            var resService = new Result<KEventDto>();
             try
             {
-                var resRep = _repository.KEvents.Get(id);
+                var resRep = await _repository.KEvents.GetAsync(id);
                 if (resRep.IsValid)
                 {
-                    resRep = _repository.KEvents.Delete(resRep.Entity);
+                    resRep = await _repository.KEvents.DeleteAsync(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<KEventInfoDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }
@@ -175,6 +149,7 @@ namespace KNote.ServiceEF.Services
             }
             return ResultDomainAction(resService);
         }
+
         #endregion 
     }
 }

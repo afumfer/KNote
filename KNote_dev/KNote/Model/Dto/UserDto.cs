@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class UserDto : UserBasicEditDto
+    public class UserDto : UserBaseDto
     {
         public List<KMessageDto> MessagesInfo { get; set; }
     }

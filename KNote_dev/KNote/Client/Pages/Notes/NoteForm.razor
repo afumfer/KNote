@@ -235,12 +235,12 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
-    [Parameter] public List<NoteTypeInfoDto> NoteTypes { get; set; }  //  = new List<NoteTypeInfoDto>();
+    [Parameter] public List<NoteTypeDto> NoteTypes { get; set; }  //  = new List<NoteTypeDto>();
 
     private List<ResourceDto> resources; // { get; set; }
     private List<NoteTaskDto> tasks  { get; set; }
     private NoteTaskDto taskEdit; // { get; set; }
-    private List<UserInfoDto> users;
+    private List<UserBaseDto> users;
 
     private KntFolderSelector kntFolderSelector;
     private KntResourceSelector kntResourceSelector;
@@ -255,7 +255,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<List<UserInfoDto>>>($"api/users/getall");
+        var httpResponse = await dataService.Get<Result<List<UserBaseDto>>>($"api/users/getall");
         if (!httpResponse.Error)
         {
             users = httpResponse.Response.Entity;

@@ -32,9 +32,9 @@ namespace KNote.ServiceEF.Services
 
         #region IKntUserService  
 
-        public async Task<Result<List<UserInfoDto>>> GetAllAsync(PaginationDto pagination = null)
+        public async Task<Result<List<UserBaseDto>>> GetAllAsync(PaginationDto pagination = null)
         {
-            var resService = new Result<List<UserInfoDto>>();
+            var resService = new Result<List<UserBaseDto>>();
             try
             {   
                 if(pagination != null)
@@ -43,14 +43,14 @@ namespace KNote.ServiceEF.Services
                         .OrderBy(u => u.UserName)
                         .Pagination(pagination);
                     resService.Entity = await query
-                        .Select(u => u.GetSimpleDto<UserInfoDto>())                    
+                        .Select(u => u.GetSimpleDto<UserBaseDto>())                    
                         .ToListAsync();                
                 }
                 else
                 {
                     // Implementación old
                     //var resRep = await _repository.Users.GetAllAsync();
-                    //resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<UserInfoDto>()).ToList();
+                    //resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<UserBaseDto>()).ToList();
                     //resService.ErrorList = resRep.ErrorList;
 
                     // ó
@@ -58,7 +58,7 @@ namespace KNote.ServiceEF.Services
                     var query = _repository.Users.Queryable
                         .OrderBy(u => u.UserName);
                     resService.Entity = await query
-                        .Select(u => u.GetSimpleDto<UserInfoDto>())
+                        .Select(u => u.GetSimpleDto<UserBaseDto>())
                         .ToListAsync();
                 }
 
@@ -160,9 +160,9 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<UserInfoDto>> DeleteAsync(Guid id)
+        public async Task<Result<UserBaseDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<UserInfoDto>();
+            var resService = new Result<UserBaseDto>();
             try
             {
                 var resRep = await _repository.Users.GetAsync(id);
@@ -170,7 +170,7 @@ namespace KNote.ServiceEF.Services
                 {
                     resRep = await _repository.Users.DeleteAsync(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<UserInfoDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<UserBaseDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }

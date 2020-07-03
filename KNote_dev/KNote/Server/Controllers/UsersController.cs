@@ -20,7 +20,7 @@ using KNote.Model.Dto.Info;
 
 namespace KNote.Server.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -48,7 +48,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<UserInfoDto>>();
+                var kresApi = new Result<List<UserBaseDto>>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -71,7 +71,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<UserInfoDto>>();
+                var kresApi = new Result<List<UserBaseDto>>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -133,7 +133,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<UserInfoDto>();
+                var kresApi = new Result<UserBaseDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }

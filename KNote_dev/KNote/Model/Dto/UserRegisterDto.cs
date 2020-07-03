@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 { 
-    public class UserRegisterDto : UserBasicEditDto // UserInfoDto
+    public class UserRegisterDto : UserBaseDto // UserBaseDto
     {        
         [Required]
         public string Password { get; set; }

@@ -64,9 +64,9 @@
 
 @code {
 
-    private List<NoteTypeInfoDto> noteTypes { get; set; }
+    private List<NoteTypeDto> noteTypes { get; set; }
     private ModalDialog modalDialog;
-    private NoteTypeInfoDto itemDelete;
+    private NoteTypeDto itemDelete;
 
     protected async override Task OnInitializedAsync()
     {
@@ -75,11 +75,11 @@
 
     private async Task Load()
     {
-        var res = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        var res = await dataService.Get<Result<List<NoteTypeDto>>>("api/notetypes");
         noteTypes = res.Response.Entity;
     }
 
-    private void Delete(NoteTypeInfoDto item)
+    private void Delete(NoteTypeDto item)
     {
         modalDialog.Show();
         itemDelete = item;

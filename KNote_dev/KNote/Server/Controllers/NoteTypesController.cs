@@ -30,11 +30,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet]    // GET api/notetypes       
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                var kresApi = _service.NoteTypes.GetAll();
+                var kresApi = await _service.NoteTypes.GetAllAsync();
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -42,7 +42,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<NoteTypeInfoDto>>();
+                var kresApi = new Result<List<NoteTypeDto>>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -63,7 +63,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<NoteTypeInfoDto>();
+                var kresApi = new Result<NoteTypeDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }

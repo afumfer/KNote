@@ -14,10 +14,10 @@ namespace KNote.Model.Services
 {
     public interface IKntSystemValuesService
     {
-        Result<List<SystemValueInfoDto>> GetAll();
-        Result<SystemValueInfoDto> Get(string key);
-        Result<SystemValueInfoDto> Get(Guid id);
-        Result<SystemValueInfoDto> Save(SystemValueInfoDto entityInfo);
-        Result<SystemValueInfoDto> Delete(Guid id);
+        Task<Result<List<SystemValueDto>>> GetAllAsync();
+        Task<Result<SystemValueDto>> GetAsync(string key);
+        Task<Result<SystemValueDto>> GetAsync(Guid id);
+        Task<Result<SystemValueDto>> SaveAsync(SystemValueDto entityInfo);
+        Task<Result<SystemValueDto>> DeleteAsync(Guid id);
     }
 }

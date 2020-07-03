@@ -29,16 +29,15 @@ namespace KNote.ServiceEF.Services
 
         #endregion
 
-
         #region IKntSystemValuesService
 
-        public Result<List<SystemValueInfoDto>> GetAll()
+        public async Task<Result<List<SystemValueDto>>> GetAllAsync()
         {
-            var resService = new Result<List<SystemValueInfoDto>>();
+            var resService = new Result<List<SystemValueDto>>();
             try
             {
-                var resRep = _repository.SystemValues.GetAll();
-                resService.Entity = resRep.Entity?.Select(sv => sv.GetSimpleDto<SystemValueInfoDto>()).ToList();
+                var resRep = await _repository.SystemValues.GetAllAsync();
+                resService.Entity = resRep.Entity?.Select(sv => sv.GetSimpleDto<SystemValueDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -48,13 +47,13 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<SystemValueInfoDto> Get(string key)
+        public async Task<Result<SystemValueDto>> GetAsync(string key)
         {
-            var resService = new Result<SystemValueInfoDto>();
+            var resService = new Result<SystemValueDto>();
             try
             {
-                var resRep = _repository.SystemValues.Get(sv => sv.Key == key);
-                resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueInfoDto>();
+                var resRep = await _repository.SystemValues.GetAsync(sv => sv.Key == key);
+                resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -64,13 +63,13 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<SystemValueInfoDto> Get(Guid id)
+        public async Task<Result<SystemValueDto>> GetAsync(Guid id)
         {
-            var resService = new Result<SystemValueInfoDto>();
+            var resService = new Result<SystemValueDto>();
             try
             {
-                var resRep = _repository.SystemValues.Get((object) id);
-                resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueInfoDto>();
+                var resRep = await _repository.SystemValues.GetAsync((object) id);
+                resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -80,23 +79,23 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<SystemValueInfoDto> Save(SystemValueInfoDto entityInfo)
+        public async Task<Result<SystemValueDto>> SaveAsync(SystemValueDto entity)
         {
             Result<SystemValue> resRep = null;
-            var resService = new Result<SystemValueInfoDto>();
+            var resService = new Result<SystemValueDto>();
 
             try
             {
-                if (entityInfo.SystemValueId == Guid.Empty)
+                if (entity.SystemValueId == Guid.Empty)
                 {
-                    entityInfo.SystemValueId = Guid.NewGuid();
+                    entity.SystemValueId = Guid.NewGuid();
                     var newEntity = new SystemValue();
-                    newEntity.SetSimpleDto(entityInfo);
+                    newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
 
-                    resRep = _repository.SystemValues.Add(newEntity);
+                    resRep = await _repository.SystemValues.AddAsync(newEntity);
                 }
                 else
                 {
@@ -108,7 +107,7 @@ namespace KNote.ServiceEF.Services
                         _repository.SystemValues.ThrowKntException = false;
                     }
 
-                    var entityForUpdate = _repository.SystemValues.Get(entityInfo.SystemValueId).Entity;
+                    var entityForUpdate = (await _repository.SystemValues.GetAsync(entity.SystemValueId)).Entity;
 
                     if (flagThrowKntException == true)
                         _repository.SystemValues.ThrowKntException = true;
@@ -117,17 +116,17 @@ namespace KNote.ServiceEF.Services
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
-                        resRep = _repository.SystemValues.Update(entityForUpdate);
+                        entityForUpdate.SetSimpleDto(entity);
+                        resRep = await _repository.SystemValues.UpdateAsync(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new SystemValue();
-                        newEntity.SetSimpleDto(entityInfo);
+                        newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
-                        resRep = _repository.SystemValues.Add(newEntity);
+                        resRep = await _repository.SystemValues.AddAsync(newEntity);
                     }
                 }
             }
@@ -136,23 +135,23 @@ namespace KNote.ServiceEF.Services
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
             
-            resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public Result<SystemValueInfoDto> Delete(Guid id)
+        public async Task<Result<SystemValueDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<SystemValueInfoDto>();
+            var resService = new Result<SystemValueDto>();
             try
             {
-                var resRep = _repository.SystemValues.Get(id);
+                var resRep = await _repository.SystemValues.GetAsync(id);
                 if (resRep.IsValid)
                 {
-                    resRep = _repository.SystemValues.Delete(resRep.Entity);
+                    resRep = await _repository.SystemValues.DeleteAsync(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueInfoDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }
@@ -165,7 +164,6 @@ namespace KNote.ServiceEF.Services
             }
             return ResultDomainAction(resService);
         }
-
 
         #endregion
     }

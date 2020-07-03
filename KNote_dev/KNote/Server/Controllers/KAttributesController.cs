@@ -42,7 +42,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<NoteTypeInfoDto>>();
+                var kresApi = new Result<List<NoteTypeDto>>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -61,7 +61,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<NoteTypeInfoDto>>();
+                var kresApi = new Result<List<NoteTypeDto>>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }

@@ -20,7 +20,7 @@ else
 
     private KAttributeDto kattribute;
     private bool showForm = false;
-    private List<NoteTypeInfoDto> noteTypes = new List<NoteTypeInfoDto>();
+    private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
 
     protected async override Task OnInitializedAsync()
     {
@@ -35,7 +35,7 @@ else
             kattribute = httpResponse.Response.Entity;
         }
 
-        var httpResponse2 = await dataService.Get<Result<List<NoteTypeInfoDto>>>("api/notetypes");
+        var httpResponse2 = await dataService.Get<Result<List<NoteTypeDto>>>("api/notetypes");
         if (httpResponse2.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
