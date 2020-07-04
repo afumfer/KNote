@@ -36,15 +36,15 @@ namespace KNote.ServiceEF.Services
 
         #region IKntAttributeService
 
-        public Result<List<KAttributeDto>> GetAll()
+        public async Task<Result<List<KAttributeDto>>> GetAllAsync()
         {            
             var resService = new Result<List<KAttributeDto>>();
             try
             {
-                var listAtr = _repository.KAttributes.DbSet
+                var listAtr = await _repository.KAttributes.DbSet
                     .Include(a => a.NoteType)
                     .OrderBy(a => a.Order).ThenBy(a => a.Name)
-                    .ToList();
+                    .ToListAsync();
 
                 List<KAttributeDto> listDto = new List<KAttributeDto>();
 
@@ -64,12 +64,12 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<List<KAttributeInfoDto>> GetAll(Guid? typeId)
+        public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
         {
             var resService = new Result<List<KAttributeInfoDto>>();
             try
             {
-                var resRep = _repository.KAttributes.GetAll(_ => _.NoteTypeId == typeId);
+                var resRep = await _repository.KAttributes.GetAllAsync(_ => _.NoteTypeId == typeId);
 
                 resService.Entity = resRep.Entity?
                     .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
@@ -109,36 +109,6 @@ namespace KNote.ServiceEF.Services
 
         }
 
-        public Result<KAttributeDto> New(KAttributeInfoDto kattributeInfo = null)
-        {
-            var resService = new Result<KAttributeDto>();
-            KAttributeDto newAttribute;
-
-            try
-            {
-                newAttribute = new KAttributeDto();
-                if (kattributeInfo != null)
-                    newAttribute.SetSimpleDto(kattributeInfo);
-
-                // TODO: load default values
-                // for new newAttribute
-
-                if (newAttribute.KAttributeId == Guid.Empty)
-                    newAttribute.KAttributeId = Guid.NewGuid();
-
-                if (newAttribute.KAttributeValues == null)
-                    newAttribute.KAttributeValues = new List<KAttributeTabulatedValueDto>();
-
-                resService.Entity = newAttribute;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-
-            return ResultDomainAction(resService);            
-        }
-
         public async Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entity)
         {
             Result<KAttribute> resRep = null;
@@ -152,9 +122,6 @@ namespace KNote.ServiceEF.Services
                     var newEntity = new KAttribute();
 
                     newEntity.SetSimpleDto(entity);
-
-                    // TODO: update standard control values to newEntity
-                    // ...
 
                     resRep = await _repository.KAttributes.AddAsync(newEntity);
                 }
@@ -175,8 +142,6 @@ namespace KNote.ServiceEF.Services
 
                     if (entityForUpdate != null)
                     {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
                         entityForUpdate.SetSimpleDto(entity);
                         resRep = await _repository.KAttributes.UpdateAsync(entityForUpdate);
                     }
@@ -185,8 +150,6 @@ namespace KNote.ServiceEF.Services
                         var newEntity = new KAttribute();
                         newEntity.SetSimpleDto(entity);
 
-                        // TODO: update standard control values to newEntity
-                        // ...
                         resRep = await _repository.KAttributes.AddAsync(newEntity);
                     }
                 }
@@ -205,9 +168,7 @@ namespace KNote.ServiceEF.Services
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
 
-            //resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
             resService.ErrorList = resRep.ErrorList;
-
             return ResultDomainAction(resService);
         }
 
@@ -299,18 +260,18 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<KAttributeTabulatedValueInfoDto> AddNewKAttributeTabulatedValue(Guid id, KAttributeTabulatedValueInfoDto entityInfo)
+        public async Task<Result<KAttributeTabulatedValueDto>> AddNewKAttributeTabulatedValueAsync(Guid id, KAttributeTabulatedValueDto entityInfo)
         {
-            var resService = new Result<KAttributeTabulatedValueInfoDto>();
+            var resService = new Result<KAttributeTabulatedValueDto>();
             try
             {
-                var resRep = _repository.KAttributes.Get((object) id);
+                var resRep = await _repository.KAttributes.GetAsync((object) id);
                 var kattribute = resRep.Entity;
                 var tabulatedValue = new KAttributeTabulatedValue();
                 tabulatedValue.SetSimpleDto(entityInfo);
                 kattribute.KAttributeTabulatedValues.Add(tabulatedValue);
 
-                resService.Entity = tabulatedValue.GetSimpleDto<KAttributeTabulatedValueInfoDto>();                    
+                resService.Entity = tabulatedValue.GetSimpleDto<KAttributeTabulatedValueDto>();                    
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -320,9 +281,9 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<KAttributeTabulatedValueInfoDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
+        public async Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
         {
-            var resService = new Result<KAttributeTabulatedValueInfoDto>();
+            var resService = new Result<KAttributeTabulatedValueDto>();
             try
             {
                 var resRep = await _repository.KAttributeTabulatedValues.GetAsync(id);
@@ -330,7 +291,7 @@ namespace KNote.ServiceEF.Services
                 {
                     resRep = await _repository.KAttributeTabulatedValues.DeleteAsync(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueInfoDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }
@@ -344,12 +305,12 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<List<KAttributeTabulatedValueDto>> GetKAttributeTabulatedValues(Guid attributeId)
+        public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
         {
             var resService = new Result<List<KAttributeTabulatedValueDto>>();
             try
             {
-                var resRep = _repository.KAttributeTabulatedValues.GetAll(tv => tv.KAttributeId == attributeId);
+                var resRep = await _repository.KAttributeTabulatedValues.GetAllAsync(tv => tv.KAttributeId == attributeId);
 
                 if (resRep.IsValid)
                 {

@@ -7,8 +7,25 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class UserDto : UserBaseDto
+    public class UserDto : KntModelBase
     {
-        public List<KMessageDto> MessagesInfo { get; set; }
+        public Guid UserId { get; set; }
+
+        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [MaxLength(32)]
+        public string UserName { get; set; }
+
+        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [MaxLength(256)]
+        public string EMail { get; set; }
+
+        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [MaxLength(256)]
+        public string FullName { get; set; }
+
+        //[Required(ErrorMessage = "* Attribute {0} is required ")]
+        public string RoleDefinition { get; set; }
+
+        //public List<KMessageDto> MessagesInfo { get; set; }
     }
 }

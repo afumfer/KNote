@@ -12,14 +12,11 @@ namespace KNote.Model.Services
 {
     public interface IKntKMessageService
     {
-        Result<List<KMessageInfoDto>> GetAll();
-        Result<List<KMessageInfoDto>> GetAllForUser(Guid id);
-        Result<List<KMessageInfoDto>> GetAllForNote(Guid id);
-        Result<KMessageInfoDto> Get(Guid id);
-        Result<KMessageDto> New(KMessageInfoDto entity = null);
-        Result<KMessageInfoDto> Save(KMessageInfoDto entityInfo);
-        Task<Result<KMessageInfoDto>> SaveAsync(KMessageInfoDto entityInfo);
-        Result<KMessageInfoDto> Delete(Guid id);
-        Task<Result<KMessageInfoDto>> DeleteAsync(Guid id);
+        Task<Result<List<KMessageDto>>> GetAllAsync();
+        Task<Result<List<KMessageDto>>> GetAllForUserAsync(Guid id);
+        Task<Result<List<KMessageDto>>> GetAllForNoteAsync(Guid id);
+        Task<Result<KMessageDto>> GetAsync(Guid id);
+        Task<Result<KMessageDto>> SaveAsync(KMessageDto entityInfo);
+        Task<Result<KMessageDto>> DeleteAsync(Guid id);
     }
 }

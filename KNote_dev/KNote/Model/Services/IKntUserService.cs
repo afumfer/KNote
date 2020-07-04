@@ -13,10 +13,10 @@ namespace KNote.Model.Services
 {
     public interface IKntUserService
     {        
-        Task<Result<List<UserBaseDto>>> GetAllAsync(PaginationDto pagination = null);
+        Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null);
         Task<Result<UserDto>> GetAsync(Guid userId);   
         Task<Result<UserDto>> SaveAsync(UserDto entityInfo);
-        Task<Result<UserBaseDto>> DeleteAsync(Guid userId);
+        Task<Result<UserDto>> DeleteAsync(Guid userId);
         Task<Result<int>> GetCount();
         Result<UserDto> Authenticate(string username, string password);
         Result<UserDto> Create(UserRegisterDto userRegisterInfoDto);

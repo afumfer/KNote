@@ -30,11 +30,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet]    // GET api/kattributes       
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                var kresApi = _service.KAttributes.GetAll();
+                var kresApi = await _service.KAttributes.GetAllAsync();
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -49,11 +49,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("[action]/{typeId}")]    // GET api/kattributes/getfornotetype/typeId      
-        public IActionResult GetForNoteType(Guid? typeId)
+        public async Task<IActionResult> GetForNoteType(Guid? typeId)
         {
             try
             {
-                var kresApi = _service.KAttributes.GetAll(typeId);
+                var kresApi = await _service.KAttributes.GetAllAsync(typeId);
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -151,11 +151,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("[action]/{idAttribute}")]    // GET api/kattributes/getattributetabulatedvalues/guid 
-        public IActionResult GetAttributeTabulatedValues(Guid idAttribute)
+        public async Task<IActionResult> GetAttributeTabulatedValues(Guid idAttribute)
         {
             try
             {
-                var resApi = _service.KAttributes.GetKAttributeTabulatedValues(idAttribute);
+                var resApi = await _service.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else

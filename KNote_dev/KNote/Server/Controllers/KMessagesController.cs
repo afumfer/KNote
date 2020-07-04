@@ -32,12 +32,12 @@ namespace KNote.Server.Controllers
 
         // TODO: Eliminar este método. (Sólo para periodo de pruebas)
         [HttpGet]   // GET api/kmessages
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            var kresApi = new Result<List<KMessageInfoDto>>();
+            var kresApi = new Result<List<KMessageDto>>();
             try
             {
-                kresApi = _service.KMessages.GetAll();
+                kresApi = await _service.KMessages.GetAllAsync();
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -51,12 +51,12 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("{messageId}")]    // GET api/kmessages/guidmessage
-        public IActionResult Get(Guid messageId)
+        public async Task<IActionResult> Get(Guid messageId)
         {
-            var kresApi = new Result<KMessageInfoDto>();
+            var kresApi = new Result<KMessageDto>();
             try
             {
-                kresApi = _service.KMessages.Get(messageId);
+                kresApi = await _service.KMessages.GetAsync(messageId);
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -71,12 +71,12 @@ namespace KNote.Server.Controllers
 
 
         [HttpGet("[action]/{noteId}")]    // GET api/kmessages/GetToNote/xx        
-        public IActionResult GetToNote(Guid noteId)
+        public async Task<IActionResult> GetToNote(Guid noteId)
         {
-            var kresApi = new Result<List<KMessageInfoDto>>();
+            var kresApi = new Result<List<KMessageDto>>();
             try
             {
-                kresApi = _service.KMessages.GetAllForNote(noteId);
+                kresApi = await _service.KMessages.GetAllForNoteAsync(noteId);
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -91,12 +91,12 @@ namespace KNote.Server.Controllers
 
 
         [HttpGet("[action]/{userId}")]    // GET api/kmessages/GetToUser/xx        
-        public IActionResult GetToUser(Guid userId)
+        public async Task<IActionResult> GetToUser(Guid userId)
         {
-            var kresApi = new Result<List<KMessageInfoDto>>();
+            var kresApi = new Result<List<KMessageDto>>();
             try
             {
-                kresApi = _service.KMessages.GetAllForUser(userId);
+                kresApi = await _service.KMessages.GetAllForUserAsync(userId);
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -113,9 +113,9 @@ namespace KNote.Server.Controllers
         [HttpPost]   // POST api/kmessages
         [HttpPut]    // PUT api/kmessages
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> Post([FromBody]KMessageInfoDto kmessageInfo)
+        public async Task<IActionResult> Post([FromBody]KMessageDto kmessageInfo)
         {
-            var kresApi = new Result<KMessageInfoDto>();
+            var kresApi = new Result<KMessageDto>();
             try
             {
                 kresApi = await _service.KMessages.SaveAsync(kmessageInfo);
@@ -136,7 +136,7 @@ namespace KNote.Server.Controllers
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var kresApi = new Result<KMessageInfoDto>();
+            var kresApi = new Result<KMessageDto>();
             try
             {
                 kresApi = await _service.KMessages.DeleteAsync(id);

@@ -15,16 +15,16 @@ namespace KNote.Model.Services
 {
     public interface IKntKAttributeService
     {        
-        Result<List<KAttributeDto>> GetAll();
-        Result<List<KAttributeInfoDto>> GetAll(Guid? typeId);
+        Task<Result<List<KAttributeDto>>> GetAllAsync();
+        Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId);
         Task<Result<KAttributeDto>> GetAsync(Guid id);
-        Result<KAttributeDto> New(KAttributeInfoDto entity = null);
+        
         Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entityInfo);
         Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id);        
         Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entityInfo);        
-        Result<KAttributeTabulatedValueInfoDto> AddNewKAttributeTabulatedValue(Guid id, KAttributeTabulatedValueInfoDto entityInfo);
-        Task<Result<KAttributeTabulatedValueInfoDto>> DeleteKAttributeTabulatedValueAsync(Guid id);
-        Result<List<KAttributeTabulatedValueDto>> GetKAttributeTabulatedValues(Guid attributeId);
+        Task<Result<KAttributeTabulatedValueDto>> AddNewKAttributeTabulatedValueAsync(Guid id, KAttributeTabulatedValueDto entityInfo);
+        Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id);
+        Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId);
         
     }
 

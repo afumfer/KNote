@@ -48,7 +48,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<UserBaseDto>>();
+                var kresApi = new Result<List<UserDto>>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -71,7 +71,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<List<UserBaseDto>>();
+                var kresApi = new Result<List<UserDto>>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }
@@ -133,7 +133,7 @@ namespace KNote.Server.Controllers
             }
             catch (Exception ex)
             {
-                var kresApi = new Result<UserBaseDto>();
+                var kresApi = new Result<UserDto>();
                 kresApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(kresApi);
             }

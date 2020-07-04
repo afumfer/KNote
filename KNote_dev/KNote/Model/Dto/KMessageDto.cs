@@ -21,8 +21,5 @@ namespace KNote.Model.Dto
         public DateTime? AlarmDateTime { get; set; }
         public int? AlarmMinutes { get; set; }
         public bool? AlarmOk { get; set; }
-
-        public UserDto UserDto { get; set; }
-        public NoteDto NoteDto { get; set; }
     }
 }

@@ -71,9 +71,9 @@
 
 @code {
 
-    private List<UserBaseDto> users { get; set; }
+    private List<UserDto> users { get; set; }
     private ModalDialog modalDialog;
-    private UserBaseDto itemDelete;
+    private UserDto itemDelete;
     private int currentPage = 1;
     private int totalPages;
 
@@ -90,7 +90,7 @@
 
     private async Task Load(int page = 1)
     {
-        var httpResponse = await dataService.Get<Result<List<UserBaseDto>>>($"api/users?page={page}");
+        var httpResponse = await dataService.Get<Result<List<UserDto>>>($"api/users?page={page}");
         if (!httpResponse.Error)
         {
             users = httpResponse.Response.Entity;
@@ -124,7 +124,7 @@
         return rolesDes;
     }
 
-    private void Delete(UserBaseDto item)
+    private void Delete(UserDto item)
     {
         modalDialog.Show();
         itemDelete = item;

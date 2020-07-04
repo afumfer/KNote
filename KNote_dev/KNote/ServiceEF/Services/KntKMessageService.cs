@@ -33,13 +33,13 @@ namespace KNote.ServiceEF.Services
 
         #region IKntKMessageService
 
-        public Result<List<KMessageInfoDto>> GetAll()
+        public async Task<Result<List<KMessageDto>>> GetAllAsync()
         {
-            var resService = new Result<List<KMessageInfoDto>>();
+            var resService = new Result<List<KMessageDto>>();
             try
             {
-                var resRep = _repository.KMessages.GetAll();
-                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageInfoDto>()).ToList();
+                var resRep = await _repository.KMessages.GetAllAsync();
+                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -49,13 +49,13 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<List<KMessageInfoDto>> GetAllForUser(Guid id)
+        public async Task<Result<List<KMessageDto>>> GetAllForUserAsync(Guid id)
         {
-            var resService = new Result<List<KMessageInfoDto>>();
+            var resService = new Result<List<KMessageDto>>();
             try
             {
-                var resRep = _repository.KMessages.GetAll( m => m.UserId == id);
-                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageInfoDto>()).ToList();
+                var resRep = await _repository.KMessages.GetAllAsync( m => m.UserId == id);
+                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -65,13 +65,13 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<List<KMessageInfoDto>> GetAllForNote(Guid id)
+        public async Task<Result<List<KMessageDto>>> GetAllForNoteAsync(Guid id)
         {
-            var resService = new Result<List<KMessageInfoDto>>();
+            var resService = new Result<List<KMessageDto>>();
             try
             {
-                var resRep = _repository.KMessages.GetAll(m => m.NoteId == id);
-                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageInfoDto>()).ToList();
+                var resRep = await _repository.KMessages.GetAllAsync(m => m.NoteId == id);
+                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -81,118 +81,26 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public Result<KMessageInfoDto> Get(Guid id)
-        {
-            var resService = new Result<KMessageInfoDto>();
-            try
-            {                
-                var resRep = _repository.KMessages.Get((object)id);
-                resService.Entity = resRep.Entity?.GetSimpleDto<KMessageInfoDto>();
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public Result<KMessageDto> New(KMessageInfoDto entityInfo = null)
+        public async Task<Result<KMessageDto>> GetAsync(Guid id)
         {
             var resService = new Result<KMessageDto>();
-            KMessageDto newKMessage;
-
             try
-            {
-                newKMessage = new KMessageDto();
-                if (entityInfo != null)
-                    newKMessage.SetSimpleDto(entityInfo);
-
-                if (newKMessage.UserId == Guid.Empty)
-                    newKMessage.UserId = Guid.NewGuid();
-
-                // TODO: load default values
-                // for newKMessage
-
-                // newKMessage.NoteInfoDto = ...
-                // newKMessage.UserBaseDto = ...
-
-                resService.Entity = newKMessage;
+            {                
+                var resRep = await _repository.KMessages.GetAsync((object)id);
+                resService.Entity = resRep.Entity?.GetSimpleDto<KMessageDto>();
+                resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
             {
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
-
             return ResultDomainAction(resService);
         }
 
-        public Result<KMessageInfoDto> Save(KMessageInfoDto entityInfo)
+        public async Task<Result<KMessageDto>> SaveAsync(KMessageDto entityInfo)
         {
             Result<KMessage> resRep = null;
-            var resService = new Result<KMessageInfoDto>();
-
-            try
-            {
-                if (entityInfo.KMessageId == Guid.Empty)
-                {
-                    entityInfo.UserId = Guid.NewGuid();
-                    var newEntity = new KMessage();
-                    newEntity.SetSimpleDto(entityInfo);
-
-                    // TODO: update standard control values to newEntity
-                    // ...
-
-                    resRep = _repository.KMessages.Add(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
-
-                    if (_repository.KMessages.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _repository.KMessages.ThrowKntException = false;
-                    }
-
-                    var entityForUpdate = _repository.KMessages.Get(entityInfo.KMessageId).Entity;
-
-                    if (flagThrowKntException == true)
-                        _repository.KMessages.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entityInfo);
-                        resRep = _repository.KMessages.Update(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new KMessage();
-                        newEntity.SetSimpleDto(entityInfo);
-
-                        // TODO: update standard control values to newEntity
-                        // ...
-                        resRep = _repository.KMessages.Add(newEntity);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            
-            resService.Entity = resRep.Entity?.GetSimpleDto<KMessageInfoDto>();
-            resService.ErrorList = resRep.ErrorList;
-
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<KMessageInfoDto>> SaveAsync(KMessageInfoDto entityInfo)
-        {
-            Result<KMessage> resRep = null;
-            var resService = new Result<KMessageInfoDto>();
+            var resService = new Result<KMessageDto>();
 
             try
             {
@@ -246,39 +154,15 @@ namespace KNote.ServiceEF.Services
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
 
-            resService.Entity = resRep.Entity?.GetSimpleDto<KMessageInfoDto>();
+            resService.Entity = resRep.Entity?.GetSimpleDto<KMessageDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public Result<KMessageInfoDto> Delete(Guid id)
+        public async Task<Result<KMessageDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<KMessageInfoDto>();
-            try
-            {
-                var resRep = _repository.KMessages.Get(id);
-                if (resRep.IsValid)
-                {
-                    resRep = _repository.KMessages.Delete(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<KMessageInfoDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<KMessageInfoDto>> DeleteAsync(Guid id)
-        {
-            var resService = new Result<KMessageInfoDto>();
+            var resService = new Result<KMessageDto>();
             try
             {
                 var resRep = await _repository.KMessages.GetAsync(id);
@@ -286,7 +170,7 @@ namespace KNote.ServiceEF.Services
                 {
                     resRep = await _repository.KMessages.DeleteAsync(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<KMessageInfoDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<KMessageDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }

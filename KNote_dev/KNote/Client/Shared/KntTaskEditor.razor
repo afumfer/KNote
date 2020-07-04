@@ -125,7 +125,7 @@
     [Parameter] public string Title { get; set; } = "KNote task editor";
     [Parameter] public EventCallback<NoteTaskDto> OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
-    [Parameter] public List<UserBaseDto> Users { get; set; }
+    [Parameter] public List<UserDto> Users { get; set; }
     //[Parameter] public NoteTaskDto Task { get; set; }
 
     private NoteTaskDto task; // { get; set; } = new NoteTaskDto();
