@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Model.Dto.Info;
 using KNote.Model.Entities;
 
 

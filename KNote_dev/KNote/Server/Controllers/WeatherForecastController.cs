@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using KNote.Model.Services;
 using KNote.Model.Dto;
-using KNote.Model.Dto.Info;
 using Microsoft.Extensions.Configuration;
 using KNote.Server.Helpers;
 using Microsoft.Extensions.Options;
@@ -50,9 +49,9 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("GetFolders")]
-        public IEnumerable<FolderDto> GetFolders()
+        public async Task<IEnumerable<FolderDto>> GetFolders()
         {            
-            return service.Folders.GetAll().Entity;
+            return (await service.Folders.GetAllAsync()).Entity;
         }
 
         [HttpGet("GetAppSettings")]

@@ -7,27 +7,8 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class FolderDto : KntModelBase
+    public class FolderDto : FolderInfoDto
     {
-        public Guid FolderId { get; set; }
-
-        public int FolderNumber { get; set; }
-        
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
-        [MaxLength(256)]
-        public string Name { get; set; }
-
-        [MaxLength(1024)]
-        public string Tags { get; set; }
-
-        public int Order { get; set; }
-
-        [MaxLength(256)]
-        public string OrderNotes { get; set; }
-
-        public string Script { get; set; }
-
-        public Guid? ParentId { get; set; }
 
         public FolderDto ParentFolderDto { get; set; }  
 

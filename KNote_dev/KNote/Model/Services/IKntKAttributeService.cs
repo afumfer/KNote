@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using KNote.Model.Dto.Info;
 using KNote.Model.Dto;
 using KNote.Model;
 using KNote.Model.Entities;

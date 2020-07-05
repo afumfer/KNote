@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Model.Dto.Info;
 using KNote.Model.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,11 +27,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet]   // GET api/folders
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                var resApi = _service.Folders.GetAll();
+                var resApi = await _service.Folders.GetAllAsync();
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -49,11 +48,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("getroots")]   // GET api/folders/getroots
-        public IActionResult GeRoots()
+        public async Task<IActionResult> GeRoots()
         {
             try
             {
-                var resApi = _service.Folders.GetRoots();
+                var resApi = await _service.Folders.GetRootsAsync();
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -68,11 +67,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("gettree")]   // GET api/folders/gettree
-        public IActionResult GeTree()
+        public async Task<IActionResult> GeTree()
         {
             try
             {
-                var resApi = _service.Folders.GetTree();
+                var resApi = await _service.Folders.GetTreeAsync();
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -88,30 +87,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("{folderId}")]    // GET api/folders/guidfolder
-        public IActionResult Get(Guid folderId)
+        public async Task<IActionResult> Get(Guid folderId)
         {
             try
             {
-                var resApi = _service.Folders.Get(folderId);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-            }
-            catch (Exception ex)
-            {
-                var resApi = new Result<FolderInfoDto>();
-                resApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(resApi);
-            }
-        }
-
-        [HttpGet("[action]/{folderNumber}")]    // GET api/folders/GetByNumber/xx        
-        public IActionResult GetByNumber(int folderNumber)
-        {
-            try
-            {
-                var resApi = _service.Folders.Get(folderNumber);
+                var resApi = await _service.Folders.GetAsync(folderId);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -126,11 +106,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("[action]/{folderId}")]    // GET api/folders/GetNotes/xxxxxxxxxx        
-        public IActionResult GetNotes(Guid folderId)
+        public async Task<IActionResult> GetNotes(Guid folderId)
         {
             try
             {
-                var resApi = _service.Notes.GetByFolder(folderId);
+                var resApi = await _service.Notes.GetByFolderAsync(folderId);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else

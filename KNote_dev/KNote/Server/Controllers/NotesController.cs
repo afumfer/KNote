@@ -6,7 +6,6 @@ using KNote.Model.Services;
 using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Model.Dto.Info;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,11 +30,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet]   // GET api/notes
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                var resApi = _service.Notes.GetAll();
+                var resApi = await _service.Notes.GetAllAsync();
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -73,29 +72,6 @@ namespace KNote.Server.Controllers
             }
         }
 
-        //// TODO: !!! Eliminar 
-        //[HttpGet("getfilter")]   // GET api/notes/getfilter
-        //public async Task<IActionResult> GetFilter([FromQuery] NotesFilterDto notesFilter)
-        //{
-        //    try
-        //    {
-        //        var kresApi = await _service.Notes.GetFilter(notesFilter);
-
-        //        HttpContext.InsertPaginationParamInResponse(kresApi.CountEntity, notesFilter.NumRecords);
-
-        //        if (kresApi.IsValid)
-        //            return Ok(kresApi);
-        //        else
-        //            return BadRequest(kresApi);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var kresApi = new Result<List<NoteInfoDto>>();
-        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
-        //        return BadRequest(kresApi);
-        //    }
-        //}
-
         [HttpGet("getsearch")]   // GET api/notes/getfilter
         public async Task<IActionResult> GetSearch([FromQuery] NotesSearchDto notesSearch)
         {
@@ -120,11 +96,11 @@ namespace KNote.Server.Controllers
 
         //[Authorize]
         [HttpGet("homenotes")]   // GET api/notes/homenotes
-        public IActionResult HomeNotes()
+        public async Task<IActionResult> HomeNotes()
         {
             try
             {
-                var resApi = _service.Notes.HomeNotes();
+                var resApi = await _service.Notes.HomeNotesAsync();
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -163,11 +139,11 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("new")]    // GET api/notes/new
-        public IActionResult New()
+        public async Task<IActionResult> New()
         {
             try
             {
-                var resApi = _service.Notes.New();
+                var resApi = await _service.Notes.NewAsync();
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -184,12 +160,12 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/xxxxxxxxxx        
-        public IActionResult GetByFolder(Guid folderId)
+        public async Task<IActionResult> GetByFolder(Guid folderId)
         {
 
             try
             {
-                var resApi = _service.Notes.GetByFolder(folderId);
+                var resApi = await _service.Notes.GetByFolderAsync(folderId);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else
@@ -279,7 +255,7 @@ namespace KNote.Server.Controllers
         {
             try
             {
-                var resApi = _service.Notes.GetNoteResources(id);
+                var resApi = await _service.Notes.GetNoteResourcesAsync(id);
                 if (resApi.IsValid)
                 {
                     foreach (var r in resApi.Entity)
@@ -368,11 +344,11 @@ namespace KNote.Server.Controllers
 
         [HttpGet("[action]/{id}")]    // GET api/notes/getnoteresources
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public IActionResult GetNoteTasks(Guid id)
+        public async Task<IActionResult> GetNoteTasks(Guid id)
         {
             try
             {
-                var resApi = _service.Notes.GetNoteTasks(id);
+                var resApi = await _service.Notes.GetNoteTasksAsync(id);
                 if (resApi.IsValid)                
                 {                    
                     return Ok(resApi);

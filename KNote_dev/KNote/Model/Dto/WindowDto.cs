@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Model.Dto.Info
+namespace KNote.Model.Dto
 {
-    public class WindowInfoDto : KntModelBase 
+    public class WindowDto : KntModelBase 
     {
         public Guid WindowId { get; set; }
         public Guid NoteId { get; set; }

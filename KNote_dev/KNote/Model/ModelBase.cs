@@ -54,12 +54,12 @@ namespace KNote.Model
             }
         }
 
-        [Timestamp]
-        public Byte[] Timestamp { get; set; }
-
         // TODO: add property IsDirty
 
         #endregion
 
+        [Timestamp]
+        public Byte[] Timestamp { get; set; }
+       
     }
 }

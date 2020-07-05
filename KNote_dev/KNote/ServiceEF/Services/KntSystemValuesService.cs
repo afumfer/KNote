@@ -7,7 +7,6 @@ using KNote.ServiceEF.Repositories;
 using KNote.Model;
 using KNote.Model.Entities;
 using KNote.Model.Dto;
-using KNote.Model.Dto.Info;
 using KNote.Model.Services;
 
 namespace KNote.ServiceEF.Services

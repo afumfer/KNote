@@ -15,7 +15,6 @@ using KNote.Model.Services;
 using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Model.Dto.Info;
 
 
 namespace KNote.Server.Controllers

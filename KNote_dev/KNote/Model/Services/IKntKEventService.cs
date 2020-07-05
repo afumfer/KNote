@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using KNote.Model.Dto.Info;
 using KNote.Model.Dto;
 using KNote.Model;
 using KNote.Model.Entities;
