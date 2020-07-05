@@ -7,7 +7,7 @@ using KNote.Model;
 
 namespace KNote.Model.Entities
 {
-    public class TraceNote : ModelBase
+    public class TraceNote : EntityModelBase
     {
         #region Constructor 
 
@@ -16,138 +16,31 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
+        
+        [Key]
+        public Guid TraceNoteId { get; set; }
 
-        private Guid _traceNoteId;
-        public Guid TraceNoteId
-        {
-            get { return _traceNoteId; }
-            set
-            {
-                if (_traceNoteId != value)
-                {
-                    _traceNoteId = value;
-                    OnPropertyChanged("TraceNoteId");
-                }
-            }
-        }
-
-        private Guid _fromId;        
-        public Guid FromId
-        {
-            get { return _fromId; }
-            set
-            {
-                if (_fromId != value)
-                {
-                    _fromId = value;
-                    OnPropertyChanged("FromId");
-                }
-            }
-        }
-
-        private Guid _toId;
-        public Guid ToId
-        {
-            get { return _toId; }
-            set
-            {
-                if (_toId != value)
-                {
-                    _toId = value;
-                    OnPropertyChanged("ToId");
-                }
-            }
-        }
-
-        private int _order;
-        public int Order
-        {
-            get { return _order; }
-            set
-            {
-                if (_order != value)
-                {
-                    _order = value;
-                    OnPropertyChanged("Order");
-                }
-            }
-        }
-
-        private double _weight;
-        public double Weight
-        {
-            get { return _weight; }
-            set
-            {
-                if (_weight != value)
-                {
-                    _weight = value;
-                    OnPropertyChanged("Weight");
-                }
-            }
-        }
-
-        private Guid? _traceNoteTypeId;
-        public Guid? TraceNoteTypeId
-        {
-            get { return _traceNoteTypeId; }
-            set
-            {
-                if (_traceNoteTypeId != value)
-                {
-                    _traceNoteTypeId = value;
-                    OnPropertyChanged("TraceNoteTypeId");
-                }
-            }
-        }
+        public Guid FromId { get; set; }
+        
+        public Guid ToId { get; set; }
+                
+        public int Order { get; set; }
+        
+        public double Weight { get; set; }
+        
+        public Guid? TraceNoteTypeId { get; set; }
 
         #region Virtual - navigation properties
-
-        private Note _from;
+        
         [InverseProperty("From")]
         [ForeignKey("FromId")]
-        public virtual Note From
-        {
-            get { return _from; }
-            set
-            {
-                if (_from != value)
-                {
-                    _from = value;
-                    OnPropertyChanged("From");
-                }
-            }
-        }
-
-        private Note _to;
+        public virtual Note From { get; set; }
+        
         [InverseProperty("To")]
         [ForeignKey("ToId")]
-        public virtual Note To
-        {
-            get { return _to; }
-            set
-            {
-                if (_to != value)
-                {
-                    _to = value;
-                    OnPropertyChanged("To");
-                }
-            }
-        }
-
-        private TraceNoteType _traceNoteType;        
-        public virtual TraceNoteType TraceNoteType
-        {
-            get { return _traceNoteType; }
-            set
-            {
-                if (_traceNoteType != value)
-                {
-                    _traceNoteType = value;
-                    OnPropertyChanged("TraceNoteType");
-                }
-            }
-        }
+        public virtual Note To { get; set; }
+        
+        public virtual TraceNoteType TraceNoteType { get; set; }
 
         #endregion
 

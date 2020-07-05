@@ -6,9 +6,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Model.Dto
+namespace KNote.Model
 {
-    public static class DtoExtensions
+    public static class ModelExtensions
     {
         // TODO: Refactorizar esto, hay código repetido aquí. 
 
@@ -29,15 +29,15 @@ namespace KNote.Model.Dto
         //        UtilCopyProperties(entity, info);
         //}
 
-        public static TInfo GetSimpleDto<TInfo>(this KntModelBase entity)
-            where TInfo : KntModelBase, new()
+        public static TInfo GetSimpleDto<TInfo>(this ModelBase entity)
+            where TInfo : ModelBase, new()
         {
             var info = new TInfo();
             UtilCopyProperties(info, entity);
             return info;
         }
 
-        public static void SetSimpleDto(this KntModelBase dest, KntModelBase source)
+        public static void SetSimpleDto(this ModelBase dest, ModelBase source)
         {
             if (source != null)
                 UtilCopyProperties(dest, source);

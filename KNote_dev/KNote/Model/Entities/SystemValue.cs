@@ -7,7 +7,7 @@ using KNote.Model;
 
 namespace KNote.Model.Entities
 {
-    public class SystemValue : ModelBase
+    public class SystemValue : EntityModelBase
     {
         #region Constructor
 
@@ -16,67 +16,19 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
-
-        private Guid _systemValueId;
+        
         [Key]
-        public Guid SystemValueId
-        {
-            get { return _systemValueId; }
-            set
-            {
-                if (_systemValueId != value)
-                {
-                    _systemValueId = value;
-                    OnPropertyChanged("SystemValueId");
-                }
-            }
-        }
+        public Guid SystemValueId { get; set; }
 
-        private string _scope;
         [Required(ErrorMessage = "KMSG: La clave es requerida")]
         [MaxLength(256)]
-        public string Scope
-        {
-            get { return _scope; }
-            set
-            {
-                if (_scope != value)
-                {
-                    _scope = value;
-                    OnPropertyChanged("Scope");
-                }
-            }
-        }
-
-        private string _key;
+        public string Scope { get; set; }
+        
         [Required(ErrorMessage = "KMSG: La clave es requerida")]
         [MaxLength(256)]        
-        public string Key
-        {
-            get { return _key; }
-            set
-            {
-                if (_key != value)
-                {
-                    _key = value;
-                    OnPropertyChanged("Key");
-                }
-            }
-        }
-
-        private string _value;
-        public string Value
-        {
-            get { return _value; }
-            set
-            {
-                if (_value != value)
-                {
-                    _value = value;
-                    OnPropertyChanged("Value");
-                }
-            }
-        }
+        public string Key { get; set; }
+        
+        public string Value { get; set; }
 
         #endregion
 

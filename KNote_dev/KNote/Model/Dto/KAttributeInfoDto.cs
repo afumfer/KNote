@@ -7,26 +7,194 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class KAttributeInfoDto : KntModelBase
+    public class KAttributeInfoDto : DtoModelBase
     {
-        public Guid KAttributeId { get; set; }
+        //public Guid KAttributeId { get; set; }
 
+        //[Required(ErrorMessage = "* Attribute {0} is required ")]
+        //[MaxLength(256)]
+        //public string Name { get; set; }
+
+        //public string Description { get; set; }
+
+        //public bool RequiredValue { get; set; }
+
+        //public int Order { get; set; }
+
+        //public bool Disabled { get; set; }
+
+        //public string Script { get; set; }
+
+        //public EnumKAttributeDataType KAttributeDataType { get; set; }
+
+        //public Guid? NoteTypeId { get; set; }
+
+        #region Property definitions
+
+        private Guid _kattributeId;        
+        public Guid KAttributeId
+        {
+            get { return _kattributeId; }
+            set
+            {
+                if (_kattributeId != value)
+                {
+                    _kattributeId = value;
+                    OnPropertyChanged("KAttributeId");
+                }
+            }
+        }
+
+        private string _name;
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         [MaxLength(256)]
-        public string Name { get; set; }
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged("Name");
+                }
+            }
+        }
 
-        public string Description { get; set; }
+        private string _description;
+        public string Description
+        {
+            get { return _description; }
+            set
+            {
+                if (_description != value)
+                {
+                    _description = value;
+                    OnPropertyChanged("Description");
+                }
+            }
+        }
 
-        public bool RequiredValue { get; set; }
+        private EnumKAttributeDataType _kattributeDataType;
+        public EnumKAttributeDataType KAttributeDataType
+        {
+            get { return _kattributeDataType; }
+            set
+            {
+                if (_kattributeDataType != value)
+                {
+                    _kattributeDataType = value;
+                    OnPropertyChanged("KAttributeDataType");
+                }
+            }
+        }
 
-        public int Order { get; set; }
+        private bool _requiredValue;
+        public bool RequiredValue
+        {
+            get { return _requiredValue; }
+            set
+            {
+                if (_requiredValue != value)
+                {
+                    _requiredValue = value;
+                    OnPropertyChanged("RequiredValue");
+                }
+            }
+        }
 
-        public bool Disabled { get; set; }
+        private int _order;
+        public int Order
+        {
+            get { return _order; }
+            set
+            {
+                if (_order != value)
+                {
+                    _order = value;
+                    OnPropertyChanged("Order");
+                }
+            }
+        }
 
-        public string Script { get; set; }
+        private string _script;
+        public string Script
+        {
+            get { return _script; }
+            set
+            {
+                if (_script != value)
+                {
+                    _script = value;
+                    OnPropertyChanged("Script");
+                }
+            }
+        }
 
-        public EnumKAttributeDataType KAttributeDataType { get; set; }
+        private bool _disabled;
+        public bool Disabled
+        {
+            get { return _disabled; }
+            set
+            {
+                if (_disabled != value)
+                {
+                    _disabled = value;
+                    OnPropertyChanged("Disabled");
+                }
+            }
+        }
 
-        public Guid? NoteTypeId { get; set; }
+        private Guid? _noteTypeId;
+        public Guid? NoteTypeId
+        {
+            get { return _noteTypeId; }
+            set
+            {
+                if (_noteTypeId != value)
+                {
+                    _noteTypeId = value;
+                    OnPropertyChanged("NoteTypeId");
+                }
+            }
+        }
+
+        #endregion
+
+        #region Validations
+
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var results = new List<ValidationResult>();
+
+            // ---
+            // Capturar las validaciones implementadas vía atributos.
+            // ---
+
+            Validator.TryValidateProperty(this.Name,
+               new ValidationContext(this, null, null) { MemberName = "Name" },
+               results);
+
+
+            //----
+            // Validaciones específicas
+            //----
+
+            // ---- Ejemplo
+            //if (ModificationDateTime < CreationDateTime)
+            //{
+            //    results.Add(new ValidationResult
+            //     ("KMSG: La fecha de modificación no puede ser mayor que la fecha de creación"
+            //     , new[] { "ModificationDateTime", "CreationDateTime" }));
+            //}
+
+            // ---
+            // Retornar List<ValidationResult>()
+            // ---           
+
+            return results;
+        }
+
+        #endregion
     }
 }

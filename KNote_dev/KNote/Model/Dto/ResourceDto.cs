@@ -7,17 +7,170 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class ResourceDto : KntModelBase
+    public class ResourceDto : DtoModelBase
     {
-        public Guid ResourceId { get; set; }
+        //public Guid ResourceId { get; set; }
 
+        //[Required(ErrorMessage = "* Attribute {0} is required ")]
+        //[MaxLength(1024)]
+        //public string Name { get; set; }
+
+        //public string Container { get; set; }
+
+        //public string FullUrl { get; set; }
+
+        //public string RelativeUrl {get; set; }
+
+        //public string Description { get; set; }
+
+        //public int Order { get; set; }
+
+        //[MaxLength(64)]
+        //public string FileType { get; set; }
+
+        //public bool ContentInDB { get; set; }
+
+        //public byte[] ContentArrayBytes { get; set; }
+
+
+        //public Guid NoteId { get; set; }
+
+        #region Property definitions
+
+        private Guid _resourceId;        
+        public Guid ResourceId
+        {
+            get { return _resourceId; }
+            set
+            {
+                if (_resourceId != value)
+                {
+                    _resourceId = value;
+                    OnPropertyChanged("ResourceId");
+                }
+            }
+        }
+
+        private string _name;
         [Required(ErrorMessage = "* Attribute {0} is required ")]
         [MaxLength(1024)]
-        public string Name { get; set; }
-        
-        public string NameOut 
+        public string Name
         {
-            get 
+            get { return _name; }
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged("Name");
+                }
+            }
+        }
+
+        private string _container;
+        public string Container
+        {
+            get { return _container; }
+            set
+            {
+                if (_container != value)
+                {
+                    _container = value;
+                    OnPropertyChanged("Container");
+                }
+            }
+        }
+
+        private string _description;
+        public string Description
+        {
+            get { return _description; }
+            set
+            {
+                if (_description != value)
+                {
+                    _description = value;
+                    OnPropertyChanged("Description");
+                }
+            }
+        }
+
+        private int _order;
+        public int Order
+        {
+            get { return _order; }
+            set
+            {
+                if (_order != value)
+                {
+                    _order = value;
+                    OnPropertyChanged("Order");
+                }
+            }
+        }
+
+        private string _fileType;
+        [MaxLength(64)]
+        public string FileType
+        {
+            get { return _fileType; }
+            set
+            {
+                if (_fileType != value)
+                {
+                    _fileType = value;
+                    OnPropertyChanged("FileType");
+                }
+            }
+        }
+
+        private bool _contentInDB;
+        public bool ContentInDB
+        {
+            get { return _contentInDB; }
+            set
+            {
+                if (_contentInDB != value)
+                {
+                    _contentInDB = value;
+                    OnPropertyChanged("ContentInDB");
+                }
+            }
+        }
+
+        private byte[] _contentArrayBytes;
+        public byte[] ContentArrayBytes
+        {
+            get { return _contentArrayBytes; }
+            set
+            {
+                if (_contentArrayBytes != value)
+                {
+                    _contentArrayBytes = value;
+                    OnPropertyChanged("ContentArrayBytes");
+                }
+            }
+        }
+
+        private Guid _noteId;
+        public Guid NoteId
+        {
+            get { return _noteId; }
+            set
+            {
+                if (_noteId != value)
+                {
+                    _noteId = value;
+                    OnPropertyChanged("NoteId");
+                }
+            }
+        }
+
+        public string ContentBase64 { get; set; }
+
+        public string NameOut
+        {
+            get
             {
                 if (string.IsNullOrEmpty(Name))
                     return Name;
@@ -29,30 +182,51 @@ namespace KNote.Model.Dto
                         return Name.Substring(i, Name.Length - i);
                     else
                         return Name;
-                }                
+                }
             }
-            set { } 
+            set { }
         }
-
-        public string Container { get; set; }
 
         public string FullUrl { get; set; }
 
-        public string RelativeUrl {get; set; }
+        public string RelativeUrl { get; set; }
 
-        public string Description { get; set; }
+        #endregion 
 
-        public int Order { get; set; }
+        #region Validations
 
-        [MaxLength(64)]
-        public string FileType { get; set; }
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var results = new List<ValidationResult>();
 
-        public bool ContentInDB { get; set; }
+            // ---
+            // Capturar las validaciones implementadas vía atributos.
+            // ---
 
-        public byte[] ContentArrayBytes { get; set; }
-        
-        public string ContentBase64 { get; set; }
+            Validator.TryValidateProperty(this.Name,
+               new ValidationContext(this, null, null) { MemberName = "Name" },
+               results);
 
-        public Guid NoteId { get; set; }
+            //----
+            // Validaciones específicas
+            //----
+
+            // ---- Ejemplo
+            //if (ModificationDateTime < CreationDateTime)
+            //{
+            //    results.Add(new ValidationResult
+            //     ("KMSG: La fecha de modificación no puede ser mayor que la fecha de creación"
+            //     , new[] { "ModificationDateTime", "CreationDateTime" }));
+            //}
+
+            // ---
+            // Retornar List<ValidationResult>()
+            // ---           
+
+            return results;
+        }
+
+        #endregion
+
     }
 }

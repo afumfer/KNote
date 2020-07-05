@@ -7,7 +7,7 @@ using KNote.Model;
 
 namespace KNote.Model.Entities
 {
-    public class Resource : ModelBase
+    public class Resource : EntityModelBase
     {
         #region Constructor
 
@@ -16,152 +16,32 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
-
-        private Guid _resourceId;
+        
         [Key]
-        public Guid ResourceId
-        {
-            get { return _resourceId; }
-            set
-            {
-                if (_resourceId != value)
-                {
-                    _resourceId = value;
-                    OnPropertyChanged("ResourceId");
-                }
-            }
-        }
+        public Guid ResourceId { get; set; }
 
-        private string _name;
         [Required(ErrorMessage = "KMSG: El nombre del recurso es requerido")]
         [MaxLength(1024)]        
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                if (_name != value)
-                {
-                    _name = value;
-                    OnPropertyChanged("Name");
-                }
-            }
-        }
-
-        private string _container;
-        public string Container
-        {
-            get { return _container; }
-            set
-            {
-                if (_container != value)
-                {
-                    _container = value;
-                    OnPropertyChanged("Container");
-                }
-            }
-        }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set
-            {
-                if (_description != value)
-                {
-                    _description = value;
-                    OnPropertyChanged("Description");
-                }
-            }
-        }
-
-        private int _order;
-        public int Order
-        {
-            get { return _order; }
-            set
-            {
-                if (_order != value)
-                {
-                    _order = value;
-                    OnPropertyChanged("Order");
-                }
-            }
-        }
-
-        private string _fileType;
+        public string Name { get; set; }
+        
+        public string Container { get; set; }
+        
+        public string Description { get; set; }
+        
+        public int Order { get; set; }
+        
         [MaxLength(64)]
-        public string FileType
-        {
-            get { return _fileType; }
-            set
-            {
-                if (_fileType != value)
-                {
-                    _fileType = value;
-                    OnPropertyChanged("FileType");
-                }
-            }
-        }
-
-        private bool _contentInDB;
-        public bool ContentInDB
-        {
-            get { return _contentInDB; }
-            set
-            {
-                if (_contentInDB != value)
-                {
-                    _contentInDB = value;
-                    OnPropertyChanged("ContentInDB");
-                }
-            }
-        }
-
-        private byte[] _contentArrayBytes;
-        public byte[] ContentArrayBytes
-        {
-            get { return _contentArrayBytes; }
-            set
-            {
-                if (_contentArrayBytes != value)
-                {
-                    _contentArrayBytes = value;
-                    OnPropertyChanged("ContentArrayBytes");
-                }
-            }
-        }
-
-        private Guid _noteId;
-        public Guid NoteId
-        {
-            get { return _noteId; }
-            set
-            {
-                if (_noteId != value)
-                {
-                    _noteId = value;
-                    OnPropertyChanged("NoteId");
-                }
-            }
-        }
+        public string FileType { get; set; }
+        
+        public bool ContentInDB { get; set; }
+        
+        public byte[] ContentArrayBytes { get; set; }
+        
+        public Guid NoteId { get; set; }
 
         #region Virtual - navigation properties
-
-        private Note _note;        
-        public virtual Note Note
-        {
-            get { return _note; }
-            set
-            {
-                if (_note != value)
-                {
-                    _note = value;
-                    OnPropertyChanged("Note");
-                }
-            }
-        }
+        
+        public virtual Note Note { get; set; }
 
         #endregion 
 

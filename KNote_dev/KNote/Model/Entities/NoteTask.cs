@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KNote.Model.Entities
 {
-    public class NoteTask : ModelBase
+    public class NoteTask : EntityModelBase
     {
         #region Constructor 
 
@@ -17,264 +17,47 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
-
-        private Guid _noteTaskId;
+        
         [Key]
-        public Guid NoteTaskId
-        {
-            get { return _noteTaskId; }
-            set
-            {
-                if (_noteTaskId != value)
-                {
-                    _noteTaskId = value;
-                    OnPropertyChanged("NoteTaskId");
-                }
-            }
-        }
+        public Guid NoteTaskId { get; set; }
 
-        private Guid _noteId;
-        public Guid NoteId
-        {
-            get { return _noteId; }
-            set
-            {
-                if (_noteId != value)
-                {
-                    _noteId = value;
-                    OnPropertyChanged("NoteId");
-                }
-            }
-        }
+        public Guid NoteId { get; set; }
+        
+        public Guid UserId { get; set; }
+        
+        public DateTime CreationDateTime { get; set; }
 
-        private Guid _userId;
-        public Guid UserId
-        {
-            get { return _userId; }
-            set
-            {
-                if (_userId != value)
-                {
-                    _userId = value;
-                    OnPropertyChanged("UserId");
-                }
-            }
-        }
-
-        private DateTime _creationDateTime;
-        public DateTime CreationDateTime
-        {
-            get { return _creationDateTime; }
-            set
-            {
-                if (_creationDateTime != value)
-                {
-                    _creationDateTime = value;
-                    OnPropertyChanged("CreationDateTime");
-                }
-            }
-        }
-
-
-        private DateTime _modificationDateTime;
-        public DateTime ModificationDateTime
-        {
-            get { return _modificationDateTime; }
-            set
-            {
-                if (_modificationDateTime != value)
-                {
-                    _modificationDateTime = value;
-                    OnPropertyChanged("ModificationDateTime");
-                }
-            }
-        }
-
-        private string _description;
+        public DateTime ModificationDateTime { get; set; }
+        
         [Required(ErrorMessage = "KMSG: La descripción de la tarea es requerida")]        
-        public string Description
-        {
-            get { return _description; }
-            set
-            {
-                if (_description != value)
-                {
-                    _description = value;
-                    OnPropertyChanged("Description");
-                }
-            }
-        }
-
-        private string _tags;
+        public string Description { get; set; }
+        
         [MaxLength(1024)]
-        public string Tags
-        {
-            get { return _tags; }
-            set
-            {
-                if (_tags != value)
-                {
-                    _tags = value;
-                    OnPropertyChanged("Tags");
-                }
-            }
-        }
-
-        private int _priority;
-        public int Priority
-        {
-            get { return _priority; }
-            set
-            {
-                if (_priority != value)
-                {
-                    _priority = value;
-                    OnPropertyChanged("Priority");
-                }
-            }
-        }
-
-        private bool _resolved;
-        public bool Resolved
-        {
-            get { return _resolved; }
-            set
-            {
-                if (_resolved != value)
-                {
-                    _resolved = value;
-                    OnPropertyChanged("Resolved");
-                }
-            }
-        }
-
-        private double? _estimatedTime;
-        public double? EstimatedTime
-        {
-            get { return _estimatedTime; }
-            set
-            {
-                if (_estimatedTime != value)
-                {
-                    _estimatedTime = value;
-                    OnPropertyChanged("EstimatedTime");
-                }
-            }
-        }
-
-        private double? _spentTime;
-        public double? SpentTime
-        {
-            get { return _spentTime; }
-            set
-            {
-                if (_spentTime != value)
-                {
-                    _spentTime = value;
-                    OnPropertyChanged("SpentTime");
-                }
-            }
-        }
-
-        private double? _difficultyLevel;
-        public double? DifficultyLevel
-        {
-            get { return _difficultyLevel; }
-            set
-            {
-                if (_difficultyLevel != value)
-                {
-                    _difficultyLevel = value;
-                    OnPropertyChanged("DifficultyLevel");
-                }
-            }
-        }
-
-        private DateTime? _expectedStartDate;
-        public DateTime? ExpectedStartDate
-        {
-            get { return _expectedStartDate; }
-            set
-            {
-                if (_expectedStartDate != value)
-                {
-                    _expectedStartDate = value;
-                    OnPropertyChanged("ExpectedStartDate");
-                }
-            }
-        }
-
-        private DateTime? _expectedEndDate;
-        public DateTime? ExpectedEndDate
-        {
-            get { return _expectedEndDate; }
-            set
-            {
-                if (_expectedEndDate != value)
-                {
-                    _expectedEndDate = value;
-                    OnPropertyChanged("ExpectedEndDate");
-                }
-            }
-        }
-
-        private DateTime? _startDate;
-        public DateTime? StartDate
-        {
-            get { return _startDate; }
-            set
-            {
-                if (_startDate != value)
-                {
-                    _startDate = value;
-                    OnPropertyChanged("StartDate");
-                }
-            }
-        }
-
-        private DateTime? _endDate;
-        public DateTime? EndDate
-        {
-            get { return _endDate; }
-            set
-            {
-                if (_endDate != value)
-                {
-                    _endDate = value;
-                    OnPropertyChanged("EndDate");
-                }
-            }
-        }
+        public string Tags { get; set; }
+        
+        public int Priority { get; set; }
+        
+        public bool Resolved { get; set; }
+        
+        public double? EstimatedTime { get; set; }
+        
+        public double? SpentTime { get; set; }
+        
+        public double? DifficultyLevel { get; set; }
+        
+        public DateTime? ExpectedStartDate { get; set; }
+        
+        public DateTime? ExpectedEndDate { get; set; }
+        
+        public DateTime? StartDate { get; set; }
+        
+        public DateTime? EndDate { get; set; }
 
         #region virtual - navigaion properties
-
-        private Note _note;        
-        public virtual Note Note
-        {
-            get { return _note; }
-            set
-            {
-                if (_note != value)
-                {
-                    _note = value;
-                    OnPropertyChanged("Note");
-                }
-            }
-        }
-
-        private User _user;
-        public virtual User User
-        {
-            get { return _user; }
-            set
-            {
-                if (_user != value)
-                {
-                    _user = value;
-                    OnPropertyChanged("User");
-                }
-            }
-        }
+        
+        public virtual Note Note { get; set; }
+        
+        public virtual User User { get; set; }
 
         #endregion 
 

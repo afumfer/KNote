@@ -7,7 +7,7 @@ using KNote.Model;
 
 namespace KNote.Model.Entities
 {
-    public class TraceNoteType : ModelBase
+    public class TraceNoteType : EntityModelBase
     {
         #region Constructor
 
@@ -16,51 +16,15 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
-
-        private Guid _traceNoteTypeId;
+        
         [Key]
-        public Guid TraceNoteTypeId
-        {
-            get { return _traceNoteTypeId; }
-            set
-            {
-                if (_traceNoteTypeId != value)
-                {
-                    _traceNoteTypeId = value;
-                    OnPropertyChanged("TraceNoteTypeId");
-                }
-            }
-        }
+        public Guid TraceNoteTypeId { get; set; }
 
-        private string _name;
         [Required(ErrorMessage = "KMSG: El nombre del tipo es requerido")]
         [MaxLength(256)]
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                if (_name != value)
-                {
-                    _name = value;
-                    OnPropertyChanged("Name");
-                }
-            }
-        }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set
-            {
-                if (_description != value)
-                {
-                    _description = value;
-                    OnPropertyChanged("Description");
-                }
-            }
-        }
+        public string Name { get; set; }
+        
+        public string Description { get; set; }
 
         #endregion
 

@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KNote.Model.Entities
 {
-    public class NoteKAttribute : ModelBase
+    public class NoteKAttribute : EntityModelBase
     {
         #region Constructor
 
@@ -15,93 +15,21 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
-        
-        private Guid _noteKAttributeId;
+                
         [Key]
-        public Guid NoteKAttributeId
-        {
-            get { return _noteKAttributeId; }
-            set
-            {
-                if (_noteKAttributeId != value)
-                {
-                    _noteKAttributeId = value;
-                    OnPropertyChanged("NoteKAttributeId");
-                }
-            }
-        }
+        public Guid NoteKAttributeId { get; set; }
 
-        private Guid _noteId;       
-        public Guid NoteId
-        {
-            get { return _noteId; }
-            set
-            {
-                if (_noteId != value)
-                {
-                    _noteId = value;
-                    OnPropertyChanged("NoteId");
-                }
-            }
-        }
-
-        private Guid _kattributeId;        
-        public Guid KAttributeId
-        {
-            get { return _kattributeId; }
-            set
-            {
-                if (_kattributeId != value)
-                {
-                    _kattributeId = value;
-                    OnPropertyChanged("KAttributeId");
-                }
-            }
-        }
-
-        private string _value;
-        public string Value
-        {
-            get { return _value; }
-            set
-            {
-                if (_value != value)
-                {
-                    _value = value;
-                    OnPropertyChanged("Value");
-                }
-            }
-        }
+        public Guid NoteId { get; set; }
+        
+        public Guid KAttributeId { get; set; }
+        
+        public string Value { get; set; }
 
         #region Virtual - navigation properties
 
-        private Note _note;        
-        public virtual Note Note
-        {
-            get { return _note; }
-            set
-            {
-                if (_note != value)
-                {
-                    _note = value;
-                    OnPropertyChanged("Note");
-                }
-            }
-        }
-
-        private KAttribute _kattribute;        
-        public virtual KAttribute KAttribute
-        {
-            get { return _kattribute; }
-            set
-            {
-                if (_kattribute != value)
-                {
-                    _kattribute = value;
-                    OnPropertyChanged("KAttribute");
-                }
-            }
-        }
+        public virtual Note Note { get; set; }
+        
+        public virtual KAttribute KAttribute { get; set; }
 
         #endregion 
 

@@ -7,30 +7,39 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class KAttributeTabulatedValueDto : DtoModelBase
+    public class NoteKAttributeInfoDto : DtoModelBase
     {
-        //public Guid KAttributeTabulatedValueId { get; set; }
-
+        //public Guid NoteKAttributeId { get; set; }
+        //public Guid NoteId { get; set; }
         //public Guid KAttributeId { get; set; }
-
-        //[Required(ErrorMessage = "* Attribute {0} is required ")]
         //public string Value { get; set; }
-        //public string Description { get; set; }
-
-        //public int Order { get; set; }
 
         #region Property definitions
 
-        private Guid _kattributeTabulatedValueId;        
-        public Guid KAttributeTabulatedValueId
+        private Guid _noteKAttributeId;        
+        public Guid NoteKAttributeId
         {
-            get { return _kattributeTabulatedValueId; }
+            get { return _noteKAttributeId; }
             set
             {
-                if (_kattributeTabulatedValueId != value)
+                if (_noteKAttributeId != value)
                 {
-                    _kattributeTabulatedValueId = value;
-                    OnPropertyChanged("KAttributeTabulatedValueId");
+                    _noteKAttributeId = value;
+                    OnPropertyChanged("NoteKAttributeId");
+                }
+            }
+        }
+
+        private Guid _noteId;
+        public Guid NoteId
+        {
+            get { return _noteId; }
+            set
+            {
+                if (_noteId != value)
+                {
+                    _noteId = value;
+                    OnPropertyChanged("NoteId");
                 }
             }
         }
@@ -50,7 +59,6 @@ namespace KNote.Model.Dto
         }
 
         private string _value;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
         public string Value
         {
             get { return _value; }
@@ -60,34 +68,6 @@ namespace KNote.Model.Dto
                 {
                     _value = value;
                     OnPropertyChanged("Value");
-                }
-            }
-        }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set
-            {
-                if (_description != value)
-                {
-                    _description = value;
-                    OnPropertyChanged("Description");
-                }
-            }
-        }
-
-        private int _order;
-        public int Order
-        {
-            get { return _order; }
-            set
-            {
-                if (_order != value)
-                {
-                    _order = value;
-                    OnPropertyChanged("Order");
                 }
             }
         }
@@ -102,17 +82,16 @@ namespace KNote.Model.Dto
 
             // ---
             // Capturar las validaciones implementadas vía atributos.
-            // ---
+            // ---            
 
-            Validator.TryValidateProperty(this.Value,
-               new ValidationContext(this, null, null) { MemberName = "Value" },
-               results);
+            //Validator.TryValidateProperty(this.Name,
+            //   new ValidationContext(this, null, null) { MemberName = "Name" },
+            //   results);
 
             //----
             // Validaciones específicas
             //----
 
-            // ---- Ejemplo
             //if (ModificationDateTime < CreationDateTime)
             //{
             //    results.Add(new ValidationResult
@@ -122,10 +101,13 @@ namespace KNote.Model.Dto
 
             // ---
             // Retornar List<ValidationResult>()
-            // ---
+            // ---           
+
             return results;
         }
 
+
         #endregion
+
     }
 }

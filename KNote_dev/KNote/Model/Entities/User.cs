@@ -8,7 +8,7 @@ using KNote.Model;
 
 namespace KNote.Model.Entities
 {
-    public class User : ModelBase
+    public class User : EntityModelBase
     {
         #region Constructor
 
@@ -17,168 +17,36 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
-
-        private Guid _userId;
+        
         [Key]
-        public Guid UserId
-        {
-            get { return _userId; }
-            set
-            {
-                if (_userId != value)
-                {
-                    _userId = value;
-                    OnPropertyChanged("UserId");
-                }
-            }
-        }
-
-        private string _userName;        
+        public Guid UserId { get; set; }
+        
         [Required(ErrorMessage = "KMSG: El nombre es requerido")]
         [MaxLength(32)]
-        public string UserName
-        {
-            get { return _userName; }
-            set
-            {
-                if (_userName != value)
-                {
-                    _userName = value;
-                    OnPropertyChanged("UserName");
-                }
-            }
-        }
-
-        private string _eMail;
+        public string UserName { get; set; }
+        
         [Required(ErrorMessage = "KMSG: El correo electrónico es requerido")]
         [MaxLength(256)]
-        public string EMail
-        {
-            get { return _eMail; }
-            set
-            {
-                if (_eMail != value)
-                {
-                    _eMail = value;
-                    OnPropertyChanged("EMail");
-                }
-            }
-        }
-
-        private string _fullName;
+        public string EMail { get; set; }
+        
         [MaxLength(256)]
-        public string FullName
-        {
-            get { return _fullName; }
-            set
-            {
-                if (_fullName != value)
-                {
-                    _fullName = value;
-                    OnPropertyChanged("FullName");
-                }
-            }
-        }
-
-        private string _roleDefinition;        
-        public string RoleDefinition
-        {
-            get { return _roleDefinition; }
-            set
-            {
-                if (_roleDefinition != value)
-                {
-                    _roleDefinition = value;
-                    OnPropertyChanged("RoleDefinition");
-                }
-            }
-        }
-
-        private bool _disabled;
-        public bool Disabled
-        {
-            get { return _disabled; }
-            set
-            {
-                if (_disabled != value)
-                {
-                    _disabled = value;
-                    OnPropertyChanged("Disabled");
-                }
-            }
-        }
-
-        private byte[] _passwordHash;
-        public byte[] PasswordHash
-        {
-            get { return _passwordHash; }
-            set
-            {
-                if (_passwordHash != value)
-                {
-                    _passwordHash = value;
-                    OnPropertyChanged("PasswordHash");
-                }
-            }
-        }
-
-        private byte[] _passwordSalt;
-        public byte[] PasswordSalt
-        {
-            get { return _passwordSalt; }
-            set
-            {
-                if (_passwordSalt != value)
-                {
-                    _passwordSalt = value;
-                    OnPropertyChanged("PasswordSalt");
-                }
-            }
-        }
+        public string FullName { get; set; }
+        
+        public string RoleDefinition { get; set; }
+        
+        public bool Disabled { get; set; }
+        
+        public byte[] PasswordHash { get; set; }
+        
+        public byte[] PasswordSalt { get; set; }
 
         #region Virtual - navigation properties 
-
-        private List<Window> _windows;
-        public virtual List<Window> Windows
-        {
-            get { return _windows; }
-            set
-            {
-                if (_windows != value)
-                {
-                    _windows = value;
-                    OnPropertyChanged("Windows");
-                }
-            }
-        }
-
-        private List<NoteTask> _tasks;
-        public virtual List<NoteTask> Tasks
-        {
-            get { return _tasks; }
-            set
-            {
-                if (_tasks != value)
-                {
-                    _tasks = value;
-                    OnPropertyChanged("Tasks");
-                }
-            }
-        }
-
-        private List<KMessage> _kMessages;
-        public virtual List<KMessage> KMessages
-        {
-            get { return _kMessages; }
-            set
-            {
-                if (_kMessages != value)
-                {
-                    _kMessages = value;
-                    OnPropertyChanged("Messages");
-                }
-            }
-        }
+        
+        public virtual List<Window> Windows { get; set; }
+        
+        public virtual List<NoteTask> Tasks { get; set; }
+        
+        public virtual List<KMessage> KMessages { get; set; }
 
         #endregion 
 

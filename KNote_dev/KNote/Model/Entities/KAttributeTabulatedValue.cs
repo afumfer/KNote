@@ -8,7 +8,7 @@ using KNote.Model;
 
 namespace KNote.Model.Entities
 {
-    public class KAttributeTabulatedValue : ModelBase
+    public class KAttributeTabulatedValue : EntityModelBase
     {
         #region Constructor
 
@@ -17,94 +17,22 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
-
-        private Guid _kattributeTabulatedValueId;
+        
         [Key]
-        public Guid KAttributeTabulatedValueId
-        {
-            get { return _kattributeTabulatedValueId; }
-            set
-            {
-                if (_kattributeTabulatedValueId != value)
-                {
-                    _kattributeTabulatedValueId = value;
-                    OnPropertyChanged("KAttributeTabulatedValueId");
-                }
-            }
-        }
+        public Guid KAttributeTabulatedValueId { get; set; }
 
-        private Guid _kattributeId;
-        public Guid KAttributeId
-        {
-            get { return _kattributeId; }
-            set
-            {
-                if (_kattributeId != value)
-                {
-                    _kattributeId = value;
-                    OnPropertyChanged("KAttributeId");
-                }
-            }
-        }
-
-        private string _value;
+        public Guid KAttributeId { get; set; }
+        
         [Required(ErrorMessage = "KMSG: El valor para el atributo es requerido")]
-        public string Value
-        {
-            get { return _value; }
-            set
-            {
-                if (_value != value)
-                {
-                    _value = value;
-                    OnPropertyChanged("Value");
-                }
-            }
-        }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set
-            {
-                if (_description != value)
-                {
-                    _description = value;
-                    OnPropertyChanged("Description");
-                }
-            }
-        }
-
-        private int _order;
-        public int Order
-        {
-            get { return _order; }
-            set
-            {
-                if (_order != value)
-                {
-                    _order = value;
-                    OnPropertyChanged("Order");
-                }
-            }
-        }
+        public string Value { get; set; }
+        
+        public string Description { get; set; }
+        
+        public int Order { get; set; }
 
         #region Virtual - navigation properties
-
-        private KAttribute _kattribute;        
-        public virtual KAttribute KAttribute
-        {
-            get { return _kattribute; }
-            set
-            {
-                if (_kattribute != value)
-                {
-                    _kattribute = value;
-                    OnPropertyChanged("KAttribute");
-                }
-            }
-        }
+        
+        public virtual KAttribute KAttribute { get; set; }
 
         #endregion 
 

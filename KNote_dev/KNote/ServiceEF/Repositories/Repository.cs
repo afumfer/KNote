@@ -13,7 +13,7 @@ namespace KNote.ServiceEF.Repositories
 {
  
     public class Repository<TContext, TEntity> : DomainActionBase, IRepository<TContext, TEntity>
-        where TEntity : ModelBase, new()
+        where TEntity : EntityModelBase, new()
         where TContext: DbContext, new()
     {
 
@@ -259,7 +259,7 @@ namespace KNote.ServiceEF.Repositories
             return result;
         }
 
-        public Result<List<TEntity>> GetAllWithPagination(int page, int limit, Expression<Func<TEntity, bool>> predicate = null)
+        public Result<List<TEntity>> GetAllWithPagination(int page, int limit, Expression<Func<TEntity, bool>> predicate = null)            
         {
             var result = new Result<List<TEntity>>();
 

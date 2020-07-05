@@ -7,7 +7,7 @@ using KNote.Model;
 
 namespace KNote.Model.Entities
 {
-    public class NoteType : ModelBase
+    public class NoteType : EntityModelBase
     {
         #region Constructor
 
@@ -16,84 +16,24 @@ namespace KNote.Model.Entities
         #endregion
 
         #region Property definitions
-
-        private Guid _noteTypeId;
+        
         [Key]
-        public Guid NoteTypeId
-        {
-            get { return _noteTypeId; }
-            set
-            {
-                if (_noteTypeId != value)
-                {
-                    _noteTypeId = value;
-                    OnPropertyChanged("NoteTypeId");
-                }
-            }
-        }
+        public Guid NoteTypeId { get; set; }
 
-        private string _name;
         [Required(ErrorMessage = "KMSG: El nombre del tipo es requerido")]
         [MaxLength(256)]        
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                if (_name != value)
-                {
-                    _name = value;
-                    OnPropertyChanged("Name");
-                }
-            }
-        }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set
-            {
-                if (_description != value)
-                {
-                    _description = value;
-                    OnPropertyChanged("Description");
-                }
-            }
-        }
-
-        private Guid? _parentNoteTypeId;        
-        public Guid? ParenNoteTypeId
-        {
-            get { return _parentNoteTypeId; }
-            set
-            {
-                if (_parentNoteTypeId != value)
-                {
-                    _parentNoteTypeId = value;
-                    OnPropertyChanged("ParenNoteTypeId");
-                }
-            }
-        }
+        public string Name { get; set; }
+        
+        public string Description { get; set; }
+        
+        public Guid? ParenNoteTypeId { get; set; }
 
         #endregion
 
         #region Virtual - navigation properties
-
-        private NoteType _parenNoteType;
+        
         [ForeignKey("ParenNoteTypeId")]   
-        public virtual NoteType ParenNoteType
-        {
-            get { return _parenNoteType; }
-            set
-            {
-                if (_parenNoteType != value)
-                {
-                    _parenNoteType = value;
-                    OnPropertyChanged("ParenNoteType");
-                }
-            }
-        }
+        public virtual NoteType ParenNoteType { get; set; }
 
         #endregion 
 

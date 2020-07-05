@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class NoteKAttributeDto : KntModelBase
+    public class NoteKAttributeDto : NoteKAttributeInfoDto
     {
-        public Guid NoteKAttributeId { get; set; }
-        public Guid NoteId { get; set; }
-        public Guid KAttributeId { get; set; }
-        public string Value { get; set; }
-        
-        public string Name { get; set; }        
+        public string Name { get; set; }
 
-        public string Description { get; set; }        
+        public string Description { get; set; }
         public EnumKAttributeDataType KAttributeDataType { get; set; }
         public Guid? KAttributeNoteTypeId { get; set; }
         public bool RequiredValue { get; set; }
