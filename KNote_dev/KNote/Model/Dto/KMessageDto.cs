@@ -9,20 +9,6 @@ namespace KNote.Model.Dto
 {
     public class KMessageDto : DtoModelBase
     {
-        //public Guid KMessageId { get; set; }
-        //public Guid? UserId { get; set; }
-        //public Guid? NoteId { get; set; }
-        //public EnumActionType ActionType { get; set; }
-        //public EnumNotificationType NotificationType { get; set; }
-        //public EnumAlarmType AlarmType { get; set; }
-        //public bool Disabled { get; set; }
-        //public string Content { get; set; }
-        //public string Forward { get; set; }
-        //public bool? AlarmActivated { get; set; }
-        //public DateTime? AlarmDateTime { get; set; }
-        //public int? AlarmMinutes { get; set; }
-        //public bool? AlarmOk { get; set; }
-
         #region Property definitions
 
         private Guid _kmessageId;        

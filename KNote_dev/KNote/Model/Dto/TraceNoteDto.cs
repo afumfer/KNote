@@ -9,19 +9,6 @@ namespace KNote.Model.Dto
 {
     public class TraceNoteDto : DtoModelBase
     {
-        //public Guid TraceNoteId { get; set; }
-
-        //public Guid FromId { get; set; }
-
-        //public Guid ToId { get; set; }
-
-        //public int Order { get; set; }
-
-        //public double Weight { get; set; }
-
-        //public Guid? TraceNoteTypeId { get; set; }
-
-
         #region Property definitions
 
         private Guid _traceNoteId;

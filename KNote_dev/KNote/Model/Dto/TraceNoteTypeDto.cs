@@ -9,14 +9,6 @@ namespace KNote.Model.Dto
 {
     public class TraceNoteTypeDto : DtoModelBase
     {
-        //public Guid TraceNoteTypeId { get; set; }
-
-        //[Required(ErrorMessage = "* Attribute {0} is required ")]
-        //[MaxLength(256)]
-        //public string Name { get; set; }
-
-        //public string Description { get; set; }
-
         #region Property definitions
 
         private Guid _traceNoteTypeId;        

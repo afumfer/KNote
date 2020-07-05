@@ -9,12 +9,6 @@ namespace KNote.Model.Dto
 {
     public class SystemValueDto : DtoModelBase
     {
-        //public Guid SystemValueId { get; set; }
-        //[Required(ErrorMessage = "* Attribute {0} is required ")]
-        //[MaxLength(256)]
-        //public string Key { get; set; }
-        //public string Value { get; set; }
-
         #region Property definitions
 
         private Guid _systemValueId;        

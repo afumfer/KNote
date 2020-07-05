@@ -9,25 +9,6 @@ namespace KNote.Model.Dto
 {
     public class KEventDto : DtoModelBase
     {
-        //public Guid KEventId { get; set; }
-
-        //// TODO: NoteScriptId debe ser null
-        //public Guid? NoteScriptId { get; set; }
-
-        //public Guid? EntityId { get; set; }
-
-        //[MaxLength(64)]
-        //public string EntityName { get; set; }
-
-        //[MaxLength(64)]
-        //public string PropertyName { get; set; }
-
-        //public string PropertyValue { get; set; }
-
-        //public EnumEventType EventType { get; set; }
-
-        //public NoteDto NoteScriptDto { get; set; }
-
         #region Property definitions
 
         private Guid _keventId;        

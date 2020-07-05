@@ -7,14 +7,6 @@ namespace KNote.Model.Dto
 {
     public class NoteTypeDto : DtoModelBase
     {
-        //public Guid NoteTypeId { get; set; }
-
-        //[Required(ErrorMessage = "* Attribute {0} is required ")]
-        //[MaxLength(256)]
-        //public string Name { get; set; }
-
-        //public string Description { get; set; }
-
         #region Property definitions
 
         private Guid _noteTypeId;        

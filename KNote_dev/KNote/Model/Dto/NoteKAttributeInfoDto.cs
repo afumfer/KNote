@@ -9,11 +9,6 @@ namespace KNote.Model.Dto
 {
     public class NoteKAttributeInfoDto : DtoModelBase
     {
-        //public Guid NoteKAttributeId { get; set; }
-        //public Guid NoteId { get; set; }
-        //public Guid KAttributeId { get; set; }
-        //public string Value { get; set; }
-
         #region Property definitions
 
         private Guid _noteKAttributeId;        
@@ -108,6 +103,5 @@ namespace KNote.Model.Dto
 
 
         #endregion
-
     }
 }

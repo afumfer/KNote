@@ -9,32 +9,6 @@ namespace KNote.Model.Dto
 {
     public class ResourceDto : DtoModelBase
     {
-        //public Guid ResourceId { get; set; }
-
-        //[Required(ErrorMessage = "* Attribute {0} is required ")]
-        //[MaxLength(1024)]
-        //public string Name { get; set; }
-
-        //public string Container { get; set; }
-
-        //public string FullUrl { get; set; }
-
-        //public string RelativeUrl {get; set; }
-
-        //public string Description { get; set; }
-
-        //public int Order { get; set; }
-
-        //[MaxLength(64)]
-        //public string FileType { get; set; }
-
-        //public bool ContentInDB { get; set; }
-
-        //public byte[] ContentArrayBytes { get; set; }
-
-
-        //public Guid NoteId { get; set; }
-
         #region Property definitions
 
         private Guid _resourceId;        
@@ -227,6 +201,5 @@ namespace KNote.Model.Dto
         }
 
         #endregion
-
     }
 }
