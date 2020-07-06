@@ -9,11 +9,11 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using KNote.Model;
 using KNote.Model.Entities;
-using KNote.ServiceEF.Infrastructure;
-using KNote.ServiceEF.Repositories;
+using KNote.Service.Infrastructure;
+using KNote.Service.Repositories;
 using KNote.Model.Services;
 
-namespace KNote.ServiceEF.Services
+namespace KNote.Service.Services
 {
     public class KntService: IKntService, IDisposable
     {

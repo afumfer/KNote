@@ -1,6 +1,6 @@
 ﻿using KNote.Model;
 using KNote.Model.Entities;
-using KNote.ServiceEF.Infrastructure;
+using KNote.Service.Infrastructure;
 using System;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.ServiceEF.Repositories
+namespace KNote.Service.Repositories
 {
     public interface IKntRepository: IDisposable
     {

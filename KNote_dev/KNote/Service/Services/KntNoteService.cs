@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using KNote.ServiceEF.Repositories;
+using KNote.Service.Repositories;
 using KNote.Model;
 using KNote.Model.Entities;
 using KNote.Model.Dto;
-using KNote.ServiceEF.Infrastructure;
+using KNote.Service.Infrastructure;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using KNote.Model.Services;
 
-namespace KNote.ServiceEF.Services
+namespace KNote.Service.Services
 {
     public class KntNoteService : DomainActionBase, IKntNoteService
     {

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace KNote.ServiceEF.Infrastructure
+namespace KNote.Service.Infrastructure
 {
     public static class ModelBuilderExtensions
     {

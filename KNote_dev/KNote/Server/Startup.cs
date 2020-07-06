@@ -1,4 +1,4 @@
-using KNote.ServiceEF.Services;
+using KNote.Service.Services;
 using KNote.Model.Services;
 using KNote.Server.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

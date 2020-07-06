@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\KNote.Client.csproj" />
-    <ProjectReference Include="..\ServiceEF\KNote.ServiceEF.csproj" />
+    <ProjectReference Include="..\Service\KNote.Service.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using KNote.ServiceEF.Repositories;
+using KNote.Service.Repositories;
 using KNote.Model;
 using KNote.Model.Entities;
 using KNote.Model.Dto;
@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using KNote.Model.Services;
 
-namespace KNote.ServiceEF.Services
+namespace KNote.Service.Services
 {
     public class KntUserService : DomainActionBase, IKntUserService
     {

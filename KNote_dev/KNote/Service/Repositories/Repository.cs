@@ -9,7 +9,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace KNote.ServiceEF.Repositories
+namespace KNote.Service.Repositories
 {
  
     public class Repository<TContext, TEntity> : DomainActionBase, IRepository<TContext, TEntity>

@@ -12,10 +12,10 @@ using System.Linq.Expressions;
 
 using KNote.Model;
 using KNote.Model.Entities;
-using KNote.ServiceEF.Infrastructure;
-using KNote.ServiceEF.Repositories;
+using KNote.Service.Infrastructure;
+using KNote.Service.Repositories;
 
-namespace KNote.ServiceEF.Repositories
+namespace KNote.Service.Repositories
 {
     public class KntRepository : IKntRepository
     {

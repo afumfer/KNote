@@ -3,20 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using KNote.ServiceEF.Repositories;
+using KNote.Service.Repositories;
 using KNote.Model;
 using KNote.Model.Entities;
 using KNote.Model.Dto;
-using KNote.ServiceEF.Infrastructure;
-using Microsoft.EntityFrameworkCore;
-
-using System.Linq.Expressions;
+using KNote.Service.Infrastructure;
 using KNote.Model.Services;
 
-
-namespace KNote.ServiceEF.Services
+namespace KNote.Service.Services
 {
-    public class KntNoteTypeService : DomainActionBase, IKntNoteTypeService
+    public class KntKEventService : DomainActionBase, IKntKEventService
     {
         #region Fields
 
@@ -26,25 +22,22 @@ namespace KNote.ServiceEF.Services
 
         #region Constructor
 
-        public KntNoteTypeService(IKntRepository repository)
+        protected internal KntKEventService(IKntRepository repository)
         {
             _repository = repository;
         }
 
         #endregion
 
-        #region IKntNoteTypes
+        #region IKntKEventService
 
-        public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
+        public async Task<Result<List<KEventDto>>> GetAllAsync()
         {
-            var resService = new Result<List<NoteTypeDto>>();
+            var resService = new Result<List<KEventDto>>();
             try
             {
-                var resRep = await _repository.NoteTypes.GetAllAsync();
-                resService.Entity = resRep.Entity?
-                    .Select(t => t.GetSimpleDto<NoteTypeDto>())
-                    .OrderBy(t => t.Name)
-                    .ToList();
+                var resRep = await _repository.KEvents.GetAllAsync();
+                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KEventDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -54,17 +47,13 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<NoteTypeDto>> GetAsync(Guid id)
+        public async Task<Result<KEventDto>> GetAsync(Guid eventId)
         {
-            var resService = new Result<NoteTypeDto>();
+            var resService = new Result<KEventDto>();
             try
             {
-                var resRep = await _repository.NoteTypes.GetAsync((object)id);
-                
-                resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeDto>();
-                // KNote template ... load here aditionals properties for UserDto
-                // ... 
-
+                var resRep = await _repository.KEvents.GetAsync((object)eventId);
+                resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -74,56 +63,54 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entity)
+        public async Task<Result<KEventDto>> SaveAsync(KEventDto entity)
         {
-            Result<NoteType> resRep = null;
-            var resService = new Result<NoteTypeDto>();
+            Result<KEvent> resRep = null;
+            var resService = new Result<KEventDto>();
 
             try
             {
-                if (entity.NoteTypeId == Guid.Empty)
+                if (entity.KEventId == Guid.Empty)
                 {
-                    entity.NoteTypeId = Guid.NewGuid();
-                    var newEntity = new NoteType();
+                    entity.KEventId = Guid.NewGuid();
+                    var newEntity = new KEvent();
                     newEntity.SetSimpleDto(entity);
 
                     // TODO: update standard control values to newEntity
                     // ...
 
-                    resRep = await _repository.NoteTypes.AddAsync(newEntity);
+                    resRep = await _repository.KEvents.AddAsync(newEntity);
                 }
                 else
                 {
                     bool flagThrowKntException = false;
 
-                    if (_repository.Users.ThrowKntException == true)
+                    if (_repository.KEvents.ThrowKntException == true)
                     {
                         flagThrowKntException = true;
-                        _repository.Users.ThrowKntException = false;
+                        _repository.KEvents.ThrowKntException = false;
                     }
 
-                    //var entityForUpdate = _repository.Users.Get(entityInfo.UserId).Entity;
-                    resRep = await _repository.NoteTypes.GetAsync(entity.NoteTypeId);
-                    var entityForUpdate = resRep.Entity;
+                    var entityForUpdate = (await _repository.KEvents.GetAsync(entity.KEventId)).Entity;
 
                     if (flagThrowKntException == true)
-                        _repository.Users.ThrowKntException = true;
+                        _repository.KEvents.ThrowKntException = true;
 
                     if (entityForUpdate != null)
                     {
                         // TODO: update standard control values to entityForUpdate
                         // ...
                         entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _repository.NoteTypes.UpdateAsync(entityForUpdate);
+                        resRep = await  _repository.KEvents.UpdateAsync(entityForUpdate);
                     }
                     else
                     {
-                        var newEntity = new NoteType();
+                        var newEntity = new KEvent();
                         newEntity.SetSimpleDto(entity);
 
                         // TODO: update standard control values to newEntity
                         // ...
-                        resRep = await _repository.NoteTypes.AddAsync(newEntity);
+                        resRep = await _repository.KEvents.AddAsync(newEntity);
                     }
                 }
             }
@@ -131,25 +118,24 @@ namespace KNote.ServiceEF.Services
             {
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
-
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios).
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeDto>();
+            
+            resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
+        public async Task<Result<KEventDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<NoteTypeDto>();
+            var resService = new Result<KEventDto>();
             try
             {
-                var resRep = await _repository.NoteTypes.GetAsync(id);
+                var resRep = await _repository.KEvents.GetAsync(id);
                 if (resRep.IsValid)
                 {
-                    resRep = await _repository.NoteTypes.DeleteAsync(resRep.Entity);
+                    resRep = await _repository.KEvents.DeleteAsync(resRep.Entity);
                     if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeDto>();
+                        resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
                     else
                         resService.ErrorList = resRep.ErrorList;
                 }
@@ -163,7 +149,6 @@ namespace KNote.ServiceEF.Services
             return ResultDomainAction(resService);
         }
 
-        #endregion
-
+        #endregion 
     }
 }

@@ -8,7 +8,7 @@ using System.Linq;
 using KNote.Model;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace KNote.ServiceEF.Repositories
+namespace KNote.Service.Repositories
 {
     public interface IRepository<TContext, TEntity> : IDisposable
         where TEntity : ModelBase, new()
@@ -42,9 +42,9 @@ namespace KNote.ServiceEF.Repositories
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,  
             string includeProperties = "");                        
         
-        Result<TEntity> Add(TEntity entity);
-        Result<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entity);
+        Result<TEntity> Add(TEntity entity);        
         Task<Result<TEntity>> AddAsync(TEntity entity);
+        Result<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entity);
         Result<TEntity> Update(TEntity entity);
         Task<Result<TEntity>> UpdateAsync(TEntity entity);
         Result<TEntity> Delete(params object[] keyValues);

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using KNote.Model;
 
-namespace KNote.ServiceEF.Infrastructure
+namespace KNote.Service.Infrastructure
 {
     public class KntDbContext: DbContext
     {
