@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.Model", "KNote\Model\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.Service", "KNote\Service\KNote.Service.csproj", "{A8A7811E-EDA9-4CDA-BC4A-DD7C513E0F49}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNote.Repository", "KNote\Repository\KNote.Repository\KNote.Repository.csproj", "{9C59F703-C941-4C03-9CFB-26F334923FAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{A8A7811E-EDA9-4CDA-BC4A-DD7C513E0F49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8A7811E-EDA9-4CDA-BC4A-DD7C513E0F49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8A7811E-EDA9-4CDA-BC4A-DD7C513E0F49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C59F703-C941-4C03-9CFB-26F334923FAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C59F703-C941-4C03-9CFB-26F334923FAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C59F703-C941-4C03-9CFB-26F334923FAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C59F703-C941-4C03-9CFB-26F334923FAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

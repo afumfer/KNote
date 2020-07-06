@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using KNote.Model.Services;
+using KNote.Service;
 using KNote.Model.Dto;
 using Microsoft.Extensions.Configuration;
 using KNote.Server.Helpers;

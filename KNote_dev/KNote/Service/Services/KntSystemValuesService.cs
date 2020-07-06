@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using KNote.Service.Repositories;
+using KNote.Repository.EntityFramework;
 using KNote.Model;
-using KNote.Model.Entities;
+using KNote.Repository.Entities;
 using KNote.Model.Dto;
-using KNote.Model.Services;
+using KNote.Service;
+using KNote.Repository;
 
 namespace KNote.Service.Services
 {

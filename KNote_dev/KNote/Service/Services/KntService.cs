@@ -8,10 +8,11 @@ using System.Data.Common;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using KNote.Model;
-using KNote.Model.Entities;
-using KNote.Service.Infrastructure;
-using KNote.Service.Repositories;
-using KNote.Model.Services;
+using KNote.Repository.Entities;
+using KNote.Repository.EntityFramework;
+using KNote.Repository.EntityFramework;
+using KNote.Service;
+using KNote.Repository;
 
 namespace KNote.Service.Services
 {
@@ -19,7 +20,7 @@ namespace KNote.Service.Services
     {
         #region Fields
 
-        protected KntRepository _repository;
+        protected IKntRepository _repository;
 
         #endregion
 

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\KNote.Client.csproj" />
+    <ProjectReference Include="..\Model\KNote.Model.csproj" />
     <ProjectReference Include="..\Service\KNote.Service.csproj" />
   </ItemGroup>
 

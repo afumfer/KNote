@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KNote.Model.Services;
+using KNote.Service;
 using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
