@@ -10,7 +10,6 @@ using System.Linq.Expressions;
 using KNote.Model;
 using KNote.Repository.Entities;
 using KNote.Repository.EntityFramework;
-using KNote.Repository.EntityFramework;
 using KNote.Service;
 using KNote.Repository;
 
@@ -68,28 +67,6 @@ namespace KNote.Service.Services
             }
         }
 
-        private IKntKMessageService _kMessages;
-        public IKntKMessageService KMessages
-        {
-            get
-            {
-                if (_kMessages == null)
-                    _kMessages = new KntKMessageService(_repository);
-                return _kMessages;
-            }
-        }
-
-        private IKntKEventService _kEvents;
-        public IKntKEventService KEvents
-        {
-            get
-            {
-                if (_kEvents == null)
-                    _kEvents = new KntKEventService(_repository);
-                return _kEvents;
-            }
-        }
-
         private IKntFolderService _folders;
         public IKntFolderService Folders
         {
@@ -122,6 +99,29 @@ namespace KNote.Service.Services
                 return _noteTypes;
             }
         }
+
+        //private IKntKMessageService _kMessages;
+        //public IKntKMessageService KMessages
+        //{
+        //    get
+        //    {
+        //        if (_kMessages == null)
+        //            _kMessages = new KntKMessageService(_repository);
+        //        return _kMessages;
+        //    }
+        //}
+
+        //private IKntKEventService _kEvents;
+        //public IKntKEventService KEvents
+        //{
+        //    get
+        //    {
+        //        if (_kEvents == null)
+        //            _kEvents = new KntKEventService(_repository);
+        //        return _kEvents;
+        //    }
+        //}
+
 
         #endregion
 

@@ -4,16 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace KNote.Service
+namespace KNote.Repository
 {
-    public interface IKntUserService
-    {        
+    public interface IKntUserRepository : IDisposable
+    {
         Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null);
-        Task<Result<UserDto>> GetAsync(Guid userId);   
+        Task<Result<UserDto>> GetAsync(Guid userId);
         Task<Result<UserDto>> SaveAsync(UserDto entityInfo);
         Task<Result<UserDto>> DeleteAsync(Guid userId);
         Task<Result<int>> GetCount();
-        Result<UserDto> Authenticate(string username, string password);
-        Result<UserDto> Create(UserRegisterDto userRegisterInfoDto);
     }
 }

@@ -4,24 +4,24 @@ using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
 
-namespace KNote.Service
+namespace KNote.Repository
 {
-    public interface IKntNoteService
+    public interface IKntNoteRepository : IDisposable
     {
         Task<Result<List<NoteInfoDto>>> GetAllAsync();
         Task<Result<List<NoteInfoDto>>> HomeNotesAsync();
         Task<Result<NoteDto>> GetAsync(Guid noteId);
         int GetNextNoteNumber();
-        Task <Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);
+        Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);
         Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);
-        Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);                        
+        Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);
         Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);
         Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo);
         Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
         Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity);
         Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity);
         Task<Result<ResourceDto>> DeleteResourceAsync(Guid id);
-        Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote);        
+        Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote);
         Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo);
         Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote);
         Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid id);

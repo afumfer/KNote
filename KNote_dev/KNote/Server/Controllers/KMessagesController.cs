@@ -29,127 +29,127 @@ namespace KNote.Server.Controllers
         }
 
 
-        // TODO: Eliminar este método. (Sólo para periodo de pruebas)
-        [HttpGet]   // GET api/kmessages
-        public async Task<IActionResult> Get()
-        {
-            var kresApi = new Result<List<KMessageDto>>();
-            try
-            {
-                kresApi = await _service.KMessages.GetAllAsync();
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //// TODO: Eliminar este método. (Sólo para periodo de pruebas)
+        //[HttpGet]   // GET api/kmessages
+        //public async Task<IActionResult> Get()
+        //{
+        //    var kresApi = new Result<List<KMessageDto>>();
+        //    try
+        //    {
+        //        kresApi = await _service.KMessages.GetAllAsync();
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
-        [HttpGet("{messageId}")]    // GET api/kmessages/guidmessage
-        public async Task<IActionResult> Get(Guid messageId)
-        {
-            var kresApi = new Result<KMessageDto>();
-            try
-            {
-                kresApi = await _service.KMessages.GetAsync(messageId);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
-
-
-        [HttpGet("[action]/{noteId}")]    // GET api/kmessages/GetToNote/xx        
-        public async Task<IActionResult> GetToNote(Guid noteId)
-        {
-            var kresApi = new Result<List<KMessageDto>>();
-            try
-            {
-                kresApi = await _service.KMessages.GetAllForNoteAsync(noteId);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //[HttpGet("{messageId}")]    // GET api/kmessages/guidmessage
+        //public async Task<IActionResult> Get(Guid messageId)
+        //{
+        //    var kresApi = new Result<KMessageDto>();
+        //    try
+        //    {
+        //        kresApi = await _service.KMessages.GetAsync(messageId);
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
 
-        [HttpGet("[action]/{userId}")]    // GET api/kmessages/GetToUser/xx        
-        public async Task<IActionResult> GetToUser(Guid userId)
-        {
-            var kresApi = new Result<List<KMessageDto>>();
-            try
-            {
-                kresApi = await _service.KMessages.GetAllForUserAsync(userId);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //[HttpGet("[action]/{noteId}")]    // GET api/kmessages/GetToNote/xx        
+        //public async Task<IActionResult> GetToNote(Guid noteId)
+        //{
+        //    var kresApi = new Result<List<KMessageDto>>();
+        //    try
+        //    {
+        //        kresApi = await _service.KMessages.GetAllForNoteAsync(noteId);
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
 
-        [HttpPost]   // POST api/kmessages
-        [HttpPut]    // PUT api/kmessages
-        [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> Post([FromBody]KMessageDto kmessageInfo)
-        {
-            var kresApi = new Result<KMessageDto>();
-            try
-            {
-                kresApi = await _service.KMessages.SaveAsync(kmessageInfo);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //[HttpGet("[action]/{userId}")]    // GET api/kmessages/GetToUser/xx        
+        //public async Task<IActionResult> GetToUser(Guid userId)
+        //{
+        //    var kresApi = new Result<List<KMessageDto>>();
+        //    try
+        //    {
+        //        kresApi = await _service.KMessages.GetAllForUserAsync(userId);
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
 
-        [HttpDelete("{id}")]    // DELETE api/kmessages/guid        
-        [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var kresApi = new Result<KMessageDto>();
-            try
-            {
-                kresApi = await _service.KMessages.DeleteAsync(id);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //[HttpPost]   // POST api/kmessages
+        //[HttpPut]    // PUT api/kmessages
+        //[Authorize(Roles = "Admin, Staff, ProjecManager")]
+        //public async Task<IActionResult> Post([FromBody]KMessageDto kmessageInfo)
+        //{
+        //    var kresApi = new Result<KMessageDto>();
+        //    try
+        //    {
+        //        kresApi = await _service.KMessages.SaveAsync(kmessageInfo);
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
+
+
+        //[HttpDelete("{id}")]    // DELETE api/kmessages/guid        
+        //[Authorize(Roles = "Admin, Staff, ProjecManager")]
+        //public async Task<IActionResult> Delete(Guid id)
+        //{
+        //    var kresApi = new Result<KMessageDto>();
+        //    try
+        //    {
+        //        kresApi = await _service.KMessages.DeleteAsync(id);
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
     }
 
 }

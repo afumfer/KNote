@@ -7,7 +7,6 @@ using KNote.Repository.EntityFramework;
 using KNote.Repository.Entities;
 using KNote.Model.Dto;
 using KNote.Model;
-using KNote.Repository.EntityFramework;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using KNote.Service;

@@ -7,9 +7,7 @@ using KNote.Repository.EntityFramework;
 using KNote.Model;
 using KNote.Repository.Entities;
 using KNote.Model.Dto;
-using KNote.Repository.EntityFramework;
 using Microsoft.EntityFrameworkCore;
-
 using System.Linq.Expressions;
 using KNote.Service;
 using KNote.Repository;
@@ -37,130 +35,22 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
         {
-            var resService = new Result<List<NoteTypeDto>>();
-            try
-            {
-                var resRep = await _repository.NoteTypes.GetAllAsync();
-                resService.Entity = resRep.Entity?
-                    .Select(t => t.GetSimpleDto<NoteTypeDto>())
-                    .OrderBy(t => t.Name)
-                    .ToList();
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
+            return await _repository.NoteTypes.GetAllAsync();
         }
 
         public async Task<Result<NoteTypeDto>> GetAsync(Guid id)
         {
-            var resService = new Result<NoteTypeDto>();
-            try
-            {
-                var resRep = await _repository.NoteTypes.GetAsync((object)id);
-                
-                resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeDto>();
-                // KNote template ... load here aditionals properties for UserDto
-                // ... 
-
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
+            return await _repository.NoteTypes.GetAsync(id);
         }
 
         public async Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entity)
         {
-            Result<NoteType> resRep = null;
-            var resService = new Result<NoteTypeDto>();
-
-            try
-            {
-                if (entity.NoteTypeId == Guid.Empty)
-                {
-                    entity.NoteTypeId = Guid.NewGuid();
-                    var newEntity = new NoteType();
-                    newEntity.SetSimpleDto(entity);
-
-                    // TODO: update standard control values to newEntity
-                    // ...
-
-                    resRep = await _repository.NoteTypes.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
-
-                    if (_repository.Users.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _repository.Users.ThrowKntException = false;
-                    }
-
-                    //var entityForUpdate = _repository.Users.Get(entityInfo.UserId).Entity;
-                    resRep = await _repository.NoteTypes.GetAsync(entity.NoteTypeId);
-                    var entityForUpdate = resRep.Entity;
-
-                    if (flagThrowKntException == true)
-                        _repository.Users.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _repository.NoteTypes.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new NoteType();
-                        newEntity.SetSimpleDto(entity);
-
-                        // TODO: update standard control values to newEntity
-                        // ...
-                        resRep = await _repository.NoteTypes.AddAsync(newEntity);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios).
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeDto>();
-            resService.ErrorList = resRep.ErrorList;
-
-            return ResultDomainAction(resService);
+            return await _repository.NoteTypes.SaveAsync(entity);
         }
 
         public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<NoteTypeDto>();
-            try
-            {
-                var resRep = await _repository.NoteTypes.GetAsync(id);
-                if (resRep.IsValid)
-                {
-                    resRep = await _repository.NoteTypes.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteTypeDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
+            return await _repository.NoteTypes.DeleteAsync(id);
         }
 
         #endregion

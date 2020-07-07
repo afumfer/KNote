@@ -13,10 +13,11 @@ namespace KNote.Service
         IKntUserService Users { get; }
         IKntKAttributeService KAttributes { get; }
         IKntSystemValuesService SystemValues { get; }
-        IKntKMessageService KMessages { get; }
-        IKntKEventService KEvents { get; }
         IKntFolderService Folders { get; }
         IKntNoteService Notes { get; }
         IKntNoteTypeService NoteTypes { get; }
+
+        //IKntKMessageService KMessages { get; }
+        //IKntKEventService KEvents { get; }
     }
 }

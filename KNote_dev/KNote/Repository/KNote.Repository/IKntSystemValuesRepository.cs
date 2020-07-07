@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
 using KNote.Model;
 using KNote.Model.Dto;
 
-namespace KNote.Service
+namespace KNote.Repository
 {
-    public interface IKntSystemValuesService
+    public interface IKntSystemValuesRepository : IDisposable
     {
         Task<Result<List<SystemValueDto>>> GetAllAsync();
         Task<Result<SystemValueDto>> GetAsync(string key);

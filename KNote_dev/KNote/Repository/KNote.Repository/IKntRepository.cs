@@ -12,23 +12,39 @@ namespace KNote.Repository
 {
     public interface IKntRepository: IDisposable
     {
+                
+        IKntNoteTypeRepository NoteTypes { get; }
+        
+        //IGenericRepositoryEF<KntDbContext, SystemValue> SystemValues { get; }
+        IKntSystemValuesRepository SystemValues { get; }
+
+        /// ------------------
+
+
         IGenericRepositoryEF<KntDbContext, User> Users { get; }
         IGenericRepositoryEF<KntDbContext, Folder> Folders { get; }
+        IGenericRepositoryEF<KntDbContext, KAttribute> KAttributes { get; }
         IGenericRepositoryEF<KntDbContext, Note> Notes { get; }
         IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes { get; }
-        IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks { get; }
-        IGenericRepositoryEF<KntDbContext, Window> Windows { get; }
         IGenericRepositoryEF<KntDbContext, Resource> Resources { get; }
-        IGenericRepositoryEF<KntDbContext, KAttribute> KAttributes { get; }
+        IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks { get; }
+                        
         IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues { get; }
-        IGenericRepositoryEF<KntDbContext, SystemValue> SystemValues { get; }
-        IGenericRepositoryEF<KntDbContext, TraceNote> TraceNotes { get; }
-        IGenericRepositoryEF<KntDbContext, KEvent> KEvents { get; }
-        IGenericRepositoryEF<KntDbContext, KMessage> KMessages { get; }
-        IGenericRepositoryEF<KntDbContext, KLog> KLogs { get; }
-        IGenericRepositoryEF<KntDbContext, NoteType> NoteTypes { get; }
-        IGenericRepositoryEF<KntDbContext, TraceNoteType> TraceNoteTypes { get; }
+
+        // -------------------------------
+
         
+
+        // -------------------------------
+
+        //IGenericRepositoryEF<KntDbContext, Window> Windows { get; }
+        //IGenericRepositoryEF<KntDbContext, TraceNote> TraceNotes { get; }
+        //IGenericRepositoryEF<KntDbContext, KEvent> KEvents { get; }
+        //IGenericRepositoryEF<KntDbContext, KMessage> KMessages { get; }
+        //IGenericRepositoryEF<KntDbContext, KLog> KLogs { get; }
+        //IGenericRepositoryEF<KntDbContext, TraceNoteType> TraceNoteTypes { get; }
+
+
         void RefresDbContext();
     }
 }

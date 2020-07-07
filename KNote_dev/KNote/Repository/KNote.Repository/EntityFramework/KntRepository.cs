@@ -42,6 +42,32 @@ namespace KNote.Repository.EntityFramework
 
         #region IKntRepository
 
+
+        private IKntNoteTypeRepository _noteTypes;
+        public IKntNoteTypeRepository NoteTypes 
+        {
+            get
+            {
+                if (_noteTypes == null)
+                    _noteTypes = new KntNoteTypeRepository(_context, _throwKntException);
+                return _noteTypes;
+            }
+        }
+
+        private IKntSystemValuesRepository _systemValues;
+        public IKntSystemValuesRepository SystemValues
+        {
+            get
+            {
+                if (_systemValues == null)
+                    _systemValues = new KntSystemValuesRepository(_context, _throwKntException);
+                return _systemValues;
+            }
+        }
+
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!
+
         private IGenericRepositoryEF<KntDbContext, User> _users;
         public IGenericRepositoryEF<KntDbContext, User> Users
         {
@@ -97,17 +123,6 @@ namespace KNote.Repository.EntityFramework
             }
         }
 
-        private IGenericRepositoryEF<KntDbContext, Window> _windows;
-        public IGenericRepositoryEF<KntDbContext, Window> Windows
-        {
-            get
-            {
-                if (_windows == null)
-                    _windows = new GenericRepositoryEF<KntDbContext, Window>(_context, _throwKntException);
-                return _windows;
-            }
-        }
-
         private IGenericRepositoryEF<KntDbContext, Resource> _resources;
         public IGenericRepositoryEF<KntDbContext, Resource> Resources
         {
@@ -141,93 +156,78 @@ namespace KNote.Repository.EntityFramework
             }
         }
 
-        private IGenericRepositoryEF<KntDbContext, SystemValue> _systemValues;
-        public IGenericRepositoryEF<KntDbContext, SystemValue> SystemValues
-        {
-            get
-            {
-                if (_systemValues == null)
-                    _systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(_context, _throwKntException);
-                return _systemValues;
-            }
-        }
 
-        private IGenericRepositoryEF<KntDbContext, TraceNote> _traceNotes;
-        public IGenericRepositoryEF<KntDbContext, TraceNote> TraceNotes
-        {
-            get
-            {
-                if (_traceNotes == null)
-                    _traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(_context, _throwKntException);
-                return _traceNotes;
-            }
-        }
 
-        private IGenericRepositoryEF<KntDbContext, KEvent> _kEvents;
-        public IGenericRepositoryEF<KntDbContext, KEvent> KEvents
-        {
-            get
-            {
-                if (_kEvents == null)
-                    _kEvents = new GenericRepositoryEF<KntDbContext, KEvent>(_context, _throwKntException);
-                return _kEvents;
-            }
-        }
+        //private IGenericRepositoryEF<KntDbContext, Window> _windows;
+        //public IGenericRepositoryEF<KntDbContext, Window> Windows
+        //{
+        //    get
+        //    {
+        //        if (_windows == null)
+        //            _windows = new GenericRepositoryEF<KntDbContext, Window>(_context, _throwKntException);
+        //        return _windows;
+        //    }
+        //}
 
-        private IGenericRepositoryEF<KntDbContext, KMessage> _kMessages;
-        public IGenericRepositoryEF<KntDbContext, KMessage> KMessages
-        {
-            get
-            {
-                if (_kMessages == null)
-                    _kMessages = new GenericRepositoryEF<KntDbContext, KMessage>(_context, _throwKntException);
-                return _kMessages;
-            }
-        }
+        //private IGenericRepositoryEF<KntDbContext, TraceNote> _traceNotes;
+        //public IGenericRepositoryEF<KntDbContext, TraceNote> TraceNotes
+        //{
+        //    get
+        //    {
+        //        if (_traceNotes == null)
+        //            _traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(_context, _throwKntException);
+        //        return _traceNotes;
+        //    }
+        //}
+
+        //private IGenericRepositoryEF<KntDbContext, KEvent> _kEvents;
+        //public IGenericRepositoryEF<KntDbContext, KEvent> KEvents
+        //{
+        //    get
+        //    {
+        //        if (_kEvents == null)
+        //            _kEvents = new GenericRepositoryEF<KntDbContext, KEvent>(_context, _throwKntException);
+        //        return _kEvents;
+        //    }
+        //}
+
+        //private IGenericRepositoryEF<KntDbContext, KMessage> _kMessages;
+        //public IGenericRepositoryEF<KntDbContext, KMessage> KMessages
+        //{
+        //    get
+        //    {
+        //        if (_kMessages == null)
+        //            _kMessages = new GenericRepositoryEF<KntDbContext, KMessage>(_context, _throwKntException);
+        //        return _kMessages;
+        //    }
+        //}
         
-        private IGenericRepositoryEF<KntDbContext, KLog> _kLogs;
-        public IGenericRepositoryEF<KntDbContext, KLog> KLogs
-        {
-            get
-            {
-                if (_kLogs == null)
-                    _kLogs = new GenericRepositoryEF<KntDbContext, KLog>(_context, _throwKntException);
-                return _kLogs;
-            }
-        }
-      
-        private IGenericRepositoryEF<KntDbContext, NoteType> _noteTypes;
-        public IGenericRepositoryEF<KntDbContext, NoteType> NoteTypes
-        {
-            get
-            {
-                if (_noteTypes == null)
-                    _noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(_context, _throwKntException);
-                return _noteTypes;
-            }
-        }
-        
-        private IGenericRepositoryEF<KntDbContext, TraceNoteType> _traceNoteTypes;
-        public IGenericRepositoryEF<KntDbContext, TraceNoteType> TraceNoteTypes
-        {
-            get
-            {
-                if (_traceNoteTypes == null)
-                    _traceNoteTypes = new GenericRepositoryEF<KntDbContext, TraceNoteType>(_context, _throwKntException);
-                return _traceNoteTypes;
-            }
-        }
+        //private IGenericRepositoryEF<KntDbContext, KLog> _kLogs;
+        //public IGenericRepositoryEF<KntDbContext, KLog> KLogs
+        //{
+        //    get
+        //    {
+        //        if (_kLogs == null)
+        //            _kLogs = new GenericRepositoryEF<KntDbContext, KLog>(_context, _throwKntException);
+        //        return _kLogs;
+        //    }
+        //}
+              
+        //private IGenericRepositoryEF<KntDbContext, TraceNoteType> _traceNoteTypes;
+        //public IGenericRepositoryEF<KntDbContext, TraceNoteType> TraceNoteTypes
+        //{
+        //    get
+        //    {
+        //        if (_traceNoteTypes == null)
+        //            _traceNoteTypes = new GenericRepositoryEF<KntDbContext, TraceNoteType>(_context, _throwKntException);
+        //        return _traceNoteTypes;
+        //    }
+        //}
 
         public void RefresDbContext()
         {
             try
             {
-                // TODO: Esto no funciona en EntityFrameworkCore
-                //var conn = DbProviderFactories.GetFactory(_strProvider).CreateConnection();
-                //conn.ConnectionString = _strConn;
-                //_context = new KntDbContext(conn);
-
-
                 // Esto es para strProvider = "System.Data.SqlClient"                
                 var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
                 optionsBuilder.UseSqlServer(_strConn);
@@ -260,28 +260,28 @@ namespace KNote.Repository.EntityFramework
                 _attributes.Dispose();
             if (_systemValues != null)
                 _systemValues.Dispose();
-            if (_traceNotes != null)
-                _traceNotes.Dispose();
-            if (_kEvents != null)
-                _kEvents.Dispose();
-            if (_kMessages != null)
-                _kMessages.Dispose();
+            //if (_traceNotes != null)
+            //    _traceNotes.Dispose();
+            //if (_kEvents != null)
+            //    _kEvents.Dispose();
+            //if (_kMessages != null)
+            //    _kMessages.Dispose();
             if (_noteKAttributes != null)
                 _noteKAttributes.Dispose();
             if (_noteTask != null)
                 _noteTask.Dispose();
-            if (_windows != null)
-                _windows.Dispose();
+            //if (_windows != null)
+            //    _windows.Dispose();
             if (_resources != null)
                 _resources.Dispose();
             if (_attributeTabulatedValues != null)
                 _attributeTabulatedValues.Dispose();
-            if (_kLogs != null)
-                _kLogs.Dispose();
+            //if (_kLogs != null)
+            //    _kLogs.Dispose();
             if (_noteTypes != null)
                 _noteTypes.Dispose();
-            if (_traceNoteTypes != null)
-                _traceNoteTypes.Dispose();
+            //if (_traceNoteTypes != null)
+            //    _traceNoteTypes.Dispose();
 
             if (_context != null)
                 _context.Dispose();

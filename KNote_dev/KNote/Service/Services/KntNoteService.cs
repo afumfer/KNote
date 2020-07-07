@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using KNote.Repository.EntityFramework;
 using KNote.Model;
 using KNote.Repository.Entities;
 using KNote.Model.Dto;
-using KNote.Repository.EntityFramework;
+
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using KNote.Service;
@@ -693,133 +694,133 @@ namespace KNote.Service.Services
 
         #region // TODO: !!! Pendiente de estandarizar / Implementar
 
-        public async Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity)
-        {
-            Result<Window> resRep = null;
-            var resService = new Result<WindowDto>();
+        //public async Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity)
+        //{
+        //    Result<Window> resRep = null;
+        //    var resService = new Result<WindowDto>();
 
-            try
-            {
-                if (entity.WindowId == Guid.Empty)
-                {
-                    entity.WindowId = Guid.NewGuid();
-                    var newEntity = new Window();
-                    newEntity.SetSimpleDto(entity);
+        //    try
+        //    {
+        //        if (entity.WindowId == Guid.Empty)
+        //        {
+        //            entity.WindowId = Guid.NewGuid();
+        //            var newEntity = new Window();
+        //            newEntity.SetSimpleDto(entity);
 
-                    // TODO: update standard control values to newEntity
-                    // ...
+        //            // TODO: update standard control values to newEntity
+        //            // ...
 
-                    resRep = await _repository.Windows.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
+        //            resRep = await _repository.Windows.AddAsync(newEntity);
+        //        }
+        //        else
+        //        {
+        //            bool flagThrowKntException = false;
 
-                    if (_repository.Windows.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _repository.Windows.ThrowKntException = false;
-                    }
+        //            if (_repository.Windows.ThrowKntException == true)
+        //            {
+        //                flagThrowKntException = true;
+        //                _repository.Windows.ThrowKntException = false;
+        //            }
 
-                    var entityForUpdate = (await _repository.Windows.GetAsync(entity.WindowId)).Entity;
+        //            var entityForUpdate = (await _repository.Windows.GetAsync(entity.WindowId)).Entity;
 
-                    if (flagThrowKntException == true)
-                        _repository.Windows.ThrowKntException = true;
+        //            if (flagThrowKntException == true)
+        //                _repository.Windows.ThrowKntException = true;
 
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _repository.Windows.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new Window();
-                        newEntity.SetSimpleDto(entity);
+        //            if (entityForUpdate != null)
+        //            {
+        //                // TODO: update standard control values to entityForUpdate
+        //                // ...
+        //                entityForUpdate.SetSimpleDto(entity);
+        //                resRep = await _repository.Windows.UpdateAsync(entityForUpdate);
+        //            }
+        //            else
+        //            {
+        //                var newEntity = new Window();
+        //                newEntity.SetSimpleDto(entity);
 
-                        // TODO: update standard control values to newEntity
-                        // ...
+        //                // TODO: update standard control values to newEntity
+        //                // ...
 
-                        resRep = await _repository.Windows.AddAsync(newEntity);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
+        //                resRep = await _repository.Windows.AddAsync(newEntity);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //    }
 
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<WindowDto>();
-            resService.ErrorList = resRep.ErrorList;
+        //    // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
+        //    resService.Entity = resRep.Entity?.GetSimpleDto<WindowDto>();
+        //    resService.ErrorList = resRep.ErrorList;
 
-            return ResultDomainAction(resService);
-        }
+        //    return ResultDomainAction(resService);
+        //}
         
-        public async Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entity)
-        {
-            Result<TraceNote> resRep = null;
-            var resService = new Result<TraceNoteDto>();
+        //public async Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entity)
+        //{
+        //    Result<TraceNote> resRep = null;
+        //    var resService = new Result<TraceNoteDto>();
 
-            try
-            {
-                if (entity.TraceNoteId == Guid.Empty)
-                {
-                    entity.TraceNoteId = Guid.NewGuid();
-                    var newEntity = new TraceNote();
-                    newEntity.SetSimpleDto(entity);
+        //    try
+        //    {
+        //        if (entity.TraceNoteId == Guid.Empty)
+        //        {
+        //            entity.TraceNoteId = Guid.NewGuid();
+        //            var newEntity = new TraceNote();
+        //            newEntity.SetSimpleDto(entity);
 
-                    // TODO: update standard control values to newEntity
-                    // ...
+        //            // TODO: update standard control values to newEntity
+        //            // ...
 
-                    resRep = await _repository.TraceNotes.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
+        //            resRep = await _repository.TraceNotes.AddAsync(newEntity);
+        //        }
+        //        else
+        //        {
+        //            bool flagThrowKntException = false;
 
-                    if (_repository.TraceNotes.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _repository.TraceNotes.ThrowKntException = false;
-                    }
+        //            if (_repository.TraceNotes.ThrowKntException == true)
+        //            {
+        //                flagThrowKntException = true;
+        //                _repository.TraceNotes.ThrowKntException = false;
+        //            }
 
-                    var entityForUpdate = (await _repository.TraceNotes.GetAsync(entity.TraceNoteId)).Entity;
+        //            var entityForUpdate = (await _repository.TraceNotes.GetAsync(entity.TraceNoteId)).Entity;
 
-                    if (flagThrowKntException == true)
-                        _repository.TraceNotes.ThrowKntException = true;
+        //            if (flagThrowKntException == true)
+        //                _repository.TraceNotes.ThrowKntException = true;
 
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _repository.TraceNotes.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new TraceNote();
-                        newEntity.SetSimpleDto(entity);
+        //            if (entityForUpdate != null)
+        //            {
+        //                // TODO: update standard control values to entityForUpdate
+        //                // ...
+        //                entityForUpdate.SetSimpleDto(entity);
+        //                resRep = await _repository.TraceNotes.UpdateAsync(entityForUpdate);
+        //            }
+        //            else
+        //            {
+        //                var newEntity = new TraceNote();
+        //                newEntity.SetSimpleDto(entity);
 
-                        // TODO: update standard control values to newEntity
-                        // ...
+        //                // TODO: update standard control values to newEntity
+        //                // ...
 
-                        resRep = await _repository.TraceNotes.AddAsync(newEntity);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
+        //                resRep = await _repository.TraceNotes.AddAsync(newEntity);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //    }
 
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<TraceNoteDto>();
-            resService.ErrorList = resRep.ErrorList;
+        //    // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
+        //    resService.Entity = resRep.Entity?.GetSimpleDto<TraceNoteDto>();
+        //    resService.ErrorList = resRep.ErrorList;
 
-            return ResultDomainAction(resService);
-        }
+        //    return ResultDomainAction(resService);
+        //}
 
         #endregion
 

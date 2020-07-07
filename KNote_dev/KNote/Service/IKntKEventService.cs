@@ -11,9 +11,9 @@ namespace KNote.Service
 {
     public interface IKntKEventService
     {
-        Task<Result<List<KEventDto>>> GetAllAsync();
-        Task<Result<KEventDto>> GetAsync(Guid eventId);        
-        Task<Result<KEventDto>> SaveAsync(KEventDto entityInfo);
-        Task<Result<KEventDto>> DeleteAsync(Guid id);
+        //Task<Result<List<KEventDto>>> GetAllAsync();
+        //Task<Result<KEventDto>> GetAsync(Guid eventId);        
+        //Task<Result<KEventDto>> SaveAsync(KEventDto entityInfo);
+        //Task<Result<KEventDto>> DeleteAsync(Guid id);
     }
 }
