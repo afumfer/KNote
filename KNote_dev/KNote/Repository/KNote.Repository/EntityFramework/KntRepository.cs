@@ -64,6 +64,19 @@ namespace KNote.Repository.EntityFramework
                 return _systemValues;
             }
         }
+        
+
+        private IKntFolderRepository _folders;
+        public IKntFolderRepository Folders
+        {
+            get
+            {
+                if (_folders == null)
+                    _folders = new KntFolderRepository(_context, _throwKntException);
+                return _folders;
+            }
+        }
+
 
 
         // !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -76,17 +89,6 @@ namespace KNote.Repository.EntityFramework
                 if (_users == null)
                     _users = new GenericRepositoryEF<KntDbContext, User>(_context, _throwKntException);                
                 return _users;
-            }
-        }
-
-        private IGenericRepositoryEF<KntDbContext, Folder> _folders;
-        public IGenericRepositoryEF<KntDbContext, Folder> Folders
-        {
-            get
-            {
-                if (_folders == null)
-                    _folders = new GenericRepositoryEF<KntDbContext, Folder>(_context, _throwKntException);
-                return _folders;
             }
         }
 
@@ -224,24 +226,6 @@ namespace KNote.Repository.EntityFramework
         //    }
         //}
 
-        public void RefresDbContext()
-        {
-            try
-            {
-                // Esto es para strProvider = "System.Data.SqlClient"                
-                var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
-                optionsBuilder.UseSqlServer(_strConn);
-                _context = new KntDbContext(optionsBuilder.Options);
-
-                // TODO: Pendiente de establecer la conexión con Sqlite ...
-
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
         #endregion 
 
         #region IDisposable members 
@@ -287,6 +271,29 @@ namespace KNote.Repository.EntityFramework
                 _context.Dispose();
         }
 
+        #endregion
+
+        #region  Private methods
+
+        public void RefresDbContext()
+        {
+            try
+            {
+                // Esto es para strProvider = "System.Data.SqlClient"                
+                var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
+                optionsBuilder.UseSqlServer(_strConn);
+                _context = new KntDbContext(optionsBuilder.Options);
+
+                // TODO: Pendiente de establecer la conexión con Sqlite ...
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         #endregion 
+
     }
 }

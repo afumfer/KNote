@@ -13,6 +13,7 @@ namespace KNote.Repository
         Task<Result<List<FolderDto>>> GetRootsAsync();
         Task<Result<List<FolderDto>>> GetTreeAsync();
         Task<Result<FolderDto>> GetAsync(Guid folderId);
+        Task<Result<FolderDto>> GetHomeAsync();
         Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo);
         Task<Result<FolderDto>> DeleteAsync(Guid id);
     }

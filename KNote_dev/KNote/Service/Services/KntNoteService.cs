@@ -61,10 +61,13 @@ namespace KNote.Service.Services
             {
                 // TODO: Repensar esto 
 
-                var idFolderHome = await _repository.Folders.DbSet
-                    .Where(f => f.FolderNumber == 1)
-                    .Select(f => f.FolderId)
-                    .SingleOrDefaultAsync();
+                //var idFolderHome = await _repository.Folders.DbSet
+                //    .Where(f => f.FolderNumber == 1)
+                //    .Select(f => f.FolderId)
+                //    .SingleOrDefaultAsync();
+
+                var idFolderHome = (await _repository.Folders.GetHomeAsync()).Entity?.FolderId;
+
 
                 var resRep = await _repository.Notes.DbSet
                     .Include(n => n.Folder)                    

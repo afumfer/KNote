@@ -13,16 +13,16 @@ namespace KNote.Repository
     public interface IKntRepository: IDisposable
     {
                 
-        IKntNoteTypeRepository NoteTypes { get; }
-        
-        //IGenericRepositoryEF<KntDbContext, SystemValue> SystemValues { get; }
-        IKntSystemValuesRepository SystemValues { get; }
+        IKntNoteTypeRepository NoteTypes { get; }                
+        IKntSystemValuesRepository SystemValues { get; }        
+        IKntFolderRepository Folders { get; }        
 
+        
+                        
         /// ------------------
 
-
         IGenericRepositoryEF<KntDbContext, User> Users { get; }
-        IGenericRepositoryEF<KntDbContext, Folder> Folders { get; }
+        
         IGenericRepositoryEF<KntDbContext, KAttribute> KAttributes { get; }
         IGenericRepositoryEF<KntDbContext, Note> Notes { get; }
         IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes { get; }
