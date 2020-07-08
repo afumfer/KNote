@@ -65,7 +65,6 @@ namespace KNote.Repository.EntityFramework
             }
         }
         
-
         private IKntFolderRepository _folders;
         public IKntFolderRepository Folders
         {
@@ -77,7 +76,16 @@ namespace KNote.Repository.EntityFramework
             }
         }
 
-
+        private IKntKAttributeRepository _attributes;
+        public IKntKAttributeRepository KAttributes
+        {
+            get
+            {
+                if (_attributes == null)
+                    _attributes = new KntKAttributeRepository(_context, _throwKntException);
+                return _attributes;
+            }
+        }
 
         // !!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -136,27 +144,18 @@ namespace KNote.Repository.EntityFramework
             }
         }
 
-        private IGenericRepositoryEF<KntDbContext, KAttribute> _attributes;
-        public IGenericRepositoryEF<KntDbContext, KAttribute> KAttributes
-        {
-            get
-            {
-                if (_attributes == null)
-                    _attributes = new GenericRepositoryEF<KntDbContext, KAttribute>(_context, _throwKntException);
-                return _attributes;
-            }
-        }
+
         
-        private IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> _attributeTabulatedValues;
-        public IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues
-        {
-            get
-            {
-                if (_attributeTabulatedValues == null)
-                    _attributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(_context, _throwKntException);
-                return _attributeTabulatedValues;
-            }
-        }
+        //private IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> _attributeTabulatedValues;
+        //public IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues
+        //{
+        //    get
+        //    {
+        //        if (_attributeTabulatedValues == null)
+        //            _attributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(_context, _throwKntException);
+        //        return _attributeTabulatedValues;
+        //    }
+        //}
 
 
 
@@ -258,8 +257,8 @@ namespace KNote.Repository.EntityFramework
             //    _windows.Dispose();
             if (_resources != null)
                 _resources.Dispose();
-            if (_attributeTabulatedValues != null)
-                _attributeTabulatedValues.Dispose();
+            //if (_attributeTabulatedValues != null)
+            //    _attributeTabulatedValues.Dispose();
             //if (_kLogs != null)
             //    _kLogs.Dispose();
             if (_noteTypes != null)

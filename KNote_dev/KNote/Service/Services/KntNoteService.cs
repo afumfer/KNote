@@ -924,42 +924,45 @@ namespace KNote.Service.Services
 
         private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {
-            var attributes = (await _repository.KAttributes.GetAllAsync(_ => _.NoteTypeId == null || _.NoteTypeId == noteTypeId)).Entity;
-            foreach (KAttribute a in attributes)
-            {
-                var atrTmp = attributesNotes
-                    .Where(na => na.KAttributeId == a.KAttributeId)
-                    .Select(at => at).SingleOrDefault();
-                if (atrTmp == null)
-                {
-                    attributesNotes.Add(new NoteKAttributeDto
-                    {
-                        KAttributeId = a.KAttributeId,
-                        NoteId = noteId,
-                        Value = "",
-                        Name = a.Name,
-                        Description = a.Description,
-                        KAttributeDataType = a.KAttributeDataType,
-                        KAttributeNoteTypeId = a.NoteTypeId,
-                        RequiredValue = a.RequiredValue,
-                        Order = a.Order,
-                        Script = a.Script,
-                        Disabled = a.Disabled
-                    });
-                }
-                else
-                {
-                    atrTmp.Name = a.Name;
-                    atrTmp.Description = a.Description;
-                    atrTmp.KAttributeDataType = a.KAttributeDataType;
-                    atrTmp.KAttributeNoteTypeId = a.NoteTypeId;
-                    atrTmp.RequiredValue = a.RequiredValue;
-                    atrTmp.Order = a.Order;
-                    atrTmp.Script = a.Script;
-                    atrTmp.Disabled = a.Disabled;
-                }
-            }
-            return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
+            // 
+            return null;
+            // TODO: pendiente de refactorizar, cuando se aborde la refactorización de la capa de servicio notes.
+            //var attributes = (await _repository.KAttributes.GetAllAsync(_ => _.NoteTypeId == null || _.NoteTypeId == noteTypeId)).Entity;
+            //foreach (KAttribute a in attributes)
+            //{
+            //    var atrTmp = attributesNotes
+            //        .Where(na => na.KAttributeId == a.KAttributeId)
+            //        .Select(at => at).SingleOrDefault();
+            //    if (atrTmp == null)
+            //    {
+            //        attributesNotes.Add(new NoteKAttributeDto
+            //        {
+            //            KAttributeId = a.KAttributeId,
+            //            NoteId = noteId,
+            //            Value = "",
+            //            Name = a.Name,
+            //            Description = a.Description,
+            //            KAttributeDataType = a.KAttributeDataType,
+            //            KAttributeNoteTypeId = a.NoteTypeId,
+            //            RequiredValue = a.RequiredValue,
+            //            Order = a.Order,
+            //            Script = a.Script,
+            //            Disabled = a.Disabled
+            //        });
+            //    }
+            //    else
+            //    {
+            //        atrTmp.Name = a.Name;
+            //        atrTmp.Description = a.Description;
+            //        atrTmp.KAttributeDataType = a.KAttributeDataType;
+            //        atrTmp.KAttributeNoteTypeId = a.NoteTypeId;
+            //        atrTmp.RequiredValue = a.RequiredValue;
+            //        atrTmp.Order = a.Order;
+            //        atrTmp.Script = a.Script;
+            //        atrTmp.Disabled = a.Disabled;
+            //    }
+            //}
+            //return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
         }
 
         private void UpdateStandardValuesToNewEntity(Note newEntity)

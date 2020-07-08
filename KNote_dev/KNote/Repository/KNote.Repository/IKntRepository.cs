@@ -15,21 +15,20 @@ namespace KNote.Repository
                 
         IKntNoteTypeRepository NoteTypes { get; }                
         IKntSystemValuesRepository SystemValues { get; }        
-        IKntFolderRepository Folders { get; }        
+        IKntFolderRepository Folders { get; }
+        IKntKAttributeRepository KAttributes { get; }
 
-        
-                        
         /// ------------------
 
         IGenericRepositoryEF<KntDbContext, User> Users { get; }
         
-        IGenericRepositoryEF<KntDbContext, KAttribute> KAttributes { get; }
+        
         IGenericRepositoryEF<KntDbContext, Note> Notes { get; }
         IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes { get; }
         IGenericRepositoryEF<KntDbContext, Resource> Resources { get; }
         IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks { get; }
                         
-        IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues { get; }
+        // IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues { get; }
 
         // -------------------------------
 
