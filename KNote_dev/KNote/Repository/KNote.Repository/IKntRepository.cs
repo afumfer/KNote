@@ -11,44 +11,26 @@ using System.Threading.Tasks;
 namespace KNote.Repository
 {
     public interface IKntRepository: IDisposable
-    {
-                
+    {                
         IKntNoteTypeRepository NoteTypes { get; }                
         IKntSystemValuesRepository SystemValues { get; }        
         IKntFolderRepository Folders { get; }
         IKntKAttributeRepository KAttributes { get; }
-
         IKntNoteRepository Notes { get; }
-
-
 
         /// ------------------
 
         IGenericRepositoryEF<KntDbContext, User> Users { get; }
 
+        /// ------------------
 
-
-
-
-        // -------------------------------
-        // Basura
-
-        // IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues { get; }
-
-        //IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes { get; }
-        //IGenericRepositoryEF<KntDbContext, Resource> Resources { get; }
-        //IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks { get; }
-
-
-        // -------------------------------
-
+        // TODO: pendiente de completar implementación con interfaz IKntRepositoryXxxxxx
         //IGenericRepositoryEF<KntDbContext, Window> Windows { get; }
         //IGenericRepositoryEF<KntDbContext, TraceNote> TraceNotes { get; }
         //IGenericRepositoryEF<KntDbContext, KEvent> KEvents { get; }
         //IGenericRepositoryEF<KntDbContext, KMessage> KMessages { get; }
         //IGenericRepositoryEF<KntDbContext, KLog> KLogs { get; }
         //IGenericRepositoryEF<KntDbContext, TraceNoteType> TraceNoteTypes { get; }
-
 
         void RefresDbContext();
     }

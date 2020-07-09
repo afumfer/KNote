@@ -111,78 +111,9 @@ namespace KNote.Repository.EntityFramework
             }
         }
 
+        #region Pendiente ....
 
-       
-        //private IGenericRepositoryEF<KntDbContext, NoteKAttribute> _noteKAttributes;
-        //public IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes
-        //{
-        //    get
-        //    {
-        //        if (_noteKAttributes == null)
-        //            _noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(_context, _throwKntException);
-        //        return _noteKAttributes;
-        //    }
-        //}
-   
-        //private IGenericRepositoryEF<KntDbContext, NoteTask> _noteTask;
-        //public IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks
-        //{
-        //    get
-        //    {
-        //        if (_noteTask == null)
-        //            _noteTask = new GenericRepositoryEF<KntDbContext, NoteTask>(_context, _throwKntException);
-        //        return _noteTask;
-        //    }
-        //}
-
-        //private IGenericRepositoryEF<KntDbContext, Resource> _resources;
-        //public IGenericRepositoryEF<KntDbContext, Resource> Resources
-        //{
-        //    get
-        //    {
-        //        if (_resources == null)
-        //            _resources = new GenericRepositoryEF<KntDbContext, Resource>(_context, _throwKntException);
-        //        return _resources;
-        //    }
-        //}
-
-
-        
-        //private IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> _attributeTabulatedValues;
-        //public IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues
-        //{
-        //    get
-        //    {
-        //        if (_attributeTabulatedValues == null)
-        //            _attributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(_context, _throwKntException);
-        //        return _attributeTabulatedValues;
-        //    }
-        //}
-
-
-
-
-        //private IGenericRepositoryEF<KntDbContext, Window> _windows;
-        //public IGenericRepositoryEF<KntDbContext, Window> Windows
-        //{
-        //    get
-        //    {
-        //        if (_windows == null)
-        //            _windows = new GenericRepositoryEF<KntDbContext, Window>(_context, _throwKntException);
-        //        return _windows;
-        //    }
-        //}
-
-        //private IGenericRepositoryEF<KntDbContext, TraceNote> _traceNotes;
-        //public IGenericRepositoryEF<KntDbContext, TraceNote> TraceNotes
-        //{
-        //    get
-        //    {
-        //        if (_traceNotes == null)
-        //            _traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(_context, _throwKntException);
-        //        return _traceNotes;
-        //    }
-        //}
+        // TODO: pendiente de re-implementar con patrón IKntRepositoryXxxxxx
 
         //private IGenericRepositoryEF<KntDbContext, KEvent> _kEvents;
         //public IGenericRepositoryEF<KntDbContext, KEvent> KEvents
@@ -205,7 +136,7 @@ namespace KNote.Repository.EntityFramework
         //        return _kMessages;
         //    }
         //}
-        
+
         //private IGenericRepositoryEF<KntDbContext, KLog> _kLogs;
         //public IGenericRepositoryEF<KntDbContext, KLog> KLogs
         //{
@@ -216,7 +147,7 @@ namespace KNote.Repository.EntityFramework
         //        return _kLogs;
         //    }
         //}
-              
+
         //private IGenericRepositoryEF<KntDbContext, TraceNoteType> _traceNoteTypes;
         //public IGenericRepositoryEF<KntDbContext, TraceNoteType> TraceNoteTypes
         //{
@@ -230,11 +161,13 @@ namespace KNote.Repository.EntityFramework
 
         #endregion 
 
+        #endregion
+
         #region IDisposable members 
 
         public void Dispose()
         {
-            // TODO: make this with reflection 
+            // TODO: make this with reflection or clear code
 
             if (_users != null)
                 _users.Dispose();
