@@ -18,21 +18,27 @@ namespace KNote.Repository
         IKntFolderRepository Folders { get; }
         IKntKAttributeRepository KAttributes { get; }
 
+        IKntNoteRepository Notes { get; }
+
+
+
         /// ------------------
 
         IGenericRepositoryEF<KntDbContext, User> Users { get; }
-        
-        
-        IGenericRepositoryEF<KntDbContext, Note> Notes { get; }
-        IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes { get; }
-        IGenericRepositoryEF<KntDbContext, Resource> Resources { get; }
-        IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks { get; }
-                        
-        // IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues { get; }
+
+
+
+
 
         // -------------------------------
+        // Basura
 
-        
+        // IGenericRepositoryEF<KntDbContext, KAttributeTabulatedValue> KAttributeTabulatedValues { get; }
+
+        //IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes { get; }
+        //IGenericRepositoryEF<KntDbContext, Resource> Resources { get; }
+        //IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks { get; }
+
 
         // -------------------------------
 

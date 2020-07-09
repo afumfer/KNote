@@ -87,6 +87,17 @@ namespace KNote.Repository.EntityFramework
             }
         }
 
+        private IKntNoteRepository _notes;
+        public IKntNoteRepository Notes
+        {
+            get
+            {
+                if (_notes == null)
+                    _notes = new KntNoteRepository(_context, _throwKntException);
+                return _notes;
+            }
+        }
+
         // !!!!!!!!!!!!!!!!!!!!!!!!!!
 
         private IGenericRepositoryEF<KntDbContext, User> _users;
@@ -100,49 +111,40 @@ namespace KNote.Repository.EntityFramework
             }
         }
 
-        private IGenericRepositoryEF<KntDbContext, Note> _notes;
-        public IGenericRepositoryEF<KntDbContext, Note> Notes
-        {
-            get
-            {
-                if (_notes == null)
-                    _notes = new GenericRepositoryEF<KntDbContext, Note>(_context, _throwKntException);
-                return _notes;
-            }
-        }
-       
-        private IGenericRepositoryEF<KntDbContext, NoteKAttribute> _noteKAttributes;
-        public IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes
-        {
-            get
-            {
-                if (_noteKAttributes == null)
-                    _noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(_context, _throwKntException);
-                return _noteKAttributes;
-            }
-        }
-   
-        private IGenericRepositoryEF<KntDbContext, NoteTask> _noteTask;
-        public IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks
-        {
-            get
-            {
-                if (_noteTask == null)
-                    _noteTask = new GenericRepositoryEF<KntDbContext, NoteTask>(_context, _throwKntException);
-                return _noteTask;
-            }
-        }
 
-        private IGenericRepositoryEF<KntDbContext, Resource> _resources;
-        public IGenericRepositoryEF<KntDbContext, Resource> Resources
-        {
-            get
-            {
-                if (_resources == null)
-                    _resources = new GenericRepositoryEF<KntDbContext, Resource>(_context, _throwKntException);
-                return _resources;
-            }
-        }
+       
+        //private IGenericRepositoryEF<KntDbContext, NoteKAttribute> _noteKAttributes;
+        //public IGenericRepositoryEF<KntDbContext, NoteKAttribute> NoteKAttributes
+        //{
+        //    get
+        //    {
+        //        if (_noteKAttributes == null)
+        //            _noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(_context, _throwKntException);
+        //        return _noteKAttributes;
+        //    }
+        //}
+   
+        //private IGenericRepositoryEF<KntDbContext, NoteTask> _noteTask;
+        //public IGenericRepositoryEF<KntDbContext, NoteTask> NoteTasks
+        //{
+        //    get
+        //    {
+        //        if (_noteTask == null)
+        //            _noteTask = new GenericRepositoryEF<KntDbContext, NoteTask>(_context, _throwKntException);
+        //        return _noteTask;
+        //    }
+        //}
+
+        //private IGenericRepositoryEF<KntDbContext, Resource> _resources;
+        //public IGenericRepositoryEF<KntDbContext, Resource> Resources
+        //{
+        //    get
+        //    {
+        //        if (_resources == null)
+        //            _resources = new GenericRepositoryEF<KntDbContext, Resource>(_context, _throwKntException);
+        //        return _resources;
+        //    }
+        //}
 
 
         
@@ -156,6 +158,7 @@ namespace KNote.Repository.EntityFramework
         //        return _attributeTabulatedValues;
         //    }
         //}
+
 
 
 
@@ -249,14 +252,14 @@ namespace KNote.Repository.EntityFramework
             //    _kEvents.Dispose();
             //if (_kMessages != null)
             //    _kMessages.Dispose();
-            if (_noteKAttributes != null)
-                _noteKAttributes.Dispose();
-            if (_noteTask != null)
-                _noteTask.Dispose();
+            //if (_noteKAttributes != null)
+            //    _noteKAttributes.Dispose();
+            //if (_noteTask != null)
+            //    _noteTask.Dispose();
             //if (_windows != null)
             //    _windows.Dispose();
-            if (_resources != null)
-                _resources.Dispose();
+            //if (_resources != null)
+            //    _resources.Dispose();
             //if (_attributeTabulatedValues != null)
             //    _attributeTabulatedValues.Dispose();
             //if (_kLogs != null)

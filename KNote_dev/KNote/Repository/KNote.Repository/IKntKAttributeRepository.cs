@@ -10,7 +10,8 @@ namespace KNote.Repository
     public interface IKntKAttributeRepository : IDisposable
     {
         Task<Result<List<KAttributeDto>>> GetAllAsync();
-        Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId);
+        Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId);        
+        Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId);
         Task<Result<KAttributeDto>> GetAsync(Guid id);
         Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entityInfo);
         Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id);

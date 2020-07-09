@@ -72,6 +72,27 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
+        public async Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId)
+        {
+            var resService = new Result<List<KAttributeInfoDto>>();
+            try
+            {                
+                var resRep = await _kattributes.GetAllAsync(_ => _.NoteTypeId == null || _.NoteTypeId == typeId);
+
+                resService.Entity = resRep.Entity?
+                    .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
+                    .OrderBy(a => a.Order).ThenBy(a => a.Name)
+                    .ToList();
+
+                resService.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
         public async Task<Result<KAttributeDto>> GetAsync(Guid id)
         {
             var resService = new Result<KAttributeDto>();
