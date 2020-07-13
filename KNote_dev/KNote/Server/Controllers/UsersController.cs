@@ -100,7 +100,8 @@ namespace KNote.Server.Controllers
         [HttpPost]   // POST api/users
         [HttpPut]    // PUT api/users
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post([FromBody]UserDto userDto)
+        //public async Task<ActionResult<Result<UserDto>>> Post([FromBody]UserDto userDto)
+        public async Task<IActionResult> Post([FromBody] UserDto userDto)
         {
             try
             {
@@ -140,11 +141,11 @@ namespace KNote.Server.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register([FromBody]UserRegisterDto user)
+        public async Task<IActionResult> Register([FromBody]UserRegisterDto user)
         {
             try
             {
-                var kresRep = _service.Users.Create(user);
+                var kresRep = await _service.Users.Create(user);
                 if (kresRep.IsValid)                    
                     return Ok(BuildToken(kresRep.Entity));
                 else                    
@@ -158,11 +159,11 @@ namespace KNote.Server.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public IActionResult Login([FromBody]UserCredentialsDto credentials)
+        public async Task<IActionResult> Login([FromBody]UserCredentialsDto credentials)
         {            
             try
             {
-                var kresRep = _service.Users.Authenticate(credentials.Name, credentials.Password);
+                var kresRep = await _service.Users.Authenticate(credentials.Name, credentials.Password);
                 var user = kresRep.Entity;
 
                 if (!kresRep.IsValid)

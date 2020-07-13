@@ -98,18 +98,29 @@ namespace KNote.Repository.EntityFramework
             }
         }
 
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        private IGenericRepositoryEF<KntDbContext, User> _users;
-        public IGenericRepositoryEF<KntDbContext, User> Users
+        private IKntUserRepository _users;
+        public IKntUserRepository Users
         {
             get
             {
                 if (_users == null)
-                    _users = new GenericRepositoryEF<KntDbContext, User>(_context, _throwKntException);                
+                    _users = new KntUserRepository(_context, _throwKntException);
                 return _users;
             }
         }
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        //private IGenericRepositoryEF<KntDbContext, User> _users;
+        //public IGenericRepositoryEF<KntDbContext, User> Users
+        //{
+        //    get
+        //    {
+        //        if (_users == null)
+        //            _users = new GenericRepositoryEF<KntDbContext, User>(_context, _throwKntException);                
+        //        return _users;
+        //    }
+        //}
 
         #region Pendiente ....
 

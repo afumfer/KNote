@@ -16,13 +16,11 @@ namespace KNote.Repository
         IKntSystemValuesRepository SystemValues { get; }        
         IKntFolderRepository Folders { get; }
         IKntKAttributeRepository KAttributes { get; }
-        IKntNoteRepository Notes { get; }
+        IKntNoteRepository Notes { get; }              
+        IKntUserRepository Users { get; }
 
-        /// ------------------
-
-        IGenericRepositoryEF<KntDbContext, User> Users { get; }
-
-        /// ------------------
+        // ------------------
+        //IGenericRepositoryEF<KntDbContext, User> Users { get; }
 
         // TODO: pendiente de completar implementación con interfaz IKntRepositoryXxxxxx
         //IGenericRepositoryEF<KntDbContext, Window> Windows { get; }

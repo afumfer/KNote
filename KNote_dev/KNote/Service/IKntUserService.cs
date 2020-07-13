@@ -13,7 +13,7 @@ namespace KNote.Service
         Task<Result<UserDto>> SaveAsync(UserDto entityInfo);
         Task<Result<UserDto>> DeleteAsync(Guid userId);
         Task<Result<int>> GetCount();
-        Result<UserDto> Authenticate(string username, string password);
-        Result<UserDto> Create(UserRegisterDto userRegisterInfoDto);
+        Task<Result<UserDto>> Authenticate(string username, string password);        
+        Task<Result<UserDto>> Create(UserRegisterDto userRegisterInfoDto);
     }
 }

@@ -35,157 +35,164 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null)
         {
-            var resService = new Result<List<UserDto>>();
-            try
-            {   
-                if(pagination != null)
-                {
-                    var query = _repository.Users.Queryable
-                        .OrderBy(u => u.UserName)
-                        .Pagination(pagination);
-                    resService.Entity = await query
-                        .Select(u => u.GetSimpleDto<UserDto>())                    
-                        .ToListAsync();                
-                }
-                else
-                {
-                    // Implementación old
-                    //var resRep = await _repository.Users.GetAllAsync();
-                    //resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<UserDto>()).ToList();
-                    //resService.ErrorList = resRep.ErrorList;
+            //var resService = new Result<List<UserDto>>();
+            //try
+            //{   
+            //    if(pagination != null)
+            //    {
+            //        var query = _repository.Users.Queryable
+            //            .OrderBy(u => u.UserName)
+            //            .Pagination(pagination);
+            //        resService.Entity = await query
+            //            .Select(u => u.GetSimpleDto<UserDto>())                    
+            //            .ToListAsync();                
+            //    }
+            //    else
+            //    {
+            //        // Implementación old
+            //        //var resRep = await _repository.Users.GetAllAsync();
+            //        //resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<UserDto>()).ToList();
+            //        //resService.ErrorList = resRep.ErrorList;
 
-                    // ó
+            //        // ó
 
-                    var query = _repository.Users.Queryable
-                        .OrderBy(u => u.UserName);
-                    resService.Entity = await query
-                        .Select(u => u.GetSimpleDto<UserDto>())
-                        .ToListAsync();
-                }
+            //        var query = _repository.Users.Queryable
+            //            .OrderBy(u => u.UserName);
+            //        resService.Entity = await query
+            //            .Select(u => u.GetSimpleDto<UserDto>())
+            //            .ToListAsync();
+            //    }
 
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
+            //}
+            //catch (Exception ex)
+            //{
+            //    AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            //}
+            //return ResultDomainAction(resService);
+
+            return await _repository.Users.GetAllAsync();
         }
 
         public async Task<Result<int>> GetCount()
         {
-            var resService = new Result<int>();
-            try
-            {                
-                resService.Entity = await _repository.Users.Queryable.CountAsync();                
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
+            //var resService = new Result<int>();
+            //try
+            //{                
+            //    resService.Entity = await _repository.Users.Queryable.CountAsync();                
+            //}
+            //catch (Exception ex)
+            //{
+            //    AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            //}
+            //return ResultDomainAction(resService);
+            return await _repository.Users.GetCount();
         }
 
         public async Task<Result<UserDto>> GetAsync(Guid userId)
         {
-            var resService = new Result<UserDto>();
-            try
-            {                
-                var resRep = await _repository.Users.GetAsync((object) userId);
-                
-                resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-                // KNote template ... load here aditionals properties for UserDto
-                // ... 
+            //var resService = new Result<UserDto>();
+            //try
+            //{                
+            //    var resRep = await _repository.Users.GetAsync((object) userId);
 
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
+            //    resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+            //    // KNote template ... load here aditionals properties for UserDto
+            //    // ... 
+
+            //    resService.ErrorList = resRep.ErrorList;
+            //}
+            //catch (Exception ex)
+            //{
+            //    AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            //}
+            //return ResultDomainAction(resService);
+            return await _repository.Users.GetAsync(userId);
         }
 
         public async Task<Result<UserDto>> SaveAsync(UserDto entity)
         {
-            Result<User> resRep = null;
-            var resService = new Result<UserDto>();
+            //Result<User> resRep = null;
+            //var resService = new Result<UserDto>();
 
-            try
-            {
-                if (entity.UserId == Guid.Empty)
-                {
-                    entity.UserId = Guid.NewGuid();
-                    var newEntity = new User();
-                    newEntity.SetSimpleDto(entity);
-                    resRep = await _repository.Users.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
+            //try
+            //{
+            //    if (entity.UserId == Guid.Empty)
+            //    {
+            //        entity.UserId = Guid.NewGuid();
+            //        var newEntity = new User();
+            //        newEntity.SetSimpleDto(entity);
+            //        resRep = await _repository.Users.AddAsync(newEntity);
+            //    }
+            //    else
+            //    {
+            //        bool flagThrowKntException = false;
 
-                    if (_repository.Users.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _repository.Users.ThrowKntException = false;
-                    }
-                    
-                    resRep = await _repository.Users.GetAsync(entity.UserId);
-                    var entityForUpdate = resRep.Entity;
+            //        if (_repository.Users.ThrowKntException == true)
+            //        {
+            //            flagThrowKntException = true;
+            //            _repository.Users.ThrowKntException = false;
+            //        }
 
-                    if (flagThrowKntException == true)
-                        _repository.Users.ThrowKntException = true;
+            //        resRep = await _repository.Users.GetAsync(entity.UserId);
+            //        var entityForUpdate = resRep.Entity;
 
-                    if (entityForUpdate != null)
-                    {
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _repository.Users.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new User();
-                        newEntity.SetSimpleDto(entity);
+            //        if (flagThrowKntException == true)
+            //            _repository.Users.ThrowKntException = true;
 
-                        resRep = await _repository.Users.AddAsync(newEntity);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
+            //        if (entityForUpdate != null)
+            //        {
+            //            entityForUpdate.SetSimpleDto(entity);
+            //            resRep = await _repository.Users.UpdateAsync(entityForUpdate);
+            //        }
+            //        else
+            //        {
+            //            var newEntity = new User();
+            //            newEntity.SetSimpleDto(entity);
 
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-            resService.ErrorList = resRep.ErrorList;
+            //            resRep = await _repository.Users.AddAsync(newEntity);
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            //}
 
-            return ResultDomainAction(resService);
+            //// TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
+            //resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+            //resService.ErrorList = resRep.ErrorList;
+
+            //return ResultDomainAction(resService);
+
+            return await _repository.Users.SaveAsync(entity);
         }
 
         public async Task<Result<UserDto>> DeleteAsync(Guid id)
         {
-            var resService = new Result<UserDto>();
-            try
-            {
-                var resRep = await _repository.Users.GetAsync(id);
-                if (resRep.IsValid)
-                {
-                    resRep = await _repository.Users.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
+            //var resService = new Result<UserDto>();
+            //try
+            //{
+            //    var resRep = await _repository.Users.GetAsync(id);
+            //    if (resRep.IsValid)
+            //    {
+            //        resRep = await _repository.Users.DeleteAsync(resRep.Entity);
+            //        if (resRep.IsValid)
+            //            resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+            //        else
+            //            resService.ErrorList = resRep.ErrorList;
+            //    }
+            //    else
+            //        resService.ErrorList = resRep.ErrorList;
+            //}
+            //catch (Exception ex)
+            //{
+            //    AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            //}
+            //return ResultDomainAction(resService);
+            return await _repository.Users.DeleteAsync(id);
         }
 
-        public Result<UserDto> Authenticate(string username, string password)
+        public async Task<Result<UserDto>> Authenticate(string username, string password)
         {
             var resService = new Result<UserDto>();
 
@@ -197,7 +204,8 @@ namespace KNote.Service.Services
                 return resService;
             }
 
-            var resRep = _repository.Users.Get(u => u.UserName == username);
+            //var resRep = _repository.Users.Get(u => u.UserName == username);
+            var resRep = await _repository.Users.GetInternalAsync(username);
 
             // check if username exists
             if (!resRep.IsValid)
@@ -220,7 +228,7 @@ namespace KNote.Service.Services
             return resService;
         }
                 
-        public Result<UserDto> Create(UserRegisterDto userRegisterInfo)
+        public async Task<Result<UserDto>> Create(UserRegisterDto userRegisterInfo)
         {
             Result<UserDto> resService = new Result<UserDto>();
             
@@ -231,20 +239,22 @@ namespace KNote.Service.Services
                 if (string.IsNullOrWhiteSpace(password))
                     throw new AppException("Password is required");
 
-                if (_repository.Users.Get(u => u.UserName == userRegisterInfo.UserName).Entity != null)
-                    throw new AppException("Username \"" + userRegisterInfo.UserName + "\" is already taken");
+                //if (_repository.Users.Get(u => u.UserName == userRegisterInfo.UserName).Entity != null)
+                if ((await _repository.Users.GetInternalAsync(userRegisterInfo.UserName)).Entity != null)
+                        throw new AppException("Username \"" + userRegisterInfo.UserName + "\" is already taken");
                 else
                 {                                        
                     byte[] passwordHash, passwordSalt;
                     CreatePasswordHash(password, out passwordHash, out passwordSalt);
 
-                    var newEntity = new User();                    
+                    var newEntity = new UserInternalDto();                    
                     newEntity.SetSimpleDto(userRegisterInfo);
                     newEntity.UserId = Guid.NewGuid();
                     newEntity.PasswordHash = passwordHash;
                     newEntity.PasswordSalt = passwordSalt;
 
-                    var resRep = _repository.Users.Add(newEntity);
+                    //var resRep = _repository.Users.Add(newEntity);
+                    var resRep = await _repository.Users.AddInternalAsync(newEntity);
                     resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
                     if (!resRep.IsValid)
                         CopyErrorList(resRep.ErrorList, resService.ErrorList);
