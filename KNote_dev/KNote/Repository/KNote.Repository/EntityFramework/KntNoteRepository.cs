@@ -776,7 +776,6 @@ namespace KNote.Repository.EntityFramework
         private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {                        
             // TODO: pendiente de refactorizar este método 
-
             var attributes = (await _kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
             foreach (KAttributeInfoDto a in attributes)
             {
