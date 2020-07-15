@@ -44,14 +44,15 @@ namespace KNote.Repository.EntityFramework
         
         Result<TEntity> Add(TEntity entity);        
         Task<Result<TEntity>> AddAsync(TEntity entity);
-        Result<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entity);
+        Result<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entities);
+        Task<Result<IEnumerable<TEntity>>> AddRangeAsync(IEnumerable<TEntity> entities);
         Result<TEntity> Update(TEntity entity);
         Task<Result<TEntity>> UpdateAsync(TEntity entity);
+        Result<IEnumerable<TEntity>> UpdateRange(IEnumerable<TEntity> entities);
         Result<TEntity> Delete(params object[] keyValues);
         Result<TEntity> Delete(TEntity entity);
         Task<Result<TEntity>> DeleteAsync(TEntity entity);
-        Result<IEnumerable<TEntity>> DeleteRange(IEnumerable<TEntity> entity);
-        Task<Result<IEnumerable<TEntity>>> DeleteRangeAsync(IEnumerable<TEntity> entity);        
+        Result<IEnumerable<TEntity>> DeleteRange(IEnumerable<TEntity> entity);        
         Result<TEntity> LoadCollection<TCollection>(TEntity entity, Expression<Func<TEntity, IEnumerable<TCollection>>> colec) where TCollection : ModelBase;
         Result<TEntity> LoadReference<TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> prop) where TProperty : class;
                 

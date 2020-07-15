@@ -309,13 +309,7 @@ namespace KNote.Repository.EntityFramework
 
             return ResultDomainAction<TEntity>(result);
         }
-
-        // TODO: Pendiente de implementar
-        public Result<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entity)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public async Task<Result<TEntity>> AddAsync(TEntity entity)
         {
             var result = new Result<TEntity>();
@@ -338,6 +332,55 @@ namespace KNote.Repository.EntityFramework
 
             return ResultDomainAction<TEntity>(result);
         }
+
+        public Result<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entities)
+        {
+            //throw new NotImplementedException();
+            var result = new Result<IEnumerable<TEntity>>();
+            int res;
+
+            try
+            {
+                result.Entity = entities;
+                _context.Set<TEntity>().AddRange(entities);
+                res = _context.SaveChanges();
+            }
+            catch (KntEntityValidationException ex)
+            {
+                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+
+            return ResultDomainAction<IEnumerable<TEntity>>(result);
+        }
+
+        public async Task<Result<IEnumerable<TEntity>>> AddRangeAsync(IEnumerable<TEntity> entities)
+        {
+            //throw new NotImplementedException();
+            var result = new Result<IEnumerable<TEntity>>();
+            int res;
+
+            try
+            {
+                result.Entity = entities;
+                await _context.Set<TEntity>().AddRangeAsync(entities);
+                res = await _context.SaveChangesAsync();
+            }
+            catch (KntEntityValidationException ex)
+            {
+                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+
+            return ResultDomainAction<IEnumerable<TEntity>>(result);
+        }
+
 
         public Result<TEntity> Update(TEntity entity)
         {
@@ -381,6 +424,30 @@ namespace KNote.Repository.EntityFramework
             }
 
             return ResultDomainAction<TEntity>(result);
+        }
+
+        public Result<IEnumerable<TEntity>> UpdateRange(IEnumerable<TEntity> entities)
+        {
+            //throw new NotImplementedException();
+            var result = new Result<IEnumerable<TEntity>>();
+            int res;
+
+            try
+            {
+                result.Entity = entities;
+                _context.Set<TEntity>().UpdateRange(entities);
+                res = _context.SaveChanges();
+            }
+            catch (KntEntityValidationException ex)
+            {
+                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+
+            return ResultDomainAction<IEnumerable<TEntity>>(result);
         }
 
         public Result<TEntity> Delete(params object[] keyValues)
@@ -497,29 +564,6 @@ namespace KNote.Repository.EntityFramework
                 result.Entity = entities;
                 _context.Set<TEntity>().RemoveRange(entities);                
                 res = _context.SaveChanges();
-            }
-            catch (KntEntityValidationException ex)
-            {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-
-            return ResultDomainAction<IEnumerable<TEntity>>(result);
-        }
-
-        public async Task<Result<IEnumerable<TEntity>>> DeleteRangeAsync(IEnumerable<TEntity> entities)
-        {
-            var result = new Result<IEnumerable<TEntity>>();
-            int res;
-
-            try
-            {
-                result.Entity = entities;
-                _context.Set<TEntity>().RemoveRange(entities);
-                res = await _context.SaveChangesAsync();
             }
             catch (KntEntityValidationException ex)
             {
