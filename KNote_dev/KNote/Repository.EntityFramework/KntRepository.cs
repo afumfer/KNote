@@ -219,10 +219,14 @@ namespace KNote.Repository.EntityFramework
         {
             try
             {
-                // Esto es para strProvider = "System.Data.SqlClient"                
-                var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
-                optionsBuilder.UseSqlServer(_strConn);
-                _context = new KntDbContext(optionsBuilder.Options);
+                if (_strProvider == "System.Data.SqlClient")
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
+                    optionsBuilder.UseSqlServer(_strConn);
+                    _context = new KntDbContext(optionsBuilder.Options);
+                }
+                else
+                    throw new Exception("Data provider not suported (KntEx)");
 
                 // TODO: Pendiente de establecer la conexión con Sqlite ...
 

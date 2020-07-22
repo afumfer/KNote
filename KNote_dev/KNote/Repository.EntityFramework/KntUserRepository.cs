@@ -17,6 +17,7 @@ namespace KNote.Repository.EntityFramework
         public KntUserRepository(KntDbContext context, bool throwKntException)
         {
             _users = new GenericRepositoryEF<KntDbContext, User>(context, throwKntException);
+            ThrowKntException = throwKntException;
         }
 
 

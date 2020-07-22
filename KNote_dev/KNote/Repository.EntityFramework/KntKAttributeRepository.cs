@@ -19,6 +19,7 @@ namespace KNote.Repository.EntityFramework
         {
             _kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(context, throwKntException);
             _kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(context, throwKntException);
+            ThrowKntException = throwKntException;
         }
 
 

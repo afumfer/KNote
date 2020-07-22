@@ -17,6 +17,7 @@ namespace KNote.Repository.EntityFramework
         public KntFolderRepository(KntDbContext context, bool throwKntException)
         {
             _folders = new GenericRepositoryEF<KntDbContext, Folder>(context, throwKntException);
+            ThrowKntException = throwKntException;
         }
 
         public async Task<Result<List<FolderDto>>> GetAllAsync()

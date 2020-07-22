@@ -16,25 +16,26 @@ namespace KNote.Repository.EntityFramework
         public KntNoteTypeRepository(KntDbContext context, bool throwKntException) 
         {        
             _noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(context, throwKntException);
+            ThrowKntException = throwKntException;
         }
 
         public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
         {            
-            var resService = new Result<List<NoteTypeDto>>();
+            var res = new Result<List<NoteTypeDto>>();
             try
             {
                 var resRep = await _noteTypes.GetAllAsync();
-                resService.Entity = resRep.Entity?
+                res.Entity = resRep.Entity?
                     .Select(t => t.GetSimpleDto<NoteTypeDto>())
                     .OrderBy(t => t.Name)
                     .ToList();
-                resService.ErrorList = resRep.ErrorList;
+                res.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, res.ErrorList);
             }
-            return ResultDomainAction(resService);
+            return ResultDomainAction(res);
         }
 
         public async Task<Result<NoteTypeDto>> GetAsync(Guid id)

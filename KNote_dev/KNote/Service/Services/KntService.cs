@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using KNote.Repository;
 using KNote.Repository.EntityFramework;
+using DP = KNote.Repository.Dapper;
 
 namespace KNote.Service.Services
 {
@@ -16,6 +17,7 @@ namespace KNote.Service.Services
         #region Fields
 
         protected IKntRepository _repository;
+        protected IKntRepository _repositoryDapper;
 
         #endregion
 
@@ -24,6 +26,7 @@ namespace KNote.Service.Services
         public KntService(string strConn, string strProvider = "System.Data.SqlClient", bool throwKntException = false)
         {            
             _repository = new KntRepository(strConn, strProvider, throwKntException);
+            _repositoryDapper = new DP.KntRepository(strConn, strProvider, throwKntException);
         }
 
         #endregion
@@ -91,7 +94,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_noteTypes == null)
-                    _noteTypes = new KntNoteTypeService(_repository);
+                    //_noteTypes = new KntNoteTypeService(_repository);
+                    _noteTypes = new KntNoteTypeService(_repositoryDapper);
                 return _noteTypes;
             }
         }

@@ -29,6 +29,8 @@ namespace KNote.Repository.EntityFramework
             _resources = new GenericRepositoryEF<KntDbContext, Resource>(context, throwKntException);
             _folders = new KntFolderRepository(context, throwKntException);
             _kattributes = new KntKAttributeRepository(context, throwKntException);
+
+            ThrowKntException = throwKntException;
         }
 
         public async Task<Result<List<NoteInfoDto>>> GetAllAsync()

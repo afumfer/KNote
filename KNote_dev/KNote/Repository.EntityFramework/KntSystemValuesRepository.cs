@@ -16,6 +16,7 @@ namespace KNote.Repository.EntityFramework
         public KntSystemValuesRepository(KntDbContext context, bool throwKntException)
         {
             _systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(context, throwKntException);
+            ThrowKntException = throwKntException;
         }
 
         public async Task<Result<List<SystemValueDto>>> GetAllAsync()

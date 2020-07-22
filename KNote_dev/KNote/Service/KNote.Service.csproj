@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
+    <ProjectReference Include="..\Repository.Dapper\KNote.Repository.Dapper.csproj" />
     <ProjectReference Include="..\Repository.EntityFramework\KNote.Repository.EntityFramework.csproj" />
     <ProjectReference Include="..\Repository\KNote.Repository.csproj" />
   </ItemGroup>

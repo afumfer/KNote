@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.Repository", "KNote\R
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.Repository.EntityFramework", "KNote\Repository.EntityFramework\KNote.Repository.EntityFramework.csproj", "{34FADD12-B8F1-4A16-97FC-5870D752B683}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNote.Repository.Dapper", "KNote\Repository.Dapper\KNote.Repository.Dapper.csproj", "{71D8ABD0-1F81-4F91-812E-CA327D39BACE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{34FADD12-B8F1-4A16-97FC-5870D752B683}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34FADD12-B8F1-4A16-97FC-5870D752B683}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34FADD12-B8F1-4A16-97FC-5870D752B683}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71D8ABD0-1F81-4F91-812E-CA327D39BACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71D8ABD0-1F81-4F91-812E-CA327D39BACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71D8ABD0-1F81-4F91-812E-CA327D39BACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71D8ABD0-1F81-4F91-812E-CA327D39BACE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
