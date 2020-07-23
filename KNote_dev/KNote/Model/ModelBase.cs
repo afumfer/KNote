@@ -18,20 +18,33 @@ namespace KNote.Model
 
         public abstract IEnumerable<ValidationResult> Validate(ValidationContext validationContext);
 
-        [NotMapped]
-        public bool IsValid
+        //[NotMapped]
+        //public bool IsValid
+        //{
+        //    get
+        //    {
+        //        IEnumerable<ValidationResult> Validations = Validate(null);
+        //        if (Validations != null)
+        //            return (Validations.Count() == 0);
+        //        else
+        //            return true;
+        //    }
+        //}
+
+        // Por Implementar IsValid como método en lugar de propiedad.
+        // Con WebAssempby podemos controlar mejor las ejecución
+        // del código de validación. Evitamos el disparo automático de esta 
+        // propiedasd. 
+        public bool IsValid()
         {
-            get
-            {
-                IEnumerable<ValidationResult> Validations = Validate(null);
-                if (Validations != null)
-                    return (Validations.Count() == 0);
-                else
-                    return true;
-            }
+            IEnumerable<ValidationResult> Validations = Validate(null);
+            if (Validations != null)
+                return (Validations.Count() == 0);
+            else
+                return true;
         }
 
         // TODO: add property IsDirty
-       
+
     }
 }

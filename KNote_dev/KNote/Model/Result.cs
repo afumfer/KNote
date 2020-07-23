@@ -33,7 +33,9 @@ namespace KNote.Model
         {
             get
             {
-                return (base.IsValid && Entity != null);
+                // TODO: Revisar / repensar la condición de que la entidasd tenga que ser 
+                //       distinta de null
+                return (base.IsValid && Entity != null);                
             }
         }
 

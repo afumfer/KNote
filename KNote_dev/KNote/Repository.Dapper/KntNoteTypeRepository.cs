@@ -25,62 +25,120 @@ namespace KNote.Repository.Dapper
 
         public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
         {
-            var res = new Result<List<NoteTypeDto>>();
+            var result = new Result<List<NoteTypeDto>>();
             try
             {
                 var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM [dbo].[NoteTypes] ORDER BY Name";
 
                 var entity = await _db.QueryAsync<NoteTypeDto>(sql.ToString(), new { });
-                res.Entity = entity.ToList();                
+                result.Entity = entity.ToList();
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, res.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
-            //return ResultDomainAction(res);
-            return res;
+            return ResultDomainAction(result);            
         }
 
-        public Task<Result<NoteTypeDto>> GetAsync(Guid id)
+        public async Task<Result<NoteTypeDto>> GetAsync(Guid id)
         {
-            //var sql = @"SELECT IdCarpeta, NombreCarpeta, IdCarpetaPadre, Orden, OrdenNotas, TipoSalidaNotas 
-            //            FROM dbo.Carpetas Where IdCarpeta = @Id";
-            //return await db.QueryFirstOrDefaultAsync<Carpeta>(sql.ToString(), new { Id = id });
+            var result = new Result<NoteTypeDto>();
+            try
+            {
+                var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM NoteTypes 
+                        WHERE NoteTypeId = @Id";
 
-            throw new NotImplementedException();
+                var entity =  await _db.QueryFirstOrDefaultAsync<NoteTypeDto>(sql.ToString(), new { Id = id });
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }            
+            return ResultDomainAction(result);
         }
 
         public Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entity)
         {
-            //var db = dbConnection();
-            //var sql = @"INSERT INTO Carpetas (NombreCarpeta, IdCarpetaPadre, Orden, OrdenNotas, TipoSalidaNotas)
-            //            VALUES (@NombreCarpeta, @IdCarpetaPadre, @Orden, @OrdenNotas, @TipoSalidaNotas)";
-            //var result = await db.ExecuteAsync(sql.ToString(), new { carpeta.NombreCarpeta, carpeta.IdCarpetaPadre, carpeta.Orden, carpeta.OrdenNotas, carpeta.TipoSalidaNotas });
-            //return result > 0;
-
-            //var db = dbConnection();
-            //var sql = @"UPDATE Carpetas SET
-            //            NombreCarpeta = @NombreCarpeta
-            //            , IdCarpetaPadre = @IdCarpetaPadre
-            //            , Orden = @Orden
-            //            , OrdenNotas = @OrdenNotas
-            //            , TipoSalidaNotas = @TipoSalidaNotas 
-            //            WHERE IdCarpeta = @IdCarpeta;";
-            //var result = await db.ExecuteAsync(sql.ToString(),
-            //                new { carpeta.IdCarpeta, carpeta.NombreCarpeta, carpeta.IdCarpetaPadre, carpeta.Orden, carpeta.OrdenNotas, carpeta.TipoSalidaNotas });
-            //return result > 0;
-
             throw new NotImplementedException();
         }
 
-        public Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
+        public async Task<Result<NoteTypeDto>> AddAsync(NoteTypeDto entity)
         {
-            //var db = dbConnection();
-            //var sql = @"DELETE FROM Carpetas WHERE IdCarpeta = @Id";
-            //var result = await db.ExecuteAsync(sql.ToString(), new { Id = id });
-            //return result > 0;
+            var result = new Result<NoteTypeDto>();
+            try
+            {
+                // TODO: Esto va en la capa de servicio
+                //if (entity.NoteTypeId == Guid.Empty)
+                //    entity.NoteTypeId = Guid.NewGuid();
+                
+                var sql = @"INSERT INTO NoteTypes (NoteTypeId, Name, Description, ParenNoteTypeId)
+                            VALUES (@NoteTypeId, @Name, @Description, @ParenNoteTypeId)";
 
-            throw new NotImplementedException();
+                var r = await _db.ExecuteAsync(sql.ToString(), 
+                    new { entity.NoteTypeId, entity.Name, entity.Description, entity.ParenNoteTypeId });
+
+                if (r == 0)                                   
+                    result.ErrorList.Add("Entity not inserted");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<NoteTypeDto>> UpdateAsync(NoteTypeDto entity)
+        {
+            var result = new Result<NoteTypeDto>();
+            try
+            {
+                var sql = @"UPDATE NoteTypes SET                     
+                       Name = @Name
+                      , Description = @Description
+                      , ParenNoteTypeId = @ParenNoteTypeId
+                    WHERE NoteTypeId = @NoteTypeId";
+                
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new { entity.NoteTypeId, entity.Name, entity.Description, entity.ParenNoteTypeId });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not updated");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
+        {
+            var result = new Result<NoteTypeDto>();
+            try
+            {
+                var sql = @"DELTE FROM NoteTypes WHERE NoteTypeId = @Id";
+
+                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+                
+                // TODO: Esto no me gusta mucho ....
+                if (r == 0)
+                {
+                    result.ErrorList.Add("Entity not deleted");
+                    result.Entity = null;
+                }
+                else
+                    result.Entity = new NoteTypeDto();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
 
