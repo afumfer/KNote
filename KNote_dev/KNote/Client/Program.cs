@@ -10,7 +10,7 @@ using KNote.Client.ClientDataServices;
 using KNote.Client.Helpers;
 using Microsoft.AspNetCore.Components.Authorization;
 using KNote.Client.Auth;
-using Blazor.FileReader;
+using Tewr.Blazor.FileReader;
 using System.Net.Http;
 using KNote.Client.Shared;
 
