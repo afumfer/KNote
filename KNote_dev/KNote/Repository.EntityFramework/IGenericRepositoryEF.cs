@@ -50,6 +50,7 @@ namespace KNote.Repository.EntityFramework
         Task<Result<TEntity>> UpdateAsync(TEntity entity);
         Result<IEnumerable<TEntity>> UpdateRange(IEnumerable<TEntity> entities);
         Result<TEntity> Delete(params object[] keyValues);
+        Task<Result<TEntity>> DeleteAsync(params object[] keyValues);
         Result<TEntity> Delete(TEntity entity);
         Task<Result<TEntity>> DeleteAsync(TEntity entity);
         Result<IEnumerable<TEntity>> DeleteRange(IEnumerable<TEntity> entity);        

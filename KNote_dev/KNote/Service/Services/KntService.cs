@@ -16,6 +16,9 @@ namespace KNote.Service.Services
     {
         #region Fields
 
+        // !!! OJO, doble respositorio para el proceso de implementación de dapper y depuración. 
+        // En la versión definitiva habrá una inyección de dependencia. 
+
         protected IKntRepository _repository;
         protected IKntRepository _repositoryDapper;
 
@@ -94,8 +97,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_noteTypes == null)
-                    //_noteTypes = new KntNoteTypeService(_repository);
-                    _noteTypes = new KntNoteTypeService(_repositoryDapper);
+                    _noteTypes = new KntNoteTypeService(_repository);
+                    //_noteTypes = new KntNoteTypeService(_repositoryDapper);
                 return _noteTypes;
             }
         }

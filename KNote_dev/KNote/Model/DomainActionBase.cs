@@ -56,6 +56,14 @@ namespace KNote.Model
             return resultRepositoryAction;
         }
 
+        protected Result ResultDomainAction(Result resultRepositoryAction)
+        {
+            if (resultRepositoryAction.IsValid == false)
+                if (_throwKntException == true)
+                    throw new Exception(resultRepositoryAction.Message);
+            return resultRepositoryAction;
+        }
+
 
     }
 }

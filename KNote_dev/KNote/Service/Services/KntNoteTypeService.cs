@@ -42,12 +42,43 @@ namespace KNote.Service.Services
 
         public async Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entity)
         {
-            return await _repository.NoteTypes.SaveAsync(entity);
+            // !!! Refactorizar. 
+            //return await _repository.NoteTypes.SaveAsync(entity);
+
+            if (entity.NoteTypeId == Guid.Empty)
+            {
+                entity.NoteTypeId = Guid.NewGuid();
+                return await _repository.NoteTypes.AddAsync(entity);
+            }
+            else
+            {
+                return await _repository.NoteTypes.UpdateAsync(entity);
+            }
         }
 
         public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
         {
-            return await _repository.NoteTypes.DeleteAsync(id);
+            // return await _repository.NoteTypes.DeleteAsync(id);
+
+            var result = new Result<NoteTypeDto>();
+
+            var resGetEntity = await GetAsync(id);
+
+            if (resGetEntity.IsValid) 
+            { 
+                var resDelEntity = await _repository.NoteTypes.DeleteAsync(id);
+                if (resDelEntity.IsValid)                
+                    result.Entity = resGetEntity.Entity;                                    
+                else                
+                    result.ErrorList = resDelEntity.ErrorList;
+                                    
+            }
+            else
+            {
+                result.ErrorList = resGetEntity.ErrorList;
+            }
+
+            return result;
         }
 
         #endregion

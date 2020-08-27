@@ -49,6 +49,10 @@ namespace KNote.Repository.Dapper
                         WHERE NoteTypeId = @Id";
 
                 var entity =  await _db.QueryFirstOrDefaultAsync<NoteTypeDto>(sql.ToString(), new { Id = id });
+
+                if (entity == null)
+                    result.AddErrorMessage("Entity not found.");
+
                 result.Entity = entity;
             }
             catch (Exception ex)
@@ -58,20 +62,11 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entity)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<Result<NoteTypeDto>> AddAsync(NoteTypeDto entity)
         {
             var result = new Result<NoteTypeDto>();
             try
-            {
-                // TODO: Esto va en la capa de servicio
-                //if (entity.NoteTypeId == Guid.Empty)
-                //    entity.NoteTypeId = Guid.NewGuid();
-                
+            {                
                 var sql = @"INSERT INTO NoteTypes (NoteTypeId, Name, Description, ParenNoteTypeId)
                             VALUES (@NoteTypeId, @Name, @Description, @ParenNoteTypeId)";
 
@@ -116,23 +111,18 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
+        public async Task<Result> DeleteAsync(Guid id)
         {
-            var result = new Result<NoteTypeDto>();
+            var result = new Result();
             try
             {
-                var sql = @"DELTE FROM NoteTypes WHERE NoteTypeId = @Id";
+                var sql = @"DELETE FROM NoteTypes WHERE NoteTypeId = @Id";
 
                 var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+                                
+                if (r == 0)                
+                    result.AddErrorMessage("Entity not deleted");                    
                 
-                // TODO: Esto no me gusta mucho ....
-                if (r == 0)
-                {
-                    result.ErrorList.Add("Entity not deleted");
-                    result.Entity = null;
-                }
-                else
-                    result.Entity = new NoteTypeDto();
             }
             catch (Exception ex)
             {
@@ -140,7 +130,6 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
-
 
         public void Dispose()
         {

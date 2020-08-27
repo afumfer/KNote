@@ -3,13 +3,18 @@ using System.Text;
 
 namespace KNote.Model
 {
-    public class Result<TEntity>: ResultBase        
+    public class Result : ResultBase
+    {
+
+    }
+
+    public class Result<TEntity>: ResultBase
     {
         #region Properties
 
         public TEntity Entity { get; set; }
 
-        public int CountEntity { get; set; } = 1;
+        public int CountColecEntity { get; set; } = 1;
 
         #endregion
 
@@ -29,17 +34,20 @@ namespace KNote.Model
 
         #region Override methods
 
-        public override bool IsValid
-        {
-            get
-            {
-                // TODO: Revisar / repensar la condición de que la entidasd tenga que ser 
-                //       distinta de null
-                return (base.IsValid && Entity != null);                
-            }
-        }
+        // TODO: Penditne de comprobar y eliminar este código
+
+        //public override bool IsValid
+        //{
+        //    get
+        //    {
+        //        // TODO: Revisar / repensar la condición de que la entidasd tenga que ser 
+        //        //       distinta de null
+        //        return (base.IsValid && Entity != null);                
+        //    }
+        //}
 
         #endregion
 
     }
+
 }

@@ -159,7 +159,7 @@ namespace KNote.Repository.EntityFramework
                     query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
                 }
 
-                resService.CountEntity = await query.CountAsync();
+                resService.CountColecEntity = await query.CountAsync();
 
                 // Order by and pagination
                 query = query
@@ -232,7 +232,7 @@ namespace KNote.Repository.EntityFramework
                     }
                 }
 
-                resService.CountEntity = await query.CountAsync();
+                resService.CountColecEntity = await query.CountAsync();
 
                 // Order by and pagination
                 query = query
