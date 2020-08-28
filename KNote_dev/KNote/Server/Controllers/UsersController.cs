@@ -59,6 +59,7 @@ namespace KNote.Server.Controllers
             try
             {
                 var count = (await _service.Users.GetCount()).Entity;
+
                 HttpContext.InsertPaginationParamInResponse(count, pagination.NumRecords);
 
                 var kresApi = await _service.Users.GetAllAsync(pagination);

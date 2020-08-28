@@ -32,7 +32,7 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null)
         {
-            return await _repository.Users.GetAllAsync();
+            return await _repository.Users.GetAllAsync(pagination);
         }
 
         public async Task<Result<int>> GetCount()
@@ -46,13 +46,38 @@ namespace KNote.Service.Services
         }
 
         public async Task<Result<UserDto>> SaveAsync(UserDto entity)
-        {
-            return await _repository.Users.SaveAsync(entity);
+        {            
+            if (entity.UserId == Guid.Empty)
+            {
+                entity.UserId = Guid.NewGuid();
+                return await _repository.Users.AddAsync(entity);
+            }
+            else
+            {
+                return await _repository.Users.UpdateAsync(entity);
+            }
         }
 
         public async Task<Result<UserDto>> DeleteAsync(Guid id)
-        {
-            return await _repository.Users.DeleteAsync(id);
+        {            
+            var result = new Result<UserDto>();
+
+            var resGetEntity = await GetAsync(id);
+
+            if (resGetEntity.IsValid)
+            {
+                var resDelEntity = await _repository.Users.DeleteAsync(id);
+                if (resDelEntity.IsValid)
+                    result.Entity = resGetEntity.Entity;
+                else
+                    result.ErrorList = resDelEntity.ErrorList;
+            }
+            else
+            {
+                result.ErrorList = resGetEntity.ErrorList;
+            }
+
+            return result;
         }
 
         public async Task<Result<UserDto>> Authenticate(string username, string password)

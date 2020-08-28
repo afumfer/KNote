@@ -22,8 +22,6 @@ namespace KNote.Repository.Dapper
             ThrowKntException = throwKntException;
         }
 
-
-
         public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
         {
             var res = new Result<List<NoteInfoDto>>();

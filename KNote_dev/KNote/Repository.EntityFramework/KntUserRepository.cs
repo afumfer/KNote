@@ -123,84 +123,83 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<UserDto>> SaveAsync(UserDto entity)
+        public async Task<Result<UserDto>> AddAsync(UserDto entity)
         {
-            Result<User> resRep = null;
-            var resService = new Result<UserDto>();
-
+            var response = new Result<UserDto>();
             try
             {
-                if (entity.UserId == Guid.Empty)
-                {
-                    entity.UserId = Guid.NewGuid();
-                    var newEntity = new User();
-                    newEntity.SetSimpleDto(entity);
+                var newEntity = new User();
+                newEntity.SetSimpleDto(entity);
 
-                    resRep = await _users.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
+                var resGenRep = await _users.AddAsync(newEntity);
 
-                    if (_users.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _users.ThrowKntException = false;
-                    }
-
-                    resRep = await _users.GetAsync(entity.UserId);
-                    var entityForUpdate = resRep.Entity;
-
-                    if (flagThrowKntException == true)
-                        _users.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _users.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new User();
-                        newEntity.SetSimpleDto(entity);
-
-                        resRep = await _users.AddAsync(newEntity);
-                    }
-                }
+                response.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-            
-            resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-            resService.ErrorList = resRep.ErrorList;
-
-            return ResultDomainAction(resService);
+            return ResultDomainAction(response);
         }
 
-        public async Task<Result<UserDto>> DeleteAsync(Guid userId)
+        public async Task<Result<UserDto>> UpdateAsync(UserDto entity)
         {
-            var resService = new Result<UserDto>();
+            var resGenRep = new Result<User>();
+            var response = new Result<UserDto>();
+
             try
             {
-                var resRep = await _users.GetAsync(userId);
-                if (resRep.IsValid)
+                bool flagThrowKntException = false;
+                if (_users.ThrowKntException == true)
                 {
-                    resRep = await _users.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
+                    flagThrowKntException = true;
+                    _users.ThrowKntException = false;
+                }
+
+                var resGenRepGet = await _users.GetAsync(entity.UserId);
+                User entityForUpdate;
+
+                if (flagThrowKntException == true)
+                    _users.ThrowKntException = true;
+
+                if (resGenRepGet.IsValid)
+                {
+                    entityForUpdate = resGenRepGet.Entity;
+                    entityForUpdate.SetSimpleDto(entity);
+                    resGenRep = await _users.UpdateAsync(entityForUpdate);
                 }
                 else
-                    resService.ErrorList = resRep.ErrorList;
+                {
+                    resGenRep.Entity = null;
+                    resGenRep.AddErrorMessage("Can't find entity for update.");
+                }
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-            return ResultDomainAction(resService);
+
+            return ResultDomainAction(response);
+        }
+
+        public async Task<Result> DeleteAsync(Guid id)
+        {
+            var response = new Result();
+            try
+            {
+                var resGenRep = await _users.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
         }
 
         #region  IDisposable

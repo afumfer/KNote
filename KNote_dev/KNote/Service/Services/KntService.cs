@@ -42,7 +42,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_users == null)
-                    _users = new KntUserService(_repository);
+                    //_users = new KntUserService(_repository);
+                    _users = new KntUserService(_repositoryDapper);
                 return _users;
             }
         }
@@ -97,8 +98,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_noteTypes == null)
-                    _noteTypes = new KntNoteTypeService(_repository);
-                    //_noteTypes = new KntNoteTypeService(_repositoryDapper);
+                    //_noteTypes = new KntNoteTypeService(_repository);
+                    _noteTypes = new KntNoteTypeService(_repositoryDapper);
                 return _noteTypes;
             }
         }

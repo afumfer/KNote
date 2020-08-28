@@ -42,9 +42,6 @@ namespace KNote.Service.Services
 
         public async Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entity)
         {
-            // !!! Refactorizar. 
-            //return await _repository.NoteTypes.SaveAsync(entity);
-
             if (entity.NoteTypeId == Guid.Empty)
             {
                 entity.NoteTypeId = Guid.NewGuid();
@@ -58,8 +55,6 @@ namespace KNote.Service.Services
 
         public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
         {
-            // return await _repository.NoteTypes.DeleteAsync(id);
-
             var result = new Result<NoteTypeDto>();
 
             var resGetEntity = await GetAsync(id);
@@ -70,8 +65,7 @@ namespace KNote.Service.Services
                 if (resDelEntity.IsValid)                
                     result.Entity = resGetEntity.Entity;                                    
                 else                
-                    result.ErrorList = resDelEntity.ErrorList;
-                                    
+                    result.ErrorList = resDelEntity.ErrorList;                                    
             }
             else
             {

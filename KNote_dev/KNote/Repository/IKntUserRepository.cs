@@ -10,10 +10,11 @@ namespace KNote.Repository
     {
         Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null);
         Task<Result<UserDto>> GetAsync(Guid userId);
-        Task<Result<UserInternalDto>> GetInternalAsync(string userName);
-        Task<Result<UserDto>> SaveAsync(UserDto userEntity);
+        Task<Result<UserInternalDto>> GetInternalAsync(string userName);        
+        Task<Result<UserDto>> AddAsync(UserDto userEntity);
+        Task<Result<UserDto>> UpdateAsync(UserDto userEntity);
         Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto userEntity);
-        Task<Result<UserDto>> DeleteAsync(Guid userId);
+        Task<Result> DeleteAsync(Guid userId);
         Task<Result<int>> GetCount();
     }
 }

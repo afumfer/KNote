@@ -28,7 +28,6 @@ namespace KNote.Repository.Dapper
             RefresDbContext();
         }
 
-
         private IKntNoteTypeRepository _noteTypes;
         public IKntNoteTypeRepository NoteTypes
         {
@@ -39,7 +38,50 @@ namespace KNote.Repository.Dapper
                 return _noteTypes;
             }
         }
+        
+        private IKntUserRepository _users;
+        public IKntUserRepository Users
+        {
+            get
+            {
+                if (_users == null)
+                    _users = new KntUserRepository(_db, _throwKntException);
+                return _users;
+            }
+        }
+        
+        private IKntSystemValuesRepository _systemValues;
+        public IKntSystemValuesRepository SystemValues
+        {
+            get
+            {
+                if (_systemValues == null)
+                    _systemValues = new KntSystemValuesRepository(_db, _throwKntException);
+                return _systemValues;
+            }
+        }
+        
+        private IKntFolderRepository _folders;
+        public IKntFolderRepository Folders
+        {
+            get
+            {
+                if (_folders == null)
+                    _folders = new KntFolderRepository(_db, _throwKntException);
+                return _folders;
+            }
+        }
 
+        private IKntKAttributeRepository _kAttributes;
+        public IKntKAttributeRepository KAttributes
+        {
+            get
+            {
+                if (_kAttributes == null)
+                    _kAttributes = new KntKAttributeRepository(_db, _throwKntException);
+                return _kAttributes;
+            }
+        }
 
         private IKntNoteRepository _notes;
         public IKntNoteRepository Notes
@@ -51,31 +93,21 @@ namespace KNote.Repository.Dapper
                 return _notes;
             }
         }
-
-
-       
-        public IKntSystemValuesRepository SystemValues => throw new NotImplementedException();
-
-        public IKntFolderRepository Folders => throw new NotImplementedException();
-
-        public IKntKAttributeRepository KAttributes => throw new NotImplementedException();
-        
-        public IKntUserRepository Users => throw new NotImplementedException();
-
+                    
         public void Dispose()
         {
             // TODO: make this with reflection or clear code
 
-            //if (_users != null)
-            //    _users.Dispose();
-            //if (_folders != null)
-            //    _folders.Dispose();
+            if (_users != null)
+                _users.Dispose();
+            if (_folders != null)
+                _folders.Dispose();
             if (_notes != null)
                 _notes.Dispose();
-            //if (_attributes != null)
-            //    _attributes.Dispose();
-            //if (_systemValues != null)
-            //    _systemValues.Dispose();
+            if (_kAttributes != null)
+                _kAttributes.Dispose();
+            if (_systemValues != null)
+                _systemValues.Dispose();
             if (_noteTypes != null)
                 _noteTypes.Dispose();
 
