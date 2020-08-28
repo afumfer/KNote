@@ -7,10 +7,8 @@ using KNote.Model;
 namespace KNote.Service
 {
     public interface IKntFolderService
-    {
-        int GetNextFolderNumber();
-        Task<Result<List<FolderDto>>> GetAllAsync();
-        Task<Result<List<FolderDto>>> GetRootsAsync();
+    {        
+        Task<Result<List<FolderDto>>> GetAllAsync();        
         Task<Result<List<FolderDto>>> GetTreeAsync();
         Task<Result<FolderDto>> GetAsync(Guid folderId);        
         Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo);                        

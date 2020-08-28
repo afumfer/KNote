@@ -77,6 +77,7 @@ namespace KNote.Service.Services
             {
                 if (_folders == null)
                     _folders = new KntFolderService(_repository);
+                    //_folders = new KntFolderService(_repositoryDapper);
                 return _folders;
             }
         }

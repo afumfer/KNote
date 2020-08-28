@@ -22,34 +22,96 @@ namespace KNote.Repository.Dapper
             ThrowKntException = throwKntException;
         }
 
-        public Task<Result<List<FolderDto>>> GetAllAsync()
-        {
-            throw new NotImplementedException();
+        public async Task<Result<List<FolderDto>>> GetAllAsync()
+        {            
+            var result = new Result<List<FolderDto>>();
+            try
+            {
+                var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
+                sql += "FROM Folders ORDER BY [Order];";
+
+                var entity = await _db.QueryAsync<FolderDto>(sql.ToString(), new { });
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<FolderDto>> GetAsync(Guid folderId)
+        public async Task<Result<FolderDto>> GetHomeAsync()
         {
-            throw new NotImplementedException();
+            var result = new Result<FolderDto>();
+            try
+            {
+                var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
+                sql += "FROM Folders WHERE FolderNumber = 1;";
+
+                result.Entity = await _db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { });                 
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+        public async Task<Result<List<FolderDto>>> GetTreeAsync()
+        {            
+            var result = new Result<List<FolderDto>>();
+
+            var treeFolders = new List<FolderDto>();
+
+            try
+            {
+                var allFoldersInfo = (await GetAllAsync()).Entity;
+
+                treeFolders = allFoldersInfo.Where(fi => fi.ParentId == null)
+                    .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
+
+                foreach (FolderDto f in treeFolders)
+                    LoadChilds(f, allFoldersInfo);
+
+                result.Entity = treeFolders;
+
+            }
+            catch (KntEntityValidationException ex)
+            {
+                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+
+            return ResultDomainAction<List<FolderDto>>(result);
         }
 
-        public Task<Result<FolderDto>> GetHomeAsync()
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<Result<FolderDto>> GetAsync(Guid id)
+        {            
+            var result = new Result<FolderDto>();
+            try
+            {
+                var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
+                sql += "FROM Folders WHERE FolderId = @Id;";
 
-        public int GetNextFolderNumber()
-        {
-            throw new NotImplementedException();
-        }
+                var entity = await _db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { Id = id });
 
-        public Task<Result<List<FolderDto>>> GetRootsAsync()
-        {
-            throw new NotImplementedException();
-        }
+                if (entity == null)
+                    result.AddErrorMessage("Entity not found.");
+                else
+                {
+                    if(entity.ParentId != null)
+                        entity.ParentFolderDto = await _db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { Id = entity.ParentId });
+                }
 
-        public Task<Result<List<FolderDto>>> GetTreeAsync()
-        {
-            throw new NotImplementedException();
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
         public Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo)
@@ -66,6 +128,29 @@ namespace KNote.Repository.Dapper
         {
             throw new NotImplementedException();
         }
+
+        #region Private methods
+
+        // TODO: Pendiente de refactorizar (este código está repetido en el repositorio EF)
+        private void LoadChilds(FolderDto folder, List<FolderDto> allFolders)
+        {
+            folder.ChildFolders = allFolders.Where(fi => fi.ParentId == folder.FolderId)
+                .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
+
+            foreach (FolderDto f in folder.ChildFolders)
+                LoadChilds(f, allFolders);
+        }
+
+        private int GetNextFolderNumber()
+        {
+            var sql = "SELECT MAX(FolderNumber) FROM Folders";
+            var result = _db.ExecuteScalar(sql);
+
+            return (result == null) ? 1 : ((int)result) + 1;
+        }
+
+        #endregion
+
 
     }
 }

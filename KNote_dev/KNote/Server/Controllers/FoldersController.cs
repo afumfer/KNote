@@ -47,25 +47,6 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("getroots")]   // GET api/folders/getroots
-        public async Task<IActionResult> GeRoots()
-        {
-            try
-            {
-                var resApi = await _service.Folders.GetRootsAsync();
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-            }
-            catch (Exception ex)
-            {
-                var resApi = new Result<List<FolderInfoDto>>();
-                resApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(resApi);
-            }
-        }
-
         [HttpGet("gettree")]   // GET api/folders/gettree
         public async Task<IActionResult> GeTree()
         {

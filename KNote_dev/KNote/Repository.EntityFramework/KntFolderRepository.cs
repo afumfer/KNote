@@ -36,22 +36,6 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<List<FolderDto>>> GetRootsAsync()
-        {
-            var resService = new Result<List<FolderDto>>();
-            try
-            {
-                var resRep = await _folders.GetAllAsync(f => f.ParentId == null);
-                resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
         public async Task<Result<FolderDto>> GetAsync(Guid folderId)
         {
             var resService = new Result<FolderDto>();
@@ -74,17 +58,6 @@ namespace KNote.Repository.EntityFramework
             }
             return ResultDomainAction(resService);
         }
-
-        public int GetNextFolderNumber()
-        {
-            // Emplear método LastOrDefault() en lugar de FirstOrDafault 
-            var lastFolder = _folders
-                .DbSet.OrderByDescending(f => f.FolderNumber).FirstOrDefault();
-
-            return lastFolder != null ? lastFolder.FolderNumber + 1 : 1;
-        }
-
-
 
         public async Task<Result<List<FolderDto>>> GetTreeAsync()
         {
@@ -246,6 +219,15 @@ namespace KNote.Repository.EntityFramework
 
             foreach (FolderDto f in folder.ChildFolders)
                 LoadChilds(f, allFolders);
+        }
+
+        private int GetNextFolderNumber()
+        {
+            // Emplear método LastOrDefault() en lugar de FirstOrDafault 
+            var lastFolder = _folders
+                .DbSet.OrderByDescending(f => f.FolderNumber).FirstOrDefault();
+
+            return lastFolder != null ? lastFolder.FolderNumber + 1 : 1;
         }
 
         #endregion

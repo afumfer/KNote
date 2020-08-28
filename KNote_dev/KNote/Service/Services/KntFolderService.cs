@@ -34,20 +34,10 @@ namespace KNote.Service.Services
         {
             return await _repository.Folders.GetAllAsync();
         }
-
-        public async Task <Result<List<FolderDto>>> GetRootsAsync()
-        {
-            return await _repository.Folders.GetRootsAsync();
-        }
         
         public async Task<Result<FolderDto>> GetAsync(Guid folderId)
         {
             return await _repository.Folders.GetAsync(folderId);
-        }
-
-        public int GetNextFolderNumber()
-        {
-            return  _repository.Folders.GetNextFolderNumber();
         }
 
         public async Task<Result<List<FolderDto>>> GetTreeAsync()
