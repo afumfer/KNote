@@ -46,13 +46,38 @@ namespace KNote.Service.Services
         }
 
         public async Task<Result<FolderDto>> SaveAsync(FolderDto entity)
-        {
-            return await _repository.Folders.SaveAsync(entity);
+        {            
+            if (entity.FolderId == Guid.Empty)
+            {
+                entity.FolderId = Guid.NewGuid();
+                return await _repository.Folders.AddAsync(entity);
+            }
+            else
+            {
+                return await _repository.Folders.UpdateAsync(entity);
+            }
         }
 
         public async Task<Result<FolderDto>> DeleteAsync(Guid id)
-        {
-            return await _repository.Folders.DeleteAsync(id);
+        {            
+            var result = new Result<FolderDto>();
+
+            var resGetEntity = await GetAsync(id);
+
+            if (resGetEntity.IsValid)
+            {
+                var resDelEntity = await _repository.Folders.DeleteAsync(id);
+                if (resDelEntity.IsValid)
+                    result.Entity = resGetEntity.Entity;
+                else
+                    result.ErrorList = resDelEntity.ErrorList;
+            }
+            else
+            {
+                result.ErrorList = resGetEntity.ErrorList;
+            }
+
+            return result;
         }
 
         #endregion

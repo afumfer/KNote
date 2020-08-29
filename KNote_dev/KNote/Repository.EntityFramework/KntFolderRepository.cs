@@ -112,93 +112,88 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<FolderDto>> SaveAsync(FolderDto entity)
+        public async Task<Result<FolderDto>> AddAsync(FolderDto entity)
         {
-            Result<Folder> resRep = null;
-            var resService = new Result<FolderDto>();
-
+            var response = new Result<FolderDto>();
             try
             {
-                if (entity.FolderId == Guid.Empty)
-                {
-                    entity.FolderId = Guid.NewGuid();
-                    var newEntity = new Folder();
-                    newEntity.SetSimpleDto(entity);
+                var newEntity = new Folder();
+                newEntity.SetSimpleDto(entity);
+                newEntity.FolderNumber = GetNextFolderNumber();
+                newEntity.CreationDateTime = DateTime.Now;
+                newEntity.ModificationDateTime = DateTime.Now;
 
-                    // TODO: update standard control values to newEntity
-                    // ...
-                    newEntity.FolderNumber = GetNextFolderNumber();
+                var resGenRep = await _folders.AddAsync(newEntity);
 
-                    resRep = await _folders.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
-
-                    if (ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        ThrowKntException = false;
-                    }
-
-                    resRep = await _folders.GetAsync(entity.FolderId);
-                    var entityForUpdate = resRep.Entity;
-
-                    if (flagThrowKntException == true)
-                        ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _folders.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new Folder();
-                        newEntity.SetSimpleDto(entity);
-
-                        // TODO: update standard control values to newEntity
-                        // ...
-                        resRep = await _folders.AddAsync(newEntity);
-                    }
-                }
+                response.Entity = resGenRep.Entity?.GetSimpleDto<FolderDto>();
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
-            resService.ErrorList = resRep.ErrorList;
-
-            return ResultDomainAction(resService);
+            return ResultDomainAction(response);
         }
 
-        public async Task<Result<FolderDto>> DeleteAsync(Guid id)
+        public async Task<Result<FolderDto>> UpdateAsync(FolderDto entity)
         {
-            var resService = new Result<FolderDto>();
+            var resGenRep = new Result<Folder>();
+            var response = new Result<FolderDto>();
+
             try
             {
-                var resRep = await _folders.GetAsync(id);
-                if (resRep.IsValid)
+                bool flagThrowKntException = false;
+                if (_folders.ThrowKntException == true)
                 {
-                    resRep = await _folders.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
+                    flagThrowKntException = true;
+                    _folders.ThrowKntException = false;
+                }
+
+                var resGenRepGet = await _folders.GetAsync(entity.FolderId);
+                Folder entityForUpdate;
+
+                if (flagThrowKntException == true)
+                    _folders.ThrowKntException = true;
+
+                if (resGenRepGet.IsValid)
+                {
+                    entityForUpdate = resGenRepGet.Entity;
+                    entityForUpdate.SetSimpleDto(entity);
+                    entityForUpdate.ModificationDateTime = DateTime.Now;
+                    resGenRep = await _folders.UpdateAsync(entityForUpdate);
                 }
                 else
-                    resService.ErrorList = resRep.ErrorList;
+                {
+                    resGenRep.Entity = null;
+                    resGenRep.AddErrorMessage("Can't find entity for update.");
+                }
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<FolderDto>();
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-            return ResultDomainAction(resService);
+
+            return ResultDomainAction(response);
+        }
+
+        public async Task<Result> DeleteAsync(Guid id)
+        {
+            var response = new Result();
+            try
+            {
+                var resGenRep = await _folders.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
+
         }
 
         #region  IDisposable

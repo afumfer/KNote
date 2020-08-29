@@ -114,19 +114,117 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo)
+        public async Task<Result<FolderDto>> AddAsync(FolderDto entity)
         {
-            throw new NotImplementedException();
+            var result = new Result<FolderDto>();
+            try
+            {                
+                entity.CreationDateTime = DateTime.Now;
+                entity.ModificationDateTime = DateTime.Now;
+
+                var sql = @"INSERT INTO Folders (FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, 
+                                PathFolder, [Order], OrderNotes, Script, ParentId )
+                            VALUES (@FolderId, @FolderNumber, @CreationDateTime, @ModificationDateTime, @Name, @Tags, 
+                                    @PathFolder, @Order, @OrderNotes, @Script, @ParentId)";
+
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new {
+                        entity.FolderId,
+                        entity.FolderNumber,
+                        entity.CreationDateTime,
+                        entity.ModificationDateTime,
+                        entity.Name,
+                        entity.Tags,
+                        entity.PathFolder,
+                        entity.Order,
+                        entity.OrderNotes,
+                        entity.Script,
+                        entity.ParentId
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not inserted");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<FolderDto>> DeleteAsync(Guid id)
+        public async Task<Result<FolderDto>> UpdateAsync(FolderDto entity)
         {
-            throw new NotImplementedException();
+            var result = new Result<FolderDto>();
+            try
+            {
+                entity.ModificationDateTime = DateTime.Now;
+
+                var sql = @"UPDATE Folders SET                     
+                        FolderNumber = @FolderNumber, 
+                        CreationDateTime = @CreationDateTime, 
+                        ModificationDateTime = @ModificationDateTime, 
+                        [Name] = @Name, 
+                        Tags = @Tags,
+                        PathFolder = @PathFolder, 
+                        [Order] = @Order, 
+                        OrderNotes = @OrderNotes, 
+                        Script = @Script, 
+                        ParentId = @ParentId
+                    WHERE FolderId = @FolderId";
+
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new {
+                        entity.FolderId,
+                        entity.FolderNumber,
+                        entity.CreationDateTime,
+                        entity.ModificationDateTime,
+                        entity.Name,
+                        entity.Tags,
+                        entity.PathFolder,
+                        entity.Order,
+                        entity.OrderNotes,
+                        entity.Script,
+                        entity.ParentId
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not updated");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+
+        public async Task<Result> DeleteAsync(Guid id)
+        {
+            var result = new Result();
+            try
+            {
+                var sql = @"DELETE FROM Folders WHERE FolderId = @Id";
+
+                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+
+                if (r == 0)
+                    result.AddErrorMessage("Entity not deleted");
+
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            //
         }
 
         #region Private methods
