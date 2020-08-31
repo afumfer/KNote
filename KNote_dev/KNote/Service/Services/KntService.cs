@@ -55,6 +55,7 @@ namespace KNote.Service.Services
             {
                 if (_kattributes == null)
                     _kattributes = new KntKAttributeService(_repository);
+                    //_kattributes = new KntKAttributeService(_repositoryDapper);
                 return _kattributes;
             }
         }
@@ -65,7 +66,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_systemValues == null)
-                    _systemValues = new KntSystemValuesService(_repository);
+                    //_systemValues = new KntSystemValuesService(_repository);
+                    _systemValues = new KntSystemValuesService(_repositoryDapper);
                 return _systemValues;
             }
         }
@@ -76,8 +78,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_folders == null)
-                    _folders = new KntFolderService(_repository);
-                    //_folders = new KntFolderService(_repositoryDapper);
+                    //_folders = new KntFolderService(_repository);
+                    _folders = new KntFolderService(_repositoryDapper);
                 return _folders;
             }
         }
@@ -89,6 +91,7 @@ namespace KNote.Service.Services
             {
                 if (_notes == null)
                     _notes = new KntNoteService(_repository);
+                    //_notes = new KntNoteService(_repositoryDapper);
                 return _notes;
             }
         }

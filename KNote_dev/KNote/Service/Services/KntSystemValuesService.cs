@@ -34,9 +34,9 @@ namespace KNote.Service.Services
             return await _repository.SystemValues.GetAllAsync();
         }
 
-        public async Task<Result<SystemValueDto>> GetAsync(string key)
+        public async Task<Result<SystemValueDto>> GetAsync(string scope, string key)
         {
-            return await _repository.SystemValues.GetAsync(key);
+            return await _repository.SystemValues.GetAsync(scope, key);
         }
 
         public async Task<Result<SystemValueDto>> GetAsync(Guid id)
@@ -46,12 +46,37 @@ namespace KNote.Service.Services
 
         public async Task<Result<SystemValueDto>> SaveAsync(SystemValueDto entity)
         {
-            return await _repository.SystemValues.SaveAsync(entity);
+            if (entity.SystemValueId == Guid.Empty)
+            {
+                entity.SystemValueId = Guid.NewGuid();
+                return await _repository.SystemValues.AddAsync(entity);
+            }
+            else
+            {
+                return await _repository.SystemValues.UpdateAsync(entity);
+            }
         }
 
         public async Task<Result<SystemValueDto>> DeleteAsync(Guid id)
         {
-            return await _repository.SystemValues.DeleteAsync(id);
+            var result = new Result<SystemValueDto>();
+
+            var resGetEntity = await GetAsync(id);
+
+            if (resGetEntity.IsValid)
+            {
+                var resDelEntity = await _repository.SystemValues.DeleteAsync(id);
+                if (resDelEntity.IsValid)
+                    result.Entity = resGetEntity.Entity;
+                else
+                    result.ErrorList = resDelEntity.ErrorList;
+            }
+            else
+            {
+                result.ErrorList = resGetEntity.ErrorList;
+            }
+
+            return result;
         }
 
         #endregion

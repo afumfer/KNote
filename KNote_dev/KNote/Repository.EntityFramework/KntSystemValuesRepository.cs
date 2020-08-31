@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework
 {
+
+    // TODO: Pendiente de probar
+
     public class KntSystemValuesRepository : DomainActionBase, IKntSystemValuesRepository
     {
         private IGenericRepositoryEF<KntDbContext, SystemValue> _systemValues;
@@ -35,12 +38,12 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<SystemValueDto>> GetAsync(string key)
+        public async Task<Result<SystemValueDto>> GetAsync(string scope, string key)
         {
             var resService = new Result<SystemValueDto>();
             try
             {
-                var resRep = await _systemValues.GetAsync(sv => sv.Key == key);
+                var resRep = await _systemValues.GetAsync(sv => sv.Scope == scope && sv.Key == key);
                 resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
                 resService.ErrorList = resRep.ErrorList;
             }
@@ -67,90 +70,84 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<SystemValueDto>> SaveAsync(SystemValueDto entity)
+        public async Task<Result<SystemValueDto>> AddAsync(SystemValueDto entity)
         {
-            Result<SystemValue> resRep = null;
-            var resService = new Result<SystemValueDto>();
-
+            var response = new Result<SystemValueDto>();
             try
             {
-                if (entity.SystemValueId == Guid.Empty)
-                {
-                    entity.SystemValueId = Guid.NewGuid();
-                    var newEntity = new SystemValue();
-                    newEntity.SetSimpleDto(entity);
+                var newEntity = new SystemValue();
+                newEntity.SetSimpleDto(entity);
 
-                    // TODO: update standard control values to newEntity
-                    // ...
+                var resGenRep = await _systemValues.AddAsync(newEntity);
 
-                    resRep = await _systemValues.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
-
-                    if (_systemValues.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _systemValues.ThrowKntException = false;
-                    }
-
-                    var entityForUpdate = (await _systemValues.GetAsync(entity.SystemValueId)).Entity;
-
-                    if (flagThrowKntException == true)
-                        _systemValues.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _systemValues.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new SystemValue();
-                        newEntity.SetSimpleDto(entity);
-
-                        // TODO: update standard control values to newEntity
-                        // ...
-                        resRep = await _systemValues.AddAsync(newEntity);
-                    }
-                }
+                response.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-
-            resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
-            resService.ErrorList = resRep.ErrorList;
-
-            return ResultDomainAction(resService);
+            return ResultDomainAction(response);
         }
 
-        public async Task<Result<SystemValueDto>> DeleteAsync(Guid id)
+        public async Task<Result<SystemValueDto>> UpdateAsync(SystemValueDto entity)
         {
-            var resService = new Result<SystemValueDto>();
+            var resGenRep = new Result<SystemValue>();
+            var response = new Result<SystemValueDto>();
+
             try
             {
-                var resRep = await _systemValues.GetAsync(id);
-                if (resRep.IsValid)
+                bool flagThrowKntException = false;
+                if (_systemValues.ThrowKntException == true)
                 {
-                    resRep = await _systemValues.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
+                    flagThrowKntException = true;
+                    _systemValues.ThrowKntException = false;
+                }
+
+                var resGenRepGet = await _systemValues.GetAsync(entity.SystemValueId);
+                SystemValue entityForUpdate;
+
+                if (flagThrowKntException == true)
+                    _systemValues.ThrowKntException = true;
+
+                if (resGenRepGet.IsValid)
+                {
+                    entityForUpdate = resGenRepGet.Entity;
+                    entityForUpdate.SetSimpleDto(entity);
+                    resGenRep = await _systemValues.UpdateAsync(entityForUpdate);
                 }
                 else
-                    resService.ErrorList = resRep.ErrorList;
+                {
+                    resGenRep.Entity = null;
+                    resGenRep.AddErrorMessage("Can't find entity for update.");
+                }
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-            return ResultDomainAction(resService);
+
+            return ResultDomainAction(response);
+        }
+
+        public async Task<Result> DeleteAsync(Guid id)
+        {
+            var response = new Result();
+            try
+            {
+                var resGenRep = await _systemValues.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
+
         }
 
         #region  IDisposable
