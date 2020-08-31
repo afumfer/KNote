@@ -54,8 +54,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_kattributes == null)
-                    _kattributes = new KntKAttributeService(_repository);
-                    //_kattributes = new KntKAttributeService(_repositoryDapper);
+                    //_kattributes = new KntKAttributeService(_repository);
+                    _kattributes = new KntKAttributeService(_repositoryDapper);
                 return _kattributes;
             }
         }

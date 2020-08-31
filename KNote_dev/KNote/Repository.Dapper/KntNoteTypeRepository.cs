@@ -37,7 +37,7 @@ namespace KNote.Repository.Dapper
             {
                 AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
-            return ResultDomainAction(result);            
+            return ResultDomainAction(result);
         }
 
         public async Task<Result<NoteTypeDto>> GetAsync(Guid id)

@@ -22,9 +22,49 @@ namespace KNote.Repository.Dapper
             ThrowKntException = throwKntException;
         }
 
-        public Task<Result<List<KAttributeDto>>> GetAllAsync()
+        public async Task<Result<List<KAttributeDto>>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var result = new Result<List<KAttributeDto>>();
+            try
+            {
+                var sql = @"SELECT        
+	                        KA.KAttributeId, 
+	                        KA.Name, 
+	                        KA.Description, 
+	                        KA.KAttributeDataType, 
+	                        KA.RequiredValue, 
+	                        KA.[Order], 
+	                        KA.Script, 
+	                        KA.Disabled, 
+	                        
+	                        NT.NoteTypeId, 
+	                        NT.Name, 
+	                        NT.Description, 
+	                        NT.ParenNoteTypeId 
+                        FROM
+	                        KAttributes KA LEFT OUTER JOIN  NoteTypes NT
+	                        ON KA.NoteTypeId = NT.NoteTypeId
+                        ORDER BY NT.Name, [Order], KA.Name
+                        ";
+                                        
+                var entity = await _db.QueryAsync<KAttributeDto, NoteTypeDto, KAttributeDto> (
+                    sql.ToString(),
+                    (kAttribute, noteType) =>
+                    {
+                        kAttribute.NoteTypeDto = noteType;
+                        return kAttribute;
+                    },
+                    new { }
+                    , splitOn: "NoteTypeId"
+                    );
+
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
         public Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
@@ -39,6 +79,9 @@ namespace KNote.Repository.Dapper
 
         public Task<Result<KAttributeDto>> GetAsync(Guid id)
         {
+            // NOTA: Para obtener objetos complejos se puede usar query y luego
+            //       el FirstOrDefault de dicho query. 
+
             throw new NotImplementedException();
         }
 
