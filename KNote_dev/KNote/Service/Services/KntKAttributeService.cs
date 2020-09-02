@@ -30,7 +30,7 @@ namespace KNote.Service.Services
 
         #region IKntAttributeService
 
-        public async Task<Result<List<KAttributeDto>>> GetAllAsync()
+        public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
         {
             return await _repository.KAttributes.GetAllAsync();
         }

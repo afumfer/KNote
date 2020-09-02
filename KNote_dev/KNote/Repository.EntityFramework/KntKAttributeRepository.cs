@@ -24,21 +24,21 @@ namespace KNote.Repository.EntityFramework
 
 
 
-        public async Task<Result<List<KAttributeDto>>> GetAllAsync()
+        public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
         {
-            var resService = new Result<List<KAttributeDto>>();
+            var resService = new Result<List<KAttributeInfoDto>>();
             try
             {
-                var listAtr = await _kattributes.DbSet
+                var listAtr = await _kattributes.DbSet                    
                     .Include(a => a.NoteType)
                     .OrderBy(a => a.Order).ThenBy(a => a.Name)
                     .ToListAsync();
 
-                List<KAttributeDto> listDto = new List<KAttributeDto>();
+                List<KAttributeInfoDto> listDto = new List<KAttributeInfoDto>();
 
                 foreach (var a in listAtr)
                 {
-                    var dto = a.GetSimpleDto<KAttributeDto>();
+                    var dto = a.GetSimpleDto<KAttributeInfoDto>();
                     dto.NoteTypeDto = a.NoteType?.GetSimpleDto<NoteTypeDto>(); ;
                     listDto.Add(dto);
                 }
@@ -57,6 +57,8 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<List<KAttributeInfoDto>>();
             try
             {
+                // TODO: pendiente de poblar la propiedad NoteTypeDto. Coger implementación de GetAllAsync().
+
                 var resRep = await _kattributes.GetAllAsync(_ => _.NoteTypeId == typeId);
 
                 resService.Entity = resRep.Entity?
@@ -77,7 +79,9 @@ namespace KNote.Repository.EntityFramework
         {
             var resService = new Result<List<KAttributeInfoDto>>();
             try
-            {                
+            {
+                // TODO: pendiente de poblar la propiedad NoteTypeDto.  Coger implementación de GetAllAsync().
+
                 var resRep = await _kattributes.GetAllAsync(_ => _.NoteTypeId == null || _.NoteTypeId == typeId);
 
                 resService.Entity = resRep.Entity?

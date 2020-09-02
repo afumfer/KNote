@@ -9,8 +9,7 @@ namespace KNote.Model.Dto
 {
     public class KAttributeDto : KAttributeInfoDto
     {
-        public NoteTypeDto NoteTypeDto { get; set; }
-
+        
         public List<KAttributeTabulatedValueDto> KAttributeValues { get; set; } = new List<KAttributeTabulatedValueDto>();        
     }
 }

@@ -9,7 +9,7 @@ namespace KNote.Repository
 {
     public interface IKntKAttributeRepository : IDisposable
     {
-        Task<Result<List<KAttributeDto>>> GetAllAsync();
+        Task<Result<List<KAttributeInfoDto>>> GetAllAsync();
         Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId);        
         Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId);
         Task<Result<KAttributeDto>> GetAsync(Guid id);

@@ -139,6 +139,8 @@ namespace KNote.Model.Dto
             }
         }
 
+        public NoteTypeDto NoteTypeDto { get; set; }
+
         #endregion
 
         #region Validations

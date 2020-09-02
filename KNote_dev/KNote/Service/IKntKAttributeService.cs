@@ -8,7 +8,7 @@ namespace KNote.Service
 {
     public interface IKntKAttributeService
     {        
-        Task<Result<List<KAttributeDto>>> GetAllAsync();
+        Task<Result<List<KAttributeInfoDto>>> GetAllAsync();
         Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId);
         Task<Result<KAttributeDto>> GetAsync(Guid id);
         

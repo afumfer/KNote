@@ -22,11 +22,26 @@ namespace KNote.Repository.Dapper
             ThrowKntException = throwKntException;
         }
 
-        public async Task<Result<List<KAttributeDto>>> GetAllAsync()
+        public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
         {
-            var result = new Result<List<KAttributeDto>>();
+            return await GetAllAsync(false, null, false);
+        }
+
+        public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
+        {            
+            return await GetAllAsync(true, typeId, false);
+        }
+
+        public async Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId)
+        {            
+            return await GetAllAsync(true, typeId, true);
+        }
+
+        private async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(bool applyFilter, Guid? typeId, bool includeNullType)
+        {
+            var result = new Result<List<KAttributeInfoDto>>();
             try
-            {
+            {                
                 var sql = @"SELECT        
 	                        KA.KAttributeId, 
 	                        KA.Name, 
@@ -35,26 +50,33 @@ namespace KNote.Repository.Dapper
 	                        KA.RequiredValue, 
 	                        KA.[Order], 
 	                        KA.Script, 
-	                        KA.Disabled, 
-	                        
+	                        KA.Disabled, 	
+                            KA.NoteTypeId, 
 	                        NT.NoteTypeId, 
 	                        NT.Name, 
 	                        NT.Description, 
 	                        NT.ParenNoteTypeId 
                         FROM
 	                        KAttributes KA LEFT OUTER JOIN  NoteTypes NT
-	                        ON KA.NoteTypeId = NT.NoteTypeId
-                        ORDER BY NT.Name, [Order], KA.Name
-                        ";
-                                        
-                var entity = await _db.QueryAsync<KAttributeDto, NoteTypeDto, KAttributeDto> (
+	                        ON KA.NoteTypeId = NT.NoteTypeId";
+
+                if (applyFilter)
+                {
+                    sql += " WHERE KA.NoteTypeId = @NoteTypeId ";
+                    if (includeNullType)
+                        sql += " AND NoteTypeId is null ";                    
+                }
+                    
+                sql += " ORDER BY NT.Name, [Order], KA.Name";
+
+                var entity = await _db.QueryAsync<KAttributeInfoDto, NoteTypeDto, KAttributeInfoDto>(
                     sql.ToString(),
                     (kAttribute, noteType) =>
                     {
                         kAttribute.NoteTypeDto = noteType;
                         return kAttribute;
                     },
-                    new { }
+                    new { NoteTypeId = typeId }
                     , splitOn: "NoteTypeId"
                     );
 
@@ -65,16 +87,6 @@ namespace KNote.Repository.Dapper
                 AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
             return ResultDomainAction(result);
-        }
-
-        public Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId)
-        {
-            throw new NotImplementedException();
         }
 
         public Task<Result<KAttributeDto>> GetAsync(Guid id)
