@@ -12,9 +12,10 @@ namespace KNote.Repository
         Task<Result<List<KAttributeInfoDto>>> GetAllAsync();
         Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId);        
         Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId);
-        Task<Result<KAttributeDto>> GetAsync(Guid id);
-        Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entityInfo);
-        Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id);
+        Task<Result<KAttributeDto>> GetAsync(Guid id);        
+        Task<Result<KAttributeDto>> AddAsync(KAttributeDto entityInfo);
+        Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entityInfo);        
+        Task<Result> DeleteAsync(Guid id);
         Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entityInfo);
         Task<Result<KAttributeTabulatedValueDto>> AddNewKAttributeTabulatedValueAsync(Guid id, KAttributeTabulatedValueDto entityInfo);
         Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id);

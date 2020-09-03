@@ -23,7 +23,6 @@ namespace KNote.Repository.EntityFramework
         }
 
 
-
         public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
         {
             var resService = new Result<List<KAttributeInfoDto>>();
@@ -121,91 +120,99 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entity)
+        public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity)
         {
-            Result<KAttribute> resRep = null;
-            var resService = new Result<KAttributeDto>();
-
+            var response = new Result<KAttributeDto>();
             try
             {
-                if (entity.KAttributeId == Guid.Empty)
-                {
-                    entity.KAttributeId = Guid.NewGuid();
-                    var newEntity = new KAttribute();
+                var newEntity = new KAttribute();
+                newEntity.SetSimpleDto(entity);
 
-                    newEntity.SetSimpleDto(entity);
+                var resGenRep = await _kattributes.AddAsync(newEntity);
 
-                    resRep = await _kattributes.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
-
-                    if (_kattributes.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _kattributes.ThrowKntException = false;
-                    }
-
-                    var entityForUpdate = (await _kattributes.GetAsync(entity.KAttributeId)).Entity;
-
-                    if (flagThrowKntException == true)
-                        _kattributes.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _kattributes.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new KAttribute();
-                        newEntity.SetSimpleDto(entity);
-
-                        resRep = await _kattributes.AddAsync(newEntity);
-                    }
-                }
-
-                resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
+                response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
+                response.ErrorList = resGenRep.ErrorList;
 
                 foreach (var value in entity.KAttributeValues)
                 {
-                    var res = await SaveTabulateValueAsync(resService.Entity.KAttributeId, value);
-                    resService.Entity.KAttributeValues.Add(res.Entity);
+                    var res = await SaveTabulateValueAsync(response.Entity.KAttributeId, value);
+                    response.Entity.KAttributeValues.Add(res.Entity);
                 }
-
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-
-            resService.ErrorList = resRep.ErrorList;
-            return ResultDomainAction(resService);
+            return ResultDomainAction(response);
         }
 
-        public async Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id)
+        public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity)
         {
-            var resService = new Result<KAttributeInfoDto>();
+            var resGenRep = new Result<KAttribute>();
+            var response = new Result<KAttributeDto>();
+
             try
             {
-                var resRep = await _kattributes.GetAsync((object)id);
-                if (resRep.IsValid)
+                bool flagThrowKntException = false;
+                if (_kattributes.ThrowKntException == true)
                 {
-                    resRep = await _kattributes.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeInfoDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
+                    flagThrowKntException = true;
+                    _kattributes.ThrowKntException = false;
+                }
+
+                var resGenRepGet = await _kattributes.GetAsync(entity.KAttributeId);
+                KAttribute entityForUpdate;
+
+                if (flagThrowKntException == true)
+                    _kattributes.ThrowKntException = true;
+
+                if (resGenRepGet.IsValid)
+                {
+                    entityForUpdate = resGenRepGet.Entity;
+                    entityForUpdate.SetSimpleDto(entity);
+                    resGenRep = await _kattributes.UpdateAsync(entityForUpdate);
                 }
                 else
-                    resService.ErrorList = resRep.ErrorList;
+                {
+                    resGenRep.Entity = null;
+                    resGenRep.AddErrorMessage("Can't find entity for update.");
+                }
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
+
+                foreach (var value in entity.KAttributeValues)
+                {
+                    var res = await SaveTabulateValueAsync(response.Entity.KAttributeId, value);
+                    response.Entity.KAttributeValues.Add(res.Entity);
+                }
+
+                // TODO: hay que acumular los posibles errores del guardado de los hijos ??
+                response.ErrorList = resGenRep.ErrorList;
+
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-            return ResultDomainAction(resService);
+
+            return ResultDomainAction(response);
+        }
+
+        public async Task<Result> DeleteAsync(Guid id)
+        {
+            var response = new Result();
+            try
+            {
+                var resGenRep = await _kattributes.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
+
         }
 
         public async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entity)
