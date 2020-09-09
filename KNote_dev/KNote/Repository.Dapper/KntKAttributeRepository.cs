@@ -37,58 +37,6 @@ namespace KNote.Repository.Dapper
             return await GetAllAsync(true, typeId, true);
         }
 
-        private async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(bool applyFilter, Guid? typeId, bool includeNullType)
-        {
-            var result = new Result<List<KAttributeInfoDto>>();
-            try
-            {                
-                var sql = @"SELECT        
-	                        KA.KAttributeId, 
-	                        KA.Name, 
-	                        KA.Description, 
-	                        KA.KAttributeDataType, 
-	                        KA.RequiredValue, 
-	                        KA.[Order], 
-	                        KA.Script, 
-	                        KA.Disabled, 	
-                            KA.NoteTypeId, 
-	                        NT.NoteTypeId, 
-	                        NT.Name, 
-	                        NT.Description, 
-	                        NT.ParenNoteTypeId 
-                        FROM
-	                        KAttributes KA LEFT OUTER JOIN  NoteTypes NT
-	                        ON KA.NoteTypeId = NT.NoteTypeId";
-
-                if (applyFilter)
-                {
-                    sql += " WHERE KA.NoteTypeId = @NoteTypeId ";
-                    if (includeNullType)
-                        sql += " AND NoteTypeId is null ";                    
-                }
-                    
-                sql += " ORDER BY NT.Name, [Order], KA.Name";
-
-                var entity = await _db.QueryAsync<KAttributeInfoDto, NoteTypeDto, KAttributeInfoDto>(
-                    sql.ToString(),
-                    (kAttribute, noteType) =>
-                    {
-                        kAttribute.NoteTypeDto = noteType;
-                        return kAttribute;
-                    },
-                    new { NoteTypeId = typeId }
-                    , splitOn: "NoteTypeId"
-                    );
-
-                result.Entity = entity.ToList();
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
         public async Task<Result<KAttributeDto>> GetAsync(Guid id)
         {
             var result = new Result<KAttributeDto>();
@@ -169,6 +117,8 @@ namespace KNote.Repository.Dapper
                 if (r == 0)
                     result.ErrorList.Add("Entity not inserted");
 
+                // TODO: add tabulatedvalues
+
                 result.Entity = entity;
             }
             catch (Exception ex)
@@ -200,6 +150,10 @@ namespace KNote.Repository.Dapper
                 if (r == 0)
                     result.ErrorList.Add("Entity not updated");
 
+                // TODO: update tabulatedvalues
+
+
+
                 result.Entity = entity;
             }
             catch (Exception ex)
@@ -208,7 +162,6 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
-
 
         public async Task<Result> DeleteAsync(Guid id)
         {
@@ -230,32 +183,131 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
+        {            
+            var result = new Result<List<KAttributeTabulatedValueDto>>();
+            try
+            {
+                var sql = @"SELECT KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order] 
+                            FROM [KAttributeTabulatedValues]
+                            WHERE KAttributeId = @AttributeId ORDER BY [Order], [Description]";
 
-        public Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
-        {
-            throw new NotImplementedException();
+                var entity = await _db.QueryAsync<KAttributeTabulatedValueDto>(sql.ToString(), new { AttributeId = attributeId });
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entityInfo)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<KAttributeTabulatedValueDto>> GetKAttributeTabulatedValueAsync(Guid attributeTabulateValueId)
+        {            
+            var result = new Result<KAttributeTabulatedValueDto>();
+            try
+            {
+                var sql = @"SELECT KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order] FROM [KAttributeTabulatedValues] 
+                        WHERE KAttributeTabulatedValueId = @Id";
+
+                var entity = await _db.QueryFirstOrDefaultAsync<KAttributeTabulatedValueDto>(sql.ToString(), new { Id = attributeTabulateValueId });
+
+                if (entity == null)
+                    result.AddErrorMessage("Entity not found.");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<KAttributeTabulatedValueDto>> AddNewKAttributeTabulatedValueAsync(Guid id, KAttributeTabulatedValueDto entityInfo)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<Result>DeleteKAttributeTabulatedValueAsync(Guid id)
+        {            
+            var result = new Result();
+            try
+            {
+                var sql = @"DELETE FROM [KAttributeTabulatedValues] WHERE KAttributeTabulatedValueId = @Id";
 
-        public Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
+                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
 
+                if (r == 0)
+                    result.AddErrorMessage("Entity not deleted");
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
 
         public void Dispose()
         {
+            
+        }
+
+        #region Private methods
+
+        private async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(bool applyFilter, Guid? typeId, bool includeNullType)
+        {
+            var result = new Result<List<KAttributeInfoDto>>();
+            try
+            {
+                var sql = @"SELECT        
+	                        KA.KAttributeId, 
+	                        KA.Name, 
+	                        KA.Description, 
+	                        KA.KAttributeDataType, 
+	                        KA.RequiredValue, 
+	                        KA.[Order], 
+	                        KA.Script, 
+	                        KA.Disabled, 	
+                            KA.NoteTypeId, 
+	                        NT.NoteTypeId, 
+	                        NT.Name, 
+	                        NT.Description, 
+	                        NT.ParenNoteTypeId 
+                        FROM
+	                        KAttributes KA LEFT OUTER JOIN  NoteTypes NT
+	                        ON KA.NoteTypeId = NT.NoteTypeId";
+
+                if (applyFilter)
+                {
+                    sql += " WHERE KA.NoteTypeId = @NoteTypeId ";
+                    if (includeNullType)
+                        sql += " AND NoteTypeId is null ";
+                }
+
+                sql += " ORDER BY NT.Name, [Order], KA.Name";
+
+                var entity = await _db.QueryAsync<KAttributeInfoDto, NoteTypeDto, KAttributeInfoDto>(
+                    sql.ToString(),
+                    (kAttribute, noteType) =>
+                    {
+                        kAttribute.NoteTypeDto = noteType;
+                        return kAttribute;
+                    },
+                    new { NoteTypeId = typeId }
+                    , splitOn: "NoteTypeId"
+                    );
+
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        private Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(List<KAttributeTabulatedValueDto> tabulatedValues)
+        {
             throw new NotImplementedException();
         }
+
+        #endregion
 
     }
 }

@@ -22,7 +22,6 @@ namespace KNote.Repository.EntityFramework
             ThrowKntException = throwKntException;
         }
 
-
         public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
         {
             var resService = new Result<List<KAttributeInfoDto>>();
@@ -215,7 +214,78 @@ namespace KNote.Repository.EntityFramework
 
         }
 
-        public async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entity)
+        public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
+        {
+            var result = new Result<List<KAttributeTabulatedValueDto>>();
+            try
+            {
+                var resRep = await _kattributeTabulatedValues.GetAllAsync(tv => tv.KAttributeId == attributeId);
+
+                if (resRep.IsValid)
+                {
+                    result.Entity = resRep.Entity.Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
+                }
+                else
+                    result.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<KAttributeTabulatedValueDto>> GetKAttributeTabulatedValueAsync(Guid attributeTabulateValueId)
+        {
+            var result = new Result<KAttributeTabulatedValueDto>();
+            try
+            {
+                var resRep = await _kattributeTabulatedValues.GetAsync(tv => tv.KAttributeTabulatedValueId == attributeTabulateValueId);
+
+                if (resRep.IsValid)
+                {
+                    result.Entity = resRep.Entity.GetSimpleDto<KAttributeTabulatedValueDto>();
+                }
+                else
+                    result.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result> DeleteKAttributeTabulatedValueAsync(Guid id)
+        {
+            var response = new Result();
+            try
+            {
+                var resGenRep = await _kattributeTabulatedValues.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
+
+        }
+
+        #region  IDisposable
+
+        public virtual void Dispose()
+        {
+            _kattributes.Dispose();
+            _kattributeTabulatedValues.Dispose();
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entity)
         {
             Result<KAttributeTabulatedValue> resRep = null;
             var resService = new Result<KAttributeTabulatedValueDto>();
@@ -279,80 +349,6 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<KAttributeTabulatedValueDto>> AddNewKAttributeTabulatedValueAsync(Guid id, KAttributeTabulatedValueDto entity)
-        {
-            var resService = new Result<KAttributeTabulatedValueDto>();
-            try
-            {
-                var resRep = await _kattributes.GetAsync((object)id);
-                var kattribute = resRep.Entity;
-                var tabulatedValue = new KAttributeTabulatedValue();
-                tabulatedValue.SetSimpleDto(entity);
-                kattribute.KAttributeTabulatedValues.Add(tabulatedValue);
-
-                resService.Entity = tabulatedValue.GetSimpleDto<KAttributeTabulatedValueDto>();
-                resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
-        {
-            var resService = new Result<KAttributeTabulatedValueDto>();
-            try
-            {
-                var resRep = await _kattributeTabulatedValues.GetAsync(id);
-                if (resRep.IsValid)
-                {
-                    resRep = await _kattributeTabulatedValues.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
-        {
-            var resService = new Result<List<KAttributeTabulatedValueDto>>();
-            try
-            {
-                var resRep = await _kattributeTabulatedValues.GetAllAsync(tv => tv.KAttributeId == attributeId);
-
-                if (resRep.IsValid)
-                {
-                    resService.Entity = resRep.Entity.Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        #region  IDisposable
-
-        public virtual void Dispose()
-        {
-            _kattributes.Dispose();
-            _kattributeTabulatedValues.Dispose();
-        }
-
-        #endregion
+        #endregion 
     }
 }

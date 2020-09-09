@@ -162,14 +162,20 @@
 
     private async Task OnAtrValueDelete(KAttributeTabulatedValueDto atrValue)
     {
+        if (atrValue.KAttributeTabulatedValueId == Guid.Empty)
+        {
+            KAttribute.KAttributeValues.Remove(atrValue);
+            return;
+        }
+
+
         var httpResponse = await dataService.Delete($"api/kattributes/deletetabulatedvalue/{atrValue.KAttributeTabulatedValueId}");
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {
-            //var i = KAttribute.KAttributeValues.IndexOf(atrOld);
+        {            
             KAttribute.KAttributeValues.Remove(atrValue);
         }
     }
@@ -185,11 +191,10 @@
     }
 
     private void OnConfirmAtrValueEditor(KAttributeTabulatedValueDto atrValue)
-    {
+    {        
+        var atrOld = KAttribute.KAttributeValues.Where(v => v.Value == atrValue.Value).SingleOrDefault();
 
-        var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
-
-        if(atrOld == null)
+        if (atrOld == null)
         {
             atrValue.KAttributeId = KAttribute.KAttributeId;
             KAttribute.KAttributeValues.Add(atrValue);

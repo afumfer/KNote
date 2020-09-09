@@ -13,8 +13,6 @@ namespace KNote.Service
         Task<Result<KAttributeDto>> GetAsync(Guid id);        
         Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entityInfo);
         Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id);        
-        Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entityInfo);        
-        Task<Result<KAttributeTabulatedValueDto>> AddNewKAttributeTabulatedValueAsync(Guid id, KAttributeTabulatedValueDto entityInfo);
         Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id);
         Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId);        
     }
