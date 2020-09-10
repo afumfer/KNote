@@ -113,12 +113,13 @@ namespace KNote.Repository.Dapper
 
                 var r = await _db.ExecuteAsync(sql.ToString(),
                     new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
-
                 if (r == 0)
                     result.ErrorList.Add("Entity not inserted");
-
-                // TODO: add tabulatedvalues
-
+                
+                var resTabValues = await SaveTabulateValueAsync(entity.KAttributeId, entity.KAttributeValues);
+                if (!resTabValues.IsValid)
+                    CopyErrorList(resTabValues.ErrorList, result.ErrorList);
+                
                 result.Entity = entity;
             }
             catch (Exception ex)
@@ -150,9 +151,9 @@ namespace KNote.Repository.Dapper
                 if (r == 0)
                     result.ErrorList.Add("Entity not updated");
 
-                // TODO: update tabulatedvalues
-
-
+                var resTabValues = await SaveTabulateValueAsync(entity.KAttributeId, entity.KAttributeValues);
+                if (!resTabValues.IsValid)
+                    CopyErrorList(resTabValues.ErrorList, result.ErrorList);
 
                 result.Entity = entity;
             }
@@ -302,9 +303,47 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        private Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(List<KAttributeTabulatedValueDto> tabulatedValues)
-        {
-            throw new NotImplementedException();
+        private async Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(Guid kattributeId, List<KAttributeTabulatedValueDto> tabulatedValues)
+        {            
+            var result = new Result<List<KAttributeTabulatedValueDto>>();
+            string sql = "";
+            int r = 0;
+            try
+            {
+                foreach(var tv in tabulatedValues)
+                {
+                    tv.KAttributeId = kattributeId;
+
+                    if (tv.KAttributeTabulatedValueId == Guid.Empty)
+                    {
+                        tv.KAttributeTabulatedValueId = Guid.NewGuid();    
+                        sql = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
+                                VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
+                    }
+                    else
+                    {
+                        sql = @"UPDATE [KAttributeTabulatedValues] SET                                     
+                                    KAttributeId = @KAttributeId, 
+                                    [Value] = @Value, 
+                                    [Description] = @Description, 
+                                    [Order] = @Order  
+                                WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
+                    }
+
+                    r = await _db.ExecuteAsync(sql.ToString(),
+                        new { tv.KAttributeTabulatedValueId, tv.KAttributeId, tv.Value, tv.Description, tv.Order });
+
+                    if (r == 0)
+                        result.ErrorList.Add("Entity tabulated value not updated.");
+                }
+                              
+                result.Entity = tabulatedValues;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
         #endregion
