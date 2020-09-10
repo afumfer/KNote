@@ -80,9 +80,12 @@ namespace KNote.Repository.Dapper
             {
                 IEnumerable<NoteInfoDto> entity;
 
+
+
                 var sql = GetSelectNoteInfoDto();
-                sql += GetWhereFilterNotesInfoDto(notesFilter);
-                sql += @" ORDER BY [Priority], Topic ";
+                var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
+                                
+                sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
                
                 var pagination = notesFilter.Pagination;
 
@@ -95,6 +98,8 @@ namespace KNote.Repository.Dapper
                 {
                     entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
                 }
+
+                result.CountColecEntity = GetCountFilter(sqlWhere);
 
                 result.Entity = entity.ToList();
             }
@@ -243,6 +248,15 @@ namespace KNote.Repository.Dapper
 
             return (result == null) ? 1 : ((int)result) + 1;
         }
+
+        private int GetCountFilter(string filter)
+        {
+            var sql = "SELECT COUNT(*) FROM Notes " + filter;
+            var result = _db.ExecuteScalar(sql);
+
+            return (result == null) ? 0 : ((int)result);
+        }
+
 
         private string GetSelectNoteInfoDto()
         {
