@@ -103,14 +103,6 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public int GetNextNoteNumber()
-        {
-            //var lastNote = _repository.Context.Notes.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
-            var lastNote = _notes
-                .DbSet.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
-            return lastNote != null ? lastNote.NoteNumber + 1 : 1;
-        }
-
         public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
         {
             var resService = new Result<List<NoteInfoDto>>();
@@ -679,9 +671,28 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
+        #region  IDisposable
 
+        public virtual void Dispose()
+        {
+            _notes.Dispose();
+
+            _noteKAttributes.Dispose();
+            _noteTasks.Dispose();
+            _resources.Dispose();
+        }
+
+        #endregion
 
         #region Utils methods 
+
+        private int GetNextNoteNumber()
+        {
+            //var lastNote = _repository.Context.Notes.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
+            var lastNote = _notes
+                .DbSet.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
+            return lastNote != null ? lastNote.NoteNumber + 1 : 1;
+        }
 
         private int ExtractNoteNumberSearch(string textSearch)
         {
@@ -828,19 +839,6 @@ namespace KNote.Repository.EntityFramework
         #endregion
 
 
-
-        #region  IDisposable
-
-        public virtual void Dispose()
-        {
-            _notes.Dispose();
-
-            _noteKAttributes.Dispose();
-            _noteTasks.Dispose();
-            _resources.Dispose();
-        }
-
-        #endregion
 
     }
 
