@@ -312,29 +312,32 @@ namespace KNote.Repository.Dapper
             {
                 foreach(var tv in tabulatedValues)
                 {
-                    tv.KAttributeId = kattributeId;
-
-                    if (tv.KAttributeTabulatedValueId == Guid.Empty)
+                    if (tv != null)
                     {
-                        tv.KAttributeTabulatedValueId = Guid.NewGuid();    
-                        sql = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
-                                VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
-                    }
-                    else
-                    {
-                        sql = @"UPDATE [KAttributeTabulatedValues] SET                                     
-                                    KAttributeId = @KAttributeId, 
-                                    [Value] = @Value, 
-                                    [Description] = @Description, 
-                                    [Order] = @Order  
-                                WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
-                    }
+                        tv.KAttributeId = kattributeId;
 
-                    r = await _db.ExecuteAsync(sql.ToString(),
-                        new { tv.KAttributeTabulatedValueId, tv.KAttributeId, tv.Value, tv.Description, tv.Order });
+                        if (tv.KAttributeTabulatedValueId == Guid.Empty)
+                        {
+                            tv.KAttributeTabulatedValueId = Guid.NewGuid();    
+                            sql = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
+                                    VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
+                        }
+                        else
+                        {
+                            sql = @"UPDATE [KAttributeTabulatedValues] SET                                     
+                                        KAttributeId = @KAttributeId, 
+                                        [Value] = @Value, 
+                                        [Description] = @Description, 
+                                        [Order] = @Order  
+                                    WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
+                        }
 
-                    if (r == 0)
-                        result.ErrorList.Add("Entity tabulated value not updated.");
+                        r = await _db.ExecuteAsync(sql.ToString(),
+                            new { tv.KAttributeTabulatedValueId, tv.KAttributeId, tv.Value, tv.Description, tv.Order });
+
+                        if (r == 0)
+                            result.ErrorList.Add("Entity tabulated value not updated.");
+                    }
                 }
                               
                 result.Entity = tabulatedValues;

@@ -42,7 +42,7 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<NoteInfoDto>>();
             try
             {
-                var sql = GetSelectNoteInfoDto();
+                var sql = GetSelectFilter();
                 sql += @" WHERE FolderId = @folderId ORDER BY [Priority], Topic ;";
 
                 var entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { folderId });
@@ -60,7 +60,7 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<NoteInfoDto>>();
             try
             {
-                var sql = GetSelectNoteInfoDto();
+                var sql = GetSelectFilter();
                 sql += @" ORDER BY [Priority], Topic ;";
 
                 var entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
@@ -80,9 +80,7 @@ namespace KNote.Repository.Dapper
             {
                 IEnumerable<NoteInfoDto> entity;
 
-
-
-                var sql = GetSelectNoteInfoDto();
+                var sql = GetSelectFilter();
                 var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
                                 
                 sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
@@ -251,18 +249,33 @@ namespace KNote.Repository.Dapper
 
         private int GetCountFilter(string filter)
         {
-            var sql = "SELECT COUNT(*) FROM Notes " + filter;
+            //@"SELECT COUNT(*) FROM Notes " 
+            var sql =
+                @"SELECT count(*) 
+                FROM 
+                    Notes LEFT OUTER JOIN
+                    NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId"
+                + filter;
             var result = _db.ExecuteScalar(sql);
 
             return (result == null) ? 0 : ((int)result);
         }
 
 
-        private string GetSelectNoteInfoDto()
+        private string GetSelectFilter()
         {
-            return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
-                            [Description], ContentType, Script, InternalTags, Tags, [Priority], FolderId, NoteTypeId
-                    FROM Notes ";
+            //return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
+            //                [Description], ContentType, Script, InternalTags, Tags, [Priority], FolderId, NoteTypeId
+            //        FROM Notes ";
+
+            return @"SELECT DISTINCT
+                 Notes.NoteId, Notes.NoteNumber, Notes.Topic, Notes.CreationDateTime, 
+                 Notes.ModificationDateTime, Notes.Description, Notes.ContentType, Notes.Script, 
+                 Notes.InternalTags, Notes.Tags, Notes.Priority, Notes.FolderId, 
+                 Notes.NoteTypeId
+            FROM 
+                Notes LEFT OUTER JOIN
+                NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId";
         }
 
         private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter)
@@ -270,44 +283,54 @@ namespace KNote.Repository.Dapper
             string strWhere = "" ;
 
             if (notesFilter.FolderId != null)
-                strWhere = "FolderId = '" + notesFilter.FolderId.ToString() + "' ";
-            //query = query.Where(n => n.FolderId == notesFilter.FolderId);
+            {
+                strWhere = AddAndToStringSQL(strWhere);
+                strWhere += "FolderId = '" + notesFilter.FolderId.ToString() + "' ";
+            }
+            
+            if (notesFilter.NoteTypeId != null)
+            {
+                strWhere = AddAndToStringSQL(strWhere);
+                strWhere += "NoteTypeId = '" + notesFilter.NoteTypeId.ToString() + "' ";
+            }
+           
+            if (!string.IsNullOrEmpty(notesFilter.Topic))
+            {
+                strWhere = AddAndToStringSQL(strWhere);
+                strWhere += "Topic LIKE '%" + notesFilter.Topic.ToString() + "%' ";                
+            }
 
-            //if (notesFilter.NoteTypeId != null)
-            //    query = query.Where(n => n.NoteTypeId == notesFilter.NoteTypeId);
+            if (!string.IsNullOrEmpty(notesFilter.Tags))
+            {
+                strWhere = AddAndToStringSQL(strWhere);
+                strWhere += "Tags LIKE '%" + notesFilter.Tags.ToString() + "%' ";                
+            }
 
-            //if (!string.IsNullOrEmpty(notesFilter.Topic))
-            //    query = query.Where(n => n.Topic.ToLower().Contains(notesFilter.Topic.ToLower()));
+            if (!string.IsNullOrEmpty(notesFilter.Description))
+            {
+                strWhere = AddAndToStringSQL(strWhere);
+                strWhere += "Description LIKE '%" + notesFilter.Description.ToString() + "%' ";                
+            }
 
-            //if (!string.IsNullOrEmpty(notesFilter.Tags))
-            //    query = query.Where(n => n.Tags.ToLower().Contains(notesFilter.Tags.ToLower()));
-
-            //if (!string.IsNullOrEmpty(notesFilter.Description))
-            //    query = query.Where(n => n.Description.ToLower().Contains(notesFilter.Description.ToLower()));
-
-            //foreach (var f in notesFilter.AttributesFilter)
-            //{
-            //    //query = query.Where(n => n.KAttributes.Select(a => a.Value).Contains(f.Value));
-            //    query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
-            //}
-
-            //resService.CountColecEntity = await query.CountAsync();     // ????
-
-            //// Order by and pagination
-            //query = query
-            //    .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
-            //    .Pagination(notesFilter.Pagination);
-
-            //// Get content
-            //resService.Entity = await query
-            //    .Select(u => u.GetSimpleDto<NoteInfoDto>())
-            //    .ToListAsync();
+            foreach (var f in notesFilter.AttributesFilter)
+            {
+                strWhere = AddAndToStringSQL(strWhere);
+                strWhere += " NoteKAttributes.KAttributeId = '" + f.AtrId + "' AND NoteKAttributes.Value LIKE '%" + f.Value + "%'" ;
+                // query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
+            }
 
             if (!string.IsNullOrEmpty(strWhere))
                 strWhere = " WHERE " + strWhere;
 
             return strWhere;
 
+        }
+
+        private string AddAndToStringSQL (string str)
+        {
+            if (str != "")
+                str += " AND ";
+            return str;
         }
 
         #endregion

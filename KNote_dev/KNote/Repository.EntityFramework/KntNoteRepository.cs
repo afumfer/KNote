@@ -74,35 +74,6 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<NoteDto>> GetAsync(Guid noteId)
-        {
-            var resService = new Result<NoteDto>();
-            try
-            {
-                var entity = await _notes.DbSet.Where(n => n.NoteId == noteId)
-                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
-                    .Include(n => n.Folder)
-                    .Include(n => n.NoteType)
-                    .SingleOrDefaultAsync();
-
-                // Map to dto
-                resService.Entity = entity?.GetSimpleDto<NoteDto>();
-                resService.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
-                resService.Entity.KAttributesDto = entity?.KAttributes
-                    .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
-                    .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == resService.Entity.NoteTypeId)
-                    .ToList();
-
-                // Complete Attributes list
-                resService.Entity.KAttributesDto = await CompleteNoteAttributes(resService.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-            return ResultDomainAction(resService);
-        }
-
         public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
         {
             var resService = new Result<List<NoteInfoDto>>();
@@ -235,6 +206,35 @@ namespace KNote.Repository.EntityFramework
                 resService.Entity = await query
                     .Select(u => u.GetSimpleDto<NoteInfoDto>())
                     .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public async Task<Result<NoteDto>> GetAsync(Guid noteId)
+        {
+            var resService = new Result<NoteDto>();
+            try
+            {
+                var entity = await _notes.DbSet.Where(n => n.NoteId == noteId)
+                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                    .Include(n => n.Folder)
+                    .Include(n => n.NoteType)
+                    .SingleOrDefaultAsync();
+
+                // Map to dto
+                resService.Entity = entity?.GetSimpleDto<NoteDto>();
+                resService.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
+                resService.Entity.KAttributesDto = entity?.KAttributes
+                    .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
+                    .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == resService.Entity.NoteTypeId)
+                    .ToList();
+
+                // Complete Attributes list
+                resService.Entity.KAttributesDto = await CompleteNoteAttributes(resService.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
             }
             catch (Exception ex)
             {
