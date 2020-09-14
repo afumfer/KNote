@@ -82,9 +82,11 @@ namespace KNote.Repository.Dapper
 
                 var sql = GetSelectFilter();
                 var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
-                                
+
+                result.CountColecEntity = GetCountFilter(sqlWhere);
+
                 sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
-               
+                
                 var pagination = notesFilter.Pagination;
 
                 if (pagination != null)
@@ -96,8 +98,93 @@ namespace KNote.Repository.Dapper
                 {
                     entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
                 }
+                
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
 
+        public async  Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
+        {
+            var result = new Result<List<NoteInfoDto>>();
+            var searchNumber = 0;            
+            var sql = "";
+            var sqlWhere = "";
+            var sqlOrder = "";
+            IEnumerable<NoteInfoDto> entity;
+
+            try
+            {                
+                searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
+                sql = GetSelectSearch();
+                sqlWhere = "";                
+                sqlOrder = @" ORDER BY Topic ";
+
+                if (searchNumber > 0)
+                {
+                    sqlWhere = " WHERE NoteNumber = " + searchNumber.ToString() + " " ;
+                }                
+                else
+                {
+                    var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
+                    var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
+                    var flagSearchDescription = listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault();
+
+                    if (flagSearchDescription != "***")
+                    {
+                        foreach (var token in listTokens)
+                        {
+                            if (!string.IsNullOrEmpty(token))
+                            {
+                                if (token[0] != '!')
+                                {
+                                    sqlWhere = AddAndToStringSQL(sqlWhere);
+                                    sqlWhere += " (Topic LIKE '%" + token + "%') ";
+                                }
+                                else
+                                {
+                                    var tokenNot = token.Substring(1, token.Length - 1);
+                                    sqlWhere = AddAndToStringSQL(sqlWhere);
+                                    sqlWhere += " (Topic NOT LIKE '%" + tokenNot + "%')";
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var token in listTokens)
+                        {
+                            if (!string.IsNullOrEmpty(token))
+                            {
+                                if (token[0] != '!')
+                                {                                    
+                                    sqlWhere = AddAndToStringSQL(sqlWhere);
+                                    sqlWhere += " (Topic LIKE '%" + token + "%' OR Description LIKE '%" + token + "%') ";
+                                }
+                                else
+                                {
+                                    var tokenNot = token.Substring(1, token.Length - 1);                                 
+                                    sqlWhere = AddAndToStringSQL(sqlWhere);
+                                    sqlWhere += " (Topic NOT LIKE '%" + tokenNot + "%' AND Description NOT LIKE '%" + tokenNot + "%') ";
+                                }
+                            }
+                        }
+                    }
+                    if (sqlWhere != "")
+                        sqlWhere = " WHERE " + sqlWhere;
+                }
+
+                sql = sql + sqlWhere + sqlOrder;
+                                
                 result.CountColecEntity = GetCountFilter(sqlWhere);
+
+                sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+                var pagination = notesSearch.Pagination;
+                entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
 
                 result.Entity = entity.ToList();
             }
@@ -106,6 +193,11 @@ namespace KNote.Repository.Dapper
                 AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
             return ResultDomainAction(result);
+        }
+
+        public Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
+        {
+            throw new NotImplementedException();
         }
 
         public Task<Result<NoteDto>> GetAsync(Guid noteId)
@@ -158,16 +250,6 @@ namespace KNote.Repository.Dapper
         }
 
         public Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
         {
             throw new NotImplementedException();
         }
@@ -261,13 +343,8 @@ namespace KNote.Repository.Dapper
             return (result == null) ? 0 : ((int)result);
         }
 
-
         private string GetSelectFilter()
         {
-            //return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
-            //                [Description], ContentType, Script, InternalTags, Tags, [Priority], FolderId, NoteTypeId
-            //        FROM Notes ";
-
             return @"SELECT DISTINCT
                  Notes.NoteId, Notes.NoteNumber, Notes.Topic, Notes.CreationDateTime, 
                  Notes.ModificationDateTime, Notes.Description, Notes.ContentType, Notes.Script, 
@@ -276,6 +353,13 @@ namespace KNote.Repository.Dapper
             FROM 
                 Notes LEFT OUTER JOIN
                 NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId";
+        }
+
+        private string GetSelectSearch()
+        {
+            return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
+                            [Description], ContentType, Script, InternalTags, Tags, [Priority], FolderId, NoteTypeId
+                    FROM Notes ";
         }
 
         private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter)

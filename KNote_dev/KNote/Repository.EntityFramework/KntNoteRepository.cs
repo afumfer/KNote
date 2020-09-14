@@ -143,7 +143,7 @@ namespace KNote.Repository.EntityFramework
 
         public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
         {
-            var resService = new Result<List<NoteInfoDto>>();
+            var result = new Result<List<NoteInfoDto>>();
             int searchNumber;
 
             try
@@ -195,7 +195,7 @@ namespace KNote.Repository.EntityFramework
                     }
                 }
 
-                resService.CountColecEntity = await query.CountAsync();
+                result.CountColecEntity = await query.CountAsync();
 
                 // Order by and pagination
                 query = query
@@ -203,15 +203,15 @@ namespace KNote.Repository.EntityFramework
                     .Pagination(notesSearch.Pagination);
 
                 // Get content
-                resService.Entity = await query
+                result.Entity = await query
                     .Select(u => u.GetSimpleDto<NoteInfoDto>())
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
-            return ResultDomainAction(resService);
+            return ResultDomainAction(result);
         }
 
         public async Task<Result<NoteDto>> GetAsync(Guid noteId)
@@ -694,96 +694,96 @@ namespace KNote.Repository.EntityFramework
             return lastNote != null ? lastNote.NoteNumber + 1 : 1;
         }
 
-        private int ExtractNoteNumberSearch(string textSearch)
-        {
-            if (textSearch == null)
-                return 0;
+        //private int ExtractNoteNumberSearch(string textSearch)
+        //{
+        //    if (textSearch == null)
+        //        return 0;
 
-            var n = 0;
-            string strStartNumber = "";
+        //    var n = 0;
+        //    string strStartNumber = "";
 
-            if (textSearch[0] == '#')
-            {
-                var i = textSearch.IndexOf(' ', 0);
-                if (i > 0)
-                    strStartNumber = textSearch.Substring(1, i - 1);
-                else
-                    strStartNumber = textSearch.Substring(1, textSearch.Length - 1);
-                int.TryParse(strStartNumber, out n);
-            }
+        //    if (textSearch[0] == '#')
+        //    {
+        //        var i = textSearch.IndexOf(' ', 0);
+        //        if (i > 0)
+        //            strStartNumber = textSearch.Substring(1, i - 1);
+        //        else
+        //            strStartNumber = textSearch.Substring(1, textSearch.Length - 1);
+        //        int.TryParse(strStartNumber, out n);
+        //    }
 
-            return n;
-        }
+        //    return n;
+        //}
 
-        private List<string> ExtractListTokensSearch(string textIn)
-        {
-            List<string> tokens = new List<string>();
-            int i = 0, lenString = 0;
-            int state = 0;
-            char c;
-            string word = "";
-            char action = 'a';
-            string especialToken = "";
+        //private List<string> ExtractListTokensSearch(string textIn)
+        //{
+        //    List<string> tokens = new List<string>();
+        //    int i = 0, lenString = 0;
+        //    int state = 0;
+        //    char c;
+        //    string word = "";
+        //    char action = 'a';
+        //    string especialToken = "";
 
-            if (textIn == null)
-                return tokens;
+        //    if (textIn == null)
+        //        return tokens;
 
-            lenString = textIn.Length;
+        //    lenString = textIn.Length;
 
-            while (i < lenString)
-            {
-                c = textIn[i];
+        //    while (i < lenString)
+        //    {
+        //        c = textIn[i];
 
-                switch (c)
-                {
-                    case '\"':
-                        if (state == 0)
-                        {
-                            state = 1;
-                            action = 'p';
-                        }
-                        else
-                        {
-                            state = 0;
-                            action = 'p';
-                        }
-                        break;
-                    case ' ':
-                        if (state == 0 || state == 2)
-                            action = 'p';
-                        break;
-                    default:
-                        action = 'a';
-                        break;
-                }
+        //        switch (c)
+        //        {
+        //            case '\"':
+        //                if (state == 0)
+        //                {
+        //                    state = 1;
+        //                    action = 'p';
+        //                }
+        //                else
+        //                {
+        //                    state = 0;
+        //                    action = 'p';
+        //                }
+        //                break;
+        //            case ' ':
+        //                if (state == 0 || state == 2)
+        //                    action = 'p';
+        //                break;
+        //            default:
+        //                action = 'a';
+        //                break;
+        //        }
 
-                if (action == 'p')
-                {
-                    if (word != "")
-                    {
-                        // Si es un Token especial => va con la siguiente palabra
-                        if (word == "!")
-                            especialToken = word;
-                        else
-                        {
-                            word = especialToken + word;
-                            especialToken = "";
-                            tokens.Add(word);
-                        }
-                    }
-                    word = "";
-                }
-                if (action == 'a')
-                    word += c;
+        //        if (action == 'p')
+        //        {
+        //            if (word != "")
+        //            {
+        //                // Si es un Token especial => va con la siguiente palabra
+        //                if (word == "!")
+        //                    especialToken = word;
+        //                else
+        //                {
+        //                    word = especialToken + word;
+        //                    especialToken = "";
+        //                    tokens.Add(word);
+        //                }
+        //            }
+        //            word = "";
+        //        }
+        //        if (action == 'a')
+        //            word += c;
 
-                i++;
-            }
+        //        i++;
+        //    }
 
-            if (word != "")
-                tokens.Add(word);
+        //    if (word != "")
+        //        tokens.Add(word);
 
-            return tokens;
-        }
+        //    return tokens;
+        //}
 
         private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {                        
@@ -842,13 +842,13 @@ namespace KNote.Repository.EntityFramework
 
     }
 
-    public class SearchTokens
-    {
-        public int NoteNumber { get; set; }
+    //public class SearchTokens
+    //{
+    //    public int NoteNumber { get; set; }
 
-        public List<string> TextTokens { get; set; } = new List<string>();
+    //    public List<string> TextTokens { get; set; } = new List<string>();
 
-        public bool SearchInDescription { get; set; }
-    }
+    //    public bool SearchInDescription { get; set; }
+    //}
 
 }

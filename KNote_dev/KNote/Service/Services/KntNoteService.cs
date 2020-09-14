@@ -45,11 +45,6 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetAsync(noteId);
         }
         
-        //public int GetNextNoteNumber()
-        //{
-        //    return _repository.Notes.GetNextNoteNumber();
-        //}
-
         public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
         {
             return await _repository.Notes.GetByFolderAsync(folderId);
