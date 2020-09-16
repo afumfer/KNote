@@ -10,8 +10,7 @@ namespace KNote.Repository
     {
         Task<Result<List<NoteInfoDto>>> GetAllAsync();
         Task<Result<List<NoteInfoDto>>> HomeNotesAsync();
-        Task<Result<NoteDto>> GetAsync(Guid noteId);
-        //int GetNextNoteNumber();
+        Task<Result<NoteDto>> GetAsync(Guid noteId);        
         Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);
         Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);
         Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);

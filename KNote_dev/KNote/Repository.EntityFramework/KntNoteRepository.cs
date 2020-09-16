@@ -216,7 +216,7 @@ namespace KNote.Repository.EntityFramework
 
         public async Task<Result<NoteDto>> GetAsync(Guid noteId)
         {
-            var resService = new Result<NoteDto>();
+            var result = new Result<NoteDto>();
             try
             {
                 var entity = await _notes.DbSet.Where(n => n.NoteId == noteId)
@@ -226,26 +226,27 @@ namespace KNote.Repository.EntityFramework
                     .SingleOrDefaultAsync();
 
                 // Map to dto
-                resService.Entity = entity?.GetSimpleDto<NoteDto>();
-                resService.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
-                resService.Entity.KAttributesDto = entity?.KAttributes
+                result.Entity = entity?.GetSimpleDto<NoteDto>();
+                result.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
+                result.Entity.NoteTypeDto = entity?.NoteType.GetSimpleDto<NoteTypeDto>();
+                result.Entity.KAttributesDto = entity?.KAttributes
                     .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
-                    .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == resService.Entity.NoteTypeId)
+                    .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == result.Entity.NoteTypeId)
                     .ToList();
 
                 // Complete Attributes list
-                resService.Entity.KAttributesDto = await CompleteNoteAttributes(resService.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
+                result.Entity.KAttributesDto = await CompleteNoteAttributes(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
-            return ResultDomainAction(resService);
+            return ResultDomainAction(result);
         }
 
         public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
         {
-            var resService = new Result<NoteDto>();
+            var result = new Result<NoteDto>();
             NoteDto newNote;
 
             try
@@ -254,25 +255,21 @@ namespace KNote.Repository.EntityFramework
                 if (entity != null)
                     newNote.SetSimpleDto(entity);
 
-                // Load default values
-                // for newNote
-
-                if (newNote.NoteId == Guid.Empty)
-                    newNote.NoteId = Guid.NewGuid();
-
+                //if (newNote.NoteId == Guid.Empty)
+                //    newNote.NoteId = Guid.NewGuid();
                 newNote.IsNew = true;
-
+                newNote.CreationDateTime = DateTime.Now;
                 newNote.KAttributesDto = new List<NoteKAttributeDto>();
                 newNote.KAttributesDto = await CompleteNoteAttributes(newNote.KAttributesDto, newNote.NoteId);
 
-                resService.Entity = newNote;
+                result.Entity = newNote;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
 
-            return ResultDomainAction(resService);
+            return ResultDomainAction(result);
         }
 
         public async Task<Result<NoteDto>> SaveAsync(NoteDto entity)
@@ -512,18 +509,18 @@ namespace KNote.Repository.EntityFramework
 
         public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
         {
-            var resService = new Result<List<ResourceDto>>();
+            var result = new Result<List<ResourceDto>>();
             try
             {
                 var resRep = await _resources.GetAllAsync(r => r.NoteId == idNote);
-                resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<ResourceDto>()).ToList();
-                resService.ErrorList = resRep.ErrorList;
+                result.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<ResourceDto>()).ToList();
+                result.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
-            return ResultDomainAction(resService);
+            return ResultDomainAction(result);
         }
 
         public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
@@ -626,25 +623,25 @@ namespace KNote.Repository.EntityFramework
 
         public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
         {
-            var resService = new Result<List<NoteTaskDto>>();
+            var result = new Result<List<NoteTaskDto>>();
             try
             {
                 var listTasks = await _noteTasks.DbSet.Where(n => n.NoteId == idNote)
                     .Include(t => t.User)
                     .ToListAsync();
-                resService.Entity = new List<NoteTaskDto>();
+                result.Entity = new List<NoteTaskDto>();
                 foreach (var e in listTasks)
                 {
                     var nt = e.GetSimpleDto<NoteTaskDto>();
                     nt.UserFullName = e.User.FullName;
-                    resService.Entity.Add(nt);
+                    result.Entity.Add(nt);
                 }
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
-            return ResultDomainAction(resService);
+            return ResultDomainAction(result);
         }
 
         public async Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid id)
@@ -693,97 +690,6 @@ namespace KNote.Repository.EntityFramework
                 .DbSet.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
             return lastNote != null ? lastNote.NoteNumber + 1 : 1;
         }
-
-        //private int ExtractNoteNumberSearch(string textSearch)
-        //{
-        //    if (textSearch == null)
-        //        return 0;
-
-        //    var n = 0;
-        //    string strStartNumber = "";
-
-        //    if (textSearch[0] == '#')
-        //    {
-        //        var i = textSearch.IndexOf(' ', 0);
-        //        if (i > 0)
-        //            strStartNumber = textSearch.Substring(1, i - 1);
-        //        else
-        //            strStartNumber = textSearch.Substring(1, textSearch.Length - 1);
-        //        int.TryParse(strStartNumber, out n);
-        //    }
-
-        //    return n;
-        //}
-
-        //private List<string> ExtractListTokensSearch(string textIn)
-        //{
-        //    List<string> tokens = new List<string>();
-        //    int i = 0, lenString = 0;
-        //    int state = 0;
-        //    char c;
-        //    string word = "";
-        //    char action = 'a';
-        //    string especialToken = "";
-
-        //    if (textIn == null)
-        //        return tokens;
-
-        //    lenString = textIn.Length;
-
-        //    while (i < lenString)
-        //    {
-        //        c = textIn[i];
-
-        //        switch (c)
-        //        {
-        //            case '\"':
-        //                if (state == 0)
-        //                {
-        //                    state = 1;
-        //                    action = 'p';
-        //                }
-        //                else
-        //                {
-        //                    state = 0;
-        //                    action = 'p';
-        //                }
-        //                break;
-        //            case ' ':
-        //                if (state == 0 || state == 2)
-        //                    action = 'p';
-        //                break;
-        //            default:
-        //                action = 'a';
-        //                break;
-        //        }
-
-        //        if (action == 'p')
-        //        {
-        //            if (word != "")
-        //            {
-        //                // Si es un Token especial => va con la siguiente palabra
-        //                if (word == "!")
-        //                    especialToken = word;
-        //                else
-        //                {
-        //                    word = especialToken + word;
-        //                    especialToken = "";
-        //                    tokens.Add(word);
-        //                }
-        //            }
-        //            word = "";
-        //        }
-        //        if (action == 'a')
-        //            word += c;
-
-        //        i++;
-        //    }
-
-        //    if (word != "")
-        //        tokens.Add(word);
-
-        //    return tokens;
-        //}
 
         private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {                        
@@ -837,18 +743,5 @@ namespace KNote.Repository.EntityFramework
         }
 
         #endregion
-
-
-
     }
-
-    //public class SearchTokens
-    //{
-    //    public int NoteNumber { get; set; }
-
-    //    public List<string> TextTokens { get; set; } = new List<string>();
-
-    //    public bool SearchInDescription { get; set; }
-    //}
-
 }

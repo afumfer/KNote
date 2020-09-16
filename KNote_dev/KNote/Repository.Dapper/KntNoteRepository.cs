@@ -195,64 +195,146 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<NoteDto>> GetAsync(Guid noteId)
+        {            
+            var result = new Result<NoteDto>();
+            try
+            {
+                var sql = @"SELECT        
+                    Notes.NoteId, Notes.NoteNumber, Notes.Topic, Notes.CreationDateTime, 
+	                Notes.ModificationDateTime, Notes.Description, Notes.ContentType, Notes.Script, 
+	                Notes.InternalTags, Notes.Tags, Notes.Priority, Notes.FolderId, 
+	                
+                    Folders.FolderId, Folders.FolderNumber, Folders.CreationDateTime, 
+	                Folders.ModificationDateTime, Folders.Name, Folders.Tags, Folders.PathFolder, 
+	                Folders.[Order], Folders.OrderNotes, Folders.Script, Folders.ParentId, 
+
+                    Notes.NoteTypeId, NoteTypes.NoteTypeId, 
+	                NoteTypes.Name, NoteTypes.Description, NoteTypes.ParenNoteTypeId
+                            
+                    FROM  Notes 
+                          INNER JOIN  Folders ON Notes.FolderId = Folders.FolderId 
+                          LEFT OUTER JOIN  NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId
+                    
+                    WHERE NoteId = @noteId ;";
+
+                var entity = await _db.QueryAsync<NoteDto, FolderDto, NoteTypeDto, NoteDto>(
+                    sql.ToString(),
+                    (note, folder, noteType) =>
+                    {
+                        note.FolderDto = folder;
+                        note.NoteTypeDto = noteType;
+                        return note;
+                    },
+                    new { noteId }, 
+                    splitOn: "FolderId, NoteTypeId"
+                    );
+
+                result.Entity = entity.ToList().FirstOrDefault();
+
+                var sqlAtr = @"
+                        SELECT 
+                              NoteKAttributes.NoteKAttributeId, NoteKAttributes.NoteId, NoteKAttributes.Value, 
+                              NoteKAttributes.KAttributeId, 
+
+                              KAttributes.KAttributeId, KAttributes.Name, KAttributes.Description, KAttributes.KAttributeDataType, 
+                              KAttributes.RequiredValue, KAttributes.[Order], KAttributes.Script, KAttributes.Disabled
+
+                         FROM  NoteKAttributes INNER JOIN
+                            KAttributes ON NoteKAttributes.KAttributeId = KAttributes.KAttributeId
+
+                         WHERE NoteId = @noteId";
+
+                var entityList = await _db.QueryAsync<NoteKAttributeDto>(sqlAtr.ToString(), new { noteId } );
+
+                var atrList = entityList.ToList();
+
+                // Complete Attributes list                                                
+                atrList = await CompleteNoteAttributes(atrList, result.Entity.NoteId, result.Entity.NoteTypeId);
+
+                result.Entity.KAttributesDto = atrList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+
         }
 
-        public Task<Result<NoteDto>> GetAsync(Guid noteId)
+        public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
         {
-            throw new NotImplementedException();
+            var result = new Result<List<ResourceDto>>();
+            try
+            {
+                var sql = @"SELECT 
+                        ResourceId, [Name], Container, [Description], [Order], FileType, ContentInDB, ContentArrayBytes, NoteId 
+                    FROM Resources
+                    WHERE NoteId = @idNote 
+                    ORDER BY [Order];";
 
-            //var result = new Result<List<NoteInfoDto>>();
-            //try
-            //{
-            //    var sql = @"SELECT        
-	           //                 Notes.NoteId, Notes.NoteNumber, Notes.Topic, Notes.CreationDateTime, 
-	           //                 Notes.ModificationDateTime, Notes.Description, Notes.ContentType, Notes.Script, 
-	           //                 Notes.InternalTags, Notes.Tags, Notes.Priority, Notes.FolderId, 
-	           //                 Folders.FolderId, Folders.FolderNumber, Folders.CreationDateTime, 
-	           //                 Folders.ModificationDateTime, Folders.Name, Folders.Tags, Folders.PathFolder, 
-	           //                 Folders.[Order], Folders.OrderNotes, 
-	           //                 Folders.Script, Folders.ParentId, Notes.NoteTypeId, NoteTypes.NoteTypeId, 
-	           //                 NoteTypes.Name, NoteTypes.Description, NoteTypes.ParenNoteTypeId
-            //                FROM  Notes 
-            //                INNER JOIN  Folders ON Notes.FolderId = Folders.FolderId 
-            //                LEFT OUTER JOIN  NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId
-            //                WHERE FolderId = @folderId ORDER BY [Priority], Topic ;";
-
-
-            //    var entity = await _db.QueryAsync<NoteInfoDto, FolderDto, NoteTypeDto, NoteInfoDto>(
-            //        sql.ToString(),
-            //        (note, folder, noteType) =>
-            //        {
-            //            note.FolderDto = folder;
-            //            note.NoteTypeId = noteType;
-            //            return note;
-            //        },
-            //        new { folderId }
-            //        , splitOn: "FolderId, NoteTypeId"
-            //        );
-
-            //    result.Entity = entity.ToList();
-            //}
-            //catch (Exception ex)
-            //{
-            //    AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            //}
-            //return ResultDomainAction(result);
-
+                var entity = await _db.QueryAsync<ResourceDto>(sql.ToString(), new { idNote });
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
+        public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
         {
-            throw new NotImplementedException();
+            var result = new Result<List<NoteTaskDto>>();
+            try
+            {
+                var sql = @"SELECT
+                         NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime, 
+                         NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved, 
+                         NoteTasks.EstimatedTime, NoteTasks.SpentTime, NoteTasks.DifficultyLevel, NoteTasks.ExpectedStartDate, 
+                         NoteTasks.ExpectedEndDate, NoteTasks.StartDate, NoteTasks.EndDate, Users.FullName as UserFullName
+                    FROM  NoteTasks LEFT OUTER JOIN
+                         Users ON NoteTasks.UserId = Users.UserId
+                    WHERE (NoteTasks.NoteId = @idNote)
+
+                    ORDER BY [CreationDateTime];";
+
+                var entity = await _db.QueryAsync<NoteTaskDto>(sql.ToString(), new { idNote });
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
+        public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
         {
-            throw new NotImplementedException();
+            var result = new Result<NoteDto>();
+            NoteDto newNote;
+
+            try
+            {
+                newNote = new NoteDto();
+                if (entity != null)
+                    newNote.SetSimpleDto(entity);
+
+                newNote.IsNew = true;
+                newNote.CreationDateTime = DateTime.Now;
+                newNote.KAttributesDto = new List<NoteKAttributeDto>();
+                newNote.KAttributesDto = await CompleteNoteAttributes(newNote.KAttributesDto, newNote.NoteId);
+
+                result.Entity = newNote;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+
+            return ResultDomainAction(result);
         }
+
 
         public Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo)
         {
@@ -399,15 +481,13 @@ namespace KNote.Repository.Dapper
             foreach (var f in notesFilter.AttributesFilter)
             {
                 strWhere = AddAndToStringSQL(strWhere);
-                strWhere += " NoteKAttributes.KAttributeId = '" + f.AtrId + "' AND NoteKAttributes.Value LIKE '%" + f.Value + "%'" ;
-                // query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
+                strWhere += " NoteKAttributes.KAttributeId = '" + f.AtrId + "' AND NoteKAttributes.Value LIKE '%" + f.Value + "%'" ;                
             }
 
             if (!string.IsNullOrEmpty(strWhere))
                 strWhere = " WHERE " + strWhere;
 
             return strWhere;
-
         }
 
         private string AddAndToStringSQL (string str)
@@ -417,8 +497,46 @@ namespace KNote.Repository.Dapper
             return str;
         }
 
+        private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+        {
+            var attributes = (await _kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
+            foreach (KAttributeInfoDto a in attributes)
+            {
+                var atrTmp = attributesNotes
+                    .Where(na => na.KAttributeId == a.KAttributeId)
+                    .Select(at => at).SingleOrDefault();
+                if (atrTmp == null)
+                {
+                    attributesNotes.Add(new NoteKAttributeDto
+                    {
+                        KAttributeId = a.KAttributeId,
+                        NoteId = noteId,
+                        Value = "",
+                        Name = a.Name,
+                        Description = a.Description,
+                        KAttributeDataType = a.KAttributeDataType,
+                        KAttributeNoteTypeId = a.NoteTypeId,
+                        RequiredValue = a.RequiredValue,
+                        Order = a.Order,
+                        Script = a.Script,
+                        Disabled = a.Disabled
+                    });
+                }
+                else
+                {
+                    atrTmp.Name = a.Name;
+                    atrTmp.Description = a.Description;
+                    atrTmp.KAttributeDataType = a.KAttributeDataType;
+                    atrTmp.KAttributeNoteTypeId = a.NoteTypeId;
+                    atrTmp.RequiredValue = a.RequiredValue;
+                    atrTmp.Order = a.Order;
+                    atrTmp.Script = a.Script;
+                    atrTmp.Disabled = a.Disabled;
+                }
+            }
+            return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
+        }
+
         #endregion
-
-
     }
 }

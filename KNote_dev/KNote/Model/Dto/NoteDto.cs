@@ -10,6 +10,7 @@ namespace KNote.Model.Dto
     public class NoteDto : NoteInfoDto
     {
         public FolderDto FolderDto { get; set; } = new FolderDto();
+        public NoteTypeDto NoteTypeDto { get; set; } = new NoteTypeDto();
 
         public List<NoteKAttributeDto> KAttributesDto { get; set; } = new List<NoteKAttributeDto>();
 

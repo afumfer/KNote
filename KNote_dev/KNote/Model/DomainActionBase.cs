@@ -155,6 +155,5 @@ namespace KNote.Model
             return tokens;
         }
 
-
     }
 }

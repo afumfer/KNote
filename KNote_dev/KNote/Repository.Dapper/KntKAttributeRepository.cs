@@ -278,7 +278,7 @@ namespace KNote.Repository.Dapper
                 {
                     sql += " WHERE KA.NoteTypeId = @NoteTypeId ";
                     if (includeNullType)
-                        sql += " AND NoteTypeId is null ";
+                        sql += " OR KA.NoteTypeId is null ";
                 }
 
                 sql += " ORDER BY NT.Name, [Order], KA.Name";
