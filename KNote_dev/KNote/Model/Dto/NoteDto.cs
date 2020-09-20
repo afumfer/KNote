@@ -9,10 +9,60 @@ namespace KNote.Model.Dto
 {
     public class NoteDto : NoteInfoDto
     {
-        public FolderDto FolderDto { get; set; } = new FolderDto();
-        public NoteTypeDto NoteTypeDto { get; set; } = new NoteTypeDto();
+        private FolderDto _folderDto;
+        public FolderDto FolderDto 
+        {
+            get {
+                if (_folderDto == null)
+                    _folderDto = new FolderDto();
+                return _folderDto; 
+            }
+            set
+            {
+                if (_folderDto != value)
+                {
+                    _folderDto = value;
+                    OnPropertyChanged("FolderDto");
+                }
+            }
+        }
 
-        public List<NoteKAttributeDto> KAttributesDto { get; set; } = new List<NoteKAttributeDto>();
+        //private NoteTypeDto _noteTypeDto { get; set; }
+        //public NoteTypeDto NoteTypeDto { get; set; }
+        //{
+        //    get
+        //    {
+        //        if (_noteTypeDto == null)
+        //            _noteTypeDto = new NoteTypeDto();
+        //        return _noteTypeDto;
+        //    }
+        //    set
+        //    {
+        //        if (_noteTypeDto != value)
+        //        {
+        //            _noteTypeDto = value;
+        //            OnPropertyChanged("FolderDto");
+        //        }
+        //    }
+        //}
+
+        private List<NoteKAttributeDto> _kAttributesDto;
+        public List<NoteKAttributeDto> KAttributesDto
+        {
+            get {
+                if (_kAttributesDto == null)
+                    _kAttributesDto = new List<NoteKAttributeDto>();
+                return _kAttributesDto; 
+            }
+            set
+            {
+                if (_kAttributesDto != value)
+                {
+                    _kAttributesDto = value;
+                    OnPropertyChanged("KAttributesDto");
+                }
+            }
+        } 
 
         public bool IsNew { get; set; } = false;
 

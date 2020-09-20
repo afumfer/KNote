@@ -223,7 +223,7 @@ namespace KNote.Repository.Dapper
                     (note, folder, noteType) =>
                     {
                         note.FolderDto = folder;
-                        note.NoteTypeDto = noteType;
+                        //note.NoteTypeDto = noteType;
                         return note;
                     },
                     new { noteId }, 
@@ -336,34 +336,40 @@ namespace KNote.Repository.Dapper
         }
 
 
-        public Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo)
+        //public Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo)
+        //{
+        //    //var db = dbConnection();
+        //    //var sql = @"INSERT INTO Carpetas (NombreCarpeta, IdCarpetaPadre, Orden, OrdenNotas, TipoSalidaNotas)
+        //    //            VALUES (@NombreCarpeta, @IdCarpetaPadre, @Orden, @OrdenNotas, @TipoSalidaNotas)";
+        //    //var result = await db.ExecuteAsync(sql.ToString(), new { carpeta.NombreCarpeta, carpeta.IdCarpetaPadre, carpeta.Orden, carpeta.OrdenNotas, carpeta.TipoSalidaNotas });
+        //    //return result > 0;
+
+        //    //var db = dbConnection();
+        //    //var sql = @"UPDATE Carpetas SET
+        //    //            NombreCarpeta = @NombreCarpeta
+        //    //            , IdCarpetaPadre = @IdCarpetaPadre
+        //    //            , Orden = @Orden
+        //    //            , OrdenNotas = @OrdenNotas
+        //    //            , TipoSalidaNotas = @TipoSalidaNotas 
+        //    //            WHERE IdCarpeta = @IdCarpeta;";
+        //    //var result = await db.ExecuteAsync(sql.ToString(),
+        //    //                new { carpeta.IdCarpeta, carpeta.NombreCarpeta, carpeta.IdCarpetaPadre, carpeta.Orden, carpeta.OrdenNotas, carpeta.TipoSalidaNotas });
+        //    //return result > 0;
+
+
+        //    throw new NotImplementedException();
+        //}
+
+        public Task<Result<NoteDto>> AddAsync(NoteDto entity)
         {
-            //var db = dbConnection();
-            //var sql = @"INSERT INTO Carpetas (NombreCarpeta, IdCarpetaPadre, Orden, OrdenNotas, TipoSalidaNotas)
-            //            VALUES (@NombreCarpeta, @IdCarpetaPadre, @Orden, @OrdenNotas, @TipoSalidaNotas)";
-            //var result = await db.ExecuteAsync(sql.ToString(), new { carpeta.NombreCarpeta, carpeta.IdCarpetaPadre, carpeta.Orden, carpeta.OrdenNotas, carpeta.TipoSalidaNotas });
-            //return result > 0;
-
-            //var db = dbConnection();
-            //var sql = @"UPDATE Carpetas SET
-            //            NombreCarpeta = @NombreCarpeta
-            //            , IdCarpetaPadre = @IdCarpetaPadre
-            //            , Orden = @Orden
-            //            , OrdenNotas = @OrdenNotas
-            //            , TipoSalidaNotas = @TipoSalidaNotas 
-            //            WHERE IdCarpeta = @IdCarpeta;";
-            //var result = await db.ExecuteAsync(sql.ToString(),
-            //                new { carpeta.IdCarpeta, carpeta.NombreCarpeta, carpeta.IdCarpetaPadre, carpeta.Orden, carpeta.OrdenNotas, carpeta.TipoSalidaNotas });
-            //return result > 0;
-
-
             throw new NotImplementedException();
         }
 
-        public Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity)
+        public Task<Result<NoteDto>> UpdateAsync(NoteDto entity)
         {
             throw new NotImplementedException();
         }
+
 
         public Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo)
         {
@@ -375,7 +381,7 @@ namespace KNote.Repository.Dapper
             throw new NotImplementedException();
         }
 
-        public Task<Result<NoteInfoDto>> DeleteAsync(Guid id)
+        public Task<Result> DeleteAsync(Guid id)
         {
             //var db = dbConnection();
             //var sql = @"DELETE FROM Carpetas WHERE IdCarpeta = @Id";
@@ -535,6 +541,11 @@ namespace KNote.Repository.Dapper
                 }
             }
             return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
+        }
+
+        private Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

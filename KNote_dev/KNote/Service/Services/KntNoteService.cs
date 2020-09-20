@@ -67,17 +67,37 @@ namespace KNote.Service.Services
 
         public async Task<Result<NoteDto>> SaveAsync(NoteDto entity)
         {
-            return await _repository.Notes.SaveAsync(entity);
+            if (entity.NoteId == Guid.Empty)
+            {
+                entity.NoteId = Guid.NewGuid();
+                return await _repository.Notes.AddAsync(entity);
+            }
+            else
+            {
+                return await _repository.Notes.UpdateAsync(entity);
+            }
         }
 
-        public async Task<Result<NoteInfoDto>> DeleteAsync(Guid id)
-        {
-            return await _repository.Notes.DeleteAsync(id);
-        }
+        public async Task<Result<NoteDto>> DeleteAsync(Guid id)
+        {            
+            var result = new Result<NoteDto>();
 
-        public async Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity)
-        {
-            return await _repository.Notes.SaveAttrtibuteAsync(entity);
+            var resGetEntity = await GetAsync(id);
+
+            if (resGetEntity.IsValid)
+            {
+                var resDelEntity = await _repository.Notes.DeleteAsync(id);
+                if (resDelEntity.IsValid)
+                    result.Entity = resGetEntity.Entity;
+                else
+                    result.ErrorList = resDelEntity.ErrorList;
+            }
+            else
+            {
+                result.ErrorList = resGetEntity.ErrorList;
+            }
+
+            return result;
         }
 
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)

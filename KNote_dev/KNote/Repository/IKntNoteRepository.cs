@@ -15,9 +15,10 @@ namespace KNote.Repository
         Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);
         Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);
         Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);
-        Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo);
-        Task<Result<NoteInfoDto>> DeleteAsync(Guid id);
-        Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity);
+        //Task<Result<NoteDto>> SaveAsync(NoteDto entity);
+        Task<Result<NoteDto>> AddAsync(NoteDto entity);
+        Task<Result<NoteDto>> UpdateAsync(NoteDto entity);
+        Task<Result> DeleteAsync(Guid id);        
         Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity);
         Task<Result<ResourceDto>> DeleteResourceAsync(Guid id);
         Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote);

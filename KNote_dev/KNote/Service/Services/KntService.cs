@@ -90,8 +90,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_notes == null)
-                    //_notes = new KntNoteService(_repository);
-                    _notes = new KntNoteService(_repositoryDapper);
+                    _notes = new KntNoteService(_repository);
+                    //_notes = new KntNoteService(_repositoryDapper);
                 return _notes;
             }
         }

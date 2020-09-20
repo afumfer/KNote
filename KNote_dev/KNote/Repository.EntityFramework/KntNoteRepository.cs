@@ -228,7 +228,7 @@ namespace KNote.Repository.EntityFramework
                 // Map to dto
                 result.Entity = entity?.GetSimpleDto<NoteDto>();
                 result.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
-                result.Entity.NoteTypeDto = entity?.NoteType.GetSimpleDto<NoteTypeDto>();
+                //result.Entity.NoteTypeDto = entity?.NoteType?.GetSimpleDto<NoteTypeDto>();
                 result.Entity.KAttributesDto = entity?.KAttributes
                     .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
                     .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == result.Entity.NoteTypeId)
@@ -259,6 +259,7 @@ namespace KNote.Repository.EntityFramework
                 //    newNote.NoteId = Guid.NewGuid();
                 newNote.IsNew = true;
                 newNote.CreationDateTime = DateTime.Now;
+                newNote.ModificationDateTime = DateTime.Now;
                 newNote.KAttributesDto = new List<NoteKAttributeDto>();
                 newNote.KAttributesDto = await CompleteNoteAttributes(newNote.KAttributesDto, newNote.NoteId);
 
@@ -272,7 +273,7 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<NoteDto>> SaveAsync(NoteDto entity)
+        private async Task<Result<NoteDto>> SaveAsync(NoteDto entity)
         {
             Result<Note> resRep = null;
             var resService = new Result<NoteDto>();
@@ -283,9 +284,9 @@ namespace KNote.Repository.EntityFramework
                 {
                     entity.NoteId = Guid.NewGuid();
                     var newEntity = new Note();
+                    UpdateStandardValuesToNewEntity(entity);
                     newEntity.SetSimpleDto(entity);
-                    UpdateStandardValuesToNewEntity(newEntity);
-
+                    
                     resRep = await _notes.AddAsync(newEntity);
                 }
                 else
@@ -320,9 +321,9 @@ namespace KNote.Repository.EntityFramework
                     else
                     {
                         var newEntity = new Note();
+                        UpdateStandardValuesToNewEntity(entity);
                         newEntity.SetSimpleDto(entity);
-                        UpdateStandardValuesToNewEntity(newEntity);
-
+                        
                         resRep = await _notes.AddAsync(newEntity);
                     }
                 }
@@ -347,92 +348,124 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<NoteInfoDto>> DeleteAsync(Guid id)
+        public async Task<Result<NoteDto>> AddAsync(NoteDto entity)
         {
-            var resService = new Result<NoteInfoDto>();
+            //return await SaveAsync(entity);
+            Result<Note> resRep = null;
+            var result = new Result<NoteDto>();
+
             try
             {
-                var resRep = await _notes.GetAsync(id);
-                if (resRep.IsValid)
+                var newEntity = new Note();
+                UpdateStandardValuesToNewEntity(entity);
+                newEntity.SetSimpleDto(entity);
+                
+                resRep = await _notes.AddAsync(newEntity);
+                // TODO: !!! Importante !!! pendiente de capturar y volcar errores de res en resService
+
+                // Complete Attributes list
+                //result.Entity.KAttributesDto = await CompleteNoteAttributes(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
+
+                // TODO: Limpiar lo siguiente, está sucio ...
+
+                foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {
-                    resRep = await _notes.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteInfoDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
+                    atr.NoteId = entity.NoteId;
+                    var res = (await SaveAttrtibuteAsync(atr)).Entity;
+                    // TODO: !!! Importante !!! pendiente de capturar y volcar errores de res en resService
+                    atr.KAttributeId = res.KAttributeId;
+                    atr.NoteKAttributeId = res.NoteKAttributeId;
                 }
-                else
-                    resService.ErrorList = resRep.ErrorList;
+
+                result.Entity = entity;
+                
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
-            return ResultDomainAction(resService);
+
+            result.ErrorList = resRep.ErrorList;
+            return ResultDomainAction(result);
         }
 
-        public async Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity)
+        public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity)
         {
-            Result<NoteKAttribute> resRep = null;
-            var resService = new Result<NoteKAttributeDto>();
+            Result<Note> resRep = null;
+            var result = new Result<NoteDto>();
 
             try
             {
-                if (entity.NoteKAttributeId == Guid.Empty)
+                bool flagThrowKntException = false;
+
+                if (_notes.ThrowKntException == true)
                 {
-                    entity.NoteKAttributeId = Guid.NewGuid();
-                    var newEntity = new NoteKAttribute();
-                    newEntity.SetSimpleDto(entity);
+                    flagThrowKntException = true;
+                    _notes.ThrowKntException = false;
+                }
 
-                    // TODO: update standard control values to newEntity
-                    // ...
+                var entityU = await _notes.DbSet.Where(n => n.NoteId == entity.NoteId)
+                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                    .Include(n => n.Folder)
+                    .Include(n => n.NoteType)
+                    .SingleOrDefaultAsync();
+                var entityForUpdate = entityU;
 
-                    resRep = await _noteKAttributes.AddAsync(newEntity);
+                if (flagThrowKntException == true)
+                    _notes.ThrowKntException = true;
+
+                if (entityForUpdate != null)
+                {
+                    entityForUpdate.SetSimpleDto(entity);
+                    entityForUpdate.ModificationDateTime = DateTime.Now;
+                    // Delete deprecated atttibutes
+                    entityForUpdate.KAttributes.RemoveAll(_ => _.KAttribute.NoteTypeId != entityForUpdate.NoteTypeId && _.KAttribute.NoteTypeId != null);
+
+                    resRep = await _notes.UpdateAsync(entityForUpdate);
                 }
                 else
                 {
-                    bool flagThrowKntException = false;
-
-                    if (_noteKAttributes.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _noteKAttributes.ThrowKntException = false;
-                    }
-
-                    var entityForUpdate = (await _noteKAttributes.GetAsync(entity.NoteKAttributeId)).Entity;
-
-                    if (flagThrowKntException == true)
-                        _noteKAttributes.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await _noteKAttributes.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new NoteKAttribute();
-                        newEntity.SetSimpleDto(entity);
-
-                        // TODO: update standard control values to newEntity
-                        // ...
-
-                        resRep = await _noteKAttributes.AddAsync(newEntity);
-                    }
+                    resRep.Entity = null;
+                    resRep.AddErrorMessage("Can't find entity for update.");
                 }
+                                
+
+                // TODO: Limiar lo siguiente está sucio ...
+
+                result.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+
+                foreach (NoteKAttributeDto atr in entity.KAttributesDto)
+                {
+                    var res = await SaveAttrtibuteAsync(atr);
+                    // TODO: !!! Importante !!! pendiente de capturar y volcar errores de res en resService
+                    result.Entity.KAttributesDto.Add(res.Entity);
+                }
+
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, resRep.ErrorList);
             }
+            
+            result.ErrorList = resRep.ErrorList;
+            return ResultDomainAction(result);
+        }
 
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteKAttributeDto>();
-            resService.ErrorList = resRep.ErrorList;
+        public async Task<Result> DeleteAsync(Guid id)
+        {
+            var response = new Result();
+            try
+            {
+                var resGenRep = await _notes.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
 
-            return ResultDomainAction(resService);
         }
 
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
@@ -732,7 +765,7 @@ namespace KNote.Repository.EntityFramework
             return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
         }
 
-        private void UpdateStandardValuesToNewEntity(Note newEntity)
+        private void UpdateStandardValuesToNewEntity(NoteDto newEntity)
         {
             newEntity.NoteNumber = GetNextNoteNumber();
             if (newEntity.CreationDateTime == DateTime.MinValue)
@@ -740,6 +773,70 @@ namespace KNote.Repository.EntityFramework
 
             if (newEntity.ModificationDateTime == DateTime.MinValue)
                 newEntity.ModificationDateTime = DateTime.Now;
+        }
+
+        private async Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity)
+        {
+            Result<NoteKAttribute> resRep = null;
+            var resService = new Result<NoteKAttributeDto>();
+
+            try
+            {
+                if (entity.NoteKAttributeId == Guid.Empty)
+                {
+                    entity.NoteKAttributeId = Guid.NewGuid();
+                    var newEntity = new NoteKAttribute();
+                    newEntity.SetSimpleDto(entity);
+
+                    // TODO: update standard control values to newEntity
+                    // ...
+
+                    resRep = await _noteKAttributes.AddAsync(newEntity);
+                }
+                else
+                {
+                    bool flagThrowKntException = false;
+
+                    if (_noteKAttributes.ThrowKntException == true)
+                    {
+                        flagThrowKntException = true;
+                        _noteKAttributes.ThrowKntException = false;
+                    }
+
+                    var entityForUpdate = (await _noteKAttributes.GetAsync(entity.NoteKAttributeId)).Entity;
+
+                    if (flagThrowKntException == true)
+                        _noteKAttributes.ThrowKntException = true;
+
+                    if (entityForUpdate != null)
+                    {
+                        // TODO: update standard control values to entityForUpdate
+                        // ...
+                        entityForUpdate.SetSimpleDto(entity);
+                        resRep = await _noteKAttributes.UpdateAsync(entityForUpdate);
+                    }
+                    else
+                    {
+                        var newEntity = new NoteKAttribute();
+                        newEntity.SetSimpleDto(entity);
+
+                        // TODO: update standard control values to newEntity
+                        // ...
+
+                        resRep = await _noteKAttributes.AddAsync(newEntity);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+
+            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
+            resService.Entity = resRep.Entity?.GetSimpleDto<NoteKAttributeDto>();
+            resService.ErrorList = resRep.ErrorList;
+
+            return ResultDomainAction(resService);
         }
 
         #endregion
