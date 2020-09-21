@@ -28,7 +28,11 @@ namespace KNote.Model.Dto
         [MaxLength(256)]
         public string Name
         {
-            get { return _name; }
+            get {
+                if (_name == null)
+                    _name = "(Enter new type note name)";
+                return _name; 
+            }
             set
             {
                 if (_name != value)

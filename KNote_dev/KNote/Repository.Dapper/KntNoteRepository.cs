@@ -204,32 +204,31 @@ namespace KNote.Repository.Dapper
                 var sql = @"SELECT        
                     Notes.NoteId, Notes.NoteNumber, Notes.Topic, Notes.CreationDateTime, 
 	                Notes.ModificationDateTime, Notes.Description, Notes.ContentType, Notes.Script, 
-	                Notes.InternalTags, Notes.Tags, Notes.Priority, Notes.FolderId, Notes.NoteTypeId, 
+	                Notes.InternalTags, Notes.Tags, Notes.Priority, Notes.FolderId , Notes.NoteTypeId, 
 	                
                     Folders.FolderId, Folders.FolderNumber, Folders.CreationDateTime, 
 	                Folders.ModificationDateTime, Folders.Name, Folders.Tags, Folders.PathFolder, 
-	                Folders.[Order], Folders.OrderNotes, Folders.Script, Folders.ParentId  
+	                Folders.[Order], Folders.OrderNotes, Folders.Script, Folders.ParentId, 
 
-                    -- Notes.NoteTypeId, NoteTypes.NoteTypeId, 
-	                -- NoteTypes.Name, NoteTypes.Description, NoteTypes.ParenNoteTypeId
+                    NoteTypes.NoteTypeId, 
+	                NoteTypes.Name, NoteTypes.Description, NoteTypes.ParenNoteTypeId
                             
                     FROM  Notes 
                           INNER JOIN  Folders ON Notes.FolderId = Folders.FolderId 
-                          -- LEFT OUTER JOIN  NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId
+                          LEFT OUTER JOIN  NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId
                     
                     WHERE NoteId = @noteId ;";
-
-                //var entity = await _db.QueryAsync<NoteDto, FolderDto, NoteTypeDto, NoteDto>(
-                var entity = await _db.QueryAsync<NoteDto, FolderDto, NoteDto>(
+                
+                var entity = await _db.QueryAsync<NoteDto, FolderDto, NoteTypeDto, NoteDto>(
                     sql.ToString(),
-                    (note, folder) =>
+                    (note, folder, noteType) =>
                     {
                         note.FolderDto = folder;
-                        //note.NoteTypeDto = noteType;
+                        note.NoteTypeDto = noteType;
                         return note;
                     },
                     new { noteId }, 
-                    splitOn: "FolderId"
+                    splitOn: "FolderId, NoteTypeId"
                     );
 
                 result.Entity = entity.ToList().FirstOrDefault();

@@ -27,24 +27,23 @@ namespace KNote.Model.Dto
             }
         }
 
-        //private NoteTypeDto _noteTypeDto { get; set; }
-        //public NoteTypeDto NoteTypeDto { get; set; }
-        //{
-        //    get
-        //    {
-        //        if (_noteTypeDto == null)
-        //            _noteTypeDto = new NoteTypeDto();
-        //        return _noteTypeDto;
-        //    }
-        //    set
-        //    {
-        //        if (_noteTypeDto != value)
-        //        {
-        //            _noteTypeDto = value;
-        //            OnPropertyChanged("FolderDto");
-        //        }
-        //    }
-        //}
+        private NoteTypeDto _noteTypeDto;
+        public NoteTypeDto NoteTypeDto
+        {
+            get
+            {
+                if (_noteTypeDto == null)
+                    _noteTypeDto = new NoteTypeDto();
+                return _noteTypeDto;
+            }
+            set
+            {
+                if (_noteTypeDto != value)
+                {
+                    _noteTypeDto = value;
+                    OnPropertyChanged("FolderDto");}
+            }
+        }
 
         private List<NoteKAttributeDto> _kAttributesDto;
         public List<NoteKAttributeDto> KAttributesDto
