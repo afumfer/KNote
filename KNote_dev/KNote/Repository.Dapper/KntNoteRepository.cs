@@ -9,6 +9,7 @@ using Dapper;
 using KNote.Model;
 using KNote.Model.Dto;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace KNote.Repository.Dapper
 {
@@ -203,31 +204,32 @@ namespace KNote.Repository.Dapper
                 var sql = @"SELECT        
                     Notes.NoteId, Notes.NoteNumber, Notes.Topic, Notes.CreationDateTime, 
 	                Notes.ModificationDateTime, Notes.Description, Notes.ContentType, Notes.Script, 
-	                Notes.InternalTags, Notes.Tags, Notes.Priority, Notes.FolderId, 
+	                Notes.InternalTags, Notes.Tags, Notes.Priority, Notes.FolderId, Notes.NoteTypeId, 
 	                
                     Folders.FolderId, Folders.FolderNumber, Folders.CreationDateTime, 
 	                Folders.ModificationDateTime, Folders.Name, Folders.Tags, Folders.PathFolder, 
-	                Folders.[Order], Folders.OrderNotes, Folders.Script, Folders.ParentId, 
+	                Folders.[Order], Folders.OrderNotes, Folders.Script, Folders.ParentId  
 
-                    Notes.NoteTypeId, NoteTypes.NoteTypeId, 
-	                NoteTypes.Name, NoteTypes.Description, NoteTypes.ParenNoteTypeId
+                    -- Notes.NoteTypeId, NoteTypes.NoteTypeId, 
+	                -- NoteTypes.Name, NoteTypes.Description, NoteTypes.ParenNoteTypeId
                             
                     FROM  Notes 
                           INNER JOIN  Folders ON Notes.FolderId = Folders.FolderId 
-                          LEFT OUTER JOIN  NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId
+                          -- LEFT OUTER JOIN  NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId
                     
                     WHERE NoteId = @noteId ;";
 
-                var entity = await _db.QueryAsync<NoteDto, FolderDto, NoteTypeDto, NoteDto>(
+                //var entity = await _db.QueryAsync<NoteDto, FolderDto, NoteTypeDto, NoteDto>(
+                var entity = await _db.QueryAsync<NoteDto, FolderDto, NoteDto>(
                     sql.ToString(),
-                    (note, folder, noteType) =>
+                    (note, folder) =>
                     {
                         note.FolderDto = folder;
                         //note.NoteTypeDto = noteType;
                         return note;
                     },
                     new { noteId }, 
-                    splitOn: "FolderId, NoteTypeId"
+                    splitOn: "FolderId"
                     );
 
                 result.Entity = entity.ToList().FirstOrDefault();
@@ -322,6 +324,7 @@ namespace KNote.Repository.Dapper
 
                 newNote.IsNew = true;
                 newNote.CreationDateTime = DateTime.Now;
+                newNote.ModificationDateTime = DateTime.Now;
                 newNote.KAttributesDto = new List<NoteKAttributeDto>();
                 newNote.KAttributesDto = await CompleteNoteAttributes(newNote.KAttributesDto, newNote.NoteId);
 
@@ -335,41 +338,200 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-
-        //public Task<Result<NoteDto>> SaveAsync(NoteDto entityInfo)
-        //{
-        //    //var db = dbConnection();
-        //    //var sql = @"INSERT INTO Carpetas (NombreCarpeta, IdCarpetaPadre, Orden, OrdenNotas, TipoSalidaNotas)
-        //    //            VALUES (@NombreCarpeta, @IdCarpetaPadre, @Orden, @OrdenNotas, @TipoSalidaNotas)";
-        //    //var result = await db.ExecuteAsync(sql.ToString(), new { carpeta.NombreCarpeta, carpeta.IdCarpetaPadre, carpeta.Orden, carpeta.OrdenNotas, carpeta.TipoSalidaNotas });
-        //    //return result > 0;
-
-        //    //var db = dbConnection();
-        //    //var sql = @"UPDATE Carpetas SET
-        //    //            NombreCarpeta = @NombreCarpeta
-        //    //            , IdCarpetaPadre = @IdCarpetaPadre
-        //    //            , Orden = @Orden
-        //    //            , OrdenNotas = @OrdenNotas
-        //    //            , TipoSalidaNotas = @TipoSalidaNotas 
-        //    //            WHERE IdCarpeta = @IdCarpeta;";
-        //    //var result = await db.ExecuteAsync(sql.ToString(),
-        //    //                new { carpeta.IdCarpeta, carpeta.NombreCarpeta, carpeta.IdCarpetaPadre, carpeta.Orden, carpeta.OrdenNotas, carpeta.TipoSalidaNotas });
-        //    //return result > 0;
-
-
-        //    throw new NotImplementedException();
-        //}
-
-        public Task<Result<NoteDto>> AddAsync(NoteDto entity)
+        public async Task<Result<NoteDto>> AddAsync(NoteDto entity)
         {
-            throw new NotImplementedException();
+            var result = new Result<NoteDto>();
+            try
+            {
+                entity.CreationDateTime = DateTime.Now;
+                entity.ModificationDateTime = DateTime.Now;
+                entity.NoteNumber = GetNextNoteNumber();
+
+                var sql = @"INSERT INTO [Notes] 
+                                (NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime, 
+                                [Description], ContentType, Script, InternalTags, Tags, 
+                                [Priority], FolderId, NoteTypeId)
+                          VALUES
+                                (@NoteId, @NoteNumber, @Topic, @CreationDateTime, @ModificationDateTime, 
+                                @Description, @ContentType, @Script, @InternalTags, @Tags, 
+                                @Priority, @FolderId, @NoteTypeId)";
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new
+                    {
+                        entity.NoteId,
+                        entity.NoteNumber,
+                        entity.Topic,
+                        entity.CreationDateTime,
+                        entity.ModificationDateTime,
+                        entity.Description,
+                        entity.ContentType,
+                        entity.Script,
+                        entity.InternalTags,
+                        entity.Tags,
+                        entity.Priority,
+                        entity.FolderId,
+                        entity.NoteTypeId
+                    });
+
+                if (r == 0)
+                {
+                    result.ErrorList.Add("Entity not inserted");
+                    return ResultDomainAction(result);
+                }
+
+                foreach (var atr in entity.KAttributesDto)
+                {
+                    atr.NoteKAttributeId = Guid.NewGuid();
+                    atr.NoteId = entity.NoteId;
+
+                    sql = @"INSERT INTO [NoteKAttributes] 
+                                (NoteKAttributeId, NoteId, KAttributeId, [Value])
+                          VALUES
+                                ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
+                    var rA = await _db.ExecuteAsync(sql.ToString(),
+                        new
+                        {
+                            atr.NoteKAttributeId,
+                            atr.NoteId,
+                            atr.KAttributeId,
+                            atr.Value
+                        });
+
+                    if (rA == 0)
+                    {
+                        result.ErrorList.Add("Entity not inserted");
+                        return ResultDomainAction(result);
+                    }
+                }
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<NoteDto>> UpdateAsync(NoteDto entity)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity)
+        {            
+            var result = new Result<NoteDto>();
+            try
+            {                
+                entity.ModificationDateTime = DateTime.Now;
+                
+                var sql = @"UPDATE [Notes] SET 
+                                NoteId = @NoteId, 
+                                NoteNumber = @NoteNumber, 
+                                Topic = @Topic, 
+                                CreationDateTime = @CreationDateTime, 
+                                ModificationDateTime = @ModificationDateTime, 
+                                [Description] = @Description, 
+                                ContentType = @ContentType, 
+                                Script = @Script, 
+                                InternalTags = @InternalTags, 
+                                Tags = @Tags, 
+                                [Priority] = @Priority, 
+                                FolderId = @FolderId, 
+                                NoteTypeId = @NoteTypeId
+                          WHERE NoteId = @NoteId";
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new
+                    {
+                        entity.NoteId, entity.NoteNumber, entity.Topic, entity.CreationDateTime, entity.ModificationDateTime,
+                        entity.Description, entity.ContentType, entity.Script, entity.InternalTags, entity.Tags,
+                        entity.Priority, entity.FolderId, entity.NoteTypeId
+                    });
+
+                if (r == 0)
+                {
+                    result.ErrorList.Add("Entity not inserted");
+                    return ResultDomainAction(result);
+                }
+
+                foreach (var atr in entity.KAttributesDto)
+                {
+                    if(atr.NoteKAttributeId == Guid.Empty)
+                    {
+                        atr.NoteKAttributeId = Guid.NewGuid();
+                        atr.NoteId = entity.NoteId;
+                        sql = @"INSERT INTO [NoteKAttributes] 
+                                    (NoteKAttributeId, NoteId, KAttributeId, [Value])
+                              VALUES
+                                    ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
+                    }
+                    else
+                    {
+                        sql = @"UPDATE [NoteKAttributes] SET                                    
+                                    NoteId = @NoteId, 
+                                    KAttributeId = @KAttributeId, 
+                                    [Value] = @Value
+                              WHERE NoteKAttributeId = @NoteKAttributeId";
+                    }
+
+                    var rA = await _db.ExecuteAsync(sql.ToString(),
+                        new
+                        {
+                            atr.NoteKAttributeId,
+                            atr.NoteId,
+                            atr.KAttributeId,
+                            atr.Value
+                        });
+
+                    if (rA == 0)
+                    {
+                        result.ErrorList.Add("Entity not inserted");
+                        return ResultDomainAction(result);
+                    }
+                }
+
+                // Delete old attributes
+                sql = "SELECT NoteKAttributeId, NoteId, KAttributeId, [Value] FROM NoteKAttributes WHERE NoteId = @NoteId";
+                var allAtr = (await _db.QueryAsync<NoteKAttributeDto>(sql.ToString(), new { entity.NoteId })).ToList();
+
+                foreach (var a in allAtr)
+                {
+                    var delAtr = entity.KAttributesDto.Where(_ => _.NoteKAttributeId == a.NoteKAttributeId).FirstOrDefault();
+                    if (delAtr == null)
+                    {
+                        sql = @"DELETE [NoteKAttributes] WHERE NoteKAttributeId = @NoteKAttributeId";
+                        var rDel = await _db.ExecuteAsync(sql.ToString(), new { a.NoteKAttributeId });
+                        if (rDel == 0)
+                        {
+                            result.ErrorList.Add("Entity not deleted");
+                            return ResultDomainAction(result);
+                        }
+                    }
+                }
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
+        public async Task<Result> DeleteAsync(Guid id)
+        {
+            var result = new Result();
+            try
+            {
+                var sql = @"DELETE FROM Notes WHERE NoteId = @Id";
+
+                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+
+                if (r == 0)
+                    result.AddErrorMessage("Entity not deleted");
+
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
 
         public Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo)
         {
@@ -378,16 +540,6 @@ namespace KNote.Repository.Dapper
 
         public Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<Result> DeleteAsync(Guid id)
-        {
-            //var db = dbConnection();
-            //var sql = @"DELETE FROM Carpetas WHERE IdCarpeta = @Id";
-            //var result = await db.ExecuteAsync(sql.ToString(), new { Id = id });
-            //return result > 0;
-
             throw new NotImplementedException();
         }
 
@@ -411,7 +563,7 @@ namespace KNote.Repository.Dapper
 
         private int GetNextNoteNumber()
         {            
-            var sql = "SELECT MAX(NoteNumber) FROM Notess";
+            var sql = "SELECT MAX(NoteNumber) FROM Notes";
             var result = _db.ExecuteScalar(sql);
 
             return (result == null) ? 1 : ((int)result) + 1;

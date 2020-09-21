@@ -229,6 +229,7 @@ namespace KNote.Model.Dto
             // Validaciones específicas
             //----
 
+            // TODO: Revisar Esto
             if (ModificationDateTime < CreationDateTime)
             {
                 results.Add(new ValidationResult
