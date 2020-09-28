@@ -273,7 +273,6 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
-
         public async Task<Result<NoteDto>> AddAsync(NoteDto entity)
         {
             //return await SaveAsync(entity);
@@ -393,78 +392,6 @@ namespace KNote.Repository.EntityFramework
 
         }
 
-        public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
-        {
-            Result<Resource> resRep = null;
-            var resService = new Result<ResourceDto>();
-
-            try
-            {
-                if (entity.ResourceId == Guid.Empty)
-                {
-                    entity.ResourceId = Guid.NewGuid();
-                    var newEntity = new Resource();
-                    newEntity.SetSimpleDto(entity);
-
-                    // TODO: update standard control values to newEntity (refactor ...)
-                    // ...
-                    newEntity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
-                    newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
-
-                    resRep = await _resources.AddAsync(newEntity);
-                }
-                else
-                {
-                    bool flagThrowKntException = false;
-
-                    if (_resources.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _resources.ThrowKntException = false;
-                    }
-
-                    var entityForUpdate = _resources.Get(entity.ResourceId).Entity;
-
-                    if (flagThrowKntException == true)
-                        _resources.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
-                        entityForUpdate.SetSimpleDto(entity);
-                        entityForUpdate.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
-                        resRep = await _resources.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new Resource();
-                        newEntity.SetSimpleDto(entity);
-
-                        // TODO: update standard control values to newEntity  (refactor ...)
-                        // ...
-                        newEntity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
-                        newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
-
-                        resRep = await _resources.AddAsync(newEntity);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<ResourceDto>();
-            if (resService.Entity != null)
-                resService.Entity.ContentBase64 = entity.ContentBase64;
-
-            resService.ErrorList = resRep.ErrorList;
-
-            return ResultDomainAction(resService);
-        }
-
         public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
         {
             var result = new Result<List<ResourceDto>>();
@@ -481,102 +408,94 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
+        public async Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity)
         {
-            var resService = new Result<ResourceDto>();
+            var response = new Result<ResourceDto>();
             try
             {
-                var resRep = await _resources.GetAsync(id);
-                if (resRep.IsValid)
-                {
-                    resRep = await _resources.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<ResourceDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
+                var newEntity = new Resource();
+                newEntity.SetSimpleDto(entity);
+                // TODO: refactorizar la sigueinte línea (generalizar)
+                newEntity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
+                newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+
+                var resGenRep = await _resources.AddAsync(newEntity);
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<ResourceDto>();
+                if (response.Entity != null)
+                    response.Entity.ContentBase64 = entity.ContentBase64;
+
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-            return ResultDomainAction(resService);
+            return ResultDomainAction(response);
         }
 
-        public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo)
+        public async Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity)
         {
-            Result<NoteTask> resRep = null;
-            var resService = new Result<NoteTaskDto>();
-
-            var userFullName = entityInfo.UserFullName;
+            // TODO: Pendiente de probar 
+            var resGenRep = new Result<Resource>();
+            var response = new Result<ResourceDto>();
 
             try
             {
-                if (entityInfo.NoteTaskId == Guid.Empty)
+                bool flagThrowKntException = false;
+                if (_resources.ThrowKntException == true)
                 {
-                    entityInfo.NoteTaskId = Guid.NewGuid();
-                    var newEntity = new NoteTask();
-                    newEntity.SetSimpleDto(entityInfo);
+                    flagThrowKntException = true;
+                    _resources.ThrowKntException = false;
+                }
 
-                    // TODO: update standard control values to newEntity
-                    newEntity.CreationDateTime = DateTime.Now;
-                    newEntity.ModificationDateTime = DateTime.Now;
-                    // ...
+                var resGenRepGet = await _resources.GetAsync(entity.ResourceId);
+                Resource entityForUpdate;
 
-                    resRep = await _noteTasks.AddAsync(newEntity);
+                if (flagThrowKntException == true)
+                    _resources.ThrowKntException = true;
+
+                if (resGenRepGet.IsValid)
+                {
+                    entityForUpdate = resGenRepGet.Entity;
+                    entityForUpdate.SetSimpleDto(entity);
+                    entityForUpdate.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+                    resGenRep = await _resources.UpdateAsync(entityForUpdate);
                 }
                 else
                 {
-                    bool flagThrowKntException = false;
-
-                    if (_noteTasks.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        _noteTasks.ThrowKntException = false;
-                    }
-
-                    var entityForUpdate = _noteTasks.Get(entityInfo.NoteTaskId).Entity;
-
-                    if (flagThrowKntException == true)
-                        _noteTasks.ThrowKntException = true;
-
-                    if (entityForUpdate != null)
-                    {
-                        // TODO: update standard control values to entityForUpdate                                                
-                        entityForUpdate.SetSimpleDto(entityInfo);
-                        entityForUpdate.ModificationDateTime = DateTime.Now;
-                        // ...
-
-                        resRep = await _noteTasks.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new NoteTask();
-                        newEntity.SetSimpleDto(entityInfo);
-
-                        // TODO: update standard control values to newEntity
-                        newEntity.CreationDateTime = DateTime.Now;
-                        newEntity.ModificationDateTime = DateTime.Now;
-                        // ...
-
-                        resRep = await _noteTasks.AddAsync(newEntity);
-                    }
+                    resGenRep.Entity = null;
+                    resGenRep.AddErrorMessage("Can't find entity for update.");
                 }
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<ResourceDto>();
+                if (response.Entity != null)
+                    response.Entity.ContentBase64 = entity.ContentBase64;
+
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
 
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteTaskDto>();
-            if (resRep.Entity != null)
-                resService.Entity.UserFullName = userFullName;
-            resService.ErrorList = resRep.ErrorList;
+            return ResultDomainAction(response);
+        }
 
-            return ResultDomainAction(resService);
+        public async Task<Result> DeleteResourceAsync(Guid id)
+        {
+            var response = new Result();
+            try
+            {
+                var resGenRep = await _resources.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
         }
 
         public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
@@ -602,28 +521,91 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid id)
+        public async Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity)
         {
-            var resService = new Result<NoteTaskDto>();
+            var response = new Result<NoteTaskDto>();
             try
             {
-                var resRep = await _noteTasks.GetAsync(id);
-                if (resRep.IsValid)
-                {
-                    resRep = await _noteTasks.DeleteAsync(resRep.Entity);
-                    if (resRep.IsValid)
-                        resService.Entity = resRep.Entity?.GetSimpleDto<NoteTaskDto>();
-                    else
-                        resService.ErrorList = resRep.ErrorList;
-                }
-                else
-                    resService.ErrorList = resRep.ErrorList;
+                var newEntity = new NoteTask();
+                newEntity.SetSimpleDto(entity);                
+                newEntity.CreationDateTime = DateTime.Now;
+                newEntity.ModificationDateTime = DateTime.Now;
+                
+                var resGenRep = await _noteTasks.AddAsync(newEntity);
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<NoteTaskDto>();
+                if (response.Entity != null)
+                    response.Entity.UserFullName = entity.UserFullName;
+
+                response.ErrorList = resGenRep.ErrorList;
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
-            return ResultDomainAction(resService);
+            return ResultDomainAction(response);
+        }
+
+        public async Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity)
+        {
+            var resGenRep = new Result<NoteTask>();
+            var response = new Result<NoteTaskDto>();
+
+            try
+            {
+                bool flagThrowKntException = false;
+                if (_noteTasks.ThrowKntException == true)
+                {
+                    flagThrowKntException = true;
+                    _noteTasks.ThrowKntException = false;
+                }
+
+                var resGenRepGet = await _noteTasks.GetAsync(entity.NoteTaskId);
+                NoteTask entityForUpdate;
+
+                if (flagThrowKntException == true)
+                    _noteTasks.ThrowKntException = true;
+
+                if (resGenRepGet.IsValid)
+                {
+                    entityForUpdate = resGenRepGet.Entity;
+                    entityForUpdate.SetSimpleDto(entity);
+                    entityForUpdate.ModificationDateTime = DateTime.Now;
+                    resGenRep = await _noteTasks.UpdateAsync(entityForUpdate);
+                }
+                else
+                {
+                    resGenRep.Entity = null;
+                    resGenRep.AddErrorMessage("Can't find entity for update.");
+                }
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<NoteTaskDto>();
+                if (response.Entity != null)
+                    response.Entity.UserFullName = entity.UserFullName;
+                response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+
+            return ResultDomainAction(response);
+        }
+
+        public async Task<Result> DeleteNoteTaskAsync(Guid id)
+        {
+            var response = new Result();
+            try
+            {
+                var resGenRep = await _noteTasks.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
         }
 
         #region  IDisposable

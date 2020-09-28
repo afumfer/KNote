@@ -100,24 +100,50 @@ namespace KNote.Service.Services
             return result;
         }
 
-        public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
-        {
-            return await _repository.Notes.SaveResourceAsync(entity);
-        }
-
         public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
         {
             return await _repository.Notes.GetNoteResourcesAsync(idNote);
         }
 
-        public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
-        {
-            return await _repository.Notes.DeleteResourceAsync(id);
+        public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
+        {            
+            if (entity.ResourceId == Guid.Empty)
+            {
+                entity.ResourceId = Guid.NewGuid();
+                return await _repository.Notes.AddResourceAsync(entity);
+            }
+            else
+            {
+                return await _repository.Notes.UpdateResourceAsync(entity);
+            }
         }
-        
-        public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo)
-        {
-            return await _repository.Notes.SaveNoteTaskAsync(entityInfo);
+
+        public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
+        {            
+            var result = new Result<ResourceDto>();
+
+            //var resGetEntity = await GetResourceAsync(id);
+            //if (resGetEntity.IsValid)
+            //{
+            //    var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
+            //    if (resDelEntity.IsValid)
+            //        result.Entity = resGetEntity.Entity;
+            //    else
+            //        result.ErrorList = resDelEntity.ErrorList;
+            //}
+            //else
+            //{
+            //    result.ErrorList = resGetEntity.ErrorList;
+            //}
+
+            // TODO: Implementación provisional al bloque anterior
+            var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
+            if (resDelEntity.IsValid)
+                result.Entity = null;
+            else
+                result.ErrorList = resDelEntity.ErrorList;
+
+            return result;
         }
 
         public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
@@ -125,9 +151,45 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetNoteTasksAsync(idNote);
         }
 
+        public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entity)
+        {            
+            if (entity.NoteTaskId == Guid.Empty)
+            {
+                entity.NoteTaskId = Guid.NewGuid();
+                return await _repository.Notes.AddNoteTaskAsync(entity);
+            }
+            else
+            {
+                return await _repository.Notes.UpdateNoteTaskAsync(entity);
+            }
+        }
+
         public async Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid id)
-        {
-            return await _repository.Notes.DeleteNoteTaskAsync(id);
+        {         
+            var result = new Result<NoteTaskDto>();
+
+            //var resGetEntity = await GetNoteTaskAsync(id);
+            //if (resGetEntity.IsValid)
+            //{
+            //    var resDelEntity = await _repository.Notes.DeleteNoteTaskAsync(id);
+            //    if (resDelEntity.IsValid)
+            //        result.Entity = resGetEntity.Entity;
+            //    else
+            //        result.ErrorList = resDelEntity.ErrorList;
+            //}
+            //else
+            //{
+            //    result.ErrorList = resGetEntity.ErrorList;
+            //}
+            
+            // TODO: Implementación provisional al bloque anterior
+            var resDelEntity = await _repository.Notes.DeleteNoteTaskAsync(id);
+            if (resDelEntity.IsValid)
+                result.Entity = null;
+            else
+                result.ErrorList = resDelEntity.ErrorList;
+
+            return result;
         }
 
 

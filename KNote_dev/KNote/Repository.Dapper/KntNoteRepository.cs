@@ -532,26 +532,35 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo)
+        public Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
+        public Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid id)
+        public Task<Result> DeleteResourceAsync(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
+        public Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entityInfo)
         {
             throw new NotImplementedException();
         }
 
+        public Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entityInfo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result> DeleteNoteTaskAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Dispose()
         {

@@ -132,7 +132,6 @@ namespace KNote.Repository.EntityFramework
                 AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
             return ResultDomainAction(response);
-
         }
 
         #region  IDisposable
