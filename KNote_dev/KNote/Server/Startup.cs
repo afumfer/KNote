@@ -13,6 +13,10 @@ using System;
 using System.Linq;
 using System.Text;
 
+using KNote.Repository;
+using EF = KNote.Repository.EntityFramework;
+using DP = KNote.Repository.Dapper;
+
 namespace KNote.Server
 {
     public class Startup
@@ -37,12 +41,16 @@ namespace KNote.Server
                     .AllowAnyHeader();
             }));
 
-
-            //// Para pruebas de uso del DbContext directo 
+            // Para pruebas de uso del DbContext directo 
             //services.AddDbContext<KntDbContext>(options =>
             //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddScoped<IKntService>(provider => new KntService(configuration["ConnectionStrings:DefaultConnection"]));
+            // Inyectar el repositorio deseado (se podría implementar una personalización vía appconfig).
+            services.AddScoped<IKntRepository>(provider => new DP.KntRepository(configuration["ConnectionStrings:DefaultConnection"]));
+            //services.AddScoped<IKntRepository>(provider => new EF.KntRepository(configuration["ConnectionStrings:DefaultConnection"]));
+            
+            services.AddScoped<IKntService, KntService>();
+
             //services.AddSingleton<IConfiguration>(configuration);
 
             var appSettingsSection = configuration.GetSection("AppSettings");
@@ -106,9 +114,7 @@ namespace KNote.Server
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
-            //app.UseCors();
-            
+                        
             // global cors policy
             //app.UseCors(x => x
             //    .AllowAnyOrigin()

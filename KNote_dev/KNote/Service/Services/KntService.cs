@@ -16,20 +16,15 @@ namespace KNote.Service.Services
     {
         #region Fields
 
-        // !!! OJO, doble respositorio para el proceso de implementación de dapper y depuración. 
-        // En la versión definitiva habrá una inyección de dependencia. 
-
         protected IKntRepository _repository;
-        protected IKntRepository _repositoryDapper;
 
         #endregion
 
         #region Constructors
 
-        public KntService(string strConn, string strProvider = "System.Data.SqlClient", bool throwKntException = false)
-        {            
-            _repository = new KntRepository(strConn, strProvider, throwKntException);
-            _repositoryDapper = new DP.KntRepository(strConn, strProvider, throwKntException);
+        public KntService(IKntRepository repository)
+        {
+            _repository = repository;
         }
 
         #endregion
@@ -42,8 +37,7 @@ namespace KNote.Service.Services
             get
             {
                 if (_users == null)
-                    //_users = new KntUserService(_repository);
-                    _users = new KntUserService(_repositoryDapper);
+                    _users = new KntUserService(_repository);
                 return _users;
             }
         }
@@ -54,8 +48,7 @@ namespace KNote.Service.Services
             get
             {
                 if (_kattributes == null)
-                    //_kattributes = new KntKAttributeService(_repository);
-                    _kattributes = new KntKAttributeService(_repositoryDapper);
+                    _kattributes = new KntKAttributeService(_repository);
                 return _kattributes;
             }
         }
@@ -66,8 +59,7 @@ namespace KNote.Service.Services
             get
             {
                 if (_systemValues == null)
-                    //_systemValues = new KntSystemValuesService(_repository);
-                    _systemValues = new KntSystemValuesService(_repositoryDapper);
+                    _systemValues = new KntSystemValuesService(_repository);
                 return _systemValues;
             }
         }
@@ -78,8 +70,7 @@ namespace KNote.Service.Services
             get
             {
                 if (_folders == null)
-                    //_folders = new KntFolderService(_repository);
-                    _folders = new KntFolderService(_repositoryDapper);
+                    _folders = new KntFolderService(_repository);
                 return _folders;
             }
         }
@@ -90,8 +81,7 @@ namespace KNote.Service.Services
             get
             {
                 if (_notes == null)
-                    //_notes = new KntNoteService(_repository);
-                    _notes = new KntNoteService(_repositoryDapper);
+                    _notes = new KntNoteService(_repository);
                 return _notes;
             }
         }
@@ -102,8 +92,7 @@ namespace KNote.Service.Services
             get
             {
                 if (_noteTypes == null)
-                    //_noteTypes = new KntNoteTypeService(_repository);
-                    _noteTypes = new KntNoteTypeService(_repositoryDapper);
+                    _noteTypes = new KntNoteTypeService(_repository);
                 return _noteTypes;
             }
         }
