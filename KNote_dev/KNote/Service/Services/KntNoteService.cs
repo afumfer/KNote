@@ -122,26 +122,26 @@ namespace KNote.Service.Services
         {            
             var result = new Result<ResourceDto>();
 
-            //var resGetEntity = await GetResourceAsync(id);
-            //if (resGetEntity.IsValid)
-            //{
-            //    var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
-            //    if (resDelEntity.IsValid)
-            //        result.Entity = resGetEntity.Entity;
-            //    else
-            //        result.ErrorList = resDelEntity.ErrorList;
-            //}
-            //else
-            //{
-            //    result.ErrorList = resGetEntity.ErrorList;
-            //}
+            var resGetEntity = await _repository.Notes.GetNoteResourceAsync(id);
+            if (resGetEntity.IsValid)
+            {
+                var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
+                if (resDelEntity.IsValid)
+                    result.Entity = resGetEntity.Entity;
+                else
+                    result.ErrorList = resDelEntity.ErrorList;
+            }
+            else
+            {
+                result.ErrorList = resGetEntity.ErrorList;
+            }
 
             // TODO: Implementación provisional al bloque anterior
-            var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
-            if (resDelEntity.IsValid)
-                result.Entity = null;
-            else
-                result.ErrorList = resDelEntity.ErrorList;
+            //var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
+            //if (resDelEntity.IsValid)
+            //    result.Entity = null;
+            //else
+            //    result.ErrorList = resDelEntity.ErrorList;
 
             return result;
         }
@@ -168,26 +168,19 @@ namespace KNote.Service.Services
         {         
             var result = new Result<NoteTaskDto>();
 
-            //var resGetEntity = await GetNoteTaskAsync(id);
-            //if (resGetEntity.IsValid)
-            //{
-            //    var resDelEntity = await _repository.Notes.DeleteNoteTaskAsync(id);
-            //    if (resDelEntity.IsValid)
-            //        result.Entity = resGetEntity.Entity;
-            //    else
-            //        result.ErrorList = resDelEntity.ErrorList;
-            //}
-            //else
-            //{
-            //    result.ErrorList = resGetEntity.ErrorList;
-            //}
-            
-            // TODO: Implementación provisional al bloque anterior
-            var resDelEntity = await _repository.Notes.DeleteNoteTaskAsync(id);
-            if (resDelEntity.IsValid)
-                result.Entity = null;
+            var resGetEntity = await _repository.Notes.GetNoteTaskAsync(id);
+            if (resGetEntity.IsValid)
+            {
+                var resDelEntity = await _repository.Notes.DeleteNoteTaskAsync(id);
+                if (resDelEntity.IsValid)
+                    result.Entity = resGetEntity.Entity;
+                else
+                    result.ErrorList = resDelEntity.ErrorList;
+            }
             else
-                result.ErrorList = resDelEntity.ErrorList;
+            {
+                result.ErrorList = resGetEntity.ErrorList;
+            }
 
             return result;
         }

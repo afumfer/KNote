@@ -18,13 +18,15 @@ namespace KNote.Repository
         Task<Result<NoteDto>> AddAsync(NoteDto entity);
         Task<Result<NoteDto>> UpdateAsync(NoteDto entity);
         Task<Result> DeleteAsync(Guid id);
-        Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote);        
+        Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote);
+        Task<Result<ResourceDto>> GetNoteResourceAsync(Guid idNoteResource);
         Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity);
         Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity);
-        Task<Result> DeleteResourceAsync(Guid id);               
-        Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entityInfo);
-        Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entityInfo);
-        Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote);        
+        Task<Result> DeleteResourceAsync(Guid id);
+        Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote);
+        Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask);
+        Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity);
+        Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity);        
         Task<Result> DeleteNoteTaskAsync(Guid id);
 
         //Task<Result<WindowDto>> SaveWindowAsync(WindowDto entityInfo);

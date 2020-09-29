@@ -408,6 +408,22 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
+        public async  Task<Result<ResourceDto>> GetNoteResourceAsync(Guid idNoteResource)
+        {            
+            var result = new Result<ResourceDto>();
+            try
+            {
+                var resRep = await _resources.GetAsync(r => r.ResourceId == idNoteResource);
+                result.Entity = resRep.Entity.GetSimpleDto<ResourceDto>(); 
+                result.ErrorList = resRep.ErrorList;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
         public async Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity)
         {
             var response = new Result<ResourceDto>();
@@ -513,6 +529,25 @@ namespace KNote.Repository.EntityFramework
                     nt.UserFullName = e.User.FullName;
                     result.Entity.Add(nt);
                 }
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask)
+        {
+            var result = new Result<NoteTaskDto>();
+            try
+            {
+                var entiy = await _noteTasks.DbSet.Where(n => n.NoteTaskId == idNoteTask)
+                    .Include(t => t.User)
+                    .SingleOrDefaultAsync();
+
+                result.Entity = entiy.GetSimpleDto<NoteTaskDto>();
+                result.Entity.UserFullName = entiy.User.FullName;
             }
             catch (Exception ex)
             {

@@ -121,8 +121,7 @@ namespace KNote.Repository.Dapper
                 var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
                                 
                 if (r == 0)                
-                    result.AddErrorMessage("Entity not deleted");                    
-                
+                    result.AddErrorMessage("Entity not deleted");                                    
             }
             catch (Exception ex)
             {

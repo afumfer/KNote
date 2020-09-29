@@ -263,53 +263,6 @@ namespace KNote.Repository.Dapper
 
         }
 
-        public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
-        {
-            var result = new Result<List<ResourceDto>>();
-            try
-            {
-                var sql = @"SELECT 
-                        ResourceId, [Name], Container, [Description], [Order], FileType, ContentInDB, ContentArrayBytes, NoteId 
-                    FROM Resources
-                    WHERE NoteId = @idNote 
-                    ORDER BY [Order];";
-
-                var entity = await _db.QueryAsync<ResourceDto>(sql.ToString(), new { idNote });
-                result.Entity = entity.ToList();
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
-        public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
-        {
-            var result = new Result<List<NoteTaskDto>>();
-            try
-            {
-                var sql = @"SELECT
-                         NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime, 
-                         NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved, 
-                         NoteTasks.EstimatedTime, NoteTasks.SpentTime, NoteTasks.DifficultyLevel, NoteTasks.ExpectedStartDate, 
-                         NoteTasks.ExpectedEndDate, NoteTasks.StartDate, NoteTasks.EndDate, Users.FullName as UserFullName
-                    FROM  NoteTasks LEFT OUTER JOIN
-                         Users ON NoteTasks.UserId = Users.UserId
-                    WHERE (NoteTasks.NoteId = @idNote)
-
-                    ORDER BY [CreationDateTime];";
-
-                var entity = await _db.QueryAsync<NoteTaskDto>(sql.ToString(), new { idNote });
-                result.Entity = entity.ToList();
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
         public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
         {
             var result = new Result<NoteDto>();
@@ -532,34 +485,326 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity)
+        public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
         {
-            throw new NotImplementedException();
+            var result = new Result<List<ResourceDto>>();
+            try
+            {
+                var sql = @"SELECT 
+                        ResourceId, [Name], Container, [Description], [Order], FileType, ContentInDB, ContentArrayBytes, NoteId 
+                    FROM Resources
+                    WHERE NoteId = @idNote 
+                    ORDER BY [Order];";
+
+                var entity = await _db.QueryAsync<ResourceDto>(sql.ToString(), new { idNote });
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<ResourceDto>> GetNoteResourceAsync(Guid idNoteResource)
+        {            
+            var result = new Result<ResourceDto>();
+            try
+            {
+                var sql = @"SELECT  ResourceId, [Name], Container, [Description], [Order], FileType, 
+                                ContentInDB, ContentArrayBytes, NoteId 
+                        FROM Resources 
+                        WHERE ResourceId = @Id";
+
+                var entity = await _db.QueryFirstOrDefaultAsync<ResourceDto>(sql.ToString(), new { Id = idNoteResource });
+
+                if (entity == null)
+                    result.AddErrorMessage("Entity not found.");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result> DeleteResourceAsync(Guid id)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity)
+        {            
+            var result = new Result<ResourceDto>();
+            try
+            {
+                // TODO: pendiente, parametrizar esto. 
+                entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
+                entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+
+                var sql = @"INSERT INTO Resources 
+                            (ResourceId, [Name], Container, [Description], [Order], 
+                                FileType, ContentInDB, ContentArrayBytes, NoteId)
+                            VALUES (@ResourceId, @Name, @Container, @Description, @Order, 
+                                @FileType, @ContentInDB, @ContentArrayBytes, @NoteId)";
+
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new { entity.ResourceId, entity.Name, entity.Container, 
+                        entity.Description, entity.Order, entity.FileType, 
+                        entity.ContentInDB, entity.ContentArrayBytes, entity.NoteId });
+                
+                if (r == 0)
+                    result.ErrorList.Add("Entity not inserted");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entityInfo)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity)
+        {            
+            // TODO: Pendiente de probar
+            var result = new Result<ResourceDto>();
+            try
+            {
+                // TODO: pendiente, parametrizar esto. 
+                entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
+                entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+
+                var sql = @"UPDATE Resources SET                                                
+                            [Name] = @Name, 
+                            Container = @Container, 
+                            [Description] = @Description, 
+                            [Order] = @Order, 
+                            FileType = @FileType, 
+                            ContentInDB = @ContentInDB, 
+                            ContentArrayBytes = @ContentArrayBytes, 
+                            NoteId = @NoteId
+                    WHERE ResourceId = @ResourceId";
+
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new {
+                        entity.ResourceId,
+                        entity.Name,
+                        entity.Container,
+                        entity.Description,
+                        entity.Order,
+                        entity.FileType,
+                        entity.ContentInDB,
+                        entity.ContentArrayBytes,
+                        entity.NoteId
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not updated");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entityInfo)
+        public async Task<Result> DeleteResourceAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var result = new Result();
+            try
+            {
+                var sql = @"DELETE FROM Resources WHERE ResourceId = @Id";
+
+                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+
+                if (r == 0)
+                    result.AddErrorMessage("Entity not deleted");
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result> DeleteNoteTaskAsync(Guid id)
+        public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
         {
-            throw new NotImplementedException();
+            var result = new Result<List<NoteTaskDto>>();
+            try
+            {
+                var sql = @"SELECT
+                         NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime, 
+                         NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved, 
+                         NoteTasks.EstimatedTime, NoteTasks.SpentTime, NoteTasks.DifficultyLevel, NoteTasks.ExpectedStartDate, 
+                         NoteTasks.ExpectedEndDate, NoteTasks.StartDate, NoteTasks.EndDate, Users.FullName as UserFullName
+                    FROM  NoteTasks LEFT OUTER JOIN
+                         Users ON NoteTasks.UserId = Users.UserId
+                    WHERE (NoteTasks.NoteId = @idNote)
+
+                    ORDER BY [CreationDateTime];";
+
+                var entity = await _db.QueryAsync<NoteTaskDto>(sql.ToString(), new { idNote });
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask)
+        {            
+            var result = new Result<NoteTaskDto>();
+            try
+            {
+                var sql = @"SELECT 
+                        NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime, 
+                        NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved, 
+                        NoteTasks.EstimatedTime, NoteTasks.SpentTime, NoteTasks.DifficultyLevel, NoteTasks.ExpectedStartDate, 
+                        NoteTasks.ExpectedEndDate, NoteTasks.StartDate, NoteTasks.EndDate, Users.FullName as UserFullName
+                    FROM  NoteTasks LEFT OUTER JOIN
+                        Users ON NoteTasks.UserId = Users.UserId 
+                    WHERE NoteTaskId = @Id";
+
+                var entity = await _db.QueryFirstOrDefaultAsync<NoteTaskDto>(sql.ToString(), new { Id = idNoteTask });
+
+                if (entity == null)
+                    result.AddErrorMessage("Entity not found.");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+
+        }
+
+        public async Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity)
+        {            
+            var result = new Result<NoteTaskDto>();
+            try
+            {
+                entity.CreationDateTime = DateTime.Now;
+                entity.ModificationDateTime = DateTime.Now;
+                var sql = @"INSERT INTO [NoteTasks] 
+                                (NoteTaskId, NoteId, UserId, CreationDateTime, ModificationDateTime, 
+                                [Description], Tags, [Priority], Resolved, EstimatedTime, SpentTime, 
+                                DifficultyLevel, ExpectedStartDate, ExpectedEndDate, StartDate, EndDate)
+                            VALUES 
+                                (@NoteTaskId, @NoteId, @UserId, @CreationDateTime, @ModificationDateTime, 
+                                @Description, @Tags, @Priority, @Resolved, @EstimatedTime, @SpentTime, 
+                                @DifficultyLevel, @ExpectedStartDate, @ExpectedEndDate, @StartDate, @EndDate
+                                )";
+
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new {
+                        entity.NoteTaskId,
+                        entity.NoteId,
+                        entity.UserId,
+                        entity.CreationDateTime,
+                        entity.ModificationDateTime,
+                        entity.Description,
+                        entity.Tags,
+                        entity.Priority,
+                        entity.Resolved,
+                        entity.EstimatedTime,
+                        entity.SpentTime,
+                        entity.DifficultyLevel,
+                        entity.ExpectedStartDate,
+                        entity.ExpectedEndDate,
+                        entity.StartDate,
+                        entity.EndDate
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not inserted");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity)
+        {            
+            var result = new Result<NoteTaskDto>();
+            try
+            {
+                entity.ModificationDateTime = DateTime.Now;
+
+                var sql = @"UPDATE [NoteTasks] SET                     
+                        NoteId = @NoteId, 
+                        UserId = @UserId, 
+                        CreationDateTime = @CreationDateTime, 
+                        ModificationDateTime = @ModificationDateTime, 
+                        [Description] = @Description, 
+                        Tags = @Tags, 
+                        [Priority] = @Priority, 
+                        Resolved = @Resolved, 
+                        EstimatedTime = @EstimatedTime, 
+                        SpentTime = @SpentTime, 
+                        DifficultyLevel = @DifficultyLevel, 
+                        ExpectedStartDate = @ExpectedStartDate, 
+                        ExpectedEndDate = @ExpectedEndDate, 
+                        StartDate = @StartDate, 
+                        EndDate = @EndDate
+                    WHERE NoteTaskId = @NoteTaskId";
+
+                var r = await _db.ExecuteAsync(sql.ToString(),
+                    new {
+                        entity.NoteTaskId,
+                        entity.NoteId,
+                        entity.UserId,
+                        entity.CreationDateTime,
+                        entity.ModificationDateTime,
+                        entity.Description,
+                        entity.Tags,
+                        entity.Priority,
+                        entity.Resolved,
+                        entity.EstimatedTime,
+                        entity.SpentTime,
+                        entity.DifficultyLevel,
+                        entity.ExpectedStartDate,
+                        entity.ExpectedEndDate,
+                        entity.StartDate,
+                        entity.EndDate
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not updated");
+
+                result.Entity = entity;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result> DeleteNoteTaskAsync(Guid id)
+        {            
+            var result = new Result();
+            try
+            {
+                var sql = @"DELETE FROM NoteTasks WHERE NoteTaskId = @Id";
+
+                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+
+                if (r == 0)
+                    result.AddErrorMessage("Entity not deleted");
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
         public void Dispose()
