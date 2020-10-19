@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 
-using Microsoft.Data.SqlClient;
+using System.Data.Common;
 using Dapper;
 
 using KNote.Model;
@@ -15,9 +15,9 @@ namespace KNote.Repository.Dapper
 {
     public class KntNoteTypeRepository : DomainActionBase, IKntNoteTypeRepository
     {
-        protected SqlConnection _db;        
+        protected DbConnection _db;        
 
-        public KntNoteTypeRepository(SqlConnection db, bool throwKntException)
+        public KntNoteTypeRepository(DbConnection db, bool throwKntException)
         {
             _db = db;
             ThrowKntException = throwKntException;

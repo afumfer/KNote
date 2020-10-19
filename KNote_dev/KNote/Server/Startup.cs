@@ -41,14 +41,19 @@ namespace KNote.Server
                     .AllowAnyHeader();
             }));
 
-            // Para pruebas de uso del DbContext directo 
+            // For test, use DbContext 
             //services.AddDbContext<KntDbContext>(options =>
             //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
-            // Inyectar el repositorio deseado (se podría implementar una personalización vía appconfig).
-            services.AddScoped<IKntRepository>(provider => new DP.KntRepository(configuration["ConnectionStrings:DefaultConnection"]));
-            //services.AddScoped<IKntRepository>(provider => new EF.KntRepository(configuration["ConnectionStrings:DefaultConnection"]));
             
+            // Inject repository (see appconfig).
+            var orm = configuration["ConnectionStrings:DefaultORM"]; ;
+            var prov = configuration["ConnectionStrings:DefaultProvider"];
+            var conn = configuration["ConnectionStrings:DefaultConnection"];
+            if(orm == "Dapper")                
+                services.AddScoped<IKntRepository>(provider => new DP.KntRepository(conn, prov));
+            else if (orm == "EntityFramework")                
+                services.AddScoped<IKntRepository>(provider => new EF.KntRepository(conn, prov));
+
             services.AddScoped<IKntService, KntService>();
 
             //services.AddSingleton<IConfiguration>(configuration);

@@ -8,18 +8,18 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 
 using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 
 namespace KNote.Repository.Dapper
 {
     public class KntRepository : IKntRepository
-    {
-
-        protected SqlConnection _db;
+    {        
+        protected DbConnection _db;
         protected bool _throwKntException;
         protected string _strConn;
         protected string _strProvider;
 
-        public KntRepository(string strConn, string strProvider = "System.Data.SqlClient", bool throwKntException = false)
+        public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = false)
         {
             _throwKntException = throwKntException;
             _strConn = strConn;
@@ -117,16 +117,8 @@ namespace KNote.Repository.Dapper
             //    _kEvents.Dispose();
             //if (_kMessages != null)
             //    _kMessages.Dispose();
-            //if (_noteKAttributes != null)
-            //    _noteKAttributes.Dispose();
-            //if (_noteTask != null)
-            //    _noteTask.Dispose();
             //if (_windows != null)
             //    _windows.Dispose();
-            //if (_resources != null)
-            //    _resources.Dispose();
-            //if (_attributeTabulatedValues != null)
-            //    _attributeTabulatedValues.Dispose();
             //if (_kLogs != null)
             //    _kLogs.Dispose();
             //if (_traceNoteTypes != null)
@@ -139,8 +131,13 @@ namespace KNote.Repository.Dapper
         public void RefresDbContext()
         {
             try
-            {
-                _db = new SqlConnection(_strConn);
+            {                
+                if (_strProvider == "Microsoft.Data.SqlClient")
+                    _db = new SqlConnection(_strConn);                
+                else if (_strProvider == "Microsoft.Data.Sqlite")                
+                    _db = new SqliteConnection(_strConn);                
+                else
+                    throw new Exception("Data provider not suported (KntEx)");                
             }
             catch (Exception ex)
             {

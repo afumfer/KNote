@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-using Microsoft.Data.SqlClient;
+using System.Data.Common;
 using Dapper;
 
 using KNote.Model;
@@ -15,11 +15,11 @@ namespace KNote.Repository.Dapper
 {
     public class KntNoteRepository : DomainActionBase, IKntNoteRepository
     {
-        protected SqlConnection _db;
+        protected DbConnection _db;
         private IKntFolderRepository _folders;
         private IKntKAttributeRepository _kattributes;
 
-        public KntNoteRepository(SqlConnection db, bool throwKntException)
+        public KntNoteRepository(DbConnection db, bool throwKntException)
         {
             _db = db;
             ThrowKntException = throwKntException;

@@ -23,7 +23,7 @@ namespace KNote.Repository.EntityFramework
 
         #region Constructors
 
-        public KntRepository(string strConn, string strProvider = "System.Data.SqlClient", bool throwKntException = false)
+        public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = false)
         {
             _throwKntException = throwKntException;
             _strConn = strConn;
@@ -184,26 +184,19 @@ namespace KNote.Repository.EntityFramework
                 _attributes.Dispose();
             if (_systemValues != null)
                 _systemValues.Dispose();
+            if (_noteTypes != null)
+                _noteTypes.Dispose();
+
             //if (_traceNotes != null)
             //    _traceNotes.Dispose();
             //if (_kEvents != null)
             //    _kEvents.Dispose();
             //if (_kMessages != null)
             //    _kMessages.Dispose();
-            //if (_noteKAttributes != null)
-            //    _noteKAttributes.Dispose();
-            //if (_noteTask != null)
-            //    _noteTask.Dispose();
             //if (_windows != null)
             //    _windows.Dispose();
-            //if (_resources != null)
-            //    _resources.Dispose();
-            //if (_attributeTabulatedValues != null)
-            //    _attributeTabulatedValues.Dispose();
             //if (_kLogs != null)
             //    _kLogs.Dispose();
-            if (_noteTypes != null)
-                _noteTypes.Dispose();
             //if (_traceNoteTypes != null)
             //    _traceNoteTypes.Dispose();
 
@@ -218,18 +211,17 @@ namespace KNote.Repository.EntityFramework
         public void RefresDbContext()
         {
             try
-            {
-                if (_strProvider == "System.Data.SqlClient")
-                {
-                    var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
-                    optionsBuilder.UseSqlServer(_strConn);
-                    _context = new KntDbContext(optionsBuilder.Options);
-                }
+            {                
+                var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
+
+                if (_strProvider == "Microsoft.Data.SqlClient")                                    
+                    optionsBuilder.UseSqlServer(_strConn);                                    
+                else if (_strProvider == "Microsoft.Data.Sqlite")                
+                    optionsBuilder.UseSqlite(_strConn);                
                 else
                     throw new Exception("Data provider not suported (KntEx)");
 
-                // TODO: Pendiente de establecer la conexión con Sqlite ...
-
+                _context = new KntDbContext(optionsBuilder.Options);
             }
             catch (Exception ex)
             {
