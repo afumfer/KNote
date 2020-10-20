@@ -91,9 +91,14 @@ namespace KNote.Repository.Dapper
                 var pagination = notesFilter.Pagination;
 
                 if (pagination != null)
-                {
-                    sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
-                    entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
+                {                    
+                    // Pagination SqlServer != SQlite
+                    if (_db.GetType().Name == "SqliteConnection")
+                        sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
+                    else
+                        sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+
+                    entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });                    
                 }
                 else
                 {
@@ -822,9 +827,8 @@ namespace KNote.Repository.Dapper
             return (result == null) ? 1 : ((int)result) + 1;
         }
 
-        private int GetCountFilter(string filter)
-        {
-            //@"SELECT COUNT(*) FROM Notes " 
+        private long GetCountFilter(string filter)
+        {            
             var sql =
                 @"SELECT count(*) 
                 FROM 
@@ -833,7 +837,7 @@ namespace KNote.Repository.Dapper
                 + filter;
             var result = _db.ExecuteScalar(sql);
 
-            return (result == null) ? 0 : ((int)result);
+            return (result == null) ? 0 : ((long)result);
         }
 
         private string GetSelectFilter()
@@ -862,13 +866,13 @@ namespace KNote.Repository.Dapper
             if (notesFilter.FolderId != null)
             {
                 strWhere = AddAndToStringSQL(strWhere);
-                strWhere += "FolderId = '" + notesFilter.FolderId.ToString() + "' ";
+                strWhere += "FolderId = '" + notesFilter.FolderId.ToString().ToUpper() + "' ";
             }
             
             if (notesFilter.NoteTypeId != null)
             {
                 strWhere = AddAndToStringSQL(strWhere);
-                strWhere += "NoteTypeId = '" + notesFilter.NoteTypeId.ToString() + "' ";
+                strWhere += "NoteTypeId = '" + notesFilter.NoteTypeId.ToString().ToUpper() + "' ";
             }
            
             if (!string.IsNullOrEmpty(notesFilter.Topic))

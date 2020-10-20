@@ -44,10 +44,10 @@ namespace KNote.Repository.Dapper
         {
             var result = new Result<FolderDto>();
             try
-            {
+            {                
                 var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
                 sql += "FROM Folders WHERE FolderNumber = 1;";
-
+                
                 result.Entity = await _db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { });                 
             }
             catch (Exception ex)

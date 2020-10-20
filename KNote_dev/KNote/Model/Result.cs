@@ -14,7 +14,8 @@ namespace KNote.Model
 
         public TEntity Entity { get; set; }
 
-        public int CountColecEntity { get; set; } = 1;
+        //public int CountColecEntity { get; set; } = 1;
+        public long CountColecEntity { get; set; } = 1;
 
         #endregion
 

@@ -9,6 +9,8 @@ using System.Linq.Expressions;
 
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
+using Dapper;
+using System.Data;
 
 namespace KNote.Repository.Dapper
 {
@@ -134,8 +136,16 @@ namespace KNote.Repository.Dapper
             {                
                 if (_strProvider == "Microsoft.Data.SqlClient")
                     _db = new SqlConnection(_strConn);                
-                else if (_strProvider == "Microsoft.Data.Sqlite")                
-                    _db = new SqliteConnection(_strConn);                
+                else if (_strProvider == "Microsoft.Data.Sqlite")
+                {
+                    // TODO: Estudiar poner esto en otro sitio, una clase estática. 
+                    //       SqlMapper es estático.
+                    SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
+                    SqlMapper.AddTypeHandler(new GuidHandler());
+                    SqlMapper.AddTypeHandler(new TimeSpanHandler());
+                    // ---
+                    _db = new SqliteConnection(_strConn);
+                }
                 else
                     throw new Exception("Data provider not suported (KntEx)");                
             }
@@ -145,4 +155,30 @@ namespace KNote.Repository.Dapper
             }
         }
     }
+
+    abstract class SqliteTypeHandler<T> : SqlMapper.TypeHandler<T>
+    {
+        // Parameters are converted by Microsoft.Data.Sqlite
+        public override void SetValue(IDbDataParameter parameter, T value)
+            => parameter.Value = value;
+    }
+
+    class DateTimeOffsetHandler : SqliteTypeHandler<DateTimeOffset>
+    {
+        public override DateTimeOffset Parse(object value)
+            => DateTimeOffset.Parse((string)value);
+    }
+
+    class GuidHandler : SqliteTypeHandler<Guid>
+    {
+        public override Guid Parse(object value)
+            => Guid.Parse((string)value);
+    }
+
+    class TimeSpanHandler : SqliteTypeHandler<TimeSpan>
+    {
+        public override TimeSpan Parse(object value)
+            => TimeSpan.Parse((string)value);
+    }
+
 }

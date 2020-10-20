@@ -49,7 +49,8 @@ namespace KNote.Server
             var orm = configuration["ConnectionStrings:DefaultORM"]; ;
             var prov = configuration["ConnectionStrings:DefaultProvider"];
             var conn = configuration["ConnectionStrings:DefaultConnection"];
-            if(orm == "Dapper")                
+
+            if(orm == "Dapper")
                 services.AddScoped<IKntRepository>(provider => new DP.KntRepository(conn, prov));
             else if (orm == "EntityFramework")                
                 services.AddScoped<IKntRepository>(provider => new EF.KntRepository(conn, prov));

@@ -24,7 +24,7 @@ namespace KNote.Model.Dto
                 }
             }
         }
-
+      
         private int _folderNumber;
         public int FolderNumber
         {
@@ -201,4 +201,5 @@ namespace KNote.Model.Dto
 
         #endregion 
     }
+
 }
