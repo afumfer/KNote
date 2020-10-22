@@ -836,8 +836,8 @@ namespace KNote.Repository.Dapper
                     NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId"
                 + filter;
             var result = _db.ExecuteScalar(sql);
-
-            return (result == null) ? 0 : ((long)result);
+            
+            return (result == null) ? 0 : Convert.ToInt64(result);
         }
 
         private string GetSelectFilter()

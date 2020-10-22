@@ -13,8 +13,7 @@ namespace KNote.Model
         #region Properties
 
         public TEntity Entity { get; set; }
-
-        //public int CountColecEntity { get; set; } = 1;
+        
         public long CountColecEntity { get; set; } = 1;
 
         #endregion
