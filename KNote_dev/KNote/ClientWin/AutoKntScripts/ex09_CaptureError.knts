@@ -1,0 +1,20 @@
+' --- Captuere error
+
+_KNTERRORTRAP = true;
+
+var db = GetSQLConnection("Server=.\SQLEXPRESS1;Database=MyDataBase;trusted_connection=Yes");
+
+if _KNTERRORCODE == 0 then
+  ' do something here
+  ' ...
+  db.Close();  
+  printline "";		
+  printline ">> OK";
+else
+  ' Error 
+  print "Error: ";
+  print _KNTERRORCODE;
+  print " - ";
+  printline _KNTERRORDESCRIPTION;  
+end if;
+

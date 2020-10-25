@@ -1,0 +1,11 @@
+var sourceFile = "..\..\..\..\Samples\ex01_HelloWorld.knts";
+var destFile = System.IO.Path.GetTempPath() + "zz_trash_KntScript.tmp";
+
+printline sourceFile;
+printline destFile;
+
+System.IO.File.Copy(sourceFile, destFile);
+
+'System.IO.File.Delete(destFile);
+
+printline "<< end >>";

@@ -1,0 +1,9 @@
+' --- DateTime manipulation example 
+
+var dateTime1 = DateTimeNow();
+var dateTime2 = #24/12/2012 10:20:33#;
+
+printline dateTime1.ToString("yyyyMMdd HH:mm");
+
+printline dateTime2.AddDays(3);
+printline dateTime2.ToString("yyyyMMdd HH:mm");

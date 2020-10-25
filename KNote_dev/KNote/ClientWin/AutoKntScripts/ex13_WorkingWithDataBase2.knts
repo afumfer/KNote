@@ -1,0 +1,32 @@
+' --- Example obtain data from SQL Server (store procedure)
+'     (Customize your server, database and store procedure).
+
+var db = GetSQLConnection("Server=.\SQLEXPRESS;Database=KNote02DB;trusted_connection=Yes");
+var cmd = new System.Data.SqlClient.SqlCommand("sp_tables", db);
+cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+var param = new System.Data.SqlClient.SqlParameter("@table_owner", System.Data.SqlDbType.VarChar);
+param.Value = "dbo";
+
+' MyLibrary method ...
+SetParameter(cmd, param);
+
+db.Open();
+var reader = cmd.ExecuteReader();
+
+while reader.Read()                        
+	printline reader.GetString(2);
+end while;
+
+reader.Close();
+db.Close();
+
+printline "";		
+printline "<< end >>";
+
+
+
+
+
+
+

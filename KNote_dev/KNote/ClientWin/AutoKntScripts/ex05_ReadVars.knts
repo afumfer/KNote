@@ -1,0 +1,23 @@
+' --- Algunos tipos de variables y la sentencia readvar 
+' --- Some variables types and readvar statement
+
+var a = 123;
+var b = "my string";
+var c = 1.0;
+var d = 345f;
+
+readvar { 
+   "Type a number" : a ,
+   "Type a number" : b,  
+   "Type a variable c" : c,  
+   "Type a variable d" : d
+};
+
+printline a;
+printline b;
+printline c;
+printline d;
+
+printline "";
+
+printline "<< END >>";

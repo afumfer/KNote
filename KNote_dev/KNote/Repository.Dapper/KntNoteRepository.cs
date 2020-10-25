@@ -188,7 +188,11 @@ namespace KNote.Repository.Dapper
                                 
                 result.CountColecEntity = GetCountFilter(sqlWhere);
 
-                sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+                if (_db.GetType().Name == "SqliteConnection")
+                    sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
+                else
+                    sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+
                 var pagination = notesSearch.Pagination;
                 entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
 

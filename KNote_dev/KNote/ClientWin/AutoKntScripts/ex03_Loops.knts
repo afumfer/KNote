@@ -1,0 +1,30 @@
+' Example with:
+' --- for loop
+' --- while loop
+' --- call function library 
+' --- if statement
+
+var a = 0;
+var b = 0;
+
+printline "For loop:";
+
+for a = 1 to 5
+	printline "Hi, for loop " + a;
+end for;
+
+printline "";
+printline "While loop:";
+
+a = 0;
+' call RandomInt (function library)
+b = RandomInt(10,20);
+
+while (a < 50)	
+	if a > b then
+		printline " >> BREAK AT " + a;
+		break;
+	end if;	
+	printline "Hi, while loop with break " + a;
+	a = a + 1;
+end while;

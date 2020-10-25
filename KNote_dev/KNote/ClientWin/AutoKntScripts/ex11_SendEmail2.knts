@@ -1,0 +1,40 @@
+' --- Send an email using MyLibrary method
+
+' Customize your account and credentials here ---------
+var user = "fooUserxx";
+var pwd = "tutuPwdxx";
+var fromEmail = "foo@mycompany.co";
+var fromName = "Mr. Foo";
+var toEmail = NewCollectionObjects();
+var host = "xxx.myhost.com";
+var port = 25;
+var stringsubject = "Subject: test KntScript, sending message (with MyLibrary method)";
+var body = "Body: test KntScript, sending message (with MyLibrary method).";
+var isBodyHtml = false;
+var enbleSsl = false;
+
+toEmail.Add("tutuxx@mycompany.com");
+' -----------------------------------------------------
+
+printline "Sending message ...  ";
+
+var res = SendMailMessage(
+	fromEmail, 
+	fromName, 
+	pwd, 
+	toEmail, 
+	stringsubject, 
+	body, 
+	isBodyHtml, 
+	port, 
+	host, 
+	enbleSsl);
+
+if res == true then
+	printline "--- email sent ---";
+else
+	printline "Error";
+end if;
+
+printline  "<< end >>";
+

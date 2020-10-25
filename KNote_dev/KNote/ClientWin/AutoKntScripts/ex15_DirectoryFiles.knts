@@ -1,0 +1,5 @@
+var files = System.IO.Directory.GetFiles(".\");
+
+foreach f in files
+	printline f;
+end foreach;

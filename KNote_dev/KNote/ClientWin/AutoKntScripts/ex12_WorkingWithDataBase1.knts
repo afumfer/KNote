@@ -1,0 +1,35 @@
+' --- Example obtain data from SQL Server.
+'     (Customize your server, database and select statement).
+
+var conn = "Server=.\SQLEXPRESS;Database=KNote02DB;trusted_connection=Yes";
+
+var db = GetSQLConnection(conn);
+' ... or with .net class connection
+'var db = new System.Data.SqlClient.SqlConnection(conn);
+
+var cmd = db.CreateCommand();
+
+var sql = "SELECT Topic, Description FROM Notes";
+var i = 1;
+
+cmd.CommandText = sql;
+
+db.Open();
+var reader = cmd.ExecuteReader();
+
+while reader.Read()                        
+	print i + " - ";
+	printline reader.GetString(0);
+	printline reader.GetString(1);
+	printline "";
+	i = i + 1;
+end while;
+
+reader.Close();
+db.Close();
+
+printline "";		
+printline "<< end >>";
+
+
+

@@ -1,0 +1,5 @@
+var x = "hello world!";
+printline x;
+printline "<< end >>";
+
+

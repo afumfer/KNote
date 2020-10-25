@@ -1,0 +1,22 @@
+var colecString = NewCollectionObjects();
+var colecNumber = NewCollectionObjects();
+
+colecString.Add("aaa");
+colecString.Add("bbb");
+colecString.Add("ccc");
+colecString.Add("ddd");
+
+colecNumber.Add(3456);
+colecNumber.Add(4456);
+colecNumber.Add(345.564);
+colecNumber.Add(12.3344);
+
+foreach str in colecString
+	printline str;
+end foreach;
+
+printline "==========";
+
+foreach num in colecNumber
+	printline num;
+end foreach;

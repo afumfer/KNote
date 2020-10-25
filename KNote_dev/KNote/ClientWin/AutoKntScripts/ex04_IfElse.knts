@@ -1,0 +1,22 @@
+' Example with
+' - Expressions
+' - if else statement
+
+var a = 0;
+var b = 0;
+var c = 0;
+
+a = (((10 + 4) * 5) + 19);
+b = RandomInt(50,100);
+
+printline "Check expression: (a > b) and (b + 1 < 90 and b - 1 > 70)";
+printline "  a value is  : " + a;
+printline "  b value is : " + b;
+printline "";
+
+if (a > b) and (b + 1 < 90 and b - 1 > 70) then
+	print "<< Expression is true >>";
+else
+	print "<< Expression is false >>";
+end if;
+
