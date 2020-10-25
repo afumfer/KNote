@@ -822,9 +822,10 @@ namespace KNote.Repository.Dapper
         private int GetNextNoteNumber()
         {            
             var sql = "SELECT MAX(NoteNumber) FROM Notes";
-            var result = _db.ExecuteScalar(sql);
+            var result = _db.ExecuteScalar<int>(sql);
 
-            return (result == null) ? 1 : ((int)result) + 1;
+            //return (result == null) ? 1 : ((int)result) + 1;
+            return result + 1;
         }
 
         private long GetCountFilter(string filter)

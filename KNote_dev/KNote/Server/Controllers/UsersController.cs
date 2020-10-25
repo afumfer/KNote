@@ -15,7 +15,7 @@ using KNote.Service;
 using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
-
+using System.Threading;
 
 namespace KNote.Server.Controllers
 {
@@ -189,6 +189,8 @@ namespace KNote.Server.Controllers
                 new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
                 new Claim(ClaimTypes.Name, userDto.UserName),
                 //new Claim("KNoteApp", "KNoteWeb"),
+                // Jti es un identificador del toquen, podría ser útil para llevar un registro y en algún 
+                // momento poder invalidar dicho token. (Podría servir también como un id de sesión). 
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
                         
@@ -216,6 +218,21 @@ namespace KNote.Server.Controllers
                 token = new JwtSecurityTokenHandler().WriteToken(token),
                 uid = userDto.UserId.ToString()
             };
+        }
+
+        [HttpGet]
+        [Route("echoping")]
+        public IActionResult EchoPing()
+        {
+            return Ok(true);
+        }
+
+        [HttpGet]
+        [Route("echouser")]
+        public IActionResult EchoUser()
+        {
+            var identity = Thread.CurrentPrincipal.Identity;
+            return Ok($" IPrincipal-user: {identity.Name} - IsAuthenticated: {identity.IsAuthenticated}");
         }
 
         #endregion 

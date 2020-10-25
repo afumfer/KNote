@@ -201,7 +201,6 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-
         public async Task<Result> DeleteAsync(Guid id)
         {
             var result = new Result();
@@ -242,9 +241,9 @@ namespace KNote.Repository.Dapper
         private int GetNextFolderNumber()
         {
             var sql = "SELECT MAX(FolderNumber) FROM Folders";
-            var result = _db.ExecuteScalar(sql);
+            var result = _db.ExecuteScalar<int>(sql);
 
-            return (result == null) ? 1 : ((int)result) + 1;
+            return result + 1;
         }
 
         #endregion

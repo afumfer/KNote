@@ -28,7 +28,7 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<NoteTypeDto>>();
             try
             {
-                var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM [dbo].[NoteTypes] ORDER BY Name;";
+                var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM [NoteTypes] ORDER BY Name;";
 
                 var entity = await _db.QueryAsync<NoteTypeDto>(sql.ToString(), new { });
                 result.Entity = entity.ToList();

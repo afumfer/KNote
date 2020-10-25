@@ -111,6 +111,7 @@ else
                     }
                 }
                 note.NoteNumber = entitySaved.NoteNumber;
+                note.NoteId = entitySaved.NoteId;
                 note.IsNew = false;
 
                 await showMessages.ShowOkMessage("Note successfully updated.");

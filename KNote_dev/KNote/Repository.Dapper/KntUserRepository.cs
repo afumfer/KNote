@@ -33,7 +33,11 @@ namespace KNote.Repository.Dapper
 
                 if (pagination != null)
                 {
-                    sql += "OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+                    if (_db.GetType().Name == "SqliteConnection")
+                        sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
+                    else                        
+                        sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+
                     entity = await _db.QueryAsync<UserDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
                 }
                 else
