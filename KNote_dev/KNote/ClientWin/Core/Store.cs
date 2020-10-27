@@ -8,23 +8,23 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Core
 {
-    public class KntContext
+    public class Store
     {
         #region Application state 
 
         public string LogFile { get; set; }
 
-        public bool LogActivatd = false;
+        public bool LogActivated = false;
 
-        public readonly ViewsFactory FactoryViews;
+        public readonly FactoryViews FactoryViews;
 
-        private readonly List<KntServiceRef> _servicesRefs;
+        private readonly List<ServiceRef> _servicesRefs;
 
-        private readonly List<BaseCtrl> _listCtrl;
+        private readonly List<ComponentBase> _listCtrl;
 
         public AppConfig Config { get; }
 
-        public KntServiceRef PersonalServiceRef { get; }
+        public ServiceRef PersonalServiceRef { get; }
        
         //public User ActiveUser { get; }
 
@@ -39,17 +39,17 @@ namespace KNote.ClientWin.Core
 
         #region Constructor 
 
-        public KntContext()
+        public Store()
         {
             if (Config == null)
                 Config = new AppConfig();
 
-            _listCtrl = new List<BaseCtrl>();
-            _servicesRefs = new List<KntServiceRef>();            
-            FactoryViews = new ViewsFactory();
+            _listCtrl = new List<ComponentBase>();
+            _servicesRefs = new List<ServiceRef>();            
+            FactoryViews = new FactoryViews();
         }
 
-        public KntContext(AppConfig config) : this ()
+        public Store(AppConfig config) : this ()
         {
             Config = config;
         }
@@ -57,41 +57,41 @@ namespace KNote.ClientWin.Core
         #endregion
 
         #region Actions        
-        public event EventHandler<EntityEventArgs<KntServiceRef>> AddedServiceRef;
-        public void AddServiceRef(KntServiceRef serviceRef)
+        public event EventHandler<EntityEventArgs<ServiceRef>> AddedServiceRef;
+        public void AddServiceRef(ServiceRef serviceRef)
         {
             _servicesRefs.Add(serviceRef);
             if (AddedServiceRef != null)
-                AddedServiceRef(this, new EntityEventArgs<KntServiceRef>(serviceRef));
+                AddedServiceRef(this, new EntityEventArgs<ServiceRef>(serviceRef));
         }
         
-        public event EventHandler<EntityEventArgs<KntServiceRef>> RemovedServiceRef;
-        public void RemoveServiceRef(KntServiceRef serviceRef)
+        public event EventHandler<EntityEventArgs<ServiceRef>> RemovedServiceRef;
+        public void RemoveServiceRef(ServiceRef serviceRef)
         {
             _servicesRefs.Remove(serviceRef);
             if (RemovedServiceRef != null)
-                RemovedServiceRef(this, new EntityEventArgs<KntServiceRef>(serviceRef));
+                RemovedServiceRef(this, new EntityEventArgs<ServiceRef>(serviceRef));
         }
 
-        public List<KntServiceRef> GetAllServiceRef()
+        public List<ServiceRef> GetAllServiceRef()
         {
             return _servicesRefs.ToList();
         }
 
-        public event EventHandler<StateCtrlEventArgs> ControllersStateChanged;
-        public void AddController(BaseCtrl controller)
+        public event EventHandler<StateComponentEventArgs> ControllersStateChanged;
+        public void AddController(ComponentBase controller)
         {
             _listCtrl.Add(controller);
             controller.StateCtrlChanged += Controllers_StateCtrlChanged;
         }
 
-        private void Controllers_StateCtrlChanged(object sender, StateCtrlEventArgs e)
+        private void Controllers_StateCtrlChanged(object sender, StateComponentEventArgs e)
         {
             if(ControllersStateChanged != null)
                 ControllersStateChanged(sender, e);
         }
 
-        public void RemoveController(BaseCtrl controller)
+        public void RemoveController(ComponentBase controller)
         {            
             _listCtrl.Remove(controller);            
         }

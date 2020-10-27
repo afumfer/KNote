@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace KNote.ClientWin.Core
 {
-    public class ViewsFactory
+    public class FactoryViews
     {
 
         // #region Primary views

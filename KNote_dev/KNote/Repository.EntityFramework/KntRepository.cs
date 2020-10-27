@@ -29,7 +29,7 @@ namespace KNote.Repository.EntityFramework
             _strConn = strConn;
             _strProvider = strProvider;
 
-            RefresDbContext();
+            RefreshDbConnection();
         }
 
         #endregion
@@ -208,7 +208,7 @@ namespace KNote.Repository.EntityFramework
 
         #region  Private methods
 
-        public void RefresDbContext()
+        public void RefreshDbConnection()
         {
             try
             {                

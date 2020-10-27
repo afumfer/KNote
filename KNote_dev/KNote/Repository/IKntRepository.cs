@@ -15,6 +15,6 @@ namespace KNote.Repository
         IKntNoteRepository Notes { get; }              
         IKntUserRepository Users { get; }
               
-        void RefresDbContext();
+        void RefreshDbConnection();
     }
 }

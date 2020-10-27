@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 //using KNote.ScriptLibrary;
 using System.IO;
 
-namespace KNote.ClientWin.Controllers
+namespace KNote.ClientWin.Components
 {
     //public class MonitorCtrl : BaseManagmentCtrl<IManagmentView>
     //{

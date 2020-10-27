@@ -10,19 +10,17 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Core
 {
-    abstract public class BaseCtrl : IDisposable
+    abstract public class ComponentBase : IDisposable
     {
 
         #region Public properties
 
-        public readonly Guid IdCtrl;
+        public readonly Guid IdComponent;
 
-        public KntContext Context { get; protected set; }
+        public Store Store { get; protected set; }
 
-        public CtrlState CtrlState { get; protected set; } = CtrlState.NotStarted;
-
-        public CtrlResult CtrlResult { get; protected set; } = CtrlResult.None;
-
+        public ComponentState ComponentState { get; protected set; } = ComponentState.NotStarted;
+       
         public bool EmbededMode { get; set; } = false;
 
         public bool ModalMode { get; set; } = false;
@@ -48,13 +46,13 @@ namespace KNote.ClientWin.Core
 
         #region Standard events for base controller
 
-        public event EventHandler<StateCtrlEventArgs> StateCtrlChanged;
+        public event EventHandler<StateComponentEventArgs> StateCtrlChanged;
 
-        protected void OnStateCtrlChanged(CtrlState state)
+        protected void OnStateCtrlChanged(ComponentState state)
         {
-            CtrlState = state;
+            ComponentState = state;
             if (StateCtrlChanged != null)
-                StateCtrlChanged(this, new StateCtrlEventArgs(state));
+                StateCtrlChanged(this, new StateComponentEventArgs(state));
         }
 
         // TODO: Pendiente de valorar la implementación de eventos específicos 
@@ -64,21 +62,26 @@ namespace KNote.ClientWin.Core
 
         #region Constructor
 
-        public BaseCtrl(KntContext context)
+        public ComponentBase(Store store)
         {
-            IdCtrl = Guid.NewGuid();
-            OnStateCtrlChanged(CtrlState.NotStarted);           
-            Context = context;
-            Context.AddController(this);
+            IdComponent = Guid.NewGuid();
+            OnStateCtrlChanged(ComponentState.NotStarted);           
+            Store = store;
+            Store.AddController(this);
             AddExtensions();
         }
 
         #endregion
 
 
-        protected abstract Result<CtrlResult> OnStart() ;
+        protected abstract void OnInitialized() ;
 
-        protected virtual Result<CtrlResult> CheckPreconditions()
+        protected virtual void OnAfterRenderView()
+        {
+
+        }
+
+        protected virtual Result CheckPreconditions()
         {
             // TODO: En el futuro se implementarán reglas genéricas
             //       para todas las controladoras.
@@ -86,12 +89,12 @@ namespace KNote.ClientWin.Core
             //       clases derivadas. 
             //       Por ahora las precondiciones de la clase base 
             //       siempre se superan 
-            var res = new Result<CtrlResult>();
-            res.Entity = CtrlResult.None;
+            var res = new Result();
+            
             return res;
         }
 
-        protected virtual void End() {
+        protected virtual void OnFinalized() {
             
         }
 
@@ -100,72 +103,71 @@ namespace KNote.ClientWin.Core
             
         }
 
-        public Result<CtrlResult> StartCtrl() 
+        public Result Run() 
         {
+            var result = new Result();
             var preconditionResult = CheckPreconditions();
             if (preconditionResult.IsValid) 
             {
-                OnStateCtrlChanged(CtrlState.PreconditionsOvercome);
-                var ret = OnStart();
-                OnStateCtrlChanged(CtrlState.Started);
-                return ResultControllerAction<CtrlResult>(ret);
+                OnStateCtrlChanged(ComponentState.PreconditionsOvercome);
+                OnInitialized();
+                OnStateCtrlChanged(ComponentState.Initialized);
+                
             }
             else
             {
-                OnStateCtrlChanged(CtrlState.Error);
-                return ResultControllerAction<CtrlResult>(preconditionResult);
+                result.ErrorList = preconditionResult.ErrorList;
+                OnStateCtrlChanged(ComponentState.Error);                
             }
+
+            OnStateCtrlChanged(ComponentState.Started);
+            return result;
         }
 
-        public Result<CtrlResult> StartCtrlModal()
+        public Result RunModal()
         {            
             ModalMode = true;
-            return StartCtrl();
+            return Run();
         }
 
-        public Result<CtrlResult> FinalizeCtrl()
+        public Result Finalize()
         {
-            var result = new Result<CtrlResult>();
+            var result = new Result();
             
-            if (CtrlState == CtrlState.Finalized)
+            if (ComponentState == ComponentState.Finalized)
             {
-                result.Entity = CtrlResult.Executed;
-                return ResultControllerAction<CtrlResult>(result);
+                result.AddErrorMessage("The component is already finalized.");
+                return result;
             }
 
             try
             {
-                End();
-                Context.RemoveController(this);
-                FinalizeViewsControllers();                               
-                result.Entity = CtrlResult.Executed;                
-                OnStateCtrlChanged(CtrlState.Finalized);
-                // 
-                // OJO: no cambiar la propiedad CtrlResult aquí. ()
-                // 
+                OnFinalized();
+                Store.RemoveController(this);
+                FinalizeViewsComponent();                                               
+                OnStateCtrlChanged(ComponentState.Finalized);
             }
             catch (Exception ex)
-            {
-                result.Entity = CtrlResult.Error;
+            {                
                 result.AddErrorMessage(ex.Message);
-                OnStateCtrlChanged(CtrlState.Error);
+                OnStateCtrlChanged(ComponentState.Error);
             }
            
-            return ResultControllerAction<CtrlResult>(result);
+            return result;
         }
 
         public void Dispose()
         {
-            FinalizeCtrl();
+            Finalize();
         }
 
         #region Utils methods
 
-        protected void FinalizeViewsControllers()
+        protected void FinalizeViewsComponent()
         {            
-            List<BaseCtrl> lc = GetControllers(Fields);
-            foreach (BaseCtrl c in lc)
-                c.FinalizeCtrl();
+            List<ComponentBase> lc = GetControllers(Fields);
+            foreach (ComponentBase c in lc)
+                c.Finalize();
 
             List<IViewBase> lv = GetViews(Fields);
             foreach (IViewBase v in lv)
@@ -175,7 +177,7 @@ namespace KNote.ClientWin.Core
             foreach (FieldInfo field in Fields)
             {
                 object v = field.GetValue(this);
-                if (v != null && v is BaseCtrl)
+                if (v != null && v is ComponentBase)
                 {
                     field.SetValue(this, null);
                 }
@@ -197,22 +199,14 @@ namespace KNote.ClientWin.Core
 
                     foreach (Attribute attribute in attributes)
                     {
-                        if (attribute is ResetControllerFieldAttribute)
+                        if (attribute is ResetComponentFieldAttribute)
                         {
-                            field.SetValue(this, ((ResetControllerFieldAttribute)attribute).ValueReset);
+                            field.SetValue(this, ((ResetComponentFieldAttribute)attribute).ValueReset);
                             break;
                         }
                     }
                 }
             }            
-        }
-
-        protected Result<T> ResultControllerAction<T>(Result<T> resultAction)
-        {
-            if (resultAction.IsValid == false)
-                if (ThrowKntException == true)
-                    throw new Exception(resultAction.Message);
-            return resultAction;
         }
 
         protected List<FieldInfo> GetAllTheClassField()
@@ -221,17 +215,17 @@ namespace KNote.ClientWin.Core
                 | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
         }
 
-        protected List<BaseCtrl> GetControllers(List<FieldInfo> fields)
+        protected List<ComponentBase> GetControllers(List<FieldInfo> fields)
         {
-            List<BaseCtrl>
-                myList = new List<BaseCtrl>();
+            List<ComponentBase>
+                myList = new List<ComponentBase>();
 
             foreach (FieldInfo field in fields)
             {
                 object v = field.GetValue(this);
-                if (v != null && v is BaseCtrl) 
+                if (v != null && v is ComponentBase) 
                 {
-                    myList.Add((BaseCtrl)field.GetValue(this));
+                    myList.Add((ComponentBase)field.GetValue(this));
                 }
             }
 
@@ -276,29 +270,21 @@ namespace KNote.ClientWin.Core
 
     #region  Controller typos 
 
-    public enum CtrlState
+    public enum ComponentState
     {
         NotStarted,
         PreconditionsOvercome,
-        Started,
-        Refresh,
+        Initialized,
+        Started,        
         Finalized,
         Error
     }
 
-    public enum CtrlResult
+    public class StateComponentEventArgs : EventArgs
     {
-        None,
-        Executed,
-        Canceled,
-        Error
-    }
+        public ComponentState State { get; set; }
 
-    public class StateCtrlEventArgs : EventArgs
-    {
-        public CtrlState State { get; set; }
-
-        public StateCtrlEventArgs(CtrlState state)
+        public StateComponentEventArgs(ComponentState state)
             : base()
         {
             this.State = state;
@@ -336,13 +322,8 @@ namespace KNote.ClientWin.Core
     /// Attribute to identify the variables of the controller that you want to reset
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = true)]
-    public class ResetControllerFieldAttribute : Attribute
-    {        
-        /// <summary>
-        /// Represents Guid.Empty
-        /// </summary>
-        public const string GUID_EMPTY = "00000000-0000-0000-0000-000000000000";
-        
+    public class ResetComponentFieldAttribute : Attribute
+    {                
         private object _valueReset;
         
         /// <summary>
@@ -357,7 +338,7 @@ namespace KNote.ClientWin.Core
         /// Attribute to identify the variables of the controller that you want to reset
         /// </summary>
         /// <param name="valueReset">Value to be assigned to perform a reset</param>
-        public ResetControllerFieldAttribute(object valueReset)
+        public ResetComponentFieldAttribute(object valueReset)
             : base()
         {
             this._valueReset = valueReset;
@@ -366,7 +347,7 @@ namespace KNote.ClientWin.Core
         /// <summary>
         /// Attribute to identify the variables of the controller that you want to reset (overload 2)
         /// </summary>
-        public ResetControllerFieldAttribute(Type typeValueReset, object valueReset)
+        public ResetComponentFieldAttribute(Type typeValueReset, object valueReset)
             : base()
         {
             try

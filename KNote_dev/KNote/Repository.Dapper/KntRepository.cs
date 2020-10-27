@@ -27,7 +27,7 @@ namespace KNote.Repository.Dapper
             _strConn = strConn;
             _strProvider = strProvider;
 
-            RefresDbContext();
+            RefreshDbConnection();
         }
 
         private IKntNoteTypeRepository _noteTypes;
@@ -130,7 +130,7 @@ namespace KNote.Repository.Dapper
                 _db.Dispose();
         }
 
-        public void RefresDbContext()
+        public void RefreshDbConnection()
         {
             try
             {                
