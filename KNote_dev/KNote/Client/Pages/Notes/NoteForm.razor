@@ -405,7 +405,7 @@
     private async Task OnConfirmResourceSelector(ResourceDto resource)
     {
         resource.NoteId = Note.NoteId;
-        resource.Name = Note.NoteId.ToString() + "_" + resource.Name;        
+        resource.Name = Note.NoteId.ToString() + "_" + resource.Name;
 
         var httpResponse = await dataService.Post<ResourceDto, Result<ResourceDto>>($"api/notes/saveresource", resource);
         if (httpResponse.Error)
@@ -488,7 +488,7 @@
                 tasks.Insert(i, taskUpdated);
             }
             kntTaskEditor.Hide();
-        }        
+        }
     }
 
     private void OnCancelTaskEditor()
@@ -531,7 +531,8 @@
         }
     }
 
-    private async Task OnChangeNoteTypeActions()
+    //private async Task OnChangeNoteTypeActions()
+    private async void OnChangeNoteTypeActions()
     {
         if (Note.NoteTypeId == null)
         {

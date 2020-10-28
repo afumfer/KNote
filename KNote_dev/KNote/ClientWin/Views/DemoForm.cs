@@ -6,8 +6,10 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using KNote.ClientWin.Core;
+using KNote.Model.Dto;
 using KntScript;
 
 namespace KNote.ClientWin.Views
@@ -18,12 +20,19 @@ namespace KNote.ClientWin.Views
 
         private string _pathSampleScripts = @"..\..\..\AutoKntScripts\";
         private string _selectedFile;
+        private Store _store;
 
         #endregion 
 
         public DemoForm()
         {
-            InitializeComponent();
+            InitializeComponent();            
+        }
+
+        public DemoForm(Store store): this()
+        {
+            //InitializeComponent();
+            _store = store;
         }
 
         #region Form events handlers
@@ -179,5 +188,33 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-    }
+
+        //private async void buttonTestApp1_Click(object sender, EventArgs e)  // opción 1 / 2
+        private void buttonTestApp1_Click(object sender, EventArgs e)  // opción 3
+        {
+            // opción 1
+            //var service = _store.PersonalServiceRef.Service;
+
+            //var notes = (await service.Notes.HomeNotesAsync()).Entity;
+            //foreach (var note in notes)
+            //    listTest.Items.Add(note.Topic);
+
+            // or 
+
+            //await LoadNotes();  // opción 2
+
+            LoadNotes();   // opción 3
+        }
+
+        //private async Task LoadNotes()  // opción 2
+        private async void LoadNotes()   // opción 3
+        {
+            var service = _store.PersonalServiceRef.Service;
+            var notes = (await service.Notes.HomeNotesAsync()).Entity;            
+            foreach (var note in notes)
+                listTest.Items.Add(note.Topic);
+
+        }
+
+}
 }

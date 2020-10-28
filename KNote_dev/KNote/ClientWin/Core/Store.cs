@@ -24,16 +24,20 @@ namespace KNote.ClientWin.Core
 
         public AppConfig Config { get; }
 
-        public ServiceRef PersonalServiceRef { get; }
-       
+        public ServiceRef PersonalServiceRef 
+        {
+            get { return _servicesRefs[0]; }
+                 
+        }
+
         //public User ActiveUser { get; }
 
 
-        //public FolderWithServiceRef _activeFolderWithServiceRef;
-        //public FolderWithServiceRef ActiveFolderWithServiceRef
-        //{
-        //    get { return _activeFolderWithServiceRef; }
-        //}
+        public FolderWithServiceRef _activeFolderWithServiceRef;
+        public FolderWithServiceRef ActiveFolderWithServiceRef
+        {
+            get { return _activeFolderWithServiceRef; }
+        }
 
         #endregion
 
@@ -78,32 +82,32 @@ namespace KNote.ClientWin.Core
             return _servicesRefs.ToList();
         }
 
-        public event EventHandler<StateComponentEventArgs> ControllersStateChanged;
-        public void AddController(ComponentBase controller)
+        public event EventHandler<StateComponentEventArgs> ComponentsStateChanged;
+        public void AddComponent(ComponentBase controller)
         {
             _listCtrl.Add(controller);
-            controller.StateCtrlChanged += Controllers_StateCtrlChanged;
+            controller.StateCtrlChanged += Components_StateCtrlChanged;
         }
 
-        private void Controllers_StateCtrlChanged(object sender, StateComponentEventArgs e)
+        private void Components_StateCtrlChanged(object sender, StateComponentEventArgs e)
         {
-            if(ControllersStateChanged != null)
-                ControllersStateChanged(sender, e);
+            if(ComponentsStateChanged != null)
+                ComponentsStateChanged(sender, e);
         }
 
-        public void RemoveController(ComponentBase controller)
+        public void RemoveComponent(ComponentBase component)
         {            
-            _listCtrl.Remove(controller);            
+            _listCtrl.Remove(component);            
         }
 
-        //public event EventHandler<EntityEventArgs<FolderWithServiceRef>> ActiveFolderChanged;
-        //public void UpdateActiveFolder(FolderWithServiceRef activeFolder )
-        //{
-        //    _activeFolderWithServiceRef = activeFolder;
-        //    if (ActiveFolderChanged != null)
-        //        ActiveFolderChanged(this, new EntityEventArgs<FolderWithServiceRef>(activeFolder));
-        //}
-       
+        public event EventHandler<EntityEventArgs<FolderWithServiceRef>> ActiveFolderChanged;
+        public void UpdateActiveFolder(FolderWithServiceRef activeFolder)
+        {
+            _activeFolderWithServiceRef = activeFolder;
+            if (ActiveFolderChanged != null)
+                ActiveFolderChanged(this, new EntityEventArgs<FolderWithServiceRef>(activeFolder));
+        }
+
         #endregion
     }
 

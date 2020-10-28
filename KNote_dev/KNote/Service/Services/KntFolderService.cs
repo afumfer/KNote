@@ -45,6 +45,12 @@ namespace KNote.Service.Services
             return await _repository.Folders.GetTreeAsync();
         }
 
+        public async Task<Result<FolderDto>> GetHomeAsync()
+        {
+            return await _repository.Folders.GetHomeAsync();
+        }
+
+
         public async Task<Result<FolderDto>> SaveAsync(FolderDto entity)
         {            
             if (entity.FolderId == Guid.Empty)

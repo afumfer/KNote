@@ -60,7 +60,7 @@ namespace KNote.ClientWin.Core
             Alias = name;
             ConnectionString = connectionString;
             Provider = provider;
-            Orm = Orm;
+            Orm = orm;
         }
     }
 }

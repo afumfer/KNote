@@ -67,7 +67,7 @@ namespace KNote.ClientWin.Core
             IdComponent = Guid.NewGuid();
             OnStateCtrlChanged(ComponentState.NotStarted);           
             Store = store;
-            Store.AddController(this);
+            Store.AddComponent(this);
             AddExtensions();
         }
 
@@ -143,7 +143,7 @@ namespace KNote.ClientWin.Core
             try
             {
                 OnFinalized();
-                Store.RemoveController(this);
+                Store.RemoveComponent(this);
                 FinalizeViewsComponent();                                               
                 OnStateCtrlChanged(ComponentState.Finalized);
             }

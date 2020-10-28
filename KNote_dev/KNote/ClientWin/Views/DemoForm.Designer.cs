@@ -36,6 +36,8 @@
             this.listSamples = new System.Windows.Forms.ListBox();
             this.buttonInteract = new System.Windows.Forms.Button();
             this.buttonRunBackground = new System.Windows.Forms.Button();
+            this.listTest = new System.Windows.Forms.ListBox();
+            this.buttonTestApp1 = new System.Windows.Forms.Button();
             this.groupSamples.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -43,7 +45,7 @@
             // 
             this.button1.Location = new System.Drawing.Point(12, 18);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(305, 28);
+            this.button1.Size = new System.Drawing.Size(243, 28);
             this.button1.TabIndex = 0;
             this.button1.Text = "Run simple script (embedded code)";
             this.button1.UseVisualStyleBackColor = true;
@@ -53,7 +55,7 @@
             // 
             this.button3.Location = new System.Drawing.Point(12, 123);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(305, 29);
+            this.button3.Size = new System.Drawing.Size(243, 29);
             this.button3.TabIndex = 3;
             this.button3.Text = "Show KntConsole";
             this.button3.UseVisualStyleBackColor = true;
@@ -105,7 +107,7 @@
             // 
             this.buttonInteract.Location = new System.Drawing.Point(12, 52);
             this.buttonInteract.Name = "buttonInteract";
-            this.buttonInteract.Size = new System.Drawing.Size(305, 28);
+            this.buttonInteract.Size = new System.Drawing.Size(243, 28);
             this.buttonInteract.TabIndex = 1;
             this.buttonInteract.Text = "Interacting with kntscript (embedded code)";
             this.buttonInteract.UseVisualStyleBackColor = true;
@@ -115,17 +117,38 @@
             // 
             this.buttonRunBackground.Location = new System.Drawing.Point(12, 86);
             this.buttonRunBackground.Name = "buttonRunBackground";
-            this.buttonRunBackground.Size = new System.Drawing.Size(305, 31);
+            this.buttonRunBackground.Size = new System.Drawing.Size(243, 31);
             this.buttonRunBackground.TabIndex = 2;
             this.buttonRunBackground.Text = "Run simple script in bakground";
             this.buttonRunBackground.UseVisualStyleBackColor = true;
             this.buttonRunBackground.Click += new System.EventHandler(this.buttonRunBackground_Click);
             // 
+            // listTest
+            // 
+            this.listTest.FormattingEnabled = true;
+            this.listTest.ItemHeight = 15;
+            this.listTest.Location = new System.Drawing.Point(491, 182);
+            this.listTest.Name = "listTest";
+            this.listTest.Size = new System.Drawing.Size(290, 289);
+            this.listTest.TabIndex = 4;
+            // 
+            // buttonTestApp1
+            // 
+            this.buttonTestApp1.Location = new System.Drawing.Point(491, 18);
+            this.buttonTestApp1.Name = "buttonTestApp1";
+            this.buttonTestApp1.Size = new System.Drawing.Size(290, 28);
+            this.buttonTestApp1.TabIndex = 5;
+            this.buttonTestApp1.Text = "Test Store 1";
+            this.buttonTestApp1.UseVisualStyleBackColor = true;
+            this.buttonTestApp1.Click += new System.EventHandler(this.buttonTestApp1_Click);
+            // 
             // DemoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(475, 495);
+            this.ClientSize = new System.Drawing.Size(799, 495);
+            this.Controls.Add(this.buttonTestApp1);
+            this.Controls.Add(this.listTest);
             this.Controls.Add(this.buttonRunBackground);
             this.Controls.Add(this.buttonInteract);
             this.Controls.Add(this.groupSamples);
@@ -151,5 +174,7 @@
         private System.Windows.Forms.ListBox listSamples;
         private System.Windows.Forms.Button buttonInteract;
         private System.Windows.Forms.Button buttonRunBackground;
+        private System.Windows.Forms.ListBox listTest;
+        private System.Windows.Forms.Button buttonTestApp1;
     }
 }
