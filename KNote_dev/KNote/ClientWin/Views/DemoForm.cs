@@ -8,9 +8,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Components;
 using KNote.Model.Dto;
 using KntScript;
+
+
 
 namespace KNote.ClientWin.Views
 {
@@ -203,6 +207,12 @@ namespace KNote.ClientWin.Views
 
             //await LoadNotes();  // opción 2
 
+            var monitor = new MonitorComponent(_store);
+            monitor.Run();
+
+            var folderSelector = new FolderSelectorComponent(_store);
+            folderSelector.Run();
+
             LoadNotes();   // opción 3
         }
 
@@ -213,7 +223,6 @@ namespace KNote.ClientWin.Views
             var notes = (await service.Notes.HomeNotesAsync()).Entity;            
             foreach (var note in notes)
                 listTest.Items.Add(note.Topic);
-
         }
 
 }

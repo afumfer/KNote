@@ -16,11 +16,11 @@ namespace KNote.ClientWin.Core
 
         public bool LogActivated = false;
 
-        public readonly FactoryViews FactoryViews;
+        public readonly IFactoryViews FactoryViews;
 
         private readonly List<ServiceRef> _servicesRefs;
 
-        private readonly List<ComponentBase> _listCtrl;
+        private readonly List<ComponentBase> _listComponents;
 
         public AppConfig Config { get; }
 
@@ -43,17 +43,17 @@ namespace KNote.ClientWin.Core
 
         #region Constructor 
 
-        public Store()
+        public Store(IFactoryViews factoryViews)
         {
             if (Config == null)
                 Config = new AppConfig();
 
-            _listCtrl = new List<ComponentBase>();
-            _servicesRefs = new List<ServiceRef>();            
-            FactoryViews = new FactoryViews();
+            _listComponents = new List<ComponentBase>();
+            _servicesRefs = new List<ServiceRef>();
+            FactoryViews = factoryViews; //
         }
 
-        public Store(AppConfig config) : this ()
+        public Store(AppConfig config, IFactoryViews factoryViews) : this (factoryViews)
         {
             Config = config;
         }
@@ -85,7 +85,7 @@ namespace KNote.ClientWin.Core
         public event EventHandler<StateComponentEventArgs> ComponentsStateChanged;
         public void AddComponent(ComponentBase controller)
         {
-            _listCtrl.Add(controller);
+            _listComponents.Add(controller);
             controller.StateCtrlChanged += Components_StateCtrlChanged;
         }
 
@@ -97,7 +97,7 @@ namespace KNote.ClientWin.Core
 
         public void RemoveComponent(ComponentBase component)
         {            
-            _listCtrl.Remove(component);            
+            _listComponents.Remove(component);            
         }
 
         public event EventHandler<EntityEventArgs<FolderWithServiceRef>> ActiveFolderChanged;

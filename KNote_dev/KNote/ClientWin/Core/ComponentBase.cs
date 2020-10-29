@@ -74,11 +74,14 @@ namespace KNote.ClientWin.Core
         #endregion
 
 
-        protected abstract void OnInitialized() ;
-
-        protected virtual void OnAfterRenderView()
+        protected virtual Result OnInitialized()
         {
+            return new Result();
+        } 
 
+        protected virtual Result OnAfterRenderView()
+        {
+            return new Result();
         }
 
         protected virtual Result CheckPreconditions()
@@ -94,29 +97,29 @@ namespace KNote.ClientWin.Core
             return res;
         }
 
-        protected virtual void OnFinalized() {
-            
+        protected virtual Result OnFinalized() 
+        {
+            return new Result();
         }
 
-        protected virtual void AddExtensions()
+        protected virtual Result AddExtensions()
         {
-            
+            return new Result();
         }
 
         public Result Run() 
         {
-            var result = new Result();
+            Result result;
             var preconditionResult = CheckPreconditions();
             if (preconditionResult.IsValid) 
             {
                 OnStateCtrlChanged(ComponentState.PreconditionsOvercome);
-                OnInitialized();
-                OnStateCtrlChanged(ComponentState.Initialized);
-                
+                result = OnInitialized();
+                OnStateCtrlChanged(ComponentState.Initialized);                
             }
             else
             {
-                result.ErrorList = preconditionResult.ErrorList;
+                result = preconditionResult;
                 OnStateCtrlChanged(ComponentState.Error);                
             }
 
@@ -132,23 +135,25 @@ namespace KNote.ClientWin.Core
 
         public Result Finalize()
         {
-            var result = new Result();
+            Result result;
             
             if (ComponentState == ComponentState.Finalized)
             {
+                result = new Result();
                 result.AddErrorMessage("The component is already finalized.");
                 return result;
             }
 
             try
             {
-                OnFinalized();
+                result = OnFinalized();
                 Store.RemoveComponent(this);
                 FinalizeViewsComponent();                                               
                 OnStateCtrlChanged(ComponentState.Finalized);
             }
             catch (Exception ex)
-            {                
+            {
+                result = new Result();
                 result.AddErrorMessage(ex.Message);
                 OnStateCtrlChanged(ComponentState.Error);
             }
@@ -171,7 +176,7 @@ namespace KNote.ClientWin.Core
 
             List<IViewBase> lv = GetViews(Fields);
             foreach (IViewBase v in lv)
-                v.CloseView();
+                v.OnClosingView();
 
             // Reset fields
             foreach (FieldInfo field in Fields)

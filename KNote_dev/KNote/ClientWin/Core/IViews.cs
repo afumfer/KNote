@@ -11,8 +11,9 @@ namespace KNote.ClientWin.Core
     public interface IViewBase
     {
         void ShowView();
-        void CloseView();
-        void RefreshView();        
+        void OnClosingView();
+        void RefreshView();
+        void ShowInfo(string info);
     }
 
     public interface IViewConfigurable
@@ -25,15 +26,9 @@ namespace KNote.ClientWin.Core
 
     #region Generals views
 
-    public interface IManagmentView : IViewBase
-    {        
-        void ShowInfo(string info);
-    }
-
     public interface IEditorView<T> : IViewBase, IViewConfigurable
     {        
-        void CleanView();
-        void ShowInfo(string info);
+        void CleanView();        
         void RefreshBindingModel();        
     }
 

@@ -25,8 +25,8 @@ namespace KNote.ClientWin
 
             //Application.Run(new DemoForm());
 
-            Store appStore = new Store();
-
+            Store appStore = new Store(new FactoryViewsWinForms());
+           
             await LoadAppStore(appStore);
 
             #region Demo & lab
@@ -36,6 +36,8 @@ namespace KNote.ClientWin
             #endregion 
 
             Application.Run(applicationContext);
+
+
         }
 
         static async Task LoadAppStore(Store store)
@@ -47,7 +49,7 @@ namespace KNote.ClientWin
 
             var defaultServiceRef = new ServiceRef(
                 "Test db1 (SQL Server Prod - Dapper", 
-                "Data Source=.\\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
+                @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
                 "Microsoft.Data.SqlClient",
                 "Dapper");
 
@@ -72,13 +74,13 @@ namespace KNote.ClientWin
 
             store.AddServiceRef(new ServiceRef
                 ("Test db2 (SQL Server Desa - Dapper)",
-                @"Data Source=.\\sqlexpress;Initial Catalog=KNote02DesaDB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
-                "Microsoft.Data.SqlClient", 
+                @"Data Source=.\sqlexpress;Initial Catalog=KNote02DesaDB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
+                "Microsoft.Data.SqlClient",
                 "Dapper"));
 
             store.AddServiceRef(new ServiceRef
                 ("Tasks db3 (Sqlite)",
-                @"Data Source=D:\\DBs\\KNote02DB_Sqlite.db",
+                @"Data Source=D:\DBs\KNote02DB_Sqlite.db",
                 "Microsoft.Data.Sqlite", 
                 "Dapper"));
         }
