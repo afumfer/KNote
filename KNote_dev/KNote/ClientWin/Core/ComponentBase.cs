@@ -19,8 +19,11 @@ namespace KNote.ClientWin.Core
 
         public Store Store { get; protected set; }
 
-        public ComponentState ComponentState { get; protected set; } = ComponentState.NotStarted;
-       
+        public EComponentState ComponentState { get; protected set; } = EComponentState.NotStarted;
+
+        // TODO: eliminar, por ahora no hace falta. 
+        //public EComponentResult ComponentResult { get; protected set; } = EComponentResult.None;
+
         public bool EmbededMode { get; set; } = false;
 
         public bool ModalMode { get; set; } = false;
@@ -48,7 +51,7 @@ namespace KNote.ClientWin.Core
 
         public event EventHandler<StateComponentEventArgs> StateCtrlChanged;
 
-        protected void OnStateCtrlChanged(ComponentState state)
+        protected void OnStateCtrlChanged(EComponentState state)
         {
             ComponentState = state;
             if (StateCtrlChanged != null)
@@ -65,7 +68,7 @@ namespace KNote.ClientWin.Core
         public ComponentBase(Store store)
         {
             IdComponent = Guid.NewGuid();
-            OnStateCtrlChanged(ComponentState.NotStarted);           
+            OnStateCtrlChanged(EComponentState.NotStarted);           
             Store = store;
             Store.AddComponent(this);
             AddExtensions();
@@ -113,17 +116,17 @@ namespace KNote.ClientWin.Core
             var preconditionResult = CheckPreconditions();
             if (preconditionResult.IsValid) 
             {
-                OnStateCtrlChanged(ComponentState.PreconditionsOvercome);
+                OnStateCtrlChanged(EComponentState.PreconditionsOvercome);
                 result = OnInitialized();
-                OnStateCtrlChanged(ComponentState.Initialized);                
+                OnStateCtrlChanged(EComponentState.Initialized);                
             }
             else
             {
                 result = preconditionResult;
-                OnStateCtrlChanged(ComponentState.Error);                
+                OnStateCtrlChanged(EComponentState.Error);                
             }
 
-            OnStateCtrlChanged(ComponentState.Started);
+            OnStateCtrlChanged(EComponentState.Started);
             return result;
         }
 
@@ -137,7 +140,7 @@ namespace KNote.ClientWin.Core
         {
             Result result;
             
-            if (ComponentState == ComponentState.Finalized)
+            if (ComponentState == EComponentState.Finalized)
             {
                 result = new Result();
                 result.AddErrorMessage("The component is already finalized.");
@@ -149,13 +152,13 @@ namespace KNote.ClientWin.Core
                 result = OnFinalized();
                 Store.RemoveComponent(this);
                 FinalizeViewsComponent();                                               
-                OnStateCtrlChanged(ComponentState.Finalized);
+                OnStateCtrlChanged(EComponentState.Finalized);
             }
             catch (Exception ex)
             {
                 result = new Result();
                 result.AddErrorMessage(ex.Message);
-                OnStateCtrlChanged(ComponentState.Error);
+                OnStateCtrlChanged(EComponentState.Error);
             }
            
             return result;
@@ -275,7 +278,7 @@ namespace KNote.ClientWin.Core
 
     #region  Controller typos 
 
-    public enum ComponentState
+    public enum EComponentState
     {
         NotStarted,
         PreconditionsOvercome,
@@ -285,11 +288,19 @@ namespace KNote.ClientWin.Core
         Error
     }
 
+    public enum EComponentResult
+    {
+        None,
+        Executed,
+        Canceled,
+        Error
+    }
+
     public class StateComponentEventArgs : EventArgs
     {
-        public ComponentState State { get; set; }
+        public EComponentState State { get; set; }
 
-        public StateComponentEventArgs(ComponentState state)
+        public StateComponentEventArgs(EComponentState state)
             : base()
         {
             this.State = state;

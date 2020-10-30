@@ -29,24 +29,24 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.treeViewFolders = new System.Windows.Forms.TreeView();
             this.imageListFolders = new System.Windows.Forms.ImageList(this.components);
             this.contextMenuFolders = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.panel1.SuspendLayout();
+            this.panelBottom.SuspendLayout();
             this.SuspendLayout();
             // 
-            // panel1
+            // panelBottom
             // 
-            this.panel1.Controls.Add(this.buttonCancel);
-            this.panel1.Controls.Add(this.buttonAccept);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 418);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(394, 51);
-            this.panel1.TabIndex = 0;
+            this.panelBottom.Controls.Add(this.buttonCancel);
+            this.panelBottom.Controls.Add(this.buttonAccept);
+            this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelBottom.Location = new System.Drawing.Point(0, 418);
+            this.panelBottom.Name = "panelBottom";
+            this.panelBottom.Size = new System.Drawing.Size(394, 51);
+            this.panelBottom.TabIndex = 0;
             // 
             // buttonCancel
             // 
@@ -57,6 +57,7 @@
             this.buttonCancel.TabIndex = 1;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
             // buttonAccept
             // 
@@ -67,6 +68,7 @@
             this.buttonAccept.TabIndex = 0;
             this.buttonAccept.Text = "&Acept";
             this.buttonAccept.UseVisualStyleBackColor = true;
+            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
             // 
             // treeViewFolders
             // 
@@ -75,6 +77,7 @@
             this.treeViewFolders.Name = "treeViewFolders";
             this.treeViewFolders.Size = new System.Drawing.Size(394, 418);
             this.treeViewFolders.TabIndex = 1;
+            this.treeViewFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewFolders_AfterSelect);
             // 
             // imageListFolders
             // 
@@ -93,18 +96,18 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(394, 469);
             this.Controls.Add(this.treeViewFolders);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.panelBottom);
             this.Name = "FoldersSelectorForm";
             this.Text = "Folders selector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FoldersSelectorForm_FormClosing);
-            this.panel1.ResumeLayout(false);
+            this.panelBottom.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonAccept;
         private System.Windows.Forms.TreeView treeViewFolders;

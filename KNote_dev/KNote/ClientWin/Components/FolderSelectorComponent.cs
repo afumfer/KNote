@@ -30,10 +30,8 @@ namespace KNote.ClientWin.Components
 
             View.ShowView();
 
-
             return result;
         }
-
 
         #endregion 
 
@@ -52,7 +50,51 @@ namespace KNote.ClientWin.Components
             return (await serviceRef.Service.Folders.GetAllAsync()).Entity;
         }
 
+        public FolderWithServiceRef SelectedFolderWithServiceRef { get; set; }
+
         #endregion 
+
+        public event EventHandler<EntityEventArgs<FolderWithServiceRef>> EntitySelection;
+
+        public void NotifyEntitySelectionAction()
+        {            
+            OnEntitySelection(new EntityEventArgs<FolderWithServiceRef>(SelectedFolderWithServiceRef));
+        }
+        protected virtual void OnEntitySelection(EntityEventArgs<FolderWithServiceRef> e)
+        {
+            EntitySelection?.Invoke(this, e);
+        }
+
+        public virtual Result<EComponentResult> CancelAction()
+        {
+            var result = new Result<EComponentResult>();
+            
+            result.Entity = EComponentResult.Canceled;
+            
+            base.Finalize();
+
+            return result;
+        }
+
+        public virtual Result<EComponentResult> AcceptAction()
+        {
+            var result = new Result<EComponentResult>();
+
+            try
+            {
+                // SelectorEntityAction();
+                result.Entity = EComponentResult.Executed;                
+                base.Finalize();
+            }
+            catch (Exception ex)
+            {
+                result.Entity = EComponentResult.Error;
+                OnStateCtrlChanged(EComponentState.Error);
+                result.AddErrorMessage(ex.Message);
+            }
+
+            return result;
+        }
 
     }
 }

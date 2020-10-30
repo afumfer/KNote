@@ -37,7 +37,6 @@ namespace KNote.ClientWin
 
             Application.Run(applicationContext);
 
-
         }
 
         static async Task LoadAppStore(Store store)

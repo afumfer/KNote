@@ -49,46 +49,9 @@ namespace KNote.ClientWin.Views
                 rootRepNode.Tag = serviceRef;
                 treeViewFolders.Nodes.Add(rootRepNode);
 
-                LoadNodes(rootRepNode, await _com.GetTreeAsync(serviceRef));
+                LoadNodes(rootRepNode, serviceRef, await _com.GetTreeAsync(serviceRef));
             }
             treeViewFolders.Visible = true;
-        }
-
-        private void LoadNodes(TreeNode node, List<FolderDto> folders)
-        {
-            if (folders == null)
-                return;
-
-            foreach(var f in folders)
-            {
-                //TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);
-                TreeNode nodeFolder = new TreeNode(f.Name);
-                nodeFolder.Name = f.FolderId.ToString();
-                nodeFolder.Tag = f;
-                node.Nodes.Add(nodeFolder);
-
-                LoadNodes(nodeFolder, f.ChildFolders);
-            }
-        }
-
-        public void AddItem(FolderWithServiceRef item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ConfigureEmbededMode()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ConfigureWindowMode()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteItem(FolderWithServiceRef item)
-        {
-            throw new NotImplementedException();
         }
 
         public void OnClosingView()
@@ -97,27 +60,154 @@ namespace KNote.ClientWin.Views
             this.Close();
         }
 
+        public void ConfigureEmbededMode()
+        {
+            TopLevel = false;
+            Dock = DockStyle.Fill;
+            FormBorderStyle = FormBorderStyle.None;
+            panelBottom.Visible = false;
+        }
+
+        public void ConfigureWindowMode()
+        {
+            TopLevel = true;
+            Dock = DockStyle.None;
+            FormBorderStyle = FormBorderStyle.Sizable;
+            panelBottom.Visible = true;
+            StartPosition = FormStartPosition.CenterScreen;
+        }
+
+        public void AddItem(FolderWithServiceRef item)
+        {
+            //TreeNode newNode = new TreeNode(item.FolderInfo.Name, 1, 0);
+            //newNode.Tag = item;
+            //newNode.Name = item.FolderInfo.FolderId.ToString();
+
+            //TreeNode n0 = treeViewFolders.SelectedNode;
+
+            //if (((FolderWithServiceRef)n0.Tag).FolderInfo.FolderId == item.FolderInfo.ParentId)
+            //{
+            //    n0.Nodes.Add(newNode);
+            //    n0.Expand();
+            //    treeViewFolders.SelectedNode = newNode;
+            //}
+            //else
+            //    _ctrl.ShowMessage("KMSG: El nodo padre del nuevo nodo no es correcto", "KNote");
+        }
+
+        public void DeleteItem(FolderWithServiceRef item)
+        {
+            //if (SelectItem(item) != null)
+            //{
+            //    TreeNode parentNode = treeViewFolders.SelectedNode.Parent;
+            //    treeViewFolders.SelectedNode.Remove();
+            //    treeViewFolders.SelectedNode = parentNode;
+            //}
+        }
+
+
         public void RefreshItem(FolderWithServiceRef item)
         {
-            throw new NotImplementedException();
+            //if (SelectItem(item) != null)
+            //{
+            //    treeViewFolders.SelectedNode.Tag = item;
+            //    treeViewFolders.SelectedNode.Text = item.FolderInfo.Name;
+            //}
         }
 
         public object SelectItem(FolderWithServiceRef item)
         {
-            throw new NotImplementedException();
+            var treeNodes = treeViewFolders.Nodes.Find(item.FolderInfo.FolderId.ToString(), true);
+
+            // if (treeNodes.Count() >  0) // esto no funciona en .core
+
+            if (treeNodes.Length > 0)
+            {
+                var node = treeNodes[0];
+                treeViewFolders.SelectedNode = node;
+                return node;
+            }
+            else
+                return null;
         }
 
         public void ShowInfo(string info)
         {
-            throw new NotImplementedException();
+            MessageBox.Show(info);
         }
 
         #endregion
+
+        #region Form handlers events
 
         private void FoldersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
         {            
             if (!_viewFinalized)                            
                 _com.Finalize();            
+        }
+
+        private void buttonAccept_Click(object sender, EventArgs e)
+        {
+            _com.NotifyEntitySelectionAction();
+            _com.AcceptAction();            
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            _com.CancelAction();
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private void LoadNodes(TreeNode node, ServiceRef service, List<FolderDto> folders)
+        {
+            if (folders == null)
+                return;
+
+            foreach (var f in folders)
+            {
+                //TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);
+                TreeNode nodeFolder = new TreeNode(f.Name);
+                nodeFolder.Name = f.FolderId.ToString();
+                nodeFolder.Tag = new FolderWithServiceRef() { ServiceRef = service, FolderInfo = f }; ;
+                node.Nodes.Add(nodeFolder);
+
+                LoadNodes(nodeFolder, service, f.ChildFolders);
+            }
+        }
+
+        #endregion
+
+        private void treeViewFolders_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (sender != null)
+                this.Cursor = Cursors.WaitCursor;
+            try
+            {
+                FolderWithServiceRef v = null;
+
+                if (e.Node.Tag is FolderWithServiceRef)
+                    v = (FolderWithServiceRef)e.Node.Tag;
+                else if (e.Node.Tag is ServiceRef)
+                {
+                    v = new FolderWithServiceRef() { ServiceRef = (ServiceRef)e.Node.Tag, FolderInfo = null };
+                }
+
+                _com.SelectedFolderWithServiceRef = v;
+                _com.NotifyEntitySelectionAction(); // .NotifyEntityChangeAction();
+            }
+            catch (Exception)
+            {
+                // TODO: ... investigar esto
+                throw;
+            }
+            finally
+            {
+                if (sender != null)
+                    this.Cursor = Cursors.Default;
+            }
         }
     }
 }
