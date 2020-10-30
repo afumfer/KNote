@@ -14,6 +14,7 @@ namespace KNote.ClientWin.Views
     public partial class FoldersSelectorForm : Form, ISelectorView<FolderWithServiceRef>
     {
         private readonly FolderSelectorComponent _com;
+        private bool _viewFinalized = false;
 
         public FoldersSelectorForm(FolderSelectorComponent com)
         {
@@ -41,23 +42,17 @@ namespace KNote.ClientWin.Views
             treeViewFolders.Visible = false;
             treeViewFolders.Nodes.Clear();
 
-            foreach(var serviceRef in _com.Store.GetAllServiceRef())
+            foreach(var serviceRef in _com.ServicesRef)
             {
                 //rootRepNode = new TreeNode("[" + service.Alias + "]", 2, 2);
                 rootRepNode = new TreeNode("[" + serviceRef.Alias + "]");
                 rootRepNode.Tag = serviceRef;
                 treeViewFolders.Nodes.Add(rootRepNode);
 
-                var folders = (await serviceRef.Service.Folders.GetTreeAsync()).Entity;
-
-                LoadNodes(rootRepNode, folders);
+                LoadNodes(rootRepNode, await _com.GetTreeAsync(serviceRef));
             }
-
-
-
             treeViewFolders.Visible = true;
         }
-
 
         private void LoadNodes(TreeNode node, List<FolderDto> folders)
         {
@@ -75,7 +70,6 @@ namespace KNote.ClientWin.Views
                 LoadNodes(nodeFolder, f.ChildFolders);
             }
         }
-
 
         public void AddItem(FolderWithServiceRef item)
         {
@@ -99,14 +93,14 @@ namespace KNote.ClientWin.Views
 
         public void OnClosingView()
         {
-            
+            _viewFinalized = true;
+            this.Close();
         }
 
         public void RefreshItem(FolderWithServiceRef item)
         {
             throw new NotImplementedException();
         }
-
 
         public object SelectItem(FolderWithServiceRef item)
         {
@@ -118,13 +112,12 @@ namespace KNote.ClientWin.Views
             throw new NotImplementedException();
         }
 
-
         #endregion
 
         private void FoldersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // TODO: !!! Temporal, esto hay que quitarlo de aquí. 
-            _com.Finalize();
+        {            
+            if (!_viewFinalized)                            
+                _com.Finalize();            
         }
     }
 }

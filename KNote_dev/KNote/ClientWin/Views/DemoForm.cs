@@ -24,19 +24,15 @@ namespace KNote.ClientWin.Views
 
         private string _pathSampleScripts = @"..\..\..\AutoKntScripts\";
         private string _selectedFile;
-        private Store _store;
 
-        #endregion 
+
+        
+
+        #endregion
 
         public DemoForm()
         {
             InitializeComponent();            
-        }
-
-        public DemoForm(Store store): this()
-        {
-            //InitializeComponent();
-            _store = store;
         }
 
         #region Form events handlers
@@ -192,38 +188,6 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
-        //private async void buttonTestApp1_Click(object sender, EventArgs e)  // opción 1 / 2
-        private void buttonTestApp1_Click(object sender, EventArgs e)  // opción 3
-        {
-            // opción 1
-            //var service = _store.PersonalServiceRef.Service;
-
-            //var notes = (await service.Notes.HomeNotesAsync()).Entity;
-            //foreach (var note in notes)
-            //    listTest.Items.Add(note.Topic);
-
-            // or 
-
-            //await LoadNotes();  // opción 2
-
-            var monitor = new MonitorComponent(_store);
-            monitor.Run();
-
-            var folderSelector = new FolderSelectorComponent(_store);
-            folderSelector.Run();
-
-            LoadNotes();   // opción 3
-        }
-
-        //private async Task LoadNotes()  // opción 2
-        private async void LoadNotes()   // opción 3
-        {
-            var service = _store.PersonalServiceRef.Service;
-            var notes = (await service.Notes.HomeNotesAsync()).Entity;            
-            foreach (var note in notes)
-                listTest.Items.Add(note.Topic);
-        }
-
-}
+     
+    }
 }

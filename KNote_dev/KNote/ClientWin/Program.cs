@@ -31,7 +31,7 @@ namespace KNote.ClientWin
 
             #region Demo & lab
 
-            applicationContext.MainForm = new DemoForm(appStore);
+            applicationContext.MainForm = new LabForm(appStore);
 
             #endregion 
 

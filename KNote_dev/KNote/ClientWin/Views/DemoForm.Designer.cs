@@ -36,8 +36,6 @@
             this.listSamples = new System.Windows.Forms.ListBox();
             this.buttonInteract = new System.Windows.Forms.Button();
             this.buttonRunBackground = new System.Windows.Forms.Button();
-            this.listTest = new System.Windows.Forms.ListBox();
-            this.buttonTestApp1 = new System.Windows.Forms.Button();
             this.groupSamples.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -123,32 +121,11 @@
             this.buttonRunBackground.UseVisualStyleBackColor = true;
             this.buttonRunBackground.Click += new System.EventHandler(this.buttonRunBackground_Click);
             // 
-            // listTest
-            // 
-            this.listTest.FormattingEnabled = true;
-            this.listTest.ItemHeight = 15;
-            this.listTest.Location = new System.Drawing.Point(491, 182);
-            this.listTest.Name = "listTest";
-            this.listTest.Size = new System.Drawing.Size(290, 289);
-            this.listTest.TabIndex = 4;
-            // 
-            // buttonTestApp1
-            // 
-            this.buttonTestApp1.Location = new System.Drawing.Point(491, 18);
-            this.buttonTestApp1.Name = "buttonTestApp1";
-            this.buttonTestApp1.Size = new System.Drawing.Size(290, 28);
-            this.buttonTestApp1.TabIndex = 5;
-            this.buttonTestApp1.Text = "Test Store 1";
-            this.buttonTestApp1.UseVisualStyleBackColor = true;
-            this.buttonTestApp1.Click += new System.EventHandler(this.buttonTestApp1_Click);
-            // 
             // DemoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(799, 495);
-            this.Controls.Add(this.buttonTestApp1);
-            this.Controls.Add(this.listTest);
+            this.ClientSize = new System.Drawing.Size(482, 495);
             this.Controls.Add(this.buttonRunBackground);
             this.Controls.Add(this.buttonInteract);
             this.Controls.Add(this.groupSamples);
@@ -174,7 +151,5 @@
         private System.Windows.Forms.ListBox listSamples;
         private System.Windows.Forms.Button buttonInteract;
         private System.Windows.Forms.Button buttonRunBackground;
-        private System.Windows.Forms.ListBox listTest;
-        private System.Windows.Forms.Button buttonTestApp1;
     }
 }
