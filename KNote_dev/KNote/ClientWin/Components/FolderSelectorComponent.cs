@@ -9,9 +9,8 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Components
 {
-    public class FolderSelectorComponent : ComponentViewBase<ISelectorView<FolderWithServiceRef>>
+    public class FolderSelectorComponent : ComponentSelectorViewBase<ISelectorView<FolderWithServiceRef>, FolderWithServiceRef>   
     {
-
         public FolderSelectorComponent(Store store) : base(store)
         {
 
@@ -35,7 +34,7 @@ namespace KNote.ClientWin.Components
 
         #endregion 
 
-        #region Component public members
+        #region Component specific public members
 
         public List<ServiceRef> ServicesRef
         {
@@ -47,54 +46,14 @@ namespace KNote.ClientWin.Components
 
         public async Task<List<FolderDto>> GetTreeAsync(ServiceRef serviceRef)
         {
-            return (await serviceRef.Service.Folders.GetAllAsync()).Entity;
+            return (await serviceRef.Service.Folders.GetTreeAsync()).Entity;
         }
 
-        public FolderWithServiceRef SelectedFolderWithServiceRef { get; set; }
-
-        #endregion 
-
-        public event EventHandler<EntityEventArgs<FolderWithServiceRef>> EntitySelection;
-
-        public void NotifyEntitySelectionAction()
-        {            
-            OnEntitySelection(new EntityEventArgs<FolderWithServiceRef>(SelectedFolderWithServiceRef));
-        }
-        protected virtual void OnEntitySelection(EntityEventArgs<FolderWithServiceRef> e)
+        public void SelectFolder(FolderWithServiceRef folder)
         {
-            EntitySelection?.Invoke(this, e);
+            View.SelectItem(folder);            
         }
-
-        public virtual Result<EComponentResult> CancelAction()
-        {
-            var result = new Result<EComponentResult>();
-            
-            result.Entity = EComponentResult.Canceled;
-            
-            base.Finalize();
-
-            return result;
-        }
-
-        public virtual Result<EComponentResult> AcceptAction()
-        {
-            var result = new Result<EComponentResult>();
-
-            try
-            {
-                // SelectorEntityAction();
-                result.Entity = EComponentResult.Executed;                
-                base.Finalize();
-            }
-            catch (Exception ex)
-            {
-                result.Entity = EComponentResult.Error;
-                OnStateCtrlChanged(EComponentState.Error);
-                result.AddErrorMessage(ex.Message);
-            }
-
-            return result;
-        }
+        #endregion
 
     }
 }

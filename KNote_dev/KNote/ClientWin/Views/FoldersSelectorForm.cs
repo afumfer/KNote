@@ -44,9 +44,9 @@ namespace KNote.ClientWin.Views
 
             foreach(var serviceRef in _com.ServicesRef)
             {
-                //rootRepNode = new TreeNode("[" + service.Alias + "]", 2, 2);
-                rootRepNode = new TreeNode("[" + serviceRef.Alias + "]");
-                rootRepNode.Tag = serviceRef;
+                rootRepNode = new TreeNode("[" + serviceRef.Alias + "]", 2, 2);
+                //rootRepNode = new TreeNode("[" + serviceRef.Alias + "]");
+                rootRepNode.Tag = serviceRef;                
                 treeViewFolders.Nodes.Add(rootRepNode);
 
                 LoadNodes(rootRepNode, serviceRef, await _com.GetTreeAsync(serviceRef));
@@ -76,6 +76,10 @@ namespace KNote.ClientWin.Views
             panelBottom.Visible = true;
             StartPosition = FormStartPosition.CenterScreen;
         }
+
+        #region Extensions managment ... 
+
+        // TODO: extensions managment ... 
 
         public void AddItem(FolderWithServiceRef item)
         {
@@ -115,11 +119,14 @@ namespace KNote.ClientWin.Views
             //}
         }
 
+        #endregion 
+
+
+        // TODO: pendiente ... 
+
         public object SelectItem(FolderWithServiceRef item)
         {
             var treeNodes = treeViewFolders.Nodes.Find(item.FolderInfo.FolderId.ToString(), true);
-
-            // if (treeNodes.Count() >  0) // esto no funciona en .core
 
             if (treeNodes.Length > 0)
             {
@@ -140,46 +147,6 @@ namespace KNote.ClientWin.Views
 
         #region Form handlers events
 
-        private void FoldersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
-        {            
-            if (!_viewFinalized)                            
-                _com.Finalize();            
-        }
-
-        private void buttonAccept_Click(object sender, EventArgs e)
-        {
-            _com.NotifyEntitySelectionAction();
-            _com.AcceptAction();            
-        }
-
-        private void buttonCancel_Click(object sender, EventArgs e)
-        {
-            _com.CancelAction();
-        }
-
-        #endregion
-
-        #region Private methods
-
-        private void LoadNodes(TreeNode node, ServiceRef service, List<FolderDto> folders)
-        {
-            if (folders == null)
-                return;
-
-            foreach (var f in folders)
-            {
-                //TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);
-                TreeNode nodeFolder = new TreeNode(f.Name);
-                nodeFolder.Name = f.FolderId.ToString();
-                nodeFolder.Tag = new FolderWithServiceRef() { ServiceRef = service, FolderInfo = f }; ;
-                node.Nodes.Add(nodeFolder);
-
-                LoadNodes(nodeFolder, service, f.ChildFolders);
-            }
-        }
-
-        #endregion
-
         private void treeViewFolders_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (sender != null)
@@ -195,12 +162,12 @@ namespace KNote.ClientWin.Views
                     v = new FolderWithServiceRef() { ServiceRef = (ServiceRef)e.Node.Tag, FolderInfo = null };
                 }
 
-                _com.SelectedFolderWithServiceRef = v;
-                _com.NotifyEntitySelectionAction(); // .NotifyEntityChangeAction();
+                _com.SelectedEntity = v;
+                _com.NotifySelectedEntity();
             }
             catch (Exception)
             {
-                // TODO: ... investigar esto
+                // TODO: ... investigar excepciones en este punto
                 throw;
             }
             finally
@@ -209,5 +176,45 @@ namespace KNote.ClientWin.Views
                     this.Cursor = Cursors.Default;
             }
         }
+
+        private void buttonAccept_Click(object sender, EventArgs e)
+        {            
+            _com.AcceptAction();            
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            _com.CancelAction();
+        }
+
+        private void FoldersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!_viewFinalized)
+                _com.Finalize();
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private void LoadNodes(TreeNode node, ServiceRef service, List<FolderDto> folders)
+        {
+            if (folders == null)
+                return;
+
+            foreach (var f in folders)
+            {
+                TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);
+                //TreeNode nodeFolder = new TreeNode(f.Name);
+                nodeFolder.Name = f.FolderId.ToString();
+                nodeFolder.Tag = new FolderWithServiceRef() { ServiceRef = service, FolderInfo = f }; ;
+                node.Nodes.Add(nodeFolder);
+
+                LoadNodes(nodeFolder, service, f.ChildFolders);
+            }
+        }
+
+        #endregion
+
     }
 }

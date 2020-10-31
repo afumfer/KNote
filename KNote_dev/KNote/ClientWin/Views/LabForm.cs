@@ -14,7 +14,9 @@ namespace KNote.ClientWin.Views
     {
         private Store _store;
 
-        private FolderSelectorComponent folderSelector;
+        private FolderSelectorComponent _folderSelector;
+
+        private FolderWithServiceRef temp;
 
         public LabForm()
         {
@@ -24,7 +26,13 @@ namespace KNote.ClientWin.Views
         public LabForm(Store store) : this()
         {
             _store = store;
-            folderSelector = new FolderSelectorComponent(_store);
+            _folderSelector = new FolderSelectorComponent(_store);
+            _folderSelector.EntitySelection += _folderSelector_EntitySelection;
+        }
+
+        private void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        {
+            labelInfo1.Text = $" {e.Entity.ServiceRef.Alias} - {e.Entity.FolderInfo?.Name}";
         }
 
 
@@ -54,15 +62,28 @@ namespace KNote.ClientWin.Views
             var monitor = new MonitorComponent(_store);
             monitor.Run();
 
-            //var folderSelector = new FolderSelectorComponent(_store);
-            folderSelector.Run();
+
 
             //LoadNotes();   // opción 3
         }
 
         private void buttonTest2_Click(object sender, EventArgs e)
         {
-            folderSelector.Finalize();
+            //var folderSelector = new FolderSelectorComponent(_store);
+            _folderSelector.Run();            
+        }
+
+        private void buttonTest3_Click(object sender, EventArgs e)
+        {
+            //_folderSelector.Finalize();
+            //labelInfo2.Text = _folderSelector.SelectedEntity.FolderInfo?.Name;
+            _folderSelector.SelectN(temp);
+
+        }
+
+        private void buttonTest4_Click(object sender, EventArgs e)
+        {
+            temp = _folderSelector.SelectedEntity;
         }
     }
 }

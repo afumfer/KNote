@@ -36,7 +36,8 @@ namespace KNote.ClientWin.Components
                 Store.AddedServiceRef += Store_AddedServiceRef;
                 Store.ActiveFolderChanged += Store_ActiveFolderChanged;
                 Store.RemovedServiceRef += Store_RemovedServiceRef;
-                
+                Store.ComponentsResultChanged += Store_ComponentsResultChanged;
+                    
                 // TODO: Add more context events controllers here.
                 // ...    
             }
@@ -49,31 +50,38 @@ namespace KNote.ClientWin.Components
             return result;
         }
 
+        private void Store_ComponentsStateChanged(object sender, ComponentEventArgs<EComponentState> e)
+        {
+            var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((ComponentBase)sender).ComponentId}";
+            OnShowLog(info);
+        }
+
+        private void Store_ComponentsResultChanged(object sender, ComponentEventArgs<EComponentResult> e)
+        {
+            var info = $"{DateTime.Now} - [ControllersResultChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((ComponentBase)sender).ComponentId}";
+            OnShowLog(info);
+        }
+
         #region Private methods 
 
-        private void Store_RemovedServiceRef(object sender, EntityEventArgs<ServiceRef> e)
+        private void Store_RemovedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
         {
             var info = $"{DateTime.Now} - [RemovedServiceRef] - {sender.ToString()} - {e.Entity.Alias.ToString()}";
             OnShowLog(info);
         }
 
-        private void Store_ActiveFolderChanged(object sender, EntityEventArgs<FolderWithServiceRef> e)
+        private void Store_ActiveFolderChanged(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
             var info = $"{DateTime.Now}  - [ActiveFolderChanged] - {sender.ToString()} - {e.Entity.FolderInfo.Name.ToString()}";
             OnShowLog(info);
         }
 
-        private void Store_AddedServiceRef(object sender, EntityEventArgs<ServiceRef> e)
+        private void Store_AddedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
         {
             var info = $"{DateTime.Now} - [AddedServiceRef] - {sender.ToString()} - {e.Entity.Alias.ToString()}";
             OnShowLog(info);
         }
 
-        private void Store_ComponentsStateChanged(object sender, StateComponentEventArgs e)
-        {
-            var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.State.ToString()}";
-            OnShowLog(info);
-        }
 
         private void OnShowLog(string info)
         {

@@ -30,6 +30,7 @@
         {
             this.sqliteConnection1 = new Microsoft.Data.Sqlite.SqliteConnection();
             this.listBoxMessages = new System.Windows.Forms.ListBox();
+            this.buttonClearMessages = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // sqliteConnection1
@@ -44,16 +45,27 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listBoxMessages.FormattingEnabled = true;
             this.listBoxMessages.ItemHeight = 15;
-            this.listBoxMessages.Location = new System.Drawing.Point(12, 12);
+            this.listBoxMessages.Location = new System.Drawing.Point(12, 42);
             this.listBoxMessages.Name = "listBoxMessages";
-            this.listBoxMessages.Size = new System.Drawing.Size(382, 424);
+            this.listBoxMessages.Size = new System.Drawing.Size(924, 244);
             this.listBoxMessages.TabIndex = 0;
+            // 
+            // buttonClearMessages
+            // 
+            this.buttonClearMessages.Location = new System.Drawing.Point(817, 9);
+            this.buttonClearMessages.Name = "buttonClearMessages";
+            this.buttonClearMessages.Size = new System.Drawing.Size(119, 27);
+            this.buttonClearMessages.TabIndex = 1;
+            this.buttonClearMessages.Text = "Clear messages";
+            this.buttonClearMessages.UseVisualStyleBackColor = true;
+            this.buttonClearMessages.Click += new System.EventHandler(this.buttonClearMessages_Click);
             // 
             // MonitorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(406, 447);
+            this.ClientSize = new System.Drawing.Size(948, 311);
+            this.Controls.Add(this.buttonClearMessages);
             this.Controls.Add(this.listBoxMessages);
             this.Name = "MonitorForm";
             this.Text = "MonitorForm";
@@ -66,5 +78,6 @@
 
         private Microsoft.Data.Sqlite.SqliteConnection sqliteConnection1;
         private System.Windows.Forms.ListBox listBoxMessages;
+        private System.Windows.Forms.Button buttonClearMessages;
     }
 }

@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FoldersSelectorForm));
             this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
@@ -73,8 +74,11 @@
             // treeViewFolders
             // 
             this.treeViewFolders.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewFolders.ImageIndex = 0;
+            this.treeViewFolders.ImageList = this.imageListFolders;
             this.treeViewFolders.Location = new System.Drawing.Point(0, 0);
             this.treeViewFolders.Name = "treeViewFolders";
+            this.treeViewFolders.SelectedImageIndex = 0;
             this.treeViewFolders.Size = new System.Drawing.Size(394, 418);
             this.treeViewFolders.TabIndex = 1;
             this.treeViewFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewFolders_AfterSelect);
@@ -82,8 +86,11 @@
             // imageListFolders
             // 
             this.imageListFolders.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageListFolders.ImageSize = new System.Drawing.Size(16, 16);
+            this.imageListFolders.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageListFolders.ImageStream")));
             this.imageListFolders.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageListFolders.Images.SetKeyName(0, "folderOpene_16.png");
+            this.imageListFolders.Images.SetKeyName(1, "folderLight_16.png");
+            this.imageListFolders.Images.SetKeyName(2, "database_16.png");
             // 
             // contextMenuFolders
             // 
@@ -97,6 +104,7 @@
             this.ClientSize = new System.Drawing.Size(394, 469);
             this.Controls.Add(this.treeViewFolders);
             this.Controls.Add(this.panelBottom);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FoldersSelectorForm";
             this.Text = "Folders selector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FoldersSelectorForm_FormClosing);

@@ -14,6 +14,7 @@ namespace KNote.ClientWin.Views
     public partial class MonitorForm : Form, IViewBase
     {
         private readonly MonitorComponent _com;
+        private bool _viewFinalized = false;
 
         public MonitorForm(MonitorComponent com)
         {
@@ -23,7 +24,8 @@ namespace KNote.ClientWin.Views
 
         public void OnClosingView()
         {
-
+            _viewFinalized = true;
+            this.Close();
         }
 
         public void RefreshView()
@@ -43,8 +45,13 @@ namespace KNote.ClientWin.Views
 
         private void MonitorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            _com.Finalize();           
+            if (!_viewFinalized)
+                _com.Finalize();           
         }
 
+        private void buttonClearMessages_Click(object sender, EventArgs e)
+        {
+            listBoxMessages.Items.Clear();
+        }
     }
 }

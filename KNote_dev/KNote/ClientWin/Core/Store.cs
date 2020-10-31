@@ -61,20 +61,20 @@ namespace KNote.ClientWin.Core
         #endregion
 
         #region Actions        
-        public event EventHandler<EntityEventArgs<ServiceRef>> AddedServiceRef;
+        public event EventHandler<ComponentEventArgs<ServiceRef>> AddedServiceRef;
         public void AddServiceRef(ServiceRef serviceRef)
         {
             _servicesRefs.Add(serviceRef);
             if (AddedServiceRef != null)
-                AddedServiceRef(this, new EntityEventArgs<ServiceRef>(serviceRef));
+                AddedServiceRef(this, new ComponentEventArgs<ServiceRef>(serviceRef));
         }
         
-        public event EventHandler<EntityEventArgs<ServiceRef>> RemovedServiceRef;
+        public event EventHandler<ComponentEventArgs<ServiceRef>> RemovedServiceRef;
         public void RemoveServiceRef(ServiceRef serviceRef)
         {
             _servicesRefs.Remove(serviceRef);
             if (RemovedServiceRef != null)
-                RemovedServiceRef(this, new EntityEventArgs<ServiceRef>(serviceRef));
+                RemovedServiceRef(this, new ComponentEventArgs<ServiceRef>(serviceRef));
         }
 
         public List<ServiceRef> GetAllServiceRef()
@@ -82,17 +82,23 @@ namespace KNote.ClientWin.Core
             return _servicesRefs.ToList();
         }
 
-        public event EventHandler<StateComponentEventArgs> ComponentsStateChanged;
+        public event EventHandler<ComponentEventArgs<EComponentResult>> ComponentsResultChanged;
+        public event EventHandler<ComponentEventArgs<EComponentState>> ComponentsStateChanged;
         public void AddComponent(ComponentBase controller)
         {
             _listComponents.Add(controller);
-            controller.StateCtrlChanged += Components_StateCtrlChanged;
+            controller.StateComponentChanged += Components_StateCtrlChanged;
+            controller.ComponentResultChanged += Controller_ComponentResultChanged;
         }
 
-        private void Components_StateCtrlChanged(object sender, StateComponentEventArgs e)
+        private void Controller_ComponentResultChanged(object sender, ComponentEventArgs<EComponentResult> e)
         {
-            if(ComponentsStateChanged != null)
-                ComponentsStateChanged(sender, e);
+            ComponentsResultChanged?.Invoke(sender, e);
+        }
+
+        private void Components_StateCtrlChanged(object sender, ComponentEventArgs<EComponentState> e)
+        {
+            ComponentsStateChanged?.Invoke(sender, e);
         }
 
         public void RemoveComponent(ComponentBase component)
@@ -100,12 +106,12 @@ namespace KNote.ClientWin.Core
             _listComponents.Remove(component);            
         }
 
-        public event EventHandler<EntityEventArgs<FolderWithServiceRef>> ActiveFolderChanged;
+        public event EventHandler<ComponentEventArgs<FolderWithServiceRef>> ActiveFolderChanged;
         public void UpdateActiveFolder(FolderWithServiceRef activeFolder)
         {
             _activeFolderWithServiceRef = activeFolder;
             if (ActiveFolderChanged != null)
-                ActiveFolderChanged(this, new EntityEventArgs<FolderWithServiceRef>(activeFolder));
+                ActiveFolderChanged(this, new ComponentEventArgs<FolderWithServiceRef>(activeFolder));
         }
 
         #endregion

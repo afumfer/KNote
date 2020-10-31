@@ -15,14 +15,13 @@ namespace KNote.ClientWin.Core
 
         #region Public properties
 
-        public readonly Guid IdComponent;
+        public readonly Guid ComponentId;
 
         public Store Store { get; protected set; }
 
         public EComponentState ComponentState { get; protected set; } = EComponentState.NotStarted;
-
-        // TODO: eliminar, por ahora no hace falta. 
-        //public EComponentResult ComponentResult { get; protected set; } = EComponentResult.None;
+        
+        public EComponentResult ComponentResult { get; protected set; } = EComponentResult.None;
 
         public bool EmbededMode { get; set; } = false;
 
@@ -48,15 +47,24 @@ namespace KNote.ClientWin.Core
         #endregion region 
 
         #region Standard events for base controller
+        
+        public event EventHandler<ComponentEventArgs<EComponentState>> StateComponentChanged;
 
-        public event EventHandler<StateComponentEventArgs> StateCtrlChanged;
-
-        protected void OnStateCtrlChanged(EComponentState state)
+        protected void OnStateComponentChanged(EComponentState state)
         {
             ComponentState = state;
-            if (StateCtrlChanged != null)
-                StateCtrlChanged(this, new StateComponentEventArgs(state));
+            StateComponentChanged?.Invoke(this, new ComponentEventArgs<EComponentState>(state));
         }
+        
+        public event EventHandler<ComponentEventArgs<EComponentResult>> ComponentResultChanged;
+
+        protected void OnComponentResultChanged(EComponentResult resutl)
+        {
+            ComponentResult = resutl;
+            ComponentResultChanged?.Invoke(this, new ComponentEventArgs<EComponentResult>(resutl));
+        }
+
+
 
         // TODO: Pendiente de valorar la implementación de eventos específicos 
         //       de inicialización de la controladora y finalización de la controladora
@@ -67,8 +75,8 @@ namespace KNote.ClientWin.Core
 
         public ComponentBase(Store store)
         {
-            IdComponent = Guid.NewGuid();
-            OnStateCtrlChanged(EComponentState.NotStarted);           
+            ComponentId = Guid.NewGuid();
+            OnStateComponentChanged(EComponentState.NotStarted);           
             Store = store;
             Store.AddComponent(this);
             AddExtensions();
@@ -116,17 +124,17 @@ namespace KNote.ClientWin.Core
             var preconditionResult = CheckPreconditions();
             if (preconditionResult.IsValid) 
             {
-                OnStateCtrlChanged(EComponentState.PreconditionsOvercome);
+                OnStateComponentChanged(EComponentState.PreconditionsOvercome);
                 result = OnInitialized();
-                OnStateCtrlChanged(EComponentState.Initialized);                
+                OnStateComponentChanged(EComponentState.Initialized);                
             }
             else
             {
                 result = preconditionResult;
-                OnStateCtrlChanged(EComponentState.Error);                
+                OnStateComponentChanged(EComponentState.Error);                
             }
 
-            OnStateCtrlChanged(EComponentState.Started);
+            OnStateComponentChanged(EComponentState.Started);
             return result;
         }
 
@@ -152,13 +160,13 @@ namespace KNote.ClientWin.Core
                 result = OnFinalized();
                 Store.RemoveComponent(this);
                 FinalizeViewsComponent();                                               
-                OnStateCtrlChanged(EComponentState.Finalized);
+                OnStateComponentChanged(EComponentState.Finalized);
             }
             catch (Exception ex)
             {
                 result = new Result();
                 result.AddErrorMessage(ex.Message);
-                OnStateCtrlChanged(EComponentState.Error);
+                OnStateComponentChanged(EComponentState.Error);
             }
            
             return result;
@@ -296,29 +304,18 @@ namespace KNote.ClientWin.Core
         Error
     }
 
-    public class StateComponentEventArgs : EventArgs
-    {
-        public EComponentState State { get; set; }
-
-        public StateComponentEventArgs(EComponentState state)
-            : base()
-        {
-            this.State = state;
-        }
-    }
-
-    public class EntityEventArgs<T> : EventArgs
+    public class ComponentEventArgs<T> : EventArgs
     {
         public T Entity { get; set; }
 
-        public EntityEventArgs(T entity)
+        public ComponentEventArgs(T entity)
             : base()
         {
             this.Entity = entity;
         }
     }
 
-    public delegate void ExtensionsEventHandler<T>(object sender, EntityEventArgs<T> e);
+    public delegate void ExtensionsEventHandler<T>(object sender, ComponentEventArgs<T> e);
 
     public static class ReflectionExtensions
     {
