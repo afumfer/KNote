@@ -43,7 +43,7 @@
             // 
             this.buttonTest1.Location = new System.Drawing.Point(12, 12);
             this.buttonTest1.Name = "buttonTest1";
-            this.buttonTest1.Size = new System.Drawing.Size(161, 23);
+            this.buttonTest1.Size = new System.Drawing.Size(294, 23);
             this.buttonTest1.TabIndex = 0;
             this.buttonTest1.Text = "Test 1 - Monitor Component";
             this.buttonTest1.UseVisualStyleBackColor = true;
@@ -51,11 +51,11 @@
             // 
             // buttonTest2
             // 
-            this.buttonTest2.Location = new System.Drawing.Point(12, 41);
+            this.buttonTest2.Location = new System.Drawing.Point(14, 41);
             this.buttonTest2.Name = "buttonTest2";
-            this.buttonTest2.Size = new System.Drawing.Size(159, 24);
+            this.buttonTest2.Size = new System.Drawing.Size(292, 24);
             this.buttonTest2.TabIndex = 1;
-            this.buttonTest2.Text = "Test 2 - Run Folder Component";
+            this.buttonTest2.Text = "Test 2 - Run Folders Selector Component";
             this.buttonTest2.UseVisualStyleBackColor = true;
             this.buttonTest2.Click += new System.EventHandler(this.buttonTest2_Click);
             // 
@@ -80,9 +80,9 @@
             // 
             this.buttonTest3.Location = new System.Drawing.Point(12, 71);
             this.buttonTest3.Name = "buttonTest3";
-            this.buttonTest3.Size = new System.Drawing.Size(159, 24);
+            this.buttonTest3.Size = new System.Drawing.Size(294, 24);
             this.buttonTest3.TabIndex = 4;
-            this.buttonTest3.Text = "Test 3- Finalize Folder";
+            this.buttonTest3.Text = "Test 3- Run NotesSelector";
             this.buttonTest3.UseVisualStyleBackColor = true;
             this.buttonTest3.Click += new System.EventHandler(this.buttonTest3_Click);
             // 
@@ -115,7 +115,7 @@
             // 
             // buttonTest4
             // 
-            this.buttonTest4.Location = new System.Drawing.Point(202, 71);
+            this.buttonTest4.Location = new System.Drawing.Point(506, 12);
             this.buttonTest4.Name = "buttonTest4";
             this.buttonTest4.Size = new System.Drawing.Size(135, 24);
             this.buttonTest4.TabIndex = 8;
@@ -127,7 +127,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(653, 548);
+            this.ClientSize = new System.Drawing.Size(750, 548);
             this.Controls.Add(this.buttonTest4);
             this.Controls.Add(this.labelInfo3);
             this.Controls.Add(this.labelInfo2);

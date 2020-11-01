@@ -15,6 +15,7 @@ namespace KNote.ClientWin.Views
         private Store _store;
 
         private FolderSelectorComponent _folderSelector;
+        private NotesSelectorComponent _notesSelector;
 
         private FolderWithServiceRef temp;
 
@@ -27,12 +28,34 @@ namespace KNote.ClientWin.Views
         {
             _store = store;
             _folderSelector = new FolderSelectorComponent(_store);
+            _notesSelector = new NotesSelectorComponent(_store);
+
             _folderSelector.EntitySelection += _folderSelector_EntitySelection;
+            _notesSelector.EntitySelection += _notesSelector_EntitySelection;
+        }
+
+        private void _notesSelector_EntitySelection(object sender, ComponentEventArgs<Model.Dto.NoteInfoDto> e)
+        {
+            if (e.Entity == null)
+            {
+                labelInfo1.Text = "";
+                return;
+            }
+
+            labelInfo2.Text = $" {e.Entity.Topic} - {e.Entity.NoteId}";
         }
 
         private void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
+            if (e.Entity == null)
+            {
+                labelInfo1.Text = "";
+                return;
+            }
+
             labelInfo1.Text = $" {e.Entity.ServiceRef.Alias} - {e.Entity.FolderInfo?.Name}";
+            if (_notesSelector != null)
+                _notesSelector.GetListNotesAsync(e.Entity);
         }
 
 
@@ -62,29 +85,35 @@ namespace KNote.ClientWin.Views
             var monitor = new MonitorComponent(_store);
             monitor.Run();
 
-
-
             //LoadNotes();   // opción 3
         }
 
         private void buttonTest2_Click(object sender, EventArgs e)
-        {
-            //var folderSelector = new FolderSelectorComponent(_store);
+        {            
             _folderSelector.Run();            
         }
 
         private void buttonTest3_Click(object sender, EventArgs e)
         {
-            //_folderSelector.Finalize();
-            //labelInfo2.Text = _folderSelector.SelectedEntity.FolderInfo?.Name;
-            _folderSelector.SelectN(temp);
-
+            
+            _notesSelector.Run();
         }
 
         private void buttonTest4_Click(object sender, EventArgs e)
         {
-            temp = _folderSelector.SelectedEntity;
+            
         }
+
+        private void Trash()
+        {
+            //_folderSelector.Finalize();
+            //labelInfo2.Text = _folderSelector.SelectedEntity.FolderInfo?.Name;
+            // _folderSelector.SelectFolder(temp);
+
+            //temp = _folderSelector.SelectedEntity;
+
+        }
+
     }
 }
 

@@ -135,11 +135,13 @@ namespace KNote.Repository.Dapper
             try
             {                
                 if (_strProvider == "Microsoft.Data.SqlClient")
+                {
                     _db = new SqlConnection(_strConn);                
+                }
                 else if (_strProvider == "Microsoft.Data.Sqlite")
                 {
                     // TODO: Estudiar poner esto en otro sitio, una clase estática. 
-                    //       SqlMapper es estático.
+                    //       SqlMapper es estático.                    
                     SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
                     SqlMapper.AddTypeHandler(new GuidHandler());
                     SqlMapper.AddTypeHandler(new TimeSpanHandler());

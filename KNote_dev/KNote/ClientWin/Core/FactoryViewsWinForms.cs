@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Views;
+using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Core
 {
@@ -21,28 +22,20 @@ namespace KNote.ClientWin.Core
             return new FoldersSelectorForm(component);
         }
 
+        public ISelectorView<NoteInfoDto> View(NotesSelectorComponent component)
+        {
+            return new NotesSelectorForm(component);
+        }
 
-        // #region Primary views
+        public IViewBase View(KNoteManagmentComponent component)
+        {
+            return new KNoteManagmentForm(component);
+        }
 
-        //public ISelectorView<NoteItemDto> View(NotesSelectorCtrl ctrl)
-        //{                        
-        //    return new NotesSelectorForm(ctrl);            
-        //}
-
-
-        //public IManagmentView View(KNoteManagmentCtrl ctrl)
-        //{
-        //    return new KNoteManagmentForm(ctrl);
-        //}
-
-
-        //public IEditorView<NoteDto> View(NoteEditorCtrl ctrl)
-        //{
-        //    return new NoteEditorForm(ctrl);
-        //}
-
-
-        //#endregion
+        public IEditorView<NoteDto> View(NoteEditorComponent component)
+        {
+            return new NoteEditorForm(component);
+        }
 
         //#region Secondary views
 

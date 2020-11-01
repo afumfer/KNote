@@ -44,17 +44,17 @@
             this.panelBottom.Controls.Add(this.buttonCancel);
             this.panelBottom.Controls.Add(this.buttonAccept);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 418);
+            this.panelBottom.Location = new System.Drawing.Point(0, 425);
             this.panelBottom.Name = "panelBottom";
-            this.panelBottom.Size = new System.Drawing.Size(394, 51);
+            this.panelBottom.Size = new System.Drawing.Size(394, 44);
             this.panelBottom.TabIndex = 0;
             // 
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(296, 11);
+            this.buttonCancel.Location = new System.Drawing.Point(296, 10);
             this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(86, 29);
+            this.buttonCancel.Size = new System.Drawing.Size(86, 24);
             this.buttonCancel.TabIndex = 1;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
@@ -63,11 +63,11 @@
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(207, 11);
+            this.buttonAccept.Location = new System.Drawing.Point(207, 10);
             this.buttonAccept.Name = "buttonAccept";
-            this.buttonAccept.Size = new System.Drawing.Size(83, 29);
+            this.buttonAccept.Size = new System.Drawing.Size(83, 24);
             this.buttonAccept.TabIndex = 0;
-            this.buttonAccept.Text = "&Acept";
+            this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
             // 
@@ -79,7 +79,7 @@
             this.treeViewFolders.Location = new System.Drawing.Point(0, 0);
             this.treeViewFolders.Name = "treeViewFolders";
             this.treeViewFolders.SelectedImageIndex = 0;
-            this.treeViewFolders.Size = new System.Drawing.Size(394, 418);
+            this.treeViewFolders.Size = new System.Drawing.Size(394, 425);
             this.treeViewFolders.TabIndex = 1;
             this.treeViewFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewFolders_AfterSelect);
             // 

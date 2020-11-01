@@ -1,13 +1,14 @@
-﻿using KNote.ClientWin.Components;
-using KNote.ClientWin.Core;
-using KNote.Model.Dto;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+
+using KNote.ClientWin.Components;
+using KNote.ClientWin.Core;
+using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views
 {
@@ -76,6 +77,25 @@ namespace KNote.ClientWin.Views
             panelBottom.Visible = true;
             StartPosition = FormStartPosition.CenterScreen;
         }
+      
+        public object SelectItem(FolderWithServiceRef item)
+        {
+            var treeNodes = treeViewFolders.Nodes.Find(item.FolderInfo.FolderId.ToString(), true);
+
+            if (treeNodes.Length > 0)
+            {
+                var node = treeNodes[0];
+                treeViewFolders.SelectedNode = node;
+                return node;
+            }
+            else
+                return null;
+        }
+
+        public void ShowInfo(string info)
+        {
+            MessageBox.Show(info);
+        }
 
         #region Extensions managment ... 
 
@@ -121,31 +141,9 @@ namespace KNote.ClientWin.Views
 
         #endregion 
 
-
-        // TODO: pendiente ... 
-
-        public object SelectItem(FolderWithServiceRef item)
-        {
-            var treeNodes = treeViewFolders.Nodes.Find(item.FolderInfo.FolderId.ToString(), true);
-
-            if (treeNodes.Length > 0)
-            {
-                var node = treeNodes[0];
-                treeViewFolders.SelectedNode = node;
-                return node;
-            }
-            else
-                return null;
-        }
-
-        public void ShowInfo(string info)
-        {
-            MessageBox.Show(info);
-        }
-
         #endregion
 
-        #region Form handlers events
+        #region Form events handlers 
 
         private void treeViewFolders_AfterSelect(object sender, TreeViewEventArgs e)
         {

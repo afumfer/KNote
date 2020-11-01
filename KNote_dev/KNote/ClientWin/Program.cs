@@ -47,10 +47,17 @@ namespace KNote.ClientWin
             store.LogActivated = false;
 
             var defaultServiceRef = new ServiceRef(
-                "Test db1 (SQL Server Prod - Dapper", 
+                "Test db1 (SQL Server Prod - Dapper",
                 @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
                 "Microsoft.Data.SqlClient",
                 "Dapper");
+
+            //var defaultServiceRef = new ServiceRef(
+            //    "Tasks db3 (Sqlite)",
+            //    @"Data Source=D:\DBs\KNote02DB_Sqlite.db",
+            //    "Microsoft.Data.Sqlite",
+            //    "Dapper");
+
 
             var folder = (await defaultServiceRef.Service.Folders.GetHomeAsync()).Entity;
 
@@ -77,11 +84,21 @@ namespace KNote.ClientWin
                 "Microsoft.Data.SqlClient",
                 "Dapper"));
 
+
+            // --------------------------
+
             store.AddServiceRef(new ServiceRef
                 ("Tasks db3 (Sqlite)",
                 @"Data Source=D:\DBs\KNote02DB_Sqlite.db",
-                "Microsoft.Data.Sqlite", 
-                "Dapper"));
+                "Microsoft.Data.Sqlite",
+                "EntityFramework"));
+
+            //store.AddServiceRef(new ServiceRef(
+            //    "Test db1 (SQL Server Prod - Dapper",
+            //    @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
+            //    "Microsoft.Data.SqlClient",
+            //    "Dapper"));
+
         }
     }
 }
