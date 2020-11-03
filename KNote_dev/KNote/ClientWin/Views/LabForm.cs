@@ -101,7 +101,21 @@ namespace KNote.ClientWin.Views
 
         private void buttonTest4_Click(object sender, EventArgs e)
         {
-            
+            //KNoteManagmentForm f = new KNoteManagmentForm(null);
+            //f.Show();
+
+            //NoteEditorForm n = new NoteEditorForm(null);
+            //n.Show();
+
+            //SplashForm f = new SplashForm(null);
+            //f.Show();
+
+            //NotifyForm nf = new NotifyForm(null);
+            //nf.Show();
+
+            ServerCOMForm sc = new ServerCOMForm();
+            sc.Show();
+
         }
 
         private void Trash()

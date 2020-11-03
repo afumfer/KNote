@@ -37,14 +37,14 @@ namespace KNote.ClientWin.Core
             return new NoteEditorForm(component);
         }
 
-        //#region Secondary views
+        #region Secondary views
 
-        //public IManagmentView NotifyView(KNoteManagmentCtrl ctrl)
-        //{
-        //    return new NotifyForm(ctrl);
-        //}
+        public IViewBase NotifyView(KNoteManagmentComponent component)
+        {
+            return new NotifyForm(component);
+        }
 
-        //#endregion 
+        #endregion 
 
     }
 }

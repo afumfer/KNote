@@ -165,7 +165,8 @@ namespace KNote.ClientWin.Views
             }
             catch (Exception ex)
             {
-                var msg = ex.Message;
+                //var msg = ex.Message;
+                throw ex;
                 //TODO: pendiente de registrar el error.
             }
             finally
@@ -177,8 +178,10 @@ namespace KNote.ClientWin.Views
 
         private void CoonfigureGridStd()
         {
-            //if (_configuredGrid)
-            //    return;
+            if (_configuredGrid)
+                return;
+
+            // TODO: arreglar esto ... (el grid de net core parece que no se comporta de la misma manera). 
 
             //DataGridViewCellStyle cellStyle0 = new DataGridViewCellStyle();
             //cellStyle0.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -189,39 +192,45 @@ namespace KNote.ClientWin.Views
             //DataGridViewCellStyle cellStyle2 = new DataGridViewCellStyle();
             //cellStyle2.DataSourceNullValue = new DateTime(1900, 1, 1);
 
-            //dataGridNotes.Columns[0].Visible = false; // NoteId
+            dataGridNotes.Columns[0].Visible = false;  // NoteId
             //dataGridNotes.Columns[0].Width = 40;
             //dataGridNotes.Columns[0].HeaderText = "Note Id";
             //dataGridNotes.Columns[0].DataPropertyName = "NoteId";
 
             //dataGridNotes.Columns[1].Visible = true; // NoteNumber
-            //dataGridNotes.Columns[1].Width = 50;
-            //dataGridNotes.Columns[1].HeaderText = "Number";
+            dataGridNotes.Columns[1].Width = 50;
+            dataGridNotes.Columns[1].HeaderText = "Number";
             //dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
             //dataGridNotes.Columns[1].DefaultCellStyle = cellStyle0;
 
-            //dataGridNotes.Columns[2].Width = 500;  // Topic
+            dataGridNotes.Columns[2].Width = 500;  // Topic
             //dataGridNotes.Columns[2].DataPropertyName = "Topic";
 
-            //dataGridNotes.Columns[3].Width = 65;  // Priority
+            dataGridNotes.Columns[3].Width = 125;  // CreationDateTime
+            dataGridNotes.Columns[3].HeaderText = "Creation date";
+            //dataGridNotes.Columns[5].DataPropertyName = "CreationDateTime";
+            //dataGridNotes.Columns[5].DefaultCellStyle = cellStyle2;
+
+            dataGridNotes.Columns[4].Width = 125;  // ModificationDateTime
+            dataGridNotes.Columns[4].HeaderText = "Modification date";
+            //dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
+            //dataGridNotes.Columns[6].DefaultCellStyle = cellStyle2;
+
+            dataGridNotes.Columns[5].Visible = false;  // Description 
+            dataGridNotes.Columns[6].Visible = false;  // ContentType
+            dataGridNotes.Columns[7].Visible = false;  // Script
+            dataGridNotes.Columns[8].Visible = false;  // InternalTags
+
+            dataGridNotes.Columns[9].Width = 200;  // Tags
+            //dataGridNotes.Columns[9].DataPropertyName = "Tags";
+
+
+            dataGridNotes.Columns[10].Width = 65;  // Priority
             //dataGridNotes.Columns[3].DefaultCellStyle = cellStyle1;
             //dataGridNotes.Columns[3].DataPropertyName = "Priority";
 
-            //dataGridNotes.Columns[4].Width = 200;  // Tags
-            //dataGridNotes.Columns[4].DataPropertyName = "Tags";
-
-            //dataGridNotes.Columns[5].Width = 115;  // CreationDateTime
-            //dataGridNotes.Columns[5].HeaderText = "Creation date";
-            //dataGridNotes.Columns[5].DataPropertyName = "CreationDateTime";
-            //dataGridNotes.Columns[5].DefaultCellStyle = cellStyle2;
-            
-            //dataGridNotes.Columns[6].Width = 115;  // ModificationDateTime
-            //dataGridNotes.Columns[6].HeaderText = "Modification date";
-            //dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
-            //dataGridNotes.Columns[6].DefaultCellStyle = cellStyle2;
-            
-            //dataGridNotes.Columns[7].Visible = false; // FolderId
-            //dataGridNotes.Columns[7].DataPropertyName = "FolderId";
+            dataGridNotes.Columns[11].Visible = false;  // FolderId 
+            dataGridNotes.Columns[12].Visible = false;  // NoteTypeId
 
             ////dataGridNotes.ColumnHeadersDefaultCellStyle.Font = new Font("Tahoma", 8, FontStyle.Regular, GraphicsUnit.Point);
 
@@ -231,6 +240,7 @@ namespace KNote.ClientWin.Views
 
             //dataGridNotes.DefaultCellStyle.Font = new Font("Tahoma", 8, FontStyle.Regular, GraphicsUnit.Point);
             //dataGridNotes.DefaultCellStyle.BackColor = Color.Empty;
+
             //dataGridNotes.AlternatingRowsDefaultCellStyle.BackColor = SystemColors.ControlLight;
             //dataGridNotes.CellBorderStyle = DataGridViewCellBorderStyle.Single;
             //dataGridNotes.GridColor = SystemColors.ControlDark;
