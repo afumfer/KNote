@@ -17,6 +17,8 @@ namespace KNote.ClientWin.Views
         private FolderSelectorComponent _folderSelector;
         private NotesSelectorComponent _notesSelector;
 
+        private KNoteManagmentComponent _knoteManagment;
+
         private FolderWithServiceRef temp;
 
         public LabForm()
@@ -29,6 +31,8 @@ namespace KNote.ClientWin.Views
             _store = store;
             _folderSelector = new FolderSelectorComponent(_store);
             _notesSelector = new NotesSelectorComponent(_store);
+
+            _knoteManagment = new KNoteManagmentComponent(_store);
 
             _folderSelector.EntitySelection += _folderSelector_EntitySelection;
             _notesSelector.EntitySelection += _notesSelector_EntitySelection;
@@ -55,9 +59,10 @@ namespace KNote.ClientWin.Views
 
             labelInfo1.Text = $" {e.Entity.ServiceRef.Alias} - {e.Entity.FolderInfo?.Name}";
             if (_notesSelector != null)
-                _notesSelector.GetListNotesAsync(e.Entity);
+                _notesSelector.LoadNotesByFolderAsync(e.Entity);
         }
 
+        #region Tests 0
 
         //private async Task LoadNotes()  // opción 2
         private async void LoadNotes()   // opción 3
@@ -88,19 +93,46 @@ namespace KNote.ClientWin.Views
             //LoadNotes();   // opción 3
         }
 
+        #endregion 
+
         private void buttonTest2_Click(object sender, EventArgs e)
-        {            
-            _folderSelector.Run();            
+        {
+            _folderSelector.Run();
+            _notesSelector.Run();
+           
         }
 
         private void buttonTest3_Click(object sender, EventArgs e)
         {
-            
-            _notesSelector.Run();
+            _knoteManagment.Run();
         }
 
         private void buttonTest4_Click(object sender, EventArgs e)
+        {            
+        }
+
+        private void Trash()
         {
+
+            //_folderSelector.EmbededMode = true;
+            //_folderSelector.ModalMode = false;
+
+            //panelTest1.Controls.Add((Control)_folderSelector.View.PanelView());
+            //_folderSelector.Run();
+
+            //Form1 f = new Form1();
+            //panelTest1.Controls.Add((Control)f.p1);
+            //f.Show();
+
+            //_notesSelector.Finalize();
+            //labelInfo3.Text = "***" + _notesSelector.SelectedEntity?.Topic;
+
+            // _folderSelector.Finalize();
+            // labelInfo2.Text = _folderSelector.SelectedEntity.FolderInfo?.Name;
+            // _folderSelector.SelectFolder(temp);
+
+            //temp = _folderSelector.SelectedEntity;
+
             //KNoteManagmentForm f = new KNoteManagmentForm(null);
             //f.Show();
 
@@ -113,18 +145,9 @@ namespace KNote.ClientWin.Views
             //NotifyForm nf = new NotifyForm(null);
             //nf.Show();
 
-            ServerCOMForm sc = new ServerCOMForm();
-            sc.Show();
+            //ServerCOMForm sc = new ServerCOMForm();
+            //sc.Show();
 
-        }
-
-        private void Trash()
-        {
-            //_folderSelector.Finalize();
-            //labelInfo2.Text = _folderSelector.SelectedEntity.FolderInfo?.Name;
-            // _folderSelector.SelectFolder(temp);
-
-            //temp = _folderSelector.SelectedEntity;
 
         }
 

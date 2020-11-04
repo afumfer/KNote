@@ -25,6 +25,11 @@ namespace KNote.ClientWin.Views
             _com = ctrl;
         }
 
+        public Control PanelView()
+        {
+            return null;
+        }
+
         public void CleanView()
         {
             labelInfoIdNote.Text = "";

@@ -52,7 +52,7 @@ namespace KNote.ClientWin.Components
             get { return _listNotes; }
         }
 
-        public async void GetListNotesAsync(FolderWithServiceRef folderWithServiceRef)
+        public async void LoadNotesByFolderAsync(FolderWithServiceRef folderWithServiceRef)
         {
             _service = folderWithServiceRef.ServiceRef.Service;
             _folder = folderWithServiceRef.FolderInfo;
@@ -64,35 +64,6 @@ namespace KNote.ClientWin.Components
 
             View.RefreshView();            
         }
-
-
-        //protected override void LoadDataSelector()
-        //{
-        //    try
-        //    {
-        //        if (ListEntities != null)
-        //            ListEntities.Clear();
-        //        else
-        //            ListEntities = new List<NoteItemDto>();
-
-        //        if (DataSource != null)
-        //        {
-        //            if (DataSource.NotesFilter.Folder == null)
-        //                ListEntities = DataSource.ServiceRef.Service
-        //                    .Notes.GetNoteItemList(null).Entity;
-        //            else
-        //                ListEntities = DataSource.ServiceRef.Service
-        //                    .Notes.GetNoteItemList(DataSource.NotesFilter.Folder.FolderId).Entity;
-        //            .Notes3.GetNoteItemList(n => n.FolderId == DataSource.NotesFilter.Folder.FolderId).Entity;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        string msg = "KMSG: Ha ocurrido el siguiente error al cargar la lista de notas: >> ";
-        //        msg += ex.Message;
-        //        ShowMessage(msg, "KMSG: Error en la carga de la lista de notas");
-        //    }
-        //}
 
         #endregion
     }

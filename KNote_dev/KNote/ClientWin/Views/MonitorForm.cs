@@ -22,6 +22,11 @@ namespace KNote.ClientWin.Views
             _com = com;
         }
 
+        public Control PanelView()
+        {
+            return null; 
+        }
+
         public void OnClosingView()
         {
             _viewFinalized = true;

@@ -29,9 +29,19 @@ namespace KNote.ClientWin.Views
 
         #region ISelectorView interface 
 
+        public Control PanelView()
+        {
+            return panelForm;
+        }
+
         public void ShowView()
         {
             RefreshView();
+
+            if (!_com.EmbededMode)
+                ConfigureWindowMode();
+            else
+                ConfigureEmbededMode();
 
             if (_com.ModalMode)
                 this.ShowDialog();
@@ -136,6 +146,16 @@ namespace KNote.ClientWin.Views
                 _com.Finalize();
         }
 
+        private void buttonAccept_Click(object sender, EventArgs e)
+        {
+            _com.AcceptAction();
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            _com.CancelAction();
+        }
+
         #endregion
 
         #region Private methods
@@ -144,7 +164,6 @@ namespace KNote.ClientWin.Views
         {
             if (_skipSelectionChanged || _countRepetition > 5)
                 return;
-
             try
             {
                 if (_com.ListNotes == null)
@@ -157,17 +176,17 @@ namespace KNote.ClientWin.Views
                     _com.SelectedEntity = DataGridViewRowToNoteItemList(sr);                    
                     _com.NotifySelectedEntity();
                 }
-                else
-                {
-                    _com.SelectedEntity = null;
-                    _com.NotifySelectedEntity();
-                }
+                //else
+                //{
+                //    _com.SelectedEntity = null;
+                //    _com.NotifySelectedEntity();
+                //}
             }
             catch (Exception ex)
             {
                 //var msg = ex.Message;
-                throw ex;
                 //TODO: pendiente de registrar el error.
+                throw ex;                
             }
             finally
             {
@@ -301,7 +320,6 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
 
     }
 }

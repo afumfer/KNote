@@ -24,12 +24,10 @@ namespace KNote.ClientWin.Components
 
         protected override Result OnInitialized()
         {
-            Result result;
+            var result = base.OnInitialized();
 
             try
-            {
-                result = base.OnInitialized();
-                
+            {                                
                 View.ShowView();
 
                 Store.ComponentsStateChanged += Store_ComponentsStateChanged;
@@ -37,18 +35,38 @@ namespace KNote.ClientWin.Components
                 Store.ActiveFolderChanged += Store_ActiveFolderChanged;
                 Store.RemovedServiceRef += Store_RemovedServiceRef;
                 Store.ComponentsResultChanged += Store_ComponentsResultChanged;
-                    
-                // TODO: Add more context events controllers here.
-                // ...    
+                      
             }
             catch (Exception ex)
-            {
-                result = new Result();
+            {                
                 result.AddErrorMessage(ex.Message);
             }
 
             return result;
         }
+
+        protected override Result OnFinalized()
+        {
+            var result = base.OnFinalized();
+
+            try
+            {
+                Store.ComponentsStateChanged -= Store_ComponentsStateChanged;
+                Store.AddedServiceRef -= Store_AddedServiceRef;
+                Store.ActiveFolderChanged -= Store_ActiveFolderChanged;
+                Store.RemovedServiceRef -= Store_RemovedServiceRef;
+                Store.ComponentsResultChanged -= Store_ComponentsResultChanged;
+
+            }
+            catch (Exception ex)
+            {
+                result.AddErrorMessage(ex.Message);                
+            }
+
+            return result;
+        }
+
+        #region Store events handlers
 
         private void Store_ComponentsStateChanged(object sender, ComponentEventArgs<EComponentState> e)
         {
@@ -61,9 +79,7 @@ namespace KNote.ClientWin.Components
             var info = $"{DateTime.Now} - [ControllersResultChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((ComponentBase)sender).ComponentId}";
             OnShowLog(info);
         }
-
-        #region Private methods 
-
+       
         private void Store_RemovedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
         {
             var info = $"{DateTime.Now} - [RemovedServiceRef] - {sender.ToString()} - {e.Entity.Alias.ToString()}";
@@ -82,6 +98,9 @@ namespace KNote.ClientWin.Components
             OnShowLog(info);
         }
 
+        #endregion 
+
+        #region Private methods
 
         private void OnShowLog(string info)
         {

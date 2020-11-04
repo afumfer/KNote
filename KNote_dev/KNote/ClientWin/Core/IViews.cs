@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace KNote.ClientWin.Core
 {
@@ -10,6 +11,7 @@ namespace KNote.ClientWin.Core
 
     public interface IViewBase
     {
+        Control PanelView();
         void ShowView();
         void OnClosingView();
         void RefreshView();

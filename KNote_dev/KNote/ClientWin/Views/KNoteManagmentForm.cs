@@ -22,13 +22,28 @@ namespace KNote.ClientWin.Views
             InitializeComponent();
 
             _com = com;
+            
         }
 
         #region IViewBase interface 
 
-        public void OnClosingView()
+        public Control PanelView()
         {
-            this.Close();
+            return null;
+        }
+
+        public void ShowView()
+        {
+            RefreshView();
+
+            if (_com.ModalMode)
+                this.ShowDialog();
+            else
+            {
+                this.Show();
+            }
+            Application.DoEvents();
+            InitializeCtrComponents();
         }
 
         public void RefreshView()
@@ -49,27 +64,21 @@ namespace KNote.ClientWin.Views
             //labelFolerName.Text = folderName;
         }
 
+        public void OnClosingView()
+        {
+            _viewFinalized = true;
+            this.Close();
+        }
+
         public void ShowInfo(string info)
         {
             //MessageBox.Show(info);            
             statusLabel1.Text = info;
         }
 
-        public void ShowView()
-        {
-            //RefreshView();
+        #endregion
 
-            //if (_ctrl.ModalMode)
-            //    this.ShowDialog();
-            //else
-            //{
-            //    this.Show();
-            //}
-            //Application.DoEvents();
-            //InitializeCtrComponents();
-        }
-
-        #endregion 
+        #region Form events handlers
 
         private void menu_Click(object sender, EventArgs e)
         {
@@ -108,13 +117,21 @@ namespace KNote.ClientWin.Views
             //}
         }
 
+        private void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!_viewFinalized)
+                _com.Finalize();
+        }
+
+        #endregion
+
         #region Private methods
 
         private void InitializeCtrComponents()
         {
-            //tabTreeFolders.Controls.Add((Form)_ctrl.FoldersSelectorCtrl.View);
-            //splitContainer2.Panel1.Controls.Add((Form)_ctrl.NotesSelectorCtrl.View);
-            //splitContainer2.Panel2.Controls.Add((Form)_ctrl.NoteEditorCtrl.View);
+            tabTreeFolders.Controls.Add(_com.FoldersSelectorComponent.View.PanelView());
+            splitContainer2.Panel1.Controls.Add(_com.NotesSelectorComponent.View.PanelView());
+            //splitContainer2.Panel2.Controls.Add((Form)_com.NoteEditorCtrl.View);
         }
 
         #endregion

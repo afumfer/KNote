@@ -55,7 +55,7 @@
             this.buttonTest2.Name = "buttonTest2";
             this.buttonTest2.Size = new System.Drawing.Size(292, 24);
             this.buttonTest2.TabIndex = 1;
-            this.buttonTest2.Text = "Test 2 - Run Folders Selector Component";
+            this.buttonTest2.Text = "Test 2 - Run Folders /Notes selector";
             this.buttonTest2.UseVisualStyleBackColor = true;
             this.buttonTest2.Click += new System.EventHandler(this.buttonTest2_Click);
             // 
@@ -82,7 +82,7 @@
             this.buttonTest3.Name = "buttonTest3";
             this.buttonTest3.Size = new System.Drawing.Size(294, 24);
             this.buttonTest3.TabIndex = 4;
-            this.buttonTest3.Text = "Test 3- Run NotesSelector";
+            this.buttonTest3.Text = "Test 3- Run KNoteManagment";
             this.buttonTest3.UseVisualStyleBackColor = true;
             this.buttonTest3.Click += new System.EventHandler(this.buttonTest3_Click);
             // 

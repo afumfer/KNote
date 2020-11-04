@@ -30,58 +30,16 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FoldersSelectorForm));
+            this.imageListFolders = new System.Windows.Forms.ImageList(this.components);
+            this.contextMenuFolders = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.panelView = new System.Windows.Forms.Panel();
             this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.treeViewFolders = new System.Windows.Forms.TreeView();
-            this.imageListFolders = new System.Windows.Forms.ImageList(this.components);
-            this.contextMenuFolders = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.panelView.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // panelBottom
-            // 
-            this.panelBottom.Controls.Add(this.buttonCancel);
-            this.panelBottom.Controls.Add(this.buttonAccept);
-            this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 425);
-            this.panelBottom.Name = "panelBottom";
-            this.panelBottom.Size = new System.Drawing.Size(394, 44);
-            this.panelBottom.TabIndex = 0;
-            // 
-            // buttonCancel
-            // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(296, 10);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(86, 24);
-            this.buttonCancel.TabIndex = 1;
-            this.buttonCancel.Text = "&Cancel";
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
-            // 
-            // buttonAccept
-            // 
-            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(207, 10);
-            this.buttonAccept.Name = "buttonAccept";
-            this.buttonAccept.Size = new System.Drawing.Size(83, 24);
-            this.buttonAccept.TabIndex = 0;
-            this.buttonAccept.Text = "&Accept";
-            this.buttonAccept.UseVisualStyleBackColor = true;
-            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
-            // 
-            // treeViewFolders
-            // 
-            this.treeViewFolders.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeViewFolders.ImageIndex = 0;
-            this.treeViewFolders.ImageList = this.imageListFolders;
-            this.treeViewFolders.Location = new System.Drawing.Point(0, 0);
-            this.treeViewFolders.Name = "treeViewFolders";
-            this.treeViewFolders.SelectedImageIndex = 0;
-            this.treeViewFolders.Size = new System.Drawing.Size(394, 425);
-            this.treeViewFolders.TabIndex = 1;
-            this.treeViewFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewFolders_AfterSelect);
             // 
             // imageListFolders
             // 
@@ -97,29 +55,83 @@
             this.contextMenuFolders.Name = "contextMenuFolders";
             this.contextMenuFolders.Size = new System.Drawing.Size(61, 4);
             // 
+            // panelView
+            // 
+            this.panelView.Controls.Add(this.panelBottom);
+            this.panelView.Controls.Add(this.treeViewFolders);
+            this.panelView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelView.Location = new System.Drawing.Point(0, 0);
+            this.panelView.Name = "panelView";
+            this.panelView.Size = new System.Drawing.Size(460, 468);
+            this.panelView.TabIndex = 2;
+            // 
+            // panelBottom
+            // 
+            this.panelBottom.Controls.Add(this.buttonCancel);
+            this.panelBottom.Controls.Add(this.buttonAccept);
+            this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelBottom.Location = new System.Drawing.Point(0, 424);
+            this.panelBottom.Name = "panelBottom";
+            this.panelBottom.Size = new System.Drawing.Size(460, 44);
+            this.panelBottom.TabIndex = 0;
+            // 
+            // buttonCancel
+            // 
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancel.Location = new System.Drawing.Point(362, 8);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Size = new System.Drawing.Size(86, 24);
+            this.buttonCancel.TabIndex = 1;
+            this.buttonCancel.Text = "&Cancel";
+            this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            // 
+            // buttonAccept
+            // 
+            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAccept.Location = new System.Drawing.Point(273, 8);
+            this.buttonAccept.Name = "buttonAccept";
+            this.buttonAccept.Size = new System.Drawing.Size(83, 24);
+            this.buttonAccept.TabIndex = 0;
+            this.buttonAccept.Text = "&Accept";
+            this.buttonAccept.UseVisualStyleBackColor = true;
+            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
+            // 
+            // treeViewFolders
+            // 
+            this.treeViewFolders.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewFolders.ImageIndex = 0;
+            this.treeViewFolders.ImageList = this.imageListFolders;
+            this.treeViewFolders.Location = new System.Drawing.Point(0, 0);
+            this.treeViewFolders.Name = "treeViewFolders";
+            this.treeViewFolders.SelectedImageIndex = 0;
+            this.treeViewFolders.Size = new System.Drawing.Size(460, 468);
+            this.treeViewFolders.TabIndex = 1;
+            this.treeViewFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewFolders_AfterSelect);
+            // 
             // FoldersSelectorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(394, 469);
-            this.Controls.Add(this.treeViewFolders);
-            this.Controls.Add(this.panelBottom);
+            this.ClientSize = new System.Drawing.Size(460, 468);
+            this.Controls.Add(this.panelView);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FoldersSelectorForm";
             this.Text = "Folders selector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FoldersSelectorForm_FormClosing);
+            this.panelView.ResumeLayout(false);
             this.panelBottom.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
+        private System.Windows.Forms.ImageList imageListFolders;
+        private System.Windows.Forms.ContextMenuStrip contextMenuFolders;
+        private System.Windows.Forms.Panel panelView;
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonAccept;
         private System.Windows.Forms.TreeView treeViewFolders;
-        private System.Windows.Forms.ImageList imageListFolders;
-        private System.Windows.Forms.ContextMenuStrip contextMenuFolders;
     }
 }

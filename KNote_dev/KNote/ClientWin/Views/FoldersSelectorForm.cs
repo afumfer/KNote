@@ -26,10 +26,20 @@ namespace KNote.ClientWin.Views
 
         #region ISelectorView interface
 
+        public Control PanelView()
+        {
+            return panelView;
+        }
+
         public void ShowView()
         {
             RefreshView();
 
+            if (!_com.EmbededMode)            
+                ConfigureWindowMode();            
+            else            
+                ConfigureEmbededMode();
+                         
             if (_com.ModalMode)
                 this.ShowDialog();
             else

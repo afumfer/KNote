@@ -137,7 +137,7 @@
             this.menuMangment.Location = new System.Drawing.Point(0, 0);
             this.menuMangment.Name = "menuMangment";
             this.menuMangment.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
-            this.menuMangment.Size = new System.Drawing.Size(1124, 24);
+            this.menuMangment.Size = new System.Drawing.Size(1014, 24);
             this.menuMangment.TabIndex = 2;
             this.menuMangment.Text = "KNote menu managment";
             // 
@@ -599,10 +599,10 @@
             this.statusLabel1,
             this.statusS1,
             this.statusLabel2});
-            this.statusBarManagment.Location = new System.Drawing.Point(0, 798);
+            this.statusBarManagment.Location = new System.Drawing.Point(0, 668);
             this.statusBarManagment.Name = "statusBarManagment";
             this.statusBarManagment.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
-            this.statusBarManagment.Size = new System.Drawing.Size(1124, 22);
+            this.statusBarManagment.Size = new System.Drawing.Size(1014, 22);
             this.statusBarManagment.TabIndex = 3;
             this.statusBarManagment.Text = "statusStrip1";
             // 
@@ -640,7 +640,7 @@
             this.toolConfiguration});
             this.toolBarManagment.Location = new System.Drawing.Point(0, 24);
             this.toolBarManagment.Name = "toolBarManagment";
-            this.toolBarManagment.Size = new System.Drawing.Size(1124, 25);
+            this.toolBarManagment.Size = new System.Drawing.Size(1014, 25);
             this.toolBarManagment.TabIndex = 4;
             this.toolBarManagment.Text = "toolStrip1";
             // 
@@ -793,7 +793,7 @@
             this.tabTreeFolders.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabTreeFolders.Name = "tabTreeFolders";
             this.tabTreeFolders.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabTreeFolders.Size = new System.Drawing.Size(317, 655);
+            this.tabTreeFolders.Size = new System.Drawing.Size(284, 533);
             this.tabTreeFolders.TabIndex = 0;
             this.tabTreeFolders.Text = "Tree folders  ";
             this.tabTreeFolders.ToolTipText = "Tree folders view";
@@ -806,7 +806,7 @@
             this.tabSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabSearch.Name = "tabSearch";
             this.tabSearch.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabSearch.Size = new System.Drawing.Size(317, 655);
+            this.tabSearch.Size = new System.Drawing.Size(284, 533);
             this.tabSearch.TabIndex = 1;
             this.tabSearch.Text = "Search  ";
             this.tabSearch.ToolTipText = "Search panel";
@@ -854,6 +854,7 @@
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "KNoteManagmentForm";
             this.Text = "KeyNote Managment";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KNoteManagmentForm_FormClosing);
             this.menuMangment.ResumeLayout(false);
             this.menuMangment.PerformLayout();
             this.statusBarManagment.ResumeLayout(false);

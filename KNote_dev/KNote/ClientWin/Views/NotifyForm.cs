@@ -24,6 +24,10 @@ namespace KNote.ClientWin.Views
         }
 
         #region IManagmentView implementation
+        public Control PanelView()
+        {
+            return null;
+        }
 
         public void CloseView()
         {

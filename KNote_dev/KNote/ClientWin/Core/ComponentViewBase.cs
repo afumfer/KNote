@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KNote.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -25,7 +26,11 @@ namespace KNote.ClientWin.Core
         }
         
         protected abstract TView CreateView();
-             
+
+        protected override Result OnInitialized()
+        {
+            return base.OnInitialized();
+        }
     }
 
     abstract public class ComponentSelectorViewBase<TView, TEntity> : ComponentViewBase<TView>

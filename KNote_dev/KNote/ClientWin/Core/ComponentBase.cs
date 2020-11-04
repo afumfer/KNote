@@ -64,11 +64,6 @@ namespace KNote.ClientWin.Core
             ComponentResultChanged?.Invoke(this, new ComponentEventArgs<EComponentResult>(resutl));
         }
 
-
-
-        // TODO: Pendiente de valorar la implementación de eventos específicos 
-        //       de inicialización de la controladora y finalización de la controladora
-
         #endregion
 
         #region Constructor
@@ -83,7 +78,6 @@ namespace KNote.ClientWin.Core
         }
 
         #endregion
-
 
         protected virtual Result OnInitialized()
         {
@@ -197,10 +191,11 @@ namespace KNote.ClientWin.Core
                 {
                     field.SetValue(this, null);
                 }
-                else if (v != null && v is ModelBase)
-                {
-                    field.SetValue(this, null);
-                }
+                // TODO: pensar mejor esto, dejar el resto de campos del objeto intacto.
+                //else if (v != null && v is ModelBase)
+                //{
+                //    field.SetValue(this, null);
+                //}
                 else if (v != null && v is IViewBase)
                 {
                     field.SetValue(this, null);
