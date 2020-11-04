@@ -32,12 +32,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FoldersSelectorForm));
             this.imageListFolders = new System.Windows.Forms.ImageList(this.components);
             this.contextMenuFolders = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.panelView = new System.Windows.Forms.Panel();
+            this.panelForm = new System.Windows.Forms.Panel();
             this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.treeViewFolders = new System.Windows.Forms.TreeView();
-            this.panelView.SuspendLayout();
+            this.panelForm.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,15 +55,15 @@
             this.contextMenuFolders.Name = "contextMenuFolders";
             this.contextMenuFolders.Size = new System.Drawing.Size(61, 4);
             // 
-            // panelView
+            // panelForm
             // 
-            this.panelView.Controls.Add(this.panelBottom);
-            this.panelView.Controls.Add(this.treeViewFolders);
-            this.panelView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelView.Location = new System.Drawing.Point(0, 0);
-            this.panelView.Name = "panelView";
-            this.panelView.Size = new System.Drawing.Size(460, 468);
-            this.panelView.TabIndex = 2;
+            this.panelForm.Controls.Add(this.panelBottom);
+            this.panelForm.Controls.Add(this.treeViewFolders);
+            this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelForm.Location = new System.Drawing.Point(0, 0);
+            this.panelForm.Name = "panelForm";
+            this.panelForm.Size = new System.Drawing.Size(460, 468);
+            this.panelForm.TabIndex = 2;
             // 
             // panelBottom
             // 
@@ -114,12 +114,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(460, 468);
-            this.Controls.Add(this.panelView);
+            this.Controls.Add(this.panelForm);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FoldersSelectorForm";
             this.Text = "Folders selector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FoldersSelectorForm_FormClosing);
-            this.panelView.ResumeLayout(false);
+            this.panelForm.ResumeLayout(false);
             this.panelBottom.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -128,7 +128,7 @@
         #endregion
         private System.Windows.Forms.ImageList imageListFolders;
         private System.Windows.Forms.ContextMenuStrip contextMenuFolders;
-        private System.Windows.Forms.Panel panelView;
+        private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonAccept;

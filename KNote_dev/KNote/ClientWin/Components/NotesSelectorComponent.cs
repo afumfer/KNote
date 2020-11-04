@@ -23,15 +23,6 @@ namespace KNote.ClientWin.Components
             return Store.FactoryViews.View(this);
         }
 
-        protected override Result OnInitialized()
-        {
-            var result = base.OnInitialized();
-
-            View.ShowView();
-
-            return result;
-        }
-
         #region Component specific public members
 
         private IKntService _service;

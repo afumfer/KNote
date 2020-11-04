@@ -10,14 +10,14 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Components
 {
-    public class MonitorComponent : ComponentViewBase<IViewBase>
+    public class MonitorComponent : ComponentViewBase<IViewConfigurable>
     {
         public MonitorComponent(Store store) : base(store)
         {
 
         }
             
-        protected override IViewBase CreateView()
+        protected override IViewConfigurable CreateView()
         {
             return Store.FactoryViews.View(this);
         }

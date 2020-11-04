@@ -10,13 +10,13 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Components
 {
-    public class NoteEditorComponent : ComponentViewBase<IViewBase>
+    public class NoteEditorComponent : ComponentViewBase<IViewConfigurable>
     {
         public NoteEditorComponent(Store store) : base(store)
         {
         }
 
-        protected override IViewBase CreateView()
+        protected override IViewConfigurable CreateView()
         {
             throw new NotImplementedException();
         }

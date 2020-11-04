@@ -11,7 +11,7 @@ using KNote.ClientWin.Components;
 
 namespace KNote.ClientWin.Views
 {
-    public partial class MonitorForm : Form, IViewBase
+    public partial class MonitorForm : Form, IViewConfigurable
     {
         private readonly MonitorComponent _com;
         private bool _viewFinalized = false;
@@ -57,6 +57,16 @@ namespace KNote.ClientWin.Views
         private void buttonClearMessages_Click(object sender, EventArgs e)
         {
             listBoxMessages.Items.Clear();
+        }
+
+        public void ConfigureEmbededMode()
+        {
+            
+        }
+
+        public void ConfigureWindowMode()
+        {
+            
         }
     }
 }

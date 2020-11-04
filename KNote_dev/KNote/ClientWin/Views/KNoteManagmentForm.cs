@@ -12,7 +12,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views
 {
-    public partial class KNoteManagmentForm : Form, IViewBase
+    public partial class KNoteManagmentForm : Form, IViewConfigurable
     {
         private readonly KNoteManagmentComponent _com;
         private bool _viewFinalized = false;
@@ -132,6 +132,16 @@ namespace KNote.ClientWin.Views
             tabTreeFolders.Controls.Add(_com.FoldersSelectorComponent.View.PanelView());
             splitContainer2.Panel1.Controls.Add(_com.NotesSelectorComponent.View.PanelView());
             //splitContainer2.Panel2.Controls.Add((Form)_com.NoteEditorCtrl.View);
+        }
+
+        public void ConfigureEmbededMode()
+        {
+            
+        }
+
+        public void ConfigureWindowMode()
+        {
+            
         }
 
         #endregion

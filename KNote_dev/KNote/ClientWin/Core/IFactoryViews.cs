@@ -8,10 +8,10 @@ namespace KNote.ClientWin.Core
 {
     public interface IFactoryViews
     {
-        IViewBase View(MonitorComponent component);
+        IViewConfigurable View(MonitorComponent component);
         ISelectorView<FolderWithServiceRef> View(FolderSelectorComponent component);
         ISelectorView<NoteInfoDto> View(NotesSelectorComponent component);
-        IViewBase View(KNoteManagmentComponent component);
+        IViewConfigurable View(KNoteManagmentComponent component);
         IEditorView<NoteDto> View(NoteEditorComponent component);
         IViewBase NotifyView(KNoteManagmentComponent component);
     }

@@ -91,14 +91,15 @@ namespace KNote.ClientWin.Core
 
         protected virtual Result CheckPreconditions()
         {
+            var res = new Result();
+
             // TODO: En el futuro se implementarán reglas genéricas
             //       para todas las controladoras.
             //       Estas reglas se podrán sobreescibir o complementar en mis  
             //       clases derivadas. 
             //       Por ahora las precondiciones de la clase base 
-            //       siempre se superan 
-            var res = new Result();
-            
+            //       siempre se superan             
+
             return res;
         }
 

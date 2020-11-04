@@ -6,6 +6,7 @@ using System.Text;
 namespace KNote.ClientWin.Core
 {
     abstract public class ComponentViewBase<TView> : ComponentBase
+        where TView : IViewConfigurable
     {
         public ComponentViewBase(Store store): base(store)
         {
@@ -29,11 +30,24 @@ namespace KNote.ClientWin.Core
 
         protected override Result OnInitialized()
         {
-            return base.OnInitialized();
+            var result = base.OnInitialized();
+
+            View.RefreshView();
+
+            if (!EmbededMode)
+                View.ConfigureWindowMode();
+            else
+                View.ConfigureEmbededMode();
+
+            View.ShowView();
+
+            return result;
         }
+
     }
 
     abstract public class ComponentSelectorViewBase<TView, TEntity> : ComponentViewBase<TView>
+        where TView : IViewConfigurable
     {
         public ComponentSelectorViewBase(Store store) : base(store)
         {

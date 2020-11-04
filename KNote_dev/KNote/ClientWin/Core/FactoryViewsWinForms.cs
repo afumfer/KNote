@@ -12,7 +12,7 @@ namespace KNote.ClientWin.Core
 {
     public class FactoryViewsWinForms : IFactoryViews
     {
-        public IViewBase View(MonitorComponent component)
+        public IViewConfigurable View(MonitorComponent component)
         {
             return new MonitorForm(component);
         }
@@ -27,7 +27,7 @@ namespace KNote.ClientWin.Core
             return new NotesSelectorForm(component);
         }
 
-        public IViewBase View(KNoteManagmentComponent component)
+        public IViewConfigurable View(KNoteManagmentComponent component)
         {
             return new KNoteManagmentForm(component);
         }

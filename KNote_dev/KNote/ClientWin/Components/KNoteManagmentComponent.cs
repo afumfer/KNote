@@ -10,7 +10,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Components
 {
-    public class KNoteManagmentComponent : ComponentViewBase<IViewBase>
+    public class KNoteManagmentComponent : ComponentViewBase<IViewConfigurable>
     {
         public KNoteManagmentComponent(Store store) : base(store)
         {
@@ -19,7 +19,7 @@ namespace KNote.ClientWin.Components
 
         #region Views
 
-        protected override IViewBase CreateView()
+        protected override IViewConfigurable CreateView()
         {
             return Store.FactoryViews.View(this);
         }

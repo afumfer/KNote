@@ -18,7 +18,7 @@ namespace KNote.ClientWin.Core
         void ShowInfo(string info);
     }
 
-    public interface IViewConfigurable
+    public interface IViewConfigurable: IViewBase
     {
         void ConfigureEmbededMode();
         void ConfigureWindowMode();
@@ -28,13 +28,13 @@ namespace KNote.ClientWin.Core
 
     #region Generals views
 
-    public interface IEditorView<T> : IViewBase, IViewConfigurable
+    public interface IEditorView<T> : IViewConfigurable
     {        
         void CleanView();        
         void RefreshBindingModel();        
     }
 
-    public interface ISelectorView<TItem> : IViewBase, IViewConfigurable
+    public interface ISelectorView<TItem> : IViewConfigurable
     {                
         void RefreshItem(TItem item);
         void DeleteItem(TItem item);

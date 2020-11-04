@@ -36,13 +36,6 @@ namespace KNote.ClientWin.Views
 
         public void ShowView()
         {
-            RefreshView();
-
-            if (!_com.EmbededMode)
-                ConfigureWindowMode();
-            else
-                ConfigureEmbededMode();
-
             if (_com.ModalMode)
                 this.ShowDialog();
             else

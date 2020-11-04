@@ -28,18 +28,11 @@ namespace KNote.ClientWin.Views
 
         public Control PanelView()
         {
-            return panelView;
+            return panelForm;
         }
 
         public void ShowView()
-        {
-            RefreshView();
-
-            if (!_com.EmbededMode)            
-                ConfigureWindowMode();            
-            else            
-                ConfigureEmbededMode();
-                         
+        {                         
             if (_com.ModalMode)
                 this.ShowDialog();
             else
@@ -55,8 +48,7 @@ namespace KNote.ClientWin.Views
 
             foreach(var serviceRef in _com.ServicesRef)
             {
-                rootRepNode = new TreeNode("[" + serviceRef.Alias + "]", 2, 2);
-                //rootRepNode = new TreeNode("[" + serviceRef.Alias + "]");
+                rootRepNode = new TreeNode("[" + serviceRef.Alias + "]", 2, 2);         
                 rootRepNode.Tag = serviceRef;                
                 treeViewFolders.Nodes.Add(rootRepNode);
 
@@ -212,8 +204,7 @@ namespace KNote.ClientWin.Views
 
             foreach (var f in folders)
             {
-                TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);
-                //TreeNode nodeFolder = new TreeNode(f.Name);
+                TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);                
                 nodeFolder.Name = f.FolderId.ToString();
                 nodeFolder.Tag = new FolderWithServiceRef() { ServiceRef = service, FolderInfo = f }; ;
                 node.Nodes.Add(nodeFolder);
