@@ -68,6 +68,9 @@ namespace KNote.ClientWin.Views
             Dock = DockStyle.Fill;
             FormBorderStyle = FormBorderStyle.None;
             panelBottom.Visible = false;
+            panelDataGridNotes.Dock = DockStyle.Fill;
+            dataGridNotes.BorderStyle = BorderStyle.None;
+            dataGridNotes.Dock = DockStyle.Fill;
         }
 
         public void ConfigureWindowMode()
@@ -211,7 +214,7 @@ namespace KNote.ClientWin.Views
 
             //dataGridNotes.Columns[1].Visible = true; // NoteNumber
             dataGridNotes.Columns[1].Width = 50;
-            dataGridNotes.Columns[1].HeaderText = "Number";
+            dataGridNotes.Columns[1].HeaderText = "Number";            
             //dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
             //dataGridNotes.Columns[1].DefaultCellStyle = cellStyle0;
 

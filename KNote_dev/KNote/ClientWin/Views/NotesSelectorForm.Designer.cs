@@ -29,26 +29,58 @@
         private void InitializeComponent()
         {
             this.panelForm = new System.Windows.Forms.Panel();
+            this.panelDataGridNotes = new System.Windows.Forms.Panel();
+            this.dataGridNotes = new System.Windows.Forms.DataGridView();
             this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
-            this.panelDataGridNotes = new System.Windows.Forms.Panel();
-            this.dataGridNotes = new System.Windows.Forms.DataGridView();
             this.panelForm.SuspendLayout();
-            this.panelBottom.SuspendLayout();
             this.panelDataGridNotes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridNotes)).BeginInit();
+            this.panelBottom.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelForm
             // 
-            this.panelForm.Controls.Add(this.panelBottom);
             this.panelForm.Controls.Add(this.panelDataGridNotes);
+            this.panelForm.Controls.Add(this.panelBottom);
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(552, 495);
-            this.panelForm.TabIndex = 3;
+            this.panelForm.TabIndex = 0;
+            // 
+            // panelDataGridNotes
+            // 
+            this.panelDataGridNotes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelDataGridNotes.Controls.Add(this.dataGridNotes);
+            this.panelDataGridNotes.Location = new System.Drawing.Point(1, 1);
+            this.panelDataGridNotes.Name = "panelDataGridNotes";
+            this.panelDataGridNotes.Size = new System.Drawing.Size(551, 452);
+            this.panelDataGridNotes.TabIndex = 2;
+            // 
+            // dataGridNotes
+            // 
+            this.dataGridNotes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridNotes.BackgroundColor = System.Drawing.SystemColors.Window;
+            this.dataGridNotes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridNotes.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
+            this.dataGridNotes.Location = new System.Drawing.Point(0, 0);
+            this.dataGridNotes.Name = "dataGridNotes";
+            this.dataGridNotes.ReadOnly = true;
+            this.dataGridNotes.RowHeadersWidth = 25;
+            this.dataGridNotes.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dataGridNotes.Size = new System.Drawing.Size(550, 450);
+            this.dataGridNotes.TabIndex = 3;
+            this.dataGridNotes.Text = "dataGridView1";
+            this.dataGridNotes.SelectionChanged += new System.EventHandler(this.dataGridNotes_SelectionChanged);
+            this.dataGridNotes.DoubleClick += new System.EventHandler(this.dataGridNotes_DoubleClick);
+            this.dataGridNotes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridNotes_KeyDown);
+            this.dataGridNotes.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dataGridNotes_KeyUp);
             // 
             // panelBottom
             // 
@@ -65,7 +97,7 @@
             this.buttonCancel.Location = new System.Drawing.Point(461, 8);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(79, 24);
-            this.buttonCancel.TabIndex = 1;
+            this.buttonCancel.TabIndex = 5;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -75,36 +107,10 @@
             this.buttonAccept.Location = new System.Drawing.Point(376, 8);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(79, 24);
-            this.buttonAccept.TabIndex = 0;
+            this.buttonAccept.TabIndex = 4;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
-            // 
-            // panelDataGridNotes
-            // 
-            this.panelDataGridNotes.Controls.Add(this.dataGridNotes);
-            this.panelDataGridNotes.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelDataGridNotes.Location = new System.Drawing.Point(0, 0);
-            this.panelDataGridNotes.Name = "panelDataGridNotes";
-            this.panelDataGridNotes.Size = new System.Drawing.Size(552, 495);
-            this.panelDataGridNotes.TabIndex = 2;
-            // 
-            // dataGridNotes
-            // 
-            this.dataGridNotes.BackgroundColor = System.Drawing.SystemColors.Window;
-            this.dataGridNotes.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dataGridNotes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridNotes.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridNotes.Location = new System.Drawing.Point(0, 0);
-            this.dataGridNotes.Name = "dataGridNotes";
-            this.dataGridNotes.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridNotes.Size = new System.Drawing.Size(552, 495);
-            this.dataGridNotes.TabIndex = 0;
-            this.dataGridNotes.Text = "dataGridView1";
-            this.dataGridNotes.SelectionChanged += new System.EventHandler(this.dataGridNotes_SelectionChanged);
-            this.dataGridNotes.DoubleClick += new System.EventHandler(this.dataGridNotes_DoubleClick);
-            this.dataGridNotes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridNotes_KeyDown);
-            this.dataGridNotes.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dataGridNotes_KeyUp);
             // 
             // NotesSelectorForm
             // 
@@ -116,9 +122,9 @@
             this.Text = "Notes selector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NotesSelectorForm_FormClosing);
             this.panelForm.ResumeLayout(false);
-            this.panelBottom.ResumeLayout(false);
             this.panelDataGridNotes.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridNotes)).EndInit();
+            this.panelBottom.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

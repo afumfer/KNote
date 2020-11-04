@@ -774,16 +774,18 @@
             // 
             // tabExplorers
             // 
+            this.tabExplorers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabExplorers.Controls.Add(this.tabTreeFolders);
             this.tabExplorers.Controls.Add(this.tabSearch);
-            this.tabExplorers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabExplorers.ImageList = this.imageTabExplorer;
-            this.tabExplorers.Location = new System.Drawing.Point(0, 0);
+            this.tabExplorers.Location = new System.Drawing.Point(6, 6);
             this.tabExplorers.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabExplorers.Name = "tabExplorers";
             this.tabExplorers.Padding = new System.Drawing.Point(6, 6);
             this.tabExplorers.SelectedIndex = 0;
-            this.tabExplorers.Size = new System.Drawing.Size(292, 567);
+            this.tabExplorers.Size = new System.Drawing.Size(284, 558);
             this.tabExplorers.TabIndex = 0;
             // 
             // tabTreeFolders
@@ -793,7 +795,7 @@
             this.tabTreeFolders.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabTreeFolders.Name = "tabTreeFolders";
             this.tabTreeFolders.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabTreeFolders.Size = new System.Drawing.Size(284, 533);
+            this.tabTreeFolders.Size = new System.Drawing.Size(276, 524);
             this.tabTreeFolders.TabIndex = 0;
             this.tabTreeFolders.Text = "Tree folders  ";
             this.tabTreeFolders.ToolTipText = "Tree folders view";
@@ -806,7 +808,7 @@
             this.tabSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabSearch.Name = "tabSearch";
             this.tabSearch.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabSearch.Size = new System.Drawing.Size(284, 533);
+            this.tabSearch.Size = new System.Drawing.Size(276, 524);
             this.tabSearch.TabIndex = 1;
             this.tabSearch.Text = "Search  ";
             this.tabSearch.ToolTipText = "Search panel";
