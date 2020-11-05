@@ -19,7 +19,7 @@ namespace KNote.ClientWin.Views
 
         private KNoteManagmentComponent _knoteManagment;
 
-        private FolderWithServiceRef temp;
+        //private FolderWithServiceRef temp;
 
         public LabForm()
         {
@@ -97,8 +97,9 @@ namespace KNote.ClientWin.Views
 
         private void buttonTest2_Click(object sender, EventArgs e)
         {
-            _folderSelector.Run();
-            _notesSelector.Run();
+            var res = _folderSelector.RunModal();
+            labelInfo3.Text = res.Entity.ToString();
+            //_notesSelector.Run();
            
         }
 
@@ -109,6 +110,7 @@ namespace KNote.ClientWin.Views
 
         private void buttonTest4_Click(object sender, EventArgs e)
         {            
+
         }
 
         private void Trash()

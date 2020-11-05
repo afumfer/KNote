@@ -79,8 +79,7 @@ namespace KNote.ClientWin.Components
                 {
                     _folderSelectorComponent = new FolderSelectorComponent(Store);
                     _folderSelectorComponent.EmbededMode = true;
-                    _folderSelectorComponent.ModalMode = false;
-                    
+                                        
                     _folderSelectorComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
 
                     // TODO: lo siguiente podría estar sobrando, delegar en _folderSelectorComponent la responsabilidad
@@ -152,8 +151,7 @@ namespace KNote.ClientWin.Components
                 if (_notesSelectorComponent == null)
                 {
                     _notesSelectorComponent = new NotesSelectorComponent(Store);
-                    _notesSelectorComponent.EmbededMode = true;
-                    _notesSelectorComponent.ModalMode = false;
+                    _notesSelectorComponent.EmbededMode = true;                    
 
                     _notesSelectorComponent.EntitySelection += _notesSelectorComponent_EntitySelection;
 

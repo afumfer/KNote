@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
+using KNote.Model;
 
 namespace KNote.ClientWin.Views
 {
@@ -48,6 +49,11 @@ namespace KNote.ClientWin.Views
             this.Show();
         }
 
+        Result<EComponentResult> IViewBase.ShowModalView()
+        {
+            return null;
+        }
+
         private void MonitorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
@@ -68,5 +74,7 @@ namespace KNote.ClientWin.Views
         {
             
         }
+
+
     }
 }

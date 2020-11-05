@@ -24,9 +24,7 @@ namespace KNote.ClientWin.Core
         public EComponentResult ComponentResult { get; protected set; } = EComponentResult.None;
 
         public bool EmbededMode { get; set; } = false;
-
-        public bool ModalMode { get; set; } = false;
-
+        
         public bool ThrowKntException { get; set; } = false;
 
         #endregion
@@ -113,7 +111,7 @@ namespace KNote.ClientWin.Core
             return new Result();
         }
 
-        public Result Run() 
+        public virtual Result Run() 
         {
             Result result;
             var preconditionResult = CheckPreconditions();
@@ -131,12 +129,6 @@ namespace KNote.ClientWin.Core
 
             OnStateComponentChanged(EComponentState.Started);
             return result;
-        }
-
-        public Result RunModal()
-        {            
-            ModalMode = true;
-            return Run();
         }
 
         public Result Finalize()

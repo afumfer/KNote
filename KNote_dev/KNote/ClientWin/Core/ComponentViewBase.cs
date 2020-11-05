@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 
 namespace KNote.ClientWin.Core
 {
@@ -38,9 +39,41 @@ namespace KNote.ClientWin.Core
                 View.ConfigureWindowMode();
             else
                 View.ConfigureEmbededMode();
+            
+            return result;
+        }
+
+        public override Result Run()
+        {
+            var result = base.Run();
+
+            // TODO:  Check result here 
+            // ...
 
             View.ShowView();
 
+            return result;
+        }
+
+        public virtual Result<EComponentResult> RunModal()
+        {
+            var result = base.Run();
+
+            // TODO:  Check result here 
+            // ...
+
+            var resultView = View.ShowModalView();
+
+            return resultView;
+        }
+
+        public Result<EComponentResult> DialogResultToComponentResult(DialogResult dialogResult)
+        {
+            var result = new Result<EComponentResult>();
+            if (dialogResult == DialogResult.OK || dialogResult == DialogResult.Yes)
+                result.Entity = EComponentResult.Executed;
+            else
+                result.Entity = EComponentResult.Canceled;
             return result;
         }
 

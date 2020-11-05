@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KNote.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ namespace KNote.ClientWin.Core
     {
         Control PanelView();
         void ShowView();
+        Result<EComponentResult> ShowModalView();
         void OnClosingView();
         void RefreshView();
         void ShowInfo(string info);

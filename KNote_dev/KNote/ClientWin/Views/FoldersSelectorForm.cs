@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
+using KNote.Model;
 using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views
@@ -33,10 +34,12 @@ namespace KNote.ClientWin.Views
 
         public void ShowView()
         {                         
-            if (_com.ModalMode)
-                this.ShowDialog();
-            else
-                this.Show();
+            this.Show();
+        }
+
+        Result<EComponentResult> IViewBase.ShowModalView()
+        {            
+            return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
         public async void RefreshView()

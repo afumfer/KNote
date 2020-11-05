@@ -1,5 +1,6 @@
 ﻿using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
+using KNote.Model;
 using KNote.Model.Dto;
 
 using System;
@@ -124,5 +125,12 @@ namespace KNote.ClientWin.Views
         {
             this.Show();
         }
+
+        Result<EComponentResult> IViewBase.ShowModalView()
+        {
+            return null;
+        }
+
+
     }
 }

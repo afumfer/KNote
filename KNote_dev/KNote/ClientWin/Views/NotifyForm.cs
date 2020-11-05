@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
+using KNote.Model;
 
 namespace KNote.ClientWin.Views
 {
@@ -46,15 +47,19 @@ namespace KNote.ClientWin.Views
 
         public void ShowView()
         {
-            RefreshView();
-
-            if (_com.ModalMode)
-                this.ShowDialog();
-            else
-            {
-                this.Show();
-            }
+            this.Show();            
         }
+
+        Result<EComponentResult> IViewBase.ShowModalView()
+        {
+            return _com.DialogResultToComponentResult(this.ShowDialog());
+        }
+
+        public void OnClosingView()
+        {
+            
+        }
+
 
         #endregion
 
@@ -118,11 +123,6 @@ namespace KNote.ClientWin.Views
         private void menuExit_Click(object sender, EventArgs e)
         {            
             _com?.Finalize();
-        }
-
-        public void OnClosingView()
-        {
-            throw new NotImplementedException();
         }
 
         #endregion
