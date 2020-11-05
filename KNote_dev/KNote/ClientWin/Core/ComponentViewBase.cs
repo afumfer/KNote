@@ -46,12 +46,11 @@ namespace KNote.ClientWin.Core
         public override Result Run()
         {
             var result = base.Run();
-
+            
             // TODO:  Check result here 
             // ...
-
+            
             View.ShowView();
-
             return result;
         }
 

@@ -15,10 +15,10 @@ namespace KNote.ClientWin.Views
 {
     public partial class FoldersSelectorForm : Form, ISelectorView<FolderWithServiceRef>
     {
-        private readonly FolderSelectorComponent _com;
+        private readonly FoldersSelectorComponent _com;
         private bool _viewFinalized = false;
 
-        public FoldersSelectorForm(FolderSelectorComponent com)
+        public FoldersSelectorForm(FoldersSelectorComponent com)
         {
             InitializeComponent();
 

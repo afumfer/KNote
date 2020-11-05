@@ -17,7 +17,7 @@ namespace KNote.ClientWin.Core
             return new MonitorForm(component);
         }
 
-        public ISelectorView<FolderWithServiceRef> View(FolderSelectorComponent component)
+        public ISelectorView<FolderWithServiceRef> View(FoldersSelectorComponent component)
         {
             return new FoldersSelectorForm(component);
         }

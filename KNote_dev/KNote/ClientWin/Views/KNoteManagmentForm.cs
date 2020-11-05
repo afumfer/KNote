@@ -30,40 +30,36 @@ namespace KNote.ClientWin.Views
 
         public Control PanelView()
         {
-            return null;
+            throw new NotImplementedException();
         }
 
         public void ShowView()
-        {                                    
+        {
+            //this.Show();
+            //Application.DoEvents();
+            //LinkComponents();            
+                        
+            LinkComponents();
             Application.DoEvents();
-            InitializeCtrComponents();
             this.Show();
         }
 
         Result<EComponentResult> IViewBase.ShowModalView()
         {
+            //Application.DoEvents();
+            //LinkComponents();
+            //return _com.DialogResultToComponentResult(this.ShowDialog());
+            
+            LinkComponents();
             Application.DoEvents();
-            InitializeCtrComponents();
             return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
 
         public void RefreshView()
         {
-            //// TODO: la actualización de estos componentes la vamos a coger en futuro
-            ////       mediante la escucha de eventos del contexto cada vez que 
-            ////       cambia la capeta seleccionada. 
-            //var folderName = _ctrl.Context.ActiveFolderWithServiceRef?.FolderInfo?.Name
-            //    + " (#"
-            //    + _ctrl.Context.ActiveFolderWithServiceRef?.FolderInfo?.FolderNumber
-            //    + ")";
-            //var serviceName = _ctrl.Context.ActiveFolderWithServiceRef?.ServiceRef?.Name
-            //    + " ("
-            //    + _ctrl.Context.ActiveFolderWithServiceRef?.ServiceRef?.Provider
-            //    + ")";
-
-            //statusLabel2.Text = serviceName;
-            //labelFolerName.Text = folderName;
+            //statusLabel2.Text = $"{_com.SelectedServiceRef?.Alias} -({_com.SelectedServiceRef?.Provider})" ;
+            //labelFolerName.Text = _com.SelectedFolderInfo?.Name;
         }
 
         public void OnClosingView()
@@ -74,9 +70,22 @@ namespace KNote.ClientWin.Views
 
         public void ShowInfo(string info)
         {
-            //MessageBox.Show(info);            
-            statusLabel1.Text = info;
+            if(info != null)
+                MessageBox.Show(info);
+            statusLabel2.Text = $"{_com.SelectedServiceRef?.Alias} -({_com.SelectedServiceRef?.Provider})";
+            labelFolerName.Text = _com.SelectedFolderInfo?.Name;
         }
+
+        public void ConfigureEmbededMode()
+        {
+            
+        }
+
+        public void ConfigureWindowMode()
+        {
+            
+        }
+
 
         #endregion
 
@@ -129,21 +138,11 @@ namespace KNote.ClientWin.Views
 
         #region Private methods
 
-        private void InitializeCtrComponents()
+        private void LinkComponents()
         {
             tabTreeFolders.Controls.Add(_com.FoldersSelectorComponent.View.PanelView());
             splitContainer2.Panel1.Controls.Add(_com.NotesSelectorComponent.View.PanelView());
-            //splitContainer2.Panel2.Controls.Add((Form)_com.NoteEditorCtrl.View);
-        }
-
-        public void ConfigureEmbededMode()
-        {
-            
-        }
-
-        public void ConfigureWindowMode()
-        {
-            
+            //splitContainer2.Panel2.Controls.Add((Form)_com.NoteEditorCtrl.View);           
         }
 
         #endregion

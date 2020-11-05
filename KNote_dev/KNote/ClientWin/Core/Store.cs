@@ -60,7 +60,8 @@ namespace KNote.ClientWin.Core
 
         #endregion
 
-        #region Actions        
+        #region Actions    
+        
         public event EventHandler<ComponentEventArgs<ServiceRef>> AddedServiceRef;
         public void AddServiceRef(ServiceRef serviceRef)
         {
@@ -115,6 +116,9 @@ namespace KNote.ClientWin.Core
         }
 
         #endregion
+
+
+
     }
 
     #region  Context typos 

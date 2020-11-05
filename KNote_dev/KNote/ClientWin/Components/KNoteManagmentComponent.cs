@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -16,6 +17,8 @@ namespace KNote.ClientWin.Components
         {
 
         }
+
+        
 
         #region Views
 
@@ -44,12 +47,9 @@ namespace KNote.ClientWin.Components
             var result = base.OnInitialized();
 
             try
-            {
-                View.ShowView();
-
+            {                
                 NotesSelectorComponent.Run();
-                FoldersSelectorComponent.Run();
-                
+                FoldersSelectorComponent.Run();             
             }
             catch (Exception ex)
             {
@@ -70,14 +70,14 @@ namespace KNote.ClientWin.Components
 
         #region FoldersSelector component
 
-        private FolderSelectorComponent _folderSelectorComponent;
-        public FolderSelectorComponent FoldersSelectorComponent
+        private FoldersSelectorComponent _folderSelectorComponent;
+        public FoldersSelectorComponent FoldersSelectorComponent
         {
             get
             {
                 if (_folderSelectorComponent == null)
                 {
-                    _folderSelectorComponent = new FolderSelectorComponent(Store);
+                    _folderSelectorComponent = new FoldersSelectorComponent(Store);
                     _folderSelectorComponent.EmbededMode = true;
                                         
                     _folderSelectorComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
@@ -104,40 +104,14 @@ namespace KNote.ClientWin.Components
                 return;
             }
 
-            NotesSelectorComponent.LoadNotesByFolderAsync(e.Entity);
+            SelectedFolderInfo = e.Entity.FolderInfo;
+            SelectedServiceRef = e.Entity.ServiceRef;
 
-            //if (_notesSelectorComponent != null)
-            //    _notesSelectorComponent.LoadNotesByFolderAsync(e.Entity);
+            View.ShowInfo(null);
+
+            NotesSelectorComponent.LoadNotesByFolderAsync(e.Entity);
         }
 
-        //private void _folderSelectorCtrl_EntityChange(object sender, EntityEventArgs<FolderWithServiceRef> e)
-        //{
-        //    this.Context.UpdateActiveFolder(e.Entity);
-
-        //    // TODO: la siguiente línea se podría re-implementar mediante la ecucha
-        //    //       de evento de contexto por parte de la vista. 
-        //    View.RefreshView();
-        //    var noteSet = new NotesSet
-        //    {
-        //        ServiceRef = e.Entity.ServiceRef,
-        //        NotesFilter = new NotesFilter
-        //        {
-        //            Folder = e.Entity.FolderInfo
-        //        }
-        //    };
-
-        //    NotesSelectorCtrl.RefreshCtrl(noteSet);
-
-        //    var selectorCount = NotesSelectorCtrl.ListEntities.Count;
-        //    View.ShowInfo("Notes: " + selectorCount.ToString());
-
-        //    if (selectorCount == 0)
-        //        NoteEditorCtrl.UpdateModelCtrl(Context.ActiveFolderWithServiceRef.ServiceRef.Service,
-        //            null);
-        //    else
-        //        NoteEditorCtrl.UpdateModelCtrl(Context.ActiveFolderWithServiceRef.ServiceRef.Service,
-        //            NotesSelectorCtrl.ListEntities[0].NoteId);
-        //}
 
         #endregion
 
@@ -194,6 +168,11 @@ namespace KNote.ClientWin.Components
 
         #region Public methods
 
+        public FolderInfoDto SelectedFolderInfo { get; private set; }
+
+        public ServiceRef SelectedServiceRef { get; private set; }
+
+        
         public void ShowKntScriptConsole()
         {
             //try

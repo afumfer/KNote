@@ -14,7 +14,7 @@ namespace KNote.ClientWin.Views
     {
         private Store _store;
 
-        private FolderSelectorComponent _folderSelector;
+        private FoldersSelectorComponent _folderSelector;
         private NotesSelectorComponent _notesSelector;
 
         private KNoteManagmentComponent _knoteManagment;
@@ -29,7 +29,7 @@ namespace KNote.ClientWin.Views
         public LabForm(Store store) : this()
         {
             _store = store;
-            _folderSelector = new FolderSelectorComponent(_store);
+            _folderSelector = new FoldersSelectorComponent(_store);
             _notesSelector = new NotesSelectorComponent(_store);
 
             _knoteManagment = new KNoteManagmentComponent(_store);
@@ -97,10 +97,18 @@ namespace KNote.ClientWin.Views
 
         private void buttonTest2_Click(object sender, EventArgs e)
         {
-            var res = _folderSelector.RunModal();
-            labelInfo3.Text = res.Entity.ToString();
+            var res1 = _folderSelector.RunModal();            
+            labelInfo1.Text = res1.Entity.ToString();
+
+            var res2 = _notesSelector.RunModal();
+            labelInfo2.Text = res2.Entity.ToString();
+
+            var res3 = _knoteManagment.RunModal();
+            labelInfo3.Text = res3.Entity.ToString();
+
+
             //_notesSelector.Run();
-           
+
         }
 
         private void buttonTest3_Click(object sender, EventArgs e)
