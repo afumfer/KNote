@@ -10,15 +10,39 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Components
 {
-    public class NoteEditorComponent : ComponentViewBase<IViewConfigurable>
+    public class NoteEditorComponent : ComponentViewBase<IEditorView<NoteDto>>
     {
         public NoteEditorComponent(Store store) : base(store)
         {
         }
 
-        protected override IViewConfigurable CreateView()
+        protected override IEditorView<NoteDto> CreateView()
         {
-            throw new NotImplementedException();
+            return Store.FactoryViews.View(this);
         }
+
+        #region Component specific public members
+
+        private NoteDto _noteEdit;
+        public NoteDto NoteEdit
+        {
+            get 
+            {
+                if (_noteEdit == null)
+                    _noteEdit = new NoteDto();
+                return _noteEdit; 
+            }
+        }
+
+        public async void LoadNoteById(FolderWithServiceRef folderWithServiceRef, Guid noteId)
+        {
+            var service = folderWithServiceRef.ServiceRef.Service;
+
+            _noteEdit = (await service.Notes.GetAsync(noteId)).Entity;
+
+            View.RefreshView();
+        }
+
+        #endregion 
     }
 }

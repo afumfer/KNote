@@ -175,11 +175,6 @@ namespace KNote.ClientWin.Views
                     _com.SelectedEntity = DataGridViewRowToNoteItemList(sr);                    
                     _com.NotifySelectedEntity();
                 }
-                //else
-                //{
-                //    _com.SelectedEntity = null;
-                //    _com.NotifySelectedEntity();
-                //}
             }
             catch (Exception ex)
             {

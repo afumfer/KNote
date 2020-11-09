@@ -1,5 +1,6 @@
 ﻿using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
+using KNote.Model.Dto;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,6 +8,8 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+
+
 
 namespace KNote.ClientWin.Views
 {
@@ -19,7 +22,9 @@ namespace KNote.ClientWin.Views
 
         private KNoteManagmentComponent _knoteManagment;
 
-        //private FolderWithServiceRef temp;
+        private NoteEditorComponent _noteEditor;
+
+        private FolderWithServiceRef temp;
 
         public LabForm()
         {
@@ -34,11 +39,13 @@ namespace KNote.ClientWin.Views
 
             _knoteManagment = new KNoteManagmentComponent(_store);
 
+            _noteEditor = new NoteEditorComponent(_store);
+
             _folderSelector.EntitySelection += _folderSelector_EntitySelection;
             _notesSelector.EntitySelection += _notesSelector_EntitySelection;
         }
 
-        private void _notesSelector_EntitySelection(object sender, ComponentEventArgs<Model.Dto.NoteInfoDto> e)
+        private void _notesSelector_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
             if (e.Entity == null)
             {
@@ -47,6 +54,8 @@ namespace KNote.ClientWin.Views
             }
 
             labelInfo2.Text = $" {e.Entity.Topic} - {e.Entity.NoteId}";
+            
+            _noteEditor.LoadNoteById(temp, e.Entity.NoteId);
         }
 
         private void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
@@ -60,6 +69,8 @@ namespace KNote.ClientWin.Views
             labelInfo1.Text = $" {e.Entity.ServiceRef.Alias} - {e.Entity.FolderInfo?.Name}";
             if (_notesSelector != null)
                 _notesSelector.LoadNotesByFolderAsync(e.Entity);
+
+            temp = e.Entity;
         }
 
         #region Tests 0
@@ -97,32 +108,34 @@ namespace KNote.ClientWin.Views
 
         private void buttonTest2_Click(object sender, EventArgs e)
         {
-            var res1 = _folderSelector.RunModal();            
-            labelInfo1.Text = res1.Entity.ToString();
-
-            var res2 = _notesSelector.RunModal();
-            labelInfo2.Text = res2.Entity.ToString();
-
-            var res3 = _knoteManagment.RunModal();
-            labelInfo3.Text = res3.Entity.ToString();
-
-
-            //_notesSelector.Run();
-
+            _folderSelector.Run();
+            _notesSelector.Run();
+            _noteEditor.Run();
         }
 
         private void buttonTest3_Click(object sender, EventArgs e)
-        {
+        {            
             _knoteManagment.Run();
         }
 
         private void buttonTest4_Click(object sender, EventArgs e)
-        {            
-
+        {
+            var noteEditor = new NoteEditorComponent(_store);
+            noteEditor.RunModal();
         }
 
         private void Trash()
         {
+
+            //var res1 = _folderSelector.RunModal();
+            //labelInfo1.Text = res1.Entity.ToString();
+
+            //var res2 = _notesSelector.RunModal();
+            //labelInfo2.Text = res2.Entity.ToString();
+
+            //var res3 = _knoteManagment.RunModal();
+            //labelInfo3.Text = res3.Entity.ToString();
+
 
             //_folderSelector.EmbededMode = true;
             //_folderSelector.ModalMode = false;

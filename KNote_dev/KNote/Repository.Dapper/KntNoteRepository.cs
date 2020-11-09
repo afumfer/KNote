@@ -920,6 +920,10 @@ namespace KNote.Repository.Dapper
         private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {
             var attributes = (await _kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
+            
+            if (attributes == null)
+                return null;
+
             foreach (KAttributeInfoDto a in attributes)
             {
                 var atrTmp = attributesNotes

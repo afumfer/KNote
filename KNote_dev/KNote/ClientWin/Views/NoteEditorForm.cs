@@ -18,17 +18,18 @@ namespace KNote.ClientWin.Views
     public partial class NoteEditorForm : Form, IEditorView<NoteDto>
     {
         private readonly NoteEditorComponent _com;
+        private bool _viewFinalized = false;
 
-        public NoteEditorForm(NoteEditorComponent ctrl)
+        public NoteEditorForm(NoteEditorComponent com)
         {
             InitializeComponent();
 
-            _com = ctrl;
+            _com = com;
         }
 
         public Control PanelView()
         {
-            return null;
+            return panelForm;
         }
 
         public void CleanView()
@@ -46,8 +47,9 @@ namespace KNote.ClientWin.Views
             textPriority.Text = "";
         }
 
-        public void CloseView()
+        public void OnClosingView()
         {
+            _viewFinalized = true;
             this.Close();
         }
 
@@ -57,6 +59,7 @@ namespace KNote.ClientWin.Views
             Dock = DockStyle.Fill;
             FormBorderStyle = FormBorderStyle.None;
             toolBarNoteEditor.Visible = false;
+            panelTop.Visible = false;
         }
 
         public void ConfigureWindowMode()
@@ -65,12 +68,8 @@ namespace KNote.ClientWin.Views
             Dock = DockStyle.None;
             FormBorderStyle = FormBorderStyle.Sizable;
             toolBarNoteEditor.Visible = true;
+            panelTop.Visible = true;
             StartPosition = FormStartPosition.CenterScreen;
-        }
-
-        public void OnClosingView()
-        {
-            throw new NotImplementedException();
         }
 
         public void RefreshBindingModel()
@@ -80,13 +79,13 @@ namespace KNote.ClientWin.Views
             ////labelInfoIdFolder.Text = _ctrl.Entity.Folder?.FolderNumber.ToString();
             //textDesTopic.Text = _com.Entity.Topic;
             ////textDesFolder.Text = _ctrl.Entity.Folder?.Name;
-            
-            //// Basic data
-            //textTopic.Text = _com.Entity.Topic;
-            ////textFolder.Text = _ctrl.Entity.Folder?.Name;
-            //textTags.Text = _com.Entity.Tags;
-            //textDescription.Text = _com.Entity.Description;
-            //textPriority.Text = _com.Entity.Priority.ToString();
+
+            // Basic data
+            textTopic.Text = _com.NoteEdit.Topic;
+            //textFolder.Text = _ctrl.Entity.Folder?.Name;
+            textTags.Text = _com.NoteEdit.Tags;
+            textDescription.Text = _com.NoteEdit.Description;
+            textPriority.Text = _com.NoteEdit.Priority.ToString();
 
             // Alarms            
             //dataGridAlarms.DataSource = _ctrl.Entity.KMessages;            
@@ -113,12 +112,12 @@ namespace KNote.ClientWin.Views
 
         public void RefreshView()
         {
-            
+            RefreshBindingModel();
         }
 
         public void ShowInfo(string info)
         {
-            throw new NotImplementedException();
+            
         }
 
         public void ShowView()
@@ -128,9 +127,13 @@ namespace KNote.ClientWin.Views
 
         Result<EComponentResult> IViewBase.ShowModalView()
         {
-            return null;
+            return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
-
+        private void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!_viewFinalized)
+                _com.Finalize();
+        }
     }
 }
