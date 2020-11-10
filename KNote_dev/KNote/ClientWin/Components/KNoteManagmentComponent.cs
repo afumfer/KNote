@@ -13,12 +13,14 @@ namespace KNote.ClientWin.Components
 {
     public class KNoteManagmentComponent : ComponentViewBase<IViewConfigurable>
     {
+        #region Constructor
+
         public KNoteManagmentComponent(Store store) : base(store)
         {
 
         }
 
-        
+        #endregion 
 
         #region Views
 
@@ -40,7 +42,9 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        #endregion 
+        #endregion
+
+        #region Component override methods
 
         protected override Result OnInitialized()
         {
@@ -49,7 +53,8 @@ namespace KNote.ClientWin.Components
             try
             {                
                 NotesSelectorComponent.Run();
-                FoldersSelectorComponent.Run();             
+                FoldersSelectorComponent.Run();
+                NoteEditorComponent.Run();
             }
             catch (Exception ex)
             {
@@ -63,6 +68,8 @@ namespace KNote.ClientWin.Components
         {
             return base.OnFinalized();
         }
+
+        #endregion 
 
         //----------------------
 
@@ -104,9 +111,8 @@ namespace KNote.ClientWin.Components
                 return;
             }
 
-            SelectedFolderInfo = e.Entity.FolderInfo;
-            SelectedServiceRef = e.Entity.ServiceRef;
-
+            SelectedFolderWithServiceRef = e.Entity;
+            
             View.ShowInfo(null);
 
             NotesSelectorComponent.LoadNotesByFolderAsync(e.Entity);
@@ -136,31 +142,28 @@ namespace KNote.ClientWin.Components
 
         private void _notesSelectorComponent_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
-            
+            if (e.Entity == null)
+                return;
+            NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, e.Entity.NoteId);
         }
-
-        //private void _notesSelectorCtrl_EntityChange(object sender, EntityEventArgs<NoteItemDto> e)
-        //{
-        //    NoteEditorCtrl.UpdateModelCtrl(Context.ActiveFolderWithServiceRef.ServiceRef.Service, e.Entity?.NoteId);
-        //}
 
         #endregion
 
         #region NoteEditor component
 
-        //private NoteEditorCtrl _noteEditorCtrl;
-        //public NoteEditorCtrl NoteEditorCtrl
-        //{
-        //    get
-        //    {
-        //        if (_noteEditorCtrl == null)
-        //        {
-        //            _noteEditorCtrl = new NoteEditorCtrl(this.Context);
-        //            _noteEditorCtrl.EmbededMode = true;
-        //        }
-        //        return _noteEditorCtrl;
-        //    }
-        //}
+        private NoteEditorComponent _noteEditorComponent;
+        public NoteEditorComponent NoteEditorComponent
+        {
+            get
+            {
+                if (_noteEditorComponent == null)
+                {
+                    _noteEditorComponent = new NoteEditorComponent(Store);
+                    _noteEditorComponent.EmbededMode = true;
+                }
+                return _noteEditorComponent;
+            }
+        }
 
         #endregion
 
@@ -168,10 +171,17 @@ namespace KNote.ClientWin.Components
 
         #region Public methods
 
-        public FolderInfoDto SelectedFolderInfo { get; private set; }
+        public FolderWithServiceRef SelectedFolderWithServiceRef { get; set; }
 
-        public ServiceRef SelectedServiceRef { get; private set; }
+        public FolderInfoDto SelectedFolderInfo
+        {
+            get { return SelectedFolderWithServiceRef?.FolderInfo; }
+        }
 
+        public ServiceRef SelectedServiceRef 
+        { 
+            get { return SelectedFolderWithServiceRef?.ServiceRef; }  
+        }
         
         public void ShowKntScriptConsole()
         {

@@ -551,7 +551,7 @@
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
             this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textDescription.Size = new System.Drawing.Size(773, 380);
+            this.textDescription.Size = new System.Drawing.Size(773, 386);
             this.textDescription.TabIndex = 5;
             // 
             // buttonSelCarpeta

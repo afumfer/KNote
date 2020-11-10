@@ -194,7 +194,7 @@ namespace KNote.ClientWin.Views
             if (_configuredGrid)
                 return;
 
-            // TODO: arreglar esto ... (el grid de net core parece que no se comporta de la misma manera). 
+            // TODO: arreglar esto ... (el grid de net core parece que no se comporta de la misma manera que en netframework)
 
             //DataGridViewCellStyle cellStyle0 = new DataGridViewCellStyle();
             //cellStyle0.Alignment = DataGridViewContentAlignment.MiddleRight;

@@ -35,10 +35,6 @@ namespace KNote.ClientWin.Views
 
         public void ShowView()
         {
-            //this.Show();
-            //Application.DoEvents();
-            //LinkComponents();            
-                        
             LinkComponents();
             Application.DoEvents();
             this.Show();
@@ -46,20 +42,16 @@ namespace KNote.ClientWin.Views
 
         Result<EComponentResult> IViewBase.ShowModalView()
         {
-            //Application.DoEvents();
-            //LinkComponents();
-            //return _com.DialogResultToComponentResult(this.ShowDialog());
-            
             LinkComponents();
             Application.DoEvents();
             return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
-
         public void RefreshView()
         {
-            //statusLabel2.Text = $"{_com.SelectedServiceRef?.Alias} -({_com.SelectedServiceRef?.Provider})" ;
+            ////statusLabel2.Text = $"{_com.SelectedServiceRef?.Alias} - [{_com.SelectedServiceRef?.Provider}]";
             //labelFolerName.Text = _com.SelectedFolderInfo?.Name;
+            //labelFolderDetail.Text = $"{_com.SelectedServiceRef?.Alias} - [{_com.SelectedServiceRef?.Provider}]"; 
         }
 
         public void OnClosingView()
@@ -72,8 +64,9 @@ namespace KNote.ClientWin.Views
         {
             if(info != null)
                 MessageBox.Show(info);
-            statusLabel2.Text = $"{_com.SelectedServiceRef?.Alias} -({_com.SelectedServiceRef?.Provider})";
+            //statusLabel2.Text = $"{_com.SelectedServiceRef?.Alias} -({_com.SelectedServiceRef?.Provider})";
             labelFolerName.Text = _com.SelectedFolderInfo?.Name;
+            labelFolderDetail.Text = $"{_com.SelectedServiceRef?.Alias} - [{_com.SelectedServiceRef?.Provider}]";
         }
 
         public void ConfigureEmbededMode()
@@ -142,7 +135,7 @@ namespace KNote.ClientWin.Views
         {
             tabTreeFolders.Controls.Add(_com.FoldersSelectorComponent.View.PanelView());
             splitContainer2.Panel1.Controls.Add(_com.NotesSelectorComponent.View.PanelView());
-            //splitContainer2.Panel2.Controls.Add((Form)_com.NoteEditorCtrl.View);           
+            splitContainer2.Panel2.Controls.Add(_com.NoteEditorComponent.View.PanelView());           
         }
 
         #endregion

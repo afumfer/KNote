@@ -53,7 +53,14 @@ namespace KNote.ClientWin.Components
 
             _listNotes = (await _service.Notes.GetByFolderAsync(_folder.FolderId)).Entity;
 
-            View.RefreshView();            
+            View.RefreshView();
+
+            if (_listNotes?.Count > 0)
+                SelectedEntity = _listNotes[0];
+            else
+                SelectedEntity = null;
+            
+            NotifySelectedEntity();
         }
 
         #endregion
