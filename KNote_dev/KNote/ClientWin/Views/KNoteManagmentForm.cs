@@ -49,9 +49,7 @@ namespace KNote.ClientWin.Views
 
         public void RefreshView()
         {
-            ////statusLabel2.Text = $"{_com.SelectedServiceRef?.Alias} - [{_com.SelectedServiceRef?.Provider}]";
-            //labelFolerName.Text = _com.SelectedFolderInfo?.Name;
-            //labelFolderDetail.Text = $"{_com.SelectedServiceRef?.Alias} - [{_com.SelectedServiceRef?.Provider}]"; 
+            //
         }
 
         public void OnClosingView()
@@ -63,8 +61,7 @@ namespace KNote.ClientWin.Views
         public void ShowInfo(string info)
         {
             if(info != null)
-                MessageBox.Show(info);
-            //statusLabel2.Text = $"{_com.SelectedServiceRef?.Alias} -({_com.SelectedServiceRef?.Provider})";
+                MessageBox.Show(info);            
             labelFolerName.Text = _com.SelectedFolderInfo?.Name;
             labelFolderDetail.Text = $"{_com.SelectedServiceRef?.Alias} - [{_com.SelectedServiceRef?.Provider}]";
         }

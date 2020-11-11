@@ -34,6 +34,7 @@ namespace KNote.ClientWin.Views
 
         public void CleanView()
         {
+            // Labels top section
             labelInfoIdNote.Text = "";
             labelInfoIdFolder.Text = "";
             textDesTopic.Text = "" ;
@@ -72,43 +73,6 @@ namespace KNote.ClientWin.Views
             StartPosition = FormStartPosition.CenterScreen;
         }
 
-        public void RefreshBindingModel()
-        {
-            //// Label info
-            //labelInfoIdNote.Text = _com.Entity.NoteNumber.ToString();
-            ////labelInfoIdFolder.Text = _ctrl.Entity.Folder?.FolderNumber.ToString();
-            //textDesTopic.Text = _com.Entity.Topic;
-            ////textDesFolder.Text = _ctrl.Entity.Folder?.Name;
-
-            // Basic data
-            textTopic.Text = _com.NoteEdit.Topic;
-            //textFolder.Text = _ctrl.Entity.Folder?.Name;
-            textTags.Text = _com.NoteEdit.Tags;
-            textDescription.Text = _com.NoteEdit.Description;
-            textPriority.Text = _com.NoteEdit.Priority.ToString();
-
-            // Alarms            
-            //dataGridAlarms.DataSource = _ctrl.Entity.KMessages;            
-
-            // KAttributes                                    
-            //NoteAttributes = new List<NoteAttribute>(),
-
-            // Tasks
-            // NoteTasks = new List<NoteTask>(),
-
-            // Resources 
-            //Resources = new List<Resource>(),
-
-            // Trace notes
-            //From = new List<TraceNote>(),
-            //To = new List<TraceNote>()
-
-            // Code 
-            //[ContentBehind]
-            //MessagesForScript = new List<KMessage>(),
-            //EventsForScript = new List<KEvent>(),
-
-        }
 
         public void RefreshView()
         {
@@ -130,10 +94,68 @@ namespace KNote.ClientWin.Views
             return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
+        public void RefreshBindingModel()
+        {
+            ModelToControls();
+        }
+
+        private void ModelToControls()
+        {
+            // Label info
+            labelInfoIdNote.Text = _com.NoteEdit.NoteNumber.ToString();
+            labelInfoIdFolder.Text = _com.NoteEdit.FolderDto.FolderNumber.ToString();
+            textDesTopic.Text = _com.NoteEdit.Topic;
+            textDesFolder.Text = _com.NoteEdit.FolderDto.Name;
+
+            // Basic data
+            textTopic.Text = _com.NoteEdit.Topic;
+            textFolder.Text = _com.NoteEdit.FolderDto?.Name;
+            textTags.Text = _com.NoteEdit.Tags;
+            textDescription.Text = _com.NoteEdit.Description;
+            textPriority.Text = _com.NoteEdit.Priority.ToString();
+
+            // KAttributes           
+            textNoteType.Text = _com.NoteEdit.NoteTypeDto.Name;
+            dataGridAttributes.DataSource = _com.NoteEdit.KAttributesDto.OrderBy(_ => _.Order).Select( _ => new { _.Name, _.Value }).ToList();
+
+            // Resources 
+            //dataGridResources = _com.Xxxx -> Implementar un LazyLoad() de los recursos.    !!!!
+
+            // Tasks
+            // dataGridTasks = _com.Xxxx->Implementar un LazyLoad() de las tareas. 
+
+            // ........
+
+            // Alarms            
+            //dataGridAlarms.DataSource = _ctrl.Entity.KMessages;            
+
+            // Trace notes
+            //From = new List<TraceNote>(),
+            //To = new List<TraceNote>()
+
+            // Script 
+            //[ContentBehind]
+            //MessagesForScript = new List<KMessage>(),
+            //EventsForScript = new List<KEvent>(),
+
+        }
+
+        private void PersonalizeControls()
+        {            
+            dataGridAttributes.Columns[0].Width = 400;  // Attribute name
+            dataGridAttributes.Columns[1].Width = 200;  // Value
+        }
+
+
         private void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
                 _com.Finalize();
+        }
+
+        private void NoteEditorForm_Load(object sender, EventArgs e)
+        {
+            PersonalizeControls();
         }
     }
 }

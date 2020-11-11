@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
@@ -86,7 +87,7 @@ namespace KNote.ClientWin.Components
                 {
                     _folderSelectorComponent = new FoldersSelectorComponent(Store);
                     _folderSelectorComponent.EmbededMode = true;
-                                        
+                    
                     _folderSelectorComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
 
                     // TODO: lo siguiente podría estar sobrando, delegar en _folderSelectorComponent la responsabilidad
@@ -102,7 +103,7 @@ namespace KNote.ClientWin.Components
                 return _folderSelectorComponent;
             }
         }
-
+       
         private void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
             if (e.Entity == null)
@@ -117,7 +118,6 @@ namespace KNote.ClientWin.Components
 
             NotesSelectorComponent.LoadNotesByFolderAsync(e.Entity);
         }
-
 
         #endregion
 
