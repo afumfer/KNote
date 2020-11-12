@@ -80,6 +80,7 @@
             this.dataGridAttributes = new System.Windows.Forms.DataGridView();
             this.label10 = new System.Windows.Forms.Label();
             this.tabResources = new System.Windows.Forms.TabPage();
+            this.picResource = new System.Windows.Forms.PictureBox();
             this.button10 = new System.Windows.Forms.Button();
             this.button11 = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
@@ -97,6 +98,9 @@
             this.buttonAddAlarmForMe = new System.Windows.Forms.Button();
             this.dataGridAlarms = new System.Windows.Forms.DataGridView();
             this.label4 = new System.Windows.Forms.Label();
+            this.tabCode = new System.Windows.Forms.TabPage();
+            this.textScriptCode = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.tabTraceNotes = new System.Windows.Forms.TabPage();
             this.textTraceNodeType = new System.Windows.Forms.TextBox();
             this.button3 = new System.Windows.Forms.Button();
@@ -107,13 +111,10 @@
             this.button13 = new System.Windows.Forms.Button();
             this.button14 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
-            this.dataGridView5 = new System.Windows.Forms.DataGridView();
-            this.dataGridView6 = new System.Windows.Forms.DataGridView();
+            this.dataGridTraceTo = new System.Windows.Forms.DataGridView();
+            this.dataGridTraceFrom = new System.Windows.Forms.DataGridView();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
-            this.tabCode = new System.Windows.Forms.TabPage();
-            this.textScriptCode = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelTop.SuspendLayout();
             this.panelForm.SuspendLayout();
@@ -122,15 +123,16 @@
             this.tabAttributes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridAttributes)).BeginInit();
             this.tabResources.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picResource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridResources)).BeginInit();
             this.tabTasks.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).BeginInit();
             this.tabAlarms.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridAlarms)).BeginInit();
-            this.tabTraceNotes.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView6)).BeginInit();
             this.tabCode.SuspendLayout();
+            this.tabTraceNotes.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridTraceTo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridTraceFrom)).BeginInit();
             this.SuspendLayout();
             // 
             // toolBarNoteEditor
@@ -403,8 +405,8 @@
             this.tabNoteData.Controls.Add(this.tabResources);
             this.tabNoteData.Controls.Add(this.tabTasks);
             this.tabNoteData.Controls.Add(this.tabAlarms);
-            this.tabNoteData.Controls.Add(this.tabTraceNotes);
             this.tabNoteData.Controls.Add(this.tabCode);
+            this.tabNoteData.Controls.Add(this.tabTraceNotes);
             this.tabNoteData.ImageList = this.imageListTabNoteData;
             this.tabNoteData.Location = new System.Drawing.Point(4, 4);
             this.tabNoteData.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -682,6 +684,7 @@
             // 
             // tabResources
             // 
+            this.tabResources.Controls.Add(this.picResource);
             this.tabResources.Controls.Add(this.button10);
             this.tabResources.Controls.Add(this.button11);
             this.tabResources.Controls.Add(this.button12);
@@ -695,6 +698,18 @@
             this.tabResources.TabIndex = 4;
             this.tabResources.Text = "Resources  ";
             this.tabResources.UseVisualStyleBackColor = true;
+            // 
+            // picResource
+            // 
+            this.picResource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.picResource.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picResource.Location = new System.Drawing.Point(384, 46);
+            this.picResource.Name = "picResource";
+            this.picResource.Size = new System.Drawing.Size(404, 474);
+            this.picResource.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picResource.TabIndex = 13;
+            this.picResource.TabStop = false;
             // 
             // button10
             // 
@@ -739,8 +754,11 @@
             this.dataGridResources.Location = new System.Drawing.Point(7, 46);
             this.dataGridResources.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.dataGridResources.Name = "dataGridResources";
-            this.dataGridResources.Size = new System.Drawing.Size(780, 474);
+            this.dataGridResources.ReadOnly = true;
+            this.dataGridResources.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dataGridResources.Size = new System.Drawing.Size(370, 474);
             this.dataGridResources.TabIndex = 6;
+            this.dataGridResources.SelectionChanged += new System.EventHandler(this.dataGridResources_SelectionChanged);
             // 
             // label12
             // 
@@ -811,6 +829,8 @@
             this.dataGridTasks.Location = new System.Drawing.Point(5, 46);
             this.dataGridTasks.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.dataGridTasks.Name = "dataGridTasks";
+            this.dataGridTasks.ReadOnly = true;
+            this.dataGridTasks.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridTasks.Size = new System.Drawing.Size(782, 474);
             this.dataGridTasks.TabIndex = 6;
             // 
@@ -897,6 +917,42 @@
             this.label4.TabIndex = 0;
             this.label4.Text = "Alarms:";
             // 
+            // tabCode
+            // 
+            this.tabCode.Controls.Add(this.textScriptCode);
+            this.tabCode.Controls.Add(this.label9);
+            this.tabCode.ImageIndex = 8;
+            this.tabCode.Location = new System.Drawing.Point(4, 30);
+            this.tabCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabCode.Name = "tabCode";
+            this.tabCode.Size = new System.Drawing.Size(794, 523);
+            this.tabCode.TabIndex = 6;
+            this.tabCode.Text = "Code   ";
+            this.tabCode.UseVisualStyleBackColor = true;
+            // 
+            // textScriptCode
+            // 
+            this.textScriptCode.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textScriptCode.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.textScriptCode.Location = new System.Drawing.Point(7, 29);
+            this.textScriptCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textScriptCode.Multiline = true;
+            this.textScriptCode.Name = "textScriptCode";
+            this.textScriptCode.Size = new System.Drawing.Size(780, 491);
+            this.textScriptCode.TabIndex = 6;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(7, 7);
+            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(69, 15);
+            this.label9.TabIndex = 4;
+            this.label9.Text = "Script code:";
+            // 
             // tabTraceNotes
             // 
             this.tabTraceNotes.Controls.Add(this.textTraceNodeType);
@@ -908,8 +964,8 @@
             this.tabTraceNotes.Controls.Add(this.button13);
             this.tabTraceNotes.Controls.Add(this.button14);
             this.tabTraceNotes.Controls.Add(this.button15);
-            this.tabTraceNotes.Controls.Add(this.dataGridView5);
-            this.tabTraceNotes.Controls.Add(this.dataGridView6);
+            this.tabTraceNotes.Controls.Add(this.dataGridTraceTo);
+            this.tabTraceNotes.Controls.Add(this.dataGridTraceFrom);
             this.tabTraceNotes.Controls.Add(this.label13);
             this.tabTraceNotes.Controls.Add(this.label14);
             this.tabTraceNotes.ImageIndex = 2;
@@ -1022,30 +1078,30 @@
             this.button15.Text = "+";
             this.button15.UseVisualStyleBackColor = true;
             // 
-            // dataGridView5
+            // dataGridTraceTo
             // 
-            this.dataGridView5.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.dataGridTraceTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridView5.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridView5.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView5.Location = new System.Drawing.Point(9, 300);
-            this.dataGridView5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dataGridView5.Name = "dataGridView5";
-            this.dataGridView5.Size = new System.Drawing.Size(778, 220);
-            this.dataGridView5.TabIndex = 7;
+            this.dataGridTraceTo.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
+            this.dataGridTraceTo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridTraceTo.Location = new System.Drawing.Point(9, 300);
+            this.dataGridTraceTo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.dataGridTraceTo.Name = "dataGridTraceTo";
+            this.dataGridTraceTo.Size = new System.Drawing.Size(778, 220);
+            this.dataGridTraceTo.TabIndex = 7;
             // 
-            // dataGridView6
+            // dataGridTraceFrom
             // 
-            this.dataGridView6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.dataGridTraceFrom.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridView6.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridView6.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView6.Location = new System.Drawing.Point(9, 103);
-            this.dataGridView6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dataGridView6.Name = "dataGridView6";
-            this.dataGridView6.Size = new System.Drawing.Size(778, 141);
-            this.dataGridView6.TabIndex = 6;
+            this.dataGridTraceFrom.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
+            this.dataGridTraceFrom.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridTraceFrom.Location = new System.Drawing.Point(9, 103);
+            this.dataGridTraceFrom.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.dataGridTraceFrom.Name = "dataGridTraceFrom";
+            this.dataGridTraceFrom.Size = new System.Drawing.Size(778, 141);
+            this.dataGridTraceFrom.TabIndex = 6;
             // 
             // label13
             // 
@@ -1066,41 +1122,6 @@
             this.label14.Size = new System.Drawing.Size(99, 15);
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
-            // 
-            // tabCode
-            // 
-            this.tabCode.Controls.Add(this.textScriptCode);
-            this.tabCode.Controls.Add(this.label9);
-            this.tabCode.ImageIndex = 8;
-            this.tabCode.Location = new System.Drawing.Point(4, 30);
-            this.tabCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabCode.Name = "tabCode";
-            this.tabCode.Size = new System.Drawing.Size(794, 523);
-            this.tabCode.TabIndex = 6;
-            this.tabCode.Text = "Code   ";
-            this.tabCode.UseVisualStyleBackColor = true;
-            // 
-            // textScriptCode
-            // 
-            this.textScriptCode.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textScriptCode.Location = new System.Drawing.Point(7, 29);
-            this.textScriptCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textScriptCode.Multiline = true;
-            this.textScriptCode.Name = "textScriptCode";
-            this.textScriptCode.Size = new System.Drawing.Size(780, 491);
-            this.textScriptCode.TabIndex = 6;
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(7, 7);
-            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(69, 15);
-            this.label9.TabIndex = 4;
-            this.label9.Text = "Script code:";
             // 
             // NoteEditorForm
             // 
@@ -1129,6 +1150,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridAttributes)).EndInit();
             this.tabResources.ResumeLayout(false);
             this.tabResources.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picResource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridResources)).EndInit();
             this.tabTasks.ResumeLayout(false);
             this.tabTasks.PerformLayout();
@@ -1136,12 +1158,12 @@
             this.tabAlarms.ResumeLayout(false);
             this.tabAlarms.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridAlarms)).EndInit();
-            this.tabTraceNotes.ResumeLayout(false);
-            this.tabTraceNotes.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView6)).EndInit();
             this.tabCode.ResumeLayout(false);
             this.tabCode.PerformLayout();
+            this.tabTraceNotes.ResumeLayout(false);
+            this.tabTraceNotes.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridTraceTo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridTraceFrom)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1216,8 +1238,8 @@
         private System.Windows.Forms.Button button13;
         private System.Windows.Forms.Button button14;
         private System.Windows.Forms.Button button15;
-        private System.Windows.Forms.DataGridView dataGridView5;
-        private System.Windows.Forms.DataGridView dataGridView6;
+        private System.Windows.Forms.DataGridView dataGridTraceTo;
+        private System.Windows.Forms.DataGridView dataGridTraceFrom;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox textScriptCode;
@@ -1233,5 +1255,6 @@
         internal System.Windows.Forms.TextBox textTraceNodeType;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.PictureBox picResource;
     }
 }

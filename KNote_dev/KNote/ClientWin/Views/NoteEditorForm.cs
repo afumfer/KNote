@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -119,24 +120,31 @@ namespace KNote.ClientWin.Views
             dataGridAttributes.DataSource = _com.NoteEdit.KAttributesDto.OrderBy(_ => _.Order).Select( _ => new { _.Name, _.Value }).ToList();
 
             // Resources 
-            //dataGridResources = _com.Xxxx -> Implementar un LazyLoad() de los recursos.    !!!!
+            dataGridResources.DataSource = _com.NoteEditResources.OrderBy( _ => _.Order).Select( _ => 
+                new { Id = _.ResourceId, Name = _.NameOut, Description = _.Description, Order = _.Order, Tupe = _.FileType}).ToList() ;
+
+            if (_com.NoteEditResources.Count > 0)
+                UpdatePicResource(_com.NoteEditResources[0].ContentArrayBytes, _com.NoteEditResources[0].FileType);
+            else
+                UpdatePicResource(null, null);
 
             // Tasks
-            // dataGridTasks = _com.Xxxx->Implementar un LazyLoad() de las tareas. 
+            dataGridTasks.DataSource = _com.NoteEditTasks.Select(_ => new { User = _.UserFullName, Description = _.Description,
+                Tags = _.Tags, Priority = _.Priority, Resolved = _.Resolved, EstimatedTime = _.EstimatedTime, SependTime = _.SpentTime,
+                DifficultyLeve = _.DifficultyLevel, ExpectedStarDate = _.ExpectedStartDate, ExpectedEndDate = _.ExpectedEndDate, 
+                StartDate = _.StartDate, EndDate = _.EndDate}).ToList();
 
             // ........
 
             // Alarms            
-            //dataGridAlarms.DataSource = _ctrl.Entity.KMessages;            
+            //dataGridAlarms.DataSource = _ctrl.Entity.KMessages;                        
+
+            // Script             
+            textScriptCode.Text = _com.NoteEdit.Script;
 
             // Trace notes
             //From = new List<TraceNote>(),
             //To = new List<TraceNote>()
-
-            // Script 
-            //[ContentBehind]
-            //MessagesForScript = new List<KMessage>(),
-            //EventsForScript = new List<KEvent>(),
 
         }
 
@@ -144,6 +152,8 @@ namespace KNote.ClientWin.Views
         {            
             dataGridAttributes.Columns[0].Width = 400;  // Attribute name
             dataGridAttributes.Columns[1].Width = 200;  // Value
+            
+            dataGridResources.Columns[0].Visible = false;  // Id
         }
 
 
@@ -156,6 +166,46 @@ namespace KNote.ClientWin.Views
         private void NoteEditorForm_Load(object sender, EventArgs e)
         {
             PersonalizeControls();
+        }
+
+        private void dataGridResources_SelectionChanged(object sender, EventArgs e)
+        {
+            OnSelectedResourceItemChanged();
+        }
+
+        private void OnSelectedResourceItemChanged()
+        {
+            try
+            {
+                if (dataGridResources.SelectedRows.Count > 0)
+                {
+                    Cursor = Cursors.WaitCursor;
+                    var sr = dataGridResources.SelectedRows[0];                    
+                    var idResource = (Guid)sr.Cells[0].Value;
+                    var content = _com.NoteEditResources.Where(_ => _.ResourceId == idResource).Select(_ => _.ContentArrayBytes).FirstOrDefault();
+                    var type = _com.NoteEditResources.Where(_ => _.ResourceId == idResource).Select(_ => _.FileType).FirstOrDefault();
+                    UpdatePicResource(content, type);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private void UpdatePicResource(byte[] content, string type)
+        {
+            if (content == null || !type.Contains("image"))
+            {
+                picResource.Image = null;
+                return;
+            }
+
+            picResource.Image = Image.FromStream(new MemoryStream(content));
         }
     }
 }
