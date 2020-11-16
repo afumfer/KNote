@@ -56,13 +56,25 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        private List<KMessageDto> _noteEditMessages;
+        public List<KMessageDto> NoteEditMessages
+        {
+            get
+            {
+                if (_noteEditMessages == null)
+                    _noteEditMessages = new List<KMessageDto>();
+                return _noteEditMessages;
+            }
+        }
+
         public async void LoadNoteById(FolderWithServiceRef folderWithServiceRef, Guid noteId)
         {
             var service = folderWithServiceRef.ServiceRef.Service;
 
             _noteEdit = (await service.Notes.GetAsync(noteId)).Entity;
-            _noteEditResources = (await service.Notes.GetNoteResourcesAsync(noteId)).Entity;
+            _noteEditResources = (await service.Notes.GetResourcesAsync(noteId)).Entity;
             _noteEditTasks = (await service.Notes.GetNoteTasksAsync(noteId)).Entity;
+            _noteEditMessages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
 
             View.RefreshView();
         }
@@ -71,7 +83,7 @@ namespace KNote.ClientWin.Components
         //{
         //    var service = folderWithServiceRef.ServiceRef.Service;
 
-        //    _noteEditResources = (await service.Notes.GetNoteResourcesAsync(noteId)).Entity;
+        //    _noteEditResources = (await service.Notes.GetResourcesAsync(noteId)).Entity;
 
         //    View.RefreshView();
         //}

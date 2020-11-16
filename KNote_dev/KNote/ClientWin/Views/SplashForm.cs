@@ -19,11 +19,11 @@ namespace KNote.ClientWin.Views
         {
             InitializeComponent();
 
-            //appContext.AddedServiceRef += AppContext_AddedServiceRef1;
+            //appContext.AddedServiceRef += AppContext_AddedServiceRef; 
 
         }
 
-        private void AppContext_AddedServiceRef1(object sender, ComponentEventArgs<ServiceRef> e)
+        private void AppContext_AddedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
         {
             labelMessage.Text = "Loading " + e.Entity.Alias + "...";
             labelMessage.Refresh();

@@ -209,9 +209,15 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Dispose()
         {
             //
         }
+
     }
 }

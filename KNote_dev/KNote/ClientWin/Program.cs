@@ -22,21 +22,38 @@ namespace KNote.ClientWin
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             ApplicationContext applicationContext = new ApplicationContext();
-
-            //Application.Run(new DemoForm());
-
-            Store appStore = new Store(new FactoryViewsWinForms());
            
+            Store appStore = new Store(new FactoryViewsWinForms());
+
+            #region Splash
+
+            //SplashForm splashForm = new SplashForm(appStore);
+            //splashForm.Show();
+            //Application.DoEvents();
+
+            #endregion 
+
             await LoadAppStore(appStore);
 
             #region Demo & lab
 
-            applicationContext.MainForm = new LabForm(appStore);
+            // applicationContext.MainForm = new LabForm(appStore);
 
-            #endregion 
+            #endregion
+
+            #region Normal start
+            
+            var knoteManagment = new KNoteManagmentComponent(appStore);
+            knoteManagment.Run();
+            applicationContext.MainForm = (Form)knoteManagment.View;
+
+            #endregion
+
+            //splashForm.Close(); 
 
             Application.Run(applicationContext);
 
+            //Application.Run(new DemoForm());
         }
 
         static async Task LoadAppStore(Store store)
@@ -50,7 +67,7 @@ namespace KNote.ClientWin
                 "Test db1 (SQL Server Prod - Dapper",
                 @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
                 "Microsoft.Data.SqlClient",
-                "Dapper");
+                "EntityFramework");  // Dapper
 
             //var defaultServiceRef = new ServiceRef(
             //    "Tasks db3 (Sqlite)",

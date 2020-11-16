@@ -100,9 +100,9 @@ namespace KNote.Service.Services
             return result;
         }
 
-        public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
+        public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
         {
-            return await _repository.Notes.GetNoteResourcesAsync(idNote);
+            return await _repository.Notes.GetResourcesAsync(idNote);
         }
 
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
@@ -122,7 +122,7 @@ namespace KNote.Service.Services
         {            
             var result = new Result<ResourceDto>();
 
-            var resGetEntity = await _repository.Notes.GetNoteResourceAsync(id);
+            var resGetEntity = await _repository.Notes.GetResourceAsync(id);
             if (resGetEntity.IsValid)
             {
                 var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
@@ -185,6 +185,10 @@ namespace KNote.Service.Services
             return result;
         }
 
+        public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId)
+        {
+            return await _repository.Notes.GetMessagesAsync(noteId);
+        }
 
         #endregion
 

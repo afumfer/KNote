@@ -178,9 +178,7 @@ namespace KNote.ClientWin.Views
             }
             catch (Exception ex)
             {
-                //var msg = ex.Message;
-                //TODO: pendiente de registrar el error.
-                throw ex;                
+                MessageBox.Show($"OnSelectedNoteItemChanged error: {ex.Message}");
             }
             finally
             {

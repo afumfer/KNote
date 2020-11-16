@@ -16,6 +16,7 @@ namespace KNote.Repository.EntityFramework
         private IGenericRepositoryEF<KntDbContext, NoteKAttribute> _noteKAttributes;
         private IGenericRepositoryEF<KntDbContext, Resource> _resources;
         private IGenericRepositoryEF<KntDbContext, NoteTask> _noteTasks;
+        private IGenericRepositoryEF<KntDbContext, KMessage> _kmessages;
 
         private IKntFolderRepository _folders;
         private IKntKAttributeRepository _kattributes;
@@ -27,9 +28,11 @@ namespace KNote.Repository.EntityFramework
             _noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(context, throwKntException);
             _noteTasks = new GenericRepositoryEF<KntDbContext, NoteTask>(context, throwKntException);
             _resources = new GenericRepositoryEF<KntDbContext, Resource>(context, throwKntException);
+            _kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(context, throwKntException);
+
             _folders = new KntFolderRepository(context, throwKntException);
             _kattributes = new KntKAttributeRepository(context, throwKntException);
-
+            
             ThrowKntException = throwKntException;
         }
 
@@ -392,7 +395,7 @@ namespace KNote.Repository.EntityFramework
 
         }
 
-        public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
+        public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
         {
             var result = new Result<List<ResourceDto>>();
             try
@@ -408,7 +411,7 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
-        public async  Task<Result<ResourceDto>> GetNoteResourceAsync(Guid idNoteResource)
+        public async  Task<Result<ResourceDto>> GetResourceAsync(Guid idNoteResource)
         {            
             var result = new Result<ResourceDto>();
             try
@@ -642,6 +645,50 @@ namespace KNote.Repository.EntityFramework
             }
             return ResultDomainAction(response);
         }
+
+        public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId)
+        {
+            var result = new Result<List<KMessageDto>>();
+            try
+            {
+                var listMessages = await _kmessages.DbSet.Where(m => m.NoteId == noteId)
+                    .Include(m => m.User)
+                    .ToListAsync();
+                result.Entity = new List<KMessageDto>();
+                foreach (var m in listMessages)
+                {
+                    var msg = m.GetSimpleDto<KMessageDto>();
+                    msg.UserFullName = m.User.FullName;
+                    result.Entity.Add(msg);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public Task<Result<KMessageDto>> GetMessageAsync(Guid noteId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<ResourceDto>> AddMessageAsync(ResourceDto entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<ResourceDto>> UpdateMessageAsync(ResourceDto entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result> DeleteMessageAsync(Guid resourceId)
+        {
+            throw new NotImplementedException();
+        }
+
 
         #region  IDisposable
 

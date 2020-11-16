@@ -210,23 +210,16 @@ namespace KNote.Repository.EntityFramework
 
         public void RefreshDbConnection()
         {
-            try
-            {                
-                var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
 
-                if (_strProvider == "Microsoft.Data.SqlClient")                                    
-                    optionsBuilder.UseSqlServer(_strConn);                                    
-                else if (_strProvider == "Microsoft.Data.Sqlite")                
-                    optionsBuilder.UseSqlite(_strConn);                
-                else
-                    throw new Exception("Data provider not suported (KntEx)");
+            if (_strProvider == "Microsoft.Data.SqlClient")                                    
+                optionsBuilder.UseSqlServer(_strConn);                                    
+            else if (_strProvider == "Microsoft.Data.Sqlite")                
+                optionsBuilder.UseSqlite(_strConn);                
+            else
+                throw new Exception("Data provider not suported (KntEx)");
 
-                _context = new KntDbContext(optionsBuilder.Options);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            _context = new KntDbContext(optionsBuilder.Options);
         }
 
         #endregion 

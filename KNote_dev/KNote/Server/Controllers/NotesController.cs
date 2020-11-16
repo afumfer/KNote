@@ -249,13 +249,13 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{id}")]    // GET api/notes/getnoteresources
+        [HttpGet("[action]/{id}")]    // GET api/notes/getresources
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> GetNoteResources(Guid id)
+        public async Task<IActionResult> GetResources(Guid id)
         {
             try
             {
-                var resApi = await _service.Notes.GetNoteResourcesAsync(id);
+                var resApi = await _service.Notes.GetResourcesAsync(id);
                 if (resApi.IsValid)
                 {
                     foreach (var r in resApi.Entity)
@@ -342,7 +342,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{id}")]    // GET api/notes/getnoteresources
+        [HttpGet("[action]/{id}")]    // GET api/notes/getnotetasks
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> GetNoteTasks(Guid id)
         {

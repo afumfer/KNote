@@ -110,10 +110,7 @@ namespace KNote.ClientWin.Views
             }
             catch (Exception ex)
             {
-                if (showError == true)
-                    MessageBox.Show("The following error has occurred: " + ex.Message, "KntScript");
-                else
-                    throw ex;
+                MessageBox.Show("The following error has occurred: " + ex.Message, "KntScript");
             }
         }
 
@@ -125,7 +122,7 @@ namespace KNote.ClientWin.Views
             }
             catch (Exception ex)
             {
-                throw ex;
+                MessageBox.Show("The following error has occurred: " + ex.Message, "KntScript");
             }
         }
 

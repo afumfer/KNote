@@ -202,6 +202,11 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(response);
         }
 
+        public Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
         #region  IDisposable
 
         public virtual void Dispose()

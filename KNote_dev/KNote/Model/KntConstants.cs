@@ -5,21 +5,18 @@ using System.Text;
 namespace KNote.Model
 {
     public static class KntConst
-    {
-        // KAttributes
+    {       
         public static Dictionary<EnumKAttributeDataType, string> KAttributes { get; set; }
+     
+        public static Dictionary<EnumAlarmType, string> AlarmType { get; set; }
+        
+        public static Dictionary<EnumNotificationType, string> NotificationType { get; set; }
+        
+        public static Dictionary<EnumActionType, string> ActionType { get; set; }
 
-        // EventType
-
-        // AlarmType
-
-        // NotificationType
-
-        // ActionType
-
-        // Roles
         public static Dictionary<EnumRoles, string> Roles { get; set; }
 
+        // EventType
 
         static KntConst()
         {
@@ -43,6 +40,31 @@ namespace KNote.Model
                 { EnumRoles.Admin, "Admin"}
             };
 
+            AlarmType = new Dictionary<EnumAlarmType, string>
+            {
+                { EnumAlarmType.Standard, "Standard" },
+                { EnumAlarmType.Daily, "Daily" },
+                { EnumAlarmType.Weekly, "Weekly" },
+                { EnumAlarmType.Monthly, "Monthly" },
+                { EnumAlarmType.Annual, "Annual" },
+                { EnumAlarmType.InMinutes, "InMinutes" }
+            };
+
+            NotificationType = new Dictionary<EnumNotificationType, string> 
+            {
+                { EnumNotificationType.AppInfo, "Application info" },
+                { EnumNotificationType.PostIt, "PostIt" },
+                { EnumNotificationType.Email, "Email" }
+            };
+
+            ActionType = new Dictionary<EnumActionType, string> 
+            {
+                { EnumActionType.UserAlarm, "User Alarm" },
+                { EnumActionType.NoteAlarm, "Note Alarm" },
+                { EnumActionType.UserMessage, "User Message" },
+                { EnumActionType.NoteMessage, "Note Message" },
+                { EnumActionType.ScriptExecution, "Script Execution" }
+            };
         }
     }
 
@@ -68,20 +90,6 @@ namespace KNote.Model
         Admin
     }
 
-    public enum EnumEventType
-    {
-        OnCreateActionDefault,
-        OnSaveActionDefault,
-        OnDeleteActionDefault,
-        OnPropertyGetValueActionDefault,
-        OnPropertyChangeActionDefault,
-        OnCreateScriptExec,
-        OnSaveScriptExec,
-        OnDeleteScriptExec,
-        OnPropertyGetValueScriptExec,
-        OnPropertyChangeScriptExec
-    }
-
     public enum EnumAlarmType
     {
         Standard,
@@ -94,7 +102,7 @@ namespace KNote.Model
 
     public enum EnumNotificationType
     {
-        PrivateInfo,
+        AppInfo,
         PostIt,
         Email
     }
@@ -108,6 +116,19 @@ namespace KNote.Model
         ScriptExecution
     }
 
+    public enum EnumEventType
+    {
+        OnCreateActionDefault,
+        OnSaveActionDefault,
+        OnDeleteActionDefault,
+        OnPropertyGetValueActionDefault,
+        OnPropertyChangeActionDefault,
+        OnCreateScriptExec,
+        OnSaveScriptExec,
+        OnDeleteScriptExec,
+        OnPropertyGetValueScriptExec,
+        OnPropertyChangeScriptExec
+    }
 
 
     #endregion 

@@ -193,6 +193,8 @@ namespace KNote.Model.Dto
             }
         }
 
+        public string UserFullName { get; set; }
+
         #endregion
 
         #region Validations

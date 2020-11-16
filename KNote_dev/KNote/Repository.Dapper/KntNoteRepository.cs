@@ -15,9 +15,15 @@ namespace KNote.Repository.Dapper
 {
     public class KntNoteRepository : DomainActionBase, IKntNoteRepository
     {
+        #region Private members 
+
         protected DbConnection _db;
         private IKntFolderRepository _folders;
         private IKntKAttributeRepository _kattributes;
+
+        #endregion 
+
+        #region Constructor
 
         public KntNoteRepository(DbConnection db, bool throwKntException)
         {
@@ -27,6 +33,10 @@ namespace KNote.Repository.Dapper
             _folders = new KntFolderRepository(db, throwKntException);
             _kattributes = new KntKAttributeRepository(db, throwKntException);
         }
+
+        #endregion
+
+        #region IKntNoteRepository
 
         public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
         {
@@ -494,7 +504,7 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<List<ResourceDto>>> GetNoteResourcesAsync(Guid idNote)
+        public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
         {
             var result = new Result<List<ResourceDto>>();
             try
@@ -515,7 +525,7 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<ResourceDto>> GetNoteResourceAsync(Guid idNoteResource)
+        public async Task<Result<ResourceDto>> GetResourceAsync(Guid idNoteResource)
         {            
             var result = new Result<ResourceDto>();
             try
@@ -816,10 +826,61 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId)
+        {
+            var result = new Result<List<KMessageDto>>();
+            try
+            {
+                var sql = @"SELECT                        
+                        KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
+                        KMessages.AlarmType, KMessages.Disabled, KMessages.[Content], KMessages.Forward, KMessages.AlarmOk, 
+                        KMessages.AlarmActivated, KMessages.AlarmDateTime, KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
+                    FROM  KMessages INNER JOIN
+                         Users ON KMessages.UserId = Users.UserId
+                    WHERE (KMessages.NoteId = @noteId)
+                    -- ORDER BY [KMessages.AlarmDateTime];";
+
+                var entity = await _db.QueryAsync<KMessageDto>(sql.ToString(), new { noteId });
+                result.Entity = entity.ToList();
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public Task<Result<KMessageDto>> GetMessageAsync(Guid noteId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<ResourceDto>> AddMessageAsync(ResourceDto entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<ResourceDto>> UpdateMessageAsync(ResourceDto entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result> DeleteMessageAsync(Guid resourceId)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+
+        #region IDisposable
+
         public void Dispose()
         {
             // For clear private referencies
         }
+
+        #endregion 
 
         #region Private methods
 
@@ -959,11 +1020,6 @@ namespace KNote.Repository.Dapper
                 }
             }
             return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
-        }
-
-        private Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion

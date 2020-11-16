@@ -133,14 +133,15 @@ namespace KNote.ClientWin.Views
                 Tags = _.Tags, Priority = _.Priority, Resolved = _.Resolved, EstimatedTime = _.EstimatedTime, SependTime = _.SpentTime,
                 DifficultyLeve = _.DifficultyLevel, ExpectedStarDate = _.ExpectedStartDate, ExpectedEndDate = _.ExpectedEndDate, 
                 StartDate = _.StartDate, EndDate = _.EndDate}).ToList();
-
-            // ........
-
+            
             // Alarms            
-            //dataGridAlarms.DataSource = _ctrl.Entity.KMessages;                        
+            dataGridAlarms.DataSource = _com.NoteEditMessages.Select( _ => new { User = _.UserFullName, AlarmDateTime = _.AlarmDateTime, 
+                Content = _.Content, Activated = _.AlarmActivated } ).ToList();                        
 
             // Script             
             textScriptCode.Text = _com.NoteEdit.Script;
+
+            // ........
 
             // Trace notes
             //From = new List<TraceNote>(),
@@ -188,8 +189,8 @@ namespace KNote.ClientWin.Views
                 }
             }
             catch (Exception ex)
-            {
-                throw ex;
+            {                
+                MessageBox.Show($"OnSelectedResourceItemChanged error: {ex.Message}");
             }
             finally
             {

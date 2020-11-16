@@ -342,7 +342,7 @@
 
         if (panel == 3 && resources == null)
         {
-            var httpResponse = await dataService.Get<Result<List<ResourceDto>>>($"api/notes/getnoteresources/{Note.NoteId}");
+            var httpResponse = await dataService.Get<Result<List<ResourceDto>>>($"api/notes/getresources/{Note.NoteId}");
             if (httpResponse.Error)
             {
                 await showMessages.ShowErrorMessage(await httpResponse.GetBody());
