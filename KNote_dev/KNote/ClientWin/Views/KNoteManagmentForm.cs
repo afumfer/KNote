@@ -83,39 +83,41 @@ namespace KNote.ClientWin.Views
 
         private void menu_Click(object sender, EventArgs e)
         {
-            //ToolStripMenuItem menuSel;
-            //menuSel = (ToolStripMenuItem)sender;
+            ToolStripMenuItem menuSel;
+            menuSel = (ToolStripMenuItem)sender;
 
-            //// For TEST ...
-            //if (menuSel == menuKNoteLab)
-            //{
-            //    var testForm = new TestForm();
-            //    testForm.Show();
-            //}
-            //// Editar tarea
-            //else if (menuSel == menuExit)
-            //{
-            //    if (MessageBox.Show("Are you sure get out KNote?", "KNote",
-            //                        MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            //    {
-            //        _ctrl.FinalizeCtrl();
-            //    }
-            //}
-            //else if (menuSel == menuAntScriptConsole)
-            //{
-            //    try
-            //    {
-            //        _ctrl.ShowAnTScriptConsole();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        MessageBox.Show(ex.ToString());
-            //    }
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Option in development ... ");
-            //}
+            // For TEST ...
+            if (menuSel == menuKNoteLab)
+            {
+                var labForm = new LabForm();
+                labForm.Show();
+            }
+            // Editar tarea
+            else if (menuSel == menuExit)
+            {
+                if (MessageBox.Show("Are you sure get out KNote?", "KNote",
+                                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    _com.Finalize();
+                }
+            }
+            else if (menuSel == menuAntScriptConsole)
+            {
+                try
+                {
+                    //_ctrl.ShowAnTScriptConsole();
+                    var demoForm = new DemoForm();
+                    demoForm.Show();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+            else
+            {
+                MessageBox.Show("Option in development ... ");
+            }
         }
 
         private void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)

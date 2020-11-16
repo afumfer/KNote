@@ -19,7 +19,7 @@ namespace KNote.ClientWin.Views
         {
             InitializeComponent();
 
-            //appContext.AddedServiceRef += AppContext_AddedServiceRef; 
+            appContext.AddedServiceRef += AppContext_AddedServiceRef; 
 
         }
 
