@@ -18,7 +18,7 @@ using KntScript;
 
 namespace KNote.ClientWin.Views
 {
-    public partial class DemoForm : Form
+    public partial class LabForm : Form
     {
         #region Private fields
 
@@ -41,12 +41,12 @@ namespace KNote.ClientWin.Views
 
         #region Constructors
 
-        public DemoForm()
+        public LabForm()
         {
             InitializeComponent();            
         }
 
-        public DemoForm(Store store) : this()
+        public LabForm(Store store) : this()
         {
             _store = store;
             _folderSelector = new FoldersSelectorComponent(_store);

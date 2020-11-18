@@ -85,35 +85,22 @@ namespace KNote.ClientWin.Views
         {
             ToolStripMenuItem menuSel;
             menuSel = (ToolStripMenuItem)sender;
-
-            // For TEST ...
+            
             if (menuSel == menuKNoteLab)
             {
-                var demoForm = new DemoForm(_com.Store);
-                demoForm.Show();
-            }
-            // Editar tarea
-            else if (menuSel == menuExit)
-            {
-                if (MessageBox.Show("Are you sure exit KNote?", "KNote",
-                                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                {
-                    _com.Finalize();
-                }
+                // For test ...
+                var labForm = new LabForm(_com.Store);
+                labForm.Show();
             }
             else if (menuSel == menuKntScriptConsole)
             {
-                try
-                {
-                    _com.ShowKntScriptConsoleAction();
-
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                }
+                _com.ShowKntScriptConsoleAction();
             }
-
+            else if (menuSel == menuExit)
+            {
+                if (MessageBox.Show("Are you sure exit KNote?", "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)                
+                    _com.Finalize();                
+            }
             else
             {
                 MessageBox.Show("Option in development ... ");

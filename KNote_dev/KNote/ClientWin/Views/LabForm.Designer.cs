@@ -1,6 +1,6 @@
 ﻿namespace KNote.ClientWin.Views
 {
-    partial class DemoForm
+    partial class LabForm
     {
         /// <summary>
         /// Required designer variable.
