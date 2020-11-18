@@ -25,17 +25,45 @@ namespace KNote.ClientWin.Views
         private string _pathSampleScripts = @"..\..\..\AutoKntScripts\";
         private string _selectedFile;
 
+        private Store _store;
 
-        
+        private FoldersSelectorComponent _folderSelector;
+        private NotesSelectorComponent _notesSelector;
+
+        private KNoteManagmentComponent _knoteManagment;
+
+        private NoteEditorComponent _noteEditor;
+
+        private FolderWithServiceRef temp;
+
 
         #endregion
+
+        #region Constructors
 
         public DemoForm()
         {
             InitializeComponent();            
         }
 
-        #region Form events handlers
+        public DemoForm(Store store) : this()
+        {
+            _store = store;
+            _folderSelector = new FoldersSelectorComponent(_store);
+            _notesSelector = new NotesSelectorComponent(_store);
+
+            _knoteManagment = new KNoteManagmentComponent(_store);
+
+            _noteEditor = new NoteEditorComponent(_store);
+
+            _folderSelector.EntitySelection += _folderSelector_EntitySelection;
+            _notesSelector.EntitySelection += _notesSelector_EntitySelection;
+
+        }
+
+        #endregion 
+
+        #region Form events handlers (KntScript)
 
         private void DemoForm_Load(object sender, EventArgs e)
         {
@@ -133,7 +161,10 @@ namespace KNote.ClientWin.Views
         {
             var kntEngine = new KntSEngine(new InOutDeviceForm(), new MyLibrary());
 
-            KntScriptConsoleForm f = new KntScriptConsoleForm(kntEngine);
+            var com = new KntScriptConsoleComponent(new Store(new FactoryViewsWinForms()));
+            com.KntSEngine = kntEngine;            
+
+            KntScriptConsoleForm f = new KntScriptConsoleForm(com);
             f.Show();
         }
 
@@ -147,7 +178,11 @@ namespace KNote.ClientWin.Views
 
             var kntEngine = new KntSEngine(new InOutDeviceForm(), new MyLibrary());
 
-            KntScriptConsoleForm f = new KntScriptConsoleForm(kntEngine, _pathSampleScripts + _selectedFile);
+            var com = new KntScriptConsoleComponent(new Store(new FactoryViewsWinForms()));
+            com.KntSEngine = kntEngine;
+            com.CodeFile = _pathSampleScripts + _selectedFile;
+
+            KntScriptConsoleForm f = new KntScriptConsoleForm(com);
             f.Show();
         }
 
@@ -169,6 +204,77 @@ namespace KNote.ClientWin.Views
             _selectedFile = listSamples.SelectedItem.ToString();
         }
 
+        #endregion
+
+        #region Form events handlers (app lab)
+
+        private void _notesSelector_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            if (e.Entity == null)
+            {
+                labelInfo1.Text = "";
+                return;
+            }
+
+            labelInfo2.Text = $" {e.Entity.Topic} - {e.Entity.NoteId}";
+
+            _noteEditor.LoadNoteById(temp, e.Entity.NoteId);
+        }
+
+        private void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        {
+            if (e.Entity == null)
+            {
+                labelInfo1.Text = "";
+                return;
+            }
+
+            labelInfo1.Text = $" {e.Entity.ServiceRef.Alias} - {e.Entity.FolderInfo?.Name}";
+            if (_notesSelector != null)
+                _notesSelector.LoadNotesByFolderAsync(e.Entity);
+
+            temp = e.Entity;
+        }
+
+        private void buttonTest1_Click(object sender, EventArgs e)
+        {
+            #region Old code 
+            // opción 1
+            //var service = _store.PersonalServiceRef.Service;
+
+            //var notes = (await service.Notes.HomeNotesAsync()).Entity;
+            //foreach (var note in notes)
+            //    listTest.Items.Add(note.Topic);
+
+            // or 
+
+            //await LoadNotes();  // opción 2
+
+            //LoadNotes();   // opción 3
+            #endregion 
+
+            var monitor = new MonitorComponent(_store);
+            monitor.Run();
+        }
+
+        private void buttonTest2_Click(object sender, EventArgs e)
+        {
+            _folderSelector.Run();
+            _notesSelector.Run();
+            _noteEditor.Run();
+        }
+
+        private void buttonTest3_Click(object sender, EventArgs e)
+        {
+            _knoteManagment.Run();
+        }
+
+        private void buttonTest4_Click(object sender, EventArgs e)
+        {
+            var noteEditor = new NoteEditorComponent(_store);
+            noteEditor.RunModal();
+        }
+
         #endregion 
 
         #region Private methods
@@ -188,6 +294,67 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-     
+
+        #region Trash
+
+        //private async Task LoadNotes()  // opción 2
+        private async void LoadNotes()   // opción 3
+        {
+            var service = _store.PersonalServiceRef.Service;
+            var notes = (await service.Notes.HomeNotesAsync()).Entity;
+            foreach (var note in notes)
+                listMessages.Items.Add(note.Topic);
+        }
+
+        private void Trash_oldCode()
+        {
+
+            //var res1 = _folderSelector.RunModal();
+            //labelInfo1.Text = res1.Entity.ToString();
+
+            //var res2 = _notesSelector.RunModal();
+            //labelInfo2.Text = res2.Entity.ToString();
+
+            //var res3 = _knoteManagment.RunModal();
+            //labelInfo3.Text = res3.Entity.ToString();
+
+
+            //_folderSelector.EmbededMode = true;
+            //_folderSelector.ModalMode = false;
+
+            //panelTest1.Controls.Add((Control)_folderSelector.View.PanelView());
+            //_folderSelector.Run();
+
+            //Form1 f = new Form1();
+            //panelTest1.Controls.Add((Control)f.p1);
+            //f.Show();
+
+            //_notesSelector.Finalize();
+            //labelInfo3.Text = "***" + _notesSelector.SelectedEntity?.Topic;
+
+            // _folderSelector.Finalize();
+            // labelInfo2.Text = _folderSelector.SelectedEntity.FolderInfo?.Name;
+            // _folderSelector.SelectFolder(temp);
+
+            //temp = _folderSelector.SelectedEntity;
+
+            //KNoteManagmentForm f = new KNoteManagmentForm(null);
+            //f.Show();
+
+            //NoteEditorForm n = new NoteEditorForm(null);
+            //n.Show();
+
+            //SplashForm f = new SplashForm(null);
+            //f.Show();
+
+            //NotifyForm nf = new NotifyForm(null);
+            //nf.Show();
+
+            //ServerCOMForm sc = new ServerCOMForm();
+            //sc.Show();
+
+        }
+
+        #endregion 
     }
 }

@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
+using KntScript;
 
 namespace KNote.ClientWin.Components
 {
@@ -103,7 +105,9 @@ namespace KNote.ClientWin.Components
                 return _folderSelectorComponent;
             }
         }
-       
+
+
+
         private void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
             if (e.Entity == null)
@@ -196,8 +200,21 @@ namespace KNote.ClientWin.Components
             //}
         }
 
-        #endregion 
+        #endregion
 
+
+        public void ShowKntScriptConsoleAction()
+        {
+            var kntEngine = new KntSEngine(new InOutDeviceForm(), new MyLibrary());
+
+            var kntScriptCom = new KntScriptConsoleComponent(Store);
+            kntScriptCom.KntSEngine = kntEngine;
+
+            kntScriptCom.Run();
+
+            //var demoForm = new DemoForm();
+            //demoForm.Show();
+        }
 
         //---------------------
     }

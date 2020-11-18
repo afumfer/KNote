@@ -27,9 +27,7 @@ namespace KNote.ClientWin.Components
             var result = base.OnInitialized();
 
             try
-            {                                
-                View.ShowView();
-
+            {                                                
                 Store.ComponentsStateChanged += Store_ComponentsStateChanged;
                 Store.AddedServiceRef += Store_AddedServiceRef;
                 Store.ActiveFolderChanged += Store_ActiveFolderChanged;

@@ -89,31 +89,31 @@ namespace KNote.ClientWin.Views
             // For TEST ...
             if (menuSel == menuKNoteLab)
             {
-                var labForm = new LabForm();
-                labForm.Show();
+                var demoForm = new DemoForm(_com.Store);
+                demoForm.Show();
             }
             // Editar tarea
             else if (menuSel == menuExit)
             {
-                if (MessageBox.Show("Are you sure get out KNote?", "KNote",
+                if (MessageBox.Show("Are you sure exit KNote?", "KNote",
                                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     _com.Finalize();
                 }
             }
-            else if (menuSel == menuAntScriptConsole)
+            else if (menuSel == menuKntScriptConsole)
             {
                 try
                 {
-                    //_ctrl.ShowAnTScriptConsole();
-                    var demoForm = new DemoForm();
-                    demoForm.Show();
+                    _com.ShowKntScriptConsoleAction();
+
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.ToString());
                 }
             }
+
             else
             {
                 MessageBox.Show("Option in development ... ");

@@ -83,7 +83,7 @@
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
             this.menuRepositoryConfigurations = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuAntScriptConsole = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuKntScriptConsole = new System.Windows.Forms.ToolStripMenuItem();
             this.menuKNoteLab = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
             this.menuOptions = new System.Windows.Forms.ToolStripMenuItem();
@@ -510,7 +510,7 @@
             this.toolStripMenuItem6,
             this.menuRepositoryConfigurations,
             this.toolStripMenuItem7,
-            this.menuAntScriptConsole,
+            this.menuKntScriptConsole,
             this.menuKNoteLab,
             this.toolStripMenuItem8,
             this.menuOptions});
@@ -542,13 +542,13 @@
             this.toolStripMenuItem7.Name = "toolStripMenuItem7";
             this.toolStripMenuItem7.Size = new System.Drawing.Size(219, 6);
             // 
-            // menuAntScriptConsole
+            // menuKntScriptConsole
             // 
-            this.menuAntScriptConsole.Name = "menuAntScriptConsole";
-            this.menuAntScriptConsole.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.menuAntScriptConsole.Size = new System.Drawing.Size(222, 22);
-            this.menuAntScriptConsole.Text = "AntScript console";
-            this.menuAntScriptConsole.Click += new System.EventHandler(this.menu_Click);
+            this.menuKntScriptConsole.Name = "menuKntScriptConsole";
+            this.menuKntScriptConsole.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.menuKntScriptConsole.Size = new System.Drawing.Size(222, 22);
+            this.menuKntScriptConsole.Text = "KntScript console";
+            this.menuKntScriptConsole.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuKNoteLab
             // 
@@ -930,7 +930,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
         private System.Windows.Forms.ToolStripMenuItem menuRepositoryConfigurations;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
-        private System.Windows.Forms.ToolStripMenuItem menuAntScriptConsole;
+        private System.Windows.Forms.ToolStripMenuItem menuKntScriptConsole;
         private System.Windows.Forms.ToolStripMenuItem menuKNoteLab;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
         private System.Windows.Forms.ToolStripMenuItem menuOptions;

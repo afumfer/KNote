@@ -184,6 +184,7 @@
             this.Name = "KntScriptConsoleForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "KntScript - Console";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KntScriptConsoleForm_FormClosing);
             this.Load += new System.EventHandler(this.KntScriptForm_Load);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.KntScriptForm_KeyUp);
             this.toolStripConsole.ResumeLayout(false);

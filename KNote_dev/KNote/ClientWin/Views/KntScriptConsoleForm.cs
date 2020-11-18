@@ -12,10 +12,13 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 using KntScript;
+using KNote.ClientWin.Core;
+using KNote.Model;
+using KNote.ClientWin.Components;
 
 namespace KNote.ClientWin.Views
 {
-    internal partial class KntScriptConsoleForm : Form
+    internal partial class KntScriptConsoleForm : Form, IViewConfigurable
     {
         #region Private fields
         
@@ -27,17 +30,22 @@ namespace KNote.ClientWin.Views
         [DllImport("User32.dll", CharSet = CharSet.Auto)] 
         private static extern IntPtr SendMessage(IntPtr h, int msg, int wParam, int [] lParam);
 
+        private readonly KntScriptConsoleComponent _com;
+        private bool _viewFinalized = false;
+
         #endregion
 
         #region Constructor
 
-        public KntScriptConsoleForm(KntSEngine engine, string file = null)
+        public KntScriptConsoleForm(KntScriptConsoleComponent com) // , KntSEngine engine, string file = null
         {
             InitializeComponent();
             PersonalizeTabStop();
 
-            _engine = engine;
-            _sourceCodeFile = file;
+            _com = com;
+
+            _engine = _com.KntSEngine;
+            _sourceCodeFile = _com.CodeFile;            
         }
 
         #endregion
@@ -130,6 +138,12 @@ namespace KNote.ClientWin.Views
                 SaveFile(_sourceCodeFile);
         }
 
+        private void KntScriptConsoleForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!_viewFinalized)
+                _com.Finalize();
+        }
+
         #endregion
 
         #region Private methods
@@ -183,6 +197,54 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
+
+        #region IViewConfigurable interface 
+
+        public Control PanelView()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowView()
+        {
+            this.Show();
+        }
+
+        public Result<EComponentResult> ShowModalView()
+        {
+            return _com.DialogResultToComponentResult(this.ShowDialog());
+        }
+
+        public void OnClosingView()
+        {
+            _viewFinalized = true;
+            this.Close();
+        }
+
+        public void RefreshView()
+        {
+            
+        }
+
+        public void ShowInfo(string info)
+        {
+            MessageBox.Show("KNote", info);
+        }
+
+        public void ConfigureEmbededMode()
+        {
+
+        }
+
+        public void ConfigureWindowMode()
+        {
+
+        }
+
+
+        #endregion
+
+
     }
 
 }

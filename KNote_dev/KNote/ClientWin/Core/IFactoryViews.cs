@@ -9,6 +9,7 @@ namespace KNote.ClientWin.Core
     public interface IFactoryViews
     {
         IViewConfigurable View(MonitorComponent component);
+        IViewConfigurable View(KntScriptConsoleComponent component);
         ISelectorView<FolderWithServiceRef> View(FoldersSelectorComponent component);
         ISelectorView<NoteInfoDto> View(NotesSelectorComponent component);
         IViewConfigurable View(KNoteManagmentComponent component);

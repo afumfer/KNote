@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Views;
 using KNote.Model.Dto;
+using KntScript;
 
 namespace KNote.ClientWin.Core
 {
@@ -16,6 +17,13 @@ namespace KNote.ClientWin.Core
         {
             return new MonitorForm(component);
         }
+
+        public IViewConfigurable View(KntScriptConsoleComponent component)
+        {
+            return new KntScriptConsoleForm(component);
+        }
+
+        //
 
         public ISelectorView<FolderWithServiceRef> View(FoldersSelectorComponent component)
         {
@@ -36,6 +44,8 @@ namespace KNote.ClientWin.Core
         {
             return new NoteEditorForm(component);
         }
+
+
 
         #region Secondary views
 
