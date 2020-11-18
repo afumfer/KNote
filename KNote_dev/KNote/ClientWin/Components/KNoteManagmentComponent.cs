@@ -205,7 +205,7 @@ namespace KNote.ClientWin.Components
 
         public void ShowKntScriptConsoleAction()
         {
-            var kntEngine = new KntSEngine(new InOutDeviceForm(), new MyLibrary());
+            var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(Store));
 
             var kntScriptCom = new KntScriptConsoleComponent(Store);
             kntScriptCom.KntSEngine = kntEngine;

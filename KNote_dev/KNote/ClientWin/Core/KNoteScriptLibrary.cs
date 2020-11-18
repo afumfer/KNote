@@ -8,50 +8,67 @@ using System.Net.Mail;
 using System.Text;
 using System.Windows.Forms;
 
+using KNote.ClientWin.Components;
+using KNote.ClientWin.Core;
 using KntScript;
 
-namespace KNote.ClientWin.Views
+namespace KNote.ClientWin.Core
 {
-    public class MyLibrary: Library
-    {        
-        public List<DocumentDummy> ColecDocDemo()
-        {
-            List<DocumentDummy> lisRes = new List<DocumentDummy>();
+    public class KNoteScriptLibrary: Library
+    {
+        private readonly Store _store;
 
-            lisRes.Add(new DocumentDummy(1));
-            lisRes.Add(new DocumentDummy(2));
-            lisRes.Add(new DocumentDummy(3));
-            lisRes.Add(new DocumentDummy(4));
-            lisRes.Add(new DocumentDummy(5));
-            return lisRes;
+        //public KNoteScriptLibrary()
+        //{
+
+        //}
+
+        public KNoteScriptLibrary(Store store) // :this()
+        {
+            _store = store;
         }
 
-        public float DemoSumNum(float x, float y)
+        #region Factory methods for KntScript 
+
+        public FoldersSelectorComponent GetFoldersSelectorComponent()
         {
-            return x + y;
+            return new FoldersSelectorComponent(_store);
         }
 
-        public object TestNull()
+        public NotesSelectorComponent GetNotesSelectorComponent()
         {
-            return null;
+            return new NotesSelectorComponent(_store);
         }
 
-        public void TestMsg()
+        public KNoteManagmentComponent GetKNoteManagmentComponent()
         {
-            MessageBox.Show("TEST MyLibrary Method");
+            return new KNoteManagmentComponent(_store);
         }
 
-        public static void TestStatic()
+        public MonitorComponent GetMonitorComponent()
         {
-            MessageBox.Show("Static");
+            return new MonitorComponent(_store);
         }
+
+        public NoteEditorComponent GetNoteEditorComponent()
+        {
+            return new NoteEditorComponent(_store);
+        }
+
+        public KntScriptConsoleComponent GetKntScriptConsoleComponent()
+        {
+            return new KntScriptConsoleComponent(_store);
+        }
+
+        #endregion
+
+        #region Utils methods
 
         public bool SendGMailMessage(string fromEmail, string fromName, string fromPwd,
             List<object> toUsers, string subject, string body)
         {
             return SendMailMessage(fromEmail, fromName, fromPwd, toUsers, subject, body, false, 587, "smtp.gmail.com", true);
         }
-
 
         public bool SendMailMessage(string fromEmail, string fromName, string fromPwd,
             List<object> toUsers, string subject, string body, bool isBodyHtml,
@@ -125,6 +142,33 @@ namespace KNote.ClientWin.Views
                 MessageBox.Show("The following error has occurred: " + ex.Message, "KntScript");
             }
         }
+
+        #endregion 
+
+        #region Tests and demos
+
+
+        public float DemoSumNum(float x, float y)
+        {
+            return x + y;
+        }
+
+        public object TestNull()
+        {
+            return null;
+        }
+
+        public void TestMsg()
+        {
+            MessageBox.Show("TEST KNoteScriptLibrary Method");
+        }
+
+        public static void TestStatic()
+        {
+            MessageBox.Show("Static");
+        }
+
+        #endregion
 
     }
 

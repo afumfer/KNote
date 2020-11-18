@@ -1,0 +1,16 @@
+' Test use some components
+
+var f = GetFoldersSelectorComponent();
+var n = GetNotesSelectorComponent();
+
+f.RunModal();
+printline f.SelectedEntity.FolderInfo.Name;
+
+n.LoadNotesByFolderAsync(f.SelectedEntity);
+
+var res = n.RunModal();
+if res.Entity.ToString() == "Executed" then 
+  printline n.SelectedEntity.Topic;
+else
+  printline res.Entity.ToString();
+end if;

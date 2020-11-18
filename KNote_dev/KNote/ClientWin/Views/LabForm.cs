@@ -72,7 +72,7 @@ namespace KNote.ClientWin.Views
 
         private void buttonRunScript_Click(object sender, EventArgs e)
         {
-            var kntScript = new KntSEngine(new InOutDeviceForm());
+            var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
 
             kntScript.Run(@"
                             var i = 1;
@@ -90,54 +90,54 @@ namespace KNote.ClientWin.Views
 
         private void buttonInteract_Click(object sender, EventArgs e)
         {            
-            //
-            // Demo, inject variables and personalized api library 
-            //
+            ////
+            //// Demo, inject variables and personalized api library 
+            ////
 
-            var kntScript = new KntSEngine(new InOutDeviceForm(), new MyLibrary());
+            //var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary());
             
-            var a = new DocumentDummy();
-            a.Description = "My object, to inject in script.";
+            //var a = new DocumentDummy();
+            //a.Description = "My object, to inject in script.";
 
-            // inject variable
-            kntScript.AddVar("_a", a);
+            //// inject variable
+            //kntScript.AddVar("_a", a);
 
-            var code = @"printline ""Demo external variables / MyLibrary injected"";
+            //var code = @"printline ""Demo external variables / KNoteScriptLibrary injected"";
 
-                        ' This variable (_a) comes from the host application
-                        printline _a.Description;
-                        printline _a.IdDocument;
-                        printline _a.CreationDateTime;
-                        printline _a.Folder.Name;
-                        _a.DocumentTestMethodA("" param A "");
-                        var b = _a.DocumentTestMethodB("" == param C =="");
-                        printline b;
+            //            ' This variable (_a) comes from the host application
+            //            printline _a.Description;
+            //            printline _a.IdDocument;
+            //            printline _a.CreationDateTime;
+            //            printline _a.Folder.Name;
+            //            _a.DocumentTestMethodA("" param A "");
+            //            var b = _a.DocumentTestMethodB("" == param C =="");
+            //            printline b;
 
-                        ' Test MyLibrary (injected library)
-                        printline """";
-                        printline ""Test MyLibrary"";
-                        var colec = ColecDocDemo();
-                        foreach x in colec
-                            printline x.Description;
-                        end foreach;
+            //            ' Test KNoteScriptLibrary (injected library)
+            //            printline """";
+            //            printline ""Test KNoteScriptLibrary"";
+            //            var colec = ColecDocDemo();
+            //            foreach x in colec
+            //                printline x.Description;
+            //            end foreach;
 
-                        printline """";
-                        _a.Description = ""KntScript - changed description property !!"";                                                
-                        printline _a.Description;
-                        printline """";
+            //            printline """";
+            //            _a.Description = ""KntScript - changed description property !!"";                                                
+            //            printline _a.Description;
+            //            printline """";
 
-                        printline ""<< end >>""; 
-                        ";
+            //            printline ""<< end >>""; 
+            //            ";
 
-            kntScript.Run(code);
+            //kntScript.Run(code);
 
-            var b = (DocumentDummy)kntScript.GetVar("_a");  // -> a 
-            MessageBox.Show(a.Description + " <==> " + b.Description);
+            //var b = (DocumentDummy)kntScript.GetVar("_a");  // -> a 
+            //MessageBox.Show(a.Description + " <==> " + b.Description);
         }
 
         private void buttonRunBackground_Click(object sender, EventArgs e)
         {
-            var kntScript = new KntSEngine(new InOutDeviceForm());
+            var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
 
             var code = @"
                         var i = 1;
@@ -159,13 +159,14 @@ namespace KNote.ClientWin.Views
 
         private void buttonShowConsole_Click(object sender, EventArgs e)
         {
-            var kntEngine = new KntSEngine(new InOutDeviceForm(), new MyLibrary());
+            var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
 
-            var com = new KntScriptConsoleComponent(new Store(new FactoryViewsWinForms()));
-            com.KntSEngine = kntEngine;            
+            var com = new KntScriptConsoleComponent(_store);
+            com.KntSEngine = kntEngine;
 
-            KntScriptConsoleForm f = new KntScriptConsoleForm(com);
-            f.Show();
+            com.Run();
+            //KntScriptConsoleForm f = new KntScriptConsoleForm(com);
+            //f.Show();
         }
 
         private void buttonShowSample_Click(object sender, EventArgs e)
@@ -176,14 +177,15 @@ namespace KNote.ClientWin.Views
                 return;
             }
 
-            var kntEngine = new KntSEngine(new InOutDeviceForm(), new MyLibrary());
+            var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
 
-            var com = new KntScriptConsoleComponent(new Store(new FactoryViewsWinForms()));
+            var com = new KntScriptConsoleComponent(_store);
             com.KntSEngine = kntEngine;
             com.CodeFile = _pathSampleScripts + _selectedFile;
 
-            KntScriptConsoleForm f = new KntScriptConsoleForm(com);
-            f.Show();
+            com.Run();
+            //KntScriptConsoleForm f = new KntScriptConsoleForm(com);
+            //f.Show();
         }
 
         private void buttonRunSample_Click(object sender, EventArgs e)
@@ -194,7 +196,7 @@ namespace KNote.ClientWin.Views
                 return;                   
             }
 
-            var kntScript = new KntSEngine(new InOutDeviceForm(), new MyLibrary());
+            var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
 
             kntScript.RunFile(_pathSampleScripts + _selectedFile);
         }

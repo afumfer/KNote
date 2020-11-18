@@ -23,10 +23,3 @@ db.Close();
 
 printline "";		
 printline "<< end >>";
-
-
-
-
-
-
-

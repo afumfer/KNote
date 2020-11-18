@@ -59,7 +59,7 @@ namespace KNote.ClientWin.Components
                 SelectedEntity = _listNotes[0];
             else
                 SelectedEntity = null;
-            
+
             NotifySelectedEntity();
         }
 
