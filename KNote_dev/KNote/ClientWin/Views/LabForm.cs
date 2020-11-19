@@ -274,7 +274,7 @@ namespace KNote.ClientWin.Views
         private void buttonTest4_Click(object sender, EventArgs e)
         {
             var noteEditor = new NoteEditorComponent(_store);
-            noteEditor.RunModal();
+            noteEditor.RunModal();            
         }
 
         #endregion 

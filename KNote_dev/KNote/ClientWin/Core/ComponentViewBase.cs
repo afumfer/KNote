@@ -81,6 +81,8 @@ namespace KNote.ClientWin.Core
     abstract public class ComponentSelectorViewBase<TView, TEntity> : ComponentViewBase<TView>
         where TView : IViewConfigurable
     {
+        public TEntity SelectedEntity { get; set; }
+
         public ComponentSelectorViewBase(Store store) : base(store)
         {
 
@@ -92,11 +94,20 @@ namespace KNote.ClientWin.Core
             EntitySelection?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
         }
 
-        public TEntity SelectedEntity { get; set; }
-
         public virtual void NotifySelectedEntity()
         {
             OnEntitySelection(SelectedEntity);
+        }
+
+        public event EventHandler<ComponentEventArgs<TEntity>> EntitySelectionDoubleClick;
+        protected virtual void OnEntitySelectionDoubleClick(TEntity entity)
+        {
+            EntitySelectionDoubleClick?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+        }
+
+        public virtual void NotifySelectedEntityDoubleClick()
+        {
+            OnEntitySelectionDoubleClick(SelectedEntity);
         }
 
         public virtual void CancelAction()

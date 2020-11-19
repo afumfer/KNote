@@ -125,7 +125,7 @@ namespace KNote.ClientWin.Views
 
         private void dataGridNotes_DoubleClick(object sender, EventArgs e)
         {
-
+            _com.NotifySelectedEntityDoubleClick();
         }
 
         private void dataGridNotes_KeyUp(object sender, KeyEventArgs e)
@@ -312,6 +312,7 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
+
 
     }
 }

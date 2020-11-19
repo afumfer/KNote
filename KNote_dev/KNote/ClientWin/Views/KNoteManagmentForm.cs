@@ -92,6 +92,10 @@ namespace KNote.ClientWin.Views
                 var labForm = new LabForm(_com.Store);
                 labForm.Show();
             }
+            else if (menuSel == menuEditNote)
+            {
+                _com.EditNoteAction();
+            }
             else if (menuSel == menuKntScriptConsole)
             {
                 _com.ShowKntScriptConsoleAction();

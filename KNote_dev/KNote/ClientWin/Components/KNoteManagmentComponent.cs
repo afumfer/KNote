@@ -138,17 +138,27 @@ namespace KNote.ClientWin.Components
                     _notesSelectorComponent.EmbededMode = true;                    
 
                     _notesSelectorComponent.EntitySelection += _notesSelectorComponent_EntitySelection;
+                    _notesSelectorComponent.EntitySelectionDoubleClick += _notesSelectorComponent_EntitySelectionDoubleClick;
 
                 }
                 return _notesSelectorComponent;
             }
         }
 
+        private void _notesSelectorComponent_EntitySelectionDoubleClick(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            if (e.Entity == null)
+                return;
+            _selectedNoteInfo = e.Entity;
+            EditNoteAction();
+        }
+
         private void _notesSelectorComponent_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
             if (e.Entity == null)
                 return;
-            NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, e.Entity.NoteId);
+            _selectedNoteInfo = e.Entity;
+            NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, _selectedNoteInfo.NoteId);
         }
 
         #endregion
@@ -186,22 +196,12 @@ namespace KNote.ClientWin.Components
         { 
             get { return SelectedFolderWithServiceRef?.ServiceRef; }  
         }
-        
-        public void ShowKntScriptConsole()
+
+        private NoteInfoDto _selectedNoteInfo;
+        public NoteInfoDto SelectedNoteInfo
         {
-            //try
-            //{
-            //    string sourceScript = "";
-            //    AnTSEngine.ShowConsole(sourceScript, new KntTestServiceLibrary());
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw ex;
-            //}
+            get { return _selectedNoteInfo; }
         }
-
-        #endregion
-
 
         public void ShowKntScriptConsoleAction()
         {
@@ -211,10 +211,22 @@ namespace KNote.ClientWin.Components
             kntScriptCom.KntSEngine = kntEngine;
 
             kntScriptCom.Run();
-
-            //var demoForm = new DemoForm();
-            //demoForm.Show();
         }
+
+        public void EditNoteAction()
+        {
+            if (SelectedNoteInfo == null)
+                return;
+
+            var noteEditorComponent = new NoteEditorComponent(Store);
+            noteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, SelectedNoteInfo.NoteId);            
+            noteEditorComponent.Run();
+        }
+
+
+        #endregion
+
+
 
         //---------------------
     }

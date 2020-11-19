@@ -117,8 +117,6 @@ namespace KNote.ClientWin.Core
 
         #endregion
 
-
-
     }
 
     #region  Context typos 
