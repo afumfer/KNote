@@ -111,6 +111,17 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private void buttonToolBar_Click(object sender, EventArgs e)
+        {
+            ToolStripItem menuSel;
+            menuSel = (ToolStripItem)sender;
+
+            if (menuSel == toolEditNote)
+            {
+                _com.EditNoteAction();
+            }
+        }
+
         private void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)

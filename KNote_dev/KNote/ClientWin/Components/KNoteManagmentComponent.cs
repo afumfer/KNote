@@ -219,8 +219,24 @@ namespace KNote.ClientWin.Components
                 return;
 
             var noteEditorComponent = new NoteEditorComponent(Store);
+            noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
             noteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, SelectedNoteInfo.NoteId);            
             noteEditorComponent.Run();
+        }
+
+        private void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
+        {
+            if (NotesSelectorComponent.Folder.FolderId == e.Entity.FolderId)
+            {
+                NotesSelectorComponent.RefreshNote(e.Entity.GetSimpleDto<NoteInfoDto>());
+            }
+
+            if(NoteEditorComponent.NoteEdit.NoteId == e.Entity.NoteId)
+            {
+                //NoteEditorComponent.RefreshNote(e.Entity);
+                // o ...
+                NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, e.Entity.NoteId);
+            }
         }
 
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,17 +14,7 @@ namespace KNote.ClientWin.Components
 {
     public class NotesSelectorComponent : ComponentSelectorViewBase<ISelectorView<NoteInfoDto>, NoteInfoDto>
     {
-        public NotesSelectorComponent(Store store) : base(store)
-        {
-
-        }
-
-        protected override ISelectorView<NoteInfoDto> CreateView()
-        {
-            return Store.FactoryViews.View(this);
-        }
-
-        #region Component specific public members
+        #region Properties
 
         private IKntService _service;
         public IKntService Service
@@ -43,6 +34,29 @@ namespace KNote.ClientWin.Components
             get { return _listNotes; }
         }
 
+        #endregion
+
+        #region Constructor
+
+        public NotesSelectorComponent(Store store) : base(store)
+        {
+
+        }
+
+        #endregion
+
+        #region ISelectorView implementation
+
+        protected override ISelectorView<NoteInfoDto> CreateView()
+        {
+            return Store.FactoryViews.View(this);
+        }
+
+        #endregion 
+
+        #region Component specific public members
+
+
         public async void LoadNotesByFolderAsync(FolderWithServiceRef folderWithServiceRef)
         {
             _service = folderWithServiceRef.ServiceRef.Service;
@@ -61,6 +75,20 @@ namespace KNote.ClientWin.Components
                 SelectedEntity = null;
 
             NotifySelectedEntity();
+        }
+
+        public void RefreshNote(NoteInfoDto note)
+        {
+            if(Folder.FolderId == note.FolderId)
+            {
+                var updateNote = _listNotes.FirstOrDefault(_ => _.NoteId == note.NoteId);
+                if(updateNote != null)
+                {
+                    updateNote.SetSimpleDto(note);
+                    View.RefreshItem(updateNote);
+                }
+
+            }
         }
 
         #endregion

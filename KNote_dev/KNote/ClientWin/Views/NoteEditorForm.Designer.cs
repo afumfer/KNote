@@ -154,7 +154,7 @@
             this.toolBarNoteEditor.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
             this.toolBarNoteEditor.Size = new System.Drawing.Size(808, 25);
             this.toolBarNoteEditor.TabIndex = 6;
-            this.toolBarNoteEditor.Text = "Tool bar ANotas";
+            this.toolBarNoteEditor.Text = "Toolbar KeyNotes";
             // 
             // buttonSave
             // 
@@ -163,6 +163,7 @@
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(57, 22);
             this.buttonSave.Text = "Save  ";
+            this.buttonSave.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // buttonDelete
             // 

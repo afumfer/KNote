@@ -7,30 +7,26 @@ using System.Xml.Serialization;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Service;
 
 namespace KNote.ClientWin.Components
 {
     public class NoteEditorComponent : ComponentViewBase<IEditorView<NoteDto>>
     {
-        public NoteEditorComponent(Store store) : base(store)
-        {
-        }
-
-        protected override IEditorView<NoteDto> CreateView()
-        {
-            return Store.FactoryViews.View(this);
-        }
-
-        #region Component specific public members
+        #region Properties
 
         private NoteDto _noteEdit;
         public NoteDto NoteEdit
         {
-            get 
+            set
+            {
+                _noteEdit = value;
+            }
+            get
             {
                 if (_noteEdit == null)
                     _noteEdit = new NoteDto();
-                return _noteEdit; 
+                return _noteEdit;
             }
         }
 
@@ -67,35 +63,61 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        private IKntService _service;
+
+        #endregion
+
+        #region Constructor
+
+        public NoteEditorComponent(Store store) : base(store)
+        {
+        }
+
+        #endregion
+
+        #region IEditorView implementation
+
+        protected override IEditorView<NoteDto> CreateView()
+        {
+            return Store.FactoryViews.View(this);
+        }
+
+        #endregion
+
+        #region Component specific public members
+
         public async void LoadNoteById(FolderWithServiceRef folderWithServiceRef, Guid noteId)
         {
-            var service = folderWithServiceRef.ServiceRef.Service;
+            _service = folderWithServiceRef.ServiceRef.Service;
 
-            _noteEdit = (await service.Notes.GetAsync(noteId)).Entity;
-            _noteEditResources = (await service.Notes.GetResourcesAsync(noteId)).Entity;
-            _noteEditTasks = (await service.Notes.GetNoteTasksAsync(noteId)).Entity;
-            _noteEditMessages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
+            _noteEdit = (await _service.Notes.GetAsync(noteId)).Entity;
+            _noteEditResources = (await _service.Notes.GetResourcesAsync(noteId)).Entity;
+            _noteEditTasks = (await _service.Notes.GetNoteTasksAsync(noteId)).Entity;
+            _noteEditMessages = (await _service.Notes.GetMessagesAsync(noteId)).Entity;
 
             View.RefreshView();
         }
 
-        //public async void LoadNoteResourcesById(FolderWithServiceRef folderWithServiceRef, Guid noteId)
-        //{
-        //    var service = folderWithServiceRef.ServiceRef.Service;
+        public void RefreshNote(NoteDto note)
+        {
+            NoteEdit = note;
+            View.RefreshView();
+        }
 
-        //    _noteEditResources = (await service.Notes.GetResourcesAsync(noteId)).Entity;
+        public async void SaveModelAction()
+        {
+            var response = await _service.Notes.SaveAsync(NoteEdit);
+            _noteEdit = response.Entity;
+            OnSavedEntity(response.Entity);
+            View.RefreshView();            
+        }
 
-        //    View.RefreshView();
-        //}
+        public event EventHandler<ComponentEventArgs<NoteDto>> SavedEntity;
+        protected virtual void OnSavedEntity(NoteDto entity)
+        {
+            SavedEntity?.Invoke(this, new ComponentEventArgs<NoteDto>(entity));
+        }
 
-        //public async void LoadNoteTasksById(FolderWithServiceRef folderWithServiceRef, Guid noteId)
-        //{
-        //    var service = folderWithServiceRef.ServiceRef.Service;
-
-        //    _noteEditTasks = (await service.Notes.GetNoteTasksAsync(noteId)).Entity;
-
-        //    View.RefreshView();
-        //}
 
         #endregion 
     }

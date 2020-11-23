@@ -149,6 +149,18 @@ namespace KNote.ClientWin.Views
 
         }
 
+        private void ControlsToModel()
+        {
+            // Basic data
+            _com.NoteEdit.Topic = textTopic.Text;
+            //_com.NoteEdit.FolderDto.Name = textFolder.Text;
+            _com.NoteEdit.Tags = textTags.Text;
+            _com.NoteEdit.Description = textDescription.Text;            
+            int p;
+            if (int.TryParse(textPriority.Text, out p))
+                _com.NoteEdit.Priority = p;
+        }
+
         private void PersonalizeControls()
         {            
             dataGridAttributes.Columns[0].Width = 400;  // Attribute name
@@ -207,6 +219,18 @@ namespace KNote.ClientWin.Views
             }
 
             picResource.Image = Image.FromStream(new MemoryStream(content));
+        }
+
+        private void buttonToolBar_Click(object sender, EventArgs e)
+        {
+            ToolStripItem menuSel;
+            menuSel = (ToolStripItem)sender;
+
+            if (menuSel == buttonSave)
+            {
+                ControlsToModel();
+                _com.SaveModelAction();
+            }
         }
     }
 }

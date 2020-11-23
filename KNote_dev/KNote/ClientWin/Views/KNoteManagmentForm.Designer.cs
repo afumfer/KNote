@@ -662,6 +662,7 @@
             this.toolEditNote.Size = new System.Drawing.Size(53, 22);
             this.toolEditNote.Text = "Edit  ";
             this.toolEditNote.ToolTipText = "Edit note";
+            this.toolEditNote.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // toolDeleteNote
             // 

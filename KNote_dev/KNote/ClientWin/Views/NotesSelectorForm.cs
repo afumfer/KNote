@@ -109,7 +109,7 @@ namespace KNote.ClientWin.Views
 
         public void RefreshItem(NoteInfoDto item)
         {
-            throw new NotImplementedException();
+            dataGridNotes.Refresh();
         }
 
         #endregion
