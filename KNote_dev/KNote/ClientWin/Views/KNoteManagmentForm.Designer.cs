@@ -653,6 +653,7 @@
             this.toolNewNote.Size = new System.Drawing.Size(57, 22);
             this.toolNewNote.Text = "New  ";
             this.toolNewNote.ToolTipText = "New note";
+            this.toolNewNote.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // toolEditNote
             // 
@@ -672,6 +673,7 @@
             this.toolDeleteNote.Size = new System.Drawing.Size(66, 22);
             this.toolDeleteNote.Text = "Delete  ";
             this.toolDeleteNote.ToolTipText = "Delete note";
+            this.toolDeleteNote.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // toolStripSeparator1
             // 

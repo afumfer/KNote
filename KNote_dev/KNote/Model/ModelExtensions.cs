@@ -59,6 +59,9 @@ namespace KNote.Model
 
         static void UtilCopyProperties(object dest, object src)
         {
+            if ((dest == null) || (src == null) )
+                return;
+
             Type tDest = dest.GetType();
             Type tSrc = src.GetType();
             PropertyInfo[] properties = tDest.GetProperties();

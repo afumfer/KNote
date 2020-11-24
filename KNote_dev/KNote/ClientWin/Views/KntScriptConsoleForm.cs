@@ -226,9 +226,9 @@ namespace KNote.ClientWin.Views
             
         }
 
-        public void ShowInfo(string info)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
-            MessageBox.Show("KNote", info);
+            return MessageBox.Show("KNote", info);
         }
 
         public void ConfigureEmbededMode()

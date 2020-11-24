@@ -34,6 +34,8 @@ namespace KNote.ClientWin.Components
             get { return _listNotes; }
         }
 
+        public bool tmpAdd { get; set; }
+
         #endregion
 
         #region Constructor
@@ -88,6 +90,29 @@ namespace KNote.ClientWin.Components
                     View.RefreshItem(updateNote);
                 }
 
+            }
+        }
+
+        public void AddNote(NoteInfoDto note)
+        {
+            if (Folder.FolderId == note.FolderId)
+            {
+                tmpAdd = true;
+                _listNotes.Add(note);
+                View.AddItem(note);
+                tmpAdd = false;
+            }
+        }
+
+        public void DeleteNote(NoteInfoDto note)
+        {
+            if (Folder.FolderId == note.FolderId)
+            {
+                
+                tmpAdd = true;
+                _listNotes.RemoveAll( _ => _.NoteId == note.NoteId);                
+                View.DeleteItem(note);
+                tmpAdd = false;
             }
         }
 

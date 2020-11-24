@@ -18,15 +18,24 @@ namespace KNote.ClientWin.Views
 {
     public partial class NoteEditorForm : Form, IEditorView<NoteDto>
     {
+        #region Private fields
+
         private readonly NoteEditorComponent _com;
         private bool _viewFinalized = false;
+
+        #endregion 
+
+        #region Constructor
 
         public NoteEditorForm(NoteEditorComponent com)
         {
             InitializeComponent();
-
             _com = com;
         }
+
+        #endregion
+
+        #region IEditorView interface
 
         public Control PanelView()
         {
@@ -80,9 +89,9 @@ namespace KNote.ClientWin.Views
             RefreshBindingModel();
         }
 
-        public void ShowInfo(string info)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
-            
+            return  MessageBox.Show(info, "Key Note", MessageBoxButtons.YesNo);
         }
 
         public void ShowView()
@@ -90,15 +99,54 @@ namespace KNote.ClientWin.Views
             this.Show();
         }
 
-        Result<EComponentResult> IViewBase.ShowModalView()
+        public Result<EComponentResult> ShowModalView()
         {
             return _com.DialogResultToComponentResult(this.ShowDialog());
         }
-
+        
         public void RefreshBindingModel()
         {
             ModelToControls();
         }
+
+        #endregion
+
+        #region Form events handlers
+
+        private void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!_viewFinalized)
+            {
+                SaveModel();
+                _com.Finalize();
+            }
+        }
+
+        private void NoteEditorForm_Load(object sender, EventArgs e)
+        {
+            PersonalizeControls();
+        }
+
+        private void dataGridResources_SelectionChanged(object sender, EventArgs e)
+        {
+            OnSelectedResourceItemChanged();
+        }
+
+        private void buttonToolBar_Click(object sender, EventArgs e)
+        {
+            ToolStripItem menuSel;
+            menuSel = (ToolStripItem)sender;
+
+            if (menuSel == buttonSave)
+            {
+                SaveModel();
+            }
+        }
+
+
+        #endregion
+
+        #region Private methods
 
         private void ModelToControls()
         {
@@ -117,11 +165,11 @@ namespace KNote.ClientWin.Views
 
             // KAttributes           
             textNoteType.Text = _com.NoteEdit.NoteTypeDto.Name;
-            dataGridAttributes.DataSource = _com.NoteEdit.KAttributesDto.OrderBy(_ => _.Order).Select( _ => new { _.Name, _.Value }).ToList();
+            dataGridAttributes.DataSource = _com.NoteEdit.KAttributesDto.OrderBy(_ => _.Order).Select(_ => new { _.Name, _.Value }).ToList();
 
             // Resources 
-            dataGridResources.DataSource = _com.NoteEditResources.OrderBy( _ => _.Order).Select( _ => 
-                new { Id = _.ResourceId, Name = _.NameOut, Description = _.Description, Order = _.Order, Tupe = _.FileType}).ToList() ;
+            dataGridResources.DataSource = _com.NoteEditResources.OrderBy(_ => _.Order).Select(_ =>
+              new { Id = _.ResourceId, Name = _.NameOut, Description = _.Description, Order = _.Order, Tupe = _.FileType }).ToList();
 
             if (_com.NoteEditResources.Count > 0)
                 UpdatePicResource(_com.NoteEditResources[0].ContentArrayBytes, _com.NoteEditResources[0].FileType);
@@ -129,14 +177,28 @@ namespace KNote.ClientWin.Views
                 UpdatePicResource(null, null);
 
             // Tasks
-            dataGridTasks.DataSource = _com.NoteEditTasks.Select(_ => new { User = _.UserFullName, Description = _.Description,
-                Tags = _.Tags, Priority = _.Priority, Resolved = _.Resolved, EstimatedTime = _.EstimatedTime, SependTime = _.SpentTime,
-                DifficultyLeve = _.DifficultyLevel, ExpectedStarDate = _.ExpectedStartDate, ExpectedEndDate = _.ExpectedEndDate, 
-                StartDate = _.StartDate, EndDate = _.EndDate}).ToList();
-            
+            dataGridTasks.DataSource = _com.NoteEditTasks.Select(_ => new {
+                User = _.UserFullName,
+                Description = _.Description,
+                Tags = _.Tags,
+                Priority = _.Priority,
+                Resolved = _.Resolved,
+                EstimatedTime = _.EstimatedTime,
+                SependTime = _.SpentTime,
+                DifficultyLeve = _.DifficultyLevel,
+                ExpectedStarDate = _.ExpectedStartDate,
+                ExpectedEndDate = _.ExpectedEndDate,
+                StartDate = _.StartDate,
+                EndDate = _.EndDate
+            }).ToList();
+
             // Alarms            
-            dataGridAlarms.DataSource = _com.NoteEditMessages.Select( _ => new { User = _.UserFullName, AlarmDateTime = _.AlarmDateTime, 
-                Content = _.Content, Activated = _.AlarmActivated } ).ToList();                        
+            dataGridAlarms.DataSource = _com.NoteEditMessages.Select(_ => new {
+                User = _.UserFullName,
+                AlarmDateTime = _.AlarmDateTime,
+                Content = _.Content,
+                Activated = _.AlarmActivated
+            }).ToList();
 
             // Script             
             textScriptCode.Text = _com.NoteEdit.Script;
@@ -155,35 +217,18 @@ namespace KNote.ClientWin.Views
             _com.NoteEdit.Topic = textTopic.Text;
             //_com.NoteEdit.FolderDto.Name = textFolder.Text;
             _com.NoteEdit.Tags = textTags.Text;
-            _com.NoteEdit.Description = textDescription.Text;            
+            _com.NoteEdit.Description = textDescription.Text;
             int p;
             if (int.TryParse(textPriority.Text, out p))
                 _com.NoteEdit.Priority = p;
         }
 
         private void PersonalizeControls()
-        {            
+        {
             dataGridAttributes.Columns[0].Width = 400;  // Attribute name
             dataGridAttributes.Columns[1].Width = 200;  // Value
-            
+
             dataGridResources.Columns[0].Visible = false;  // Id
-        }
-
-
-        private void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (!_viewFinalized)
-                _com.Finalize();
-        }
-
-        private void NoteEditorForm_Load(object sender, EventArgs e)
-        {
-            PersonalizeControls();
-        }
-
-        private void dataGridResources_SelectionChanged(object sender, EventArgs e)
-        {
-            OnSelectedResourceItemChanged();
         }
 
         private void OnSelectedResourceItemChanged()
@@ -221,16 +266,13 @@ namespace KNote.ClientWin.Views
             picResource.Image = Image.FromStream(new MemoryStream(content));
         }
 
-        private void buttonToolBar_Click(object sender, EventArgs e)
+        private void SaveModel()
         {
-            ToolStripItem menuSel;
-            menuSel = (ToolStripItem)sender;
-
-            if (menuSel == buttonSave)
-            {
-                ControlsToModel();
-                _com.SaveModelAction();
-            }
+            ControlsToModel();
+            _com.SaveNote();
         }
+
+        #endregion
+
     }
 }

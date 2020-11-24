@@ -17,7 +17,7 @@ namespace KNote.ClientWin.Core
         Result<EComponentResult> ShowModalView();
         void OnClosingView();
         void RefreshView();
-        void ShowInfo(string info);
+        DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK);
     }
 
     public interface IViewConfigurable: IViewBase

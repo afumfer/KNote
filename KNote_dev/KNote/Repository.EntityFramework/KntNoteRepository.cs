@@ -229,16 +229,24 @@ namespace KNote.Repository.EntityFramework
                     .SingleOrDefaultAsync();
 
                 // Map to dto
-                result.Entity = entity?.GetSimpleDto<NoteDto>();
-                result.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
-                result.Entity.NoteTypeDto = entity?.NoteType?.GetSimpleDto<NoteTypeDto>();
-                result.Entity.KAttributesDto = entity?.KAttributes
-                    .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
-                    .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == result.Entity.NoteTypeId)
-                    .ToList();
+                if(entity != null)
+                {
+                    result.Entity = entity?.GetSimpleDto<NoteDto>();
+                    result.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
+                    result.Entity.NoteTypeDto = entity?.NoteType?.GetSimpleDto<NoteTypeDto>();
+                    result.Entity.KAttributesDto = entity?.KAttributes
+                        .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
+                        .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == result.Entity.NoteTypeId)
+                        .ToList();
 
-                // Complete Attributes list
-                result.Entity.KAttributesDto = await CompleteNoteAttributes(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
+                    // Complete Attributes list
+                    result.Entity.KAttributesDto = await CompleteNoteAttributes(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
+                }
+                else
+                {
+                    result.AddErrorMessage("Entity not found.");
+                }
+
             }
             catch (Exception ex)
             {

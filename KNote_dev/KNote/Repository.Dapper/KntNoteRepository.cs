@@ -252,27 +252,33 @@ namespace KNote.Repository.Dapper
 
                 result.Entity = entity.ToList().FirstOrDefault();
 
-                var sqlAtr = @"
-                        SELECT 
-                              NoteKAttributes.NoteKAttributeId, NoteKAttributes.NoteId, NoteKAttributes.Value, 
-                              NoteKAttributes.KAttributeId, 
+                if (result.Entity != null)
+                {
+                    var sqlAtr = @"
+                            SELECT 
+                                  NoteKAttributes.NoteKAttributeId, NoteKAttributes.NoteId, NoteKAttributes.Value, 
+                                  NoteKAttributes.KAttributeId, 
 
-                              KAttributes.KAttributeId, KAttributes.Name, KAttributes.Description, KAttributes.KAttributeDataType, 
-                              KAttributes.RequiredValue, KAttributes.[Order], KAttributes.Script, KAttributes.Disabled
+                                  KAttributes.KAttributeId, KAttributes.Name, KAttributes.Description, KAttributes.KAttributeDataType, 
+                                  KAttributes.RequiredValue, KAttributes.[Order], KAttributes.Script, KAttributes.Disabled
 
-                         FROM  NoteKAttributes INNER JOIN
-                            KAttributes ON NoteKAttributes.KAttributeId = KAttributes.KAttributeId
+                             FROM  NoteKAttributes INNER JOIN
+                                KAttributes ON NoteKAttributes.KAttributeId = KAttributes.KAttributeId
 
-                         WHERE NoteId = @noteId";
+                             WHERE NoteId = @noteId";
 
-                var entityList = await _db.QueryAsync<NoteKAttributeDto>(sqlAtr.ToString(), new { noteId } );
+                    var entityList = await _db.QueryAsync<NoteKAttributeDto>(sqlAtr.ToString(), new { noteId });
 
-                var atrList = entityList.ToList();
+                    var atrList = entityList.ToList();
 
-                // Complete Attributes list                                                
-                atrList = await CompleteNoteAttributes(atrList, result.Entity.NoteId, result.Entity.NoteTypeId);
+                    // Complete Attributes list                                                
+                    atrList = await CompleteNoteAttributes(atrList, result.Entity.NoteId, result.Entity.NoteTypeId);
 
-                result.Entity.KAttributesDto = atrList;
+                    result.Entity.KAttributesDto = atrList;
+                }
+                else
+                    result.AddErrorMessage("Entity not found.");
+
             }
             catch (Exception ex)
             {

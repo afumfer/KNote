@@ -4,6 +4,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
+using System.Windows.Forms;
+
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -98,18 +100,49 @@ namespace KNote.ClientWin.Components
             View.RefreshView();
         }
 
+        public async void LoadNewNote(FolderWithServiceRef folderWithServiceRef)
+        {
+            _service = folderWithServiceRef.ServiceRef.Service;
+
+            var response = await _service.Notes.NewAsync();
+            _noteEdit = response.Entity;
+            _noteEdit.FolderId = folderWithServiceRef.FolderInfo.FolderId;
+            _noteEdit.FolderDto = folderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+
+            View.RefreshView();
+        }
+
+        public async void SaveNote()
+        {
+            var isNew = (_noteEdit.NoteId == Guid.Empty);
+            
+            var response = await _service.Notes.SaveAsync(NoteEdit);
+            _noteEdit = response.Entity;
+            
+            if (!isNew)
+                OnSavedEntity(response.Entity);
+            else
+                OnAddedEntity(response.Entity);
+            
+            View.RefreshView();            
+        }
+
+        public async void DeleteNote(FolderWithServiceRef folderWithServiceRef, Guid noteId)
+        {
+            _service = folderWithServiceRef.ServiceRef.Service;
+
+            var result = View.ShowInfo("Are you sure you want to delete this note?", "Delte note", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes || result == DialogResult.Yes)
+            {
+                var response = await _service.Notes.DeleteAsync(noteId);
+                OnDeletedEntity(response.Entity);
+            }
+        }
+
         public void RefreshNote(NoteDto note)
         {
             NoteEdit = note;
             View.RefreshView();
-        }
-
-        public async void SaveModelAction()
-        {
-            var response = await _service.Notes.SaveAsync(NoteEdit);
-            _noteEdit = response.Entity;
-            OnSavedEntity(response.Entity);
-            View.RefreshView();            
         }
 
         public event EventHandler<ComponentEventArgs<NoteDto>> SavedEntity;
@@ -118,6 +151,17 @@ namespace KNote.ClientWin.Components
             SavedEntity?.Invoke(this, new ComponentEventArgs<NoteDto>(entity));
         }
 
+        public event EventHandler<ComponentEventArgs<NoteDto>> AddedEntity;
+        protected virtual void OnAddedEntity(NoteDto entity)
+        {
+            AddedEntity?.Invoke(this, new ComponentEventArgs<NoteDto>(entity));
+        }
+
+        public event EventHandler<ComponentEventArgs<NoteDto>> DeletedEntity;
+        protected virtual void OnDeletedEntity(NoteDto entity)
+        {
+            DeletedEntity?.Invoke(this, new ComponentEventArgs<NoteDto>(entity));
+        }
 
         #endregion 
     }

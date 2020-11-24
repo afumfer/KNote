@@ -20,6 +20,9 @@ namespace KNote.ClientWin.Views
         private bool _configuredGrid = false;
         private UInt32 _countRepetition = 0;
         private bool _skipSelectionChanged = false;
+        
+        private BindingSource _source = new BindingSource();
+
 
         public NotesSelectorForm(NotesSelectorComponent com)
         {
@@ -52,10 +55,20 @@ namespace KNote.ClientWin.Views
             else
             {
                 _skipSelectionChanged = true;
-                dataGridNotes.DataSource = _com.ListNotes;
+
+                // !!! plan A
+                //dataGridNotes.DataSource = _com.ListNotes;
+
+                // !!! plan B
+                _source.DataSource = _com.ListNotes;                
+                dataGridNotes.DataSource = _source;
+
                 _skipSelectionChanged = false;
 
                 CoonfigureGridStd();
+
+                if(_com.ListNotes.Count > 0)
+                    GridSelectFirstElement();
             }
         }
 
@@ -90,22 +103,54 @@ namespace KNote.ClientWin.Views
             throw new NotImplementedException();
         }
 
-        public void ShowInfo(string info)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
-            MessageBox.Show(info);
+            return MessageBox.Show(info, caption, buttons);
         }
 
         #region Extension methods ...
 
         public void AddItem(NoteInfoDto item)
         {
-            throw new NotImplementedException();
+            // TODO: !!! Revisar esta implementación. Esto es hack para:
+            //    a) refrescar el nuevo item en la lista, 
+            //    b) mantener activo el último item seleccionado 
+            // (Se está forzando artificialmente si item es null entonces significa que venimos de un alta)   
+            // 
+            _skipSelectionChanged = true;
+            _source.ResetBindings(false);            
+            
+            // dejar seleccionado el último item.
+            int index = 0;
+
+            if(_com.SelectedEntity != null)
+            {
+                foreach (DataGridViewRow r in dataGridNotes.Rows)
+                {
+                    if (_com.SelectedEntity.NoteId == (Guid)r.Cells["NoteId"].Value)
+                    {
+                        index = r.Index;
+                        break;
+                    }
+                }
+            }
+            _skipSelectionChanged = false;
+            dataGridNotes.Rows[index].Selected = true;
         }
 
         public void DeleteItem(NoteInfoDto item)
         {
-            throw new NotImplementedException();
+            // En este caso no se usa item, la actualizació se resuelve con ResetBindings
+            _skipSelectionChanged = true;
+            _source.ResetBindings(false);            
+            
+            if (_com.ListNotes.Count == 0)
+                return;
+
+            GridSelectFirstElement(false);
         }
+
+
 
         public void RefreshItem(NoteInfoDto item)
         {
@@ -307,8 +352,29 @@ namespace KNote.ClientWin.Views
                 else
                     n.NoteTypeId = null;
 
+
+                //n.ContentType = (string)dgr.Cells[5].Value;
+                //n.Script = (string)dgr.Cells[6].Value;
+                //n.InternalTags = (string)dgr.Cells[7].Value;
+                //n.Tags = (string)dgr.Cells[8].Value;
+                //n.Priority = (int)dgr.Cells[9].Value;
+                //n.FolderId = (Guid)dgr.Cells[10].Value;
+                //if (dgr.Cells[12].Value != null)
+                //    n.NoteTypeId = (Guid)dgr.Cells[11].Value;
+                //else
+                //    n.NoteTypeId = null;
+
                 return n;
             }
+        }
+
+        private void GridSelectFirstElement(bool skipSelectionChanged = true)
+        {
+            _skipSelectionChanged = skipSelectionChanged;
+            dataGridNotes.ClearSelection();            
+            dataGridNotes.CurrentCell = dataGridNotes.Rows[0].Cells[1];            
+            dataGridNotes.Rows[0].Selected = true;
+            _skipSelectionChanged = false;           
         }
 
         #endregion

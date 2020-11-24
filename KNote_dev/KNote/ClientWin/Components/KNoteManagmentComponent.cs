@@ -16,6 +16,28 @@ namespace KNote.ClientWin.Components
 {
     public class KNoteManagmentComponent : ComponentViewBase<IViewConfigurable>
     {
+        #region Properties
+
+        public FolderWithServiceRef SelectedFolderWithServiceRef { get; set; }
+
+        public FolderInfoDto SelectedFolderInfo
+        {
+            get { return SelectedFolderWithServiceRef?.FolderInfo; }
+        }
+
+        public ServiceRef SelectedServiceRef
+        {
+            get { return SelectedFolderWithServiceRef?.ServiceRef; }
+        }
+
+        private NoteInfoDto _selectedNoteInfo;
+        public NoteInfoDto SelectedNoteInfo
+        {
+            get { return _selectedNoteInfo; }
+        }
+
+        #endregion 
+
         #region Constructor
 
         public KNoteManagmentComponent(Store store) : base(store)
@@ -110,15 +132,15 @@ namespace KNote.ClientWin.Components
 
         private void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
-            if (e.Entity == null)
-            {
-                // ....    
+            if (e.Entity == null)                            
                 return;
-            }
+            
 
             SelectedFolderWithServiceRef = e.Entity;
             
-            View.ShowInfo(null);
+            View.ShowInfo(null);            
+            _selectedNoteInfo = null;
+            NoteEditorComponent.View.CleanView();
 
             NotesSelectorComponent.LoadNotesByFolderAsync(e.Entity);
         }
@@ -150,7 +172,7 @@ namespace KNote.ClientWin.Components
             if (e.Entity == null)
                 return;
             _selectedNoteInfo = e.Entity;
-            EditNoteAction();
+            EditNote();
         }
 
         private void _notesSelectorComponent_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
@@ -185,25 +207,7 @@ namespace KNote.ClientWin.Components
 
         #region Public methods
 
-        public FolderWithServiceRef SelectedFolderWithServiceRef { get; set; }
-
-        public FolderInfoDto SelectedFolderInfo
-        {
-            get { return SelectedFolderWithServiceRef?.FolderInfo; }
-        }
-
-        public ServiceRef SelectedServiceRef 
-        { 
-            get { return SelectedFolderWithServiceRef?.ServiceRef; }  
-        }
-
-        private NoteInfoDto _selectedNoteInfo;
-        public NoteInfoDto SelectedNoteInfo
-        {
-            get { return _selectedNoteInfo; }
-        }
-
-        public void ShowKntScriptConsoleAction()
+        public void ShowKntScriptConsole()
         {
             var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(Store));
 
@@ -213,34 +217,78 @@ namespace KNote.ClientWin.Components
             kntScriptCom.Run();
         }
 
-        public void EditNoteAction()
+        public void EditNote()
         {
             if (SelectedNoteInfo == null)
+            {
+                View.ShowInfo("There is no note selected to edit.");
                 return;
+            }
 
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
+            noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
             noteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, SelectedNoteInfo.NoteId);            
             noteEditorComponent.Run();
         }
 
-        private void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
+        public void AddNote()
         {
-            if (NotesSelectorComponent.Folder.FolderId == e.Entity.FolderId)
+            var noteEditorComponent = new NoteEditorComponent(Store);
+            noteEditorComponent.AddedEntity += NoteEditorComponent_AddedEntity;
+            noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
+            noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
+            noteEditorComponent.LoadNewNote(SelectedFolderWithServiceRef);
+            noteEditorComponent.Run();
+        }
+
+        public void DeleteNote()
+        {
+            if (SelectedNoteInfo == null)
             {
-                NotesSelectorComponent.RefreshNote(e.Entity.GetSimpleDto<NoteInfoDto>());
+                View.ShowInfo("There is no note selected to delete.");
+                return;
             }
 
+            var noteEditorComponent = new NoteEditorComponent(Store);
+            noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
+            noteEditorComponent.DeleteNote(SelectedFolderWithServiceRef, SelectedNoteInfo.NoteId);
+            
+        }
+
+        #endregion
+
+        private void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteDto> e)
+        {
+            if(NotesSelectorComponent.ListNotes.Count == 0)
+                NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, e.Entity.NoteId);
+
+            NotesSelectorComponent.AddNote(e.Entity.GetSimpleDto<NoteInfoDto>());
+        }
+
+        private void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
+        {
             if(NoteEditorComponent.NoteEdit.NoteId == e.Entity.NoteId)
             {
-                //NoteEditorComponent.RefreshNote(e.Entity);
-                // o ...
+                // NoteEditorComponent.RefreshNote(e.Entity);
+                // or ...
                 NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, e.Entity.NoteId);
+            }
+
+            NotesSelectorComponent.RefreshNote(e.Entity.GetSimpleDto<NoteInfoDto>());
+        }
+
+        private void NoteEditorComponent_DeletedEntity(object sender, ComponentEventArgs<NoteDto> e)
+        {
+            NotesSelectorComponent.DeleteNote(e.Entity.GetSimpleDto<NoteInfoDto>());
+
+            if (NotesSelectorComponent.ListNotes.Count == 0)
+            {
+                NoteEditorComponent.View.CleanView();                
+                _selectedNoteInfo = null;                
             }
         }
 
-
-        #endregion
 
 
 

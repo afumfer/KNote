@@ -97,9 +97,9 @@ namespace KNote.ClientWin.Views
                 return null;
         }
 
-        public void ShowInfo(string info)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
-            MessageBox.Show(info);
+            return MessageBox.Show(info, caption, buttons);
         }
 
         #region Extensions managment ... 
@@ -215,6 +215,9 @@ namespace KNote.ClientWin.Views
                 LoadNodes(nodeFolder, service, f.ChildFolders);
             }
         }
+
+        
+
 
         #endregion
 

@@ -58,12 +58,13 @@ namespace KNote.ClientWin.Views
             this.Close();
         }
 
-        public void ShowInfo(string info)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             if(info != null)
-                MessageBox.Show(info);            
+                return MessageBox.Show(info);            
             labelFolerName.Text = _com.SelectedFolderInfo?.Name;
             labelFolderDetail.Text = $"{_com.SelectedServiceRef?.Alias} - [{_com.SelectedServiceRef?.Provider}]";
+            return DialogResult.OK;
         }
 
         public void ConfigureEmbededMode()
@@ -94,11 +95,20 @@ namespace KNote.ClientWin.Views
             }
             else if (menuSel == menuEditNote)
             {
-                _com.EditNoteAction();
+                _com.EditNote();
+            }
+            else if (menuSel == menuNewNote)
+            {
+                _com.AddNote();
+            }
+            else if (menuSel == menuDeleteNote)
+            {
+                _com.DeleteNote();
+                
             }
             else if (menuSel == menuKntScriptConsole)
             {
-                _com.ShowKntScriptConsoleAction();
+                _com.ShowKntScriptConsole();
             }
             else if (menuSel == menuExit)
             {
@@ -118,7 +128,15 @@ namespace KNote.ClientWin.Views
 
             if (menuSel == toolEditNote)
             {
-                _com.EditNoteAction();
+                _com.EditNote();
+            }
+            else if (menuSel == toolNewNote)
+            {
+                _com.AddNote();
+            }
+            else if (menuSel == toolDeleteNote)
+            {
+                _com.DeleteNote();
             }
         }
 

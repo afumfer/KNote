@@ -39,9 +39,10 @@ namespace KNote.ClientWin.Views
             Application.DoEvents();
         }
 
-        public void ShowInfo(string info)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             listBoxMessages.Items.Add(info);
+            return DialogResult.OK;
         }
 
         public void ShowView()
