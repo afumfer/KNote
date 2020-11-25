@@ -128,14 +128,11 @@ namespace KNote.ClientWin.Components
             }
         }
 
-
-
         private void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
             if (e.Entity == null)                            
                 return;
             
-
             SelectedFolderWithServiceRef = e.Entity;
             
             View.ShowInfo(null);            
@@ -242,7 +239,7 @@ namespace KNote.ClientWin.Components
             noteEditorComponent.Run();
         }
 
-        public void DeleteNote()
+        public async void DeleteNote()
         {
             if (SelectedNoteInfo == null)
             {
@@ -252,7 +249,7 @@ namespace KNote.ClientWin.Components
 
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            noteEditorComponent.DeleteNote(SelectedFolderWithServiceRef, SelectedNoteInfo.NoteId);
+            await noteEditorComponent.DeleteNote(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
             
         }
 

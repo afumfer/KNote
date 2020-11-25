@@ -11,30 +11,8 @@ namespace KNote.Model
 {
     public abstract class ModelBase : IValidatableObject    
     {
-        //public ModelBase()
-        //{
-
-        //}
-
         public abstract IEnumerable<ValidationResult> Validate(ValidationContext validationContext);
-
-        //[NotMapped]
-        //public bool IsValid
-        //{
-        //    get
-        //    {
-        //        IEnumerable<ValidationResult> Validations = Validate(null);
-        //        if (Validations != null)
-        //            return (Validations.Count() == 0);
-        //        else
-        //            return true;
-        //    }
-        //}
-
-        // Por Implementar IsValid como método en lugar de propiedad.
-        // Con WebAssempby podemos controlar mejor las ejecución
-        // del código de validación. Evitamos el disparo automático de esta 
-        // propiedasd. 
+      
         public bool IsValid()
         {
             IEnumerable<ValidationResult> Validations = Validate(null);
@@ -42,6 +20,22 @@ namespace KNote.Model
                 return (Validations.Count() == 0);
             else
                 return true;
+        }
+
+        public string GetErrorMessage()
+        {
+            var validations = Validate(null);
+            string msgVal = null;
+            if (validations != null)
+            {
+                foreach (var v in validations)
+                    msgVal += v.ErrorMessage + "\n";
+            }
+
+            if (!string.IsNullOrEmpty(msgVal))            
+                msgVal = "Errors: \n" + msgVal;
+
+            return msgVal;            
         }
 
         // TODO: add property IsDirty

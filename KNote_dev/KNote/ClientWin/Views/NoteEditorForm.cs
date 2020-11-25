@@ -91,7 +91,7 @@ namespace KNote.ClientWin.Views
 
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
-            return  MessageBox.Show(info, "Key Note", MessageBoxButtons.YesNo);
+            return  MessageBox.Show(info, caption, buttons);
         }
 
         public void ShowView()
@@ -141,6 +141,12 @@ namespace KNote.ClientWin.Views
             {
                 SaveModel();
             }
+            else if (menuSel == buttonDelete)
+            {
+                DeleteModel();
+            }
+
+            //
         }
 
 
@@ -270,6 +276,13 @@ namespace KNote.ClientWin.Views
         {
             ControlsToModel();
             _com.SaveNote();
+        }
+
+        private async void DeleteModel()
+        {            
+            var res = await _com.DeleteNote();
+            if (res)
+                _com.Finalize();
         }
 
         #endregion

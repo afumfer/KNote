@@ -351,8 +351,8 @@ namespace KNote.Repository.EntityFramework
 
                 if (entityForUpdate != null)
                 {
-                    entityForUpdate.SetSimpleDto(entity);
-                    entityForUpdate.ModificationDateTime = DateTime.Now;
+                    entity.ModificationDateTime = DateTime.Now;
+                    entityForUpdate.SetSimpleDto(entity);                    
                     // Delete deprecated atttibutes
                     entityForUpdate.KAttributes.RemoveAll(_ => _.KAttribute.NoteTypeId != entityForUpdate.NoteTypeId && _.KAttribute.NoteTypeId != null);
 
@@ -364,10 +364,10 @@ namespace KNote.Repository.EntityFramework
                     resRep.AddErrorMessage("Can't find entity for update.");
                 }
                                 
-
                 // TODO: Limiar lo siguiente está sucio ...
 
                 result.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+                result.Entity.FolderDto = resRep.Entity.Folder.GetSimpleDto<FolderDto>();
 
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {

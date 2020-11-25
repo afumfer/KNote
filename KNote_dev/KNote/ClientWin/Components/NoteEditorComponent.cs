@@ -10,6 +10,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service;
+using System.ComponentModel.DataAnnotations;
 
 namespace KNote.ClientWin.Components
 {
@@ -90,53 +91,108 @@ namespace KNote.ClientWin.Components
 
         public async void LoadNoteById(FolderWithServiceRef folderWithServiceRef, Guid noteId)
         {
-            _service = folderWithServiceRef.ServiceRef.Service;
+            try
+            {
+                _service = folderWithServiceRef.ServiceRef.Service;
 
-            _noteEdit = (await _service.Notes.GetAsync(noteId)).Entity;
-            _noteEditResources = (await _service.Notes.GetResourcesAsync(noteId)).Entity;
-            _noteEditTasks = (await _service.Notes.GetNoteTasksAsync(noteId)).Entity;
-            _noteEditMessages = (await _service.Notes.GetMessagesAsync(noteId)).Entity;
+                _noteEdit = (await _service.Notes.GetAsync(noteId)).Entity;
+                _noteEditResources = (await _service.Notes.GetResourcesAsync(noteId)).Entity;
+                _noteEditTasks = (await _service.Notes.GetNoteTasksAsync(noteId)).Entity;
+                _noteEditMessages = (await _service.Notes.GetMessagesAsync(noteId)).Entity;
 
-            View.RefreshView();
+                View.RefreshView();
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                
+            }
         }
 
         public async void LoadNewNote(FolderWithServiceRef folderWithServiceRef)
         {
-            _service = folderWithServiceRef.ServiceRef.Service;
+            try
+            {
+                _service = folderWithServiceRef.ServiceRef.Service;
 
-            var response = await _service.Notes.NewAsync();
-            _noteEdit = response.Entity;
-            _noteEdit.FolderId = folderWithServiceRef.FolderInfo.FolderId;
-            _noteEdit.FolderDto = folderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+                var response = await _service.Notes.NewAsync();
+                _noteEdit = response.Entity;
+                _noteEdit.FolderId = folderWithServiceRef.FolderInfo.FolderId;
+                _noteEdit.FolderDto = folderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
 
-            View.RefreshView();
+                View.RefreshView();
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);                
+            }
+
         }
 
         public async void SaveNote()
         {
             var isNew = (_noteEdit.NoteId == Guid.Empty);
-            
-            var response = await _service.Notes.SaveAsync(NoteEdit);
-            _noteEdit = response.Entity;
-            
-            if (!isNew)
-                OnSavedEntity(response.Entity);
-            else
-                OnAddedEntity(response.Entity);
-            
-            View.RefreshView();            
+                        
+            var msgVal = NoteEdit.GetErrorMessage();
+            if (!string.IsNullOrEmpty(msgVal))
+            {
+                View.ShowInfo(msgVal);
+                return;
+            }
+
+            try
+            {
+                var response = await _service.Notes.SaveAsync(NoteEdit);
+
+                if (response.IsValid)
+                {
+                    _noteEdit = response.Entity;
+
+                    if (!isNew)
+                        OnSavedEntity(response.Entity);
+                    else
+                        OnAddedEntity(response.Entity);
+
+                    View.RefreshView();
+                }
+                else            
+                    View.ShowInfo(response.Message);
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+            }
+                        
         }
-
-        public async void DeleteNote(FolderWithServiceRef folderWithServiceRef, Guid noteId)
+        
+        public async Task<bool> DeleteNote(IKntService service, Guid noteId) 
         {
-            _service = folderWithServiceRef.ServiceRef.Service;
-
-            var result = View.ShowInfo("Are you sure you want to delete this note?", "Delte note", MessageBoxButtons.YesNo);
+            var result = View.ShowInfo("Are you sure you want to delete this note?", "Delete note", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes || result == DialogResult.Yes)
             {
-                var response = await _service.Notes.DeleteAsync(noteId);
-                OnDeletedEntity(response.Entity);
+                try
+                {
+                    var response = await service.Notes.DeleteAsync(noteId);
+                    
+                    if (response.IsValid)
+                    {
+                        OnDeletedEntity(response.Entity);
+                        return true;
+                    }
+                    else
+                        View.ShowInfo(response.Message);
+                }
+                catch (Exception ex)
+                {
+                    View.ShowInfo(ex.Message);
+                }
             }
+            return false;
+        }
+            
+        public async Task<bool> DeleteNote()
+        {
+            return await DeleteNote(_service, NoteEdit.NoteId);
         }
 
         public void RefreshNote(NoteDto note)

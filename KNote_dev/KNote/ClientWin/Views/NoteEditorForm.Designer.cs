@@ -172,6 +172,7 @@
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.Size = new System.Drawing.Size(66, 22);
             this.buttonDelete.Text = "Delete  ";
+            this.buttonDelete.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // buttonUndo
             // 

@@ -38,14 +38,22 @@ namespace KNote.ClientWin.Components
 
         public async Task<List<FolderDto>> GetTreeAsync(ServiceRef serviceRef)
         {
-            return (await serviceRef.Service.Folders.GetTreeAsync()).Entity;
+            try
+            {
+                return (await serviceRef.Service.Folders.GetTreeAsync()).Entity;
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                throw;
+            }
         }
 
         public void SelectFolder(FolderWithServiceRef folder)
         {
             View.SelectItem(folder);            
         }
-        #endregion
 
+        #endregion
     }
 }

@@ -58,25 +58,38 @@ namespace KNote.ClientWin.Components
 
         #region Component specific public members
 
-
         public async void LoadNotesByFolderAsync(FolderWithServiceRef folderWithServiceRef)
         {
-            _service = folderWithServiceRef.ServiceRef.Service;
-            _folder = folderWithServiceRef.FolderInfo;
+            try
+            {
+                _service = folderWithServiceRef.ServiceRef.Service;
+                _folder = folderWithServiceRef.FolderInfo;
 
-            if (_folder == null)
-                return;
+                if (_folder == null)
+                    return;
 
-            _listNotes = (await _service.Notes.GetByFolderAsync(_folder.FolderId)).Entity;
+                var response = await _service.Notes.GetByFolderAsync(_folder.FolderId);
 
-            View.RefreshView();
+                if (response.IsValid)
+                {
+                    _listNotes = response.Entity;
 
-            if (_listNotes?.Count > 0)
-                SelectedEntity = _listNotes[0];
-            else
-                SelectedEntity = null;
+                    View.RefreshView();
 
-            NotifySelectedEntity();
+                    if (_listNotes?.Count > 0)
+                        SelectedEntity = _listNotes[0];
+                    else
+                        SelectedEntity = null;
+
+                    NotifySelectedEntity();
+                }
+                else
+                    View.ShowInfo(response.Message);
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);                
+            }
         }
 
         public void RefreshNote(NoteInfoDto note)
@@ -97,10 +110,10 @@ namespace KNote.ClientWin.Components
         {
             if (Folder.FolderId == note.FolderId)
             {
-                tmpAdd = true;
+                // tmpAdd = true;
                 _listNotes.Add(note);
                 View.AddItem(note);
-                tmpAdd = false;
+                //tmpAdd = false;
             }
         }
 
@@ -109,10 +122,10 @@ namespace KNote.ClientWin.Components
             if (Folder.FolderId == note.FolderId)
             {
                 
-                tmpAdd = true;
+                //tmpAdd = true;
                 _listNotes.RemoveAll( _ => _.NoteId == note.NoteId);                
                 View.DeleteItem(note);
-                tmpAdd = false;
+                //tmpAdd = false;
             }
         }
 
