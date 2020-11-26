@@ -9,21 +9,6 @@ namespace KNote.Model.Dto
 {
     public class NoteDto : NoteInfoDto
     {
-        // TODO: !!! Está pendiente desplazar esta propiedad aquí
-        //private string _description;
-        //public string Description
-        //{
-        //    get { return _description; }
-        //    set
-        //    {
-        //        if (_description != value)
-        //        {
-        //            _description = value;
-        //            OnPropertyChanged("Description");
-        //        }
-        //    }
-        //}
-
         private FolderDto _folderDto;
         public FolderDto FolderDto 
         {

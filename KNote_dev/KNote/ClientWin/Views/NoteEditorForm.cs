@@ -144,11 +144,8 @@ namespace KNote.ClientWin.Views
             else if (menuSel == buttonDelete)
             {
                 DeleteModel();
-            }
-
-            //
+            }            
         }
-
 
         #endregion
 
@@ -219,6 +216,8 @@ namespace KNote.ClientWin.Views
 
         private void ControlsToModel()
         {
+            // TODO: !!! ojo ... completar implementación 
+
             // Basic data
             _com.NoteEdit.Topic = textTopic.Text;
             //_com.NoteEdit.FolderDto.Name = textFolder.Text;
@@ -286,6 +285,5 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
     }
 }

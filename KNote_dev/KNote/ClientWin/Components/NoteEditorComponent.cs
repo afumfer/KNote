@@ -99,6 +99,7 @@ namespace KNote.ClientWin.Components
                 _noteEditResources = (await _service.Notes.GetResourcesAsync(noteId)).Entity;
                 _noteEditTasks = (await _service.Notes.GetNoteTasksAsync(noteId)).Entity;
                 _noteEditMessages = (await _service.Notes.GetMessagesAsync(noteId)).Entity;
+                _noteEdit.SetIsDirty(false);
 
                 View.RefreshView();
             }
@@ -119,6 +120,7 @@ namespace KNote.ClientWin.Components
                 _noteEdit = response.Entity;
                 _noteEdit.FolderId = folderWithServiceRef.FolderInfo.FolderId;
                 _noteEdit.FolderDto = folderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+                _noteEdit.SetIsDirty(false);
 
                 View.RefreshView();
             }
@@ -131,6 +133,9 @@ namespace KNote.ClientWin.Components
 
         public async void SaveNote()
         {
+            if (!NoteEdit.IsDirty())
+                return;
+
             var isNew = (_noteEdit.NoteId == Guid.Empty);
                         
             var msgVal = NoteEdit.GetErrorMessage();
@@ -141,12 +146,13 @@ namespace KNote.ClientWin.Components
             }
 
             try
-            {
+            {                                
                 var response = await _service.Notes.SaveAsync(NoteEdit);
 
                 if (response.IsValid)
                 {
                     _noteEdit = response.Entity;
+                    _noteEdit.SetIsDirty(false);
 
                     if (!isNew)
                         OnSavedEntity(response.Entity);
@@ -195,11 +201,9 @@ namespace KNote.ClientWin.Components
             return await DeleteNote(_service, NoteEdit.NoteId);
         }
 
-        public void RefreshNote(NoteDto note)
-        {
-            NoteEdit = note;
-            View.RefreshView();
-        }
+        #endregion
+
+        #region Component events
 
         public event EventHandler<ComponentEventArgs<NoteDto>> SavedEntity;
         protected virtual void OnSavedEntity(NoteDto entity)

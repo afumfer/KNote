@@ -12,10 +12,14 @@ namespace KNote.ClientWin.Components
 {
     public class FoldersSelectorComponent : ComponentSelectorViewBase<ISelectorView<FolderWithServiceRef>, FolderWithServiceRef>   
     {
+        #region Constructor
+
         public FoldersSelectorComponent(Store store) : base(store)
         {
 
         }
+
+        #endregion 
 
         #region Component override methods 
 

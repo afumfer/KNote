@@ -10,6 +10,17 @@ namespace KNote.Model
 {
     public abstract class DtoModelBase : ModelBase, INotifyPropertyChanged
     {
+        protected bool _isDirty = false;
+
+        public bool IsDirty()
+        {
+            return _isDirty;
+        }
+
+        public virtual void SetIsDirty(bool isDirty)
+        {
+            _isDirty = isDirty;
+        }
 
         #region INotifyPropertyChanged members
 
@@ -17,11 +28,11 @@ namespace KNote.Model
 
         protected void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            _isDirty = true;
+            if (PropertyChanged != null)                           
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));            
         }
 
         #endregion
-
     }
 }

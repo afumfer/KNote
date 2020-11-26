@@ -15,8 +15,14 @@ namespace KNote.ClientWin.Views
 {
     public partial class FoldersSelectorForm : Form, ISelectorView<FolderWithServiceRef>
     {
+        #region Private fields
+
         private readonly FoldersSelectorComponent _com;
         private bool _viewFinalized = false;
+
+        #endregion
+
+        #region Constructor
 
         public FoldersSelectorForm(FoldersSelectorComponent com)
         {
@@ -24,6 +30,8 @@ namespace KNote.ClientWin.Views
 
             _com = com;
         }
+
+        #endregion 
 
         #region ISelectorView interface
 
@@ -215,11 +223,7 @@ namespace KNote.ClientWin.Views
                 LoadNodes(nodeFolder, service, f.ChildFolders);
             }
         }
-
-        
-
-
+       
         #endregion
-
     }
 }
