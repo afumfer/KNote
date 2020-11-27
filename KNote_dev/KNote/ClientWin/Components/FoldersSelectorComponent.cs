@@ -10,7 +10,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Components
 {
-    public class FoldersSelectorComponent : ComponentSelectorViewBase<ISelectorView<FolderWithServiceRef>, FolderWithServiceRef>   
+    public class FoldersSelectorComponent : ComponentSelectorBase<ISelectorView<FolderWithServiceRef>, FolderWithServiceRef>   
     {
         #region Constructor
 

@@ -220,7 +220,7 @@ namespace KNote.ClientWin.Views
 
             labelInfo2.Text = $" {e.Entity.Topic} - {e.Entity.NoteId}";
 
-            _noteEditor.LoadNoteById(temp, e.Entity.NoteId);
+            _noteEditor.LoadModelById(temp.ServiceRef.Service, e.Entity.NoteId);
         }
 
         private void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)

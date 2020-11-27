@@ -13,25 +13,12 @@ using KNote.Service;
 using System.ComponentModel.DataAnnotations;
 
 namespace KNote.ClientWin.Components
-{
-    public class NoteEditorComponent : ComponentViewBase<IEditorView<NoteDto>>
+{    
+    public class NoteEditorComponent : ComponentEditorBase<IEditorView<NoteDto>, NoteDto>
     {
         #region Properties
 
-        private NoteDto _noteEdit;
-        public NoteDto NoteEdit
-        {
-            set
-            {
-                _noteEdit = value;
-            }
-            get
-            {
-                if (_noteEdit == null)
-                    _noteEdit = new NoteDto();
-                return _noteEdit;
-            }
-        }
+        // TODO: propiedades pendientes de desplazar a NoteDto
 
         private List<ResourceDto> _noteEditResources;
         public List<ResourceDto> NoteEditResources
@@ -65,9 +52,7 @@ namespace KNote.ClientWin.Components
                 return _noteEditMessages;
             }
         }
-
-        private IKntService _service;
-
+       
         #endregion
 
         #region Constructor
@@ -87,40 +72,19 @@ namespace KNote.ClientWin.Components
 
         #endregion
 
-        #region Component specific public members
+        #region ComponentEditorBase override methods
 
-        public async void LoadNoteById(FolderWithServiceRef folderWithServiceRef, Guid noteId)
+        public override async void LoadModelById(IKntService service, Guid noteId)
         {
             try
-            {
-                _service = folderWithServiceRef.ServiceRef.Service;
+            {                
+                Service = service;
 
-                _noteEdit = (await _service.Notes.GetAsync(noteId)).Entity;
-                _noteEditResources = (await _service.Notes.GetResourcesAsync(noteId)).Entity;
-                _noteEditTasks = (await _service.Notes.GetNoteTasksAsync(noteId)).Entity;
-                _noteEditMessages = (await _service.Notes.GetMessagesAsync(noteId)).Entity;
-                _noteEdit.SetIsDirty(false);
-
-                View.RefreshView();
-            }
-            catch (Exception ex)
-            {
-                View.ShowInfo(ex.Message);
-                
-            }
-        }
-
-        public async void LoadNewNote(FolderWithServiceRef folderWithServiceRef)
-        {
-            try
-            {
-                _service = folderWithServiceRef.ServiceRef.Service;
-
-                var response = await _service.Notes.NewAsync();
-                _noteEdit = response.Entity;
-                _noteEdit.FolderId = folderWithServiceRef.FolderInfo.FolderId;
-                _noteEdit.FolderDto = folderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
-                _noteEdit.SetIsDirty(false);
+                Model = (await Service.Notes.GetAsync(noteId)).Entity;
+                _noteEditResources = (await Service.Notes.GetResourcesAsync(noteId)).Entity;
+                _noteEditTasks = (await Service.Notes.GetNoteTasksAsync(noteId)).Entity;
+                _noteEditMessages = (await Service.Notes.GetMessagesAsync(noteId)).Entity;
+                Model.SetIsDirty(false);
 
                 View.RefreshView();
             }
@@ -128,17 +92,39 @@ namespace KNote.ClientWin.Components
             {
                 View.ShowInfo(ex.Message);                
             }
+        }
+        
+        public override async void NewModel(IKntService service)
+        {
+            try
+            {
+                Service = service;
+                
+                var response = await Service.Notes.NewAsync();
+                Model = response.Entity;
+                
+                // Context default values
+                Model.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
+                Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
 
+                Model.SetIsDirty(false);
+
+                View.RefreshView();
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);                
+            }
         }
 
-        public async void SaveNote()
+        public override async void SaveModel()
         {
-            if (!NoteEdit.IsDirty())
+            if (!Model.IsDirty())
                 return;
 
-            var isNew = (_noteEdit.NoteId == Guid.Empty);
+            var isNew = (Model.NoteId == Guid.Empty);
                         
-            var msgVal = NoteEdit.GetErrorMessage();
+            var msgVal = Model.GetErrorMessage();
             if (!string.IsNullOrEmpty(msgVal))
             {
                 View.ShowInfo(msgVal);
@@ -147,12 +133,12 @@ namespace KNote.ClientWin.Components
 
             try
             {                                
-                var response = await _service.Notes.SaveAsync(NoteEdit);
+                var response = await Service.Notes.SaveAsync(Model);
 
                 if (response.IsValid)
                 {
-                    _noteEdit = response.Entity;
-                    _noteEdit.SetIsDirty(false);
+                    Model = response.Entity;
+                    Model.SetIsDirty(false);
 
                     if (!isNew)
                         OnSavedEntity(response.Entity);
@@ -170,8 +156,13 @@ namespace KNote.ClientWin.Components
             }
                         
         }
-        
-        public async Task<bool> DeleteNote(IKntService service, Guid noteId) 
+
+        public override async Task<bool> DeleteModel()
+        {
+            return await DeleteModel(Service, Model.NoteId);
+        }
+
+        public override async Task<bool> DeleteModel(IKntService service, Guid noteId) 
         {
             var result = View.ShowInfo("Are you sure you want to delete this note?", "Delete note", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes || result == DialogResult.Yes)
@@ -196,33 +187,6 @@ namespace KNote.ClientWin.Components
             return false;
         }
             
-        public async Task<bool> DeleteNote()
-        {
-            return await DeleteNote(_service, NoteEdit.NoteId);
-        }
-
         #endregion
-
-        #region Component events
-
-        public event EventHandler<ComponentEventArgs<NoteDto>> SavedEntity;
-        protected virtual void OnSavedEntity(NoteDto entity)
-        {
-            SavedEntity?.Invoke(this, new ComponentEventArgs<NoteDto>(entity));
-        }
-
-        public event EventHandler<ComponentEventArgs<NoteDto>> AddedEntity;
-        protected virtual void OnAddedEntity(NoteDto entity)
-        {
-            AddedEntity?.Invoke(this, new ComponentEventArgs<NoteDto>(entity));
-        }
-
-        public event EventHandler<ComponentEventArgs<NoteDto>> DeletedEntity;
-        protected virtual void OnDeletedEntity(NoteDto entity)
-        {
-            DeletedEntity?.Invoke(this, new ComponentEventArgs<NoteDto>(entity));
-        }
-
-        #endregion 
     }
 }

@@ -12,7 +12,7 @@ using KNote.Service;
 
 namespace KNote.ClientWin.Components
 {
-    public class NotesSelectorComponent : ComponentSelectorViewBase<ISelectorView<NoteInfoDto>, NoteInfoDto>
+    public class NotesSelectorComponent : ComponentSelectorBase<ISelectorView<NoteInfoDto>, NoteInfoDto>
     {
         #region Properties
 

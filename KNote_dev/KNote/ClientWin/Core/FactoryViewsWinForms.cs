@@ -44,8 +44,10 @@ namespace KNote.ClientWin.Core
         {
             return new NoteEditorForm(component);
         }
-
-
+        public IEditorView<FolderDto> View(FolderEditorComponent component)
+        {
+            return new FolderEditorForm(component);
+        }
 
         #region Secondary views
 
@@ -54,7 +56,8 @@ namespace KNote.ClientWin.Core
             return new NotifyForm(component);
         }
 
-        #endregion 
+
+        #endregion
 
     }
 }

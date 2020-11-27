@@ -22,8 +22,7 @@ namespace KNote.ClientWin.Views
         {
             InitializeComponent();
 
-            _com = com;
-            
+            _com = com;            
         }
 
         #region IViewBase interface 
@@ -92,6 +91,18 @@ namespace KNote.ClientWin.Views
                 // For test ...
                 var labForm = new LabForm(_com.Store);
                 labForm.Show();
+            }
+            else if (menuSel == menuNewFolder)
+            {
+                _com.NewFolder();
+            }
+            else if (menuSel == menuEditFolder)
+            {
+                _com.EditFolder();
+            }
+            else if (menuSel == menuDeleteFolder)
+            {
+                _com.DeleteFolder();
             }
             else if (menuSel == menuEditNote)
             {

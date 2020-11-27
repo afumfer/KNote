@@ -41,7 +41,7 @@ namespace KNote.Model.Dto
                 if (_noteTypeDto != value)
                 {
                     _noteTypeDto = value;
-                    OnPropertyChanged("FolderDto");}
+                    OnPropertyChanged("NoteTypeDto");}
             }
         }
 

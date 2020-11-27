@@ -42,6 +42,21 @@ namespace KNote.ClientWin.Views
             return panelForm;
         }
 
+        public void ShowView()
+        {
+            this.Show();
+        }
+
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
+        {
+            return MessageBox.Show(info, caption, buttons);
+        }
+
+        public Result<EComponentResult> ShowModalView()
+        {
+            return _com.DialogResultToComponentResult(this.ShowDialog());
+        }
+
         public void CleanView()
         {
             // Labels top section
@@ -56,6 +71,16 @@ namespace KNote.ClientWin.Views
             textTags.Text = "";
             textDescription.Text = "";
             textPriority.Text = "";
+        }
+
+        public void RefreshView()
+        {
+            RefreshBindingModel();
+        }
+
+        public void RefreshBindingModel()
+        {
+            ModelToControls();
         }
 
         public void OnClosingView()
@@ -83,31 +108,6 @@ namespace KNote.ClientWin.Views
             StartPosition = FormStartPosition.CenterScreen;
         }
 
-
-        public void RefreshView()
-        {
-            RefreshBindingModel();
-        }
-
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
-        {
-            return  MessageBox.Show(info, caption, buttons);
-        }
-
-        public void ShowView()
-        {
-            this.Show();
-        }
-
-        public Result<EComponentResult> ShowModalView()
-        {
-            return _com.DialogResultToComponentResult(this.ShowDialog());
-        }
-        
-        public void RefreshBindingModel()
-        {
-            ModelToControls();
-        }
 
         #endregion
 
@@ -154,21 +154,21 @@ namespace KNote.ClientWin.Views
         private void ModelToControls()
         {
             // Label info
-            labelInfoIdNote.Text = _com.NoteEdit.NoteNumber.ToString();
-            labelInfoIdFolder.Text = _com.NoteEdit.FolderDto.FolderNumber.ToString();
-            textDesTopic.Text = _com.NoteEdit.Topic;
-            textDesFolder.Text = _com.NoteEdit.FolderDto.Name;
+            labelInfoIdNote.Text = _com.Model.NoteNumber.ToString();
+            labelInfoIdFolder.Text = _com.Model.FolderDto.FolderNumber.ToString();
+            textDesTopic.Text = _com.Model.Topic;
+            textDesFolder.Text = _com.Model.FolderDto.Name;
 
             // Basic data
-            textTopic.Text = _com.NoteEdit.Topic;
-            textFolder.Text = _com.NoteEdit.FolderDto?.Name;
-            textTags.Text = _com.NoteEdit.Tags;
-            textDescription.Text = _com.NoteEdit.Description;
-            textPriority.Text = _com.NoteEdit.Priority.ToString();
+            textTopic.Text = _com.Model.Topic;
+            textFolder.Text = _com.Model.FolderDto?.Name;
+            textTags.Text = _com.Model.Tags;
+            textDescription.Text = _com.Model.Description;
+            textPriority.Text = _com.Model.Priority.ToString();
 
             // KAttributes           
-            textNoteType.Text = _com.NoteEdit.NoteTypeDto.Name;
-            dataGridAttributes.DataSource = _com.NoteEdit.KAttributesDto.OrderBy(_ => _.Order).Select(_ => new { _.Name, _.Value }).ToList();
+            textNoteType.Text = _com.Model.NoteTypeDto.Name;
+            dataGridAttributes.DataSource = _com.Model.KAttributesDto.OrderBy(_ => _.Order).Select(_ => new { _.Name, _.Value }).ToList();
 
             // Resources 
             dataGridResources.DataSource = _com.NoteEditResources.OrderBy(_ => _.Order).Select(_ =>
@@ -204,7 +204,7 @@ namespace KNote.ClientWin.Views
             }).ToList();
 
             // Script             
-            textScriptCode.Text = _com.NoteEdit.Script;
+            textScriptCode.Text = _com.Model.Script;
 
             // ........
 
@@ -219,13 +219,13 @@ namespace KNote.ClientWin.Views
             // TODO: !!! ojo ... completar implementación 
 
             // Basic data
-            _com.NoteEdit.Topic = textTopic.Text;
+            _com.Model.Topic = textTopic.Text;
             //_com.NoteEdit.FolderDto.Name = textFolder.Text;
-            _com.NoteEdit.Tags = textTags.Text;
-            _com.NoteEdit.Description = textDescription.Text;
+            _com.Model.Tags = textTags.Text;
+            _com.Model.Description = textDescription.Text;
             int p;
             if (int.TryParse(textPriority.Text, out p))
-                _com.NoteEdit.Priority = p;
+                _com.Model.Priority = p;
         }
 
         private void PersonalizeControls()
@@ -274,12 +274,12 @@ namespace KNote.ClientWin.Views
         private void SaveModel()
         {
             ControlsToModel();
-            _com.SaveNote();
+            _com.SaveModel();
         }
 
         private async void DeleteModel()
         {            
-            var res = await _com.DeleteNote();
+            var res = await _com.DeleteModel();
             if (res)
                 _com.Finalize();
         }

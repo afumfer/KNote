@@ -12,7 +12,6 @@ namespace KNote.ClientWin.Core
 {
     abstract public class ComponentBase : IDisposable
     {
-
         #region Public properties
 
         public readonly Guid ComponentId;

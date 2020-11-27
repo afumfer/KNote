@@ -18,7 +18,11 @@ namespace KNote.ClientWin.Components
     {
         #region Properties
 
-        public FolderWithServiceRef SelectedFolderWithServiceRef { get; set; }
+        public FolderWithServiceRef SelectedFolderWithServiceRef 
+        {
+            get { return Store.ActiveFolderWithServiceRef; }
+            set { Store.ActiveFolderWithServiceRef = value; } 
+        }
 
         public FolderInfoDto SelectedFolderInfo
         {
@@ -177,7 +181,7 @@ namespace KNote.ClientWin.Components
             if (e.Entity == null)
                 return;
             _selectedNoteInfo = e.Entity;
-            NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, _selectedNoteInfo.NoteId);
+            NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
         }
 
         #endregion
@@ -225,7 +229,7 @@ namespace KNote.ClientWin.Components
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            noteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, SelectedNoteInfo.NoteId);            
+            noteEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
             noteEditorComponent.Run();
         }
 
@@ -235,7 +239,7 @@ namespace KNote.ClientWin.Components
             noteEditorComponent.AddedEntity += NoteEditorComponent_AddedEntity;
             noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            noteEditorComponent.LoadNewNote(SelectedFolderWithServiceRef);
+            noteEditorComponent.NewModel(SelectedServiceRef.Service);
             noteEditorComponent.Run();
         }
 
@@ -249,8 +253,31 @@ namespace KNote.ClientWin.Components
 
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            await noteEditorComponent.DeleteNote(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
-            
+            await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
+        }
+
+        public void NewFolder()
+        {
+            View.ShowInfo("New Folder ---");
+        }
+
+
+        public void EditFolder()
+        {
+            if(SelectedFolderInfo == null)
+            {
+                View.ShowInfo("There is no folder selected to edit.");
+                return;
+            }
+
+            var folderEditorComponent = new FolderEditorComponent(Store);
+
+            folderEditorComponent.Run();
+        }
+
+        public void DeleteFolder()
+        {
+            View.ShowInfo("Delete Folder ---");
         }
 
         #endregion
@@ -258,18 +285,18 @@ namespace KNote.ClientWin.Components
         private void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteDto> e)
         {
             if(NotesSelectorComponent.ListNotes.Count == 0)
-                NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, e.Entity.NoteId);
+                NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.NoteId);
 
             NotesSelectorComponent.AddNote(e.Entity.GetSimpleDto<NoteInfoDto>());
         }
 
         private void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
         {
-            if(NoteEditorComponent.NoteEdit.NoteId == e.Entity.NoteId)
+            if(NoteEditorComponent.Model.NoteId == e.Entity.NoteId)
             {
                 // NoteEditorComponent.RefreshNote(e.Entity);
                 // or ...
-                NoteEditorComponent.LoadNoteById(SelectedFolderWithServiceRef, e.Entity.NoteId);
+                NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.NoteId);
             }
 
             NotesSelectorComponent.RefreshNote(e.Entity.GetSimpleDto<NoteInfoDto>());

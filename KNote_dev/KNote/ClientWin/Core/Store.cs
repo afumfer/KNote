@@ -30,13 +30,13 @@ namespace KNote.ClientWin.Core
                  
         }
 
-        //public User ActiveUser { get; }
-
+        //public User ActiveUser { get; protected set;}
 
         public FolderWithServiceRef _activeFolderWithServiceRef;
         public FolderWithServiceRef ActiveFolderWithServiceRef
         {
-            get { return _activeFolderWithServiceRef; }
+            set { _activeFolderWithServiceRef = value; }
+            get { return _activeFolderWithServiceRef; }            
         }
 
         #endregion
@@ -116,7 +116,6 @@ namespace KNote.ClientWin.Core
         }
 
         #endregion
-
     }
 
     #region  Context typos 
