@@ -48,13 +48,6 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonWordWrap = new System.Windows.Forms.ToolStripMenuItem();
             this.imageListTabNoteData = new System.Windows.Forms.ImageList(this.components);
-            this.panelTop = new System.Windows.Forms.Panel();
-            this.textDesTopic = new System.Windows.Forms.TextBox();
-            this.textDesFolder = new System.Windows.Forms.TextBox();
-            this.labelInfoIdFolder = new System.Windows.Forms.Label();
-            this.labelInfoFolder = new System.Windows.Forms.Label();
-            this.labelInfoNote = new System.Windows.Forms.Label();
-            this.labelInfoIdNote = new System.Windows.Forms.Label();
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabNoteData = new System.Windows.Forms.TabControl();
             this.tabBasicData = new System.Windows.Forms.TabPage();
@@ -116,7 +109,6 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolBarNoteEditor.SuspendLayout();
-            this.panelTop.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
             this.tabBasicData.SuspendLayout();
@@ -137,6 +129,7 @@
             // 
             // toolBarNoteEditor
             // 
+            this.toolBarNoteEditor.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.toolBarNoteEditor.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.buttonSave,
             this.buttonDelete,
@@ -295,106 +288,14 @@
             this.imageListTabNoteData.Images.SetKeyName(7, "checkbox_16.png");
             this.imageListTabNoteData.Images.SetKeyName(8, "codgs_16.png");
             // 
-            // panelTop
-            // 
-            this.panelTop.BackColor = System.Drawing.SystemColors.Info;
-            this.panelTop.Controls.Add(this.textDesTopic);
-            this.panelTop.Controls.Add(this.textDesFolder);
-            this.panelTop.Controls.Add(this.labelInfoIdFolder);
-            this.panelTop.Controls.Add(this.labelInfoFolder);
-            this.panelTop.Controls.Add(this.labelInfoNote);
-            this.panelTop.Controls.Add(this.labelInfoIdNote);
-            this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelTop.Location = new System.Drawing.Point(0, 25);
-            this.panelTop.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(808, 46);
-            this.panelTop.TabIndex = 38;
-            // 
-            // textDesTopic
-            // 
-            this.textDesTopic.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textDesTopic.BackColor = System.Drawing.SystemColors.Info;
-            this.textDesTopic.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textDesTopic.Enabled = false;
-            this.textDesTopic.Location = new System.Drawing.Point(128, 6);
-            this.textDesTopic.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textDesTopic.Name = "textDesTopic";
-            this.textDesTopic.Size = new System.Drawing.Size(594, 16);
-            this.textDesTopic.TabIndex = 43;
-            this.textDesTopic.Text = "(description note)";
-            // 
-            // textDesFolder
-            // 
-            this.textDesFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textDesFolder.BackColor = System.Drawing.SystemColors.Info;
-            this.textDesFolder.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textDesFolder.Enabled = false;
-            this.textDesFolder.Location = new System.Drawing.Point(128, 24);
-            this.textDesFolder.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textDesFolder.Name = "textDesFolder";
-            this.textDesFolder.Size = new System.Drawing.Size(614, 16);
-            this.textDesFolder.TabIndex = 42;
-            this.textDesFolder.Text = "(description folder)";
-            // 
-            // labelInfoIdFolder
-            // 
-            this.labelInfoIdFolder.BackColor = System.Drawing.SystemColors.Info;
-            this.labelInfoIdFolder.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.labelInfoIdFolder.Location = new System.Drawing.Point(68, 24);
-            this.labelInfoIdFolder.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelInfoIdFolder.Name = "labelInfoIdFolder";
-            this.labelInfoIdFolder.Size = new System.Drawing.Size(62, 15);
-            this.labelInfoIdFolder.TabIndex = 40;
-            this.labelInfoIdFolder.Text = "1234567";
-            this.labelInfoIdFolder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labelInfoFolder
-            // 
-            this.labelInfoFolder.BackColor = System.Drawing.SystemColors.Info;
-            this.labelInfoFolder.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.labelInfoFolder.Location = new System.Drawing.Point(9, 24);
-            this.labelInfoFolder.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelInfoFolder.Name = "labelInfoFolder";
-            this.labelInfoFolder.Size = new System.Drawing.Size(58, 15);
-            this.labelInfoFolder.TabIndex = 41;
-            this.labelInfoFolder.Text = "Folder:";
-            this.labelInfoFolder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labelInfoNote
-            // 
-            this.labelInfoNote.BackColor = System.Drawing.SystemColors.Info;
-            this.labelInfoNote.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.labelInfoNote.Location = new System.Drawing.Point(9, 6);
-            this.labelInfoNote.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelInfoNote.Name = "labelInfoNote";
-            this.labelInfoNote.Size = new System.Drawing.Size(49, 15);
-            this.labelInfoNote.TabIndex = 39;
-            this.labelInfoNote.Text = "Topic:";
-            this.labelInfoNote.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labelInfoIdNote
-            // 
-            this.labelInfoIdNote.BackColor = System.Drawing.SystemColors.Info;
-            this.labelInfoIdNote.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.labelInfoIdNote.Location = new System.Drawing.Point(69, 6);
-            this.labelInfoIdNote.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelInfoIdNote.Name = "labelInfoIdNote";
-            this.labelInfoIdNote.Size = new System.Drawing.Size(61, 15);
-            this.labelInfoIdNote.TabIndex = 38;
-            this.labelInfoIdNote.Text = "1234567";
-            this.labelInfoIdNote.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // panelForm
             // 
             this.panelForm.Controls.Add(this.tabNoteData);
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelForm.Location = new System.Drawing.Point(0, 71);
+            this.panelForm.Location = new System.Drawing.Point(0, 25);
             this.panelForm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(808, 566);
+            this.panelForm.Size = new System.Drawing.Size(808, 612);
             this.panelForm.TabIndex = 39;
             // 
             // tabNoteData
@@ -415,7 +316,7 @@
             this.tabNoteData.Name = "tabNoteData";
             this.tabNoteData.Padding = new System.Drawing.Point(4, 6);
             this.tabNoteData.SelectedIndex = 0;
-            this.tabNoteData.Size = new System.Drawing.Size(802, 557);
+            this.tabNoteData.Size = new System.Drawing.Size(802, 603);
             this.tabNoteData.TabIndex = 8;
             // 
             // tabBasicData
@@ -439,7 +340,7 @@
             this.tabBasicData.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabBasicData.Name = "tabBasicData";
             this.tabBasicData.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabBasicData.Size = new System.Drawing.Size(794, 523);
+            this.tabBasicData.Size = new System.Drawing.Size(794, 569);
             this.tabBasicData.TabIndex = 0;
             this.tabBasicData.Text = "Basic data  ";
             this.tabBasicData.UseVisualStyleBackColor = true;
@@ -549,7 +450,7 @@
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
             this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textDescription.Size = new System.Drawing.Size(773, 386);
+            this.textDescription.Size = new System.Drawing.Size(773, 432);
             this.textDescription.TabIndex = 5;
             // 
             // buttonSelCarpeta
@@ -607,7 +508,7 @@
             this.tabAttributes.Location = new System.Drawing.Point(4, 30);
             this.tabAttributes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabAttributes.Name = "tabAttributes";
-            this.tabAttributes.Size = new System.Drawing.Size(794, 523);
+            this.tabAttributes.Size = new System.Drawing.Size(794, 569);
             this.tabAttributes.TabIndex = 3;
             this.tabAttributes.Text = "Attributes  ";
             this.tabAttributes.UseVisualStyleBackColor = true;
@@ -696,7 +597,7 @@
             this.tabResources.Location = new System.Drawing.Point(4, 30);
             this.tabResources.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabResources.Name = "tabResources";
-            this.tabResources.Size = new System.Drawing.Size(794, 523);
+            this.tabResources.Size = new System.Drawing.Size(794, 569);
             this.tabResources.TabIndex = 4;
             this.tabResources.Text = "Resources  ";
             this.tabResources.UseVisualStyleBackColor = true;
@@ -783,7 +684,7 @@
             this.tabTasks.Location = new System.Drawing.Point(4, 30);
             this.tabTasks.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabTasks.Name = "tabTasks";
-            this.tabTasks.Size = new System.Drawing.Size(794, 523);
+            this.tabTasks.Size = new System.Drawing.Size(794, 569);
             this.tabTasks.TabIndex = 2;
             this.tabTasks.Text = "Tasks  ";
             this.tabTasks.UseVisualStyleBackColor = true;
@@ -858,7 +759,7 @@
             this.tabAlarms.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabAlarms.Name = "tabAlarms";
             this.tabAlarms.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabAlarms.Size = new System.Drawing.Size(794, 523);
+            this.tabAlarms.Size = new System.Drawing.Size(794, 569);
             this.tabAlarms.TabIndex = 1;
             this.tabAlarms.Text = "Alarms  ";
             this.tabAlarms.UseVisualStyleBackColor = true;
@@ -927,7 +828,7 @@
             this.tabCode.Location = new System.Drawing.Point(4, 30);
             this.tabCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabCode.Name = "tabCode";
-            this.tabCode.Size = new System.Drawing.Size(794, 523);
+            this.tabCode.Size = new System.Drawing.Size(794, 569);
             this.tabCode.TabIndex = 6;
             this.tabCode.Text = "Code   ";
             this.tabCode.UseVisualStyleBackColor = true;
@@ -974,7 +875,7 @@
             this.tabTraceNotes.Location = new System.Drawing.Point(4, 30);
             this.tabTraceNotes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabTraceNotes.Name = "tabTraceNotes";
-            this.tabTraceNotes.Size = new System.Drawing.Size(794, 523);
+            this.tabTraceNotes.Size = new System.Drawing.Size(794, 569);
             this.tabTraceNotes.TabIndex = 5;
             this.tabTraceNotes.Text = "Trace notes  ";
             this.tabTraceNotes.UseVisualStyleBackColor = true;
@@ -1131,18 +1032,15 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(808, 637);
             this.Controls.Add(this.panelForm);
-            this.Controls.Add(this.panelTop);
             this.Controls.Add(this.toolBarNoteEditor);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "NoteEditorForm";
-            this.Text = "NoteEditorForm";
+            this.Text = "Note Editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NoteEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.NoteEditorForm_Load);
             this.toolBarNoteEditor.ResumeLayout(false);
             this.toolBarNoteEditor.PerformLayout();
-            this.panelTop.ResumeLayout(false);
-            this.panelTop.PerformLayout();
             this.panelForm.ResumeLayout(false);
             this.tabNoteData.ResumeLayout(false);
             this.tabBasicData.ResumeLayout(false);
@@ -1191,13 +1089,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem buttonWordWrap;
         private System.Windows.Forms.ImageList imageListTabNoteData;
-        private System.Windows.Forms.Panel panelTop;
-        internal System.Windows.Forms.TextBox textDesTopic;
-        internal System.Windows.Forms.TextBox textDesFolder;
-        private System.Windows.Forms.Label labelInfoIdFolder;
-        private System.Windows.Forms.Label labelInfoFolder;
-        private System.Windows.Forms.Label labelInfoNote;
-        private System.Windows.Forms.Label labelInfoIdNote;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.TabControl tabNoteData;
         private System.Windows.Forms.TabPage tabBasicData;

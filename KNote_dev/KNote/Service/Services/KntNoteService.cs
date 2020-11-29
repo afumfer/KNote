@@ -44,7 +44,22 @@ namespace KNote.Service.Services
         {
             return await _repository.Notes.GetAsync(noteId);
         }
-        
+
+        public async Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId)
+        {
+            var result = new Result<NoteExtendedDto>();
+            var entity = new NoteExtendedDto();
+
+            entity.Note = (await _repository.Notes.GetAsync(noteId)).Entity;
+            entity.Resources = (await _repository.Notes.GetResourcesAsync(noteId)).Entity;
+            entity.Tasks = (await _repository.Notes.GetNoteTasksAsync(noteId)).Entity;
+            entity.Messages = (await _repository.Notes.GetMessagesAsync(noteId)).Entity;
+
+            result.Entity = entity;
+            return result;
+        }
+
+
         public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
         {
             return await _repository.Notes.GetByFolderAsync(folderId);
@@ -65,6 +80,17 @@ namespace KNote.Service.Services
             return await _repository.Notes.NewAsync(entityInfo);
         }
 
+        public async Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entityInfo = null)
+        {
+            var result = new Result<NoteExtendedDto>();
+            var entity = new NoteExtendedDto();
+
+            entity.Note = (await _repository.Notes.NewAsync(entityInfo)).Entity;
+
+            result.Entity = entity;
+            return result;
+        }
+
         public async Task<Result<NoteDto>> SaveAsync(NoteDto entity)
         {
             if (entity.NoteId == Guid.Empty)
@@ -76,6 +102,23 @@ namespace KNote.Service.Services
             {
                 return await _repository.Notes.UpdateAsync(entity);
             }
+        }
+
+        public async Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity)
+        {
+            // TODO: !!! pendiente de completar este método ....
+
+            var result = new Result<NoteExtendedDto>();
+            result.Entity = new NoteExtendedDto();
+
+
+            var resNote = await SaveAsync(entity.Note);
+
+            // TODO: !!! pendiente de grabar las propiedades adicionales de NoteExtendedDto
+            // ... 
+
+            result.Entity.Note = resNote.Entity;
+            return result;
         }
 
         public async Task<Result<NoteDto>> DeleteAsync(Guid id)
@@ -96,6 +139,23 @@ namespace KNote.Service.Services
             {
                 result.ErrorList = resGetEntity.ErrorList;
             }
+
+            return result;
+        }
+
+        public async Task<Result<NoteExtendedDto>> DeleteExtendedAsync(Guid id)
+        {
+            // TODO: !!! pendiented de completar este método ....
+
+            var result = new Result<NoteExtendedDto>();
+            result.Entity = new NoteExtendedDto();
+
+            var resNote = await DeleteAsync(id);
+
+            // TODO: !!! pendiente de borrar las propiedades adicionales de NoteExtendedDto
+            // ... 
+
+            result.Entity.Note = resNote.Entity;
 
             return result;
         }
@@ -135,13 +195,6 @@ namespace KNote.Service.Services
             {
                 result.ErrorList = resGetEntity.ErrorList;
             }
-
-            // TODO: Implementación provisional al bloque anterior
-            //var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
-            //if (resDelEntity.IsValid)
-            //    result.Entity = null;
-            //else
-            //    result.ErrorList = resDelEntity.ErrorList;
 
             return result;
         }

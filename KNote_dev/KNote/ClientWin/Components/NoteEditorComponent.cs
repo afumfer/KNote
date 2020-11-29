@@ -14,44 +14,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KNote.ClientWin.Components
 {    
-    public class NoteEditorComponent : ComponentEditorBase<IEditorView<NoteDto>, NoteDto>
+    public class NoteEditorComponent : ComponentEditorBase<IEditorView<NoteExtendedDto>, NoteExtendedDto>
     {
         #region Properties
-
-        // TODO: propiedades pendientes de desplazar a NoteDto
-
-        private List<ResourceDto> _noteEditResources;
-        public List<ResourceDto> NoteEditResources
-        {
-            get
-            {
-                if (_noteEditResources == null)
-                    _noteEditResources = new List<ResourceDto>();
-                return _noteEditResources;
-            }
-        }
-
-        private List<NoteTaskDto> _noteEditTasks;
-        public List<NoteTaskDto> NoteEditTasks
-        {
-            get
-            {
-                if (_noteEditTasks == null)
-                    _noteEditTasks = new List<NoteTaskDto>();
-                return _noteEditTasks;
-            }
-        }
-
-        private List<KMessageDto> _noteEditMessages;
-        public List<KMessageDto> NoteEditMessages
-        {
-            get
-            {
-                if (_noteEditMessages == null)
-                    _noteEditMessages = new List<KMessageDto>();
-                return _noteEditMessages;
-            }
-        }
        
         #endregion
 
@@ -65,7 +30,7 @@ namespace KNote.ClientWin.Components
 
         #region IEditorView implementation
 
-        protected override IEditorView<NoteDto> CreateView()
+        protected override IEditorView<NoteExtendedDto> CreateView()
         {
             return Store.FactoryViews.View(this);
         }
@@ -80,10 +45,7 @@ namespace KNote.ClientWin.Components
             {                
                 Service = service;
 
-                Model = (await Service.Notes.GetAsync(noteId)).Entity;
-                _noteEditResources = (await Service.Notes.GetResourcesAsync(noteId)).Entity;
-                _noteEditTasks = (await Service.Notes.GetNoteTasksAsync(noteId)).Entity;
-                _noteEditMessages = (await Service.Notes.GetMessagesAsync(noteId)).Entity;
+                Model = (await Service.Notes.GetExtendedAsync(noteId)).Entity;
                 Model.SetIsDirty(false);
 
                 View.RefreshView();
@@ -100,12 +62,12 @@ namespace KNote.ClientWin.Components
             {
                 Service = service;
                 
-                var response = await Service.Notes.NewAsync();
+                var response = await Service.Notes.NewExtendedAsync();
                 Model = response.Entity;
                 
                 // Context default values
-                Model.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
-                Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+                Model.Note.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
+                Model.Note.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
 
                 Model.SetIsDirty(false);
 
@@ -122,7 +84,7 @@ namespace KNote.ClientWin.Components
             if (!Model.IsDirty())
                 return;
 
-            var isNew = (Model.NoteId == Guid.Empty);
+            var isNew = (Model.Note.NoteId == Guid.Empty);
                         
             var msgVal = Model.GetErrorMessage();
             if (!string.IsNullOrEmpty(msgVal))
@@ -133,11 +95,12 @@ namespace KNote.ClientWin.Components
 
             try
             {                                
-                var response = await Service.Notes.SaveAsync(Model);
+                var response = await Service.Notes.SaveExtendedAsync(Model);
 
                 if (response.IsValid)
                 {
                     Model = response.Entity;
+                    
                     Model.SetIsDirty(false);
 
                     if (!isNew)
@@ -159,7 +122,7 @@ namespace KNote.ClientWin.Components
 
         public override async Task<bool> DeleteModel()
         {
-            return await DeleteModel(Service, Model.NoteId);
+            return await DeleteModel(Service, Model.Note.NoteId);
         }
 
         public override async Task<bool> DeleteModel(IKntService service, Guid noteId) 
@@ -169,7 +132,7 @@ namespace KNote.ClientWin.Components
             {
                 try
                 {
-                    var response = await service.Notes.DeleteAsync(noteId);
+                    var response = await service.Notes.DeleteExtendedAsync(noteId);
                     
                     if (response.IsValid)
                     {

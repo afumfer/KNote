@@ -772,7 +772,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(1014, 569);
             this.splitContainer1.SplitterDistance = 294;
-            this.splitContainer1.SplitterWidth = 7;
+            this.splitContainer1.SplitterWidth = 6;
             this.splitContainer1.TabIndex = 6;
             // 
             // tabExplorers
@@ -841,7 +841,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.BackColor = System.Drawing.SystemColors.Control;
-            this.splitContainer2.Size = new System.Drawing.Size(713, 569);
+            this.splitContainer2.Size = new System.Drawing.Size(714, 569);
             this.splitContainer2.SplitterDistance = 192;
             this.splitContainer2.SplitterWidth = 7;
             this.splitContainer2.TabIndex = 0;

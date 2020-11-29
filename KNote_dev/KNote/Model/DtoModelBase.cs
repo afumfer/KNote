@@ -12,7 +12,7 @@ namespace KNote.Model
     {
         protected bool _isDirty = false;
 
-        public bool IsDirty()
+        public virtual bool IsDirty()
         {
             return _isDirty;
         }

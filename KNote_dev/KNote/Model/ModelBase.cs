@@ -22,10 +22,10 @@ namespace KNote.Model
                 return true;
         }
 
-        public string GetErrorMessage()
+        public virtual string GetErrorMessage()
         {
             var validations = Validate(null);
-            string msgVal = null;
+            string msgVal = "";
             if (validations != null)
             {
                 foreach (var v in validations)
@@ -33,12 +33,9 @@ namespace KNote.Model
             }
 
             if (!string.IsNullOrEmpty(msgVal))            
-                msgVal = "Errors: \n" + msgVal;
+                msgVal = "\n - " + msgVal;
 
             return msgVal;            
-        }
-
-        // TODO: add property IsDirty
-
+        }        
     }
 }

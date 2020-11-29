@@ -16,7 +16,7 @@ using System.Windows.Forms;
 
 namespace KNote.ClientWin.Views
 {
-    public partial class NoteEditorForm : Form, IEditorView<NoteDto>
+    public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
     {
         #region Private fields
 
@@ -59,12 +59,6 @@ namespace KNote.ClientWin.Views
 
         public void CleanView()
         {
-            // Labels top section
-            labelInfoIdNote.Text = "";
-            labelInfoIdFolder.Text = "";
-            textDesTopic.Text = "" ;
-            textDesFolder.Text = "";
-
             // Basic data
             textTopic.Text = "";
             textFolder.Text = "";
@@ -94,8 +88,7 @@ namespace KNote.ClientWin.Views
             TopLevel = false;
             Dock = DockStyle.Fill;
             FormBorderStyle = FormBorderStyle.None;
-            toolBarNoteEditor.Visible = false;
-            panelTop.Visible = false;
+            toolBarNoteEditor.Visible = false;            
         }
 
         public void ConfigureWindowMode()
@@ -103,8 +96,7 @@ namespace KNote.ClientWin.Views
             TopLevel = true;
             Dock = DockStyle.None;
             FormBorderStyle = FormBorderStyle.Sizable;
-            toolBarNoteEditor.Visible = true;
-            panelTop.Visible = true;
+            toolBarNoteEditor.Visible = true;            
             StartPosition = FormStartPosition.CenterScreen;
         }
 
@@ -153,34 +145,28 @@ namespace KNote.ClientWin.Views
 
         private void ModelToControls()
         {
-            // Label info
-            labelInfoIdNote.Text = _com.Model.NoteNumber.ToString();
-            labelInfoIdFolder.Text = _com.Model.FolderDto.FolderNumber.ToString();
-            textDesTopic.Text = _com.Model.Topic;
-            textDesFolder.Text = _com.Model.FolderDto.Name;
-
             // Basic data
-            textTopic.Text = _com.Model.Topic;
-            textFolder.Text = _com.Model.FolderDto?.Name;
-            textTags.Text = _com.Model.Tags;
-            textDescription.Text = _com.Model.Description;
-            textPriority.Text = _com.Model.Priority.ToString();
+            textTopic.Text = _com.Model.Note.Topic;
+            textFolder.Text = _com.Model.Note.FolderDto?.Name;
+            textTags.Text = _com.Model.Note.Tags;
+            textDescription.Text = _com.Model.Note.Description;
+            textPriority.Text = _com.Model.Note.Priority.ToString();
 
             // KAttributes           
-            textNoteType.Text = _com.Model.NoteTypeDto.Name;
-            dataGridAttributes.DataSource = _com.Model.KAttributesDto.OrderBy(_ => _.Order).Select(_ => new { _.Name, _.Value }).ToList();
+            textNoteType.Text = _com.Model.Note.NoteTypeDto.Name;
+            dataGridAttributes.DataSource = _com.Model.Note.KAttributesDto.OrderBy(_ => _.Order).Select(_ => new { _.Name, _.Value }).ToList();
 
             // Resources 
-            dataGridResources.DataSource = _com.NoteEditResources.OrderBy(_ => _.Order).Select(_ =>
+            dataGridResources.DataSource = _com.Model.Resources.OrderBy(_ => _.Order).Select(_ =>
               new { Id = _.ResourceId, Name = _.NameOut, Description = _.Description, Order = _.Order, Tupe = _.FileType }).ToList();
 
-            if (_com.NoteEditResources.Count > 0)
-                UpdatePicResource(_com.NoteEditResources[0].ContentArrayBytes, _com.NoteEditResources[0].FileType);
+            if (_com.Model.Resources.Count > 0)
+                UpdatePicResource(_com.Model.Resources[0].ContentArrayBytes, _com.Model.Resources[0].FileType);
             else
                 UpdatePicResource(null, null);
 
             // Tasks
-            dataGridTasks.DataSource = _com.NoteEditTasks.Select(_ => new {
+            dataGridTasks.DataSource = _com.Model.Tasks.Select(_ => new {
                 User = _.UserFullName,
                 Description = _.Description,
                 Tags = _.Tags,
@@ -196,7 +182,7 @@ namespace KNote.ClientWin.Views
             }).ToList();
 
             // Alarms            
-            dataGridAlarms.DataSource = _com.NoteEditMessages.Select(_ => new {
+            dataGridAlarms.DataSource = _com.Model.Messages.Select(_ => new {
                 User = _.UserFullName,
                 AlarmDateTime = _.AlarmDateTime,
                 Content = _.Content,
@@ -204,7 +190,7 @@ namespace KNote.ClientWin.Views
             }).ToList();
 
             // Script             
-            textScriptCode.Text = _com.Model.Script;
+            textScriptCode.Text = _com.Model.Note.Script;
 
             // ........
 
@@ -219,13 +205,13 @@ namespace KNote.ClientWin.Views
             // TODO: !!! ojo ... completar implementación 
 
             // Basic data
-            _com.Model.Topic = textTopic.Text;
+            _com.Model.Note.Topic = textTopic.Text;
             //_com.NoteEdit.FolderDto.Name = textFolder.Text;
-            _com.Model.Tags = textTags.Text;
-            _com.Model.Description = textDescription.Text;
+            _com.Model.Note.Tags = textTags.Text;
+            _com.Model.Note.Description = textDescription.Text;
             int p;
             if (int.TryParse(textPriority.Text, out p))
-                _com.Model.Priority = p;
+                _com.Model.Note.Priority = p;
         }
 
         private void PersonalizeControls()
@@ -245,8 +231,8 @@ namespace KNote.ClientWin.Views
                     Cursor = Cursors.WaitCursor;
                     var sr = dataGridResources.SelectedRows[0];                    
                     var idResource = (Guid)sr.Cells[0].Value;
-                    var content = _com.NoteEditResources.Where(_ => _.ResourceId == idResource).Select(_ => _.ContentArrayBytes).FirstOrDefault();
-                    var type = _com.NoteEditResources.Where(_ => _.ResourceId == idResource).Select(_ => _.FileType).FirstOrDefault();
+                    var content = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.ContentArrayBytes).FirstOrDefault();
+                    var type = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.FileType).FirstOrDefault();
                     UpdatePicResource(content, type);
                 }
             }

@@ -40,7 +40,7 @@ namespace KNote.ClientWin.Core
             return new KNoteManagmentForm(component);
         }
 
-        public IEditorView<NoteDto> View(NoteEditorComponent component)
+        public IEditorView<NoteExtendedDto> View(NoteEditorComponent component)
         {
             return new NoteEditorForm(component);
         }
