@@ -16,26 +16,12 @@ namespace KNote.ClientWin.Components
     {
         #region Properties
 
-        private IKntService _service;
-        public IKntService Service
-        {
-            get { return _service; }
-        }
-
-        private FolderInfoDto _folder;
         public FolderInfoDto Folder
         {
-            get { return _folder; }
+            get;
+            private set;
         }
-
-        private List<NoteInfoDto> _listNotes;
-        public List<NoteInfoDto> ListNotes
-        {
-            get { return _listNotes; }
-        }
-
-        public bool tmpAdd { get; set; }
-
+       
         #endregion
 
         #region Constructor
@@ -56,28 +42,33 @@ namespace KNote.ClientWin.Components
 
         #endregion 
 
-        #region Component specific public members
+        #region Component virtual / abstract public members
 
-        public async void LoadNotesByFolderAsync(FolderWithServiceRef folderWithServiceRef)
+        public override void LoadEntities(IKntService serivce)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async void LoadEntities(IKntService service, FolderInfoDto folder)
         {
             try
             {
-                _service = folderWithServiceRef.ServiceRef.Service;
-                _folder = folderWithServiceRef.FolderInfo;
+                Service = service;
+                Folder = folder;
 
-                if (_folder == null)
+                if (Folder == null)
                     return;
 
-                var response = await _service.Notes.GetByFolderAsync(_folder.FolderId);
+                var response = await Service.Notes.GetByFolderAsync(Folder.FolderId);
 
                 if (response.IsValid)
                 {
-                    _listNotes = response.Entity;
+                    ListEntities = response.Entity;
 
                     View.RefreshView();
 
-                    if (_listNotes?.Count > 0)
-                        SelectedEntity = _listNotes[0];
+                    if (ListEntities?.Count > 0)
+                        SelectedEntity = ListEntities[0];
                     else
                         SelectedEntity = null;
 
@@ -92,11 +83,16 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public void RefreshNote(NoteInfoDto note)
+        public override void SelectItem(NoteInfoDto item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void RefreshItem(NoteInfoDto note)
         {
             if(Folder.FolderId == note.FolderId)
             {
-                var updateNote = _listNotes.FirstOrDefault(_ => _.NoteId == note.NoteId);
+                var updateNote = ListEntities.FirstOrDefault(_ => _.NoteId == note.NoteId);
                 if(updateNote != null)
                 {
                     updateNote.SetSimpleDto(note);
@@ -106,26 +102,21 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public void AddNote(NoteInfoDto note)
+        public override void AddItem(NoteInfoDto note)
         {
             if (Folder.FolderId == note.FolderId)
-            {
-                // tmpAdd = true;
-                _listNotes.Add(note);
-                View.AddItem(note);
-                //tmpAdd = false;
+            {                
+                ListEntities.Add(note);
+                View.AddItem(note);             
             }
         }
 
-        public void DeleteNote(NoteInfoDto note)
+        public override void DeleteItem(NoteInfoDto note)
         {
             if (Folder.FolderId == note.FolderId)
-            {
-                
-                //tmpAdd = true;
-                _listNotes.RemoveAll( _ => _.NoteId == note.NoteId);                
-                View.DeleteItem(note);
-                //tmpAdd = false;
+            {                                
+                ListEntities.RemoveAll( _ => _.NoteId == note.NoteId);                
+                View.DeleteItem(note);             
             }
         }
 

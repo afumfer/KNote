@@ -143,7 +143,7 @@ namespace KNote.ClientWin.Components
             _selectedNoteInfo = null;
             NoteEditorComponent.View.CleanView();
 
-            NotesSelectorComponent.LoadNotesByFolderAsync(e.Entity);
+            NotesSelectorComponent.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
         }
 
         #endregion
@@ -271,7 +271,7 @@ namespace KNote.ClientWin.Components
             }
 
             var folderEditorComponent = new FolderEditorComponent(Store);
-            folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);            
+            folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
             var res = folderEditorComponent.RunModal();
             if (res.Entity == EComponentResult.Executed)
             {
@@ -291,10 +291,10 @@ namespace KNote.ClientWin.Components
         private void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
         {
             // TODO: !!! coger aquí la entidad que viene en el parámetro en lugar de acudir de nuevo a la BD.           
-            if(NotesSelectorComponent.ListNotes.Count == 0)
+            if(NotesSelectorComponent.ListEntities.Count == 0)
                 NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
 
-            NotesSelectorComponent.AddNote(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
+            NotesSelectorComponent.AddItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
         }
 
         private void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
@@ -307,14 +307,14 @@ namespace KNote.ClientWin.Components
                 NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
             }
 
-            NotesSelectorComponent.RefreshNote(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
+            NotesSelectorComponent.RefreshItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
         }
 
         private void NoteEditorComponent_DeletedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
         {
-            NotesSelectorComponent.DeleteNote(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
+            NotesSelectorComponent.DeleteItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
 
-            if (NotesSelectorComponent.ListNotes.Count == 0)
+            if (NotesSelectorComponent.ListEntities.Count == 0)
             {
                 NoteEditorComponent.View.CleanView();                
                 _selectedNoteInfo = null;                

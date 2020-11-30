@@ -96,7 +96,11 @@ namespace KNote.ClientWin.Core
     {
         #region Properties
 
+        public IKntService Service { get; protected set; }
+
         public TEntity SelectedEntity { get; set; }
+
+        public List<TEntity> ListEntities { get; protected set; }
 
         #endregion
 
@@ -107,9 +111,11 @@ namespace KNote.ClientWin.Core
 
         }
 
-        #endregion 
+        #endregion
 
         #region Component virtual / abstract methods
+
+        public abstract void LoadEntities(IKntService service);
 
         public virtual void Accept()
         {
@@ -140,6 +146,14 @@ namespace KNote.ClientWin.Core
         {
             OnEntitySelectionDoubleClick(SelectedEntity);
         }
+
+        public abstract void SelectItem(TEntity item);
+
+        public abstract void RefreshItem(TEntity item);
+        
+        public abstract void AddItem(TEntity item);
+        public abstract void DeleteItem(TEntity item);
+
 
         #endregion 
 
@@ -202,7 +216,7 @@ namespace KNote.ClientWin.Core
 
         #region Component virtual / abstract methods
 
-        public abstract void LoadModelById(IKntService service, Guid noteId);
+        public abstract void LoadModelById(IKntService service, Guid noteId, bool refreshView = true);
 
         public abstract void NewModel(IKntService service);
 

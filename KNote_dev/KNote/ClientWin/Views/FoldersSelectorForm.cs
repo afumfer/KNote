@@ -56,14 +56,16 @@ namespace KNote.ClientWin.Views
 
             treeViewFolders.Visible = false;
             treeViewFolders.Nodes.Clear();
+            _com.ListEntities.Clear();
 
-            foreach(var serviceRef in _com.ServicesRef)
+            foreach (var serviceRef in _com.ServicesRef)
             {
                 rootRepNode = new TreeNode("[" + serviceRef.Alias + "]", 2, 2);         
                 rootRepNode.Tag = serviceRef;                
                 treeViewFolders.Nodes.Add(rootRepNode);
 
-                LoadNodes(rootRepNode, serviceRef, await _com.GetTreeAsync(serviceRef));
+                LoadNodes(rootRepNode, serviceRef, await _com.LoadEntities(serviceRef));
+
             }
             treeViewFolders.Visible = true;
         }
@@ -217,13 +219,15 @@ namespace KNote.ClientWin.Views
             {
                 TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);                
                 nodeFolder.Name = f.FolderId.ToString();
-                nodeFolder.Tag = new FolderWithServiceRef() { ServiceRef = service, FolderInfo = f }; ;
+                var folderWithServiceRef = new FolderWithServiceRef() { ServiceRef = service, FolderInfo = f };
+                nodeFolder.Tag = folderWithServiceRef;
+                _com.ListEntities.Add(folderWithServiceRef);
                 node.Nodes.Add(nodeFolder);
 
                 LoadNodes(nodeFolder, service, f.ChildFolders);
             }
         }
-       
+
         #endregion
     }
 }

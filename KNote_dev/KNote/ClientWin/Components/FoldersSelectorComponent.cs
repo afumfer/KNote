@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -7,16 +8,29 @@ using System.Xml.Serialization;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Service;
 
 namespace KNote.ClientWin.Components
 {
-    public class FoldersSelectorComponent : ComponentSelectorBase<ISelectorView<FolderWithServiceRef>, FolderWithServiceRef>   
+    public class FoldersSelectorComponent : ComponentSelectorBase<ISelectorView<FolderWithServiceRef>, FolderWithServiceRef>
     {
+        #region Properties
+
+        public List<ServiceRef> ServicesRef
+        {
+            get
+            {
+                return Store.GetAllServiceRef();
+            }
+        }
+
+        #endregion 
+
         #region Constructor
 
         public FoldersSelectorComponent(Store store) : base(store)
         {
-
+            ListEntities = new List<FolderWithServiceRef>();
         }
 
         #endregion 
@@ -30,17 +44,14 @@ namespace KNote.ClientWin.Components
 
         #endregion 
 
-        #region Component specific public members
+        #region Component methods
 
-        public List<ServiceRef> ServicesRef
+        public override void LoadEntities(IKntService serivce)
         {
-            get
-            {
-                return Store.GetAllServiceRef();
-            }
+            throw new NotImplementedException();
         }
 
-        public async Task<List<FolderDto>> GetTreeAsync(ServiceRef serviceRef)
+        public async Task<List<FolderDto>> LoadEntities(ServiceRef serviceRef)
         {
             try
             {
@@ -53,20 +64,30 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public void SelectFolder(FolderWithServiceRef folder)
+        public override void RefreshItem(FolderWithServiceRef item)
+        {
+            if (SelectedEntity.FolderInfo.FolderId == item.FolderInfo.FolderId)
+            {
+                // Refresh Selected Folder
+                SelectedEntity.FolderInfo.SetSimpleDto(item.FolderInfo);
+                // Refresh View
+                View.RefreshItem(SelectedEntity);
+            }
+        }
+
+        public override void SelectItem(FolderWithServiceRef folder)
         {
             View.SelectItem(folder);            
         }
 
-        public void RefreshFolder(FolderInfoDto folder)
+        public override void AddItem(FolderWithServiceRef item)
         {
-            if (SelectedEntity.FolderInfo.FolderId == folder.FolderId)
-            {
-                // Refresh Selected Folder
-                SelectedEntity.FolderInfo.SetSimpleDto(folder);
-                // Refresh View
-                View.RefreshItem(SelectedEntity);                
-            }
+            throw new NotImplementedException();
+        }
+
+        public override void DeleteItem(FolderWithServiceRef item)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

@@ -233,7 +233,7 @@ namespace KNote.ClientWin.Views
 
             labelInfo1.Text = $" {e.Entity.ServiceRef.Alias} - {e.Entity.FolderInfo?.Name}";
             if (_notesSelector != null)
-                _notesSelector.LoadNotesByFolderAsync(e.Entity);
+                _notesSelector.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
 
             temp = e.Entity;
         }

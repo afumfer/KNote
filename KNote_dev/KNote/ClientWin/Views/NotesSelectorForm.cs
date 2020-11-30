@@ -50,7 +50,7 @@ namespace KNote.ClientWin.Views
 
         public void RefreshView()
         {
-            if (_com.ListNotes == null)
+            if (_com.ListEntities == null)
                 return;
             else
             {
@@ -60,14 +60,14 @@ namespace KNote.ClientWin.Views
                 //dataGridNotes.DataSource = _com.ListNotes;
 
                 // !!! plan B
-                _source.DataSource = _com.ListNotes;                
+                _source.DataSource = _com.ListEntities;                
                 dataGridNotes.DataSource = _source;
 
                 _skipSelectionChanged = false;
 
                 CoonfigureGridStd();
 
-                if(_com.ListNotes.Count > 0)
+                if(_com.ListEntities.Count > 0)
                     GridSelectFirstElement();
             }
         }
@@ -144,7 +144,7 @@ namespace KNote.ClientWin.Views
             _skipSelectionChanged = true;
             _source.ResetBindings(false);            
             
-            if (_com.ListNotes.Count == 0)
+            if (_com.ListEntities.Count == 0)
                 return;
 
             GridSelectFirstElement(false);
@@ -210,7 +210,7 @@ namespace KNote.ClientWin.Views
                 return;
             try
             {
-                if (_com.ListNotes == null)
+                if (_com.ListEntities == null)
                     return;
 
                 if (dataGridNotes.SelectedRows.Count > 0)

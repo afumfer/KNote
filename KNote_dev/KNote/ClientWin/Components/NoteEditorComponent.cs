@@ -39,7 +39,7 @@ namespace KNote.ClientWin.Components
 
         #region ComponentEditorBase override methods
 
-        public override async void LoadModelById(IKntService service, Guid noteId)
+        public override async void LoadModelById(IKntService service, Guid noteId, bool refreshView = true)
         {
             try
             {                
@@ -47,8 +47,8 @@ namespace KNote.ClientWin.Components
 
                 Model = (await Service.Notes.GetExtendedAsync(noteId)).Entity;
                 Model.SetIsDirty(false);
-
-                View.RefreshView();
+                if(refreshView)
+                    View.RefreshView();
             }
             catch (Exception ex)
             {
