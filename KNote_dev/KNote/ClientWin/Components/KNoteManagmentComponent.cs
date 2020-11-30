@@ -271,8 +271,14 @@ namespace KNote.ClientWin.Components
             }
 
             var folderEditorComponent = new FolderEditorComponent(Store);
-
-            folderEditorComponent.Run();
+            folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);            
+            var res = folderEditorComponent.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                //FoldersSelectorComponent
+            }
+            
+            
         }
 
         public void DeleteFolder()

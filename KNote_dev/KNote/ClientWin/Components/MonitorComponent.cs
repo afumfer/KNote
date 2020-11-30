@@ -31,9 +31,7 @@ namespace KNote.ClientWin.Components
                 Store.ComponentsStateChanged += Store_ComponentsStateChanged;
                 Store.AddedServiceRef += Store_AddedServiceRef;
                 Store.ActiveFolderChanged += Store_ActiveFolderChanged;
-                Store.RemovedServiceRef += Store_RemovedServiceRef;
-                Store.ComponentsResultChanged += Store_ComponentsResultChanged;
-                      
+                Store.RemovedServiceRef += Store_RemovedServiceRef;                                      
             }
             catch (Exception ex)
             {                
@@ -52,9 +50,7 @@ namespace KNote.ClientWin.Components
                 Store.ComponentsStateChanged -= Store_ComponentsStateChanged;
                 Store.AddedServiceRef -= Store_AddedServiceRef;
                 Store.ActiveFolderChanged -= Store_ActiveFolderChanged;
-                Store.RemovedServiceRef -= Store_RemovedServiceRef;
-                Store.ComponentsResultChanged -= Store_ComponentsResultChanged;
-
+                Store.RemovedServiceRef -= Store_RemovedServiceRef;                
             }
             catch (Exception ex)
             {
@@ -69,12 +65,6 @@ namespace KNote.ClientWin.Components
         private void Store_ComponentsStateChanged(object sender, ComponentEventArgs<EComponentState> e)
         {
             var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((ComponentBase)sender).ComponentId}";
-            OnShowLog(info);
-        }
-
-        private void Store_ComponentsResultChanged(object sender, ComponentEventArgs<EComponentResult> e)
-        {
-            var info = $"{DateTime.Now} - [ControllersResultChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((ComponentBase)sender).ComponentId}";
             OnShowLog(info);
         }
        

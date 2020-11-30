@@ -192,12 +192,12 @@ namespace KNote.ClientWin.Views
 
         private void buttonAccept_Click(object sender, EventArgs e)
         {
-            _com.AcceptAction();
+            _com.Accept();
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            _com.CancelAction();
+            _com.Cancel();
         }
 
         #endregion

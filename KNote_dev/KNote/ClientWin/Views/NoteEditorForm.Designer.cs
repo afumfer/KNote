@@ -177,7 +177,8 @@
             this.buttonUndo.Size = new System.Drawing.Size(23, 22);
             this.buttonUndo.Text = "Undo  ";
             this.buttonUndo.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
-            this.buttonUndo.ToolTipText = "Deshacer cambios";
+            this.buttonUndo.ToolTipText = "Undo changes";
+            this.buttonUndo.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // separador1
             // 
@@ -1034,11 +1035,14 @@
             this.Controls.Add(this.panelForm);
             this.Controls.Add(this.toolBarNoteEditor);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "NoteEditorForm";
             this.Text = "Note Editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NoteEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.NoteEditorForm_Load);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.NoteEditorForm_KeyPress);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.NoteEditorForm_KeyUp);
             this.toolBarNoteEditor.ResumeLayout(false);
             this.toolBarNoteEditor.PerformLayout();
             this.panelForm.ResumeLayout(false);

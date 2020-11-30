@@ -69,11 +69,6 @@ namespace KNote.ClientWin.Views
 
         public void RefreshView()
         {
-            RefreshBindingModel();
-        }
-
-        public void RefreshBindingModel()
-        {
             ModelToControls();
         }
 
@@ -136,7 +131,22 @@ namespace KNote.ClientWin.Views
             else if (menuSel == buttonDelete)
             {
                 DeleteModel();
-            }            
+            }    
+            else if (menuSel == buttonUndo)
+            {
+                UndoChanges();
+            }
+        }
+
+        private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+                buttonUndo.Enabled = true;
+        }
+
+        private void NoteEditorForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            buttonUndo.Enabled = true;
         }
 
         #endregion
@@ -257,10 +267,11 @@ namespace KNote.ClientWin.Views
             picResource.Image = Image.FromStream(new MemoryStream(content));
         }
 
-        private void SaveModel()
+        private async void SaveModel()
         {
             ControlsToModel();
-            _com.SaveModel();
+            await _com.SaveModel();
+            buttonUndo.Enabled = false;
         }
 
         private async void DeleteModel()
@@ -268,6 +279,16 @@ namespace KNote.ClientWin.Views
             var res = await _com.DeleteModel();
             if (res)
                 _com.Finalize();
+        }
+
+        private void UndoChanges()
+        {
+            var res = MessageBox.Show("Are you sure you want to undo changes?", "KeyNote", MessageBoxButtons.YesNo);
+            if(res == DialogResult.Yes)
+            {
+                ModelToControls();
+                buttonUndo.Enabled = false;
+            }
         }
 
         #endregion

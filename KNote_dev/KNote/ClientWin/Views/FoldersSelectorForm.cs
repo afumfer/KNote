@@ -174,7 +174,7 @@ namespace KNote.ClientWin.Views
                 }
 
                 _com.SelectedEntity = v;
-                _com.NotifySelectedEntity();
+                _com.NotifySelectedEntity();                
             }
             catch (Exception)
             {
@@ -190,12 +190,12 @@ namespace KNote.ClientWin.Views
 
         private void buttonAccept_Click(object sender, EventArgs e)
         {            
-            _com.AcceptAction();            
+            _com.Accept();            
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            _com.CancelAction();
+            _com.Cancel();
         }
 
         private void FoldersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)

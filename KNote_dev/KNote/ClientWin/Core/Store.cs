@@ -82,19 +82,12 @@ namespace KNote.ClientWin.Core
         {
             return _servicesRefs.ToList();
         }
-
-        public event EventHandler<ComponentEventArgs<EComponentResult>> ComponentsResultChanged;
+        
         public event EventHandler<ComponentEventArgs<EComponentState>> ComponentsStateChanged;
         public void AddComponent(ComponentBase controller)
         {
             _listComponents.Add(controller);
             controller.StateComponentChanged += Components_StateCtrlChanged;
-            controller.ComponentResultChanged += Controller_ComponentResultChanged;
-        }
-
-        private void Controller_ComponentResultChanged(object sender, ComponentEventArgs<EComponentResult> e)
-        {
-            ComponentsResultChanged?.Invoke(sender, e);
         }
 
         private void Components_StateCtrlChanged(object sender, ComponentEventArgs<EComponentState> e)

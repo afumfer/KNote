@@ -33,7 +33,7 @@ namespace KNote.ClientWin.Core
     public interface IEditorView<T> : IViewConfigurable
     {        
         void CleanView();        
-        void RefreshBindingModel();        
+        //void RefreshBindingModel();        
     }
 
     public interface ISelectorView<TItem> : IViewConfigurable

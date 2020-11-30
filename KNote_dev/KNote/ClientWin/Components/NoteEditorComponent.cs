@@ -79,10 +79,10 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public override async void SaveModel()
+        public override async Task<bool> SaveModel()
         {
             if (!Model.IsDirty())
-                return;
+                return true;
 
             var isNew = (Model.Note.NoteId == Guid.Empty);
                         
@@ -90,7 +90,7 @@ namespace KNote.ClientWin.Components
             if (!string.IsNullOrEmpty(msgVal))
             {
                 View.ShowInfo(msgVal);
-                return;
+                return false;
             }
 
             try
@@ -116,8 +116,10 @@ namespace KNote.ClientWin.Components
             catch (Exception ex)
             {
                 View.ShowInfo(ex.Message);
+                return true;
             }
-                        
+
+            return true;
         }
 
         public override async Task<bool> DeleteModel()

@@ -43,7 +43,8 @@ namespace KNote.ClientWin.Views
 
         public Result<EComponentResult> ShowModalView()
         {
-            return _com.DialogResultToComponentResult(this.ShowDialog());
+            var res = _com.DialogResultToComponentResult(this.ShowDialog());
+            return res;
         }
 
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
@@ -52,18 +53,17 @@ namespace KNote.ClientWin.Views
         }
 
         public void RefreshView()
-        {
-            RefreshBindingModel();
-        }
-
-        public void RefreshBindingModel()
-        {
-
+        {            
+            ModelToControls();
         }
 
         public void CleanView()
         {
-            
+            textName.Text = "";
+            textTags.Text = "";
+            textOrder.Text = "";
+            textOrderNotes.Text = "";
+            textParentFolder.Text = "";
         }
 
         public void OnClosingView()
@@ -84,6 +84,7 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
+        #region Form events handler
 
         private void FolderEditorForm_Load(object sender, EventArgs e)
         {
@@ -92,13 +93,47 @@ namespace KNote.ClientWin.Views
         private void FolderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
-            {
-                //SaveModel();
+            {                
                 _com.Finalize();
             }
         }
 
+        private async void buttonAccept_Click(object sender, EventArgs e)
+        {
+            ControlsToModel();
+            this.DialogResult = DialogResult.OK;
+            await _com.SaveModel();
+        }
 
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            _com.CancelEdition();
+        }
+
+        #endregion 
+
+        private void ModelToControls()
+        {
+            textName.Text = _com.Model.Name;
+            textTags.Text = _com.Model.Tags;
+            textOrder.Text = _com.Model.Order.ToString();
+            textOrderNotes.Text = _com.Model.OrderNotes;
+            textParentFolder.Text = _com.Model.ParentFolderDto?.Name;
+        }
+
+        private void ControlsToModel()
+        {
+            _com.Model.Name = textName.Text;
+            _com.Model.Tags = textTags.Text;            
+            int o;
+            if (int.TryParse(textOrder.Text, out o))
+                _com.Model.Order = o;
+
+            _com.Model.OrderNotes = textOrderNotes.Text;
+
+            // _com.Model.ParentFolder  // TODO ...
+        }
 
     }
 }

@@ -109,26 +109,36 @@ namespace KNote.ClientWin.Core
 
         #endregion 
 
-        #region Component virtual methods
+        #region Component virtual / abstract methods
 
-        public virtual void CancelAction()
-        {
-            OnComponentResultChanged(EComponentResult.Canceled);
-            base.Finalize();
-        }
-
-        public virtual void AcceptAction()
+        public virtual void Accept()
         {
             try
             {
-                NotifySelectedEntity();
-                OnComponentResultChanged(EComponentResult.Executed);
-                base.Finalize();
+                NotifySelectedEntity();  
+                OnEntitySelection(SelectedEntity);
+                Finalize();
             }
             catch (Exception)
             {
                 OnStateComponentChanged(EComponentState.Error);
             }
+        }
+
+        public virtual void Cancel()
+        {
+            OnEntitySelectionCanceled(SelectedEntity);
+            Finalize();
+        }
+
+        public virtual void NotifySelectedEntity()
+        {
+            OnEntitySelection(SelectedEntity);
+        }
+
+        public virtual void NotifySelectedEntityDoubleClick()
+        {
+            OnEntitySelectionDoubleClick(SelectedEntity);
         }
 
         #endregion 
@@ -141,20 +151,16 @@ namespace KNote.ClientWin.Core
             EntitySelection?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
         }
 
-        public virtual void NotifySelectedEntity()
-        {
-            OnEntitySelection(SelectedEntity);
-        }
-
         public event EventHandler<ComponentEventArgs<TEntity>> EntitySelectionDoubleClick;
         protected virtual void OnEntitySelectionDoubleClick(TEntity entity)
         {
             EntitySelectionDoubleClick?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
         }
 
-        public virtual void NotifySelectedEntityDoubleClick()
+        public event EventHandler<ComponentEventArgs<TEntity>> EntitySelectionCanceled;
+        protected virtual void OnEntitySelectionCanceled(TEntity entity)
         {
-            OnEntitySelectionDoubleClick(SelectedEntity);
+            EntitySelectionCanceled?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
         }
 
         #endregion 
@@ -194,17 +200,23 @@ namespace KNote.ClientWin.Core
 
         #endregion 
 
-        #region Abstract methods
+        #region Component virtual / abstract methods
 
         public abstract void LoadModelById(IKntService service, Guid noteId);
 
         public abstract void NewModel(IKntService service);
 
-        public abstract void SaveModel();
+        public abstract Task<bool> SaveModel();
 
         public abstract Task<bool> DeleteModel(IKntService service, Guid noteId);
 
         public abstract Task<bool> DeleteModel();
+
+        public virtual void CancelEdition()
+        {
+            OnEditionCanceled(Model);
+            Finalize();
+        }
 
         #endregion 
 
@@ -228,6 +240,23 @@ namespace KNote.ClientWin.Core
             DeletedEntity?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
         }
 
+        public event EventHandler<ComponentEventArgs<TEntity>> EditionCanceled;
+        protected virtual void OnEditionCanceled(TEntity entity)
+        {
+            EditionCanceled?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+        }
+
+
         #endregion 
     }
+
+
+    public enum EComponentResult
+    {
+        None,
+        Executed,
+        Canceled,
+        Error
+    }
+
 }

@@ -58,6 +58,17 @@ namespace KNote.ClientWin.Components
             View.SelectItem(folder);            
         }
 
+        public void RefreshFolder(FolderInfoDto folder)
+        {
+            if (SelectedEntity.FolderInfo.FolderId == folder.FolderId)
+            {
+                // Refresh Selected Folder
+                SelectedEntity.FolderInfo.SetSimpleDto(folder);
+                // Refresh View
+                View.RefreshItem(SelectedEntity);                
+            }
+        }
+
         #endregion
     }
 }

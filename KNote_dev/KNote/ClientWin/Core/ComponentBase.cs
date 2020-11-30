@@ -19,9 +19,7 @@ namespace KNote.ClientWin.Core
         public Store Store { get; protected set; }
 
         public EComponentState ComponentState { get; protected set; } = EComponentState.NotStarted;
-        
-        public EComponentResult ComponentResult { get; protected set; } = EComponentResult.None;
-
+                
         public bool EmbededMode { get; set; } = false;
         
         public bool ThrowKntException { get; set; } = false;
@@ -53,13 +51,13 @@ namespace KNote.ClientWin.Core
             StateComponentChanged?.Invoke(this, new ComponentEventArgs<EComponentState>(state));
         }
         
-        public event EventHandler<ComponentEventArgs<EComponentResult>> ComponentResultChanged;
+        //public event EventHandler<ComponentEventArgs<EComponentResult>> ComponentResultChanged;
 
-        protected void OnComponentResultChanged(EComponentResult resutl)
-        {
-            ComponentResult = resutl;
-            ComponentResultChanged?.Invoke(this, new ComponentEventArgs<EComponentResult>(resutl));
-        }
+        //protected void OnComponentResultChanged(EComponentResult resutl)
+        //{
+        //    ComponentResult = resutl;
+        //    ComponentResultChanged?.Invoke(this, new ComponentEventArgs<EComponentResult>(resutl));
+        //}
 
         #endregion
 
@@ -280,14 +278,6 @@ namespace KNote.ClientWin.Core
         Initialized,
         Started,        
         Finalized,
-        Error
-    }
-
-    public enum EComponentResult
-    {
-        None,
-        Executed,
-        Canceled,
         Error
     }
 
