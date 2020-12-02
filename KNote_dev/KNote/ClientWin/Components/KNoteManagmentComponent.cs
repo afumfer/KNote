@@ -176,12 +176,12 @@ namespace KNote.ClientWin.Components
             EditNote();
         }
 
-        private void _notesSelectorComponent_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
+        private async void _notesSelectorComponent_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
             if (e.Entity == null)
                 return;
             _selectedNoteInfo = e.Entity;
-            NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
+            await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
         }
 
         #endregion
@@ -218,7 +218,7 @@ namespace KNote.ClientWin.Components
             kntScriptCom.Run();
         }
 
-        public void EditNote()
+        public async void EditNote()
         {
             if (SelectedNoteInfo == null)
             {
@@ -229,7 +229,7 @@ namespace KNote.ClientWin.Components
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            noteEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
+            await noteEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
             noteEditorComponent.Run();
         }
 
@@ -262,7 +262,7 @@ namespace KNote.ClientWin.Components
         }
 
 
-        public void EditFolder()
+        public async void EditFolder()
         {
             if(SelectedFolderInfo == null)
             {
@@ -271,14 +271,14 @@ namespace KNote.ClientWin.Components
             }
 
             var folderEditorComponent = new FolderEditorComponent(Store);
-            folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
+            await folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
             var res = folderEditorComponent.RunModal();
             if (res.Entity == EComponentResult.Executed)
             {
                 //FoldersSelectorComponent
             }
-            
-            
+            //folderEditorComponent.Finalize();
+
         }
 
         public void DeleteFolder()

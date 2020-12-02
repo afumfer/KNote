@@ -44,7 +44,7 @@ namespace KNote.ClientWin.Components
 
         #region Component virtual / abstract public members
 
-        public override void LoadEntities(IKntService serivce)
+        public override void LoadEntities(IKntService service)
         {
             throw new NotImplementedException();
         }

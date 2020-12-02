@@ -216,7 +216,7 @@ namespace KNote.ClientWin.Core
 
         #region Component virtual / abstract methods
 
-        public abstract void LoadModelById(IKntService service, Guid noteId, bool refreshView = true);
+        public abstract Task<bool> LoadModelById(IKntService service, Guid noteId, bool refreshView = true);
 
         public abstract void NewModel(IKntService service);
 
