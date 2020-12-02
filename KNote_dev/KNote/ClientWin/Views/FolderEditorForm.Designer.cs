@@ -182,15 +182,14 @@ namespace KNote.ClientWin.Views
             // 
             // FolderEditorForm
             // 
-            this.AcceptButton = this.buttonAccept;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.buttonCancel;
             this.ClientSize = new System.Drawing.Size(504, 296);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FolderEditorForm";
@@ -198,6 +197,8 @@ namespace KNote.ClientWin.Views
             this.Text = "Folder editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FolderEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.FolderEditorForm_Load);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.FolderEditorForm_KeyPress);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.FolderEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             this.ResumeLayout(false);

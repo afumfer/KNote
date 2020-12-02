@@ -147,11 +147,11 @@ namespace KNote.ClientWin.Views
 
         public void RefreshItem(FolderWithServiceRef item)
         {
-            //if (SelectItem(item) != null)
-            //{
-            //    treeViewFolders.SelectedNode.Tag = item;
-            //    treeViewFolders.SelectedNode.Text = item.FolderInfo.Name;
-            //}
+            if (SelectItem(item) != null)
+            {
+                treeViewFolders.SelectedNode.Tag = item;
+                treeViewFolders.SelectedNode.Text = item.FolderInfo.Name;
+            }
         }
 
         #endregion 

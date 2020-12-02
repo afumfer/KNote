@@ -275,10 +275,10 @@ namespace KNote.ClientWin.Components
             var res = folderEditorComponent.RunModal();
             if (res.Entity == EComponentResult.Executed)
             {
-                //FoldersSelectorComponent
+                SelectedFolderWithServiceRef.FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>();
+                FoldersSelectorComponent.RefreshItem(SelectedFolderWithServiceRef);
             }
-            //folderEditorComponent.Finalize();
-
+            
         }
 
         public void DeleteFolder()
@@ -288,23 +288,23 @@ namespace KNote.ClientWin.Components
 
         #endregion
 
-        private void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
+        private async void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
         {
             // TODO: !!! coger aquí la entidad que viene en el parámetro en lugar de acudir de nuevo a la BD.           
             if(NotesSelectorComponent.ListEntities.Count == 0)
-                NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
+                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
 
             NotesSelectorComponent.AddItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
         }
 
-        private void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
+        private async void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
         {
             if(NoteEditorComponent.Model.Note.NoteId == e.Entity.Note.NoteId)
             {
                 // TODO: !!! coger el modelo que está en memoria en lugar de volver a cargar desde la BD.
                 // NoteEditorComponent.RefreshNote(e.Entity);
                 // or ...
-                NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
+                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
             }
 
             NotesSelectorComponent.RefreshItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());

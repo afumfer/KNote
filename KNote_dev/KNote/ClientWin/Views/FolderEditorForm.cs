@@ -20,6 +20,7 @@ namespace KNote.ClientWin.Views
 
         private readonly FolderEditorComponent _com;
         private bool _viewFinalized = false;
+        private bool _formIsDisty = false;
 
         #endregion 
 
@@ -49,7 +50,7 @@ namespace KNote.ClientWin.Views
 
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
-            throw new NotImplementedException();
+            return MessageBox.Show(info, caption, buttons);
         }
 
         public void RefreshView()
@@ -93,25 +94,43 @@ namespace KNote.ClientWin.Views
         private void FolderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
-            {                
-                _com.Finalize();
+            {
+                var confirmExit = OnCandelEdition();
+                if (!confirmExit)
+                    e.Cancel = true;
             }
         }
 
         private async void buttonAccept_Click(object sender, EventArgs e)
         {
-            ControlsToModel();
-            this.DialogResult = DialogResult.OK;
-            await _com.SaveModel();
+            ControlsToModel();            
+            var res = await _com.SaveModel();
+            if (res)
+            {
+                _formIsDisty = false;
+                this.DialogResult = DialogResult.OK;
+            }
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            _com.CancelEdition();
+            OnCandelEdition();
         }
 
         #endregion 
+
+        private bool OnCandelEdition()
+        {
+            if (_formIsDisty)
+            {
+                if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KeyNote", MessageBoxButtons.YesNo) == DialogResult.No)
+                    return false;
+            }
+
+            this.DialogResult = DialogResult.Cancel;
+            _com.CancelEdition();
+            return true;
+        }
 
         private void ModelToControls()
         {
@@ -135,5 +154,15 @@ namespace KNote.ClientWin.Views
             // _com.Model.ParentFolder  // TODO ...
         }
 
+        private void FolderEditorForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+                _formIsDisty = true;
+        }
+
+        private void FolderEditorForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            _formIsDisty = true;
+        }
     }
 }
