@@ -121,6 +121,7 @@ namespace KNote.Repository.Dapper
             {                
                 entity.CreationDateTime = DateTime.Now;
                 entity.ModificationDateTime = DateTime.Now;
+                entity.FolderNumber = GetNextFolderNumber();
 
                 var sql = @"INSERT INTO Folders (FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, 
                                 PathFolder, [Order], OrderNotes, Script, ParentId )

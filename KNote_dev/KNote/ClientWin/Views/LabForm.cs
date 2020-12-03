@@ -210,7 +210,7 @@ namespace KNote.ClientWin.Views
 
         #region Form events handlers (app lab)
 
-        private void _notesSelector_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
+        private async void _notesSelector_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
             if (e.Entity == null)
             {
@@ -220,7 +220,7 @@ namespace KNote.ClientWin.Views
 
             labelInfo2.Text = $" {e.Entity.Topic} - {e.Entity.NoteId}";
 
-            _noteEditor.LoadModelById(temp.ServiceRef.Service, e.Entity.NoteId);
+            await _noteEditor.LoadModelById(temp.ServiceRef.Service, e.Entity.NoteId);
         }
 
         private void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)

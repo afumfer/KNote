@@ -494,10 +494,11 @@ namespace KNote.Repository.EntityFramework
                     _context.Set<TEntity>().Remove(dbEntry);
                 }
                 res = await _context.SaveChangesAsync();
+
                 result.Entity = dbEntry;
             }
             catch (KntEntityValidationException ex)
-            {
+            {                
                 AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
             }
             catch (Exception ex)

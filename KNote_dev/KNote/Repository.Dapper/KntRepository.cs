@@ -15,11 +15,17 @@ using System.Data;
 namespace KNote.Repository.Dapper
 {
     public class KntRepository : IKntRepository
-    {        
+    {
+        #region Private/protected fields
+
         protected DbConnection _db;
-        protected bool _throwKntException;
-        protected string _strConn;
-        protected string _strProvider;
+        private readonly bool _throwKntException;
+        private readonly string _strConn;
+        private readonly string _strProvider;
+
+        #endregion
+
+        #region Constructor
 
         public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = false)
         {
@@ -29,6 +35,10 @@ namespace KNote.Repository.Dapper
 
             RefreshDbConnection();
         }
+
+        #endregion
+
+        #region IKntRepository implementation 
 
         private IKntNoteTypeRepository _noteTypes;
         public IKntNoteTypeRepository NoteTypes
@@ -95,7 +105,22 @@ namespace KNote.Repository.Dapper
                 return _notes;
             }
         }
-                    
+
+        public void ClearUnitOfWork()
+        {
+            // Dapper is not necesary clear 
+        }
+
+        public void Refresh()
+        {
+            Dispose();
+            RefreshDbConnection();
+        }
+
+        #endregion
+
+        #region IDisposable
+
         public void Dispose()
         {
             // TODO: make this with reflection or clear code
@@ -126,11 +151,22 @@ namespace KNote.Repository.Dapper
             //if (_traceNoteTypes != null)
             //    _traceNoteTypes.Dispose();
 
+            _users = null;
+            _folders = null;
+            _notes = null;
+            _kAttributes = null;
+            _systemValues = null;
+            _noteTypes = null;
+
             if (_db != null)
                 _db.Dispose();
         }
 
-        public void RefreshDbConnection()
+        #endregion
+
+        #region Private methods
+
+        private void RefreshDbConnection()
         {
             if (_strProvider == "Microsoft.Data.SqlClient")
             {
@@ -147,9 +183,13 @@ namespace KNote.Repository.Dapper
                 _db = new SqliteConnection(_strConn);
             }
             else
-                throw new Exception("Data provider not suported (KntEx)");                
+                throw new Exception("Data provider not suported (KntEx)");
         }
+
+        #endregion 
     }
+
+    #region Sqlite personalization 
 
     abstract class SqliteTypeHandler<T> : SqlMapper.TypeHandler<T>
     {
@@ -176,4 +216,5 @@ namespace KNote.Repository.Dapper
             => TimeSpan.Parse((string)value);
     }
 
+    #endregion 
 }

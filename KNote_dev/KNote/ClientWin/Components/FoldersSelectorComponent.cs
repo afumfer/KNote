@@ -70,6 +70,8 @@ namespace KNote.ClientWin.Components
             {
                 // Refresh Selected Folder
                 SelectedEntity.FolderInfo.SetSimpleDto(item.FolderInfo);
+                // TODO: !!! refresh model here ...
+                // ...
                 // Refresh View
                 View.RefreshItem(SelectedEntity);
             }
@@ -77,17 +79,25 @@ namespace KNote.ClientWin.Components
 
         public override void SelectItem(FolderWithServiceRef folder)
         {
+            // TODO: !!! refresh model here ...
+            // ...
             View.SelectItem(folder);            
         }
 
         public override void AddItem(FolderWithServiceRef item)
         {
-            throw new NotImplementedException();
+            // TODO: !!! refresh model here ...
+            // ...
+
+            View.AddItem(item);
         }
 
         public override void DeleteItem(FolderWithServiceRef item)
         {
-            throw new NotImplementedException();
+            // TODO: !!! refresh model here ...
+            // ...
+
+            View.DeleteItem(item);
         }
 
         #endregion

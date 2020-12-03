@@ -258,7 +258,16 @@ namespace KNote.ClientWin.Components
 
         public void NewFolder()
         {
-            View.ShowInfo("New Folder ---");
+            var folderEditorComponent = new FolderEditorComponent(Store);
+            folderEditorComponent.NewModel(SelectedServiceRef.Service);
+            folderEditorComponent.Model.ParentId = SelectedFolderInfo.FolderId;
+            folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo.GetSimpleDto<FolderDto>();
+            var res = folderEditorComponent.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {                
+                var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>() };
+                FoldersSelectorComponent.AddItem(fs);
+            }
         }
 
 
@@ -281,9 +290,21 @@ namespace KNote.ClientWin.Components
             
         }
 
-        public void DeleteFolder()
+        public async void DeleteFolder()
         {
-            View.ShowInfo("Delete Folder ---");
+            if (SelectedFolderInfo == null)
+            {
+                View.ShowInfo("There is no folder selected to delete.");
+                return;
+            }
+
+            var folderEditorComponent = new FolderEditorComponent(Store);
+            var res = await folderEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);
+            if (res)
+            {
+                //var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = SelectedFolderInfo };
+                FoldersSelectorComponent.DeleteItem(SelectedFolderWithServiceRef);
+            }
         }
 
         #endregion

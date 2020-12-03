@@ -96,11 +96,15 @@ namespace KNote.Service.Services
             if (entity.NoteId == Guid.Empty)
             {
                 entity.NoteId = Guid.NewGuid();
-                return await _repository.Notes.AddAsync(entity);
+                var res = await _repository.Notes.AddAsync(entity);
+                _repository.ClearUnitOfWork();
+                return res;
             }
             else
             {
-                return await _repository.Notes.UpdateAsync(entity);
+                var res =  await _repository.Notes.UpdateAsync(entity);
+                _repository.ClearUnitOfWork();
+                return res;
             }
         }
 

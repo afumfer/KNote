@@ -118,32 +118,31 @@ namespace KNote.ClientWin.Views
 
         public void AddItem(FolderWithServiceRef item)
         {
-            //TreeNode newNode = new TreeNode(item.FolderInfo.Name, 1, 0);
-            //newNode.Tag = item;
-            //newNode.Name = item.FolderInfo.FolderId.ToString();
+            TreeNode newNode = new TreeNode(item.FolderInfo.Name, 1, 0);
+            newNode.Tag = item;
+            newNode.Name = item.FolderInfo.FolderId.ToString();
 
-            //TreeNode n0 = treeViewFolders.SelectedNode;
-
-            //if (((FolderWithServiceRef)n0.Tag).FolderInfo.FolderId == item.FolderInfo.ParentId)
-            //{
-            //    n0.Nodes.Add(newNode);
-            //    n0.Expand();
-            //    treeViewFolders.SelectedNode = newNode;
-            //}
-            //else
-            //    _ctrl.ShowMessage("KMSG: El nodo padre del nuevo nodo no es correcto", "KNote");
+            TreeNode n0 = treeViewFolders.SelectedNode;            
+            if (n0.Name == item.FolderInfo.ParentId.ToString())
+            {
+                n0.Nodes.Add(newNode);                                
+                n0.Expand();
+                treeViewFolders.SelectedNode = newNode;
+            }
+            else
+                _com.ShowMessage("KMSG: The parent node of the new node is not correct.", "KeyNote");
         }
 
         public void DeleteItem(FolderWithServiceRef item)
         {
-            //if (SelectItem(item) != null)
-            //{
-            //    TreeNode parentNode = treeViewFolders.SelectedNode.Parent;
-            //    treeViewFolders.SelectedNode.Remove();
-            //    treeViewFolders.SelectedNode = parentNode;
-            //}
+            if (SelectItem(item) != null)
+            {
+                TreeNode parentNode = treeViewFolders.SelectedNode.Parent;
+                treeViewFolders.SelectedNode.Remove();
+                if(parentNode != null)
+                    treeViewFolders.SelectedNode = parentNode;
+            }
         }
-
 
         public void RefreshItem(FolderWithServiceRef item)
         {

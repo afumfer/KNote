@@ -14,12 +14,26 @@ namespace KNote.Repository.EntityFramework
     {
         #region Protected fields
 
-        protected KntDbContext _context;
-        protected bool _throwKntException;
-        protected string _strConn;
-        protected string _strProvider;
-
+        private readonly bool _throwKntException;
+        private readonly string _strConn;
+        private readonly string _strProvider;
+        
         #endregion
+
+        #region Properties
+
+        private KntDbContext _context;
+        protected KntDbContext Context
+        {
+            get 
+            {
+                if (_context == null)
+                    RefreshDbConnection();
+                return _context;
+            }            
+        }
+
+        #endregion 
 
         #region Constructors
 
@@ -27,9 +41,7 @@ namespace KNote.Repository.EntityFramework
         {
             _throwKntException = throwKntException;
             _strConn = strConn;
-            _strProvider = strProvider;
-
-            RefreshDbConnection();
+            _strProvider = strProvider;            
         }
 
         #endregion
@@ -43,8 +55,9 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_noteTypes == null)
-                    _noteTypes = new KntNoteTypeRepository(_context, _throwKntException);
+                    _noteTypes = new KntNoteTypeRepository(Context, _throwKntException);
                 return _noteTypes;
+                
             }
         }
 
@@ -54,7 +67,7 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_systemValues == null)
-                    _systemValues = new KntSystemValuesRepository(_context, _throwKntException);
+                    _systemValues = new KntSystemValuesRepository(Context, _throwKntException);
                 return _systemValues;
             }
         }
@@ -65,7 +78,7 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_folders == null)
-                    _folders = new KntFolderRepository(_context, _throwKntException);
+                    _folders = new KntFolderRepository(Context, _throwKntException);
                 return _folders;
             }
         }
@@ -76,7 +89,7 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_attributes == null)
-                    _attributes = new KntKAttributeRepository(_context, _throwKntException);
+                    _attributes = new KntKAttributeRepository(Context, _throwKntException);
                 return _attributes;
             }
         }
@@ -87,7 +100,7 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_notes == null)
-                    _notes = new KntNoteRepository(_context, _throwKntException);
+                    _notes = new KntNoteRepository(Context, _throwKntException);
                 return _notes;
             }
         }
@@ -98,23 +111,21 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_users == null)
-                    _users = new KntUserRepository(_context, _throwKntException);
+                    _users = new KntUserRepository(Context, _throwKntException);
                 return _users;
             }
         }
 
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!
+        public void ClearUnitOfWork()
+        {
+            Refresh();
+        }
 
-        //private IGenericRepositoryEF<KntDbContext, User> _users;
-        //public IGenericRepositoryEF<KntDbContext, User> Users
-        //{
-        //    get
-        //    {
-        //        if (_users == null)
-        //            _users = new GenericRepositoryEF<KntDbContext, User>(_context, _throwKntException);                
-        //        return _users;
-        //    }
-        //}
+        public void Refresh()
+        {
+            Dispose();
+            RefreshDbConnection();
+        }
 
         #region Pendiente ....
 
@@ -200,15 +211,22 @@ namespace KNote.Repository.EntityFramework
             //if (_traceNoteTypes != null)
             //    _traceNoteTypes.Dispose();
 
-            if (_context != null)
-                _context.Dispose();
+            _users = null;
+            _folders = null;
+            _notes = null;
+            _attributes = null;
+            _systemValues = null;
+            _noteTypes = null;
+
+            if (Context != null)
+                Context.Dispose();
         }
 
         #endregion
 
         #region  Private methods
 
-        public void RefreshDbConnection()
+        private void RefreshDbConnection()
         {
             var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
 
@@ -219,10 +237,10 @@ namespace KNote.Repository.EntityFramework
             else
                 throw new Exception("Data provider not suported (KntEx)");
 
-            _context = new KntDbContext(optionsBuilder.Options);
+            _context = new KntDbContext(optionsBuilder.Options);            
         }
 
-        #endregion 
+        #endregion
 
     }
 }

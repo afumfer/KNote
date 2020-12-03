@@ -84,7 +84,7 @@ namespace KNote.ClientWin
                 "Test db1 (SQL Server Prod - Dapper)",
                 @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
                 "Microsoft.Data.SqlClient",
-                "EntityFramework");  // Dapper
+                "Dapper");  // Dapper
             
             store.AddServiceRef(defaultServiceRef);
             var s1 = defaultServiceRef.Service;

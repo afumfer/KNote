@@ -152,8 +152,8 @@ namespace KNote.ClientWin.Core
         public abstract void RefreshItem(TEntity item);
         
         public abstract void AddItem(TEntity item);
-        public abstract void DeleteItem(TEntity item);
 
+        public abstract void DeleteItem(TEntity item);
 
         #endregion 
 
@@ -216,13 +216,13 @@ namespace KNote.ClientWin.Core
 
         #region Component virtual / abstract methods
 
-        public abstract Task<bool> LoadModelById(IKntService service, Guid noteId, bool refreshView = true);
+        public abstract Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true);
 
         public abstract void NewModel(IKntService service);
 
         public abstract Task<bool> SaveModel();
 
-        public abstract Task<bool> DeleteModel(IKntService service, Guid noteId);
+        public abstract Task<bool> DeleteModel(IKntService service, Guid id);
 
         public abstract Task<bool> DeleteModel();
 
@@ -264,13 +264,11 @@ namespace KNote.ClientWin.Core
         #endregion 
     }
 
-
     public enum EComponentResult
     {
-        None,
+        Null,
         Executed,
         Canceled,
         Error
     }
-
 }

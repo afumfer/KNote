@@ -51,14 +51,6 @@ namespace KNote.ClientWin.Core
             StateComponentChanged?.Invoke(this, new ComponentEventArgs<EComponentState>(state));
         }
         
-        //public event EventHandler<ComponentEventArgs<EComponentResult>> ComponentResultChanged;
-
-        //protected void OnComponentResultChanged(EComponentResult resutl)
-        //{
-        //    ComponentResult = resutl;
-        //    ComponentResultChanged?.Invoke(this, new ComponentEventArgs<EComponentResult>(resutl));
-        //}
-
         #endregion
 
         #region Constructor
