@@ -76,6 +76,19 @@ namespace KNote.Service.Services
 
             if (resGetEntity.IsValid)
             {
+                result.Entity = resGetEntity.Entity;
+
+                // Check rules
+                if (resGetEntity.Entity.ChildFolders.Count > 0)                
+                    result.AddErrorMessage("This folder has child folders. Delete is not possible.");
+                                                        
+                if ((await _repository.Notes.CountNotesInFolder(id)).Entity > 0)
+                    result.AddErrorMessage("This folder has notes. Delete is not possible.");
+
+                if(!result.IsValid)
+                    return result;
+
+                // Is OK then delete entity
                 var resDelEntity = await _repository.Folders.DeleteAsync(id);
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;

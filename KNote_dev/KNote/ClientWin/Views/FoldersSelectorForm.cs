@@ -51,7 +51,7 @@ namespace KNote.ClientWin.Views
         }
 
         public async void RefreshView()
-        {
+        {            
             TreeNode rootRepNode = null;
 
             treeViewFolders.Visible = false;

@@ -12,6 +12,8 @@ namespace KNote.Repository.EntityFramework
 {
     public class KntNoteRepository: DomainActionBase, IKntNoteRepository
     {
+        #region Private fields
+
         private IGenericRepositoryEF<KntDbContext, Note> _notes;
         private IGenericRepositoryEF<KntDbContext, NoteKAttribute> _noteKAttributes;
         private IGenericRepositoryEF<KntDbContext, Resource> _resources;
@@ -20,6 +22,10 @@ namespace KNote.Repository.EntityFramework
 
         private IKntFolderRepository _folders;
         private IKntKAttributeRepository _kattributes;
+
+        #endregion
+
+        #region Constructor
 
         public KntNoteRepository(KntDbContext context, bool throwKntException)
         {
@@ -35,6 +41,10 @@ namespace KNote.Repository.EntityFramework
             
             ThrowKntException = throwKntException;
         }
+
+        #endregion
+
+        #region IKntNoteRepository implementation
 
         public async Task<Result<List<NoteInfoDto>>> GetAllAsync()
         {
@@ -697,6 +707,23 @@ namespace KNote.Repository.EntityFramework
             throw new NotImplementedException();
         }
 
+        public async Task<Result<int>> CountNotesInFolder(Guid folderId)
+        {
+            Result<int> response = new Result<int>();
+
+            try
+            {
+                var count = await _notes.DbSet.CountAsync(_ => _.FolderId == folderId);
+                response.Entity = count;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
+        }
+
+        #endregion 
 
         #region  IDisposable
 

@@ -64,6 +64,11 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        public override void SelectItem(FolderWithServiceRef folder)
+        {
+            View.SelectItem(folder);
+        }
+
         public override void RefreshItem(FolderWithServiceRef item)
         {
             if (SelectedEntity.FolderInfo.FolderId == item.FolderInfo.FolderId)
@@ -75,13 +80,6 @@ namespace KNote.ClientWin.Components
                 // Refresh View
                 View.RefreshItem(SelectedEntity);
             }
-        }
-
-        public override void SelectItem(FolderWithServiceRef folder)
-        {
-            // TODO: !!! refresh model here ...
-            // ...
-            View.SelectItem(folder);            
         }
 
         public override void AddItem(FolderWithServiceRef item)

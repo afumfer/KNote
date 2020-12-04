@@ -56,10 +56,13 @@ namespace KNote.ClientWin.Components
                 Service = service;
                 Folder = folder;
 
+                Guid f;
                 if (Folder == null)
-                    return;
+                    f = Guid.Empty;                     
+                else 
+                    f = Folder.FolderId;
 
-                var response = await Service.Notes.GetByFolderAsync(Folder.FolderId);
+                var response = await Service.Notes.GetByFolderAsync(f);
 
                 if (response.IsValid)
                 {

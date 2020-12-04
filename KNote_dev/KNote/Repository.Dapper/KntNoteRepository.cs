@@ -876,8 +876,24 @@ namespace KNote.Repository.Dapper
             throw new NotImplementedException();
         }
 
-        #endregion
+        public async Task<Result<int>> CountNotesInFolder(Guid folderId)
+        {
+            var result = new Result<int>();
+            try
+            {
+                var sql = @"SELECT COUNT(*) FROM Notes WHERE FolderId = @folderId";
+                var countNotes = await _db.ExecuteScalarAsync<int>(sql.ToString(), new { folderId });                    
+                result.Entity = countNotes;
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
 
+
+        #endregion
 
         #region IDisposable
 
@@ -1027,6 +1043,7 @@ namespace KNote.Repository.Dapper
             }
             return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
         }
+
 
         #endregion
     }

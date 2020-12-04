@@ -99,9 +99,7 @@ namespace KNote.ClientWin.Components
         }
 
         #endregion 
-
-        //----------------------
-
+        
         #region Components included
 
         #region FoldersSelector component
@@ -206,7 +204,7 @@ namespace KNote.ClientWin.Components
 
         #endregion
 
-        #region Public methods
+        #region Component public methods
 
         public void ShowKntScriptConsole()
         {
@@ -270,7 +268,6 @@ namespace KNote.ClientWin.Components
             }
         }
 
-
         public async void EditFolder()
         {
             if(SelectedFolderInfo == null)
@@ -286,8 +283,7 @@ namespace KNote.ClientWin.Components
             {
                 SelectedFolderWithServiceRef.FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>();
                 FoldersSelectorComponent.RefreshItem(SelectedFolderWithServiceRef);
-            }
-            
+            }            
         }
 
         public async void DeleteFolder()
@@ -301,17 +297,18 @@ namespace KNote.ClientWin.Components
             var folderEditorComponent = new FolderEditorComponent(Store);
             var res = await folderEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);
             if (res)
-            {
-                //var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = SelectedFolderInfo };
+            {                
                 FoldersSelectorComponent.DeleteItem(SelectedFolderWithServiceRef);
             }
         }
 
         #endregion
 
+        #region Events handlers for extension components 
+
         private async void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
         {
-            // TODO: !!! coger aquí la entidad que viene en el parámetro en lugar de acudir de nuevo a la BD.           
+            // TODO: !!! coger aquí la entidad que viene en el parámetro en lugar de acudir de nuevo a la BD ??        
             if(NotesSelectorComponent.ListEntities.Count == 0)
                 await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
 
@@ -322,7 +319,7 @@ namespace KNote.ClientWin.Components
         {
             if(NoteEditorComponent.Model.Note.NoteId == e.Entity.Note.NoteId)
             {
-                // TODO: !!! coger el modelo que está en memoria en lugar de volver a cargar desde la BD.
+                // TODO: !!! coger el modelo que está en memoria en lugar de volver a cargar desde la BD ??
                 // NoteEditorComponent.RefreshNote(e.Entity);
                 // or ...
                 await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
@@ -342,9 +339,6 @@ namespace KNote.ClientWin.Components
             }
         }
 
-
-
-
-        //---------------------
+        #endregion 
     }
 }

@@ -34,6 +34,8 @@ namespace KNote.Repository
         Task<Result<ResourceDto>> UpdateMessageAsync(ResourceDto entity);
         Task<Result> DeleteMessageAsync(Guid resourceId);
 
+        Task<Result<int>> CountNotesInFolder(Guid folderId);
+
         //Task<Result<WindowDto>> SaveWindowAsync(WindowDto entityInfo);
         //Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entityInfo);
     }

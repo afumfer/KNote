@@ -50,6 +50,9 @@ namespace KNote.Repository.EntityFramework
                 resService.Entity.ParentFolderDto = new FolderDto();
                 resService.Entity.ParentFolderDto = resRep.Entity?.ParentFolder?.GetSimpleDto<FolderDto>();
 
+                var resultChilds = await GetTreeAsync(folderId);
+                resService.Entity.ChildFolders = resultChilds.Entity;
+
                 resService.ErrorList = resRep.ErrorList;
             }
             catch (Exception ex)
@@ -59,7 +62,7 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<List<FolderDto>>> GetTreeAsync()
+        public async Task<Result<List<FolderDto>>> GetTreeAsync(Guid? parentId = null)
         {
             var result = new Result<List<FolderDto>>();
 
@@ -71,7 +74,7 @@ namespace KNote.Repository.EntityFramework
 
                 var allFoldersInfo = allFolders.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
 
-                treeFolders = allFoldersInfo.Where(fi => fi.ParentId == null)
+                treeFolders = allFoldersInfo.Where(fi => fi.ParentId == parentId)
                     .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
 
                 foreach (FolderDto f in treeFolders)
@@ -193,7 +196,6 @@ namespace KNote.Repository.EntityFramework
                 AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
             return ResultDomainAction(response);
-
         }
 
         #region  IDisposable

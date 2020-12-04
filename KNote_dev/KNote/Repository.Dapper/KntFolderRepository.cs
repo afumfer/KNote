@@ -56,7 +56,7 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
-        public async Task<Result<List<FolderDto>>> GetTreeAsync()
+        public async Task<Result<List<FolderDto>>> GetTreeAsync(Guid? partenId = null)
         {            
             var result = new Result<List<FolderDto>>();
 
@@ -66,7 +66,7 @@ namespace KNote.Repository.Dapper
             {
                 var allFoldersInfo = (await GetAllAsync()).Entity;
 
-                treeFolders = allFoldersInfo.Where(fi => fi.ParentId == null)
+                treeFolders = allFoldersInfo.Where(fi => fi.ParentId == partenId)
                     .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
 
                 foreach (FolderDto f in treeFolders)
@@ -106,6 +106,9 @@ namespace KNote.Repository.Dapper
                 }
 
                 result.Entity = entity;
+
+                var resultChilds = await GetTreeAsync(id);
+                result.Entity.ChildFolders = resultChilds.Entity;                
             }
             catch (Exception ex)
             {
