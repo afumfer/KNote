@@ -24,6 +24,8 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        public string Path { get; set; }
+
         #endregion 
 
         #region Constructor
@@ -73,28 +75,20 @@ namespace KNote.ClientWin.Components
         {
             if (SelectedEntity.FolderInfo.FolderId == item.FolderInfo.FolderId)
             {
-                // Refresh Selected Folder
                 SelectedEntity.FolderInfo.SetSimpleDto(item.FolderInfo);
-                // TODO: !!! refresh model here ...
-                // ...
-                // Refresh View
                 View.RefreshItem(SelectedEntity);
             }
         }
 
         public override void AddItem(FolderWithServiceRef item)
         {
-            // TODO: !!! refresh model here ...
-            // ...
-
+            ListEntities.Add(item);
             View.AddItem(item);
         }
 
         public override void DeleteItem(FolderWithServiceRef item)
         {
-            // TODO: !!! refresh model here ...
-            // ...
-
+            ListEntities.Remove(item);
             View.DeleteItem(item);
         }
 

@@ -175,6 +175,7 @@ namespace KNote.ClientWin.Views
                 }
 
                 _com.SelectedEntity = v;
+                _com.Path = treeViewFolders.SelectedNode.FullPath;
                 _com.NotifySelectedEntity();                
             }
             catch (Exception)

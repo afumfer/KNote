@@ -40,6 +40,10 @@ namespace KNote.ClientWin.Components
             get { return _selectedNoteInfo; }
         }
 
+        public string FolderPath { get; set; }
+
+        public int? CountNotes { get; set; }
+
         #endregion 
 
         #region Constructor
@@ -130,18 +134,21 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        private void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        private async void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
             if (e.Entity == null)                            
                 return;
             
             SelectedFolderWithServiceRef = e.Entity;
+            FolderPath = FoldersSelectorComponent.Path;            
             
-            View.ShowInfo(null);            
-            _selectedNoteInfo = null;
+            _selectedNoteInfo = null;            
             NoteEditorComponent.View.CleanView();
-
-            NotesSelectorComponent.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
+            
+            await NotesSelectorComponent.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
+            CountNotes = NotesSelectorComponent.ListEntities?.Count;
+            
+            View.ShowInfo(null);
         }
 
         #endregion
@@ -178,7 +185,7 @@ namespace KNote.ClientWin.Components
         {
             if (e.Entity == null)
                 return;
-            _selectedNoteInfo = e.Entity;
+            _selectedNoteInfo = e.Entity;            
             await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
         }
 

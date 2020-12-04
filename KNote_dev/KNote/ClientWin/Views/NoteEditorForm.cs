@@ -61,7 +61,9 @@ namespace KNote.ClientWin.Views
         {
             // Basic data
             textTopic.Text = "";
+            textNoteNumber.Text = "";
             textFolder.Text = "";
+            textFolderNumber.Text = "";
             textTags.Text = "";
             textDescription.Text = "";
             textPriority.Text = "";
@@ -157,7 +159,9 @@ namespace KNote.ClientWin.Views
         {
             // Basic data
             textTopic.Text = _com.Model.Note.Topic;
+            textNoteNumber.Text = "#" + _com.Model.Note.NoteNumber.ToString();
             textFolder.Text = _com.Model.Note.FolderDto?.Name;
+            textFolderNumber.Text = "#" + _com.Model.Note.FolderDto.FolderNumber.ToString();
             textTags.Text = _com.Model.Note.Tags;
             textDescription.Text = _com.Model.Note.Description;
             textPriority.Text = _com.Model.Note.Priority.ToString();

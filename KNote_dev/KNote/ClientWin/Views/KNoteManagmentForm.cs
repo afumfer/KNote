@@ -60,9 +60,18 @@ namespace KNote.ClientWin.Views
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             if(info != null)
-                return MessageBox.Show(info);            
-            labelFolerName.Text = _com.SelectedFolderInfo?.Name;
-            labelFolderDetail.Text = $"{_com.SelectedServiceRef?.Alias} - [{_com.SelectedServiceRef?.Provider}]";
+                return MessageBox.Show(info);
+
+            if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
+                labelFolerName.Text = "(No folder selected)";
+            else
+                labelFolerName.Text = _com.SelectedFolderInfo?.Name;
+
+            labelFolderDetail.Text = $"{_com.FolderPath?.ToString()} ";
+
+            statusLabel1.Text = _com.CountNotes.ToString();
+            statusLabel2.Text = $" - [{_com.SelectedServiceRef?.Provider} - {_com.SelectedServiceRef?.Orm}]";
+
             return DialogResult.OK;
         }
 

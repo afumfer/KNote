@@ -49,7 +49,7 @@ namespace KNote.ClientWin.Components
             throw new NotImplementedException();
         }
 
-        public async void LoadEntities(IKntService service, FolderInfoDto folder)
+        public async Task<bool> LoadEntities(IKntService service, FolderInfoDto folder)
         {
             try
             {
@@ -78,12 +78,18 @@ namespace KNote.ClientWin.Components
                     NotifySelectedEntity();
                 }
                 else
+                {
                     View.ShowInfo(response.Message);
+                    return false;
+                }
             }
             catch (Exception ex)
             {
-                View.ShowInfo(ex.Message);                
+                View.ShowInfo(ex.Message);
+                return false;
             }
+
+            return true;
         }
 
         public override void SelectItem(NoteInfoDto item)

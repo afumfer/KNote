@@ -61,6 +61,7 @@ namespace KNote.ClientWin.Views
         public void CleanView()
         {
             textName.Text = "";
+            textNumber.Text = "";
             textTags.Text = "";
             textOrder.Text = "";
             textOrderNotes.Text = "";
@@ -135,10 +136,11 @@ namespace KNote.ClientWin.Views
         private void ModelToControls()
         {
             textName.Text = _com.Model.Name;
+            textNumber.Text = "#" + _com.Model.FolderNumber.ToString();
             textTags.Text = _com.Model.Tags;
             textOrder.Text = _com.Model.Order.ToString();
             textOrderNotes.Text = _com.Model.OrderNotes;
-            textParentFolder.Text = _com.Model.ParentFolderDto?.Name;
+            textParentFolder.Text = (_com.Model.ParentFolderDto?.Name == null) ? "(root)" : _com.Model.ParentFolderDto?.Name;
         }
 
         private void ControlsToModel()

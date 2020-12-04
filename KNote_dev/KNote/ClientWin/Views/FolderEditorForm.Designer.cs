@@ -115,11 +115,12 @@ namespace KNote.ClientWin.Views
             // textNumber
             // 
             this.textNumber.BackColor = System.Drawing.SystemColors.Control;
-            this.textNumber.Location = new System.Drawing.Point(448, 29);
+            this.textNumber.Location = new System.Drawing.Point(439, 29);
             this.textNumber.Name = "textNumber";
             this.textNumber.ReadOnly = true;
-            this.textNumber.Size = new System.Drawing.Size(40, 23);
+            this.textNumber.Size = new System.Drawing.Size(49, 23);
             this.textNumber.TabIndex = 5;
+            this.textNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textParentFolder
             // 
@@ -155,7 +156,7 @@ namespace KNote.ClientWin.Views
             // 
             this.textName.Location = new System.Drawing.Point(8, 29);
             this.textName.Name = "textName";
-            this.textName.Size = new System.Drawing.Size(441, 23);
+            this.textName.Size = new System.Drawing.Size(434, 23);
             this.textName.TabIndex = 0;
             // 
             // buttonAccept

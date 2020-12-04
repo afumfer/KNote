@@ -51,6 +51,8 @@
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabNoteData = new System.Windows.Forms.TabControl();
             this.tabBasicData = new System.Windows.Forms.TabPage();
+            this.textFolderNumber = new System.Windows.Forms.TextBox();
+            this.textNoteNumber = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.button22 = new System.Windows.Forms.Button();
             this.button23 = new System.Windows.Forms.Button();
@@ -322,6 +324,8 @@
             // 
             // tabBasicData
             // 
+            this.tabBasicData.Controls.Add(this.textFolderNumber);
+            this.tabBasicData.Controls.Add(this.textNoteNumber);
             this.tabBasicData.Controls.Add(this.label7);
             this.tabBasicData.Controls.Add(this.button22);
             this.tabBasicData.Controls.Add(this.button23);
@@ -345,6 +349,28 @@
             this.tabBasicData.TabIndex = 0;
             this.tabBasicData.Text = "Basic data  ";
             this.tabBasicData.UseVisualStyleBackColor = true;
+            // 
+            // textFolderNumber
+            // 
+            this.textFolderNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.textFolderNumber.BackColor = System.Drawing.SystemColors.Control;
+            this.textFolderNumber.Enabled = false;
+            this.textFolderNumber.Location = new System.Drawing.Point(702, 38);
+            this.textFolderNumber.Name = "textFolderNumber";
+            this.textFolderNumber.Size = new System.Drawing.Size(47, 23);
+            this.textFolderNumber.TabIndex = 52;
+            this.textFolderNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // textNoteNumber
+            // 
+            this.textNoteNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.textNoteNumber.BackColor = System.Drawing.SystemColors.Control;
+            this.textNoteNumber.Enabled = false;
+            this.textNoteNumber.Location = new System.Drawing.Point(702, 8);
+            this.textNoteNumber.Name = "textNoteNumber";
+            this.textNoteNumber.Size = new System.Drawing.Size(80, 23);
+            this.textNoteNumber.TabIndex = 51;
+            this.textNoteNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label7
             // 
@@ -426,7 +452,7 @@
             this.textFolder.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textFolder.MaxLength = 255;
             this.textFolder.Name = "textFolder";
-            this.textFolder.Size = new System.Drawing.Size(633, 23);
+            this.textFolder.Size = new System.Drawing.Size(589, 23);
             this.textFolder.TabIndex = 38;
             // 
             // textTopic
@@ -437,7 +463,7 @@
             this.textTopic.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textTopic.MaxLength = 255;
             this.textTopic.Name = "textTopic";
-            this.textTopic.Size = new System.Drawing.Size(665, 23);
+            this.textTopic.Size = new System.Drawing.Size(589, 23);
             this.textTopic.TabIndex = 37;
             // 
             // textDescription
@@ -459,12 +485,12 @@
             this.buttonSelCarpeta.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonSelCarpeta.BackColor = System.Drawing.SystemColors.Control;
             this.buttonSelCarpeta.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonSelCarpeta.Location = new System.Drawing.Point(757, 38);
+            this.buttonSelCarpeta.Location = new System.Drawing.Point(756, 38);
             this.buttonSelCarpeta.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonSelCarpeta.Name = "buttonSelCarpeta";
-            this.buttonSelCarpeta.Size = new System.Drawing.Size(26, 23);
+            this.buttonSelCarpeta.Size = new System.Drawing.Size(27, 23);
             this.buttonSelCarpeta.TabIndex = 39;
-            this.buttonSelCarpeta.Text = "..";
+            this.buttonSelCarpeta.Text = "...";
             this.buttonSelCarpeta.UseVisualStyleBackColor = false;
             // 
             // label3
@@ -1153,5 +1179,7 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.PictureBox picResource;
+        private System.Windows.Forms.TextBox textFolderNumber;
+        private System.Windows.Forms.TextBox textNoteNumber;
     }
 }
