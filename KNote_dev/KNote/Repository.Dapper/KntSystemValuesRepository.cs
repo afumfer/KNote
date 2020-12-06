@@ -15,14 +15,16 @@ namespace KNote.Repository.Dapper
 
     // TODO: Pendiente de probar
 
-    public class KntSystemValuesRepository : DomainActionBase, IKntSystemValuesRepository
+    public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepository
     {
-        protected DbConnection _db;
-
-        public KntSystemValuesRepository(DbConnection db, bool throwKntException)
+        
+        public KntSystemValuesRepository(DbConnection singletonConnection, bool throwKntException) : base(singletonConnection, throwKntException)
         {
-            _db = db;
-            ThrowKntException = throwKntException;
+        }
+
+        public KntSystemValuesRepository(string conn, string provider, bool throwKntException = false)
+             : base(conn, provider, throwKntException)
+        {
         }
 
         public async Task<Result<List<SystemValueDto>>> GetAllAsync()
@@ -30,10 +32,13 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<SystemValueDto>>();
             try
             {
-                var sql = @"SELECT SystemValueId, Scope, [Key], [Value] FROM [SystemValues] ORDER BY Scope, [Key];";
+                var db = GetOpenConnection();
 
-                var entity = await _db.QueryAsync<SystemValueDto>(sql.ToString(), new { });
+                var sql = @"SELECT SystemValueId, Scope, [Key], [Value] FROM [SystemValues] ORDER BY Scope, [Key];";
+                var entity = await db.QueryAsync<SystemValueDto>(sql.ToString(), new { });
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -47,15 +52,16 @@ namespace KNote.Repository.Dapper
             var result = new Result<SystemValueDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT  SystemValueId, Scope, [Key], [Value] FROM [SystemValues] 
                         WHERE Scope = @Scope and [Key] = @Key ";
-
-                var entity = await _db.QueryFirstOrDefaultAsync<SystemValueDto>(sql.ToString(), new { Scope = scope, Key = key });
-
+                var entity = await db.QueryFirstOrDefaultAsync<SystemValueDto>(sql.ToString(), new { Scope = scope, Key = key });
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
-
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -69,15 +75,16 @@ namespace KNote.Repository.Dapper
             var result = new Result<SystemValueDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT  SystemValueId, Scope, [Key], [Value] FROM [SystemValues] 
                         WHERE Id = @Id ";
-
-                var entity = await _db.QueryFirstOrDefaultAsync<SystemValueDto>(sql.ToString(), new { Id = id });
-
+                var entity = await db.QueryFirstOrDefaultAsync<SystemValueDto>(sql.ToString(), new { Id = id });
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
-
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -91,16 +98,17 @@ namespace KNote.Repository.Dapper
             var result = new Result<SystemValueDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"INSERT INTO SystemValues (SystemValueId, Scope, [Key], [Value])
                             VALUES (@SystemValueId, @Scope, @Key, @Value)";
-
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.SystemValueId, entity.Scope, entity.Key, entity.Value });
-
                 if (r == 0)
                     result.ErrorList.Add("Entity not inserted");
-
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -114,19 +122,20 @@ namespace KNote.Repository.Dapper
             var result = new Result<SystemValueDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"UPDATE SystemValues SET                     
                         Scope = @Scope, 
                         [Key] = @Key, 
                         [Value] = @Value
                     WHERE SystemValueId = @SystemValueId";
-
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.SystemValueId, entity.Scope, entity.Key, entity.Value });
-
                 if (r == 0)
                     result.ErrorList.Add("Entity not updated");
-
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -140,13 +149,14 @@ namespace KNote.Repository.Dapper
             var result = new Result();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"DELETE FROM SystemValues WHERE SystemValueId = @Id";
-
-                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
-
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
                 if (r == 0)
                     result.AddErrorMessage("Entity not deleted");
 
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -154,11 +164,5 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
-
-        public void Dispose()
-        {
-            //
-        }
-
     }
 }

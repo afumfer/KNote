@@ -33,8 +33,10 @@ namespace KNote.Repository.Dapper
             _strConn = strConn;
             _strProvider = strProvider;
 
-            RefreshDbConnection();
+            //RefreshDbConnection();
         }
+
+        // TODO: new constructor with DbConnection pending ....
 
         #endregion
 
@@ -46,7 +48,8 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_noteTypes == null)
-                    _noteTypes = new KntNoteTypeRepository(_db, _throwKntException);
+                    //_noteTypes = new KntNoteTypeRepository(_db, _throwKntException);
+                    _noteTypes = new KntNoteTypeRepository(_strConn, _strProvider, _throwKntException);
                 return _noteTypes;
             }
         }
@@ -57,7 +60,8 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_users == null)
-                    _users = new KntUserRepository(_db, _throwKntException);
+                    //_users = new KntUserRepository(_db, _throwKntException);
+                    _users = new KntUserRepository(_strConn, _strProvider, _throwKntException);
                 return _users;
             }
         }
@@ -68,7 +72,8 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_systemValues == null)
-                    _systemValues = new KntSystemValuesRepository(_db, _throwKntException);
+                    //_systemValues = new KntSystemValuesRepository(_db, _throwKntException);
+                    _systemValues = new KntSystemValuesRepository(_strConn, _strProvider, _throwKntException);
                 return _systemValues;
             }
         }
@@ -79,7 +84,8 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_folders == null)
-                    _folders = new KntFolderRepository(_db, _throwKntException);
+                    //_folders = new KntFolderRepository(_db, _throwKntException);
+                    _folders = new KntFolderRepository(_strConn, _strProvider, _throwKntException);
                 return _folders;
             }
         }
@@ -90,7 +96,8 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_kAttributes == null)
-                    _kAttributes = new KntKAttributeRepository(_db, _throwKntException);
+                    //_kAttributes = new KntKAttributeRepository(_db, _throwKntException);
+                    _kAttributes = new KntKAttributeRepository(_strConn, _strProvider, _throwKntException);
                 return _kAttributes;
             }
         }
@@ -101,20 +108,10 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_notes == null)
-                    _notes = new KntNoteRepository(_db, _throwKntException);
+                    //_notes = new KntNoteRepository(_db, _throwKntException);
+                    _notes = new KntNoteRepository(_strConn, _strProvider, _throwKntException);
                 return _notes;
             }
-        }
-
-        public void ClearUnitOfWork()
-        {
-            // Dapper is not necesary clear 
-        }
-
-        public void Refresh()
-        {
-            Dispose();
-            RefreshDbConnection();
         }
 
         #endregion

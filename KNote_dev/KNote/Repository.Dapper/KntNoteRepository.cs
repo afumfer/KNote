@@ -11,27 +11,25 @@ using KNote.Model.Dto;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
+using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
+using System.Data;
+
 namespace KNote.Repository.Dapper
 {
-    public class KntNoteRepository : DomainActionBase, IKntNoteRepository
+    public class KntNoteRepository : KntRepositoryBase, IKntNoteRepository
     {
-        #region Private members 
-
-        protected DbConnection _db;
-        private IKntFolderRepository _folders;
-        private IKntKAttributeRepository _kattributes;
-
-        #endregion 
-
         #region Constructor
 
-        public KntNoteRepository(DbConnection db, bool throwKntException)
+        public KntNoteRepository(DbConnection singletonConnection, bool throwKntException) : base(singletonConnection, throwKntException)
         {
-            _db = db;
-            ThrowKntException = throwKntException;
 
-            _folders = new KntFolderRepository(db, throwKntException);
-            _kattributes = new KntKAttributeRepository(db, throwKntException);
+        }
+
+        public KntNoteRepository(string conn, string provider, bool throwKntException = false)
+            : base(conn, provider, throwKntException)            
+        {          
+            
         }
 
         #endregion
@@ -40,12 +38,15 @@ namespace KNote.Repository.Dapper
 
         public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
         {
-            var idHomeFolder = (await _folders.GetHomeAsync()).Entity?.FolderId;
-
+            using var db = GetOpenConnection();
+            var folders = new KntFolderRepository(db);
+           
+            var idHomeFolder = (await folders.GetHomeAsync()).Entity?.FolderId;
+          
             if (idHomeFolder != null)
                 return await GetByFolderAsync((Guid)idHomeFolder);
             else
-                return null;
+                return null;            
         }
 
         public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
@@ -53,11 +54,14 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<NoteInfoDto>>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = GetSelectFilter();
                 sql += @" WHERE FolderId = @folderId ORDER BY [Priority], Topic ;";
-
-                var entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { folderId });
+                var entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { folderId });
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -71,11 +75,14 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<NoteInfoDto>>();
             try
             {
+                var db = GetOpenConnection();
                 var sql = GetSelectFilter();
                 sql += @" ORDER BY [Priority], Topic ;";
 
-                var entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
+                var entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -89,12 +96,14 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<NoteInfoDto>>();
             try
             {
+                var db = GetOpenConnection();
+
                 IEnumerable<NoteInfoDto> entity;
 
                 var sql = GetSelectFilter();
                 var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
 
-                result.CountColecEntity = GetCountFilter(sqlWhere);
+                result.CountColecEntity = GetCountFilter(db, sqlWhere);
 
                 sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
                 
@@ -103,19 +112,21 @@ namespace KNote.Repository.Dapper
                 if (pagination != null)
                 {                    
                     // Pagination SqlServer != SQlite
-                    if (_db.GetType().Name == "SqliteConnection")
+                    if (db.GetType().Name == "SqliteConnection")
                         sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
                     else
                         sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                    entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });                    
+                    entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });                    
                 }
                 else
                 {
-                    entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
+                    entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
                 }
                 
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -134,7 +145,9 @@ namespace KNote.Repository.Dapper
             IEnumerable<NoteInfoDto> entity;
 
             try
-            {                
+            {
+                var db = GetOpenConnection();
+
                 searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
                 sql = GetSelectSearch();
                 sqlWhere = "";                
@@ -196,17 +209,19 @@ namespace KNote.Repository.Dapper
 
                 sql = sql + sqlWhere + sqlOrder;
                                 
-                result.CountColecEntity = GetCountFilter(sqlWhere);
+                result.CountColecEntity = GetCountFilter(db, sqlWhere);
 
-                if (_db.GetType().Name == "SqliteConnection")
+                if (db.GetType().Name == "SqliteConnection")
                     sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
                 else
                     sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
                 var pagination = notesSearch.Pagination;
-                entity = await _db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
+                entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
 
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -220,6 +235,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<NoteDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT        
                     Notes.NoteId, Notes.NoteNumber, Notes.Topic, Notes.CreationDateTime, 
 	                Notes.ModificationDateTime, Notes.Description, Notes.ContentType, Notes.Script, 
@@ -238,7 +255,7 @@ namespace KNote.Repository.Dapper
                     
                     WHERE NoteId = @noteId ;";
                 
-                var entity = await _db.QueryAsync<NoteDto, FolderDto, NoteTypeDto, NoteDto>(
+                var entity = await db.QueryAsync<NoteDto, FolderDto, NoteTypeDto, NoteDto>(
                     sql.ToString(),
                     (note, folder, noteType) =>
                     {
@@ -267,25 +284,25 @@ namespace KNote.Repository.Dapper
 
                              WHERE NoteId = @noteId";
 
-                    var entityList = await _db.QueryAsync<NoteKAttributeDto>(sqlAtr.ToString(), new { noteId });
+                    var entityList = await db.QueryAsync<NoteKAttributeDto>(sqlAtr.ToString(), new { noteId });
 
                     var atrList = entityList.ToList();
 
                     // Complete Attributes list                                                
-                    atrList = await CompleteNoteAttributes(atrList, result.Entity.NoteId, result.Entity.NoteTypeId);
+                    atrList = await CompleteNoteAttributes(db, atrList, result.Entity.NoteId, result.Entity.NoteTypeId);
 
                     result.Entity.KAttributesDto = atrList;
                 }
                 else
                     result.AddErrorMessage("Entity not found.");
 
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
                 AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
             return ResultDomainAction(result);
-
         }
 
         public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
@@ -295,6 +312,8 @@ namespace KNote.Repository.Dapper
 
             try
             {
+                var db = GetOpenConnection();
+
                 newNote = new NoteDto();
                 if (entity != null)
                     newNote.SetSimpleDto(entity);
@@ -302,10 +321,12 @@ namespace KNote.Repository.Dapper
                 newNote.IsNew = true;
                 newNote.CreationDateTime = DateTime.Now;
                 newNote.ModificationDateTime = DateTime.Now;
-                newNote.KAttributesDto = new List<NoteKAttributeDto>();
-                newNote.KAttributesDto = await CompleteNoteAttributes(newNote.KAttributesDto, newNote.NoteId);
+                newNote.KAttributesDto = new List<NoteKAttributeDto>();                
+                newNote.KAttributesDto = await CompleteNoteAttributes(db, newNote.KAttributesDto, newNote.NoteId);
 
                 result.Entity = newNote;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -320,9 +341,11 @@ namespace KNote.Repository.Dapper
             var result = new Result<NoteDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 entity.CreationDateTime = DateTime.Now;
                 entity.ModificationDateTime = DateTime.Now;
-                entity.NoteNumber = GetNextNoteNumber();
+                entity.NoteNumber = GetNextNoteNumber(db);
 
                 var sql = @"INSERT INTO [Notes] 
                                 (NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime, 
@@ -332,7 +355,7 @@ namespace KNote.Repository.Dapper
                                 (@NoteId, @NoteNumber, @Topic, @CreationDateTime, @ModificationDateTime, 
                                 @Description, @ContentType, @Script, @InternalTags, @Tags, 
                                 @Priority, @FolderId, @NoteTypeId)";
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new
                     {
                         entity.NoteId,
@@ -365,7 +388,7 @@ namespace KNote.Repository.Dapper
                                 (NoteKAttributeId, NoteId, KAttributeId, [Value])
                           VALUES
                                 ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
-                    var rA = await _db.ExecuteAsync(sql.ToString(),
+                    var rA = await db.ExecuteAsync(sql.ToString(),
                         new
                         {
                             atr.NoteKAttributeId,
@@ -382,6 +405,8 @@ namespace KNote.Repository.Dapper
                 }
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -394,7 +419,9 @@ namespace KNote.Repository.Dapper
         {            
             var result = new Result<NoteDto>();
             try
-            {                
+            {
+                var db = GetOpenConnection();
+
                 entity.ModificationDateTime = DateTime.Now;
                 
                 var sql = @"UPDATE [Notes] SET 
@@ -412,7 +439,7 @@ namespace KNote.Repository.Dapper
                                 FolderId = @FolderId, 
                                 NoteTypeId = @NoteTypeId
                           WHERE NoteId = @NoteId";
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new
                     {
                         entity.NoteId, entity.NoteNumber, entity.Topic, entity.CreationDateTime, entity.ModificationDateTime,
@@ -446,7 +473,7 @@ namespace KNote.Repository.Dapper
                               WHERE NoteKAttributeId = @NoteKAttributeId";
                     }
 
-                    var rA = await _db.ExecuteAsync(sql.ToString(),
+                    var rA = await db.ExecuteAsync(sql.ToString(),
                         new
                         {
                             atr.NoteKAttributeId,
@@ -464,7 +491,7 @@ namespace KNote.Repository.Dapper
 
                 // Delete old attributes
                 sql = "SELECT NoteKAttributeId, NoteId, KAttributeId, [Value] FROM NoteKAttributes WHERE NoteId = @NoteId";
-                var allAtr = (await _db.QueryAsync<NoteKAttributeDto>(sql.ToString(), new { entity.NoteId })).ToList();
+                var allAtr = (await db.QueryAsync<NoteKAttributeDto>(sql.ToString(), new { entity.NoteId })).ToList();
 
                 foreach (var a in allAtr)
                 {
@@ -472,7 +499,7 @@ namespace KNote.Repository.Dapper
                     if (delAtr == null)
                     {
                         sql = @"DELETE [NoteKAttributes] WHERE NoteKAttributeId = @NoteKAttributeId";
-                        var rDel = await _db.ExecuteAsync(sql.ToString(), new { a.NoteKAttributeId });
+                        var rDel = await db.ExecuteAsync(sql.ToString(), new { a.NoteKAttributeId });
                         if (rDel == 0)
                         {
                             result.ErrorList.Add("Entity not deleted");
@@ -482,6 +509,8 @@ namespace KNote.Repository.Dapper
                 }
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -495,13 +524,16 @@ namespace KNote.Repository.Dapper
             var result = new Result();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"DELETE FROM Notes WHERE NoteId = @Id";
 
-                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
 
                 if (r == 0)
                     result.AddErrorMessage("Entity not deleted");
-
+                
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -515,14 +547,18 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<ResourceDto>>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT 
                         ResourceId, [Name], Container, [Description], [Order], FileType, ContentInDB, ContentArrayBytes, NoteId 
                     FROM Resources
                     WHERE NoteId = @idNote 
                     ORDER BY [Order];";
 
-                var entity = await _db.QueryAsync<ResourceDto>(sql.ToString(), new { idNote });
+                var entity = await db.QueryAsync<ResourceDto>(sql.ToString(), new { idNote });
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -536,17 +572,21 @@ namespace KNote.Repository.Dapper
             var result = new Result<ResourceDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT  ResourceId, [Name], Container, [Description], [Order], FileType, 
                                 ContentInDB, ContentArrayBytes, NoteId 
                         FROM Resources 
                         WHERE ResourceId = @Id";
 
-                var entity = await _db.QueryFirstOrDefaultAsync<ResourceDto>(sql.ToString(), new { Id = idNoteResource });
+                var entity = await db.QueryFirstOrDefaultAsync<ResourceDto>(sql.ToString(), new { Id = idNoteResource });
 
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -560,6 +600,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<ResourceDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 // TODO: pendiente, parametrizar esto. 
                 entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
@@ -570,7 +612,7 @@ namespace KNote.Repository.Dapper
                             VALUES (@ResourceId, @Name, @Container, @Description, @Order, 
                                 @FileType, @ContentInDB, @ContentArrayBytes, @NoteId)";
 
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.ResourceId, entity.Name, entity.Container, 
                         entity.Description, entity.Order, entity.FileType, 
                         entity.ContentInDB, entity.ContentArrayBytes, entity.NoteId });
@@ -579,6 +621,8 @@ namespace KNote.Repository.Dapper
                     result.ErrorList.Add("Entity not inserted");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -593,6 +637,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<ResourceDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 // TODO: pendiente, parametrizar esto. 
                 entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
@@ -608,7 +654,7 @@ namespace KNote.Repository.Dapper
                             NoteId = @NoteId
                     WHERE ResourceId = @ResourceId";
 
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new {
                         entity.ResourceId,
                         entity.Name,
@@ -625,6 +671,8 @@ namespace KNote.Repository.Dapper
                     result.ErrorList.Add("Entity not updated");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -638,12 +686,16 @@ namespace KNote.Repository.Dapper
             var result = new Result();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"DELETE FROM Resources WHERE ResourceId = @Id";
 
-                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
 
                 if (r == 0)
                     result.AddErrorMessage("Entity not deleted");
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -657,6 +709,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<NoteTaskDto>>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT
                          NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime, 
                          NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved, 
@@ -668,8 +722,10 @@ namespace KNote.Repository.Dapper
 
                     ORDER BY [CreationDateTime];";
 
-                var entity = await _db.QueryAsync<NoteTaskDto>(sql.ToString(), new { idNote });
+                var entity = await db.QueryAsync<NoteTaskDto>(sql.ToString(), new { idNote });
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -683,6 +739,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<NoteTaskDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT 
                         NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime, 
                         NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved, 
@@ -692,12 +750,14 @@ namespace KNote.Repository.Dapper
                         Users ON NoteTasks.UserId = Users.UserId 
                     WHERE NoteTaskId = @Id";
 
-                var entity = await _db.QueryFirstOrDefaultAsync<NoteTaskDto>(sql.ToString(), new { Id = idNoteTask });
+                var entity = await db.QueryFirstOrDefaultAsync<NoteTaskDto>(sql.ToString(), new { Id = idNoteTask });
 
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -712,6 +772,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<NoteTaskDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 entity.CreationDateTime = DateTime.Now;
                 entity.ModificationDateTime = DateTime.Now;
                 var sql = @"INSERT INTO [NoteTasks] 
@@ -724,7 +786,7 @@ namespace KNote.Repository.Dapper
                                 @DifficultyLevel, @ExpectedStartDate, @ExpectedEndDate, @StartDate, @EndDate
                                 )";
 
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new {
                         entity.NoteTaskId,
                         entity.NoteId,
@@ -748,6 +810,8 @@ namespace KNote.Repository.Dapper
                     result.ErrorList.Add("Entity not inserted");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -761,6 +825,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<NoteTaskDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 entity.ModificationDateTime = DateTime.Now;
 
                 var sql = @"UPDATE [NoteTasks] SET                     
@@ -781,7 +847,7 @@ namespace KNote.Repository.Dapper
                         EndDate = @EndDate
                     WHERE NoteTaskId = @NoteTaskId";
 
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new {
                         entity.NoteTaskId,
                         entity.NoteId,
@@ -805,6 +871,8 @@ namespace KNote.Repository.Dapper
                     result.ErrorList.Add("Entity not updated");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -818,12 +886,16 @@ namespace KNote.Repository.Dapper
             var result = new Result();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"DELETE FROM NoteTasks WHERE NoteTaskId = @Id";
 
-                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
 
-                if (r == 0)
+                if (r == 0)             
                     result.AddErrorMessage("Entity not deleted");
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -837,6 +909,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<KMessageDto>>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT                        
                         KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
                         KMessages.AlarmType, KMessages.Disabled, KMessages.[Content], KMessages.Forward, KMessages.AlarmOk, 
@@ -846,8 +920,10 @@ namespace KNote.Repository.Dapper
                     WHERE (KMessages.NoteId = @noteId)
                     -- ORDER BY [KMessages.AlarmDateTime];";
 
-                var entity = await _db.QueryAsync<KMessageDto>(sql.ToString(), new { noteId });
+                var entity = await db.QueryAsync<KMessageDto>(sql.ToString(), new { noteId });
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -881,9 +957,13 @@ namespace KNote.Repository.Dapper
             var result = new Result<int>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT COUNT(*) FROM Notes WHERE FolderId = @folderId";
-                var countNotes = await _db.ExecuteScalarAsync<int>(sql.ToString(), new { folderId });                    
+                var countNotes = await db.ExecuteScalarAsync<int>(sql.ToString(), new { folderId });                    
                 result.Entity = countNotes;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -895,35 +975,25 @@ namespace KNote.Repository.Dapper
 
         #endregion
 
-        #region IDisposable
-
-        public void Dispose()
-        {
-            // For clear private referencies
-        }
-
-        #endregion 
-
         #region Private methods
 
-        private int GetNextNoteNumber()
-        {            
+        private int GetNextNoteNumber(DbConnection db)
+        {
             var sql = "SELECT MAX(NoteNumber) FROM Notes";
-            var result = _db.ExecuteScalar<int>(sql);
-
-            //return (result == null) ? 1 : ((int)result) + 1;
+            var result = db.ExecuteScalar<int>(sql);
+            
             return result + 1;
         }
 
-        private long GetCountFilter(string filter)
-        {            
+        private long GetCountFilter(DbConnection db, string filter)
+        {
             var sql =
                 @"SELECT count(*) 
                 FROM 
                     Notes LEFT OUTER JOIN
                     NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId"
                 + filter;
-            var result = _db.ExecuteScalar(sql);
+            var result = db.ExecuteScalar(sql);
             
             return (result == null) ? 0 : Convert.ToInt64(result);
         }
@@ -1000,9 +1070,11 @@ namespace KNote.Repository.Dapper
             return str;
         }
 
-        private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+        private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(DbConnection conn, List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {
-            var attributes = (await _kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
+            //var kattributes = new KntKAttributeRepository(ConnectionString, Provider, ThrowKntException);
+            var kattributes = new KntKAttributeRepository(conn);
+            var attributes = (await kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
             
             if (attributes == null)
                 return null;
@@ -1044,7 +1116,7 @@ namespace KNote.Repository.Dapper
             return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
         }
 
-
         #endregion
+
     }
 }

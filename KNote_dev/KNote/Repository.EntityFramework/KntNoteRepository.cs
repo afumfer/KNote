@@ -23,6 +23,10 @@ namespace KNote.Repository.EntityFramework
         private IKntFolderRepository _folders;
         private IKntKAttributeRepository _kattributes;
 
+        string _strProvider;
+        string _strConn;
+
+
         #endregion
 
         #region Constructor
@@ -40,6 +44,12 @@ namespace KNote.Repository.EntityFramework
             _kattributes = new KntKAttributeRepository(context, throwKntException);
             
             ThrowKntException = throwKntException;
+        }
+
+        public KntNoteRepository(KntDbContext context, string strConn, string strProvider, bool throwKntException) : this (context, throwKntException)
+        {
+            _strProvider = strProvider;
+            _strConn = strConn;
         }
 
         #endregion
@@ -102,6 +112,27 @@ namespace KNote.Repository.EntityFramework
             }
             return ResultDomainAction(resService);
         }
+
+        //public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
+        //{
+        //    var resService = new Result<List<NoteInfoDto>>();
+        //    try
+        //    {
+        //        using(var ctx = GetDbContext())
+        //        {
+        //            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx, ThrowKntException);
+        //            var resRep = await notes.GetAllAsync(n => n.FolderId == folderId);
+        //            resService.Entity = resRep.Entity?.Select(n => n.GetSimpleDto<NoteInfoDto>()).ToList();
+        //            resService.ErrorList = resRep.ErrorList; ;
+
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //    }
+        //    return ResultDomainAction(resService);
+        //}
 
         public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
         {
@@ -864,5 +895,21 @@ namespace KNote.Repository.EntityFramework
         }
 
         #endregion
+
+        private KntDbContext GetDbContext()
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
+
+            if (_strProvider == "Microsoft.Data.SqlClient")
+                optionsBuilder.UseSqlServer(_strConn);
+            else if (_strProvider == "Microsoft.Data.Sqlite")
+                optionsBuilder.UseSqlite(_strConn);
+            else
+                throw new Exception("Data provider not suported (KntEx)");
+
+            return new KntDbContext(optionsBuilder.Options);
+        }
+
+
     }
 }

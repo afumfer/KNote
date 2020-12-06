@@ -56,14 +56,12 @@ namespace KNote.Service.Services
             if (entity.FolderId == Guid.Empty)
             {
                 entity.FolderId = Guid.NewGuid();
-                var res = await _repository.Folders.AddAsync(entity);
-                _repository.ClearUnitOfWork();
+                var res = await _repository.Folders.AddAsync(entity);                
                 return res;
             }
             else
             {
-                var res = await _repository.Folders.UpdateAsync(entity);
-                _repository.ClearUnitOfWork();
+                var res = await _repository.Folders.UpdateAsync(entity);                
                 return res;
             }
         }
@@ -99,8 +97,6 @@ namespace KNote.Service.Services
             {
                 result.ErrorList = resGetEntity.ErrorList;
             }
-
-            _repository.ClearUnitOfWork();
 
             return result;
         }

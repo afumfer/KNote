@@ -223,7 +223,7 @@ namespace KNote.ClientWin.Views
             await _noteEditor.LoadModelById(temp.ServiceRef.Service, e.Entity.NoteId);
         }
 
-        private void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        private async void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
             if (e.Entity == null)
             {
@@ -233,7 +233,7 @@ namespace KNote.ClientWin.Views
 
             labelInfo1.Text = $" {e.Entity.ServiceRef.Alias} - {e.Entity.FolderInfo?.Name}";
             if (_notesSelector != null)
-                _notesSelector.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
+                await _notesSelector.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
 
             temp = e.Entity;
         }

@@ -12,14 +12,15 @@ using KNote.Model.Dto;
 
 namespace KNote.Repository.Dapper
 {
-    public class KntUserRepository : DomainActionBase, IKntUserRepository
-    {
-        protected DbConnection _db;
-
-        public KntUserRepository(DbConnection db, bool throwKntException)
+    public class KntUserRepository : KntRepositoryBase, IKntUserRepository
+    {        
+        public KntUserRepository(DbConnection singletonConnection, bool throwKntException) : base(singletonConnection, throwKntException)
         {
-            _db = db;
-            ThrowKntException = throwKntException;
+        }
+
+        public KntUserRepository(string conn, string provider, bool throwKntException = false)
+            : base(conn, provider, throwKntException)
+        {
         }
 
         public async Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null)
@@ -27,25 +28,29 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<UserDto>>();
             try
             {
+                var db = GetOpenConnection();
+
                 IEnumerable<UserDto> entity;
 
                 var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users] ORDER BY UserName ";
 
                 if (pagination != null)
                 {
-                    if (_db.GetType().Name == "SqliteConnection")
+                    if (db.GetType().Name == "SqliteConnection")
                         sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
                     else                        
                         sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                    entity = await _db.QueryAsync<UserDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
+                    entity = await db.QueryAsync<UserDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
                 }
                 else
                 {
-                    entity = await _db.QueryAsync<UserDto>(sql.ToString(), new { });
+                    entity = await db.QueryAsync<UserDto>(sql.ToString(), new { });
                 }
                                                                         
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -60,8 +65,12 @@ namespace KNote.Repository.Dapper
 
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = "SELECT COUNT(*) FROM Users";
-                resService.Entity = await _db.ExecuteScalarAsync<int>(sql);
+                resService.Entity = await db.ExecuteScalarAsync<int>(sql);
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -76,15 +85,19 @@ namespace KNote.Repository.Dapper
             var result = new Result<UserDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]  
                         WHERE UserId = @Id";
 
-                var entity = await _db.QueryFirstOrDefaultAsync<UserDto>(sql.ToString(), new { Id = id });
+                var entity = await db.QueryFirstOrDefaultAsync<UserDto>(sql.ToString(), new { Id = id });
 
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -98,15 +111,19 @@ namespace KNote.Repository.Dapper
             var result = new Result<UserInternalDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled], [PasswordHash], [PasswordSalt] FROM [Users]  
                         WHERE UserName = @UserName";
 
-                var entity = await _db.QueryFirstOrDefaultAsync<UserInternalDto>(sql.ToString(), new { UserName = userName });
+                var entity = await db.QueryFirstOrDefaultAsync<UserInternalDto>(sql.ToString(), new { UserName = userName });
 
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -120,16 +137,20 @@ namespace KNote.Repository.Dapper
             var result = new Result<UserDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"INSERT INTO Users (UserId, UserName, EMail, FullName, RoleDefinition, Disabled )
                             VALUES (@UserId, @UserName, @EMail, @FullName, @RoleDefinition, @Disabled)";
 
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled });
 
                 if (r == 0)
                     result.ErrorList.Add("Entity not inserted");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -143,6 +164,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<UserDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"UPDATE Users SET 
                         UserName = @UserName, 
                         EMail = @EMail, 
@@ -151,13 +174,15 @@ namespace KNote.Repository.Dapper
                         Disabled = @Disabled
                     WHERE UserId = @UserId";
 
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled });
 
                 if (r == 0)
                     result.ErrorList.Add("Entity not updated");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -171,16 +196,20 @@ namespace KNote.Repository.Dapper
             var result = new Result<UserInternalDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"INSERT INTO Users (UserId, UserName, EMail, FullName, RoleDefinition, Disabled, PasswordHash, PasswordSalt )
                             VALUES (@UserId, @UserName, @EMail, @FullName, @RoleDefinition, @Disabled, @PasswordHash, @PasswordSalt)";
 
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled, entity.PasswordHash, entity.PasswordSalt });
 
                 if (r == 0)
                     result.ErrorList.Add("Entity not inserted");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -194,13 +223,16 @@ namespace KNote.Repository.Dapper
             var result = new Result();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"DELETE FROM Users WHERE UserId = @Id";
 
-                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
 
                 if (r == 0)
                     result.AddErrorMessage("Entity not deleted");
 
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -212,11 +244,6 @@ namespace KNote.Repository.Dapper
         public Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
         {
             throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            //
         }
 
     }

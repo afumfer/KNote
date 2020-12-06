@@ -78,7 +78,8 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_folders == null)
-                    _folders = new KntFolderRepository(Context, _throwKntException);
+                    //_folders = new KntFolderRepository(Context, _throwKntException);
+                    _folders = new KntFolderRepository(_strConn, _strProvider, _throwKntException);
                 return _folders;
             }
         }
@@ -101,6 +102,7 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_notes == null)
                     _notes = new KntNoteRepository(Context, _throwKntException);
+                    //_notes = new KntNoteRepository(Context, _strConn, _strProvider, _throwKntException);
                 return _notes;
             }
         }
@@ -114,17 +116,6 @@ namespace KNote.Repository.EntityFramework
                     _users = new KntUserRepository(Context, _throwKntException);
                 return _users;
             }
-        }
-
-        public void ClearUnitOfWork()
-        {
-            Refresh();
-        }
-
-        public void Refresh()
-        {
-            Dispose();
-            RefreshDbConnection();
         }
 
         #region Pendiente ....

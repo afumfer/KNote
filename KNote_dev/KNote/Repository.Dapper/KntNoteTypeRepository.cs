@@ -13,25 +13,31 @@ using KNote.Model.Dto;
 
 namespace KNote.Repository.Dapper
 {
-    public class KntNoteTypeRepository : DomainActionBase, IKntNoteTypeRepository
-    {
-        protected DbConnection _db;        
+    public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
+    {        
 
-        public KntNoteTypeRepository(DbConnection db, bool throwKntException)
+        public KntNoteTypeRepository(DbConnection singletonConnection, bool throwKntException) : base(singletonConnection, throwKntException)
         {
-            _db = db;
-            ThrowKntException = throwKntException;
         }
+
+        public KntNoteTypeRepository(string conn, string provider, bool throwKntException = false)
+             : base(conn, provider, throwKntException)
+        {
+        }
+
 
         public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
         {
             var result = new Result<List<NoteTypeDto>>();
             try
             {
-                var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM [NoteTypes] ORDER BY Name;";
+                var db = GetOpenConnection();
 
-                var entity = await _db.QueryAsync<NoteTypeDto>(sql.ToString(), new { });
+                var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM [NoteTypes] ORDER BY Name;";
+                var entity = await db.QueryAsync<NoteTypeDto>(sql.ToString(), new { });
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -45,15 +51,17 @@ namespace KNote.Repository.Dapper
             var result = new Result<NoteTypeDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM NoteTypes 
                         WHERE NoteTypeId = @Id";
-
-                var entity =  await _db.QueryFirstOrDefaultAsync<NoteTypeDto>(sql.ToString(), new { Id = id });
-
+                var entity =  await db.QueryFirstOrDefaultAsync<NoteTypeDto>(sql.ToString(), new { Id = id });
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -66,17 +74,19 @@ namespace KNote.Repository.Dapper
         {
             var result = new Result<NoteTypeDto>();
             try
-            {                
+            {
+                var db = GetOpenConnection();
+
                 var sql = @"INSERT INTO NoteTypes (NoteTypeId, Name, Description, ParenNoteTypeId)
                             VALUES (@NoteTypeId, @Name, @Description, @ParenNoteTypeId)";
-
-                var r = await _db.ExecuteAsync(sql.ToString(), 
+                var r = await db.ExecuteAsync(sql.ToString(), 
                     new { entity.NoteTypeId, entity.Name, entity.Description, entity.ParenNoteTypeId });
-
                 if (r == 0)                                   
                     result.ErrorList.Add("Entity not inserted");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -90,19 +100,20 @@ namespace KNote.Repository.Dapper
             var result = new Result<NoteTypeDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"UPDATE NoteTypes SET                     
                        Name = @Name
                       , Description = @Description
                       , ParenNoteTypeId = @ParenNoteTypeId
-                    WHERE NoteTypeId = @NoteTypeId";
-                
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                    WHERE NoteTypeId = @NoteTypeId";                
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.NoteTypeId, entity.Name, entity.Description, entity.ParenNoteTypeId });
-
                 if (r == 0)
                     result.ErrorList.Add("Entity not updated");
-
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -116,12 +127,14 @@ namespace KNote.Repository.Dapper
             var result = new Result();
             try
             {
-                var sql = @"DELETE FROM NoteTypes WHERE NoteTypeId = @Id";
+                var db = GetOpenConnection();
 
-                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
-                                
+                var sql = @"DELETE FROM NoteTypes WHERE NoteTypeId = @Id";
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });                                
                 if (r == 0)                
-                    result.AddErrorMessage("Entity not deleted");                                    
+                    result.AddErrorMessage("Entity not deleted");
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -129,11 +142,5 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
-
-        public void Dispose()
-        {
-            //
-        }
-
     }
 }

@@ -13,11 +13,6 @@ namespace KNote.Repository
         IKntFolderRepository Folders { get; }
         IKntKAttributeRepository KAttributes { get; }
         IKntNoteRepository Notes { get; }              
-        IKntUserRepository Users { get; }
-              
-        //void RefreshDbConnection();
-        void ClearUnitOfWork();
-
-        void Refresh();
+        IKntUserRepository Users { get; }              
     }
 }

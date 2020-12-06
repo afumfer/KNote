@@ -12,14 +12,15 @@ using KNote.Model.Dto;
 
 namespace KNote.Repository.Dapper
 {
-    public class KntKAttributeRepository : DomainActionBase, IKntKAttributeRepository
-    {
-        protected DbConnection _db;
-
-        public KntKAttributeRepository(DbConnection db, bool throwKntException)
+    public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeRepository
+    {        
+        public KntKAttributeRepository(DbConnection singletonConnection, bool throwKntException = false): base(singletonConnection, throwKntException)
         {
-            _db = db;
-            ThrowKntException = throwKntException;
+        }
+
+        public KntKAttributeRepository(string conn, string provider, bool throwKntException = false)
+             : base(conn, provider, throwKntException)
+        {
         }
 
         public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
@@ -42,6 +43,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<KAttributeDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT
                     KA.KAttributeId, 
 	                KA.Name, 
@@ -74,7 +77,7 @@ namespace KNote.Repository.Dapper
 
                 var atrDictionary = new Dictionary<Guid, KAttributeDto>();
 
-                var entity = await _db.QueryAsync<KAttributeDto, NoteTypeDto, KAttributeTabulatedValueDto, KAttributeDto>(
+                var entity = await db.QueryAsync<KAttributeDto, NoteTypeDto, KAttributeTabulatedValueDto, KAttributeDto>(
                     sql.ToString(),
                     (kAttribute, noteType, kAttributeTabulatedValueDto) =>
                     {
@@ -95,6 +98,8 @@ namespace KNote.Repository.Dapper
                     );
 
                 result.Entity = entity.ToList().FirstOrDefault<KAttributeDto>();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -108,10 +113,12 @@ namespace KNote.Repository.Dapper
             var result = new Result<KAttributeDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"INSERT INTO KAttributes  (KAttributeId, [Name], Description, KAttributeDataType, RequiredValue, [Order], Script, Disabled, NoteTypeId)
                             VALUES (@KAttributeId, @Name, @Description, @KAttributeDataType, @RequiredValue, @Order, @Script, @Disabled, @NoteTypeId)";
 
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
                 if (r == 0)
                     result.ErrorList.Add("Entity not inserted");
@@ -121,6 +128,8 @@ namespace KNote.Repository.Dapper
                     CopyErrorList(resTabValues.ErrorList, result.ErrorList);
                 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -134,6 +143,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<KAttributeDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"UPDATE KAttributes SET                     
                         [Name] = @Name, 
                         Description = @Description, 
@@ -144,10 +155,8 @@ namespace KNote.Repository.Dapper
                         Disabled = @Disabled, 
                         NoteTypeId = @NoteTypeId
                     WHERE KAttributeId = @KAttributeId";
-
-                var r = await _db.ExecuteAsync(sql.ToString(),
+                var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
-
                 if (r == 0)
                     result.ErrorList.Add("Entity not updated");
 
@@ -156,6 +165,8 @@ namespace KNote.Repository.Dapper
                     CopyErrorList(resTabValues.ErrorList, result.ErrorList);
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -169,13 +180,14 @@ namespace KNote.Repository.Dapper
             var result = new Result();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"DELETE FROM KAttributes WHERE KAttributeId = @Id";
-
-                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
-
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
                 if (r == 0)
                     result.AddErrorMessage("Entity not deleted");
 
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -189,12 +201,15 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<KAttributeTabulatedValueDto>>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order] 
                             FROM [KAttributeTabulatedValues]
                             WHERE KAttributeId = @AttributeId ORDER BY [Order], [Description]";
-
-                var entity = await _db.QueryAsync<KAttributeTabulatedValueDto>(sql.ToString(), new { AttributeId = attributeId });
+                var entity = await db.QueryAsync<KAttributeTabulatedValueDto>(sql.ToString(), new { AttributeId = attributeId });
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -208,15 +223,19 @@ namespace KNote.Repository.Dapper
             var result = new Result<KAttributeTabulatedValueDto>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order] FROM [KAttributeTabulatedValues] 
                         WHERE KAttributeTabulatedValueId = @Id";
 
-                var entity = await _db.QueryFirstOrDefaultAsync<KAttributeTabulatedValueDto>(sql.ToString(), new { Id = attributeTabulateValueId });
+                var entity = await db.QueryFirstOrDefaultAsync<KAttributeTabulatedValueDto>(sql.ToString(), new { Id = attributeTabulateValueId });
 
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
 
                 result.Entity = entity;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -230,23 +249,20 @@ namespace KNote.Repository.Dapper
             var result = new Result();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"DELETE FROM [KAttributeTabulatedValues] WHERE KAttributeTabulatedValueId = @Id";
-
-                var r = await _db.ExecuteAsync(sql.ToString(), new { Id = id });
-
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
                 if (r == 0)
                     result.AddErrorMessage("Entity not deleted");
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
                 AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
             return ResultDomainAction(result);
-        }
-
-        public void Dispose()
-        {
-            
         }
 
         #region Private methods
@@ -256,6 +272,8 @@ namespace KNote.Repository.Dapper
             var result = new Result<List<KAttributeInfoDto>>();
             try
             {
+                var db = GetOpenConnection();
+
                 var sql = @"SELECT        
 	                        KA.KAttributeId, 
 	                        KA.Name, 
@@ -283,7 +301,7 @@ namespace KNote.Repository.Dapper
 
                 sql += " ORDER BY NT.Name, [Order], KA.Name";
 
-                var entity = await _db.QueryAsync<KAttributeInfoDto, NoteTypeDto, KAttributeInfoDto>(
+                var entity = await db.QueryAsync<KAttributeInfoDto, NoteTypeDto, KAttributeInfoDto>(
                     sql.ToString(),
                     (kAttribute, noteType) =>
                     {
@@ -295,6 +313,8 @@ namespace KNote.Repository.Dapper
                     );
 
                 result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -310,7 +330,9 @@ namespace KNote.Repository.Dapper
             int r = 0;
             try
             {
-                foreach(var tv in tabulatedValues)
+                var db = GetOpenConnection();
+
+                foreach (var tv in tabulatedValues)
                 {
                     if (tv != null)
                     {
@@ -332,7 +354,7 @@ namespace KNote.Repository.Dapper
                                     WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
                         }
 
-                        r = await _db.ExecuteAsync(sql.ToString(),
+                        r = await db.ExecuteAsync(sql.ToString(),
                             new { tv.KAttributeTabulatedValueId, tv.KAttributeId, tv.Value, tv.Description, tv.Order });
 
                         if (r == 0)
@@ -341,6 +363,8 @@ namespace KNote.Repository.Dapper
                 }
                               
                 result.Entity = tabulatedValues;
+
+                await CloseIsTempConnection(db);
             }
             catch (Exception ex)
             {
@@ -350,6 +374,5 @@ namespace KNote.Repository.Dapper
         }
 
         #endregion
-
     }
 }
