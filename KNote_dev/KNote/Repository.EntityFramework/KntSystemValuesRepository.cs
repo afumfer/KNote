@@ -9,17 +9,19 @@ using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework
 {
-
     // TODO: Pendiente de probar
 
-    public class KntSystemValuesRepository : DomainActionBase, IKntSystemValuesRepository
-    {
-        private IGenericRepositoryEF<KntDbContext, SystemValue> _systemValues;
+    public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepository
+    {        
 
-        public KntSystemValuesRepository(KntDbContext context, bool throwKntException)
+        public KntSystemValuesRepository(KntDbContext singletonContext, bool throwKntException)
+            : base(singletonContext, throwKntException)
         {
-            _systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(context, throwKntException);
-            ThrowKntException = throwKntException;
+        }
+
+        public KntSystemValuesRepository(string conn, string provider, bool throwKntException = false)
+            : base(conn, provider, throwKntException)
+        {
         }
 
         public async Task<Result<List<SystemValueDto>>> GetAllAsync()
@@ -27,9 +29,14 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<List<SystemValueDto>>();
             try
             {
-                var resRep = await _systemValues.GetAllAsync();
+                var ctx = GetOpenConnection();
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+
+                var resRep = await systemValues.GetAllAsync();
                 resService.Entity = resRep.Entity?.Select(sv => sv.GetSimpleDto<SystemValueDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -43,9 +50,14 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<SystemValueDto>();
             try
             {
-                var resRep = await _systemValues.GetAsync(sv => sv.Scope == scope && sv.Key == key);
+                var ctx = GetOpenConnection();
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+
+                var resRep = await systemValues.GetAsync(sv => sv.Scope == scope && sv.Key == key);
                 resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
                 resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -59,9 +71,14 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<SystemValueDto>();
             try
             {
-                var resRep = await _systemValues.GetAsync((object)id);
+                var ctx = GetOpenConnection();
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+
+                var resRep = await systemValues.GetAsync((object)id);
                 resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
                 resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -75,13 +92,18 @@ namespace KNote.Repository.EntityFramework
             var response = new Result<SystemValueDto>();
             try
             {
+                var ctx = GetOpenConnection();
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+
                 var newEntity = new SystemValue();
                 newEntity.SetSimpleDto(entity);
 
-                var resGenRep = await _systemValues.AddAsync(newEntity);
+                var resGenRep = await systemValues.AddAsync(newEntity);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -97,24 +119,27 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
+                var ctx = GetOpenConnection();
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+
                 bool flagThrowKntException = false;
-                if (_systemValues.ThrowKntException == true)
+                if (systemValues.ThrowKntException == true)
                 {
                     flagThrowKntException = true;
-                    _systemValues.ThrowKntException = false;
+                    systemValues.ThrowKntException = false;
                 }
 
-                var resGenRepGet = await _systemValues.GetAsync(entity.SystemValueId);
+                var resGenRepGet = await systemValues.GetAsync(entity.SystemValueId);
                 SystemValue entityForUpdate;
 
                 if (flagThrowKntException == true)
-                    _systemValues.ThrowKntException = true;
+                    systemValues.ThrowKntException = true;
 
                 if (resGenRepGet.IsValid)
                 {
                     entityForUpdate = resGenRepGet.Entity;
                     entityForUpdate.SetSimpleDto(entity);
-                    resGenRep = await _systemValues.UpdateAsync(entityForUpdate);
+                    resGenRep = await systemValues.UpdateAsync(entityForUpdate);
                 }
                 else
                 {
@@ -124,6 +149,8 @@ namespace KNote.Repository.EntityFramework
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -138,9 +165,14 @@ namespace KNote.Repository.EntityFramework
             var response = new Result();
             try
             {
-                var resGenRep = await _systemValues.DeleteAsync(id);
+                var ctx = GetOpenConnection();
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+
+                var resGenRep = await systemValues.DeleteAsync(id);
                 if (!resGenRep.IsValid)
                     response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -149,14 +181,5 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(response);
 
         }
-
-        #region  IDisposable
-
-        public virtual void Dispose()
-        {
-            _systemValues.Dispose();
-        }
-
-        #endregion
     }
 }

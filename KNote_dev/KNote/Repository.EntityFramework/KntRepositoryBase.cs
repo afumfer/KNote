@@ -20,15 +20,6 @@ namespace KNote.Repository.EntityFramework
         protected readonly string Provider;
         protected readonly KntDbContext SingletonConnection;
 
-        protected IGenericRepositoryEF<KntDbContext, Folder> Folders
-        {
-            get
-            {
-                var ctx = GetOpenConnection();
-                return new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
-            }
-        }
-
         public KntRepositoryBase(KntDbContext singletonConnection, bool throwKntException = false)
         {
             SingletonConnection = singletonConnection;

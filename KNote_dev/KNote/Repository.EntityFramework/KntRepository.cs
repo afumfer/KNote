@@ -55,7 +55,8 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_noteTypes == null)
-                    _noteTypes = new KntNoteTypeRepository(Context, _throwKntException);
+                    //_noteTypes = new KntNoteTypeRepository(Context, _throwKntException);
+                    _noteTypes = new KntNoteTypeRepository(_strConn, _strProvider, _throwKntException);
                 return _noteTypes;
                 
             }
@@ -67,7 +68,8 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_systemValues == null)
-                    _systemValues = new KntSystemValuesRepository(Context, _throwKntException);
+                    //_systemValues = new KntSystemValuesRepository(Context, _throwKntException);
+                    _systemValues = new KntSystemValuesRepository(_strConn, _strProvider, _throwKntException);
                 return _systemValues;
             }
         }
@@ -90,7 +92,8 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_attributes == null)
-                    _attributes = new KntKAttributeRepository(Context, _throwKntException);
+                    //_attributes = new KntKAttributeRepository(Context, _throwKntException);
+                    _attributes = new KntKAttributeRepository(_strConn, _strProvider, _throwKntException);
                 return _attributes;
             }
         }
@@ -101,8 +104,8 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_notes == null)
-                    _notes = new KntNoteRepository(Context, _throwKntException);
-                    //_notes = new KntNoteRepository(Context, _strConn, _strProvider, _throwKntException);
+                    //_notes = new KntNoteRepository(Context, _throwKntException);
+                    _notes = new KntNoteRepository(_strConn, _strProvider, _throwKntException);
                 return _notes;
             }
         }
@@ -113,7 +116,8 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_users == null)
-                    _users = new KntUserRepository(Context, _throwKntException);
+                    //_users = new KntUserRepository(Context, _throwKntException);
+                    _users = new KntUserRepository(_strConn, _strProvider, _throwKntException);
                 return _users;
             }
         }

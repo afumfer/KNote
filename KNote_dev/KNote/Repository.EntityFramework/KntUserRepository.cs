@@ -10,25 +10,30 @@ using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework
 {
-    public class KntUserRepository : DomainActionBase, IKntUserRepository
+    public class KntUserRepository : KntRepositoryBase, IKntUserRepository
     {
-        private IGenericRepositoryEF<KntDbContext, User> _users;
-
-        public KntUserRepository(KntDbContext context, bool throwKntException)
+        public KntUserRepository(KntDbContext singletonContext, bool throwKntException)
+            : base(singletonContext, throwKntException)
         {
-            _users = new GenericRepositoryEF<KntDbContext, User>(context, throwKntException);
-            ThrowKntException = throwKntException;
         }
 
+        public KntUserRepository(string conn, string provider, bool throwKntException = false)
+            : base(conn, provider, throwKntException)
+        {
+        }
 
         public async Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null)
         {
             var resService = new Result<List<UserDto>>();
             try
             {
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
                 if (pagination != null)
                 {
-                    var query = _users.Queryable
+
+                    var query = users.Queryable
                         .OrderBy(u => u.UserName)
                         .Pagination(pagination);
                     resService.Entity = await query
@@ -37,13 +42,14 @@ namespace KNote.Repository.EntityFramework
                 }
                 else
                 {
-                    var query = _users.Queryable
+                    var query = users.Queryable
                         .OrderBy(u => u.UserName);
                     resService.Entity = await query
                         .Select(u => u.GetSimpleDto<UserDto>())
                         .ToListAsync();
                 }
 
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -57,7 +63,12 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<int>();
             try
             {
-                resService.Entity = await _users.Queryable.CountAsync();
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
+                resService.Entity = await users.Queryable.CountAsync();
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -72,11 +83,16 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<UserDto>();
             try
             {
-                var resRep = await _users.GetAsync((object)userId);
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
+                var resRep = await users.GetAsync((object)userId);
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
 
                 resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -90,11 +106,16 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<UserInternalDto>();
             try
             {
-                var resRep = await _users.GetAsync(u => u.UserName == userName);
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
+                var resRep = await users.GetAsync(u => u.UserName == userName);
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserInternalDto>();
 
                 resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -108,13 +129,18 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<UserInternalDto>();
             try
             {
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
                 var newEntity = entity.GetSimpleDto<User>();
 
-                var resRep = await _users.AddAsync(newEntity);
+                var resRep = await users.AddAsync(newEntity);
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserInternalDto>();
 
                 resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -128,13 +154,18 @@ namespace KNote.Repository.EntityFramework
             var response = new Result<UserDto>();
             try
             {
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
                 var newEntity = new User();
                 newEntity.SetSimpleDto(entity);
 
-                var resGenRep = await _users.AddAsync(newEntity);
+                var resGenRep = await users.AddAsync(newEntity);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -150,24 +181,27 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
                 bool flagThrowKntException = false;
-                if (_users.ThrowKntException == true)
+                if (users.ThrowKntException == true)
                 {
                     flagThrowKntException = true;
-                    _users.ThrowKntException = false;
+                    users.ThrowKntException = false;
                 }
 
-                var resGenRepGet = await _users.GetAsync(entity.UserId);
+                var resGenRepGet = await users.GetAsync(entity.UserId);
                 User entityForUpdate;
 
                 if (flagThrowKntException == true)
-                    _users.ThrowKntException = true;
+                    users.ThrowKntException = true;
 
                 if (resGenRepGet.IsValid)
                 {
                     entityForUpdate = resGenRepGet.Entity;
                     entityForUpdate.SetSimpleDto(entity);
-                    resGenRep = await _users.UpdateAsync(entityForUpdate);
+                    resGenRep = await users.UpdateAsync(entityForUpdate);
                 }
                 else
                 {
@@ -177,6 +211,8 @@ namespace KNote.Repository.EntityFramework
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -191,9 +227,14 @@ namespace KNote.Repository.EntityFramework
             var response = new Result();
             try
             {
-                var resGenRep = await _users.DeleteAsync(id);
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
+                var resGenRep = await users.DeleteAsync(id);
                 if (!resGenRep.IsValid)
                     response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -206,14 +247,5 @@ namespace KNote.Repository.EntityFramework
         {
             throw new NotImplementedException();
         }
-
-        #region  IDisposable
-
-        public virtual void Dispose()
-        {
-            _users.Dispose();
-        }
-
-        #endregion
     }
 }

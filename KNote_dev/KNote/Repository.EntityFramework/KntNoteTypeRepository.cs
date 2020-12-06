@@ -9,14 +9,16 @@ using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework
 {
-    public class KntNoteTypeRepository : DomainActionBase, IKntNoteTypeRepository
+    public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
     {
-        private IGenericRepositoryEF<KntDbContext, NoteType> _noteTypes;
-        
-        public KntNoteTypeRepository(KntDbContext context, bool throwKntException) 
-        {        
-            _noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(context, throwKntException);
-            ThrowKntException = throwKntException;
+        public KntNoteTypeRepository(KntDbContext singletonContext, bool throwKntException)
+            : base(singletonContext, throwKntException)
+        {
+        }
+
+        public KntNoteTypeRepository(string conn, string provider, bool throwKntException = false)
+            : base(conn, provider, throwKntException)
+        {
         }
 
         public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
@@ -24,12 +26,17 @@ namespace KNote.Repository.EntityFramework
             var response = new Result<List<NoteTypeDto>>();
             try
             {
-                var resGenRep = await _noteTypes.GetAllAsync();
+                var ctx = GetOpenConnection();
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+                
+                var resGenRep = await noteTypes.GetAllAsync();
                 response.Entity = resGenRep.Entity?
                     .Select(t => t.GetSimpleDto<NoteTypeDto>())
                     .OrderBy(t => t.Name)
                     .ToList();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -43,10 +50,15 @@ namespace KNote.Repository.EntityFramework
             var response = new Result<NoteTypeDto>();
             try
             {
-                var resGenRep = await _noteTypes.GetAsync((object)id);
+                var ctx = GetOpenConnection();
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+
+                var resGenRep = await noteTypes.GetAsync((object)id);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<NoteTypeDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -59,14 +71,19 @@ namespace KNote.Repository.EntityFramework
         {
             var response = new Result<NoteTypeDto>();
             try
-            {                
+            {
+                var ctx = GetOpenConnection();
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+
                 var newEntity = new NoteType();
                 newEntity.SetSimpleDto(entity);
 
-                var resGenRep = await _noteTypes.AddAsync(newEntity);
+                var resGenRep = await noteTypes.AddAsync(newEntity);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<NoteTypeDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -82,24 +99,27 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
+                var ctx = GetOpenConnection();
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+
                 bool flagThrowKntException = false;
-                if (_noteTypes.ThrowKntException == true)
+                if (noteTypes.ThrowKntException == true)
                 {
                     flagThrowKntException = true;
-                    _noteTypes.ThrowKntException = false;
+                    noteTypes.ThrowKntException = false;
                 }
 
-                var resGenRepGet = await _noteTypes.GetAsync(entity.NoteTypeId) ;
+                var resGenRepGet = await noteTypes.GetAsync(entity.NoteTypeId) ;
                 NoteType entityForUpdate;
 
                 if (flagThrowKntException == true)
-                    _noteTypes.ThrowKntException = true;
+                    noteTypes.ThrowKntException = true;
 
                 if (resGenRepGet.IsValid)
                 {
                     entityForUpdate = resGenRepGet.Entity;
                     entityForUpdate.SetSimpleDto(entity);
-                    resGenRep = await _noteTypes.UpdateAsync(entityForUpdate);
+                    resGenRep = await noteTypes.UpdateAsync(entityForUpdate);
                 }
                 else
                 {
@@ -109,6 +129,8 @@ namespace KNote.Repository.EntityFramework
                 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<NoteTypeDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -123,9 +145,14 @@ namespace KNote.Repository.EntityFramework
             var response = new Result();
             try
             {
-                var resGenRep = await _noteTypes.DeleteAsync(id);
+                var ctx = GetOpenConnection();
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+
+                var resGenRep = await noteTypes.DeleteAsync(id);
                 if (!resGenRep.IsValid)
                     response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -133,14 +160,5 @@ namespace KNote.Repository.EntityFramework
             }
             return ResultDomainAction(response);
         }
-
-        #region  IDisposable
-
-        public virtual void Dispose()
-        {
-            _noteTypes.Dispose();
-        }
-
-        #endregion
     }
 }

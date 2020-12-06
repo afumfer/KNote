@@ -28,9 +28,14 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<List<FolderDto>>();
             try
             {
-                var resRep = await Folders.GetAllAsync();
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException) ;
+
+                var resRep = await folders.GetAllAsync();
                 resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -44,9 +49,12 @@ namespace KNote.Repository.EntityFramework
             var resService = new Result<FolderDto>();
             try
             {
-                var resRep = await Folders.GetAsync((object)folderId);
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+
+                var resRep = await folders.GetAsync((object)folderId);
                 // KNote template ... load here aditionals properties for FolderDto
-                resRep = Folders.LoadReference(resRep.Entity, n => n.ParentFolder);
+                resRep = folders.LoadReference(resRep.Entity, n => n.ParentFolder);
 
                 // Map to dto
                 resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
@@ -57,6 +65,8 @@ namespace KNote.Repository.EntityFramework
                 resService.Entity.ChildFolders = resultChilds.Entity;
 
                 resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -73,7 +83,10 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
-                var allFolders = await Folders.DbSet.ToListAsync();
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+
+                var allFolders = await folders.DbSet.ToListAsync();
 
                 var allFoldersInfo = allFolders.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
 
@@ -85,6 +98,7 @@ namespace KNote.Repository.EntityFramework
 
                 result.Entity = treeFolders;
 
+                await CloseIsTempConnection(ctx);
             }
             catch (KntEntityValidationException ex)
             {
@@ -104,11 +118,16 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
-                var homeFolder = await Folders.DbSet
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+
+                var homeFolder = await folders.DbSet
                     .Where(f => f.FolderNumber == 1)
                     .Select(f => f)
                     .FirstOrDefaultAsync();
                 resService.Entity = homeFolder.GetSimpleDto<FolderDto>();
+                
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -123,16 +142,21 @@ namespace KNote.Repository.EntityFramework
             var response = new Result<FolderDto>();
             try
             {
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+
                 var newEntity = new Folder();
                 newEntity.SetSimpleDto(entity);
-                newEntity.FolderNumber = GetNextFolderNumber();
+                newEntity.FolderNumber = GetNextFolderNumber(folders);
                 newEntity.CreationDateTime = DateTime.Now;
                 newEntity.ModificationDateTime = DateTime.Now;
 
-                var resGenRep = await Folders.AddAsync(newEntity);
+                var resGenRep = await folders.AddAsync(newEntity);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<FolderDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -148,25 +172,28 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+
                 bool flagThrowKntException = false;
-                if (Folders.ThrowKntException == true)
+                if (folders.ThrowKntException == true)
                 {
                     flagThrowKntException = true;
-                    Folders.ThrowKntException = false;
+                    folders.ThrowKntException = false;
                 }
 
-                var resGenRepGet = await Folders.GetAsync(entity.FolderId);
+                var resGenRepGet = await folders.GetAsync(entity.FolderId);
                 Folder entityForUpdate;
 
                 if (flagThrowKntException == true)
-                    Folders.ThrowKntException = true;
+                    folders.ThrowKntException = true;
 
                 if (resGenRepGet.IsValid)
                 {
                     entityForUpdate = resGenRepGet.Entity;
                     entityForUpdate.SetSimpleDto(entity);
                     entityForUpdate.ModificationDateTime = DateTime.Now;
-                    resGenRep = await Folders.UpdateAsync(entityForUpdate);
+                    resGenRep = await folders.UpdateAsync(entityForUpdate);
                 }
                 else
                 {
@@ -176,6 +203,8 @@ namespace KNote.Repository.EntityFramework
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<FolderDto>();
                 response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -190,9 +219,14 @@ namespace KNote.Repository.EntityFramework
             var response = new Result();
             try
             {
-                var resGenRep = await Folders.DeleteAsync(id);
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+
+                var resGenRep = await folders.DeleteAsync(id);
                 if (!resGenRep.IsValid)
                     response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -212,10 +246,10 @@ namespace KNote.Repository.EntityFramework
                 LoadChilds(f, allFolders);
         }
 
-        private int GetNextFolderNumber()
-        {
+        private int GetNextFolderNumber(GenericRepositoryEF<KntDbContext, Folder> folders)
+        {            
             // Emplear método LastOrDefault() en lugar de FirstOrDafault 
-            var lastFolder = Folders
+            var lastFolder = folders
                 .DbSet.OrderByDescending(f => f.FolderNumber).FirstOrDefault();
 
             return lastFolder != null ? lastFolder.FolderNumber + 1 : 1;
