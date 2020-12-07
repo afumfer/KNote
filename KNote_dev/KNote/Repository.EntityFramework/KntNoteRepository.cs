@@ -12,46 +12,7 @@ namespace KNote.Repository.EntityFramework
 {
     public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
     {
-        //#region Private fields
-
-        //private IGenericRepositoryEF<KntDbContext, Note> _notes;
-        //private IGenericRepositoryEF<KntDbContext, NoteKAttribute> _noteKAttributes;
-        //private IGenericRepositoryEF<KntDbContext, Resource> _resources;
-        //private IGenericRepositoryEF<KntDbContext, NoteTask> _noteTasks;
-        //private IGenericRepositoryEF<KntDbContext, KMessage> _kmessages;
-
-        //private IKntFolderRepository _folders;
-        //private IKntKAttributeRepository _kattributes;
-
-        //string _strProvider;
-        //string _strConn;
-
-
-        //#endregion
-
         #region Constructor
-
-        //public KntNoteRepository(KntDbContext context, bool throwKntException)
-        //{
-        //    _notes = new GenericRepositoryEF<KntDbContext, Note>(context, throwKntException);
-
-        //    _noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(context, throwKntException);
-        //    _noteTasks = new GenericRepositoryEF<KntDbContext, NoteTask>(context, throwKntException);
-        //    _resources = new GenericRepositoryEF<KntDbContext, Resource>(context, throwKntException);
-        //    _kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(context, throwKntException);
-
-        //    _folders = new KntFolderRepository(context, throwKntException);
-        //    _kattributes = new KntKAttributeRepository(context, throwKntException);
-
-        //    ThrowKntException = throwKntException;
-        //}
-
-        //public KntNoteRepository(KntDbContext context, string strConn, string strProvider, bool throwKntException) : this (context, throwKntException)
-        //{
-        //    _strProvider = strProvider;
-        //    _strConn = strConn;
-        //}
-
 
         public KntNoteRepository(KntDbContext singletonContext, bool throwKntException)
             : base(singletonContext, throwKntException)
@@ -904,9 +865,10 @@ namespace KNote.Repository.EntityFramework
                     atrTmp.Disabled = a.Disabled;
                 }
             }
-            return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
 
             await CloseIsTempConnection(ctx);
+
+            return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();            
         }
 
         private void UpdateStandardValuesToNewEntity(GenericRepositoryEF<KntDbContext, Note> notes, NoteDto newEntity)

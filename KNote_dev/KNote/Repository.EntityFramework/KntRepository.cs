@@ -14,7 +14,7 @@ namespace KNote.Repository.EntityFramework
     {
         #region Protected fields
 
-        private readonly bool _throwKntException;
+        private bool _throwKntException;
         private readonly string _strConn;
         private readonly string _strProvider;
         
@@ -22,13 +22,11 @@ namespace KNote.Repository.EntityFramework
 
         #region Properties
 
-        private KntDbContext _context;
+        private readonly KntDbContext _context;
         protected KntDbContext Context
         {
             get 
             {
-                if (_context == null)
-                    RefreshDbConnection();
                 return _context;
             }            
         }
@@ -44,6 +42,13 @@ namespace KNote.Repository.EntityFramework
             _strProvider = strProvider;            
         }
 
+        public KntRepository(KntDbContext singletonContext, bool throwKntException = false)
+        {
+            _throwKntException = throwKntException;
+            _context = singletonContext;
+        }
+
+
         #endregion
 
         #region IKntRepository
@@ -55,8 +60,10 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_noteTypes == null)
-                    //_noteTypes = new KntNoteTypeRepository(Context, _throwKntException);
-                    _noteTypes = new KntNoteTypeRepository(_strConn, _strProvider, _throwKntException);
+                    if(_context != null)
+                        _noteTypes = new KntNoteTypeRepository(Context, _throwKntException);
+                    else 
+                        _noteTypes = new KntNoteTypeRepository(_strConn, _strProvider, _throwKntException);
                 return _noteTypes;
                 
             }
@@ -68,8 +75,10 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_systemValues == null)
-                    //_systemValues = new KntSystemValuesRepository(Context, _throwKntException);
-                    _systemValues = new KntSystemValuesRepository(_strConn, _strProvider, _throwKntException);
+                    if (_context != null)
+                        _systemValues = new KntSystemValuesRepository(Context, _throwKntException);
+                    else
+                        _systemValues = new KntSystemValuesRepository(_strConn, _strProvider, _throwKntException);
                 return _systemValues;
             }
         }
@@ -80,8 +89,10 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_folders == null)
-                    //_folders = new KntFolderRepository(Context, _throwKntException);
-                    _folders = new KntFolderRepository(_strConn, _strProvider, _throwKntException);
+                    if (_context != null)
+                        _folders = new KntFolderRepository(Context, _throwKntException);
+                    else
+                        _folders = new KntFolderRepository(_strConn, _strProvider, _throwKntException);
                 return _folders;
             }
         }
@@ -92,8 +103,10 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_attributes == null)
-                    //_attributes = new KntKAttributeRepository(Context, _throwKntException);
-                    _attributes = new KntKAttributeRepository(_strConn, _strProvider, _throwKntException);
+                    if (_context != null)
+                        _attributes = new KntKAttributeRepository(Context, _throwKntException);
+                    else
+                        _attributes = new KntKAttributeRepository(_strConn, _strProvider, _throwKntException);
                 return _attributes;
             }
         }
@@ -104,8 +117,10 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_notes == null)
-                    //_notes = new KntNoteRepository(Context, _throwKntException);
-                    _notes = new KntNoteRepository(_strConn, _strProvider, _throwKntException);
+                    if (_context != null)
+                        _notes = new KntNoteRepository(Context, _throwKntException);
+                    else
+                        _notes = new KntNoteRepository(_strConn, _strProvider, _throwKntException);
                 return _notes;
             }
         }
@@ -116,8 +131,10 @@ namespace KNote.Repository.EntityFramework
             get
             {
                 if (_users == null)
-                    //_users = new KntUserRepository(Context, _throwKntException);
-                    _users = new KntUserRepository(_strConn, _strProvider, _throwKntException);
+                    if (_context != null)
+                        _users = new KntUserRepository(Context, _throwKntException);
+                    else
+                        _users = new KntUserRepository(_strConn, _strProvider, _throwKntException);
                 return _users;
             }
         }
@@ -221,18 +238,20 @@ namespace KNote.Repository.EntityFramework
 
         #region  Private methods
 
-        private void RefreshDbConnection()
+        public KntDbContext GetKntDbContext(string connectionString, string provider, bool throwKntException = false)
         {
             var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
 
-            if (_strProvider == "Microsoft.Data.SqlClient")                                    
-                optionsBuilder.UseSqlServer(_strConn);                                    
-            else if (_strProvider == "Microsoft.Data.Sqlite")                
-                optionsBuilder.UseSqlite(_strConn);                
+            if (provider == "Microsoft.Data.SqlClient")                                    
+                optionsBuilder.UseSqlServer(connectionString);                                    
+            else if (provider == "Microsoft.Data.Sqlite")                
+                optionsBuilder.UseSqlite(connectionString);                
             else
                 throw new Exception("Data provider not suported (KntEx)");
 
-            _context = new KntDbContext(optionsBuilder.Options);            
+            _throwKntException = throwKntException;
+
+            return new KntDbContext(optionsBuilder.Options);            
         }
 
         #endregion

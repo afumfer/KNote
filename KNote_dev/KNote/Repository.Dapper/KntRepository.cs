@@ -17,11 +17,12 @@ namespace KNote.Repository.Dapper
     public class KntRepository : IKntRepository
     {
         #region Private/protected fields
-
-        protected DbConnection _db;
-        private readonly bool _throwKntException;
+        
+        private bool _throwKntException;
         private readonly string _strConn;
         private readonly string _strProvider;
+
+        private readonly DbConnection _db;
 
         #endregion
 
@@ -31,12 +32,14 @@ namespace KNote.Repository.Dapper
         {
             _throwKntException = throwKntException;
             _strConn = strConn;
-            _strProvider = strProvider;
-
-            //RefreshDbConnection();
+            _strProvider = strProvider;            
         }
 
-        // TODO: new constructor with DbConnection pending ....
+        public KntRepository(DbConnection singletonConnection, bool throwKntException = false)
+        {
+            _throwKntException = throwKntException;
+            _db = singletonConnection;            
+        }
 
         #endregion
 
@@ -48,8 +51,10 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_noteTypes == null)
-                    //_noteTypes = new KntNoteTypeRepository(_db, _throwKntException);
-                    _noteTypes = new KntNoteTypeRepository(_strConn, _strProvider, _throwKntException);
+                    if(_db != null)
+                        _noteTypes = new KntNoteTypeRepository(_db, _throwKntException);
+                    else
+                        _noteTypes = new KntNoteTypeRepository(_strConn, _strProvider, _throwKntException);
                 return _noteTypes;
             }
         }
@@ -60,8 +65,10 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_users == null)
-                    //_users = new KntUserRepository(_db, _throwKntException);
-                    _users = new KntUserRepository(_strConn, _strProvider, _throwKntException);
+                    if (_db != null)
+                        _users = new KntUserRepository(_db, _throwKntException);
+                    else
+                        _users = new KntUserRepository(_strConn, _strProvider, _throwKntException);
                 return _users;
             }
         }
@@ -72,8 +79,10 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_systemValues == null)
-                    //_systemValues = new KntSystemValuesRepository(_db, _throwKntException);
-                    _systemValues = new KntSystemValuesRepository(_strConn, _strProvider, _throwKntException);
+                    if (_db != null)
+                        _systemValues = new KntSystemValuesRepository(_db, _throwKntException);
+                    else
+                        _systemValues = new KntSystemValuesRepository(_strConn, _strProvider, _throwKntException);
                 return _systemValues;
             }
         }
@@ -84,8 +93,10 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_folders == null)
-                    //_folders = new KntFolderRepository(_db, _throwKntException);
-                    _folders = new KntFolderRepository(_strConn, _strProvider, _throwKntException);
+                    if (_db != null)
+                        _folders = new KntFolderRepository(_db, _throwKntException);
+                    else
+                        _folders = new KntFolderRepository(_strConn, _strProvider, _throwKntException);
                 return _folders;
             }
         }
@@ -96,8 +107,10 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_kAttributes == null)
-                    //_kAttributes = new KntKAttributeRepository(_db, _throwKntException);
-                    _kAttributes = new KntKAttributeRepository(_strConn, _strProvider, _throwKntException);
+                    if (_db != null)
+                        _kAttributes = new KntKAttributeRepository(_db, _throwKntException);
+                    else
+                        _kAttributes = new KntKAttributeRepository(_strConn, _strProvider, _throwKntException);
                 return _kAttributes;
             }
         }
@@ -108,8 +121,10 @@ namespace KNote.Repository.Dapper
             get
             {
                 if (_notes == null)
-                    //_notes = new KntNoteRepository(_db, _throwKntException);
-                    _notes = new KntNoteRepository(_strConn, _strProvider, _throwKntException);
+                    if (_db != null)
+                        _notes = new KntNoteRepository(_db, _throwKntException);
+                    else
+                        _notes = new KntNoteRepository(_strConn, _strProvider, _throwKntException);
                 return _notes;
             }
         }
@@ -163,13 +178,15 @@ namespace KNote.Repository.Dapper
 
         #region Private methods
 
-        private void RefreshDbConnection()
+        public DbConnection GetKntDbConnection(string connectionString, string provider, bool throwKntException = false)
         {
-            if (_strProvider == "Microsoft.Data.SqlClient")
+            _throwKntException = throwKntException;
+
+            if (provider == "Microsoft.Data.SqlClient")
             {
-                _db = new SqlConnection(_strConn);                
+                return new SqlConnection(connectionString);                
             }
-            else if (_strProvider == "Microsoft.Data.Sqlite")
+            else if (provider == "Microsoft.Data.Sqlite")
             {
                 // TODO: Estudiar poner esto en otro sitio, una clase estática. 
                 //       SqlMapper es estático.                    
@@ -177,10 +194,11 @@ namespace KNote.Repository.Dapper
                 SqlMapper.AddTypeHandler(new GuidHandler());
                 SqlMapper.AddTypeHandler(new TimeSpanHandler());
                 // ---
-                _db = new SqliteConnection(_strConn);
+                return new SqliteConnection(connectionString);
             }
             else
                 throw new Exception("Data provider not suported (KntEx)");
+
         }
 
         #endregion 
