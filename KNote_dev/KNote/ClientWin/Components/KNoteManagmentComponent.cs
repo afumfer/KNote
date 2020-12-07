@@ -79,9 +79,11 @@ namespace KNote.ClientWin.Components
 
         #region Component override methods
 
-        protected override Result OnInitialized()
+        protected override Result<EComponentResult> OnInitialized()
         {
             var result = base.OnInitialized();
+
+            // TODO: pending check result correctrly
 
             try
             {                
@@ -97,10 +99,10 @@ namespace KNote.ClientWin.Components
             return result;
         }
 
-        protected override Result OnFinalized()
-        {
-            return base.OnFinalized();
-        }
+        //protected override Result OnFinalized()
+        //{
+        //    return base.OnFinalized();
+        //}
 
         #endregion 
         

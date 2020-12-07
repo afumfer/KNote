@@ -66,19 +66,20 @@ namespace KNote.ClientWin.Core
 
         #endregion
 
-        protected virtual Result OnInitialized()
+        protected virtual Result<EComponentResult> OnInitialized()
         {
-            return new Result();
+            return new Result<EComponentResult>(EComponentResult.Executed);
+
         } 
 
-        protected virtual Result OnAfterRenderView()
+        protected virtual Result<EComponentResult> OnAfterRenderView()
         {
-            return new Result();
+            return new Result<EComponentResult>(EComponentResult.Executed);
         }
 
-        protected virtual Result CheckPreconditions()
+        protected virtual Result<EComponentResult> CheckPreconditions()
         {
-            var res = new Result();
+
 
             // TODO: En el futuro se implementarán reglas genéricas
             //       para todas las controladoras.
@@ -87,22 +88,23 @@ namespace KNote.ClientWin.Core
             //       Por ahora las precondiciones de la clase base 
             //       siempre se superan             
 
+            var res = new Result<EComponentResult>(EComponentResult.Executed);
             return res;
         }
 
-        protected virtual Result OnFinalized() 
+        protected virtual Result<EComponentResult> OnFinalized() 
         {
-            return new Result();
+            return new Result<EComponentResult>(EComponentResult.Executed);
         }
 
-        protected virtual Result AddExtensions()
+        protected virtual Result<EComponentResult> AddExtensions()
         {
-            return new Result();
+            return new Result<EComponentResult>(EComponentResult.Executed);
         }
 
-        public virtual Result Run() 
+        public virtual Result<EComponentResult> Run() 
         {
-            Result result;
+            Result<EComponentResult> result;
             var preconditionResult = CheckPreconditions();
             if (preconditionResult.IsValid) 
             {
@@ -111,22 +113,22 @@ namespace KNote.ClientWin.Core
                 OnStateComponentChanged(EComponentState.Initialized);                
             }
             else
-            {
+            {                
+                OnStateComponentChanged(EComponentState.Error);
                 result = preconditionResult;
-                OnStateComponentChanged(EComponentState.Error);                
             }
 
             OnStateComponentChanged(EComponentState.Started);
             return result;
         }
 
-        public Result Finalize()
+        public Result<EComponentResult> Finalize()
         {
-            Result result;
+            Result<EComponentResult> result;
             
             if (ComponentState == EComponentState.Finalized)
             {
-                result = new Result();
+                result = new Result<EComponentResult>(EComponentResult.Error);
                 result.AddErrorMessage("The component is already finalized.");
                 return result;
             }
@@ -140,7 +142,7 @@ namespace KNote.ClientWin.Core
             }
             catch (Exception ex)
             {
-                result = new Result();
+                result = new Result<EComponentResult>(EComponentResult.Error);
                 result.AddErrorMessage(ex.Message);
                 OnStateComponentChanged(EComponentState.Error);
             }
@@ -273,6 +275,14 @@ namespace KNote.ClientWin.Core
         Error
     }
 
+    public enum EComponentResult
+    {
+        Null,
+        Executed,
+        Canceled,
+        Error
+    }
+
     public class ComponentEventArgs<T> : EventArgs
     {
         public T Entity { get; set; }
@@ -347,5 +357,5 @@ namespace KNote.ClientWin.Core
 
     }
 
-    #endregion     
+    #endregion
 }

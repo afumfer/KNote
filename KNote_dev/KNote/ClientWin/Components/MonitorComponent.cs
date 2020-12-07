@@ -22,9 +22,11 @@ namespace KNote.ClientWin.Components
             return Store.FactoryViews.View(this);
         }
 
-        protected override Result OnInitialized()
+        protected override Result<EComponentResult> OnInitialized()
         {
             var result = base.OnInitialized();
+
+            // TODO: pending check result correctrly
 
             try
             {                                                
@@ -41,12 +43,13 @@ namespace KNote.ClientWin.Components
             return result;
         }
 
-        protected override Result OnFinalized()
+        protected override Result<EComponentResult> OnFinalized()
         {
-            var result = base.OnFinalized();
+            Result<EComponentResult> result;
 
             try
             {
+                result = base.OnFinalized();
                 Store.ComponentsStateChanged -= Store_ComponentsStateChanged;
                 Store.AddedServiceRef -= Store_AddedServiceRef;
                 Store.ActiveFolderChanged -= Store_ActiveFolderChanged;
@@ -54,6 +57,7 @@ namespace KNote.ClientWin.Components
             }
             catch (Exception ex)
             {
+                result = new Result<EComponentResult>(EComponentResult.Error);
                 result.AddErrorMessage(ex.Message);                
             }
 

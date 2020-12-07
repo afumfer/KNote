@@ -41,9 +41,11 @@ namespace KNote.ClientWin.Core
 
         protected abstract TView CreateView();
 
-        protected override Result OnInitialized()
+        protected override Result<EComponentResult> OnInitialized()
         {
             var result = base.OnInitialized();
+
+            // TODO: pending check result correctrly
 
             View.RefreshView();
 
@@ -55,27 +57,41 @@ namespace KNote.ClientWin.Core
             return result;
         }
 
-        public override Result Run()
+        public override Result<EComponentResult> Run()
         {
-            var result = base.Run();
+            Result<EComponentResult> result;
 
-            // TODO:  Check result here 
-            // ...
+            try
+            {
+                result = base.Run();                
+                View.ShowView();
+            }
+            catch (Exception ex)
+            {
+                result = new Result<EComponentResult>(EComponentResult.Error);
+                result.AddErrorMessage(ex.Message);
+            }
 
-            View.ShowView();
             return result;
         }
 
         public virtual Result<EComponentResult> RunModal()
         {
-            var result = base.Run();
+            Result<EComponentResult> result;
 
-            // TODO:  Check result here 
-            // ...
+            try
+            {
+                result = base.Run();
+                var resultView = View.ShowModalView();
+                result = resultView;
+            }
+            catch (Exception ex)
+            {
+                result = new Result<EComponentResult>(EComponentResult.Error);
+                result.AddErrorMessage(ex.Message);
+            }
 
-            var resultView = View.ShowModalView();
-
-            return resultView;
+            return result;
         }
 
         public Result<EComponentResult> DialogResultToComponentResult(DialogResult dialogResult)
@@ -262,13 +278,5 @@ namespace KNote.ClientWin.Core
 
 
         #endregion 
-    }
-
-    public enum EComponentResult
-    {
-        Null,
-        Executed,
-        Canceled,
-        Error
     }
 }
