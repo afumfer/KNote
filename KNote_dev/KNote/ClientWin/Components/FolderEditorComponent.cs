@@ -33,7 +33,7 @@ namespace KNote.ClientWin.Components
 
         public FolderEditorComponent(Store store): base(store)
         {
-            
+            ComponentName = "Folder editor";
         }
 
         protected override IEditorView<FolderDto> CreateView()

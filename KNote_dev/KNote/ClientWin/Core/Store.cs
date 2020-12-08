@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Xml.Serialization;
 using KNote.Model;
 
 namespace KNote.ClientWin.Core
@@ -12,6 +13,8 @@ namespace KNote.ClientWin.Core
     {
         #region Application state 
 
+        public string User { get; set; }
+        public string ComputerName { get; set; }
         public string LogFile { get; set; }
 
         public bool LogActivated = false;
@@ -22,7 +25,7 @@ namespace KNote.ClientWin.Core
 
         private readonly List<ComponentBase> _listComponents;
 
-        public AppConfig Config { get; }
+        public AppConfig Config { get; protected set; }
 
         public ServiceRef PersonalServiceRef 
         {
@@ -95,10 +98,19 @@ namespace KNote.ClientWin.Core
             ComponentsStateChanged?.Invoke(sender, e);
         }
 
+        public event EventHandler<ComponentEventArgs<ComponentBase>> RemovedComponent;
         public void RemoveComponent(ComponentBase component)
         {            
-            _listComponents.Remove(component);            
+            _listComponents.Remove(component);
+            RemovedComponent?.Invoke(this, new ComponentEventArgs<ComponentBase>(component));
         }
+
+        public event EventHandler<ComponentEventArgs<string>> ComponentNotification;
+        internal void OnComponentNotification(ComponentBase component, string message)
+        {
+            ComponentNotification?.Invoke(component, new ComponentEventArgs<string>(message));
+        }
+
 
         public event EventHandler<ComponentEventArgs<FolderWithServiceRef>> ActiveFolderChanged;
         public void UpdateActiveFolder(FolderWithServiceRef activeFolder)
@@ -106,6 +118,43 @@ namespace KNote.ClientWin.Core
             _activeFolderWithServiceRef = activeFolder;
             if (ActiveFolderChanged != null)
                 ActiveFolderChanged(this, new ComponentEventArgs<FolderWithServiceRef>(activeFolder));
+        }
+
+        public void SaveConfig(AppConfig appConfig, string configFile = @"KNoteData.config")
+        {
+            try
+            {                
+                TextWriter w = new StreamWriter(configFile);
+                XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
+                serializer.Serialize(w, appConfig);
+                w.Close();
+            }
+            catch (Exception )
+            {
+                throw;
+            }
+        }
+
+        public AppConfig LoadConfig(string configFile = @"KNoteData.config")
+        {
+            try
+            {                
+                if (!File.Exists(configFile))
+                    return null;
+
+                AppConfig appConfig;                
+                TextReader reader = new StreamReader(configFile);                
+                XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
+                appConfig = (AppConfig)serializer.Deserialize(reader);
+                appConfig.LastDateTimeStart = DateTime.Now;
+                appConfig.RunCounter++;
+                reader.Close();
+                return appConfig;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         #endregion

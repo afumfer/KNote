@@ -52,22 +52,32 @@ namespace KNote.ClientWin.Views
 
         public async void RefreshView()
         {            
-            TreeNode rootRepNode = null;
+            using (new WaitCursor())
+            {               
+                TreeNode rootRepNode;
+                
+                //treeViewFolders.Visible = false;
+                
+                treeViewFolders.Nodes.Clear();
+                _com.ListEntities.Clear();
 
-            treeViewFolders.Visible = false;
-            treeViewFolders.Nodes.Clear();
-            _com.ListEntities.Clear();
+                foreach (var serviceRef in _com.ServicesRef)
+                {
+                    _com.NotifyMessage($"Loading folderes in {serviceRef.Alias} ...");
 
-            foreach (var serviceRef in _com.ServicesRef)
-            {
-                rootRepNode = new TreeNode("[" + serviceRef.Alias + "]", 2, 2);         
-                rootRepNode.Tag = serviceRef;                
-                treeViewFolders.Nodes.Add(rootRepNode);
+                    rootRepNode = new TreeNode("[" + serviceRef.Alias + "]", 2, 2);         
+                    rootRepNode.Tag = serviceRef;                
+                    treeViewFolders.Nodes.Add(rootRepNode);
+                   
+                    LoadNodes(rootRepNode, serviceRef, await _com.LoadEntities(serviceRef));
+                    rootRepNode.Expand();
+                    treeViewFolders.Refresh();
+                    
+                }
+                _com.NotifyMessage("");
 
-                LoadNodes(rootRepNode, serviceRef, await _com.LoadEntities(serviceRef));
-
+                //treeViewFolders.Visible = true;                
             }
-            treeViewFolders.Visible = true;
         }
 
         public void OnClosingView()
@@ -217,7 +227,8 @@ namespace KNote.ClientWin.Views
 
             foreach (var f in folders)
             {
-                TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);                
+                TreeNode nodeFolder = new TreeNode(f.Name, 1, 0);
+                
                 nodeFolder.Name = f.FolderId.ToString();
                 var folderWithServiceRef = new FolderWithServiceRef() { ServiceRef = service, FolderInfo = f };
                 nodeFolder.Tag = folderWithServiceRef;

@@ -32,6 +32,7 @@ namespace KNote.ClientWin.Components
 
         public FoldersSelectorComponent(Store store) : base(store)
         {
+            ComponentName = "Folders selector";
             ListEntities = new List<FolderWithServiceRef>();
         }
 

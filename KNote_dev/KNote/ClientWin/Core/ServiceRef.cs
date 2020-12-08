@@ -16,14 +16,21 @@ namespace KNote.ClientWin.Core
 {
     public class ServiceRef
     {
-        public readonly Guid IdRepositoryRef;
+        public readonly Guid IdServiceRef;
 
-        public string Alias { get; }
+        public string Alias { 
+            get
+            {
+                return RepositoryRef?.Alias;
+            }
+        }
 
-        public string ConnectionString { get; }
+        //public string ConnectionString { get; }
 
-        public string Provider { get;  }        
-        public string Orm { get; }
+        //public string Provider { get;  }        
+        //public string Orm { get; }
+
+        public RepositoryRef RepositoryRef { get; protected set; }
 
         private IKntRepository _repository;
         protected IKntRepository Repository
@@ -33,10 +40,10 @@ namespace KNote.ClientWin.Core
                 if (_repository == null)
                 {
                     //_service = new KntService(ConnectionString, Provider);
-                    if (Orm == "Dapper")
-                        _repository = new DP.KntRepository(ConnectionString, Provider);
-                    else if (Orm == "EntityFramework")
-                        _repository = new EF.KntRepository(ConnectionString, Provider);
+                    if (RepositoryRef.Orm == "Dapper")
+                        _repository = new DP.KntRepository(RepositoryRef.ConnectionString, RepositoryRef.Provider);
+                    else if (RepositoryRef.Orm == "EntityFramework")
+                        _repository = new EF.KntRepository(RepositoryRef.ConnectionString, RepositoryRef.Provider);
                 }
                 return _repository;
             }
@@ -56,11 +63,15 @@ namespace KNote.ClientWin.Core
 
         public ServiceRef (string name, string connectionString, string provider, string orm)
         {
-            IdRepositoryRef = Guid.NewGuid();
-            Alias = name;
-            ConnectionString = connectionString;
-            Provider = provider;
-            Orm = orm;
+            IdServiceRef = Guid.NewGuid();
+            RepositoryRef = new RepositoryRef { Alias = name, ConnectionString = connectionString, Provider = provider, Orm = orm };
         }
+
+        public ServiceRef(RepositoryRef repositoryRef)
+        {
+            IdServiceRef = Guid.NewGuid();
+            RepositoryRef = repositoryRef;
+        }
+
     }
 }

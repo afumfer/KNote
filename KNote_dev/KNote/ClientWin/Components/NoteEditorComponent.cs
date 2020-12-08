@@ -24,6 +24,7 @@ namespace KNote.ClientWin.Components
 
         public NoteEditorComponent(Store store) : base(store)
         {
+            ComponentName = "Note editor";
         }
 
         #endregion

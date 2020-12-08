@@ -16,6 +16,8 @@ namespace KNote.ClientWin.Core
 
         public readonly Guid ComponentId;
 
+        public string ComponentName { get; protected set; }
+
         public Store Store { get; protected set; }
 
         public EComponentState ComponentState { get; protected set; } = EComponentState.NotStarted;
@@ -148,6 +150,11 @@ namespace KNote.ClientWin.Core
             }
            
             return result;
+        }
+
+        public virtual void NotifyMessage(string message)
+        {
+            Store.OnComponentNotification(this, message);
         }
 
         public void Dispose()

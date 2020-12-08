@@ -34,6 +34,7 @@
             this.contextMenuFolders = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.panelForm = new System.Windows.Forms.Panel();
             this.panelBottom = new System.Windows.Forms.Panel();
+            this.labelInfo = new System.Windows.Forms.Label();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.treeViewFolders = new System.Windows.Forms.TreeView();
@@ -67,6 +68,7 @@
             // 
             // panelBottom
             // 
+            this.panelBottom.Controls.Add(this.labelInfo);
             this.panelBottom.Controls.Add(this.buttonCancel);
             this.panelBottom.Controls.Add(this.buttonAccept);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -74,6 +76,15 @@
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(460, 44);
             this.panelBottom.TabIndex = 0;
+            // 
+            // labelInfo
+            // 
+            this.labelInfo.AutoSize = true;
+            this.labelInfo.Location = new System.Drawing.Point(102, 13);
+            this.labelInfo.Name = "labelInfo";
+            this.labelInfo.Size = new System.Drawing.Size(62, 15);
+            this.labelInfo.TabIndex = 2;
+            this.labelInfo.Text = "Loading ...";
             // 
             // buttonCancel
             // 
@@ -123,6 +134,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FoldersSelectorForm_FormClosing);
             this.panelForm.ResumeLayout(false);
             this.panelBottom.ResumeLayout(false);
+            this.panelBottom.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -135,5 +147,6 @@
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonAccept;
         private System.Windows.Forms.TreeView treeViewFolders;
+        private System.Windows.Forms.Label labelInfo;
     }
 }

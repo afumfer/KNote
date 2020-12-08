@@ -28,7 +28,7 @@ namespace KNote.ClientWin.Components
 
         public NotesSelectorComponent(Store store) : base(store)
         {
-
+            ComponentName = "Notes selector";
         }
 
         #endregion

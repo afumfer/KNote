@@ -81,15 +81,20 @@ namespace KNote.ClientWin.Components
 
         protected override Result<EComponentResult> OnInitialized()
         {
+            ComponentName = "Key note managment";
+
             var result = base.OnInitialized();
 
             // TODO: pending check result correctrly
 
             try
             {                
-                NotesSelectorComponent.Run();
-                FoldersSelectorComponent.Run();
-                NoteEditorComponent.Run();
+                using (new WaitCursor())
+                {
+                    NotesSelectorComponent.Run();
+                    FoldersSelectorComponent.Run();
+                    NoteEditorComponent.Run();
+                }
             }
             catch (Exception ex)
             {
@@ -140,7 +145,9 @@ namespace KNote.ClientWin.Components
         {
             if (e.Entity == null)                            
                 return;
-            
+
+            NotifyMessage("Loading notes list ... ");
+
             SelectedFolderWithServiceRef = e.Entity;
             FolderPath = FoldersSelectorComponent.Path;            
             
@@ -151,6 +158,7 @@ namespace KNote.ClientWin.Components
             CountNotes = NotesSelectorComponent.ListEntities?.Count;
             
             View.ShowInfo(null);
+            NotifyMessage("");
         }
 
         #endregion
@@ -187,8 +195,13 @@ namespace KNote.ClientWin.Components
         {
             if (e.Entity == null)
                 return;
+
+            NotifyMessage("Loading note details ... ");
+
             _selectedNoteInfo = e.Entity;            
             await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
+
+            NotifyMessage("");
         }
 
         #endregion

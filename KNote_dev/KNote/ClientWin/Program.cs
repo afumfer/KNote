@@ -8,6 +8,7 @@ using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
 using KNote.Model.Dto;
+using System.IO;
 
 namespace KNote.ClientWin
 {
@@ -34,8 +35,7 @@ namespace KNote.ClientWin
             Application.DoEvents();
 
             #endregion 
-
-            //await LoadAppStore(appStore);
+            
             LoadAppStore(appStore);
 
             #region Demo & lab
@@ -54,20 +54,80 @@ namespace KNote.ClientWin
 
             splashForm.Close(); 
 
-            Application.Run(applicationContext);
-
-            //Application.Run(new DemoForm());
+            Application.Run(applicationContext);            
         }
 
         //static async Task LoadAppStore(Store store)
         static void LoadAppStore(Store store)
-        {
-            // Hard values for test ....
+        {            
+            var appFileConfig = Path.Combine(Application.StartupPath, "KNoteData.config");
 
+            var appConfig = store.LoadConfig(appFileConfig);
+
+            if (appConfig == null)
+            {
+                // Add some repository for development environment ...
+
+                var r1 = new RepositoryRef
+                {
+                    Alias = "Test db1 (SQL Server Prod - Dapper)",                    
+                    // ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
+                    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
+                    Provider = "Microsoft.Data.SqlClient",
+                    Orm = "Dapper"  // Dapper / EntityFramework
+                };             
+                store.AddServiceRef(new ServiceRef(r1));
+
+                var r2 = new RepositoryRef
+                {
+                    Alias = "Test db2 (SQL Server Desa - Dapper)",                    
+                    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote02DesaDB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
+                    Provider = "Microsoft.Data.SqlClient",
+                    Orm = "Dapper" 
+                };
+                store.AddServiceRef(new ServiceRef(r2));
+
+                var r3 = new RepositoryRef
+                { 
+                    Alias = "Tasks db3 (Sqlite)",
+                    ConnectionString = @"Data Source=D:\DBs\KNote02DB_Sqlite.db",
+                    Provider = "Microsoft.Data.Sqlite",
+                    Orm = "EntityFramework" 
+                };            
+                store.AddServiceRef(new ServiceRef(r3));
+
+                appConfig = new AppConfig();
+                appConfig.RespositoryRefs.Add(r1);
+                appConfig.RespositoryRefs.Add(r2);
+                appConfig.RespositoryRefs.Add(r3);
+                appConfig.AutoSaveMinutes = 10;
+                appConfig.LastDateTimeStart = DateTime.Now;
+                appConfig.RunCounter = 1;
+            }
+            else
+            {
+                foreach(var r in appConfig.RespositoryRefs)
+                {
+                    store.AddServiceRef(new ServiceRef(r));
+                }
+
+            }
+
+            // TODO: add default values
+            store.User = SystemInformation.UserName;
+            store.ComputerName = SystemInformation.ComputerName;
             store.LogFile = Application.StartupPath + @"\KNoteWinApp.log";
             store.LogActivated = false;
 
-            #region Datos para repositorios - diferentes alternativas 
+            store.SaveConfig(appConfig, appFileConfig);
+
+            // default folder
+            //var folder = (await defaultServiceRef.Service.Folders.GetHomeAsync()).Entity;
+            //FolderInfoDto folder = null ;
+            //store.UpdateActiveFolder(new FolderWithServiceRef { FolderInfo = folder, ServiceRef = defaultServiceRef });
+
+
+            #region Doc data for repositories
 
             //"_DefaultORM": "EntityFramework",
             //"DefaultORM": "Dapper",
@@ -78,37 +138,7 @@ namespace KNote.ClientWin
             //"_DefaultProvider": "Microsoft.Data.Sqlite",
             //"_DefaultConnection": "Data Source=D:\\DBs\\KNote02DB_Sqlite.db"
 
-            #endregion 
-
-            var defaultServiceRef = new ServiceRef(
-                "Test db1 (SQL Server Prod - Dapper)",
-                @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
-                "Microsoft.Data.SqlClient",
-                "Dapper");  // Dapper
-            
-            store.AddServiceRef(defaultServiceRef);
-            var s1 = defaultServiceRef.Service;
-
-            var sr2 = new ServiceRef
-                ("Test db2 (SQL Server Desa - Dapper)",
-                @"Data Source=.\sqlexpress;Initial Catalog=KNote02DesaDB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
-                "Microsoft.Data.SqlClient",
-                "Dapper");            
-            store.AddServiceRef(sr2);
-            var s2 = sr2.Service;
-
-            var sr3 = new ServiceRef
-                ("Tasks db3 (Sqlite)",
-                @"Data Source=D:\DBs\KNote02DB_Sqlite.db",
-                "Microsoft.Data.Sqlite",
-                "EntityFramework");            
-            store.AddServiceRef(sr3);
-            var s3 = sr3.Service;
-
-            // TODO: defaults ...
-            //var folder = (await defaultServiceRef.Service.Folders.GetHomeAsync()).Entity;
-            //FolderInfoDto folder = null ;
-            //store.UpdateActiveFolder(new FolderWithServiceRef { FolderInfo = folder, ServiceRef = defaultServiceRef });
+            #endregion
         }
     }
 }

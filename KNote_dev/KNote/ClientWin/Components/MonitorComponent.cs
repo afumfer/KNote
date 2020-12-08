@@ -14,7 +14,7 @@ namespace KNote.ClientWin.Components
     {
         public MonitorComponent(Store store) : base(store)
         {
-
+            ComponentName = "KeyNote monitor";
         }
             
         protected override IViewConfigurable CreateView()

@@ -22,7 +22,20 @@ namespace KNote.ClientWin.Views
         {
             InitializeComponent();
 
-            _com = com;            
+            _com = com;
+
+            _com.Store.ComponentNotification += Store_ComponentNotification;
+        }
+
+        private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
+        {
+            string comName;
+            if (!string.IsNullOrEmpty(e?.Entity.ToString()))
+                comName = ((ComponentBase)sender)?.ComponentName + ": ";
+            else
+                comName = "";
+            statusLabel2.Text = $" {comName} {e?.Entity.ToString()}";
+            statusBarManagment.Refresh();            
         }
 
         #region IViewBase interface 
@@ -66,12 +79,9 @@ namespace KNote.ClientWin.Views
                 labelFolerName.Text = "(No folder selected)";
             else
                 labelFolerName.Text = _com.SelectedFolderInfo?.Name;
-
             labelFolderDetail.Text = $"{_com.FolderPath?.ToString()} ";
-
-            statusLabel1.Text = _com.CountNotes.ToString();
-            statusLabel2.Text = $" - [{_com.SelectedServiceRef?.Provider} - {_com.SelectedServiceRef?.Orm}]";
-
+            statusLabel1.Text = $"Notes: {_com.CountNotes.ToString()}";
+            
             return DialogResult.OK;
         }
 
@@ -180,4 +190,18 @@ namespace KNote.ClientWin.Views
         #endregion
 
     }
+
+    public class WaitCursor : IDisposable
+    {
+        public WaitCursor()
+        {
+            Cursor.Current = Cursors.WaitCursor;            
+        }
+
+        public void Dispose()
+        {
+            Cursor.Current = Cursors.Default;            
+        }
+    }
+
 }

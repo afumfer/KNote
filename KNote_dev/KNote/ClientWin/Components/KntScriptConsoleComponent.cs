@@ -14,7 +14,7 @@ namespace KNote.ClientWin.Components
     {
         public KntScriptConsoleComponent(Store store): base(store)
         {
-
+            ComponentName = "KeyNote script console";
         }
         protected override IViewConfigurable CreateView()
         {            
