@@ -35,7 +35,6 @@
             // 
             // sqliteConnection1
             // 
-            this.sqliteConnection1.ConnectionString = null;
             this.sqliteConnection1.DefaultTimeout = 30;
             // 
             // listBoxMessages
@@ -45,13 +44,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listBoxMessages.FormattingEnabled = true;
             this.listBoxMessages.ItemHeight = 15;
-            this.listBoxMessages.Location = new System.Drawing.Point(12, 42);
+            this.listBoxMessages.Location = new System.Drawing.Point(2, 42);
             this.listBoxMessages.Name = "listBoxMessages";
-            this.listBoxMessages.Size = new System.Drawing.Size(924, 244);
+            this.listBoxMessages.Size = new System.Drawing.Size(942, 274);
             this.listBoxMessages.TabIndex = 0;
             // 
             // buttonClearMessages
             // 
+            this.buttonClearMessages.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonClearMessages.Location = new System.Drawing.Point(817, 9);
             this.buttonClearMessages.Name = "buttonClearMessages";
             this.buttonClearMessages.Size = new System.Drawing.Size(119, 27);
@@ -64,7 +64,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(948, 311);
+            this.ClientSize = new System.Drawing.Size(948, 327);
             this.Controls.Add(this.buttonClearMessages);
             this.Controls.Add(this.listBoxMessages);
             this.Name = "MonitorForm";

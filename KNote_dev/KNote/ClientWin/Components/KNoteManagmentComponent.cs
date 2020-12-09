@@ -146,7 +146,7 @@ namespace KNote.ClientWin.Components
             if (e.Entity == null)                            
                 return;
 
-            NotifyMessage("Loading notes list ... ");
+            NotifyMessage($"Loading notes list for foler {e.Entity.FolderInfo?.FolderNumber}");
 
             SelectedFolderWithServiceRef = e.Entity;
             FolderPath = FoldersSelectorComponent.Path;            
@@ -158,7 +158,7 @@ namespace KNote.ClientWin.Components
             CountNotes = NotesSelectorComponent.ListEntities?.Count;
             
             View.ShowInfo(null);
-            NotifyMessage("");
+            NotifyMessage($"Loaded notes list for foler {e.Entity.FolderInfo?.FolderNumber}");
         }
 
         #endregion
@@ -196,12 +196,12 @@ namespace KNote.ClientWin.Components
             if (e.Entity == null)
                 return;
 
-            NotifyMessage("Loading note details ... ");
+            NotifyMessage($"Loading note details for note {e.Entity.NoteNumber}");
 
             _selectedNoteInfo = e.Entity;            
             await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
 
-            NotifyMessage("");
+            NotifyMessage($"Loaded note details for note {e.Entity.NoteNumber}");
         }
 
         #endregion

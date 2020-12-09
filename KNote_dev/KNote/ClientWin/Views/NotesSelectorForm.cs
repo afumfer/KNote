@@ -175,8 +175,7 @@ namespace KNote.ClientWin.Views
 
         private void dataGridNotes_KeyUp(object sender, KeyEventArgs e)
         {
-            _countRepetition = 0;
-            OnSelectedNoteItemChanged();
+            _countRepetition = 0;            
         }
 
         private void dataGridNotes_KeyDown(object sender, KeyEventArgs e)

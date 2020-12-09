@@ -42,6 +42,8 @@ namespace KNote.ClientWin.Views
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             listBoxMessages.Items.Add(info);
+            int visibleItems = listBoxMessages.ClientSize.Height / listBoxMessages.ItemHeight;
+            listBoxMessages.TopIndex = Math.Max(listBoxMessages.Items.Count - visibleItems + 1, 0);
             return DialogResult.OK;
         }
 

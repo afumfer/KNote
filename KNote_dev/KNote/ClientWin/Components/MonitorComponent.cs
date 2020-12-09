@@ -33,7 +33,8 @@ namespace KNote.ClientWin.Components
                 Store.ComponentsStateChanged += Store_ComponentsStateChanged;
                 Store.AddedServiceRef += Store_AddedServiceRef;
                 Store.ActiveFolderChanged += Store_ActiveFolderChanged;
-                Store.RemovedServiceRef += Store_RemovedServiceRef;                                      
+                Store.RemovedServiceRef += Store_RemovedServiceRef;
+                Store.ComponentNotification += Store_ComponentNotification;
             }
             catch (Exception ex)
             {                
@@ -42,6 +43,8 @@ namespace KNote.ClientWin.Components
 
             return result;
         }
+
+
 
         protected override Result<EComponentResult> OnFinalized()
         {
@@ -65,6 +68,12 @@ namespace KNote.ClientWin.Components
         }
 
         #region Store events handlers
+
+        private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
+        {
+            var info = $"{((ComponentBase)sender).ComponentName} - {e.Entity.ToString()}";
+            OnShowLog(info);
+        }
 
         private void Store_ComponentsStateChanged(object sender, ComponentEventArgs<EComponentState> e)
         {
