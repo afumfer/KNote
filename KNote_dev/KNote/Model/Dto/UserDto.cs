@@ -9,6 +9,8 @@ namespace KNote.Model.Dto
 {
     public class UserDto : DtoModelBase
     {
+        private const string KMSG = "Attribute {0} is required. ";
+
         #region Property definitions
 
         private Guid _userId;        
@@ -26,7 +28,7 @@ namespace KNote.Model.Dto
         }
 
         private string _userName;
-        [Required(ErrorMessage = "* Attribute {0} is required")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(32)]
         public string UserName
         {
@@ -42,7 +44,7 @@ namespace KNote.Model.Dto
         }
 
         private string _eMail;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(256)]
         public string EMail
         {
@@ -58,7 +60,7 @@ namespace KNote.Model.Dto
         }
 
         private string _fullName;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(256)]
         public string FullName
         {

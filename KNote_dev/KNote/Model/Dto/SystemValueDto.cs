@@ -9,6 +9,8 @@ namespace KNote.Model.Dto
 {
     public class SystemValueDto : DtoModelBase
     {
+        private const string KMSG = "Attribute {0} is required. ";
+
         #region Property definitions
 
         private Guid _systemValueId;        
@@ -26,7 +28,7 @@ namespace KNote.Model.Dto
         }
 
         private string _scope;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(256)]
         public string Scope
         {
@@ -42,7 +44,7 @@ namespace KNote.Model.Dto
         }
 
         private string _key;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(256)]
         public string Key
         {

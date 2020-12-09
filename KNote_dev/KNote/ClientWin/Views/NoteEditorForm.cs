@@ -67,6 +67,10 @@ namespace KNote.ClientWin.Views
             textTags.Text = "";
             textDescription.Text = "";
             textPriority.Text = "";
+            listViewAttributes.Clear();
+            listViewResources.Clear();
+            listViewTasks.Clear();
+            listViewAlarms.Clear();
         }
 
         public void RefreshView()
@@ -85,7 +89,8 @@ namespace KNote.ClientWin.Views
             TopLevel = false;
             Dock = DockStyle.Fill;
             FormBorderStyle = FormBorderStyle.None;
-            toolBarNoteEditor.Visible = false;            
+            toolBarNoteEditor.Visible = false;
+            _com.EditMode = false;
         }
 
         public void ConfigureWindowMode()
@@ -95,6 +100,7 @@ namespace KNote.ClientWin.Views
             FormBorderStyle = FormBorderStyle.Sizable;
             toolBarNoteEditor.Visible = true;            
             StartPosition = FormStartPosition.CenterScreen;
+            _com.EditMode = true;
         }
 
 
@@ -102,12 +108,16 @@ namespace KNote.ClientWin.Views
 
         #region Form events handlers
 
-        private void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
+        private async void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
             {
-                SaveModel();
-                _com.Finalize();
+                var savedOk = await SaveModel();
+                if (!savedOk)
+                    if (MessageBox.Show("Do yo want exit?", "KeyNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        _com.Finalize();
+                    else
+                        e.Cancel = true;
             }
         }
 
@@ -116,19 +126,14 @@ namespace KNote.ClientWin.Views
             PersonalizeControls();
         }
 
-        private void dataGridResources_SelectionChanged(object sender, EventArgs e)
-        {
-            OnSelectedResourceItemChanged();
-        }
-
-        private void buttonToolBar_Click(object sender, EventArgs e)
+        private async void buttonToolBar_Click(object sender, EventArgs e)
         {
             ToolStripItem menuSel;
             menuSel = (ToolStripItem)sender;
 
             if (menuSel == buttonSave)
             {
-                SaveModel();
+                await SaveModel();
             }
             else if (menuSel == buttonDelete)
             {
@@ -167,41 +172,21 @@ namespace KNote.ClientWin.Views
             textPriority.Text = _com.Model.Note.Priority.ToString();
 
             // KAttributes           
-            textNoteType.Text = _com.Model.Note.NoteTypeDto.Name;
-            dataGridAttributes.DataSource = _com.Model.Note.KAttributesDto.OrderBy(_ => _.Order).Select(_ => new { _.Name, _.Value }).ToList();
+            textNoteType.Text = _com.Model.Note.NoteTypeDto.Name;            
+            ModelToControlsAttributes();
 
             // Resources 
-            dataGridResources.DataSource = _com.Model.Resources.OrderBy(_ => _.Order).Select(_ =>
-              new { Id = _.ResourceId, Name = _.NameOut, Description = _.Description, Order = _.Order, Tupe = _.FileType }).ToList();
-
+            ModelToControlsResources();
             if (_com.Model.Resources.Count > 0)
                 UpdatePicResource(_com.Model.Resources[0].ContentArrayBytes, _com.Model.Resources[0].FileType);
             else
                 UpdatePicResource(null, null);
 
             // Tasks
-            dataGridTasks.DataSource = _com.Model.Tasks.Select(_ => new {
-                User = _.UserFullName,
-                Description = _.Description,
-                Tags = _.Tags,
-                Priority = _.Priority,
-                Resolved = _.Resolved,
-                EstimatedTime = _.EstimatedTime,
-                SependTime = _.SpentTime,
-                DifficultyLeve = _.DifficultyLevel,
-                ExpectedStarDate = _.ExpectedStartDate,
-                ExpectedEndDate = _.ExpectedEndDate,
-                StartDate = _.StartDate,
-                EndDate = _.EndDate
-            }).ToList();
+            ModelToControlsTasks();
 
-            // Alarms            
-            dataGridAlarms.DataSource = _com.Model.Messages.Select(_ => new {
-                User = _.UserFullName,
-                AlarmDateTime = _.AlarmDateTime,
-                Content = _.Content,
-                Activated = _.AlarmActivated
-            }).ToList();
+            // Alarms     
+            ModelToControlsAlarms();
 
             // Script             
             textScriptCode.Text = _com.Model.Note.Script;
@@ -230,34 +215,92 @@ namespace KNote.ClientWin.Views
 
         private void PersonalizeControls()
         {
-            dataGridAttributes.Columns[0].Width = 400;  // Attribute name
-            dataGridAttributes.Columns[1].Width = 200;  // Value
+            
 
-            dataGridResources.Columns[0].Visible = false;  // Id
-        }
-
-        private void OnSelectedResourceItemChanged()
-        {
-            try
+            if (_com.EditMode)
             {
-                if (dataGridResources.SelectedRows.Count > 0)
+                textTopic.ReadOnly = false;                
+                textDescription.ReadOnly = false;
+                textDescription.BackColor = Color.White;
+            }
+            else
+            {
+                foreach (Control conTmp in tabBasicData.Controls)
                 {
-                    Cursor = Cursors.WaitCursor;
-                    var sr = dataGridResources.SelectedRows[0];                    
-                    var idResource = (Guid)sr.Cells[0].Value;
-                    var content = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.ContentArrayBytes).FirstOrDefault();
-                    var type = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.FileType).FirstOrDefault();
-                    UpdatePicResource(content, type);
+                    BlockControl(conTmp);
+                }
+                foreach (Control conTmp in tabAttributes.Controls)
+                {
+                    BlockControl(conTmp);
+                }
+                foreach (Control conTmp in tabResources.Controls)
+                {
+                    BlockControl(conTmp);
+                }
+                foreach (Control conTmp in tabTasks.Controls)
+                {
+                    BlockControl(conTmp);
+                }
+                foreach (Control conTmp in tabAlarms.Controls)
+                {
+                    BlockControl(conTmp);
+                }
+                foreach (Control conTmp in tabCode.Controls)
+                {
+                    BlockControl(conTmp);
+                }
+                foreach (Control conTmp in tabTraceNotes.Controls)
+                {
+                    BlockControl(conTmp);
                 }
             }
-            catch (Exception ex)
-            {                
-                MessageBox.Show($"OnSelectedResourceItemChanged error: {ex.Message}");
-            }
-            finally
+
+            PersonalizeListView(listViewAttributes);
+            PersonalizeListView(listViewResources);
+            PersonalizeListView(listViewTasks);
+            PersonalizeListView(listViewAlarms);
+
+            // TODO: remove in this version
+            tabNoteData.TabPages.Remove(tabTraceNotes);
+        }
+
+        private void ModelToControlsAttributes()
+        {
+            listViewAttributes.Clear();
+
+            foreach(var atr in _com.Model.Note.KAttributesDto)
             {
-                this.Cursor = Cursors.Default;
+                var itemList = new ListViewItem(atr.Name);
+                itemList.Name = atr.NoteKAttributeId.ToString();
+                //itemList.BackColor = Color.LightGray;
+                itemList.SubItems.Add(atr.Value);
+                listViewAttributes.Items.Add(itemList);
             }
+
+            // Width of -2 indicates auto-size.
+            listViewAttributes.Columns.Add("Name", 400, HorizontalAlignment.Left);
+            listViewAttributes.Columns.Add("Value", -2, HorizontalAlignment.Left);
+        }
+
+        private void ModelToControlsResources()
+        {
+            listViewResources.Clear();
+
+            foreach (var res in _com.Model.Resources)
+            {
+                var itemList = new ListViewItem(res.NameOut);
+                itemList.Name = res.ResourceId.ToString();                
+                itemList.SubItems.Add(res.FileType);
+                itemList.SubItems.Add(res.Order.ToString());
+                itemList.SubItems.Add(res.Description);
+                listViewResources.Items.Add(itemList);
+            }
+
+            // Width of -2 indicates auto-size.
+            listViewResources.Columns.Add("Name", 200, HorizontalAlignment.Left);
+            listViewResources.Columns.Add("File type", 100, HorizontalAlignment.Left);
+            listViewResources.Columns.Add("Order", 100, HorizontalAlignment.Left);
+            listViewResources.Columns.Add("Description", -2, HorizontalAlignment.Left);
         }
 
         private void UpdatePicResource(byte[] content, string type)
@@ -271,11 +314,11 @@ namespace KNote.ClientWin.Views
             picResource.Image = Image.FromStream(new MemoryStream(content));
         }
 
-        private async void SaveModel()
+        private async Task<bool> SaveModel()
         {
-            ControlsToModel();
-            await _com.SaveModel();
+            ControlsToModel();            
             buttonUndo.Enabled = false;
+            return await _com.SaveModel();
         }
 
         private async void DeleteModel()
@@ -295,6 +338,141 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private void BlockControl(Control c)
+        {
+            if (c is TextBox)
+            {
+                TextBox t = (TextBox)c;
+                t.ReadOnly = true;
+                t.BackColor = Color.White;
+            }
+            else if (c is Button)
+            {
+                Button b = (Button)c;
+                b.Enabled = false;
+            }
+            else if (c is CheckBox)
+            {
+                CheckBox cb = (CheckBox)c;
+                cb.Enabled = false;
+            }
+            else if (c is ComboBox)
+            {
+                ComboBox comB = (ComboBox)c;
+                comB.Enabled = false;
+            }
+        }
+
+        private void PersonalizeListView(ListView listView)
+        {
+            listView.View = View.Details;
+            listView.LabelEdit = false;
+            listView.AllowColumnReorder = false;
+            listView.CheckBoxes = false;
+            listView.FullRowSelect = true;
+            listView.GridLines = true;
+            listView.Sorting = SortOrder.None;
+        }
+
         #endregion
+
+        private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            OnSelectedResourceItemChanged();
+        }
+
+        private void OnSelectedResourceItemChanged()
+        {
+            try
+            {
+                if (listViewResources.SelectedItems.Count > 0)
+                {
+                    Cursor = Cursors.WaitCursor;
+                    //var sr = dataGridResources.SelectedRows[0];
+                    var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));    // (Guid)sr.Cells[0].Value;
+                    var content = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.ContentArrayBytes).FirstOrDefault();
+                    var type = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.FileType).FirstOrDefault();
+                    UpdatePicResource(content, type);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"OnSelectedResourceItemChanged error: {ex.Message}");
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private void ModelToControlsTasks()
+        {
+            listViewTasks.Clear();
+
+            foreach (var task in _com.Model.Tasks)
+            {
+                var itemList = new ListViewItem(task.UserFullName);
+                itemList.Name = task.NoteTaskId.ToString();
+                //itemList.BackColor = Color.LightGray;
+                itemList.SubItems.Add(task.Description);
+                itemList.SubItems.Add(task.Tags);
+                itemList.SubItems.Add(task.Priority.ToString());
+                itemList.SubItems.Add(task.Resolved.ToString());
+                itemList.SubItems.Add(task.EstimatedTime.ToString());
+                itemList.SubItems.Add(task.SpentTime.ToString());
+                itemList.SubItems.Add(task.DifficultyLevel.ToString());
+                itemList.SubItems.Add(task.ExpectedStartDate.ToString());
+                itemList.SubItems.Add(task.ExpectedEndDate.ToString());
+                itemList.SubItems.Add(task.StartDate.ToString());
+                itemList.SubItems.Add(task.EndDate.ToString());
+                listViewTasks.Items.Add(itemList);
+            }
+
+            // Width of -2 indicates auto-size.
+            listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);           
+            listViewTasks.Columns.Add("Tags", 100, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Resolved", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Est. time", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Ex start", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Es end", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Start", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("End", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Description", -2, HorizontalAlignment.Left);
+        }
+
+        private void ModelToControlsAlarms()
+        {
+            listViewAlarms.Clear();
+
+            foreach (var msg in _com.Model.Messages)
+            {
+                var itemList = new ListViewItem(msg.UserFullName);
+                itemList.Name = msg.KMessageId.ToString();
+                //itemList.BackColor = Color.LightGray;
+                itemList.SubItems.Add(msg.AlarmDateTime.ToString());
+                itemList.SubItems.Add(msg.AlarmActivated.ToString());
+                listViewAlarms.Items.Add(itemList);
+            }
+
+            // Width of -2 indicates auto-size.
+            listViewAlarms.Columns.Add("User", 200, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Date time", 200 , HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Activated", 200, HorizontalAlignment.Left);
+        }
+
+
+        private void SizeLastColumn(ListView lv)
+        {
+            lv.Columns[lv.Columns.Count - 1].Width = -2;
+        }
+
+        private void listView_Resize(object sender, EventArgs e)
+        {
+            SizeLastColumn((ListView)sender);
+        }
+
     }
 }

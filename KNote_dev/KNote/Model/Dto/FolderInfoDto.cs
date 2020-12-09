@@ -9,6 +9,8 @@ namespace KNote.Model.Dto
 {
     public class FolderInfoDto : DtoModelBase
     {
+        private const string KMSG = "Attribute {0} is required. ";
+
         #region Properties 
 
         private Guid _folderId;
@@ -68,7 +70,7 @@ namespace KNote.Model.Dto
         }
 
         private string _name;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(256)]
         public string Name
         {

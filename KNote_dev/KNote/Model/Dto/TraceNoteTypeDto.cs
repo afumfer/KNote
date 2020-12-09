@@ -9,6 +9,8 @@ namespace KNote.Model.Dto
 {
     public class TraceNoteTypeDto : DtoModelBase
     {
+        private const string KMSG = "Attribute {0} is required. ";
+
         #region Property definitions
 
         private Guid _traceNoteTypeId;        
@@ -26,7 +28,7 @@ namespace KNote.Model.Dto
         }
 
         private string _name;
-        [Required(ErrorMessage = "KMSG: El nombre del tipo es requerido")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(256)]
         public string Name
         {

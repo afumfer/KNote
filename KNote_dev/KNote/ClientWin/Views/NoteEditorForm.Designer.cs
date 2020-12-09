@@ -54,49 +54,52 @@
             this.textFolderNumber = new System.Windows.Forms.TextBox();
             this.textNoteNumber = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.button22 = new System.Windows.Forms.Button();
-            this.button23 = new System.Windows.Forms.Button();
-            this.button24 = new System.Windows.Forms.Button();
+            this.buttonEditMarkdown = new System.Windows.Forms.Button();
+            this.buttonViewHtml = new System.Windows.Forms.Button();
+            this.buttonEditText = new System.Windows.Forms.Button();
             this.textPriority = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.textTags = new System.Windows.Forms.TextBox();
             this.textFolder = new System.Windows.Forms.TextBox();
             this.textTopic = new System.Windows.Forms.TextBox();
             this.textDescription = new System.Windows.Forms.TextBox();
-            this.buttonSelCarpeta = new System.Windows.Forms.Button();
+            this.buttonFolderSearch = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabAttributes = new System.Windows.Forms.TabPage();
+            this.listViewAttributes = new System.Windows.Forms.ListView();
             this.textNoteType = new System.Windows.Forms.TextBox();
-            this.button4 = new System.Windows.Forms.Button();
+            this.buttonNoteType = new System.Windows.Forms.Button();
             this.label15 = new System.Windows.Forms.Label();
-            this.button6 = new System.Windows.Forms.Button();
-            this.dataGridAttributes = new System.Windows.Forms.DataGridView();
+            this.buttonAttributeEdit = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.tabResources = new System.Windows.Forms.TabPage();
+            this.labelPreview = new System.Windows.Forms.Label();
+            this.listViewResources = new System.Windows.Forms.ListView();
             this.picResource = new System.Windows.Forms.PictureBox();
-            this.button10 = new System.Windows.Forms.Button();
-            this.button11 = new System.Windows.Forms.Button();
-            this.button12 = new System.Windows.Forms.Button();
-            this.dataGridResources = new System.Windows.Forms.DataGridView();
+            this.buttonResourceEdit = new System.Windows.Forms.Button();
+            this.buttonResourceDelete = new System.Windows.Forms.Button();
+            this.buttonResourceAdd = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
             this.tabTasks = new System.Windows.Forms.TabPage();
-            this.button7 = new System.Windows.Forms.Button();
-            this.button8 = new System.Windows.Forms.Button();
-            this.button9 = new System.Windows.Forms.Button();
-            this.dataGridTasks = new System.Windows.Forms.DataGridView();
+            this.listViewTasks = new System.Windows.Forms.ListView();
+            this.buttonTaskEdit = new System.Windows.Forms.Button();
+            this.buttonTaskDelete = new System.Windows.Forms.Button();
+            this.buttonTaskAdd = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.tabAlarms = new System.Windows.Forms.TabPage();
+            this.listViewAlarms = new System.Windows.Forms.ListView();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.buttonAddAlarmForMe = new System.Windows.Forms.Button();
-            this.dataGridAlarms = new System.Windows.Forms.DataGridView();
             this.label4 = new System.Windows.Forms.Label();
             this.tabCode = new System.Windows.Forms.TabPage();
             this.textScriptCode = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.tabTraceNotes = new System.Windows.Forms.TabPage();
+            this.listView2 = new System.Windows.Forms.ListView();
+            this.listView1 = new System.Windows.Forms.ListView();
             this.textTraceNodeType = new System.Windows.Forms.TextBox();
             this.button3 = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
@@ -106,8 +109,6 @@
             this.button13 = new System.Windows.Forms.Button();
             this.button14 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
-            this.dataGridTraceTo = new System.Windows.Forms.DataGridView();
-            this.dataGridTraceFrom = new System.Windows.Forms.DataGridView();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolBarNoteEditor.SuspendLayout();
@@ -115,18 +116,12 @@
             this.tabNoteData.SuspendLayout();
             this.tabBasicData.SuspendLayout();
             this.tabAttributes.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridAttributes)).BeginInit();
             this.tabResources.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridResources)).BeginInit();
             this.tabTasks.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).BeginInit();
             this.tabAlarms.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridAlarms)).BeginInit();
             this.tabCode.SuspendLayout();
             this.tabTraceNotes.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridTraceTo)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridTraceFrom)).BeginInit();
             this.SuspendLayout();
             // 
             // toolBarNoteEditor
@@ -327,16 +322,16 @@
             this.tabBasicData.Controls.Add(this.textFolderNumber);
             this.tabBasicData.Controls.Add(this.textNoteNumber);
             this.tabBasicData.Controls.Add(this.label7);
-            this.tabBasicData.Controls.Add(this.button22);
-            this.tabBasicData.Controls.Add(this.button23);
-            this.tabBasicData.Controls.Add(this.button24);
+            this.tabBasicData.Controls.Add(this.buttonEditMarkdown);
+            this.tabBasicData.Controls.Add(this.buttonViewHtml);
+            this.tabBasicData.Controls.Add(this.buttonEditText);
             this.tabBasicData.Controls.Add(this.textPriority);
             this.tabBasicData.Controls.Add(this.label6);
             this.tabBasicData.Controls.Add(this.textTags);
             this.tabBasicData.Controls.Add(this.textFolder);
             this.tabBasicData.Controls.Add(this.textTopic);
             this.tabBasicData.Controls.Add(this.textDescription);
-            this.tabBasicData.Controls.Add(this.buttonSelCarpeta);
+            this.tabBasicData.Controls.Add(this.buttonFolderSearch);
             this.tabBasicData.Controls.Add(this.label3);
             this.tabBasicData.Controls.Add(this.label2);
             this.tabBasicData.Controls.Add(this.label1);
@@ -382,38 +377,38 @@
             this.label7.Text = "Priority:";
             this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // button22
+            // buttonEditMarkdown
             // 
-            this.button22.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button22.Location = new System.Drawing.Point(693, 103);
-            this.button22.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button22.Name = "button22";
-            this.button22.Size = new System.Drawing.Size(90, 27);
-            this.button22.TabIndex = 49;
-            this.button22.Text = "Markdown";
-            this.button22.UseVisualStyleBackColor = true;
+            this.buttonEditMarkdown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonEditMarkdown.Location = new System.Drawing.Point(693, 108);
+            this.buttonEditMarkdown.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonEditMarkdown.Name = "buttonEditMarkdown";
+            this.buttonEditMarkdown.Size = new System.Drawing.Size(90, 22);
+            this.buttonEditMarkdown.TabIndex = 49;
+            this.buttonEditMarkdown.Text = "Markdown";
+            this.buttonEditMarkdown.UseVisualStyleBackColor = true;
             // 
-            // button23
+            // buttonViewHtml
             // 
-            this.button23.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button23.Location = new System.Drawing.Point(640, 103);
-            this.button23.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button23.Name = "button23";
-            this.button23.Size = new System.Drawing.Size(46, 27);
-            this.button23.TabIndex = 48;
-            this.button23.Text = "Html";
-            this.button23.UseVisualStyleBackColor = true;
+            this.buttonViewHtml.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonViewHtml.Location = new System.Drawing.Point(646, 108);
+            this.buttonViewHtml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonViewHtml.Name = "buttonViewHtml";
+            this.buttonViewHtml.Size = new System.Drawing.Size(46, 22);
+            this.buttonViewHtml.TabIndex = 48;
+            this.buttonViewHtml.Text = "Html";
+            this.buttonViewHtml.UseVisualStyleBackColor = true;
             // 
-            // button24
+            // buttonEditText
             // 
-            this.button24.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button24.Location = new System.Drawing.Point(589, 103);
-            this.button24.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button24.Name = "button24";
-            this.button24.Size = new System.Drawing.Size(44, 27);
-            this.button24.TabIndex = 47;
-            this.button24.Text = "Text";
-            this.button24.UseVisualStyleBackColor = true;
+            this.buttonEditText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonEditText.Location = new System.Drawing.Point(601, 108);
+            this.buttonEditText.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonEditText.Name = "buttonEditText";
+            this.buttonEditText.Size = new System.Drawing.Size(44, 22);
+            this.buttonEditText.TabIndex = 47;
+            this.buttonEditText.Text = "Text";
+            this.buttonEditText.UseVisualStyleBackColor = true;
             // 
             // textPriority
             // 
@@ -480,18 +475,18 @@
             this.textDescription.Size = new System.Drawing.Size(773, 432);
             this.textDescription.TabIndex = 5;
             // 
-            // buttonSelCarpeta
+            // buttonFolderSearch
             // 
-            this.buttonSelCarpeta.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelCarpeta.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonSelCarpeta.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonSelCarpeta.Location = new System.Drawing.Point(756, 38);
-            this.buttonSelCarpeta.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonSelCarpeta.Name = "buttonSelCarpeta";
-            this.buttonSelCarpeta.Size = new System.Drawing.Size(27, 23);
-            this.buttonSelCarpeta.TabIndex = 39;
-            this.buttonSelCarpeta.Text = "...";
-            this.buttonSelCarpeta.UseVisualStyleBackColor = false;
+            this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.buttonFolderSearch.Location = new System.Drawing.Point(756, 38);
+            this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonFolderSearch.Name = "buttonFolderSearch";
+            this.buttonFolderSearch.Size = new System.Drawing.Size(27, 23);
+            this.buttonFolderSearch.TabIndex = 39;
+            this.buttonFolderSearch.Text = "...";
+            this.buttonFolderSearch.UseVisualStyleBackColor = false;
             // 
             // label3
             // 
@@ -525,11 +520,11 @@
             // 
             // tabAttributes
             // 
+            this.tabAttributes.Controls.Add(this.listViewAttributes);
             this.tabAttributes.Controls.Add(this.textNoteType);
-            this.tabAttributes.Controls.Add(this.button4);
+            this.tabAttributes.Controls.Add(this.buttonNoteType);
             this.tabAttributes.Controls.Add(this.label15);
-            this.tabAttributes.Controls.Add(this.button6);
-            this.tabAttributes.Controls.Add(this.dataGridAttributes);
+            this.tabAttributes.Controls.Add(this.buttonAttributeEdit);
             this.tabAttributes.Controls.Add(this.label10);
             this.tabAttributes.ImageIndex = 5;
             this.tabAttributes.Location = new System.Drawing.Point(4, 30);
@@ -540,6 +535,19 @@
             this.tabAttributes.Text = "Attributes  ";
             this.tabAttributes.UseVisualStyleBackColor = true;
             // 
+            // listViewAttributes
+            // 
+            this.listViewAttributes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewAttributes.HideSelection = false;
+            this.listViewAttributes.Location = new System.Drawing.Point(10, 79);
+            this.listViewAttributes.Name = "listViewAttributes";
+            this.listViewAttributes.Size = new System.Drawing.Size(774, 478);
+            this.listViewAttributes.TabIndex = 46;
+            this.listViewAttributes.UseCompatibleStateImageBehavior = false;
+            this.listViewAttributes.Resize += new System.EventHandler(this.listView_Resize);
+            // 
             // textNoteType
             // 
             this.textNoteType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -549,21 +557,22 @@
             this.textNoteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textNoteType.MaxLength = 255;
             this.textNoteType.Name = "textNoteType";
-            this.textNoteType.Size = new System.Drawing.Size(647, 23);
+            this.textNoteType.ShortcutsEnabled = false;
+            this.textNoteType.Size = new System.Drawing.Size(650, 23);
             this.textNoteType.TabIndex = 44;
             // 
-            // button4
+            // buttonNoteType
             // 
-            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button4.BackColor = System.Drawing.SystemColors.Control;
-            this.button4.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button4.Location = new System.Drawing.Point(758, 16);
-            this.button4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(26, 26);
-            this.button4.TabIndex = 45;
-            this.button4.Text = "...";
-            this.button4.UseVisualStyleBackColor = false;
+            this.buttonNoteType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonNoteType.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonNoteType.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.buttonNoteType.Location = new System.Drawing.Point(758, 17);
+            this.buttonNoteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonNoteType.Name = "buttonNoteType";
+            this.buttonNoteType.Size = new System.Drawing.Size(27, 23);
+            this.buttonNoteType.TabIndex = 45;
+            this.buttonNoteType.Text = "...";
+            this.buttonNoteType.UseVisualStyleBackColor = false;
             // 
             // label15
             // 
@@ -575,32 +584,16 @@
             this.label15.Text = "Node type:";
             this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // button6
+            // buttonAttributeEdit
             // 
-            this.button6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button6.Location = new System.Drawing.Point(758, 52);
-            this.button6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(26, 26);
-            this.button6.TabIndex = 12;
-            this.button6.Text = "...";
-            this.button6.UseVisualStyleBackColor = true;
-            // 
-            // dataGridAttributes
-            // 
-            this.dataGridAttributes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridAttributes.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridAttributes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridAttributes.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
-            this.dataGridAttributes.Location = new System.Drawing.Point(7, 82);
-            this.dataGridAttributes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dataGridAttributes.Name = "dataGridAttributes";
-            this.dataGridAttributes.ReadOnly = true;
-            this.dataGridAttributes.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridAttributes.Size = new System.Drawing.Size(780, 438);
-            this.dataGridAttributes.TabIndex = 4;
+            this.buttonAttributeEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAttributeEdit.Location = new System.Drawing.Point(758, 54);
+            this.buttonAttributeEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonAttributeEdit.Name = "buttonAttributeEdit";
+            this.buttonAttributeEdit.Size = new System.Drawing.Size(27, 23);
+            this.buttonAttributeEdit.TabIndex = 12;
+            this.buttonAttributeEdit.Text = "...";
+            this.buttonAttributeEdit.UseVisualStyleBackColor = true;
             // 
             // label10
             // 
@@ -614,11 +607,12 @@
             // 
             // tabResources
             // 
+            this.tabResources.Controls.Add(this.labelPreview);
+            this.tabResources.Controls.Add(this.listViewResources);
             this.tabResources.Controls.Add(this.picResource);
-            this.tabResources.Controls.Add(this.button10);
-            this.tabResources.Controls.Add(this.button11);
-            this.tabResources.Controls.Add(this.button12);
-            this.tabResources.Controls.Add(this.dataGridResources);
+            this.tabResources.Controls.Add(this.buttonResourceEdit);
+            this.tabResources.Controls.Add(this.buttonResourceDelete);
+            this.tabResources.Controls.Add(this.buttonResourceAdd);
             this.tabResources.Controls.Add(this.label12);
             this.tabResources.ImageIndex = 3;
             this.tabResources.Location = new System.Drawing.Point(4, 30);
@@ -629,71 +623,80 @@
             this.tabResources.Text = "Resources  ";
             this.tabResources.UseVisualStyleBackColor = true;
             // 
+            // labelPreview
+            // 
+            this.labelPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelPreview.AutoSize = true;
+            this.labelPreview.Location = new System.Drawing.Point(689, 18);
+            this.labelPreview.Name = "labelPreview";
+            this.labelPreview.Size = new System.Drawing.Size(99, 15);
+            this.labelPreview.TabIndex = 15;
+            this.labelPreview.Text = "Preview resource:";
+            // 
+            // listViewResources
+            // 
+            this.listViewResources.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewResources.HideSelection = false;
+            this.listViewResources.Location = new System.Drawing.Point(5, 36);
+            this.listViewResources.Name = "listViewResources";
+            this.listViewResources.Size = new System.Drawing.Size(381, 529);
+            this.listViewResources.TabIndex = 14;
+            this.listViewResources.UseCompatibleStateImageBehavior = false;
+            this.listViewResources.SelectedIndexChanged += new System.EventHandler(this.listViewResources_SelectedIndexChanged);
+            this.listViewResources.Resize += new System.EventHandler(this.listView_Resize);
+            // 
             // picResource
             // 
             this.picResource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.picResource.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("picResource.BackgroundImage")));
             this.picResource.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picResource.Location = new System.Drawing.Point(384, 46);
+            this.picResource.Location = new System.Drawing.Point(396, 36);
             this.picResource.Name = "picResource";
-            this.picResource.Size = new System.Drawing.Size(404, 474);
+            this.picResource.Size = new System.Drawing.Size(392, 530);
             this.picResource.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picResource.TabIndex = 13;
             this.picResource.TabStop = false;
             // 
-            // button10
+            // buttonResourceEdit
             // 
-            this.button10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button10.Location = new System.Drawing.Point(756, 10);
-            this.button10.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button10.Name = "button10";
-            this.button10.Size = new System.Drawing.Size(27, 27);
-            this.button10.TabIndex = 12;
-            this.button10.Text = "...";
-            this.button10.UseVisualStyleBackColor = true;
+            this.buttonResourceEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonResourceEdit.Location = new System.Drawing.Point(360, 10);
+            this.buttonResourceEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonResourceEdit.Name = "buttonResourceEdit";
+            this.buttonResourceEdit.Size = new System.Drawing.Size(27, 23);
+            this.buttonResourceEdit.TabIndex = 12;
+            this.buttonResourceEdit.Text = "...";
+            this.buttonResourceEdit.UseVisualStyleBackColor = true;
             // 
-            // button11
+            // buttonResourceDelete
             // 
-            this.button11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button11.Location = new System.Drawing.Point(724, 10);
-            this.button11.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(27, 27);
-            this.button11.TabIndex = 11;
-            this.button11.Text = "-";
-            this.button11.UseVisualStyleBackColor = true;
+            this.buttonResourceDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonResourceDelete.Location = new System.Drawing.Point(330, 10);
+            this.buttonResourceDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonResourceDelete.Name = "buttonResourceDelete";
+            this.buttonResourceDelete.Size = new System.Drawing.Size(27, 23);
+            this.buttonResourceDelete.TabIndex = 11;
+            this.buttonResourceDelete.Text = "-";
+            this.buttonResourceDelete.UseVisualStyleBackColor = true;
             // 
-            // button12
+            // buttonResourceAdd
             // 
-            this.button12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button12.Location = new System.Drawing.Point(690, 10);
-            this.button12.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(27, 27);
-            this.button12.TabIndex = 10;
-            this.button12.Text = "+";
-            this.button12.UseVisualStyleBackColor = true;
-            // 
-            // dataGridResources
-            // 
-            this.dataGridResources.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridResources.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridResources.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridResources.Location = new System.Drawing.Point(7, 46);
-            this.dataGridResources.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dataGridResources.Name = "dataGridResources";
-            this.dataGridResources.ReadOnly = true;
-            this.dataGridResources.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridResources.Size = new System.Drawing.Size(370, 474);
-            this.dataGridResources.TabIndex = 6;
-            this.dataGridResources.SelectionChanged += new System.EventHandler(this.dataGridResources_SelectionChanged);
+            this.buttonResourceAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonResourceAdd.Location = new System.Drawing.Point(300, 10);
+            this.buttonResourceAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonResourceAdd.Name = "buttonResourceAdd";
+            this.buttonResourceAdd.Size = new System.Drawing.Size(27, 23);
+            this.buttonResourceAdd.TabIndex = 10;
+            this.buttonResourceAdd.Text = "+";
+            this.buttonResourceAdd.UseVisualStyleBackColor = true;
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(7, 16);
+            this.label12.Location = new System.Drawing.Point(6, 14);
             this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(63, 15);
@@ -702,10 +705,10 @@
             // 
             // tabTasks
             // 
-            this.tabTasks.Controls.Add(this.button7);
-            this.tabTasks.Controls.Add(this.button8);
-            this.tabTasks.Controls.Add(this.button9);
-            this.tabTasks.Controls.Add(this.dataGridTasks);
+            this.tabTasks.Controls.Add(this.listViewTasks);
+            this.tabTasks.Controls.Add(this.buttonTaskEdit);
+            this.tabTasks.Controls.Add(this.buttonTaskDelete);
+            this.tabTasks.Controls.Add(this.buttonTaskAdd);
             this.tabTasks.Controls.Add(this.label11);
             this.tabTasks.ImageIndex = 6;
             this.tabTasks.Location = new System.Drawing.Point(4, 30);
@@ -716,58 +719,56 @@
             this.tabTasks.Text = "Tasks  ";
             this.tabTasks.UseVisualStyleBackColor = true;
             // 
-            // button7
+            // listViewTasks
             // 
-            this.button7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button7.Location = new System.Drawing.Point(760, 16);
-            this.button7.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(27, 27);
-            this.button7.TabIndex = 12;
-            this.button7.Text = "...";
-            this.button7.UseVisualStyleBackColor = true;
-            // 
-            // button8
-            // 
-            this.button8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button8.Location = new System.Drawing.Point(725, 16);
-            this.button8.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(27, 27);
-            this.button8.TabIndex = 11;
-            this.button8.Text = "-";
-            this.button8.UseVisualStyleBackColor = true;
-            // 
-            // button9
-            // 
-            this.button9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button9.Location = new System.Drawing.Point(690, 16);
-            this.button9.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(27, 27);
-            this.button9.TabIndex = 10;
-            this.button9.Text = "+";
-            this.button9.UseVisualStyleBackColor = true;
-            // 
-            // dataGridTasks
-            // 
-            this.dataGridTasks.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.listViewTasks.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridTasks.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridTasks.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridTasks.Location = new System.Drawing.Point(5, 46);
-            this.dataGridTasks.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dataGridTasks.Name = "dataGridTasks";
-            this.dataGridTasks.ReadOnly = true;
-            this.dataGridTasks.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridTasks.Size = new System.Drawing.Size(782, 474);
-            this.dataGridTasks.TabIndex = 6;
+            this.listViewTasks.HideSelection = false;
+            this.listViewTasks.Location = new System.Drawing.Point(5, 36);
+            this.listViewTasks.Name = "listViewTasks";
+            this.listViewTasks.Size = new System.Drawing.Size(782, 530);
+            this.listViewTasks.TabIndex = 13;
+            this.listViewTasks.UseCompatibleStateImageBehavior = false;
+            this.listViewTasks.Resize += new System.EventHandler(this.listView_Resize);
+            // 
+            // buttonTaskEdit
+            // 
+            this.buttonTaskEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonTaskEdit.Location = new System.Drawing.Point(760, 10);
+            this.buttonTaskEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTaskEdit.Name = "buttonTaskEdit";
+            this.buttonTaskEdit.Size = new System.Drawing.Size(27, 23);
+            this.buttonTaskEdit.TabIndex = 12;
+            this.buttonTaskEdit.Text = "...";
+            this.buttonTaskEdit.UseVisualStyleBackColor = true;
+            // 
+            // buttonTaskDelete
+            // 
+            this.buttonTaskDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonTaskDelete.Location = new System.Drawing.Point(725, 10);
+            this.buttonTaskDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTaskDelete.Name = "buttonTaskDelete";
+            this.buttonTaskDelete.Size = new System.Drawing.Size(27, 23);
+            this.buttonTaskDelete.TabIndex = 11;
+            this.buttonTaskDelete.Text = "-";
+            this.buttonTaskDelete.UseVisualStyleBackColor = true;
+            // 
+            // buttonTaskAdd
+            // 
+            this.buttonTaskAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonTaskAdd.Location = new System.Drawing.Point(690, 10);
+            this.buttonTaskAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTaskAdd.Name = "buttonTaskAdd";
+            this.buttonTaskAdd.Size = new System.Drawing.Size(27, 23);
+            this.buttonTaskAdd.TabIndex = 10;
+            this.buttonTaskAdd.Text = "+";
+            this.buttonTaskAdd.UseVisualStyleBackColor = true;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(5, 16);
+            this.label11.Location = new System.Drawing.Point(6, 14);
             this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(37, 15);
@@ -776,10 +777,10 @@
             // 
             // tabAlarms
             // 
+            this.tabAlarms.Controls.Add(this.listViewAlarms);
             this.tabAlarms.Controls.Add(this.button2);
             this.tabAlarms.Controls.Add(this.button1);
             this.tabAlarms.Controls.Add(this.buttonAddAlarmForMe);
-            this.tabAlarms.Controls.Add(this.dataGridAlarms);
             this.tabAlarms.Controls.Add(this.label4);
             this.tabAlarms.ImageIndex = 0;
             this.tabAlarms.Location = new System.Drawing.Point(4, 30);
@@ -791,13 +792,25 @@
             this.tabAlarms.Text = "Alarms  ";
             this.tabAlarms.UseVisualStyleBackColor = true;
             // 
+            // listViewAlarms
+            // 
+            this.listViewAlarms.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewAlarms.HideSelection = false;
+            this.listViewAlarms.Location = new System.Drawing.Point(6, 34);
+            this.listViewAlarms.Name = "listViewAlarms";
+            this.listViewAlarms.Size = new System.Drawing.Size(781, 532);
+            this.listViewAlarms.TabIndex = 7;
+            this.listViewAlarms.UseCompatibleStateImageBehavior = false;
+            // 
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(760, 13);
+            this.button2.Location = new System.Drawing.Point(760, 10);
             this.button2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(27, 27);
+            this.button2.Size = new System.Drawing.Size(27, 23);
             this.button2.TabIndex = 6;
             this.button2.Text = "...";
             this.button2.UseVisualStyleBackColor = true;
@@ -805,10 +818,10 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(725, 13);
+            this.button1.Location = new System.Drawing.Point(725, 10);
             this.button1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(27, 27);
+            this.button1.Size = new System.Drawing.Size(27, 23);
             this.button1.TabIndex = 5;
             this.button1.Text = "-";
             this.button1.UseVisualStyleBackColor = true;
@@ -816,31 +829,18 @@
             // buttonAddAlarmForMe
             // 
             this.buttonAddAlarmForMe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAlarmForMe.Location = new System.Drawing.Point(690, 13);
+            this.buttonAddAlarmForMe.Location = new System.Drawing.Point(690, 10);
             this.buttonAddAlarmForMe.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonAddAlarmForMe.Name = "buttonAddAlarmForMe";
-            this.buttonAddAlarmForMe.Size = new System.Drawing.Size(27, 27);
+            this.buttonAddAlarmForMe.Size = new System.Drawing.Size(27, 23);
             this.buttonAddAlarmForMe.TabIndex = 4;
             this.buttonAddAlarmForMe.Text = "+";
             this.buttonAddAlarmForMe.UseVisualStyleBackColor = true;
             // 
-            // dataGridAlarms
-            // 
-            this.dataGridAlarms.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridAlarms.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridAlarms.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridAlarms.Location = new System.Drawing.Point(7, 43);
-            this.dataGridAlarms.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dataGridAlarms.Name = "dataGridAlarms";
-            this.dataGridAlarms.Size = new System.Drawing.Size(780, 477);
-            this.dataGridAlarms.TabIndex = 2;
-            // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 18);
+            this.label4.Location = new System.Drawing.Point(6, 16);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(47, 15);
@@ -866,17 +866,17 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textScriptCode.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textScriptCode.Location = new System.Drawing.Point(7, 29);
+            this.textScriptCode.Location = new System.Drawing.Point(7, 34);
             this.textScriptCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textScriptCode.Multiline = true;
             this.textScriptCode.Name = "textScriptCode";
-            this.textScriptCode.Size = new System.Drawing.Size(780, 491);
+            this.textScriptCode.Size = new System.Drawing.Size(780, 532);
             this.textScriptCode.TabIndex = 6;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(7, 7);
+            this.label9.Location = new System.Drawing.Point(6, 16);
             this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(69, 15);
@@ -885,6 +885,8 @@
             // 
             // tabTraceNotes
             // 
+            this.tabTraceNotes.Controls.Add(this.listView2);
+            this.tabTraceNotes.Controls.Add(this.listView1);
             this.tabTraceNotes.Controls.Add(this.textTraceNodeType);
             this.tabTraceNotes.Controls.Add(this.button3);
             this.tabTraceNotes.Controls.Add(this.label5);
@@ -894,8 +896,6 @@
             this.tabTraceNotes.Controls.Add(this.button13);
             this.tabTraceNotes.Controls.Add(this.button14);
             this.tabTraceNotes.Controls.Add(this.button15);
-            this.tabTraceNotes.Controls.Add(this.dataGridTraceTo);
-            this.tabTraceNotes.Controls.Add(this.dataGridTraceFrom);
             this.tabTraceNotes.Controls.Add(this.label13);
             this.tabTraceNotes.Controls.Add(this.label14);
             this.tabTraceNotes.ImageIndex = 2;
@@ -906,6 +906,29 @@
             this.tabTraceNotes.TabIndex = 5;
             this.tabTraceNotes.Text = "Trace notes  ";
             this.tabTraceNotes.UseVisualStyleBackColor = true;
+            // 
+            // listView2
+            // 
+            this.listView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listView2.HideSelection = false;
+            this.listView2.Location = new System.Drawing.Point(395, 89);
+            this.listView2.Name = "listView2";
+            this.listView2.Size = new System.Drawing.Size(393, 477);
+            this.listView2.TabIndex = 44;
+            this.listView2.UseCompatibleStateImageBehavior = false;
+            // 
+            // listView1
+            // 
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.listView1.HideSelection = false;
+            this.listView1.Location = new System.Drawing.Point(11, 89);
+            this.listView1.Name = "listView1";
+            this.listView1.Size = new System.Drawing.Size(378, 477);
+            this.listView1.TabIndex = 43;
+            this.listView1.UseCompatibleStateImageBehavior = false;
             // 
             // textTraceNodeType
             // 
@@ -944,99 +967,68 @@
             // 
             // button16
             // 
-            this.button16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button16.Location = new System.Drawing.Point(760, 267);
+            this.button16.Location = new System.Drawing.Point(566, 60);
             this.button16.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(27, 27);
+            this.button16.Size = new System.Drawing.Size(27, 23);
             this.button16.TabIndex = 15;
             this.button16.Text = "...";
             this.button16.UseVisualStyleBackColor = true;
             // 
             // button17
             // 
-            this.button17.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button17.Location = new System.Drawing.Point(728, 267);
+            this.button17.Location = new System.Drawing.Point(534, 60);
             this.button17.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button17.Name = "button17";
-            this.button17.Size = new System.Drawing.Size(27, 27);
+            this.button17.Size = new System.Drawing.Size(27, 23);
             this.button17.TabIndex = 14;
             this.button17.Text = "-";
             this.button17.UseVisualStyleBackColor = true;
             // 
             // button18
             // 
-            this.button18.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button18.Location = new System.Drawing.Point(692, 267);
+            this.button18.Location = new System.Drawing.Point(498, 60);
             this.button18.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button18.Name = "button18";
-            this.button18.Size = new System.Drawing.Size(27, 27);
+            this.button18.Size = new System.Drawing.Size(27, 23);
             this.button18.TabIndex = 13;
             this.button18.Text = "+";
             this.button18.UseVisualStyleBackColor = true;
             // 
             // button13
             // 
-            this.button13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button13.Location = new System.Drawing.Point(760, 72);
+            this.button13.Location = new System.Drawing.Point(196, 60);
             this.button13.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(27, 27);
+            this.button13.Size = new System.Drawing.Size(27, 23);
             this.button13.TabIndex = 12;
             this.button13.Text = "...";
             this.button13.UseVisualStyleBackColor = true;
             // 
             // button14
             // 
-            this.button14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button14.Location = new System.Drawing.Point(726, 72);
+            this.button14.Location = new System.Drawing.Point(162, 60);
             this.button14.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(27, 27);
+            this.button14.Size = new System.Drawing.Size(27, 23);
             this.button14.TabIndex = 11;
             this.button14.Text = "-";
             this.button14.UseVisualStyleBackColor = true;
             // 
             // button15
             // 
-            this.button15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button15.Location = new System.Drawing.Point(692, 72);
+            this.button15.Location = new System.Drawing.Point(128, 60);
             this.button15.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button15.Name = "button15";
-            this.button15.Size = new System.Drawing.Size(27, 27);
+            this.button15.Size = new System.Drawing.Size(27, 23);
             this.button15.TabIndex = 10;
             this.button15.Text = "+";
             this.button15.UseVisualStyleBackColor = true;
             // 
-            // dataGridTraceTo
-            // 
-            this.dataGridTraceTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridTraceTo.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridTraceTo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridTraceTo.Location = new System.Drawing.Point(9, 300);
-            this.dataGridTraceTo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dataGridTraceTo.Name = "dataGridTraceTo";
-            this.dataGridTraceTo.Size = new System.Drawing.Size(778, 220);
-            this.dataGridTraceTo.TabIndex = 7;
-            // 
-            // dataGridTraceFrom
-            // 
-            this.dataGridTraceFrom.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridTraceFrom.BackgroundColor = System.Drawing.SystemColors.ControlLightLight;
-            this.dataGridTraceFrom.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridTraceFrom.Location = new System.Drawing.Point(9, 103);
-            this.dataGridTraceFrom.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.dataGridTraceFrom.Name = "dataGridTraceFrom";
-            this.dataGridTraceFrom.Size = new System.Drawing.Size(778, 141);
-            this.dataGridTraceFrom.TabIndex = 6;
-            // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(9, 273);
+            this.label13.Location = new System.Drawing.Point(397, 64);
             this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(81, 15);
@@ -1046,7 +1038,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(9, 78);
+            this.label14.Location = new System.Drawing.Point(13, 64);
             this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(99, 15);
@@ -1077,23 +1069,17 @@
             this.tabBasicData.PerformLayout();
             this.tabAttributes.ResumeLayout(false);
             this.tabAttributes.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridAttributes)).EndInit();
             this.tabResources.ResumeLayout(false);
             this.tabResources.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridResources)).EndInit();
             this.tabTasks.ResumeLayout(false);
             this.tabTasks.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).EndInit();
             this.tabAlarms.ResumeLayout(false);
             this.tabAlarms.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridAlarms)).EndInit();
             this.tabCode.ResumeLayout(false);
             this.tabCode.PerformLayout();
             this.tabTraceNotes.ResumeLayout(false);
             this.tabTraceNotes.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridTraceTo)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridTraceFrom)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1127,7 +1113,7 @@
         internal System.Windows.Forms.TextBox textFolder;
         internal System.Windows.Forms.TextBox textTopic;
         private System.Windows.Forms.TextBox textDescription;
-        private System.Windows.Forms.Button buttonSelCarpeta;
+        private System.Windows.Forms.Button buttonFolderSearch;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
@@ -1140,20 +1126,16 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button buttonAddAlarmForMe;
-        private System.Windows.Forms.DataGridView dataGridAlarms;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.DataGridView dataGridAttributes;
+        private System.Windows.Forms.Button buttonAttributeEdit;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Button button7;
-        private System.Windows.Forms.Button button8;
-        private System.Windows.Forms.Button button9;
-        private System.Windows.Forms.DataGridView dataGridTasks;
+        private System.Windows.Forms.Button buttonTaskEdit;
+        private System.Windows.Forms.Button buttonTaskDelete;
+        private System.Windows.Forms.Button buttonTaskAdd;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Button button10;
-        private System.Windows.Forms.Button button11;
-        private System.Windows.Forms.Button button12;
-        private System.Windows.Forms.DataGridView dataGridResources;
+        private System.Windows.Forms.Button buttonResourceEdit;
+        private System.Windows.Forms.Button buttonResourceDelete;
+        private System.Windows.Forms.Button buttonResourceAdd;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Button button16;
         private System.Windows.Forms.Button button17;
@@ -1161,19 +1143,17 @@
         private System.Windows.Forms.Button button13;
         private System.Windows.Forms.Button button14;
         private System.Windows.Forms.Button button15;
-        private System.Windows.Forms.DataGridView dataGridTraceTo;
-        private System.Windows.Forms.DataGridView dataGridTraceFrom;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox textScriptCode;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Button button22;
-        private System.Windows.Forms.Button button23;
-        private System.Windows.Forms.Button button24;
+        private System.Windows.Forms.Button buttonEditMarkdown;
+        private System.Windows.Forms.Button buttonViewHtml;
+        private System.Windows.Forms.Button buttonEditText;
         private System.Windows.Forms.TextBox textPriority;
         private System.Windows.Forms.Label label7;
         internal System.Windows.Forms.TextBox textNoteType;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button buttonNoteType;
         private System.Windows.Forms.Label label15;
         internal System.Windows.Forms.TextBox textTraceNodeType;
         private System.Windows.Forms.Button button3;
@@ -1181,5 +1161,12 @@
         private System.Windows.Forms.PictureBox picResource;
         private System.Windows.Forms.TextBox textFolderNumber;
         private System.Windows.Forms.TextBox textNoteNumber;
+        private System.Windows.Forms.ListView listViewAttributes;
+        private System.Windows.Forms.Label labelPreview;
+        private System.Windows.Forms.ListView listViewResources;
+        private System.Windows.Forms.ListView listViewTasks;
+        private System.Windows.Forms.ListView listViewAlarms;
+        private System.Windows.Forms.ListView listView2;
+        private System.Windows.Forms.ListView listView1;
     }
 }

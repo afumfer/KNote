@@ -9,6 +9,8 @@ namespace KNote.Model.Dto
 {
     public class NoteInfoDto : DtoModelBase
     {
+        private const string KMSG = "Attribute {0} is required. ";
+
         #region Property definitions
 
         private Guid _noteId;        
@@ -40,7 +42,7 @@ namespace KNote.Model.Dto
         }
 
         private string _topic;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(1024)]
         public string Topic
         {
@@ -173,7 +175,7 @@ namespace KNote.Model.Dto
         }
 
         private Guid _folderId;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         public Guid FolderId
         {
             get { return _folderId; }
@@ -233,7 +235,7 @@ namespace KNote.Model.Dto
             if (ModificationDateTime < CreationDateTime)
             {
                 results.Add(new ValidationResult
-                 ("KMSG: La fecha de modificación no puede ser mayor que la fecha de creación"
+                 ("KMSG: Modification date cannot be greater than creation date. "
                  , new[] { "ModificationDateTime", "CreationDateTime" }));
             }
 

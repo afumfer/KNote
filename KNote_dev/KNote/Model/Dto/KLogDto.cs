@@ -9,6 +9,8 @@ namespace KNote.Model.Dto
 {
     public class KLogDto : DtoModelBase
     {
+        private const string KMSG = "Attribute {0} is required. ";
+
         #region Property definitions
 
         private Guid _klogId;        
@@ -26,7 +28,7 @@ namespace KNote.Model.Dto
         }
 
         private Guid _entityId;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         public Guid EntityId
         {
             get { return _entityId; }
@@ -41,7 +43,7 @@ namespace KNote.Model.Dto
         }
 
         private string _entityName;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(64)]
         public string EntityName
         {
@@ -57,7 +59,7 @@ namespace KNote.Model.Dto
         }
 
         private DateTime _registryDateTime;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         public DateTime RegistryDateTime
         {
             get { return _registryDateTime; }
@@ -72,7 +74,7 @@ namespace KNote.Model.Dto
         }
 
         private string _registryMessage;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         public string RegistryMessage
         {
             get { return _registryMessage; }

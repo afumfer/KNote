@@ -9,6 +9,8 @@ namespace KNote.Model.Dto
 {
     public class NoteTaskDto : DtoModelBase
     {
+        private const string KMSG = "Attribute {0} is required. ";
+
         #region Property definitions
 
         private Guid _noteTaskId;        
@@ -83,7 +85,7 @@ namespace KNote.Model.Dto
         }
 
         private string _description;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         public string Description
         {
             get { return _description; }

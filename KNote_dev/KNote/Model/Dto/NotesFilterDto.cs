@@ -6,7 +6,7 @@ using System.Text;
 namespace KNote.Model.Dto
 {
     public class NotesFilterDto
-    {
+    {        
         public int Page { get; set; } = 1;
         public int NumRecords { get; set; } = 25;
         public int TotalPages { get; set; } = 0;
@@ -32,14 +32,14 @@ namespace KNote.Model.Dto
 
     public class AtrFilterDto
     {
-        
+        private const string KMSG = "Attribute {0} is required. ";
         //public string AtrKey { get; set; }
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         public Guid AtrId { get; set; }
 
         public string AtrName { get; set; }
         
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = KMSG)]
         public string Value { get; set; }
     }
 

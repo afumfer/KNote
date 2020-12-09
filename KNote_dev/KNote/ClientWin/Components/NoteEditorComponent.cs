@@ -18,6 +18,8 @@ namespace KNote.ClientWin.Components
     {
         #region Properties
        
+        public bool EditMode { get; set; }
+
         #endregion
 
         #region Constructor
@@ -67,7 +69,14 @@ namespace KNote.ClientWin.Components
                 
                 var response = await Service.Notes.NewExtendedAsync();
                 Model = response.Entity;
-                
+
+                // Evaluate whether to put the following default values in the service layer 
+                // (null values are by default, we need empty strings so that the IsDirty is 
+                //  not altered after leaving the view when there are no modifications).
+                Model.Note.Topic = "";
+                Model.Note.Tags = "";
+                Model.Note.Description = "";
+
                 // Context default values
                 Model.Note.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
                 Model.Note.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();

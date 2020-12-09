@@ -9,6 +9,8 @@ namespace KNote.Model.Dto
 {
     public class ResourceDto : DtoModelBase
     {
+        private const string KMSG = "Attribute {0} is required. ";
+
         #region Property definitions
 
         private Guid _resourceId;        
@@ -26,7 +28,7 @@ namespace KNote.Model.Dto
         }
 
         private string _name;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage =KMSG)]
         [MaxLength(1024)]
         public string Name
         {
