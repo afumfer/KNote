@@ -72,9 +72,18 @@ namespace KNote.Model.Dto
             {
                 if (Description == null || Description.Length < 5)
                     return false;
+                
+                if (ContentType == "html")
+                    return true;
 
                 var tmp = Description.Substring(0, 5);
-                return (tmp == "<BODY") ? true : false;
+                if (tmp == "<BODY")
+                {
+                    ContentType = "html";
+                    return true;
+                }
+                else
+                    return false;
             }
 
             set { }

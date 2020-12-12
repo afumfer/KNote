@@ -255,6 +255,12 @@ namespace KNote.ClientWin.Components
 
         public void AddNote()
         {
+            if(SelectedServiceRef == null)
+            {
+                View.ShowInfo("There is no archiver selected to create new note.");
+                return;
+            }
+
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.AddedEntity += NoteEditorComponent_AddedEntity;
             noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
@@ -332,7 +338,10 @@ namespace KNote.ClientWin.Components
         {
             // TODO: !!! coger aquí la entidad que viene en el parámetro en lugar de acudir de nuevo a la BD ??        
             if(NotesSelectorComponent.ListEntities.Count == 0)
+            {
                 await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
+                _selectedNoteInfo = e.Entity.Note.GetSimpleDto<NoteInfoDto>();
+            }
 
             NotesSelectorComponent.AddItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
         }

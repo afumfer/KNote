@@ -107,7 +107,6 @@ namespace KNote.ClientWin.Components
                     updateNote.SetSimpleDto(note);
                     View.RefreshItem(updateNote);
                 }
-
             }
         }
 

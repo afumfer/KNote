@@ -51,6 +51,8 @@
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabNoteData = new System.Windows.Forms.TabControl();
             this.tabBasicData = new System.Windows.Forms.TabPage();
+            this.labelLoadingHtml = new System.Windows.Forms.Label();
+            this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.textFolderNumber = new System.Windows.Forms.TextBox();
             this.textNoteNumber = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -319,8 +321,8 @@
             // 
             // tabBasicData
             // 
-            this.tabBasicData.Controls.Add(this.textFolderNumber);
-            this.tabBasicData.Controls.Add(this.textNoteNumber);
+            this.tabBasicData.Controls.Add(this.labelLoadingHtml);
+            this.tabBasicData.Controls.Add(this.htmlDescription);
             this.tabBasicData.Controls.Add(this.label7);
             this.tabBasicData.Controls.Add(this.buttonEditMarkdown);
             this.tabBasicData.Controls.Add(this.buttonViewHtml);
@@ -335,6 +337,8 @@
             this.tabBasicData.Controls.Add(this.label3);
             this.tabBasicData.Controls.Add(this.label2);
             this.tabBasicData.Controls.Add(this.label1);
+            this.tabBasicData.Controls.Add(this.textNoteNumber);
+            this.tabBasicData.Controls.Add(this.textFolderNumber);
             this.tabBasicData.ImageIndex = 1;
             this.tabBasicData.Location = new System.Drawing.Point(4, 30);
             this.tabBasicData.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -344,6 +348,28 @@
             this.tabBasicData.TabIndex = 0;
             this.tabBasicData.Text = "Basic data  ";
             this.tabBasicData.UseVisualStyleBackColor = true;
+            // 
+            // labelLoadingHtml
+            // 
+            this.labelLoadingHtml.AutoSize = true;
+            this.labelLoadingHtml.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.labelLoadingHtml.Location = new System.Drawing.Point(101, 108);
+            this.labelLoadingHtml.Name = "labelLoadingHtml";
+            this.labelLoadingHtml.Size = new System.Drawing.Size(138, 15);
+            this.labelLoadingHtml.TabIndex = 54;
+            this.labelLoadingHtml.Text = "Loading html content ...";
+            this.labelLoadingHtml.Visible = false;
+            // 
+            // htmlDescription
+            // 
+            this.htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.htmlDescription.InnerText = null;
+            this.htmlDescription.Location = new System.Drawing.Point(356, 136);
+            this.htmlDescription.Name = "htmlDescription";
+            this.htmlDescription.Size = new System.Drawing.Size(426, 418);
+            this.htmlDescription.TabIndex = 53;
             // 
             // textFolderNumber
             // 
@@ -472,7 +498,7 @@
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
             this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textDescription.Size = new System.Drawing.Size(773, 432);
+            this.textDescription.Size = new System.Drawing.Size(333, 424);
             this.textDescription.TabIndex = 5;
             // 
             // buttonFolderSearch
@@ -1168,5 +1194,7 @@
         private System.Windows.Forms.ListView listViewAlarms;
         private System.Windows.Forms.ListView listView2;
         private System.Windows.Forms.ListView listView1;
+        private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
+        private System.Windows.Forms.Label labelLoadingHtml;
     }
 }

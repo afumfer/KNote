@@ -162,14 +162,37 @@ namespace KNote.ClientWin.Views
 
         private void ModelToControls()
         {
+            this.Cursor = Cursors.WaitCursor;
+
             // Basic data
-            textTopic.Text = _com.Model.Note.Topic;
+            textTopic.Text = _com.Model.Note.Topic;                
             textNoteNumber.Text = "#" + _com.Model.Note.NoteNumber.ToString();
             textFolder.Text = _com.Model.Note.FolderDto?.Name;
             textFolderNumber.Text = "#" + _com.Model.Note.FolderDto.FolderNumber.ToString();
-            textTags.Text = _com.Model.Note.Tags;
-            textDescription.Text = _com.Model.Note.Description;
+            textTags.Text = _com.Model.Note.Tags;            
             textPriority.Text = _com.Model.Note.Priority.ToString();
+
+            if (_com.Model.Note.HtmlFormat)
+            {
+                labelLoadingHtml.Visible = true;
+                labelLoadingHtml.Refresh();
+                textDescription.Visible = false;
+                htmlDescription.Visible = true;
+                htmlDescription.BodyHtml = "";
+                this.Refresh();
+                htmlDescription.BodyHtml = _com.Model.Note.Description;
+               
+                //
+                
+                htmlDescription.Refresh();
+                labelLoadingHtml.Visible = false;
+            }
+            else
+            {
+                htmlDescription.Visible = false;
+                textDescription.Text = _com.Model.Note.Description;
+                textDescription.Visible = true;                
+            }
 
             // KAttributes           
             textNoteType.Text = _com.Model.Note.NoteTypeDto.Name;            
@@ -197,6 +220,7 @@ namespace KNote.ClientWin.Views
             //From = new List<TraceNote>(),
             //To = new List<TraceNote>()
 
+            this.Cursor = Cursors.Default;
         }
 
         private void ControlsToModel()
@@ -207,7 +231,12 @@ namespace KNote.ClientWin.Views
             _com.Model.Note.Topic = textTopic.Text;
             //_com.NoteEdit.FolderDto.Name = textFolder.Text;
             _com.Model.Note.Tags = textTags.Text;
-            _com.Model.Note.Description = textDescription.Text;
+
+            if (_com.Model.Note.HtmlFormat)
+                _com.Model.Note.Description = htmlDescription.BodyHtml;
+            else
+                _com.Model.Note.Description = textDescription.Text;
+            
             int p;
             if (int.TryParse(textPriority.Text, out p))
                 _com.Model.Note.Priority = p;
@@ -215,13 +244,47 @@ namespace KNote.ClientWin.Views
 
         private void PersonalizeControls()
         {
-            
+            // 
+            //this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            //| System.Windows.Forms.AnchorStyles.Left)
+            //| System.Windows.Forms.AnchorStyles.Right)));
+            //this.textDescription.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.textDescription.Location = new System.Drawing.Point(9, 130);
+            //this.textDescription.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            //this.textDescription.Multiline = true;
+            //this.textDescription.Name = "textDescription";
+            //this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            if(_com.EditMode)
+                this.textDescription.Size = new System.Drawing.Size(773, 432);
+            else
+                this.textDescription.Size = new System.Drawing.Size(773, 458);
+            //this.textDescription.TabIndex = 5;
+            //this.textDescription.Visible = true;
+
+
+            //this.htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            //| System.Windows.Forms.AnchorStyles.Left)
+            //| System.Windows.Forms.AnchorStyles.Right)));
+            ////this.htmlDescription.InnerText = null;
+            this.htmlDescription.Location = new System.Drawing.Point(9, 130);
+            ////this.htmlDescription.Name = "htmlDescription";
+
+            if (_com.EditMode)
+                this.htmlDescription.Size = new System.Drawing.Size(773, 432);
+            else
+                this.htmlDescription.Size = new System.Drawing.Size(773, 458);
+
+            //this.htmlDescription.TabIndex = 5;
+
+
 
             if (_com.EditMode)
             {
                 textTopic.ReadOnly = false;                
                 textDescription.ReadOnly = false;
                 textDescription.BackColor = Color.White;
+                htmlDescription.ToolbarVisible = true;
+                htmlDescription.ReadOnly = false;
             }
             else
             {
@@ -253,6 +316,8 @@ namespace KNote.ClientWin.Views
                 {
                     BlockControl(conTmp);
                 }
+                htmlDescription.ToolbarVisible = false;
+                htmlDescription.ReadOnly = true;
             }
 
             PersonalizeListView(listViewAttributes);
@@ -411,11 +476,10 @@ namespace KNote.ClientWin.Views
 
             foreach (var task in _com.Model.Tasks)
             {
-                var itemList = new ListViewItem(task.UserFullName);
+                var itemList = new ListViewItem(task.UserFullName.ToString());
                 itemList.Name = task.NoteTaskId.ToString();
-                //itemList.BackColor = Color.LightGray;
-                itemList.SubItems.Add(task.Description);
-                itemList.SubItems.Add(task.Tags);
+                //itemList.BackColor = Color.LightGray;                
+                itemList.SubItems.Add(task.Tags.ToString());
                 itemList.SubItems.Add(task.Priority.ToString());
                 itemList.SubItems.Add(task.Resolved.ToString());
                 itemList.SubItems.Add(task.EstimatedTime.ToString());
@@ -425,19 +489,24 @@ namespace KNote.ClientWin.Views
                 itemList.SubItems.Add(task.ExpectedEndDate.ToString());
                 itemList.SubItems.Add(task.StartDate.ToString());
                 itemList.SubItems.Add(task.EndDate.ToString());
+                itemList.SubItems.Add(task.Description.ToString());
                 listViewTasks.Items.Add(itemList);
             }
 
             // Width of -2 indicates auto-size.
             listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);           
+
             listViewTasks.Columns.Add("Tags", 100, HorizontalAlignment.Left);
+
             listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Resolved", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Est. time", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
+            
             listViewTasks.Columns.Add("Ex start", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Es end", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Ex end", 50, HorizontalAlignment.Left);
+
             listViewTasks.Columns.Add("Start", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("End", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Description", -2, HorizontalAlignment.Left);
@@ -463,15 +532,21 @@ namespace KNote.ClientWin.Views
             listViewAlarms.Columns.Add("Activated", 200, HorizontalAlignment.Left);
         }
 
-
-        private void SizeLastColumn(ListView lv)
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-
         private void listView_Resize(object sender, EventArgs e)
         {
             SizeLastColumn((ListView)sender);
+        }
+
+        private void SizeLastColumn(ListView lv)
+        {
+            // Hack for control undeterminated error
+            try
+            {
+                lv.Columns[lv.Columns.Count - 1].Width = -2;
+            }
+            catch (Exception)
+            {
+            }
         }
 
     }
