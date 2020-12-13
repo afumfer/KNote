@@ -11,6 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.22.1" />
+    <PackageReference Include="ReverseMarkdown" Version="3.14.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.IO.Ports" Version="5.0.0" />
   </ItemGroup>

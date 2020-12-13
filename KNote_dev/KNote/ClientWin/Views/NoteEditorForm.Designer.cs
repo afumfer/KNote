@@ -53,12 +53,9 @@
             this.tabBasicData = new System.Windows.Forms.TabPage();
             this.labelLoadingHtml = new System.Windows.Forms.Label();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
-            this.textFolderNumber = new System.Windows.Forms.TextBox();
-            this.textNoteNumber = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.buttonEditMarkdown = new System.Windows.Forms.Button();
             this.buttonViewHtml = new System.Windows.Forms.Button();
-            this.buttonEditText = new System.Windows.Forms.Button();
             this.textPriority = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.textTags = new System.Windows.Forms.TextBox();
@@ -69,6 +66,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.textNoteNumber = new System.Windows.Forms.TextBox();
+            this.textFolderNumber = new System.Windows.Forms.TextBox();
             this.tabAttributes = new System.Windows.Forms.TabPage();
             this.listViewAttributes = new System.Windows.Forms.ListView();
             this.textNoteType = new System.Windows.Forms.TextBox();
@@ -326,7 +325,6 @@
             this.tabBasicData.Controls.Add(this.label7);
             this.tabBasicData.Controls.Add(this.buttonEditMarkdown);
             this.tabBasicData.Controls.Add(this.buttonViewHtml);
-            this.tabBasicData.Controls.Add(this.buttonEditText);
             this.tabBasicData.Controls.Add(this.textPriority);
             this.tabBasicData.Controls.Add(this.label6);
             this.tabBasicData.Controls.Add(this.textTags);
@@ -366,32 +364,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(356, 136);
+            this.htmlDescription.Location = new System.Drawing.Point(453, 329);
             this.htmlDescription.Name = "htmlDescription";
-            this.htmlDescription.Size = new System.Drawing.Size(426, 418);
+            this.htmlDescription.Size = new System.Drawing.Size(232, 117);
             this.htmlDescription.TabIndex = 53;
-            // 
-            // textFolderNumber
-            // 
-            this.textFolderNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFolderNumber.BackColor = System.Drawing.SystemColors.Control;
-            this.textFolderNumber.Enabled = false;
-            this.textFolderNumber.Location = new System.Drawing.Point(702, 38);
-            this.textFolderNumber.Name = "textFolderNumber";
-            this.textFolderNumber.Size = new System.Drawing.Size(47, 23);
-            this.textFolderNumber.TabIndex = 52;
-            this.textFolderNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // textNoteNumber
-            // 
-            this.textNoteNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.textNoteNumber.BackColor = System.Drawing.SystemColors.Control;
-            this.textNoteNumber.Enabled = false;
-            this.textNoteNumber.Location = new System.Drawing.Point(702, 8);
-            this.textNoteNumber.Name = "textNoteNumber";
-            this.textNoteNumber.Size = new System.Drawing.Size(80, 23);
-            this.textNoteNumber.TabIndex = 51;
-            this.textNoteNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label7
             // 
@@ -406,35 +382,28 @@
             // buttonEditMarkdown
             // 
             this.buttonEditMarkdown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonEditMarkdown.Location = new System.Drawing.Point(693, 108);
+            this.buttonEditMarkdown.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.buttonEditMarkdown.ImageList = this.imageListTabNoteData;
+            this.buttonEditMarkdown.Location = new System.Drawing.Point(653, 105);
             this.buttonEditMarkdown.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonEditMarkdown.Name = "buttonEditMarkdown";
-            this.buttonEditMarkdown.Size = new System.Drawing.Size(90, 22);
+            this.buttonEditMarkdown.Size = new System.Drawing.Size(79, 24);
             this.buttonEditMarkdown.TabIndex = 49;
             this.buttonEditMarkdown.Text = "Markdown";
             this.buttonEditMarkdown.UseVisualStyleBackColor = true;
+            this.buttonEditMarkdown.Click += new System.EventHandler(this.buttonEditMarkdown_Click);
             // 
             // buttonViewHtml
             // 
             this.buttonViewHtml.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonViewHtml.Location = new System.Drawing.Point(646, 108);
+            this.buttonViewHtml.Location = new System.Drawing.Point(736, 105);
             this.buttonViewHtml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonViewHtml.Name = "buttonViewHtml";
-            this.buttonViewHtml.Size = new System.Drawing.Size(46, 22);
+            this.buttonViewHtml.Size = new System.Drawing.Size(46, 24);
             this.buttonViewHtml.TabIndex = 48;
             this.buttonViewHtml.Text = "Html";
             this.buttonViewHtml.UseVisualStyleBackColor = true;
-            // 
-            // buttonEditText
-            // 
-            this.buttonEditText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonEditText.Location = new System.Drawing.Point(601, 108);
-            this.buttonEditText.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonEditText.Name = "buttonEditText";
-            this.buttonEditText.Size = new System.Drawing.Size(44, 22);
-            this.buttonEditText.TabIndex = 47;
-            this.buttonEditText.Text = "Text";
-            this.buttonEditText.UseVisualStyleBackColor = true;
+            this.buttonViewHtml.Click += new System.EventHandler(this.buttonViewHtml_Click);
             // 
             // textPriority
             // 
@@ -493,12 +462,12 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textDescription.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textDescription.Location = new System.Drawing.Point(9, 130);
+            this.textDescription.Location = new System.Drawing.Point(453, 228);
             this.textDescription.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
             this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textDescription.Size = new System.Drawing.Size(333, 424);
+            this.textDescription.Size = new System.Drawing.Size(211, 81);
             this.textDescription.TabIndex = 5;
             // 
             // buttonFolderSearch
@@ -543,6 +512,28 @@
             this.label1.TabIndex = 33;
             this.label1.Text = "Topic:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // textNoteNumber
+            // 
+            this.textNoteNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.textNoteNumber.BackColor = System.Drawing.SystemColors.Control;
+            this.textNoteNumber.Enabled = false;
+            this.textNoteNumber.Location = new System.Drawing.Point(702, 8);
+            this.textNoteNumber.Name = "textNoteNumber";
+            this.textNoteNumber.Size = new System.Drawing.Size(80, 23);
+            this.textNoteNumber.TabIndex = 51;
+            this.textNoteNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // textFolderNumber
+            // 
+            this.textFolderNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.textFolderNumber.BackColor = System.Drawing.SystemColors.Control;
+            this.textFolderNumber.Enabled = false;
+            this.textFolderNumber.Location = new System.Drawing.Point(702, 38);
+            this.textFolderNumber.Name = "textFolderNumber";
+            this.textFolderNumber.Size = new System.Drawing.Size(47, 23);
+            this.textFolderNumber.TabIndex = 52;
+            this.textFolderNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // tabAttributes
             // 
@@ -1175,7 +1166,6 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button buttonEditMarkdown;
         private System.Windows.Forms.Button buttonViewHtml;
-        private System.Windows.Forms.Button buttonEditText;
         private System.Windows.Forms.TextBox textPriority;
         private System.Windows.Forms.Label label7;
         internal System.Windows.Forms.TextBox textNoteType;

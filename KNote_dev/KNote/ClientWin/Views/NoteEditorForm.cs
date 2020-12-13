@@ -2,7 +2,7 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
-
+using Markdig;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -232,7 +232,7 @@ namespace KNote.ClientWin.Views
             //_com.NoteEdit.FolderDto.Name = textFolder.Text;
             _com.Model.Note.Tags = textTags.Text;
 
-            if (_com.Model.Note.HtmlFormat)
+            if (_com.Model.Note.ContentType == "html")
                 _com.Model.Note.Description = htmlDescription.BodyHtml;
             else
                 _com.Model.Note.Description = textDescription.Text;
@@ -276,17 +276,17 @@ namespace KNote.ClientWin.Views
 
             //this.htmlDescription.TabIndex = 5;
 
-
-
-            if (_com.EditMode)
+            if(_com.Model?.Note?.ContentType == "html")
             {
-                textTopic.ReadOnly = false;                
-                textDescription.ReadOnly = false;
-                textDescription.BackColor = Color.White;
-                htmlDescription.ToolbarVisible = true;
-                htmlDescription.ReadOnly = false;
+                EnableHtmlView();
             }
             else
+            {
+                EnableMarkdownView();
+            }
+
+
+            if (!_com.EditMode)            
             {
                 foreach (Control conTmp in tabBasicData.Controls)
                 {
@@ -548,6 +548,56 @@ namespace KNote.ClientWin.Views
             {
             }
         }
+
+        private void buttonEditMarkdown_Click(object sender, EventArgs e)
+        {
+            var config = new ReverseMarkdown.Config
+            {
+                UnknownTags = ReverseMarkdown.Config.UnknownTagsOption.PassThrough, // Include the unknown tag completely in the result (default as well)
+                GithubFlavored = true, // generate GitHub flavoured markdown, supported for BR, PRE and table tags
+                RemoveComments = false, // will ignore all comments
+                SmartHrefHandling = true // remove markdown output for links where appropriate
+            };
+
+            var converter = new ReverseMarkdown.Converter(config);
+
+            string html = htmlDescription.BodyHtml;
+            string result = converter.Convert(html);
+            
+            textDescription.Text = result;
+            _com.Model.Note.ContentType = "markdown";
+
+            EnableMarkdownView();
+        }
+
+        private void buttonViewHtml_Click(object sender, EventArgs e)
+        {
+            var MarkdownContent = textDescription.Text;
+            var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
+
+            htmlDescription.BodyHtml = HtmlContent;
+            _com.Model.Note.ContentType = "html";
+
+            EnableHtmlView();
+        }
+
+        private void EnableHtmlView ()
+        {
+            textDescription.Visible = false;
+            htmlDescription.Visible = true;
+            buttonEditMarkdown.Enabled = true;
+            buttonViewHtml.Enabled = false;
+        }
+
+        private void EnableMarkdownView()
+        {
+            htmlDescription.Visible = false;
+            textDescription.Visible = true;
+            buttonEditMarkdown.Enabled = false;
+            buttonViewHtml.Enabled = true;
+        }
+
 
     }
 }
