@@ -99,14 +99,19 @@ namespace KNote.ClientWin.Components
 
         public override void RefreshItem(NoteInfoDto note)
         {
-            if(Folder.FolderId == note.FolderId)
+            var updateNote = ListEntities.FirstOrDefault(_ => _.NoteId == note.NoteId);
+            if (updateNote == null)
+                return;
+
+            if (Folder.FolderId == note.FolderId)
             {
-                var updateNote = ListEntities.FirstOrDefault(_ => _.NoteId == note.NoteId);
-                if(updateNote != null)
-                {
-                    updateNote.SetSimpleDto(note);
-                    View.RefreshItem(updateNote);
-                }
+                updateNote.SetSimpleDto(note);
+                View.RefreshItem(updateNote);
+            }           
+            else
+            {
+                ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
+                View.DeleteItem(note);                
             }
         }
 

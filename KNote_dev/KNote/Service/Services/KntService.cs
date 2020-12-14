@@ -20,10 +20,13 @@ namespace KNote.Service.Services
 
         #endregion
 
+        public Guid IdServiceRef { get; }
+
         #region Constructors
 
         public KntService(IKntRepository repository)
         {
+            IdServiceRef = Guid.NewGuid();
             _repository = repository;
         }
 
@@ -96,7 +99,7 @@ namespace KNote.Service.Services
                 return _noteTypes;
             }
         }
-
+        
         //private IKntKMessageService _kMessages;
         //public IKntKMessageService KMessages
         //{

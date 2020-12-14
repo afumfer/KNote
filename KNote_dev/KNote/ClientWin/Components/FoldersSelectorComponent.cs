@@ -16,11 +16,18 @@ namespace KNote.ClientWin.Components
     {
         #region Properties
 
+        private List<ServiceRef> _servicesRef;
         public List<ServiceRef> ServicesRef
         {
             get
             {
-                return Store.GetAllServiceRef();
+                if(_servicesRef == null)
+                    _servicesRef = Store.GetAllServiceRef();
+                return _servicesRef;
+            }
+            set 
+            {
+                _servicesRef = value;
             }
         }
 

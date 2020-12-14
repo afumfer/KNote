@@ -355,6 +355,8 @@ namespace KNote.ClientWin.Components
                 // or ...
                 await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
             }
+            else
+                NoteEditorComponent.View.CleanView();
 
             NotesSelectorComponent.RefreshItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
         }
@@ -365,7 +367,7 @@ namespace KNote.ClientWin.Components
 
             if (NotesSelectorComponent.ListEntities.Count == 0)
             {
-                NoteEditorComponent.View.CleanView();                
+                NoteEditorComponent.View.CleanView(); 
                 _selectedNoteInfo = null;                
             }
         }

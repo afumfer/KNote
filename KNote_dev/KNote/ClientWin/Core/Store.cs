@@ -85,7 +85,13 @@ namespace KNote.ClientWin.Core
         {
             return _servicesRefs.ToList();
         }
-        
+
+        public ServiceRef GetServiceRef(Guid id)
+        {
+            return _servicesRefs.Where(_ => _.IdServiceRef == id).FirstOrDefault();
+        }
+
+
         public event EventHandler<ComponentEventArgs<EComponentState>> ComponentsStateChanged;
         public void AddComponent(ComponentBase controller)
         {

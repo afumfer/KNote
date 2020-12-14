@@ -23,6 +23,8 @@ namespace KNote.ClientWin.Views
         private readonly NoteEditorComponent _com;
         private bool _viewFinalized = false;
 
+        private Guid _selectedFolderId;
+
         #endregion 
 
         #region Constructor
@@ -66,6 +68,7 @@ namespace KNote.ClientWin.Views
             textFolderNumber.Text = "";
             textTags.Text = "";
             textDescription.Text = "";
+            htmlDescription.BodyHtml = "";
             textPriority.Text = "";
             listViewAttributes.Clear();
             listViewResources.Clear();
@@ -90,6 +93,7 @@ namespace KNote.ClientWin.Views
             Dock = DockStyle.Fill;
             FormBorderStyle = FormBorderStyle.None;
             toolBarNoteEditor.Visible = false;
+            //toolDescription.Visible = false;
             _com.EditMode = false;
         }
 
@@ -98,11 +102,11 @@ namespace KNote.ClientWin.Views
             TopLevel = true;
             Dock = DockStyle.None;
             FormBorderStyle = FormBorderStyle.Sizable;
-            toolBarNoteEditor.Visible = true;            
+            toolBarNoteEditor.Visible = true;
+            //toolDescription.Visible = true;
             StartPosition = FormStartPosition.CenterScreen;
             _com.EditMode = true;
         }
-
 
         #endregion
 
@@ -156,6 +160,49 @@ namespace KNote.ClientWin.Views
             buttonUndo.Enabled = true;
         }
 
+        private void buttonEditMarkdown_Click(object sender, EventArgs e)
+        {
+            var config = new ReverseMarkdown.Config
+            {
+                UnknownTags = ReverseMarkdown.Config.UnknownTagsOption.PassThrough, // Include the unknown tag completely in the result (default as well)
+                GithubFlavored = true, // generate GitHub flavoured markdown, supported for BR, PRE and table tags
+                RemoveComments = false, // will ignore all comments
+                SmartHrefHandling = true // remove markdown output for links where appropriate
+            };
+
+            var converter = new ReverseMarkdown.Converter(config);
+
+            string html = htmlDescription.BodyHtml;
+            string result = converter.Convert(html);
+
+            textDescription.Text = result;
+            _com.Model.Note.ContentType = "markdown";
+
+            EnableMarkdownView();
+        }
+
+        private void buttonViewHtml_Click(object sender, EventArgs e)
+        {
+            var MarkdownContent = textDescription.Text;
+            var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
+
+            htmlDescription.BodyHtml = HtmlContent;
+            _com.Model.Note.ContentType = "html";
+
+            EnableHtmlView();
+        }
+
+        private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            OnSelectedResourceItemChanged();
+        }
+
+        private void listView_Resize(object sender, EventArgs e)
+        {
+            SizeLastColumn((ListView)sender);
+        }
+
         #endregion
 
         #region Private methods
@@ -169,6 +216,7 @@ namespace KNote.ClientWin.Views
             textNoteNumber.Text = "#" + _com.Model.Note.NoteNumber.ToString();
             textFolder.Text = _com.Model.Note.FolderDto?.Name;
             textFolderNumber.Text = "#" + _com.Model.Note.FolderDto.FolderNumber.ToString();
+            _selectedFolderId = _com.Model.Note.FolderId;
             textTags.Text = _com.Model.Note.Tags;            
             textPriority.Text = _com.Model.Note.Priority.ToString();
 
@@ -178,12 +226,9 @@ namespace KNote.ClientWin.Views
                 labelLoadingHtml.Refresh();
                 textDescription.Visible = false;
                 htmlDescription.Visible = true;
-                htmlDescription.BodyHtml = "";
-                this.Refresh();
-                htmlDescription.BodyHtml = _com.Model.Note.Description;
-               
-                //
-                
+                htmlDescription.BodyHtml = "";                
+                htmlDescription.BodyHtml = _com.Model.Note.Description;               
+                //                
                 htmlDescription.Refresh();
                 labelLoadingHtml.Visible = false;
             }
@@ -229,7 +274,10 @@ namespace KNote.ClientWin.Views
 
             // Basic data
             _com.Model.Note.Topic = textTopic.Text;
-            //_com.NoteEdit.FolderDto.Name = textFolder.Text;
+            _com.Model.Note.FolderId = _selectedFolderId;
+            _com.Model.Note.FolderDto.FolderId = _selectedFolderId;
+            _com.Model.Note.FolderDto.Name = textFolder.Text;
+            _com.Model.Note.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
             _com.Model.Note.Tags = textTags.Text;
 
             if (_com.Model.Note.ContentType == "html")
@@ -244,78 +292,30 @@ namespace KNote.ClientWin.Views
 
         private void PersonalizeControls()
         {
-            // 
-            //this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            //| System.Windows.Forms.AnchorStyles.Left)
-            //| System.Windows.Forms.AnchorStyles.Right)));
-            //this.textDescription.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textDescription.Location = new System.Drawing.Point(9, 130);
-            //this.textDescription.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            //this.textDescription.Multiline = true;
-            //this.textDescription.Name = "textDescription";
-            //this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            if(_com.EditMode)
-                this.textDescription.Size = new System.Drawing.Size(773, 432);
-            else
-                this.textDescription.Size = new System.Drawing.Size(773, 458);
-            //this.textDescription.TabIndex = 5;
-            //this.textDescription.Visible = true;
-
-
-            //this.htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            //| System.Windows.Forms.AnchorStyles.Left)
-            //| System.Windows.Forms.AnchorStyles.Right)));
-            ////this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(9, 130);
-            ////this.htmlDescription.Name = "htmlDescription";
-
+            this.panelDescription.Location = new System.Drawing.Point(6, 130);
             if (_com.EditMode)
-                this.htmlDescription.Size = new System.Drawing.Size(773, 432);
+                this.panelDescription.Size = new System.Drawing.Size(780, 432);
             else
-                this.htmlDescription.Size = new System.Drawing.Size(773, 458);
+                this.panelDescription.Size = new System.Drawing.Size(780, 458);
 
-            //this.htmlDescription.TabIndex = 5;
+            this.textDescription.Dock = DockStyle.Fill;
+            this.htmlDescription.Dock = DockStyle.Fill;
 
-            if(_com.Model?.Note?.ContentType == "html")
-            {
-                EnableHtmlView();
-            }
-            else
-            {
+            if(_com.Model?.Note?.ContentType == "html")            
+                EnableHtmlView();            
+            else            
                 EnableMarkdownView();
-            }
-
-
+            
             if (!_com.EditMode)            
             {
-                foreach (Control conTmp in tabBasicData.Controls)
+                foreach(var tab in tabNoteData.TabPages)
                 {
-                    BlockControl(conTmp);
+                    foreach (Control conTmp in ((TabPage)tab).Controls)
+                    {
+                        BlockControl(conTmp);
+                    }
                 }
-                foreach (Control conTmp in tabAttributes.Controls)
-                {
-                    BlockControl(conTmp);
-                }
-                foreach (Control conTmp in tabResources.Controls)
-                {
-                    BlockControl(conTmp);
-                }
-                foreach (Control conTmp in tabTasks.Controls)
-                {
-                    BlockControl(conTmp);
-                }
-                foreach (Control conTmp in tabAlarms.Controls)
-                {
-                    BlockControl(conTmp);
-                }
-                foreach (Control conTmp in tabCode.Controls)
-                {
-                    BlockControl(conTmp);
-                }
-                foreach (Control conTmp in tabTraceNotes.Controls)
-                {
-                    BlockControl(conTmp);
-                }
+
                 htmlDescription.ToolbarVisible = false;
                 htmlDescription.ReadOnly = true;
             }
@@ -410,21 +410,40 @@ namespace KNote.ClientWin.Views
                 TextBox t = (TextBox)c;
                 t.ReadOnly = true;
                 t.BackColor = Color.White;
+                return;
             }
-            else if (c is Button)
+            if (c is Button)
             {
                 Button b = (Button)c;
                 b.Enabled = false;
+                return;
             }
-            else if (c is CheckBox)
+            if (c is CheckBox)
             {
                 CheckBox cb = (CheckBox)c;
                 cb.Enabled = false;
+                return;
             }
-            else if (c is ComboBox)
+            if (c is ComboBox)
             {
                 ComboBox comB = (ComboBox)c;
                 comB.Enabled = false;
+                return;
+            }
+            if (c is ToolStrip)
+            {
+                ToolStrip tb = (ToolStrip)c;
+                tb.Visible = false;
+                return;
+            }
+            if (c is Panel)
+            {
+                Panel tb = (Panel)c;
+                foreach (Control conTmp in tb.Controls)
+                {
+                    BlockControl(conTmp);
+                }                
+                return;
             }
         }
 
@@ -438,23 +457,15 @@ namespace KNote.ClientWin.Views
             listView.GridLines = true;
             listView.Sorting = SortOrder.None;
         }
-
-        #endregion
-
-        private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            OnSelectedResourceItemChanged();
-        }
-
+       
         private void OnSelectedResourceItemChanged()
         {
             try
             {
                 if (listViewResources.SelectedItems.Count > 0)
                 {
-                    Cursor = Cursors.WaitCursor;
-                    //var sr = dataGridResources.SelectedRows[0];
-                    var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));    // (Guid)sr.Cells[0].Value;
+                    Cursor = Cursors.WaitCursor;                    
+                    var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
                     var content = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.ContentArrayBytes).FirstOrDefault();
                     var type = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.FileType).FirstOrDefault();
                     UpdatePicResource(content, type);
@@ -479,7 +490,7 @@ namespace KNote.ClientWin.Views
                 var itemList = new ListViewItem(task.UserFullName.ToString());
                 itemList.Name = task.NoteTaskId.ToString();
                 //itemList.BackColor = Color.LightGray;                
-                itemList.SubItems.Add(task.Tags.ToString());
+                itemList.SubItems.Add(task.Tags?.ToString());
                 itemList.SubItems.Add(task.Priority.ToString());
                 itemList.SubItems.Add(task.Resolved.ToString());
                 itemList.SubItems.Add(task.EstimatedTime.ToString());
@@ -532,11 +543,6 @@ namespace KNote.ClientWin.Views
             listViewAlarms.Columns.Add("Activated", 200, HorizontalAlignment.Left);
         }
 
-        private void listView_Resize(object sender, EventArgs e)
-        {
-            SizeLastColumn((ListView)sender);
-        }
-
         private void SizeLastColumn(ListView lv)
         {
             // Hack for control undeterminated error
@@ -549,45 +555,14 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        private void buttonEditMarkdown_Click(object sender, EventArgs e)
-        {
-            var config = new ReverseMarkdown.Config
-            {
-                UnknownTags = ReverseMarkdown.Config.UnknownTagsOption.PassThrough, // Include the unknown tag completely in the result (default as well)
-                GithubFlavored = true, // generate GitHub flavoured markdown, supported for BR, PRE and table tags
-                RemoveComments = false, // will ignore all comments
-                SmartHrefHandling = true // remove markdown output for links where appropriate
-            };
-
-            var converter = new ReverseMarkdown.Converter(config);
-
-            string html = htmlDescription.BodyHtml;
-            string result = converter.Convert(html);
-            
-            textDescription.Text = result;
-            _com.Model.Note.ContentType = "markdown";
-
-            EnableMarkdownView();
-        }
-
-        private void buttonViewHtml_Click(object sender, EventArgs e)
-        {
-            var MarkdownContent = textDescription.Text;
-            var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-            var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
-
-            htmlDescription.BodyHtml = HtmlContent;
-            _com.Model.Note.ContentType = "html";
-
-            EnableHtmlView();
-        }
-
         private void EnableHtmlView ()
         {
             textDescription.Visible = false;
             htmlDescription.Visible = true;
             buttonEditMarkdown.Enabled = true;
             buttonViewHtml.Enabled = false;
+            toolDescriptionHtmlTitles.Visible = true;
+            toolDescriptionMarkdown.Visible = false;
         }
 
         private void EnableMarkdownView()
@@ -596,8 +571,197 @@ namespace KNote.ClientWin.Views
             textDescription.Visible = true;
             buttonEditMarkdown.Enabled = false;
             buttonViewHtml.Enabled = true;
+            toolDescriptionHtmlTitles.Visible = false;
+            toolDescriptionMarkdown.Visible = true;
         }
 
+        #endregion
+
+        private void toolDescriptionHtmlTitle_Click(object sender, EventArgs e)
+        {
+            ToolStripItem menuSel;
+            menuSel = (ToolStripItem)sender;
+
+            if (menuSel == toolDescriptionHtmlTitle1)
+            {
+                htmlDescription.SelectedHtml = "<h1>Título 1</h1>";
+                htmlDescription.Focus();                
+            }
+            if (menuSel == toolDescriptionHtmlTitle2)
+            {
+                htmlDescription.SelectedHtml = "<h2>Título 1</h2>";
+                htmlDescription.Focus();
+            }
+            if (menuSel == toolDescriptionHtmlTitle3)
+            {
+                htmlDescription.SelectedHtml = "<h3>Título 1</h3>";
+                htmlDescription.Focus();
+            }
+            if (menuSel == toolDescriptionHtmlTitle4)
+            {
+                htmlDescription.SelectedHtml = "<h4>Título 1</h4>";
+                htmlDescription.Focus();
+            }
+        }
+
+        private void toolDescriptionMarkdown_Click(object sender, EventArgs e)
+        {
+            ToolStripItem menuSel;
+            menuSel = (ToolStripItem)sender;
+
+            string tag = "";
+            var nl = System.Environment.NewLine;
+
+            if (menuSel == toolDescriptionMarkdownBold)                            
+                tag = " **_**";
+            else if (menuSel == toolDescriptionMarkdownStrikethrough)
+                tag = " ~~_~~";
+            else if (menuSel == toolDescriptionMarkdownItalic)
+                tag = " *_*";
+            else if (menuSel == toolDescriptionMarkdownH1)
+                tag = nl + "# ";
+            else if (menuSel == toolDescriptionMarkdownH2)
+                tag = nl + "## ";
+            else if (menuSel == toolDescriptionMarkdownH3)
+                tag = nl + "### ";
+            else if (menuSel == toolDescriptionMarkdownH4)
+                tag = nl + "#### ";
+            else if (menuSel == toolDescriptionMarkdownList)
+                tag = "-_";
+            else if (menuSel == toolDescriptionMarkdownListOrdered)
+                tag = nl + "1._";
+            else if (menuSel == toolDescriptionMarkdownLine)
+                tag = nl + "------------";
+            else if (menuSel == toolDescriptionMarkdownLink)
+                tag = nl + "[xx](http://xx 'xx')";
+            else if (menuSel == toolDescriptionMarkdownImage)
+                tag = nl + "[![Title](Address 'Title')](http://url 'Title')";
+            else if (menuSel == toolDescriptionMarkdownCode)
+                tag = nl + "```_```";
+            else if (menuSel == toolDescriptionMarkdownTable)
+            {
+                tag = nl + nl;
+                tag += "|   |   |" + nl;
+                tag += "| ------------ | ------------ |" + nl;
+                tag += "|   |   |" + nl;
+                tag += "|   |   |" + nl;
+            }
+            
+            var selStart = textDescription.SelectionStart;
+            textDescription.Text = textDescription.Text.Insert(selStart, tag);
+            textDescription.Focus();
+            textDescription.SelectionStart = selStart;
+        }
+
+        private void buttonFolderSearch_Click(object sender, EventArgs e)
+        {
+            var folder = _com.GetFolder();
+            if (folder != null)
+            {
+                _selectedFolderId = folder.FolderId;
+                textFolder.Text = folder?.Name;
+                textFolderNumber.Text = "#" + folder.FolderNumber.ToString();
+                
+                buttonUndo.Enabled = true;
+            }
+
+
+        }
+
+        //private void toolInsertarImagenClipboard_Click(object sender, EventArgs e)
+        //{
+        //    Bitmap bm;
+        //    string destino = ObtenerNombreFicheroImagenDestino();
+
+        //    if (string.IsNullOrEmpty(destino))
+        //        return;
+
+        //    destino += ".png";
+
+        //    try
+        //    {
+        //        if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Bitmap))
+        //        {
+        //            bm = (Bitmap)Clipboard.GetDataObject().GetData(DataFormats.Bitmap);
+        //            bm.Save(destino, ImageFormat.Png);
+        //            this.htmlEditor.InsertImage(destino);
+        //        }
+        //        else
+        //            MessageBox.Show("No dispone de imágenes en el Portapapeles para insertar en esta nota.", "ANotas");
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("No se ha podido copiar el fichero seleccionado en el contenedor de imágenes" +
+        //            " de este archivador (" + ex.Message + ")");
+        //    }
+
+        //    this.htmlEditor.Focus();
+        //}
+
+        //private void toolInsertarImagen_Click(object sender, EventArgs e)
+        //{
+        //    string origen = string.Empty;
+        //    string destino = ObtenerNombreFicheroImagenDestino();
+
+        //    if (string.IsNullOrEmpty(destino))
+        //        return;
+
+        //    using (OpenFileDialog dialog = new OpenFileDialog())
+        //    {
+        //        dialog.Title = "Seleccionar Imagen";
+        //        dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*";
+        //        dialog.FilterIndex = 1;
+        //        dialog.RestoreDirectory = true;
+        //        dialog.CheckFileExists = true;
+        //        // dialog.InitialDirectory = directorioTrabajo;
+        //        if (dialog.ShowDialog() == DialogResult.OK)
+        //        {
+        //            origen = Path.GetFullPath(dialog.FileName);
+        //            destino += Path.GetExtension(origen);
+
+        //            if (origen != "")
+        //            {
+        //                try
+        //                {
+        //                    // Copiar la imágen en el almacén de imágenes
+        //                    File.Copy(origen, destino);
+        //                    this.htmlEditor.InsertImage(destino);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    MessageBox.Show("No se ha podido copiar el fichero seleccionado en el contenedor de imágenes" +
+        //                        " de este archivador (" + ex.Message + ")");
+        //                }
+        //            }
+        //        }
+        //    }
+        //    this.htmlEditor.Focus();
+        //}
+
+        //private string ObtenerNombreFicheroImagenDestino()
+        //{
+        //    string destino = string.Empty;
+
+        //    // Debe estar definido el directorio raíz de los recursos del
+        //    // archivador
+        //    if (string.IsNullOrEmpty(NotaEdicion.CarpetaNota.Archivador.PathRecursos))
+        //    {
+        //        MessageBox.Show("No se ha definido la ruta de recursos para el repositorio de ficheros de este archivador." +
+        //            "En las propiedades del archivador debe definir esa ruta raíz.", "ANotas");
+        //        return "";
+        //    }
+
+        //    destino = NotaEdicion.CarpetaNota.Archivador.PathRecursosImgs;
+
+        //    DirectoryInfo d = new DirectoryInfo(destino);
+        //    if (!d.Exists)
+        //        d.Create();
+
+        //    destino += Guid.NewGuid().ToString();
+
+        //    return destino;
+        //}
 
     }
 }

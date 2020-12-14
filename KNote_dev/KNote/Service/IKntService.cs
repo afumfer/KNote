@@ -10,6 +10,7 @@ namespace KNote.Service
 {
     public interface IKntService: IDisposable
     {
+        Guid IdServiceRef { get; }        
         IKntUserService Users { get; }
         IKntKAttributeService KAttributes { get; }
         IKntSystemValuesService SystemValues { get; }

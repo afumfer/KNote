@@ -51,8 +51,36 @@
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabNoteData = new System.Windows.Forms.TabControl();
             this.tabBasicData = new System.Windows.Forms.TabPage();
-            this.labelLoadingHtml = new System.Windows.Forms.Label();
+            this.panelDescription = new System.Windows.Forms.Panel();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
+            this.textDescription = new System.Windows.Forms.TextBox();
+            this.toolDescription = new System.Windows.Forms.ToolStrip();
+            this.toolDescriptionHtmlTitles = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolDescriptionHtmlTitle1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionHtmlTitle2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionHtmlTitle3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionHtmlTitle4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdown = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolDescriptionMarkdownH1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownH2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownH3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownH4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownS1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolDescriptionMarkdownBold = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownStrikethrough = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownItalic = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownS2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolDescriptionMarkdownList = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownListOrdered = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownLine = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownLink = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownImage = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownTable = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionMarkdownCode = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionUploads = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolDescriptionUploadFromFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionUploadFromClipboard = new System.Windows.Forms.ToolStripMenuItem();
+            this.labelLoadingHtml = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.buttonEditMarkdown = new System.Windows.Forms.Button();
             this.buttonViewHtml = new System.Windows.Forms.Button();
@@ -61,7 +89,6 @@
             this.textTags = new System.Windows.Forms.TextBox();
             this.textFolder = new System.Windows.Forms.TextBox();
             this.textTopic = new System.Windows.Forms.TextBox();
-            this.textDescription = new System.Windows.Forms.TextBox();
             this.buttonFolderSearch = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -112,10 +139,13 @@
             this.button15 = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
+            this.labelFolderId = new System.Windows.Forms.Label();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
             this.tabBasicData.SuspendLayout();
+            this.panelDescription.SuspendLayout();
+            this.toolDescription.SuspendLayout();
             this.tabAttributes.SuspendLayout();
             this.tabResources.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).BeginInit();
@@ -286,6 +316,8 @@
             this.imageListTabNoteData.Images.SetKeyName(6, "tasks_16.png");
             this.imageListTabNoteData.Images.SetKeyName(7, "checkbox_16.png");
             this.imageListTabNoteData.Images.SetKeyName(8, "codgs_16.png");
+            this.imageListTabNoteData.Images.SetKeyName(9, "code_16.png");
+            this.imageListTabNoteData.Images.SetKeyName(10, "upload_16.png");
             // 
             // panelForm
             // 
@@ -320,8 +352,9 @@
             // 
             // tabBasicData
             // 
+            this.tabBasicData.Controls.Add(this.labelFolderId);
+            this.tabBasicData.Controls.Add(this.panelDescription);
             this.tabBasicData.Controls.Add(this.labelLoadingHtml);
-            this.tabBasicData.Controls.Add(this.htmlDescription);
             this.tabBasicData.Controls.Add(this.label7);
             this.tabBasicData.Controls.Add(this.buttonEditMarkdown);
             this.tabBasicData.Controls.Add(this.buttonViewHtml);
@@ -330,7 +363,6 @@
             this.tabBasicData.Controls.Add(this.textTags);
             this.tabBasicData.Controls.Add(this.textFolder);
             this.tabBasicData.Controls.Add(this.textTopic);
-            this.tabBasicData.Controls.Add(this.textDescription);
             this.tabBasicData.Controls.Add(this.buttonFolderSearch);
             this.tabBasicData.Controls.Add(this.label3);
             this.tabBasicData.Controls.Add(this.label2);
@@ -347,6 +379,251 @@
             this.tabBasicData.Text = "Basic data  ";
             this.tabBasicData.UseVisualStyleBackColor = true;
             // 
+            // panelDescription
+            // 
+            this.panelDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelDescription.Controls.Add(this.htmlDescription);
+            this.panelDescription.Controls.Add(this.textDescription);
+            this.panelDescription.Controls.Add(this.toolDescription);
+            this.panelDescription.Location = new System.Drawing.Point(14, 142);
+            this.panelDescription.Name = "panelDescription";
+            this.panelDescription.Size = new System.Drawing.Size(621, 376);
+            this.panelDescription.TabIndex = 55;
+            // 
+            // htmlDescription
+            // 
+            this.htmlDescription.InnerText = null;
+            this.htmlDescription.Location = new System.Drawing.Point(40, 116);
+            this.htmlDescription.Name = "htmlDescription";
+            this.htmlDescription.Size = new System.Drawing.Size(277, 125);
+            this.htmlDescription.TabIndex = 54;
+            // 
+            // textDescription
+            // 
+            this.textDescription.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.textDescription.Location = new System.Drawing.Point(40, 14);
+            this.textDescription.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textDescription.Multiline = true;
+            this.textDescription.Name = "textDescription";
+            this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textDescription.Size = new System.Drawing.Size(277, 78);
+            this.textDescription.TabIndex = 6;
+            // 
+            // toolDescription
+            // 
+            this.toolDescription.Dock = System.Windows.Forms.DockStyle.Left;
+            this.toolDescription.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolDescriptionHtmlTitles,
+            this.toolDescriptionMarkdown,
+            this.toolDescriptionUploads});
+            this.toolDescription.Location = new System.Drawing.Point(0, 0);
+            this.toolDescription.Name = "toolDescription";
+            this.toolDescription.Size = new System.Drawing.Size(30, 376);
+            this.toolDescription.TabIndex = 0;
+            this.toolDescription.Text = "toolStrip1";
+            // 
+            // toolDescriptionHtmlTitles
+            // 
+            this.toolDescriptionHtmlTitles.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolDescriptionHtmlTitles.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolDescriptionHtmlTitle1,
+            this.toolDescriptionHtmlTitle2,
+            this.toolDescriptionHtmlTitle3,
+            this.toolDescriptionHtmlTitle4});
+            this.toolDescriptionHtmlTitles.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionHtmlTitles.Image")));
+            this.toolDescriptionHtmlTitles.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolDescriptionHtmlTitles.Name = "toolDescriptionHtmlTitles";
+            this.toolDescriptionHtmlTitles.Size = new System.Drawing.Size(27, 20);
+            this.toolDescriptionHtmlTitles.Text = "H";
+            // 
+            // toolDescriptionHtmlTitle1
+            // 
+            this.toolDescriptionHtmlTitle1.Name = "toolDescriptionHtmlTitle1";
+            this.toolDescriptionHtmlTitle1.Size = new System.Drawing.Size(105, 22);
+            this.toolDescriptionHtmlTitle1.Text = "Title 1";
+            this.toolDescriptionHtmlTitle1.Click += new System.EventHandler(this.toolDescriptionHtmlTitle_Click);
+            // 
+            // toolDescriptionHtmlTitle2
+            // 
+            this.toolDescriptionHtmlTitle2.Name = "toolDescriptionHtmlTitle2";
+            this.toolDescriptionHtmlTitle2.Size = new System.Drawing.Size(105, 22);
+            this.toolDescriptionHtmlTitle2.Text = "Title 2";
+            this.toolDescriptionHtmlTitle2.Click += new System.EventHandler(this.toolDescriptionHtmlTitle_Click);
+            // 
+            // toolDescriptionHtmlTitle3
+            // 
+            this.toolDescriptionHtmlTitle3.Name = "toolDescriptionHtmlTitle3";
+            this.toolDescriptionHtmlTitle3.Size = new System.Drawing.Size(105, 22);
+            this.toolDescriptionHtmlTitle3.Text = "Title 3";
+            this.toolDescriptionHtmlTitle3.Click += new System.EventHandler(this.toolDescriptionHtmlTitle_Click);
+            // 
+            // toolDescriptionHtmlTitle4
+            // 
+            this.toolDescriptionHtmlTitle4.Name = "toolDescriptionHtmlTitle4";
+            this.toolDescriptionHtmlTitle4.Size = new System.Drawing.Size(105, 22);
+            this.toolDescriptionHtmlTitle4.Text = "Title 4";
+            this.toolDescriptionHtmlTitle4.Click += new System.EventHandler(this.toolDescriptionHtmlTitle_Click);
+            // 
+            // toolDescriptionMarkdown
+            // 
+            this.toolDescriptionMarkdown.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolDescriptionMarkdown.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolDescriptionMarkdownH1,
+            this.toolDescriptionMarkdownH2,
+            this.toolDescriptionMarkdownH3,
+            this.toolDescriptionMarkdownH4,
+            this.toolDescriptionMarkdownS1,
+            this.toolDescriptionMarkdownBold,
+            this.toolDescriptionMarkdownStrikethrough,
+            this.toolDescriptionMarkdownItalic,
+            this.toolDescriptionMarkdownS2,
+            this.toolDescriptionMarkdownList,
+            this.toolDescriptionMarkdownListOrdered,
+            this.toolDescriptionMarkdownLine,
+            this.toolDescriptionMarkdownLink,
+            this.toolDescriptionMarkdownImage,
+            this.toolDescriptionMarkdownTable,
+            this.toolDescriptionMarkdownCode});
+            this.toolDescriptionMarkdown.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionMarkdown.Image")));
+            this.toolDescriptionMarkdown.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolDescriptionMarkdown.Name = "toolDescriptionMarkdown";
+            this.toolDescriptionMarkdown.Size = new System.Drawing.Size(27, 20);
+            this.toolDescriptionMarkdown.Text = "Markdown";
+            // 
+            // toolDescriptionMarkdownH1
+            // 
+            this.toolDescriptionMarkdownH1.Name = "toolDescriptionMarkdownH1";
+            this.toolDescriptionMarkdownH1.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownH1.Text = "Title 1";
+            this.toolDescriptionMarkdownH1.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownH2
+            // 
+            this.toolDescriptionMarkdownH2.Name = "toolDescriptionMarkdownH2";
+            this.toolDescriptionMarkdownH2.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownH2.Text = "Title 2";
+            this.toolDescriptionMarkdownH2.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownH3
+            // 
+            this.toolDescriptionMarkdownH3.Name = "toolDescriptionMarkdownH3";
+            this.toolDescriptionMarkdownH3.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownH3.Text = "Title 3";
+            this.toolDescriptionMarkdownH3.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownH4
+            // 
+            this.toolDescriptionMarkdownH4.Name = "toolDescriptionMarkdownH4";
+            this.toolDescriptionMarkdownH4.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownH4.Text = "Title 4";
+            this.toolDescriptionMarkdownH4.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownS1
+            // 
+            this.toolDescriptionMarkdownS1.Name = "toolDescriptionMarkdownS1";
+            this.toolDescriptionMarkdownS1.Size = new System.Drawing.Size(143, 6);
+            // 
+            // toolDescriptionMarkdownBold
+            // 
+            this.toolDescriptionMarkdownBold.Name = "toolDescriptionMarkdownBold";
+            this.toolDescriptionMarkdownBold.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownBold.Text = "Bold";
+            this.toolDescriptionMarkdownBold.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownStrikethrough
+            // 
+            this.toolDescriptionMarkdownStrikethrough.Name = "toolDescriptionMarkdownStrikethrough";
+            this.toolDescriptionMarkdownStrikethrough.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownStrikethrough.Text = "Strikethrough";
+            this.toolDescriptionMarkdownStrikethrough.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownItalic
+            // 
+            this.toolDescriptionMarkdownItalic.Name = "toolDescriptionMarkdownItalic";
+            this.toolDescriptionMarkdownItalic.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownItalic.Text = "Italic";
+            this.toolDescriptionMarkdownItalic.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownS2
+            // 
+            this.toolDescriptionMarkdownS2.Name = "toolDescriptionMarkdownS2";
+            this.toolDescriptionMarkdownS2.Size = new System.Drawing.Size(143, 6);
+            // 
+            // toolDescriptionMarkdownList
+            // 
+            this.toolDescriptionMarkdownList.Name = "toolDescriptionMarkdownList";
+            this.toolDescriptionMarkdownList.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownList.Text = "List";
+            this.toolDescriptionMarkdownList.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownListOrdered
+            // 
+            this.toolDescriptionMarkdownListOrdered.Name = "toolDescriptionMarkdownListOrdered";
+            this.toolDescriptionMarkdownListOrdered.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownListOrdered.Text = "ListOrdered";
+            this.toolDescriptionMarkdownListOrdered.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownLine
+            // 
+            this.toolDescriptionMarkdownLine.Name = "toolDescriptionMarkdownLine";
+            this.toolDescriptionMarkdownLine.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownLine.Text = "Line";
+            this.toolDescriptionMarkdownLine.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownLink
+            // 
+            this.toolDescriptionMarkdownLink.Name = "toolDescriptionMarkdownLink";
+            this.toolDescriptionMarkdownLink.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownLink.Text = "Link";
+            this.toolDescriptionMarkdownLink.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownImage
+            // 
+            this.toolDescriptionMarkdownImage.Name = "toolDescriptionMarkdownImage";
+            this.toolDescriptionMarkdownImage.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownImage.Text = "Image";
+            this.toolDescriptionMarkdownImage.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownTable
+            // 
+            this.toolDescriptionMarkdownTable.Name = "toolDescriptionMarkdownTable";
+            this.toolDescriptionMarkdownTable.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownTable.Text = "Table";
+            this.toolDescriptionMarkdownTable.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionMarkdownCode
+            // 
+            this.toolDescriptionMarkdownCode.Name = "toolDescriptionMarkdownCode";
+            this.toolDescriptionMarkdownCode.Size = new System.Drawing.Size(146, 22);
+            this.toolDescriptionMarkdownCode.Text = "Code";
+            this.toolDescriptionMarkdownCode.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionUploads
+            // 
+            this.toolDescriptionUploads.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolDescriptionUploads.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolDescriptionUploadFromFile,
+            this.toolDescriptionUploadFromClipboard});
+            this.toolDescriptionUploads.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploads.Image")));
+            this.toolDescriptionUploads.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolDescriptionUploads.Name = "toolDescriptionUploads";
+            this.toolDescriptionUploads.Size = new System.Drawing.Size(27, 20);
+            this.toolDescriptionUploads.Text = "I";
+            // 
+            // toolDescriptionUploadFromFile
+            // 
+            this.toolDescriptionUploadFromFile.Name = "toolDescriptionUploadFromFile";
+            this.toolDescriptionUploadFromFile.Size = new System.Drawing.Size(221, 22);
+            this.toolDescriptionUploadFromFile.Text = "Insert image from file";
+            // 
+            // toolDescriptionUploadFromClipboard
+            // 
+            this.toolDescriptionUploadFromClipboard.Name = "toolDescriptionUploadFromClipboard";
+            this.toolDescriptionUploadFromClipboard.Size = new System.Drawing.Size(221, 22);
+            this.toolDescriptionUploadFromClipboard.Text = "Insert image form clipboard";
+            // 
             // labelLoadingHtml
             // 
             this.labelLoadingHtml.AutoSize = true;
@@ -357,17 +634,6 @@
             this.labelLoadingHtml.TabIndex = 54;
             this.labelLoadingHtml.Text = "Loading html content ...";
             this.labelLoadingHtml.Visible = false;
-            // 
-            // htmlDescription
-            // 
-            this.htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(453, 329);
-            this.htmlDescription.Name = "htmlDescription";
-            this.htmlDescription.Size = new System.Drawing.Size(232, 117);
-            this.htmlDescription.TabIndex = 53;
             // 
             // label7
             // 
@@ -384,7 +650,7 @@
             this.buttonEditMarkdown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonEditMarkdown.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.buttonEditMarkdown.ImageList = this.imageListTabNoteData;
-            this.buttonEditMarkdown.Location = new System.Drawing.Point(653, 105);
+            this.buttonEditMarkdown.Location = new System.Drawing.Point(658, 105);
             this.buttonEditMarkdown.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonEditMarkdown.Name = "buttonEditMarkdown";
             this.buttonEditMarkdown.Size = new System.Drawing.Size(79, 24);
@@ -396,7 +662,7 @@
             // buttonViewHtml
             // 
             this.buttonViewHtml.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonViewHtml.Location = new System.Drawing.Point(736, 105);
+            this.buttonViewHtml.Location = new System.Drawing.Point(740, 105);
             this.buttonViewHtml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonViewHtml.Name = "buttonViewHtml";
             this.buttonViewHtml.Size = new System.Drawing.Size(46, 24);
@@ -430,7 +696,7 @@
             this.textTags.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textTags.MaxLength = 255;
             this.textTags.Name = "textTags";
-            this.textTags.Size = new System.Drawing.Size(469, 23);
+            this.textTags.Size = new System.Drawing.Size(474, 23);
             this.textTags.TabIndex = 43;
             // 
             // textFolder
@@ -456,32 +722,19 @@
             this.textTopic.Size = new System.Drawing.Size(589, 23);
             this.textTopic.TabIndex = 37;
             // 
-            // textDescription
-            // 
-            this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textDescription.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textDescription.Location = new System.Drawing.Point(453, 228);
-            this.textDescription.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textDescription.Multiline = true;
-            this.textDescription.Name = "textDescription";
-            this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textDescription.Size = new System.Drawing.Size(211, 81);
-            this.textDescription.TabIndex = 5;
-            // 
             // buttonFolderSearch
             // 
             this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
             this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonFolderSearch.Location = new System.Drawing.Point(756, 38);
+            this.buttonFolderSearch.Location = new System.Drawing.Point(760, 38);
             this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonFolderSearch.Name = "buttonFolderSearch";
             this.buttonFolderSearch.Size = new System.Drawing.Size(27, 23);
             this.buttonFolderSearch.TabIndex = 39;
             this.buttonFolderSearch.Text = "...";
             this.buttonFolderSearch.UseVisualStyleBackColor = false;
+            this.buttonFolderSearch.Click += new System.EventHandler(this.buttonFolderSearch_Click);
             // 
             // label3
             // 
@@ -520,7 +773,7 @@
             this.textNoteNumber.Enabled = false;
             this.textNoteNumber.Location = new System.Drawing.Point(702, 8);
             this.textNoteNumber.Name = "textNoteNumber";
-            this.textNoteNumber.Size = new System.Drawing.Size(80, 23);
+            this.textNoteNumber.Size = new System.Drawing.Size(84, 23);
             this.textNoteNumber.TabIndex = 51;
             this.textNoteNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -531,7 +784,7 @@
             this.textFolderNumber.Enabled = false;
             this.textFolderNumber.Location = new System.Drawing.Point(702, 38);
             this.textFolderNumber.Name = "textFolderNumber";
-            this.textFolderNumber.Size = new System.Drawing.Size(47, 23);
+            this.textFolderNumber.Size = new System.Drawing.Size(54, 23);
             this.textFolderNumber.TabIndex = 52;
             this.textFolderNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -1062,6 +1315,16 @@
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
             // 
+            // labelFolderId
+            // 
+            this.labelFolderId.AutoSize = true;
+            this.labelFolderId.Location = new System.Drawing.Point(650, 162);
+            this.labelFolderId.Name = "labelFolderId";
+            this.labelFolderId.Size = new System.Drawing.Size(75, 15);
+            this.labelFolderId.TabIndex = 56;
+            this.labelFolderId.Text = "labelFolderId";
+            this.labelFolderId.Visible = false;
+            // 
             // NoteEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1084,6 +1347,10 @@
             this.tabNoteData.ResumeLayout(false);
             this.tabBasicData.ResumeLayout(false);
             this.tabBasicData.PerformLayout();
+            this.panelDescription.ResumeLayout(false);
+            this.panelDescription.PerformLayout();
+            this.toolDescription.ResumeLayout(false);
+            this.toolDescription.PerformLayout();
             this.tabAttributes.ResumeLayout(false);
             this.tabAttributes.PerformLayout();
             this.tabResources.ResumeLayout(false);
@@ -1129,7 +1396,6 @@
         internal System.Windows.Forms.TextBox textTags;
         internal System.Windows.Forms.TextBox textFolder;
         internal System.Windows.Forms.TextBox textTopic;
-        private System.Windows.Forms.TextBox textDescription;
         private System.Windows.Forms.Button buttonFolderSearch;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
@@ -1184,7 +1450,36 @@
         private System.Windows.Forms.ListView listViewAlarms;
         private System.Windows.Forms.ListView listView2;
         private System.Windows.Forms.ListView listView1;
-        private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
         private System.Windows.Forms.Label labelLoadingHtml;
+        private System.Windows.Forms.Panel panelDescription;
+        private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
+        private System.Windows.Forms.TextBox textDescription;
+        private System.Windows.Forms.ToolStrip toolDescription;
+        private System.Windows.Forms.ToolStripDropDownButton toolDescriptionHtmlTitles;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlTitle1;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlTitle2;
+        private System.Windows.Forms.ToolStripDropDownButton toolDescriptionUploads;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionUploadFromFile;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionUploadFromClipboard;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlTitle3;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlTitle4;
+        private System.Windows.Forms.ToolStripDropDownButton toolDescriptionMarkdown;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownH1;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownH2;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownH3;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownH4;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownBold;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownStrikethrough;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownItalic;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownList;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownListOrdered;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownLine;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownLink;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownImage;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownTable;
+        private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS1;
+        private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS2;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownCode;
+        private System.Windows.Forms.Label labelFolderId;
     }
 }

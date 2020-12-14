@@ -16,7 +16,13 @@ namespace KNote.ClientWin.Core
 {
     public class ServiceRef
     {
-        public readonly Guid IdServiceRef;
+        public Guid IdServiceRef 
+        {
+            get
+            {
+                return Service.IdServiceRef;
+            }
+        }
 
         public string Alias { 
             get
@@ -24,11 +30,6 @@ namespace KNote.ClientWin.Core
                 return RepositoryRef?.Alias;
             }
         }
-
-        //public string ConnectionString { get; }
-
-        //public string Provider { get;  }        
-        //public string Orm { get; }
 
         public RepositoryRef RepositoryRef { get; protected set; }
 
@@ -62,14 +63,12 @@ namespace KNote.ClientWin.Core
         }
 
         public ServiceRef (string name, string connectionString, string provider, string orm)
-        {
-            IdServiceRef = Guid.NewGuid();
+        {            
             RepositoryRef = new RepositoryRef { Alias = name, ConnectionString = connectionString, Provider = provider, Orm = orm };
         }
 
         public ServiceRef(RepositoryRef repositoryRef)
-        {
-            IdServiceRef = Guid.NewGuid();
+        {         
             RepositoryRef = repositoryRef;
         }
 

@@ -163,7 +163,24 @@ namespace KNote.ClientWin.Components
             }
             return false;
         }
-            
+
         #endregion
+
+        #region Other public methods
+
+        public FolderInfoDto GetFolder()
+        {
+            var folderSelector = new FoldersSelectorComponent(Store);
+            var services = new List<ServiceRef>();
+            services.Add(Store.GetServiceRef(Service.IdServiceRef));
+            folderSelector.ServicesRef = services;
+            var res = folderSelector.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+                return folderSelector.SelectedEntity.FolderInfo;
+
+            return null;
+        }
+
+        #endregion 
     }
 }
