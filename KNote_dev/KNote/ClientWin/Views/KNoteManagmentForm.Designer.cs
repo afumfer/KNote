@@ -37,19 +37,17 @@
             this.menuCreateRepositoryLink = new System.Windows.Forms.ToolStripMenuItem();
             this.menuEditRepositoryProperties = new System.Windows.Forms.ToolStripMenuItem();
             this.menuRemoveRepositoryLink = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolMenuIRepositoryS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuRefreshTreeFolders = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem14 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolMenuIRepositoryS2 = new System.Windows.Forms.ToolStripSeparator();
             this.menuImportData = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFolders = new System.Windows.Forms.ToolStripMenuItem();
             this.menuNewFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.menuEditFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.menuDeleteFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuPrintNotes = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem11 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolMenuFilesS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuHide = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuSeparadoOcultar = new System.Windows.Forms.ToolStripSeparator();
+            this.toolMenuFilesS2 = new System.Windows.Forms.ToolStripSeparator();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.menuEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.menuNewNote = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,8 +55,7 @@
             this.menuDeleteNote = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMoveSelectedNotes = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuMarkAsStarted = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuMarkAsSolved = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuUpdateAttributes = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem12 = new System.Windows.Forms.ToolStripSeparator();
             this.menuAlarmaWithin = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAlarm10m = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,8 +67,8 @@
             this.menuAlarm1week = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAlarm1month = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem13 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuAnadirEtiquetasP = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuEliminarEtiquetasP = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuAddTags = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuRemoveTags = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem16 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMoreOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.menuExecuteAnTScript = new System.Windows.Forms.ToolStripMenuItem();
@@ -146,11 +143,9 @@
             this.menuFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuRepositories,
             this.menuFolders,
-            this.toolStripMenuItem3,
-            this.menuPrintNotes,
-            this.toolStripMenuItem11,
+            this.toolMenuFilesS1,
             this.menuHide,
-            this.menuSeparadoOcultar,
+            this.toolMenuFilesS2,
             this.menuExit});
             this.menuFile.Name = "menuFile";
             this.menuFile.Size = new System.Drawing.Size(37, 20);
@@ -163,9 +158,9 @@
             this.menuCreateRepositoryLink,
             this.menuEditRepositoryProperties,
             this.menuRemoveRepositoryLink,
-            this.toolStripMenuItem5,
+            this.toolMenuIRepositoryS1,
             this.menuRefreshTreeFolders,
-            this.toolStripMenuItem14,
+            this.toolMenuIRepositoryS2,
             this.menuImportData});
             this.menuRepositories.Name = "menuRepositories";
             this.menuRepositories.Size = new System.Drawing.Size(203, 22);
@@ -199,10 +194,10 @@
             this.menuRemoveRepositoryLink.Text = "Remove link from selected repository ...";
             this.menuRemoveRepositoryLink.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolStripMenuItem5
+            // toolMenuIRepositoryS1
             // 
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(279, 6);
+            this.toolMenuIRepositoryS1.Name = "toolMenuIRepositoryS1";
+            this.toolMenuIRepositoryS1.Size = new System.Drawing.Size(279, 6);
             // 
             // menuRefreshTreeFolders
             // 
@@ -211,10 +206,10 @@
             this.menuRefreshTreeFolders.Text = "Refresh folders tree";
             this.menuRefreshTreeFolders.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolStripMenuItem14
+            // toolMenuIRepositoryS2
             // 
-            this.toolStripMenuItem14.Name = "toolStripMenuItem14";
-            this.toolStripMenuItem14.Size = new System.Drawing.Size(279, 6);
+            this.toolMenuIRepositoryS2.Name = "toolMenuIRepositoryS2";
+            this.toolMenuIRepositoryS2.Size = new System.Drawing.Size(279, 6);
             // 
             // menuImportData
             // 
@@ -254,22 +249,10 @@
             this.menuDeleteFolder.Text = "Delete folder ...";
             this.menuDeleteFolder.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolStripMenuItem3
+            // toolMenuFilesS1
             // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(200, 6);
-            // 
-            // menuPrintNotes
-            // 
-            this.menuPrintNotes.Name = "menuPrintNotes";
-            this.menuPrintNotes.Size = new System.Drawing.Size(203, 22);
-            this.menuPrintNotes.Text = "&Print notes";
-            this.menuPrintNotes.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // toolStripMenuItem11
-            // 
-            this.toolStripMenuItem11.Name = "toolStripMenuItem11";
-            this.toolStripMenuItem11.Size = new System.Drawing.Size(200, 6);
+            this.toolMenuFilesS1.Name = "toolMenuFilesS1";
+            this.toolMenuFilesS1.Size = new System.Drawing.Size(200, 6);
             // 
             // menuHide
             // 
@@ -278,10 +261,10 @@
             this.menuHide.Text = "&Hide KNote managment";
             this.menuHide.Click += new System.EventHandler(this.menu_Click);
             // 
-            // menuSeparadoOcultar
+            // toolMenuFilesS2
             // 
-            this.menuSeparadoOcultar.Name = "menuSeparadoOcultar";
-            this.menuSeparadoOcultar.Size = new System.Drawing.Size(200, 6);
+            this.toolMenuFilesS2.Name = "toolMenuFilesS2";
+            this.toolMenuFilesS2.Size = new System.Drawing.Size(200, 6);
             // 
             // menuExit
             // 
@@ -298,13 +281,12 @@
             this.menuDeleteNote,
             this.toolStripMenuItem1,
             this.menuMoveSelectedNotes,
-            this.menuMarkAsStarted,
-            this.menuMarkAsSolved,
             this.toolStripMenuItem12,
             this.menuAlarmaWithin,
             this.toolStripMenuItem13,
-            this.menuAnadirEtiquetasP,
-            this.menuEliminarEtiquetasP,
+            this.menuUpdateAttributes,
+            this.menuAddTags,
+            this.menuRemoveTags,
             this.toolStripMenuItem16,
             this.menuMoreOptions});
             this.menuEdit.Name = "menuEdit";
@@ -346,19 +328,12 @@
             this.menuMoveSelectedNotes.Text = "&Move selected notes ...";
             this.menuMoveSelectedNotes.Click += new System.EventHandler(this.menu_Click);
             // 
-            // menuMarkAsStarted
+            // menuUpdateAttributes
             // 
-            this.menuMarkAsStarted.Name = "menuMarkAsStarted";
-            this.menuMarkAsStarted.Size = new System.Drawing.Size(258, 22);
-            this.menuMarkAsStarted.Text = "Mark as task started";
-            this.menuMarkAsStarted.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuMarkAsSolved
-            // 
-            this.menuMarkAsSolved.Name = "menuMarkAsSolved";
-            this.menuMarkAsSolved.Size = new System.Drawing.Size(258, 22);
-            this.menuMarkAsSolved.Text = "Mark as task solved";
-            this.menuMarkAsSolved.Click += new System.EventHandler(this.menu_Click);
+            this.menuUpdateAttributes.Name = "menuUpdateAttributes";
+            this.menuUpdateAttributes.Size = new System.Drawing.Size(268, 22);
+            this.menuUpdateAttributes.Text = "Update attributes in selected notes ...";
+            this.menuUpdateAttributes.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem12
             // 
@@ -377,8 +352,8 @@
             this.menuAlarm1week,
             this.menuAlarm1month});
             this.menuAlarmaWithin.Name = "menuAlarmaWithin";
-            this.menuAlarmaWithin.Size = new System.Drawing.Size(258, 22);
-            this.menuAlarmaWithin.Text = "Activate task alarm within";
+            this.menuAlarmaWithin.Size = new System.Drawing.Size(268, 22);
+            this.menuAlarmaWithin.Text = "Activate note &alarm within";
             // 
             // menuAlarm10m
             // 
@@ -441,19 +416,19 @@
             this.toolStripMenuItem13.Name = "toolStripMenuItem13";
             this.toolStripMenuItem13.Size = new System.Drawing.Size(255, 6);
             // 
-            // menuAnadirEtiquetasP
+            // menuAddTags
             // 
-            this.menuAnadirEtiquetasP.Name = "menuAnadirEtiquetasP";
-            this.menuAnadirEtiquetasP.Size = new System.Drawing.Size(258, 22);
-            this.menuAnadirEtiquetasP.Text = "Add tags to selected tasks ...";
-            this.menuAnadirEtiquetasP.Click += new System.EventHandler(this.menu_Click);
+            this.menuAddTags.Name = "menuAddTags";
+            this.menuAddTags.Size = new System.Drawing.Size(268, 22);
+            this.menuAddTags.Text = "Add tags to selected notes ...";
+            this.menuAddTags.Click += new System.EventHandler(this.menu_Click);
             // 
-            // menuEliminarEtiquetasP
+            // menuRemoveTags
             // 
-            this.menuEliminarEtiquetasP.Name = "menuEliminarEtiquetasP";
-            this.menuEliminarEtiquetasP.Size = new System.Drawing.Size(258, 22);
-            this.menuEliminarEtiquetasP.Text = "Remove tags from selected tasks ...";
-            this.menuEliminarEtiquetasP.Click += new System.EventHandler(this.menu_Click);
+            this.menuRemoveTags.Name = "menuRemoveTags";
+            this.menuRemoveTags.Size = new System.Drawing.Size(268, 22);
+            this.menuRemoveTags.Text = "Remove tags from selected notes ...";
+            this.menuRemoveTags.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem16
             // 
@@ -522,7 +497,7 @@
             // 
             this.menuReports.Name = "menuReports";
             this.menuReports.Size = new System.Drawing.Size(222, 22);
-            this.menuReports.Text = "Reports ...";
+            this.menuReports.Text = "&Reports ...";
             this.menuReports.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem6
@@ -534,7 +509,7 @@
             // 
             this.menuRepositoryConfigurations.Name = "menuRepositoryConfigurations";
             this.menuRepositoryConfigurations.Size = new System.Drawing.Size(222, 22);
-            this.menuRepositoryConfigurations.Text = "Repository configurations ...";
+            this.menuRepositoryConfigurations.Text = "Repository &configurations ...";
             this.menuRepositoryConfigurations.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem7
@@ -547,7 +522,7 @@
             this.menuKntScriptConsole.Name = "menuKntScriptConsole";
             this.menuKntScriptConsole.ShortcutKeys = System.Windows.Forms.Keys.F6;
             this.menuKntScriptConsole.Size = new System.Drawing.Size(222, 22);
-            this.menuKntScriptConsole.Text = "KntScript console";
+            this.menuKntScriptConsole.Text = "Knt&Script console";
             this.menuKntScriptConsole.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuKNoteLab
@@ -555,7 +530,8 @@
             this.menuKNoteLab.Name = "menuKNoteLab";
             this.menuKNoteLab.ShortcutKeys = System.Windows.Forms.Keys.F10;
             this.menuKNoteLab.Size = new System.Drawing.Size(222, 22);
-            this.menuKNoteLab.Text = "Knote lab ...";
+            this.menuKNoteLab.Text = "Knote &lab ...";
+            this.menuKNoteLab.Visible = false;
             this.menuKNoteLab.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem8
@@ -567,7 +543,7 @@
             // 
             this.menuOptions.Name = "menuOptions";
             this.menuOptions.Size = new System.Drawing.Size(222, 22);
-            this.menuOptions.Text = "Options ...";
+            this.menuOptions.Text = "&Options ...";
             this.menuOptions.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuHelp
@@ -583,14 +559,14 @@
             // 
             this.menuHelpDoc.Name = "menuHelpDoc";
             this.menuHelpDoc.Size = new System.Drawing.Size(119, 22);
-            this.menuHelpDoc.Text = "Help ...";
+            this.menuHelpDoc.Text = "&Help ...";
             this.menuHelpDoc.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuAbout
             // 
             this.menuAbout.Name = "menuAbout";
             this.menuAbout.Size = new System.Drawing.Size(119, 22);
-            this.menuAbout.Text = "About ...";
+            this.menuAbout.Text = "&About ...";
             this.menuAbout.Click += new System.EventHandler(this.menu_Click);
             // 
             // statusBarManagment
@@ -888,19 +864,17 @@
         private System.Windows.Forms.ToolStripMenuItem menuCreateRepositoryLink;
         private System.Windows.Forms.ToolStripMenuItem menuEditRepositoryProperties;
         private System.Windows.Forms.ToolStripMenuItem menuRemoveRepositoryLink;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripSeparator toolMenuIRepositoryS1;
         private System.Windows.Forms.ToolStripMenuItem menuRefreshTreeFolders;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem14;
+        private System.Windows.Forms.ToolStripSeparator toolMenuIRepositoryS2;
         private System.Windows.Forms.ToolStripMenuItem menuImportData;
         private System.Windows.Forms.ToolStripMenuItem menuFolders;
         private System.Windows.Forms.ToolStripMenuItem menuNewFolder;
         private System.Windows.Forms.ToolStripMenuItem menuEditFolder;
         private System.Windows.Forms.ToolStripMenuItem menuDeleteFolder;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
-        private System.Windows.Forms.ToolStripMenuItem menuPrintNotes;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem11;
+        private System.Windows.Forms.ToolStripSeparator toolMenuFilesS1;
         private System.Windows.Forms.ToolStripMenuItem menuHide;
-        private System.Windows.Forms.ToolStripSeparator menuSeparadoOcultar;
+        private System.Windows.Forms.ToolStripSeparator toolMenuFilesS2;
         private System.Windows.Forms.ToolStripMenuItem menuExit;
         private System.Windows.Forms.ToolStripMenuItem menuEdit;
         private System.Windows.Forms.ToolStripMenuItem menuNewNote;
@@ -908,8 +882,7 @@
         private System.Windows.Forms.ToolStripMenuItem menuDeleteNote;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem menuMoveSelectedNotes;
-        private System.Windows.Forms.ToolStripMenuItem menuMarkAsStarted;
-        private System.Windows.Forms.ToolStripMenuItem menuMarkAsSolved;
+        private System.Windows.Forms.ToolStripMenuItem menuUpdateAttributes;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem12;
         private System.Windows.Forms.ToolStripMenuItem menuAlarmaWithin;
         private System.Windows.Forms.ToolStripMenuItem menuAlarm10m;
@@ -921,8 +894,8 @@
         private System.Windows.Forms.ToolStripMenuItem menuAlarm1week;
         private System.Windows.Forms.ToolStripMenuItem menuAlarm1month;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem13;
-        private System.Windows.Forms.ToolStripMenuItem menuAnadirEtiquetasP;
-        private System.Windows.Forms.ToolStripMenuItem menuEliminarEtiquetasP;
+        private System.Windows.Forms.ToolStripMenuItem menuAddTags;
+        private System.Windows.Forms.ToolStripMenuItem menuRemoveTags;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem16;
         private System.Windows.Forms.ToolStripMenuItem menuMoreOptions;
         private System.Windows.Forms.ToolStripMenuItem menuExecuteAnTScript;

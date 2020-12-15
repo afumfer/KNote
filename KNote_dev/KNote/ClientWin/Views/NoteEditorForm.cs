@@ -664,7 +664,20 @@ namespace KNote.ClientWin.Views
                 
                 buttonUndo.Enabled = true;
             }
+        }
 
+        private void buttonAddAlarmForMe_Click(object sender, EventArgs e)
+        {
+            _com.NewMessage();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
 
         }
 

@@ -327,7 +327,7 @@ namespace KNote.ClientWin.Components
             if (res)
             {                
                 FoldersSelectorComponent.DeleteItem(SelectedFolderWithServiceRef);
-            }
+            }            
         }
 
         #endregion

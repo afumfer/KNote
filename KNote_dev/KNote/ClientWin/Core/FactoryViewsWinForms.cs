@@ -22,9 +22,7 @@ namespace KNote.ClientWin.Core
         {
             return new KntScriptConsoleForm(component);
         }
-
-        //
-
+        
         public ISelectorView<FolderWithServiceRef> View(FoldersSelectorComponent component)
         {
             return new FoldersSelectorForm(component);
@@ -54,6 +52,26 @@ namespace KNote.ClientWin.Core
         public IViewBase NotifyView(KNoteManagmentComponent component)
         {
             return new NotifyForm(component);
+        }
+
+        public IEditorView<KMessageDto> View(MessageEditorComponent component)
+        {
+            return new MessageEditorForm(component);
+        }
+
+        public IEditorView<ResourceDto> View(ResourceEditorComponent component)
+        {
+            return new ResourceEditorForm(component);
+        }
+
+        public IEditorView<KAttributeDto> View(AttributeEditorComponent component)
+        {
+            return new AttributeEditorForm(component);
+        }
+
+        public IEditorView<NoteTaskDto> View(TaskEditorComponent component)
+        {
+            return new TaskEditorForm(component);
         }
 
 

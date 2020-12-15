@@ -95,6 +95,12 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textNoteNumber = new System.Windows.Forms.TextBox();
             this.textFolderNumber = new System.Windows.Forms.TextBox();
+            this.tabAlarms = new System.Windows.Forms.TabPage();
+            this.listViewAlarms = new System.Windows.Forms.ListView();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.buttonAddAlarmForMe = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
             this.tabAttributes = new System.Windows.Forms.TabPage();
             this.listViewAttributes = new System.Windows.Forms.ListView();
             this.textNoteType = new System.Windows.Forms.TextBox();
@@ -116,12 +122,6 @@
             this.buttonTaskDelete = new System.Windows.Forms.Button();
             this.buttonTaskAdd = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
-            this.tabAlarms = new System.Windows.Forms.TabPage();
-            this.listViewAlarms = new System.Windows.Forms.ListView();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.buttonAddAlarmForMe = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
             this.tabCode = new System.Windows.Forms.TabPage();
             this.textScriptCode = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -139,18 +139,17 @@
             this.button15 = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
-            this.labelFolderId = new System.Windows.Forms.Label();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
             this.tabBasicData.SuspendLayout();
             this.panelDescription.SuspendLayout();
             this.toolDescription.SuspendLayout();
+            this.tabAlarms.SuspendLayout();
             this.tabAttributes.SuspendLayout();
             this.tabResources.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).BeginInit();
             this.tabTasks.SuspendLayout();
-            this.tabAlarms.SuspendLayout();
             this.tabCode.SuspendLayout();
             this.tabTraceNotes.SuspendLayout();
             this.SuspendLayout();
@@ -335,10 +334,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabNoteData.Controls.Add(this.tabBasicData);
+            this.tabNoteData.Controls.Add(this.tabAlarms);
             this.tabNoteData.Controls.Add(this.tabAttributes);
             this.tabNoteData.Controls.Add(this.tabResources);
             this.tabNoteData.Controls.Add(this.tabTasks);
-            this.tabNoteData.Controls.Add(this.tabAlarms);
             this.tabNoteData.Controls.Add(this.tabCode);
             this.tabNoteData.Controls.Add(this.tabTraceNotes);
             this.tabNoteData.ImageList = this.imageListTabNoteData;
@@ -352,7 +351,6 @@
             // 
             // tabBasicData
             // 
-            this.tabBasicData.Controls.Add(this.labelFolderId);
             this.tabBasicData.Controls.Add(this.panelDescription);
             this.tabBasicData.Controls.Add(this.labelLoadingHtml);
             this.tabBasicData.Controls.Add(this.label7);
@@ -398,7 +396,7 @@
             this.htmlDescription.Location = new System.Drawing.Point(40, 116);
             this.htmlDescription.Name = "htmlDescription";
             this.htmlDescription.Size = new System.Drawing.Size(277, 125);
-            this.htmlDescription.TabIndex = 54;
+            this.htmlDescription.TabIndex = 8;
             // 
             // textDescription
             // 
@@ -409,7 +407,7 @@
             this.textDescription.Name = "textDescription";
             this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textDescription.Size = new System.Drawing.Size(277, 78);
-            this.textDescription.TabIndex = 6;
+            this.textDescription.TabIndex = 7;
             // 
             // toolDescription
             // 
@@ -654,7 +652,7 @@
             this.buttonEditMarkdown.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonEditMarkdown.Name = "buttonEditMarkdown";
             this.buttonEditMarkdown.Size = new System.Drawing.Size(79, 24);
-            this.buttonEditMarkdown.TabIndex = 49;
+            this.buttonEditMarkdown.TabIndex = 5;
             this.buttonEditMarkdown.Text = "Markdown";
             this.buttonEditMarkdown.UseVisualStyleBackColor = true;
             this.buttonEditMarkdown.Click += new System.EventHandler(this.buttonEditMarkdown_Click);
@@ -666,7 +664,7 @@
             this.buttonViewHtml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonViewHtml.Name = "buttonViewHtml";
             this.buttonViewHtml.Size = new System.Drawing.Size(46, 24);
-            this.buttonViewHtml.TabIndex = 48;
+            this.buttonViewHtml.TabIndex = 6;
             this.buttonViewHtml.Text = "Html";
             this.buttonViewHtml.UseVisualStyleBackColor = true;
             this.buttonViewHtml.Click += new System.EventHandler(this.buttonViewHtml_Click);
@@ -677,7 +675,7 @@
             this.textPriority.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textPriority.Name = "textPriority";
             this.textPriority.Size = new System.Drawing.Size(121, 23);
-            this.textPriority.TabIndex = 46;
+            this.textPriority.TabIndex = 3;
             // 
             // label6
             // 
@@ -697,7 +695,7 @@
             this.textTags.MaxLength = 255;
             this.textTags.Name = "textTags";
             this.textTags.Size = new System.Drawing.Size(474, 23);
-            this.textTags.TabIndex = 43;
+            this.textTags.TabIndex = 4;
             // 
             // textFolder
             // 
@@ -709,7 +707,7 @@
             this.textFolder.MaxLength = 255;
             this.textFolder.Name = "textFolder";
             this.textFolder.Size = new System.Drawing.Size(589, 23);
-            this.textFolder.TabIndex = 38;
+            this.textFolder.TabIndex = 1;
             // 
             // textTopic
             // 
@@ -720,7 +718,7 @@
             this.textTopic.MaxLength = 255;
             this.textTopic.Name = "textTopic";
             this.textTopic.Size = new System.Drawing.Size(589, 23);
-            this.textTopic.TabIndex = 37;
+            this.textTopic.TabIndex = 0;
             // 
             // buttonFolderSearch
             // 
@@ -731,7 +729,7 @@
             this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonFolderSearch.Name = "buttonFolderSearch";
             this.buttonFolderSearch.Size = new System.Drawing.Size(27, 23);
-            this.buttonFolderSearch.TabIndex = 39;
+            this.buttonFolderSearch.TabIndex = 2;
             this.buttonFolderSearch.Text = "...";
             this.buttonFolderSearch.UseVisualStyleBackColor = false;
             this.buttonFolderSearch.Click += new System.EventHandler(this.buttonFolderSearch_Click);
@@ -775,6 +773,7 @@
             this.textNoteNumber.Name = "textNoteNumber";
             this.textNoteNumber.Size = new System.Drawing.Size(84, 23);
             this.textNoteNumber.TabIndex = 51;
+            this.textNoteNumber.TabStop = false;
             this.textNoteNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // textFolderNumber
@@ -786,7 +785,83 @@
             this.textFolderNumber.Name = "textFolderNumber";
             this.textFolderNumber.Size = new System.Drawing.Size(54, 23);
             this.textFolderNumber.TabIndex = 52;
+            this.textFolderNumber.TabStop = false;
             this.textFolderNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // tabAlarms
+            // 
+            this.tabAlarms.Controls.Add(this.listViewAlarms);
+            this.tabAlarms.Controls.Add(this.button2);
+            this.tabAlarms.Controls.Add(this.button1);
+            this.tabAlarms.Controls.Add(this.buttonAddAlarmForMe);
+            this.tabAlarms.Controls.Add(this.label4);
+            this.tabAlarms.ImageIndex = 0;
+            this.tabAlarms.Location = new System.Drawing.Point(4, 30);
+            this.tabAlarms.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabAlarms.Name = "tabAlarms";
+            this.tabAlarms.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabAlarms.Size = new System.Drawing.Size(794, 569);
+            this.tabAlarms.TabIndex = 1;
+            this.tabAlarms.Text = "Alarms  ";
+            this.tabAlarms.UseVisualStyleBackColor = true;
+            // 
+            // listViewAlarms
+            // 
+            this.listViewAlarms.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewAlarms.HideSelection = false;
+            this.listViewAlarms.Location = new System.Drawing.Point(6, 34);
+            this.listViewAlarms.Name = "listViewAlarms";
+            this.listViewAlarms.Size = new System.Drawing.Size(781, 532);
+            this.listViewAlarms.TabIndex = 11;
+            this.listViewAlarms.UseCompatibleStateImageBehavior = false;
+            // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Location = new System.Drawing.Point(760, 10);
+            this.button2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(27, 23);
+            this.button2.TabIndex = 11;
+            this.button2.Text = "...";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.Location = new System.Drawing.Point(725, 10);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(27, 23);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "-";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // buttonAddAlarmForMe
+            // 
+            this.buttonAddAlarmForMe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAddAlarmForMe.Location = new System.Drawing.Point(690, 10);
+            this.buttonAddAlarmForMe.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonAddAlarmForMe.Name = "buttonAddAlarmForMe";
+            this.buttonAddAlarmForMe.Size = new System.Drawing.Size(27, 23);
+            this.buttonAddAlarmForMe.TabIndex = 9;
+            this.buttonAddAlarmForMe.Text = "+";
+            this.buttonAddAlarmForMe.UseVisualStyleBackColor = true;
+            this.buttonAddAlarmForMe.Click += new System.EventHandler(this.buttonAddAlarmForMe_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 16);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(47, 15);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "Alarms:";
             // 
             // tabAttributes
             // 
@@ -1045,78 +1120,6 @@
             this.label11.TabIndex = 5;
             this.label11.Text = "Tasks:";
             // 
-            // tabAlarms
-            // 
-            this.tabAlarms.Controls.Add(this.listViewAlarms);
-            this.tabAlarms.Controls.Add(this.button2);
-            this.tabAlarms.Controls.Add(this.button1);
-            this.tabAlarms.Controls.Add(this.buttonAddAlarmForMe);
-            this.tabAlarms.Controls.Add(this.label4);
-            this.tabAlarms.ImageIndex = 0;
-            this.tabAlarms.Location = new System.Drawing.Point(4, 30);
-            this.tabAlarms.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabAlarms.Name = "tabAlarms";
-            this.tabAlarms.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabAlarms.Size = new System.Drawing.Size(794, 569);
-            this.tabAlarms.TabIndex = 1;
-            this.tabAlarms.Text = "Alarms  ";
-            this.tabAlarms.UseVisualStyleBackColor = true;
-            // 
-            // listViewAlarms
-            // 
-            this.listViewAlarms.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewAlarms.HideSelection = false;
-            this.listViewAlarms.Location = new System.Drawing.Point(6, 34);
-            this.listViewAlarms.Name = "listViewAlarms";
-            this.listViewAlarms.Size = new System.Drawing.Size(781, 532);
-            this.listViewAlarms.TabIndex = 7;
-            this.listViewAlarms.UseCompatibleStateImageBehavior = false;
-            // 
-            // button2
-            // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(760, 10);
-            this.button2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(27, 23);
-            this.button2.TabIndex = 6;
-            this.button2.Text = "...";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
-            // button1
-            // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(725, 10);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(27, 23);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "-";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // buttonAddAlarmForMe
-            // 
-            this.buttonAddAlarmForMe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAlarmForMe.Location = new System.Drawing.Point(690, 10);
-            this.buttonAddAlarmForMe.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonAddAlarmForMe.Name = "buttonAddAlarmForMe";
-            this.buttonAddAlarmForMe.Size = new System.Drawing.Size(27, 23);
-            this.buttonAddAlarmForMe.TabIndex = 4;
-            this.buttonAddAlarmForMe.Text = "+";
-            this.buttonAddAlarmForMe.UseVisualStyleBackColor = true;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 16);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(47, 15);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Alarms:";
-            // 
             // tabCode
             // 
             this.tabCode.Controls.Add(this.textScriptCode);
@@ -1315,16 +1318,6 @@
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
             // 
-            // labelFolderId
-            // 
-            this.labelFolderId.AutoSize = true;
-            this.labelFolderId.Location = new System.Drawing.Point(650, 162);
-            this.labelFolderId.Name = "labelFolderId";
-            this.labelFolderId.Size = new System.Drawing.Size(75, 15);
-            this.labelFolderId.TabIndex = 56;
-            this.labelFolderId.Text = "labelFolderId";
-            this.labelFolderId.Visible = false;
-            // 
             // NoteEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1351,6 +1344,8 @@
             this.panelDescription.PerformLayout();
             this.toolDescription.ResumeLayout(false);
             this.toolDescription.PerformLayout();
+            this.tabAlarms.ResumeLayout(false);
+            this.tabAlarms.PerformLayout();
             this.tabAttributes.ResumeLayout(false);
             this.tabAttributes.PerformLayout();
             this.tabResources.ResumeLayout(false);
@@ -1358,8 +1353,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).EndInit();
             this.tabTasks.ResumeLayout(false);
             this.tabTasks.PerformLayout();
-            this.tabAlarms.ResumeLayout(false);
-            this.tabAlarms.PerformLayout();
             this.tabCode.ResumeLayout(false);
             this.tabCode.PerformLayout();
             this.tabTraceNotes.ResumeLayout(false);
@@ -1480,6 +1473,5 @@
         private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS1;
         private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS2;
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownCode;
-        private System.Windows.Forms.Label labelFolderId;
     }
 }

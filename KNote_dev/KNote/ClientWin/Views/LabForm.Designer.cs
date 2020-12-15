@@ -30,7 +30,6 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
-            this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.panelTest1 = new System.Windows.Forms.Panel();
             this.listMessages = new System.Windows.Forms.ListBox();
             this.buttonTest4 = new System.Windows.Forms.Button();
@@ -48,16 +47,20 @@
             this.buttonInteract = new System.Windows.Forms.Button();
             this.buttonShowConsole = new System.Windows.Forms.Button();
             this.buttonRunScript = new System.Windows.Forms.Button();
+            this.tabRichEditor = new System.Windows.Forms.TabPage();
+            this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
             this.groupSamples.SuspendLayout();
+            this.tabRichEditor.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabAppLab);
             this.tabControl1.Controls.Add(this.tabKntScriptLab);
+            this.tabControl1.Controls.Add(this.tabRichEditor);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -66,7 +69,6 @@
             // 
             // tabAppLab
             // 
-            this.tabAppLab.Controls.Add(this.htmlDescription);
             this.tabAppLab.Controls.Add(this.panelTest1);
             this.tabAppLab.Controls.Add(this.listMessages);
             this.tabAppLab.Controls.Add(this.buttonTest4);
@@ -82,17 +84,6 @@
             this.tabAppLab.TabIndex = 0;
             this.tabAppLab.Text = "Lab app components";
             this.tabAppLab.UseVisualStyleBackColor = true;
-            // 
-            // htmlDescription
-            // 
-            this.htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(214, 76);
-            this.htmlDescription.Name = "htmlDescription";
-            this.htmlDescription.Size = new System.Drawing.Size(426, 129);
-            this.htmlDescription.TabIndex = 9;
             // 
             // panelTest1
             // 
@@ -186,12 +177,14 @@
             // 
             // groupSamples
             // 
+            this.groupSamples.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.groupSamples.Controls.Add(this.buttonRunSample);
             this.groupSamples.Controls.Add(this.buttonShowSample);
             this.groupSamples.Controls.Add(this.listSamples);
             this.groupSamples.Location = new System.Drawing.Point(16, 154);
             this.groupSamples.Name = "groupSamples";
-            this.groupSamples.Size = new System.Drawing.Size(451, 307);
+            this.groupSamples.Size = new System.Drawing.Size(451, 379);
             this.groupSamples.TabIndex = 8;
             this.groupSamples.TabStop = false;
             this.groupSamples.Text = "Samples";
@@ -218,11 +211,13 @@
             // 
             // listSamples
             // 
+            this.listSamples.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.listSamples.FormattingEnabled = true;
             this.listSamples.ItemHeight = 15;
             this.listSamples.Location = new System.Drawing.Point(13, 19);
             this.listSamples.Name = "listSamples";
-            this.listSamples.Size = new System.Drawing.Size(230, 274);
+            this.listSamples.Size = new System.Drawing.Size(230, 349);
             this.listSamples.TabIndex = 2;
             this.listSamples.SelectedIndexChanged += new System.EventHandler(this.listSamples_SelectedIndexChanged);
             // 
@@ -266,6 +261,27 @@
             this.buttonRunScript.UseVisualStyleBackColor = true;
             this.buttonRunScript.Click += new System.EventHandler(this.buttonRunScript_Click);
             // 
+            // tabRichEditor
+            // 
+            this.tabRichEditor.Controls.Add(this.htmlDescription);
+            this.tabRichEditor.Location = new System.Drawing.Point(4, 24);
+            this.tabRichEditor.Name = "tabRichEditor";
+            this.tabRichEditor.Size = new System.Drawing.Size(662, 549);
+            this.tabRichEditor.TabIndex = 2;
+            this.tabRichEditor.Text = "Test rich editor";
+            this.tabRichEditor.UseVisualStyleBackColor = true;
+            // 
+            // htmlDescription
+            // 
+            this.htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.htmlDescription.InnerText = null;
+            this.htmlDescription.Location = new System.Drawing.Point(14, 15);
+            this.htmlDescription.Name = "htmlDescription";
+            this.htmlDescription.Size = new System.Drawing.Size(634, 287);
+            this.htmlDescription.TabIndex = 10;
+            // 
             // LabForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -282,6 +298,7 @@
             this.tabAppLab.PerformLayout();
             this.tabKntScriptLab.ResumeLayout(false);
             this.groupSamples.ResumeLayout(false);
+            this.tabRichEditor.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -306,6 +323,7 @@
         private System.Windows.Forms.Button buttonTest4;
         private System.Windows.Forms.Button buttonTest3;
         private System.Windows.Forms.Button buttonTest2;
+        private System.Windows.Forms.TabPage tabRichEditor;
         private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
     }
 }

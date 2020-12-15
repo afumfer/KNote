@@ -181,6 +181,60 @@ namespace KNote.ClientWin.Components
             return null;
         }
 
+        public void NewMessage()
+        {
+            var messageEditor = new MessageEditorComponent(Store);
+
+            messageEditor.RunModal();
+
+            //var folderEditorComponent = new FolderEditorComponent(Store);
+            //folderEditorComponent.NewModel(SelectedServiceRef.Service);
+            //folderEditorComponent.Model.ParentId = SelectedFolderInfo.FolderId;
+            //folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo.GetSimpleDto<FolderDto>();
+            //var res = folderEditorComponent.RunModal();
+            //if (res.Entity == EComponentResult.Executed)
+            //{
+            //    var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>() };
+            //    FoldersSelectorComponent.AddItem(fs);
+            //}
+        }
+
+        public void EditMessage() 
+        {
+            //if (SelectedFolderInfo == null)
+            //{
+            //    View.ShowInfo("There is no folder selected to edit.");
+            //    return;
+            //}
+
+            //var folderEditorComponent = new FolderEditorComponent(Store);
+            //await folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
+            //var res = folderEditorComponent.RunModal();
+            //if (res.Entity == EComponentResult.Executed)
+            //{
+            //    SelectedFolderWithServiceRef.FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>();
+            //    FoldersSelectorComponent.RefreshItem(SelectedFolderWithServiceRef);
+            //}
+
+        }
+
+        public void DeleteMessage()
+        {
+            //if (SelectedFolderInfo == null)
+            //{
+            //    View.ShowInfo("There is no folder selected to delete.");
+            //    return;
+            //}
+
+            //var folderEditorComponent = new FolderEditorComponent(Store);
+            //var res = await folderEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);
+            //if (res)
+            //{
+            //    FoldersSelectorComponent.DeleteItem(SelectedFolderWithServiceRef);
+            //}
+        }
+
+
         #endregion 
     }
 }

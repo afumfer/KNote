@@ -25,6 +25,10 @@ namespace KNote.ClientWin.Views
             _com = com;
 
             _com.Store.ComponentNotification += Store_ComponentNotification;
+
+#if DEBUG
+            menuKNoteLab.Visible = true;
+#endif
         }
 
         private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
