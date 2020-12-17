@@ -181,22 +181,23 @@ namespace KNote.ClientWin.Components
             return null;
         }
 
-        public void NewMessage()
+        public async Task<KMessageDto> NewMessage()
         {
             var messageEditor = new MessageEditorComponent(Store);
-
-            messageEditor.RunModal();
-
-            //var folderEditorComponent = new FolderEditorComponent(Store);
-            //folderEditorComponent.NewModel(SelectedServiceRef.Service);
-            //folderEditorComponent.Model.ParentId = SelectedFolderInfo.FolderId;
-            //folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo.GetSimpleDto<FolderDto>();
-            //var res = folderEditorComponent.RunModal();
-            //if (res.Entity == EComponentResult.Executed)
-            //{
-            //    var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>() };
-            //    FoldersSelectorComponent.AddItem(fs);
-            //}
+            messageEditor.NewModel(Service);
+            messageEditor.Model.KMessageId = Model.Note.NoteId;            
+            var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
+            messageEditor.Model.UserId = userDto.UserId;
+            messageEditor.Model.UserFullName = userDto.FullName;
+            messageEditor.Model.Content = "(Aditional text for message)";
+            var res = messageEditor.RunModal();
+            if(res.Entity == EComponentResult.Executed)
+            {
+                Model.Messages.Add(messageEditor.Model);
+                return messageEditor.Model;
+            }            
+            else 
+                return null;
         }
 
         public void EditMessage() 

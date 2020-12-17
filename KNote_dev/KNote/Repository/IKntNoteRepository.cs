@@ -29,10 +29,10 @@ namespace KNote.Repository
         Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity);        
         Task<Result> DeleteNoteTaskAsync(Guid noteTaskId);
         Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId);
-        Task<Result<KMessageDto>> GetMessageAsync(Guid noteId);
-        Task<Result<ResourceDto>> AddMessageAsync(ResourceDto entity);
-        Task<Result<ResourceDto>> UpdateMessageAsync(ResourceDto entity);
-        Task<Result> DeleteMessageAsync(Guid resourceId);
+        Task<Result<KMessageDto>> GetMessageAsync(Guid messageId);
+        Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity);
+        Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity);
+        Task<Result> DeleteMessageAsync(Guid messageId);
 
         Task<Result<int>> CountNotesInFolder(Guid folderId);
 

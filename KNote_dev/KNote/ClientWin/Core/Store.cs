@@ -13,7 +13,7 @@ namespace KNote.ClientWin.Core
     {
         #region Application state 
 
-        public string User { get; set; }
+        public string AppUserName { get; set; }
         public string ComputerName { get; set; }
         public string LogFile { get; set; }
 

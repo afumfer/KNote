@@ -36,12 +36,21 @@ namespace KNote.ClientWin.Components
 
         public override void NewModel(IKntService service)
         {
-            throw new NotImplementedException();
+            Service = service;
+
+            // TODO: call service for new model
+            Model = new KMessageDto();
         }
 
-        public override Task<bool> SaveModel()
+        public override async Task<bool> SaveModel()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+
+            //await Task.Delay(1);
+            //return true;
+            Finalize();
+            return await Task.FromResult(true);
+            
         }
 
         public override Task<bool> DeleteModel(IKntService service, Guid id)

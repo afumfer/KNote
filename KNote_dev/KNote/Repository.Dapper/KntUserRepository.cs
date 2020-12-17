@@ -106,6 +106,33 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
+        {
+            var result = new Result<UserDto>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]  
+                        WHERE UserName = @userName";
+
+                var entity = await db.QueryFirstOrDefaultAsync<UserDto>(sql.ToString(), new { userName });
+
+                if (entity == null)
+                    result.AddErrorMessage("Entity not found.");
+
+                result.Entity = entity;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+
         public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
         {            
             var result = new Result<UserInternalDto>();

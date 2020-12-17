@@ -45,6 +45,11 @@ namespace KNote.Service.Services
             return await _repository.Users.GetAsync(userId);
         }
 
+        public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
+        {
+            return await _repository.Users.GetByUserNameAsync(userName);
+        }
+
         public async Task<Result<UserDto>> SaveAsync(UserDto entity)
         {            
             if (entity.UserId == Guid.Empty)
@@ -194,7 +199,7 @@ namespace KNote.Service.Services
             return true;
         }
 
-        #endregion 
+        #endregion
 
     }
 }

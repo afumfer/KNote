@@ -97,9 +97,9 @@
             this.textFolderNumber = new System.Windows.Forms.TextBox();
             this.tabAlarms = new System.Windows.Forms.TabPage();
             this.listViewAlarms = new System.Windows.Forms.ListView();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.buttonAddAlarmForMe = new System.Windows.Forms.Button();
+            this.buttonEditAlarm = new System.Windows.Forms.Button();
+            this.buttonDeleteAlarm = new System.Windows.Forms.Button();
+            this.buttonAddAlarm = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.tabAttributes = new System.Windows.Forms.TabPage();
             this.listViewAttributes = new System.Windows.Forms.ListView();
@@ -791,9 +791,9 @@
             // tabAlarms
             // 
             this.tabAlarms.Controls.Add(this.listViewAlarms);
-            this.tabAlarms.Controls.Add(this.button2);
-            this.tabAlarms.Controls.Add(this.button1);
-            this.tabAlarms.Controls.Add(this.buttonAddAlarmForMe);
+            this.tabAlarms.Controls.Add(this.buttonEditAlarm);
+            this.tabAlarms.Controls.Add(this.buttonDeleteAlarm);
+            this.tabAlarms.Controls.Add(this.buttonAddAlarm);
             this.tabAlarms.Controls.Add(this.label4);
             this.tabAlarms.ImageIndex = 0;
             this.tabAlarms.Location = new System.Drawing.Point(4, 30);
@@ -817,41 +817,41 @@
             this.listViewAlarms.TabIndex = 11;
             this.listViewAlarms.UseCompatibleStateImageBehavior = false;
             // 
-            // button2
+            // buttonEditAlarm
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(760, 10);
-            this.button2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(27, 23);
-            this.button2.TabIndex = 11;
-            this.button2.Text = "...";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.buttonEditAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonEditAlarm.Location = new System.Drawing.Point(760, 10);
+            this.buttonEditAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonEditAlarm.Name = "buttonEditAlarm";
+            this.buttonEditAlarm.Size = new System.Drawing.Size(27, 23);
+            this.buttonEditAlarm.TabIndex = 11;
+            this.buttonEditAlarm.Text = "...";
+            this.buttonEditAlarm.UseVisualStyleBackColor = true;
+            this.buttonEditAlarm.Click += new System.EventHandler(this.buttonEditAlarm_Click);
             // 
-            // button1
+            // buttonDeleteAlarm
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(725, 10);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(27, 23);
-            this.button1.TabIndex = 10;
-            this.button1.Text = "-";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.buttonDeleteAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonDeleteAlarm.Location = new System.Drawing.Point(725, 10);
+            this.buttonDeleteAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonDeleteAlarm.Name = "buttonDeleteAlarm";
+            this.buttonDeleteAlarm.Size = new System.Drawing.Size(27, 23);
+            this.buttonDeleteAlarm.TabIndex = 10;
+            this.buttonDeleteAlarm.Text = "-";
+            this.buttonDeleteAlarm.UseVisualStyleBackColor = true;
+            this.buttonDeleteAlarm.Click += new System.EventHandler(this.buttonDeleteAlarm_Click);
             // 
-            // buttonAddAlarmForMe
+            // buttonAddAlarm
             // 
-            this.buttonAddAlarmForMe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAlarmForMe.Location = new System.Drawing.Point(690, 10);
-            this.buttonAddAlarmForMe.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonAddAlarmForMe.Name = "buttonAddAlarmForMe";
-            this.buttonAddAlarmForMe.Size = new System.Drawing.Size(27, 23);
-            this.buttonAddAlarmForMe.TabIndex = 9;
-            this.buttonAddAlarmForMe.Text = "+";
-            this.buttonAddAlarmForMe.UseVisualStyleBackColor = true;
-            this.buttonAddAlarmForMe.Click += new System.EventHandler(this.buttonAddAlarmForMe_Click);
+            this.buttonAddAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAddAlarm.Location = new System.Drawing.Point(690, 10);
+            this.buttonAddAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonAddAlarm.Name = "buttonAddAlarm";
+            this.buttonAddAlarm.Size = new System.Drawing.Size(27, 23);
+            this.buttonAddAlarm.TabIndex = 9;
+            this.buttonAddAlarm.Text = "+";
+            this.buttonAddAlarm.UseVisualStyleBackColor = true;
+            this.buttonAddAlarm.Click += new System.EventHandler(this.buttonAddAlarm_Click);
             // 
             // label4
             // 
@@ -1399,9 +1399,9 @@
         private System.Windows.Forms.TabPage tabResources;
         private System.Windows.Forms.TabPage tabTraceNotes;
         private System.Windows.Forms.TabPage tabCode;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button buttonAddAlarmForMe;
+        private System.Windows.Forms.Button buttonEditAlarm;
+        private System.Windows.Forms.Button buttonDeleteAlarm;
+        private System.Windows.Forms.Button buttonAddAlarm;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button buttonAttributeEdit;
         private System.Windows.Forms.Label label10;

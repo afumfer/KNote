@@ -42,21 +42,38 @@ namespace KNote.ClientWin.Views
             return res;
         }
 
-
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             return MessageBox.Show(info, caption, buttons);
         }
 
-
         public void RefreshView()
         {
-            //ModelToControls();
+            ModelToControls();
+        }
+
+        private void ModelToControls()
+        {
+            textUserFullName.Text = _com.Model.UserFullName?.ToString();
+            textAlarmDateTime.Text = _com.Model.AlarmDateTime.ToString();
+            //comboAlarmPeriodicity.
+            textContent.Text = _com.Model.Content.ToString();
+        }
+
+        private void ControlsToModel()
+        {
+            //  _com.Model.UserFullName = ....;
+            _com.Model.AlarmDateTime = DateTime.Now; // DateTime.Parse(textAlarmDateTime.Text);
+            //comboAlarmPeriodicity.
+            _com.Model.Content = textContent.Text;
         }
 
         public void CleanView()
         {
-            //textXxxxx.Text = "";
+            textUserFullName.Text = "";
+            textAlarmDateTime.Text = "";
+            //comboAlarmPeriodicity.
+            textContent.Text = "";
         }
 
         public void ConfigureEmbededMode()
@@ -98,5 +115,51 @@ namespace KNote.ClientWin.Views
             return true;
         }
 
+        private async void buttonAccept_Click(object sender, EventArgs e)
+        {
+            ControlsToModel();
+            var res = await _com.SaveModel();
+            if (res)
+            {
+                _formIsDisty = false;
+                this.DialogResult = DialogResult.OK;
+            }
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            OnCandelEdition();
+        }
+
+        private void MessageEditorForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+                _formIsDisty = true;
+        }
+
+        private void MessageEditorForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            _formIsDisty = true;
+        }
+
+        private void MessageEditorForm_Load(object sender, EventArgs e)
+        {
+            PersonalizeControls();
+        }
+
+        private void PersonalizeControls()
+        {
+            foreach (var alarmType in KntConst.AlarmType)
+                comboAlarmPeriodicity.Items.Add(alarmType);
+            comboAlarmPeriodicity.ValueMember = "Key";
+            comboAlarmPeriodicity.DisplayMember = "Value";
+            comboAlarmPeriodicity.SelectedIndex = 0;
+
+            foreach (var notType in KntConst.NotificationType)
+                comboNotificationType.Items.Add(notType);
+            comboNotificationType.ValueMember = "Key";
+            comboNotificationType.DisplayMember = "Value";
+            comboNotificationType.SelectedIndex = 0;
+        }
     }
 }

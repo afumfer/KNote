@@ -529,18 +529,29 @@ namespace KNote.ClientWin.Views
 
             foreach (var msg in _com.Model.Messages)
             {
-                var itemList = new ListViewItem(msg.UserFullName);
-                itemList.Name = msg.KMessageId.ToString();
-                //itemList.BackColor = Color.LightGray;
-                itemList.SubItems.Add(msg.AlarmDateTime.ToString());
-                itemList.SubItems.Add(msg.AlarmActivated.ToString());
-                listViewAlarms.Items.Add(itemList);
+                //var itemList = new ListViewItem(msg.UserFullName);
+                //itemList.Name = msg.KMessageId.ToString();
+                ////itemList.BackColor = Color.LightGray;
+                //itemList.SubItems.Add(msg.AlarmDateTime.ToString());
+                //itemList.SubItems.Add(msg.AlarmActivated.ToString());
+                //listViewAlarms.Items.Add(itemList);
+                listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
             }
 
             // Width of -2 indicates auto-size.
             listViewAlarms.Columns.Add("User", 200, HorizontalAlignment.Left);
             listViewAlarms.Columns.Add("Date time", 200 , HorizontalAlignment.Left);
             listViewAlarms.Columns.Add("Activated", 200, HorizontalAlignment.Left);
+        }
+
+        private ListViewItem MessageDtoToListViewItem(KMessageDto message)
+        {
+            var itemList = new ListViewItem(message.UserFullName);
+            itemList.Name = message.KMessageId.ToString();
+            //itemList.BackColor = Color.LightGray;
+            itemList.SubItems.Add(message.AlarmDateTime.ToString());
+            itemList.SubItems.Add(message.AlarmActivated.ToString());
+            return itemList;
         }
 
         private void SizeLastColumn(ListView lv)
@@ -666,17 +677,20 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        private void buttonAddAlarmForMe_Click(object sender, EventArgs e)
+        private async void buttonAddAlarm_Click(object sender, EventArgs e)
         {
-            _com.NewMessage();
+            var newMessage = await _com.NewMessage();
+            if (newMessage != null)            
+                listViewAlarms.Items.Add(MessageDtoToListViewItem(newMessage));
+            
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonEditAlarm_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void buttonDeleteAlarm_Click(object sender, EventArgs e)
         {
 
         }

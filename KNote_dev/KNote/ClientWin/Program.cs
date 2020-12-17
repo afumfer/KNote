@@ -63,7 +63,7 @@ namespace KNote.ClientWin
             var appFileConfig = Path.Combine(Application.StartupPath, "KNoteData.config");
 
             var appConfig = store.LoadConfig(appFileConfig);
-
+           
             if (appConfig == null)
             {
                 // Add some repository for development environment ...
@@ -114,7 +114,7 @@ namespace KNote.ClientWin
             }
 
             // TODO: add default values
-            store.User = SystemInformation.UserName;
+            store.AppUserName = SystemInformation.UserName;
             store.ComputerName = SystemInformation.ComputerName;
             store.LogFile = Application.StartupPath + @"\KNoteWinApp.log";
             store.LogActivated = false;

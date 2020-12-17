@@ -932,22 +932,22 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<KMessageDto>> GetMessageAsync(Guid noteId)
+        public Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<ResourceDto>> AddMessageAsync(ResourceDto entity)
+        public Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<ResourceDto>> UpdateMessageAsync(ResourceDto entity)
+        public Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result> DeleteMessageAsync(Guid resourceId)
+        public Task<Result> DeleteMessageAsync(Guid messageId)
         {
             throw new NotImplementedException();
         }

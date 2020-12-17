@@ -32,7 +32,6 @@ namespace KNote.Repository.EntityFramework
 
                 if (pagination != null)
                 {
-
                     var query = users.Queryable
                         .OrderBy(u => u.UserName)
                         .Pagination(pagination);
@@ -77,7 +76,6 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-
         public async Task<Result<UserDto>> GetAsync(Guid userId)
         {
             var resService = new Result<UserDto>();
@@ -87,6 +85,29 @@ namespace KNote.Repository.EntityFramework
                 var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
 
                 var resRep = await users.GetAsync((object)userId);
+
+                resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+
+                resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+        public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
+        {
+            var resService = new Result<UserDto>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var users = new GenericRepositoryEF<KntDbContext, User>(ctx, ThrowKntException);
+
+                var resRep = await users.GetAsync(_ => _.UserName == userName);
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
 

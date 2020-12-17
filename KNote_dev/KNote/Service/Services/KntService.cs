@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using KNote.Repository;
 using KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
+using KNote.Model.Dto;
 
 namespace KNote.Service.Services
 {
@@ -20,7 +21,11 @@ namespace KNote.Service.Services
 
         #endregion
 
+        #region Properties
+
         public Guid IdServiceRef { get; }
+
+        #endregion 
 
         #region Constructors
 
