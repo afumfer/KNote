@@ -43,6 +43,7 @@ namespace KNote.ClientWin.Views
             this.textUserFullName = new System.Windows.Forms.TextBox();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
+            this.checkAlarmActivated = new System.Windows.Forms.CheckBox();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -51,6 +52,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.Controls.Add(this.checkAlarmActivated);
             this.panelForm.Controls.Add(this.label5);
             this.panelForm.Controls.Add(this.comboNotificationType);
             this.panelForm.Controls.Add(this.buttonSelectDate);
@@ -64,13 +66,13 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.textUserFullName);
             this.panelForm.Location = new System.Drawing.Point(5, 12);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(407, 304);
+            this.panelForm.Size = new System.Drawing.Size(407, 325);
             this.panelForm.TabIndex = 0;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 108);
+            this.label5.Location = new System.Drawing.Point(9, 129);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(99, 15);
             this.label5.TabIndex = 8;
@@ -80,14 +82,14 @@ namespace KNote.ClientWin.Views
             // 
             this.comboNotificationType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboNotificationType.FormattingEnabled = true;
-            this.comboNotificationType.Location = new System.Drawing.Point(127, 105);
+            this.comboNotificationType.Location = new System.Drawing.Point(127, 126);
             this.comboNotificationType.Name = "comboNotificationType";
             this.comboNotificationType.Size = new System.Drawing.Size(273, 23);
             this.comboNotificationType.TabIndex = 7;
             // 
             // buttonSelectDate
             // 
-            this.buttonSelectDate.Location = new System.Drawing.Point(376, 46);
+            this.buttonSelectDate.Location = new System.Drawing.Point(376, 67);
             this.buttonSelectDate.Name = "buttonSelectDate";
             this.buttonSelectDate.Size = new System.Drawing.Size(24, 24);
             this.buttonSelectDate.TabIndex = 2;
@@ -97,7 +99,7 @@ namespace KNote.ClientWin.Views
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 137);
+            this.label4.Location = new System.Drawing.Point(9, 158);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(64, 15);
             this.label4.TabIndex = 5;
@@ -106,7 +108,7 @@ namespace KNote.ClientWin.Views
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 79);
+            this.label3.Location = new System.Drawing.Point(9, 100);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(101, 15);
             this.label3.TabIndex = 6;
@@ -116,7 +118,7 @@ namespace KNote.ClientWin.Views
             // 
             this.comboAlarmPeriodicity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboAlarmPeriodicity.FormattingEnabled = true;
-            this.comboAlarmPeriodicity.Location = new System.Drawing.Point(127, 76);
+            this.comboAlarmPeriodicity.Location = new System.Drawing.Point(127, 97);
             this.comboAlarmPeriodicity.Name = "comboAlarmPeriodicity";
             this.comboAlarmPeriodicity.Size = new System.Drawing.Size(273, 23);
             this.comboAlarmPeriodicity.TabIndex = 3;
@@ -124,7 +126,7 @@ namespace KNote.ClientWin.Views
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 50);
+            this.label2.Location = new System.Drawing.Point(9, 71);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(95, 15);
             this.label2.TabIndex = 4;
@@ -133,7 +135,7 @@ namespace KNote.ClientWin.Views
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 21);
+            this.label1.Location = new System.Drawing.Point(9, 41);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(33, 15);
             this.label1.TabIndex = 3;
@@ -141,14 +143,14 @@ namespace KNote.ClientWin.Views
             // 
             // textAlarmDateTime
             // 
-            this.textAlarmDateTime.Location = new System.Drawing.Point(127, 47);
+            this.textAlarmDateTime.Location = new System.Drawing.Point(127, 67);
             this.textAlarmDateTime.Name = "textAlarmDateTime";
             this.textAlarmDateTime.Size = new System.Drawing.Size(243, 23);
             this.textAlarmDateTime.TabIndex = 1;
             // 
             // textContent
             // 
-            this.textContent.Location = new System.Drawing.Point(127, 134);
+            this.textContent.Location = new System.Drawing.Point(127, 155);
             this.textContent.Multiline = true;
             this.textContent.Name = "textContent";
             this.textContent.Size = new System.Drawing.Size(273, 162);
@@ -157,15 +159,15 @@ namespace KNote.ClientWin.Views
             // textUserFullName
             // 
             this.textUserFullName.Enabled = false;
-            this.textUserFullName.Location = new System.Drawing.Point(127, 18);
+            this.textUserFullName.Location = new System.Drawing.Point(127, 38);
             this.textUserFullName.Name = "textUserFullName";
             this.textUserFullName.Size = new System.Drawing.Size(273, 23);
-            this.textUserFullName.TabIndex = 0;
+            this.textUserFullName.TabIndex = 1;
             // 
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(324, 322);
+            this.buttonCancel.Location = new System.Drawing.Point(324, 343);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
             this.buttonCancel.TabIndex = 6;
@@ -176,7 +178,7 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(237, 322);
+            this.buttonAccept.Location = new System.Drawing.Point(237, 343);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
             this.buttonAccept.TabIndex = 5;
@@ -184,11 +186,21 @@ namespace KNote.ClientWin.Views
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
             // 
+            // checkAlarmActivated
+            // 
+            this.checkAlarmActivated.AutoSize = true;
+            this.checkAlarmActivated.Location = new System.Drawing.Point(9, 9);
+            this.checkAlarmActivated.Name = "checkAlarmActivated";
+            this.checkAlarmActivated.Size = new System.Drawing.Size(109, 19);
+            this.checkAlarmActivated.TabIndex = 0;
+            this.checkAlarmActivated.Text = "Alarm activated";
+            this.checkAlarmActivated.UseVisualStyleBackColor = true;
+            // 
             // MessageEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(417, 363);
+            this.ClientSize = new System.Drawing.Size(417, 384);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);
@@ -225,5 +237,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textAlarmDateTime;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox comboNotificationType;
+        private System.Windows.Forms.CheckBox checkAlarmActivated;
     }
 }

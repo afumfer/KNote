@@ -203,9 +203,155 @@ namespace KNote.ClientWin.Views
             SizeLastColumn((ListView)sender);
         }
 
+        private void toolDescriptionHtmlTitle_Click(object sender, EventArgs e)
+        {
+            ToolStripItem menuSel;
+            menuSel = (ToolStripItem)sender;
+
+            if (menuSel == toolDescriptionHtmlTitle1)
+            {
+                htmlDescription.SelectedHtml = "<h1>Título 1</h1>";
+                htmlDescription.Focus();
+            }
+            if (menuSel == toolDescriptionHtmlTitle2)
+            {
+                htmlDescription.SelectedHtml = "<h2>Título 1</h2>";
+                htmlDescription.Focus();
+            }
+            if (menuSel == toolDescriptionHtmlTitle3)
+            {
+                htmlDescription.SelectedHtml = "<h3>Título 1</h3>";
+                htmlDescription.Focus();
+            }
+            if (menuSel == toolDescriptionHtmlTitle4)
+            {
+                htmlDescription.SelectedHtml = "<h4>Título 1</h4>";
+                htmlDescription.Focus();
+            }
+        }
+
+        private void toolDescriptionMarkdown_Click(object sender, EventArgs e)
+        {
+            ToolStripItem menuSel;
+            menuSel = (ToolStripItem)sender;
+
+            string tag = "";
+            var nl = System.Environment.NewLine;
+
+            if (menuSel == toolDescriptionMarkdownBold)
+                tag = " **_**";
+            else if (menuSel == toolDescriptionMarkdownStrikethrough)
+                tag = " ~~_~~";
+            else if (menuSel == toolDescriptionMarkdownItalic)
+                tag = " *_*";
+            else if (menuSel == toolDescriptionMarkdownH1)
+                tag = nl + "# ";
+            else if (menuSel == toolDescriptionMarkdownH2)
+                tag = nl + "## ";
+            else if (menuSel == toolDescriptionMarkdownH3)
+                tag = nl + "### ";
+            else if (menuSel == toolDescriptionMarkdownH4)
+                tag = nl + "#### ";
+            else if (menuSel == toolDescriptionMarkdownList)
+                tag = "-_";
+            else if (menuSel == toolDescriptionMarkdownListOrdered)
+                tag = nl + "1._";
+            else if (menuSel == toolDescriptionMarkdownLine)
+                tag = nl + "------------";
+            else if (menuSel == toolDescriptionMarkdownLink)
+                tag = nl + "[xx](http://xx 'xx')";
+            else if (menuSel == toolDescriptionMarkdownImage)
+                tag = nl + "[![Title](Address 'Title')](http://url 'Title')";
+            else if (menuSel == toolDescriptionMarkdownCode)
+                tag = nl + "```_```";
+            else if (menuSel == toolDescriptionMarkdownTable)
+            {
+                tag = nl + nl;
+                tag += "|   |   |" + nl;
+                tag += "| ------------ | ------------ |" + nl;
+                tag += "|   |   |" + nl;
+                tag += "|   |   |" + nl;
+            }
+
+            var selStart = textDescription.SelectionStart;
+            textDescription.Text = textDescription.Text.Insert(selStart, tag);
+            textDescription.Focus();
+            textDescription.SelectionStart = selStart;
+        }
+
+        private void buttonFolderSearch_Click(object sender, EventArgs e)
+        {
+            var folder = _com.GetFolder();
+            if (folder != null)
+            {
+                _selectedFolderId = folder.FolderId;
+                textFolder.Text = folder?.Name;
+                textFolderNumber.Text = "#" + folder.FolderNumber.ToString();
+
+                buttonUndo.Enabled = true;
+            }
+        }
+
+        private async void buttonAddAlarm_Click(object sender, EventArgs e)
+        {
+            var newMessage = await _com.NewMessage();
+            if (newMessage != null)
+                listViewAlarms.Items.Add(MessageDtoToListViewItem(newMessage));
+
+        }
+
+        private void buttonEditAlarm_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonDeleteAlarm_Click(object sender, EventArgs e)
+        {
+
+        }
+
         #endregion
 
         #region Private methods
+
+        private void PersonalizeControls()
+        {
+            this.panelDescription.Location = new System.Drawing.Point(6, 130);
+            if (_com.EditMode)
+                this.panelDescription.Size = new System.Drawing.Size(780, 432);
+            else
+                this.panelDescription.Size = new System.Drawing.Size(780, 458);
+
+            this.textDescription.Dock = DockStyle.Fill;
+            this.htmlDescription.Dock = DockStyle.Fill;
+
+            if (_com.Model?.Note?.ContentType == "html")
+                EnableHtmlView();
+            else
+                EnableMarkdownView();
+
+            if (!_com.EditMode)
+            {
+                foreach (var tab in tabNoteData.TabPages)
+                {
+                    foreach (Control conTmp in ((TabPage)tab).Controls)
+                    {
+                        BlockControl(conTmp);
+                    }
+                }
+
+                htmlDescription.ToolbarVisible = false;
+                htmlDescription.ReadOnly = true;
+            }
+
+            PersonalizeListView(listViewAttributes);
+            PersonalizeListView(listViewResources);
+            PersonalizeListView(listViewTasks);
+            PersonalizeListView(listViewAlarms);
+
+            // TODO: remove in this version
+            tabNoteData.TabPages.Remove(tabTraceNotes);
+        }
 
         private void ModelToControls()
         {
@@ -267,68 +413,7 @@ namespace KNote.ClientWin.Views
 
             this.Cursor = Cursors.Default;
         }
-
-        private void ControlsToModel()
-        {
-            // TODO: !!! ojo ... completar implementación 
-
-            // Basic data
-            _com.Model.Note.Topic = textTopic.Text;
-            _com.Model.Note.FolderId = _selectedFolderId;
-            _com.Model.Note.FolderDto.FolderId = _selectedFolderId;
-            _com.Model.Note.FolderDto.Name = textFolder.Text;
-            _com.Model.Note.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
-            _com.Model.Note.Tags = textTags.Text;
-
-            if (_com.Model.Note.ContentType == "html")
-                _com.Model.Note.Description = htmlDescription.BodyHtml;
-            else
-                _com.Model.Note.Description = textDescription.Text;
-            
-            int p;
-            if (int.TryParse(textPriority.Text, out p))
-                _com.Model.Note.Priority = p;
-        }
-
-        private void PersonalizeControls()
-        {
-            this.panelDescription.Location = new System.Drawing.Point(6, 130);
-            if (_com.EditMode)
-                this.panelDescription.Size = new System.Drawing.Size(780, 432);
-            else
-                this.panelDescription.Size = new System.Drawing.Size(780, 458);
-
-            this.textDescription.Dock = DockStyle.Fill;
-            this.htmlDescription.Dock = DockStyle.Fill;
-
-            if(_com.Model?.Note?.ContentType == "html")            
-                EnableHtmlView();            
-            else            
-                EnableMarkdownView();
-            
-            if (!_com.EditMode)            
-            {
-                foreach(var tab in tabNoteData.TabPages)
-                {
-                    foreach (Control conTmp in ((TabPage)tab).Controls)
-                    {
-                        BlockControl(conTmp);
-                    }
-                }
-
-                htmlDescription.ToolbarVisible = false;
-                htmlDescription.ReadOnly = true;
-            }
-
-            PersonalizeListView(listViewAttributes);
-            PersonalizeListView(listViewResources);
-            PersonalizeListView(listViewTasks);
-            PersonalizeListView(listViewAlarms);
-
-            // TODO: remove in this version
-            tabNoteData.TabPages.Remove(tabTraceNotes);
-        }
-
+        
         private void ModelToControlsAttributes()
         {
             listViewAttributes.Clear();
@@ -368,6 +453,72 @@ namespace KNote.ClientWin.Views
             listViewResources.Columns.Add("Description", -2, HorizontalAlignment.Left);
         }
 
+        private void ModelToControlsTasks()
+        {
+            listViewTasks.Clear();
+
+            foreach (var task in _com.Model.Tasks)
+            {
+                var itemList = new ListViewItem(task.UserFullName.ToString());
+                itemList.Name = task.NoteTaskId.ToString();
+                //itemList.BackColor = Color.LightGray;                
+                itemList.SubItems.Add(task.Tags?.ToString());
+                itemList.SubItems.Add(task.Priority.ToString());
+                itemList.SubItems.Add(task.Resolved.ToString());
+                itemList.SubItems.Add(task.EstimatedTime.ToString());
+                itemList.SubItems.Add(task.SpentTime.ToString());
+                itemList.SubItems.Add(task.DifficultyLevel.ToString());
+                itemList.SubItems.Add(task.ExpectedStartDate.ToString());
+                itemList.SubItems.Add(task.ExpectedEndDate.ToString());
+                itemList.SubItems.Add(task.StartDate.ToString());
+                itemList.SubItems.Add(task.EndDate.ToString());
+                itemList.SubItems.Add(task.Description.ToString());
+                listViewTasks.Items.Add(itemList);
+            }
+
+            // Width of -2 indicates auto-size.
+            listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);
+
+            listViewTasks.Columns.Add("Tags", 100, HorizontalAlignment.Left);
+
+            listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Resolved", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Est. time", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
+
+            listViewTasks.Columns.Add("Ex start", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Ex end", 50, HorizontalAlignment.Left);
+
+            listViewTasks.Columns.Add("Start", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("End", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Description", -2, HorizontalAlignment.Left);
+        }
+
+        private void ModelToControlsAlarms()
+        {
+            listViewAlarms.Clear();
+
+            foreach (var msg in _com.Model.Messages)
+            {
+                //var itemList = new ListViewItem(msg.UserFullName);
+                //itemList.Name = msg.KMessageId.ToString();
+                ////itemList.BackColor = Color.LightGray;
+                //itemList.SubItems.Add(msg.AlarmDateTime.ToString());
+                //itemList.SubItems.Add(msg.AlarmActivated.ToString());
+                //listViewAlarms.Items.Add(itemList);
+                listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
+            }
+
+            // Width of -2 indicates auto-size.            
+            listViewAlarms.Columns.Add("User", 150, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Activated", 100, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Date time", 150, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Alarm periodicity", 150, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Notification type", 150, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Comment", 150, HorizontalAlignment.Left);
+        }
+
         private void UpdatePicResource(byte[] content, string type)
         {
             if (content == null || !type.Contains("image"))
@@ -377,6 +528,28 @@ namespace KNote.ClientWin.Views
             }
 
             picResource.Image = Image.FromStream(new MemoryStream(content));
+        }
+
+        private void ControlsToModel()
+        {
+            // TODO: !!! ojo ... completar implementación 
+
+            // Basic data
+            _com.Model.Note.Topic = textTopic.Text;
+            _com.Model.Note.FolderId = _selectedFolderId;
+            _com.Model.Note.FolderDto.FolderId = _selectedFolderId;
+            _com.Model.Note.FolderDto.Name = textFolder.Text;
+            _com.Model.Note.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
+            _com.Model.Note.Tags = textTags.Text;
+
+            if (_com.Model.Note.ContentType == "html")
+                _com.Model.Note.Description = htmlDescription.BodyHtml;
+            else
+                _com.Model.Note.Description = textDescription.Text;
+
+            int p;
+            if (int.TryParse(textPriority.Text, out p))
+                _com.Model.Note.Priority = p;
         }
 
         private async Task<bool> SaveModel()
@@ -481,76 +654,16 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        private void ModelToControlsTasks()
-        {
-            listViewTasks.Clear();
-
-            foreach (var task in _com.Model.Tasks)
-            {
-                var itemList = new ListViewItem(task.UserFullName.ToString());
-                itemList.Name = task.NoteTaskId.ToString();
-                //itemList.BackColor = Color.LightGray;                
-                itemList.SubItems.Add(task.Tags?.ToString());
-                itemList.SubItems.Add(task.Priority.ToString());
-                itemList.SubItems.Add(task.Resolved.ToString());
-                itemList.SubItems.Add(task.EstimatedTime.ToString());
-                itemList.SubItems.Add(task.SpentTime.ToString());
-                itemList.SubItems.Add(task.DifficultyLevel.ToString());
-                itemList.SubItems.Add(task.ExpectedStartDate.ToString());
-                itemList.SubItems.Add(task.ExpectedEndDate.ToString());
-                itemList.SubItems.Add(task.StartDate.ToString());
-                itemList.SubItems.Add(task.EndDate.ToString());
-                itemList.SubItems.Add(task.Description.ToString());
-                listViewTasks.Items.Add(itemList);
-            }
-
-            // Width of -2 indicates auto-size.
-            listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);           
-
-            listViewTasks.Columns.Add("Tags", 100, HorizontalAlignment.Left);
-
-            listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Resolved", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Est. time", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
-            
-            listViewTasks.Columns.Add("Ex start", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Ex end", 50, HorizontalAlignment.Left);
-
-            listViewTasks.Columns.Add("Start", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("End", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Description", -2, HorizontalAlignment.Left);
-        }
-
-        private void ModelToControlsAlarms()
-        {
-            listViewAlarms.Clear();
-
-            foreach (var msg in _com.Model.Messages)
-            {
-                //var itemList = new ListViewItem(msg.UserFullName);
-                //itemList.Name = msg.KMessageId.ToString();
-                ////itemList.BackColor = Color.LightGray;
-                //itemList.SubItems.Add(msg.AlarmDateTime.ToString());
-                //itemList.SubItems.Add(msg.AlarmActivated.ToString());
-                //listViewAlarms.Items.Add(itemList);
-                listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
-            }
-
-            // Width of -2 indicates auto-size.
-            listViewAlarms.Columns.Add("User", 200, HorizontalAlignment.Left);
-            listViewAlarms.Columns.Add("Date time", 200 , HorizontalAlignment.Left);
-            listViewAlarms.Columns.Add("Activated", 200, HorizontalAlignment.Left);
-        }
-
         private ListViewItem MessageDtoToListViewItem(KMessageDto message)
         {
             var itemList = new ListViewItem(message.UserFullName);
             itemList.Name = message.KMessageId.ToString();
-            //itemList.BackColor = Color.LightGray;
-            itemList.SubItems.Add(message.AlarmDateTime.ToString());
             itemList.SubItems.Add(message.AlarmActivated.ToString());
+            itemList.SubItems.Add(message.AlarmDateTime.ToString());
+            itemList.SubItems.Add(message.AlarmType.ToString());
+            itemList.SubItems.Add(message.NotificationType.ToString());
+            itemList.SubItems.Add(message.Content.ToString());
+
             return itemList;
         }
 
@@ -588,112 +701,7 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
-        private void toolDescriptionHtmlTitle_Click(object sender, EventArgs e)
-        {
-            ToolStripItem menuSel;
-            menuSel = (ToolStripItem)sender;
 
-            if (menuSel == toolDescriptionHtmlTitle1)
-            {
-                htmlDescription.SelectedHtml = "<h1>Título 1</h1>";
-                htmlDescription.Focus();                
-            }
-            if (menuSel == toolDescriptionHtmlTitle2)
-            {
-                htmlDescription.SelectedHtml = "<h2>Título 1</h2>";
-                htmlDescription.Focus();
-            }
-            if (menuSel == toolDescriptionHtmlTitle3)
-            {
-                htmlDescription.SelectedHtml = "<h3>Título 1</h3>";
-                htmlDescription.Focus();
-            }
-            if (menuSel == toolDescriptionHtmlTitle4)
-            {
-                htmlDescription.SelectedHtml = "<h4>Título 1</h4>";
-                htmlDescription.Focus();
-            }
-        }
-
-        private void toolDescriptionMarkdown_Click(object sender, EventArgs e)
-        {
-            ToolStripItem menuSel;
-            menuSel = (ToolStripItem)sender;
-
-            string tag = "";
-            var nl = System.Environment.NewLine;
-
-            if (menuSel == toolDescriptionMarkdownBold)                            
-                tag = " **_**";
-            else if (menuSel == toolDescriptionMarkdownStrikethrough)
-                tag = " ~~_~~";
-            else if (menuSel == toolDescriptionMarkdownItalic)
-                tag = " *_*";
-            else if (menuSel == toolDescriptionMarkdownH1)
-                tag = nl + "# ";
-            else if (menuSel == toolDescriptionMarkdownH2)
-                tag = nl + "## ";
-            else if (menuSel == toolDescriptionMarkdownH3)
-                tag = nl + "### ";
-            else if (menuSel == toolDescriptionMarkdownH4)
-                tag = nl + "#### ";
-            else if (menuSel == toolDescriptionMarkdownList)
-                tag = "-_";
-            else if (menuSel == toolDescriptionMarkdownListOrdered)
-                tag = nl + "1._";
-            else if (menuSel == toolDescriptionMarkdownLine)
-                tag = nl + "------------";
-            else if (menuSel == toolDescriptionMarkdownLink)
-                tag = nl + "[xx](http://xx 'xx')";
-            else if (menuSel == toolDescriptionMarkdownImage)
-                tag = nl + "[![Title](Address 'Title')](http://url 'Title')";
-            else if (menuSel == toolDescriptionMarkdownCode)
-                tag = nl + "```_```";
-            else if (menuSel == toolDescriptionMarkdownTable)
-            {
-                tag = nl + nl;
-                tag += "|   |   |" + nl;
-                tag += "| ------------ | ------------ |" + nl;
-                tag += "|   |   |" + nl;
-                tag += "|   |   |" + nl;
-            }
-            
-            var selStart = textDescription.SelectionStart;
-            textDescription.Text = textDescription.Text.Insert(selStart, tag);
-            textDescription.Focus();
-            textDescription.SelectionStart = selStart;
-        }
-
-        private void buttonFolderSearch_Click(object sender, EventArgs e)
-        {
-            var folder = _com.GetFolder();
-            if (folder != null)
-            {
-                _selectedFolderId = folder.FolderId;
-                textFolder.Text = folder?.Name;
-                textFolderNumber.Text = "#" + folder.FolderNumber.ToString();
-                
-                buttonUndo.Enabled = true;
-            }
-        }
-
-        private async void buttonAddAlarm_Click(object sender, EventArgs e)
-        {
-            var newMessage = await _com.NewMessage();
-            if (newMessage != null)            
-                listViewAlarms.Items.Add(MessageDtoToListViewItem(newMessage));
-            
-        }
-
-        private void buttonEditAlarm_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void buttonDeleteAlarm_Click(object sender, EventArgs e)
-        {
-
-        }
 
         //private void toolInsertarImagenClipboard_Click(object sender, EventArgs e)
         //{

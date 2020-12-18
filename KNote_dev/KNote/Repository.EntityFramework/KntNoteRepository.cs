@@ -769,24 +769,120 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
-        public Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
+        public async Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
         {
-            throw new NotImplementedException();
+            var response = new Result<KMessageDto>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx, ThrowKntException);
+
+                var resGenRep = await kmessages.GetAsync((object)messageId);
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<KMessageDto>();
+                response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
         }
 
-        public Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity)
+        public async Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity)
         {
-            throw new NotImplementedException();
+            var response = new Result<KMessageDto>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx, ThrowKntException);
+
+                var newEntity = new KMessage();
+                newEntity.SetSimpleDto(entity);
+
+                var resGenRep = await kmessages.AddAsync(newEntity);
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<KMessageDto>();
+                response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
         }
 
-        public Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity)
+        public async Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity)
         {
-            throw new NotImplementedException();
+            var resGenRep = new Result<KMessage>();
+            var response = new Result<KMessageDto>();
+
+            try
+            {
+                var ctx = GetOpenConnection();
+                var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx, ThrowKntException);
+
+                bool flagThrowKntException = false;
+                if (kmessages.ThrowKntException == true)
+                {
+                    flagThrowKntException = true;
+                    kmessages.ThrowKntException = false;
+                }
+
+                var resGenRepGet = await kmessages.GetAsync(entity.KMessageId);
+                KMessage entityForUpdate;
+
+                if (flagThrowKntException == true)
+                    kmessages.ThrowKntException = true;
+
+                if (resGenRepGet.IsValid)
+                {
+                    entityForUpdate = resGenRepGet.Entity;
+                    entityForUpdate.SetSimpleDto(entity);
+                    resGenRep = await kmessages.UpdateAsync(entityForUpdate);
+                }
+                else
+                {
+                    resGenRep.Entity = null;
+                    resGenRep.AddErrorMessage("Can't find entity for update.");
+                }
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<KMessageDto>();
+                response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+
+            return ResultDomainAction(response);
         }
 
-        public Task<Result> DeleteMessageAsync(Guid messageId)
+        public async Task<Result> DeleteMessageAsync(Guid messageId)
         {
-            throw new NotImplementedException();
+            var response = new Result();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx, ThrowKntException);
+
+                var resGenRep = await kmessages.DeleteAsync(messageId);
+                if (!resGenRep.IsValid)
+                    response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
         }
 
         public async Task<Result<int>> CountNotesInFolder(Guid folderId)

@@ -17,6 +17,8 @@ namespace KNote.ClientWin.Components
     public class MessageEditorComponent : ComponentEditorBase<IEditorView<KMessageDto>, KMessageDto>
     {
 
+        public bool AutoDBSave { get; set; } = true;
+
         public MessageEditorComponent(Store store): base(store)
         {
             ComponentName = "Message / alarm editor";
@@ -43,14 +45,54 @@ namespace KNote.ClientWin.Components
         }
 
         public override async Task<bool> SaveModel()
-        {
-            //throw new NotImplementedException();
+        {            
+            //// For test
+            //Finalize();
+            //return await Task.FromResult(true);
+            //// ...
 
-            //await Task.Delay(1);
-            //return true;
-            Finalize();
-            return await Task.FromResult(true);
-            
+            if (!Model.IsDirty())
+                return true;
+
+            var isNew = (Model.KMessageId == Guid.Empty);
+
+            var msgVal = Model.GetErrorMessage();
+            if (!string.IsNullOrEmpty(msgVal))
+            {
+                View.ShowInfo(msgVal);
+                return false;
+            }
+
+            try
+            {
+                Result<KMessageDto> response;
+                if (AutoDBSave)
+                    response = await Service.Notes.SaveMessageAsync(Model);
+                else
+                    response = new Result<KMessageDto>();
+
+                if (response.IsValid)
+                {
+                    Model = response.Entity;
+                    Model.SetIsDirty(false);
+
+                    if (!isNew)
+                        OnSavedEntity(response.Entity);
+                    else
+                        OnAddedEntity(response.Entity);
+
+                    Finalize();
+                }
+                else
+                    View.ShowInfo(response.Message);
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                return false;
+            }
+
+            return true;
         }
 
         public override Task<bool> DeleteModel(IKntService service, Guid id)

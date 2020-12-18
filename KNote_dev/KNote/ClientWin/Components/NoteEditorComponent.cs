@@ -184,13 +184,17 @@ namespace KNote.ClientWin.Components
         public async Task<KMessageDto> NewMessage()
         {
             var messageEditor = new MessageEditorComponent(Store);
-            messageEditor.NewModel(Service);
-            messageEditor.Model.KMessageId = Model.Note.NoteId;            
+            //messageEditor.AutoDBSave = false;  // don't save automatically
+            
+            messageEditor.NewModel(Service);            
+            messageEditor.Model.NoteId = Model.Note.NoteId;
+            messageEditor.Model.Content = "(Aditional text for message)";
             var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
             messageEditor.Model.UserId = userDto.UserId;
             messageEditor.Model.UserFullName = userDto.FullName;
-            messageEditor.Model.Content = "(Aditional text for message)";
+            
             var res = messageEditor.RunModal();
+
             if(res.Entity == EComponentResult.Executed)
             {
                 Model.Messages.Add(messageEditor.Model);

@@ -245,6 +245,46 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetMessagesAsync(noteId);
         }
 
+        public async Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
+        {
+            return await _repository.Notes.GetMessageAsync(messageId);
+        }
+
+        public async Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity)
+        {
+            if (entity.KMessageId == Guid.Empty)
+            {
+                entity.KMessageId = Guid.NewGuid();
+                return await _repository.Notes.AddMessageAsync(entity);
+            }
+            else
+            {
+                return await _repository.Notes.UpdateMessageAsync(entity);
+            }
+        }
+
+        public async Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId)
+        {
+            var result = new Result<KMessageDto>();
+
+            var resGetEntity = await GetMessageAsync(messageId);
+
+            if (resGetEntity.IsValid)
+            {
+                var resDelEntity = await _repository.Notes.DeleteMessageAsync(messageId);
+                if (resDelEntity.IsValid)
+                    result.Entity = resGetEntity.Entity;
+                else
+                    result.ErrorList = resDelEntity.ErrorList;
+            }
+            else
+            {
+                result.ErrorList = resGetEntity.ErrorList;
+            }
+
+            return result;
+        }
+
         #endregion
 
     }

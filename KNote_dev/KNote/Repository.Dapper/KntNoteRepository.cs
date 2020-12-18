@@ -911,7 +911,8 @@ namespace KNote.Repository.Dapper
             {
                 var db = GetOpenConnection();
 
-                var sql = @"SELECT                        
+                var sql = @"
+                    SELECT                        
                         KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
                         KMessages.AlarmType, KMessages.Disabled, KMessages.[Content], KMessages.Forward, KMessages.AlarmOk, 
                         KMessages.AlarmActivated, KMessages.AlarmDateTime, KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
@@ -932,24 +933,134 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
+        public async Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
         {
-            throw new NotImplementedException();
+            var result = new Result<KMessageDto>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"
+                    SELECT                        
+                        KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
+                        KMessages.AlarmType, KMessages.Disabled, KMessages.[Content], KMessages.Forward, KMessages.AlarmOk, 
+                        KMessages.AlarmActivated, KMessages.AlarmDateTime, KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
+                    FROM  KMessages INNER JOIN
+                         Users ON KMessages.UserId = Users.UserId  
+                    WHERE KMessageId = @Id";
+
+                var entity = await db.QueryFirstOrDefaultAsync<KMessageDto>(sql.ToString(), new { Id = messageId });
+
+                if (entity == null)
+                    result.AddErrorMessage("Entity not found.");
+
+                result.Entity = entity;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity)
+        public async Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity)
         {
-            throw new NotImplementedException();
+            var result = new Result<KMessageDto>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"INSERT INTO KMessages (KMessageId, UserId, NoteId, ActionType, 
+                                NotificationType, AlarmType, [Disabled], Content, Forward, AlarmOk, 
+                                AlarmActivated, AlarmDateTime, AlarmMinutes )
+                            VALUES (@KMessageId, @UserId, @NoteId, @ActionType, 
+                                @NotificationType, @AlarmType, @Disabled, @Content, @Forward, @AlarmOk, 
+                                @AlarmActivated, @AlarmDateTime, @AlarmMinutes)";
+
+                var r = await db.ExecuteAsync(sql.ToString(),
+                    new { entity.KMessageId, entity.UserId, entity.NoteId, entity.ActionType, entity.NotificationType, 
+                        entity.AlarmType, entity.Disabled, entity.Content, entity.Forward, entity.AlarmOk, 
+                        entity.AlarmActivated, entity.AlarmDateTime,  entity.AlarmMinutes});
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not inserted");
+
+                result.Entity = entity;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity)
+        public async  Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity)
         {
-            throw new NotImplementedException();
+            var result = new Result<KMessageDto>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"UPDATE KMessages SET                         
+                        UserId = @UserId, 
+                        NoteId = @NoteId, 
+                        ActionType = @ActionType, 
+                        NotificationType = @NotificationType, 
+                        AlarmType = @AlarmType, 
+                        [Disabled] = @Disabled, 
+                        Content = @Content, 
+                        Forward = @Forward, 
+                        AlarmOk = @AlarmOk, 
+                        AlarmActivated = @AlarmActivated, 
+                        AlarmDateTime = @AlarmDateTime, 
+                        AlarmMinutes = @AlarmMinutes )
+                    WHERE KMessageId = @KMessageId";
+
+                var r = await db.ExecuteAsync(sql.ToString(),
+                    new { entity.KMessageId, entity.UserId, entity.NoteId, entity.ActionType, entity.NotificationType,
+                        entity.AlarmType, entity.Disabled, entity.Content, entity.Forward, entity.AlarmOk,
+                        entity.AlarmActivated, entity.AlarmDateTime, entity.AlarmMinutes
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not updated");
+
+                result.Entity = entity;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
-        public Task<Result> DeleteMessageAsync(Guid messageId)
+        public async Task<Result> DeleteMessageAsync(Guid messageId)
         {
-            throw new NotImplementedException();
+            var result = new Result();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"DELETE FROM KMessages WHERE KMessageId = @Id";
+
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = messageId });
+
+                if (r == 0)
+                    result.AddErrorMessage("Entity not deleted");
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
         public async Task<Result<int>> CountNotesInFolder(Guid folderId)

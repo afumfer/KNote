@@ -104,7 +104,7 @@ namespace KNote.ClientWin.Components
             catch (Exception ex)
             {
                 View.ShowInfo(ex.Message);
-                return true;
+                return false;
             }
 
             return true;

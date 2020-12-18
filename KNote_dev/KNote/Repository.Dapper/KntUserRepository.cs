@@ -268,10 +268,33 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
+        public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
         {
-            throw new NotImplementedException();
-        }
+            var result = new Result<List<KMessageDto>>();
+            try
+            {
+                var db = GetOpenConnection();
 
+                var sql = @"
+                    SELECT                        
+                        KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
+                        KMessages.AlarmType, KMessages.Disabled, KMessages.[Content], KMessages.Forward, KMessages.AlarmOk, 
+                        KMessages.AlarmActivated, KMessages.AlarmDateTime, KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
+                    FROM  KMessages INNER JOIN
+                         Users ON KMessages.UserId = Users.UserId
+                    WHERE (KMessages.UserId = @userId)
+                    -- ORDER BY [KMessages.AlarmDateTime];";
+
+                var entity = await db.QueryAsync<KMessageDto>(sql.ToString(), new { userId });
+                result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
     }
 }
