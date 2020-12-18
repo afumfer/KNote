@@ -200,27 +200,33 @@ namespace KNote.ClientWin.Components
                 Model.Messages.Add(messageEditor.Model);
                 return messageEditor.Model;
             }            
-            else 
+            else
+            {
+                View.ShowInfo(res.Message);
                 return null;
+            }
         }
 
-        public void EditMessage() 
+        public async Task<KMessageDto> EditMessage(Guid messageId) 
         {
-            //if (SelectedFolderInfo == null)
-            //{
-            //    View.ShowInfo("There is no folder selected to edit.");
-            //    return;
-            //}
+            var messageEditor = new MessageEditorComponent(Store);
+            //messageEditor.AutoDBSave = false;  // don't save automatically
 
-            //var folderEditorComponent = new FolderEditorComponent(Store);
-            //await folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
-            //var res = folderEditorComponent.RunModal();
-            //if (res.Entity == EComponentResult.Executed)
-            //{
-            //    SelectedFolderWithServiceRef.FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>();
-            //    FoldersSelectorComponent.RefreshItem(SelectedFolderWithServiceRef);
-            //}
+            var entityFound = await messageEditor.LoadModelById(Service, messageId);
+            if (!entityFound)
+            {
+                View.ShowInfo("Message/alarm not fount.");
+                return null;
+            }
 
+            var res = messageEditor.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                Model.Messages.Add(messageEditor.Model);
+                return messageEditor.Model;
+            }
+            else
+                return null;
         }
 
         public void DeleteMessage()

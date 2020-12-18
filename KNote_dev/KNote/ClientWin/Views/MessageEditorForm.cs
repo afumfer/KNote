@@ -56,24 +56,34 @@ namespace KNote.ClientWin.Views
         {
             textUserFullName.Text = _com.Model.UserFullName?.ToString();
             textAlarmDateTime.Text = _com.Model.AlarmDateTime.ToString();
-            //comboAlarmPeriodicity.
+            comboAlarmPeriodicity.ValueMember = _com.Model.AlarmType.ToString();
+            comboNotificationType.ValueMember = _com.Model.NotificationType.ToString();
             textContent.Text = _com.Model.Content.ToString();
+            checkAlarmActivated.Checked = _com.Model.AlarmActivated ?? false;            
         }
 
         private void ControlsToModel()
         {
-            //  _com.Model.UserFullName = ....;
-            _com.Model.AlarmDateTime = DateTime.Now; // DateTime.Parse(textAlarmDateTime.Text);
-            //comboAlarmPeriodicity.
+            //  _com.Model.UserFullName = .... ;
+            DateTime alarm;
+            if (DateTime.TryParse(textAlarmDateTime.Text, out alarm))
+                _com.Model.AlarmDateTime = alarm;
+            else
+                _com.Model.AlarmDateTime = null;
+            _com.Model.AlarmType = (EnumAlarmType)comboAlarmPeriodicity.SelectedIndex;
+            _com.Model.NotificationType = (EnumNotificationType)comboNotificationType.SelectedIndex;
             _com.Model.Content = textContent.Text;
+            _com.Model.AlarmActivated = checkAlarmActivated.Checked;
         }
 
         public void CleanView()
         {
             textUserFullName.Text = "";
             textAlarmDateTime.Text = "";
-            //comboAlarmPeriodicity.
+            comboAlarmPeriodicity.SelectedIndex = 0;
+            comboNotificationType.SelectedIndex = 0;
             textContent.Text = "";
+            checkAlarmActivated.Checked = true;
         }
 
         public void ConfigureEmbededMode()

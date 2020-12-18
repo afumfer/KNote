@@ -517,6 +517,7 @@ namespace KNote.ClientWin.Views
             listViewAlarms.Columns.Add("Alarm periodicity", 150, HorizontalAlignment.Left);
             listViewAlarms.Columns.Add("Notification type", 150, HorizontalAlignment.Left);
             listViewAlarms.Columns.Add("Comment", 150, HorizontalAlignment.Left);
+            listViewAlarms.CheckBoxes = true;
         }
 
         private void UpdatePicResource(byte[] content, string type)
