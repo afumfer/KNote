@@ -305,9 +305,19 @@ namespace KNote.ClientWin.Views
             EditAlarm();
         }
 
-        private void buttonDeleteAlarm_Click(object sender, EventArgs e)
+        private async void buttonDeleteAlarm_Click(object sender, EventArgs e)
         {
-
+            if (listViewAlarms.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("There is no selected alert.", "KeyNote");
+                return;
+            }
+            var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
+            var res = await _com.DeleteMessage(messageId);
+            if (res)
+            {
+                listViewAlarms.Items[messageId.ToString()].Remove();
+            }
         }
 
         #endregion

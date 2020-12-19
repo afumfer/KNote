@@ -11,6 +11,7 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace KNote.ClientWin.Components
 {    
@@ -222,6 +223,8 @@ namespace KNote.ClientWin.Components
             var res = messageEditor.RunModal();
             if (res.Entity == EComponentResult.Executed)
             {
+                var itemToRemove = Model.Messages.Single(m => m.KMessageId == messageId);
+                Model.Messages.Remove(itemToRemove);                
                 Model.Messages.Add(messageEditor.Model);
                 return messageEditor.Model;
             }
@@ -229,20 +232,16 @@ namespace KNote.ClientWin.Components
                 return null;
         }
 
-        public void DeleteMessage()
-        {
-            //if (SelectedFolderInfo == null)
-            //{
-            //    View.ShowInfo("There is no folder selected to delete.");
-            //    return;
-            //}
+        public async Task<bool> DeleteMessage(Guid messageId)
+        {            
+            var messageEditor = new MessageEditorComponent(Store);
+            //messageEditor.AutoDBSave = false;  // don't save automatically
 
-            //var folderEditorComponent = new FolderEditorComponent(Store);
-            //var res = await folderEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);
-            //if (res)
-            //{
-            //    FoldersSelectorComponent.DeleteItem(SelectedFolderWithServiceRef);
-            //}
+            var res = await messageEditor.DeleteModel(Service, messageId);
+            if (res)            
+                Model.Messages.Remove(messageEditor.Model);             
+                        
+            return res;
         }
 
 

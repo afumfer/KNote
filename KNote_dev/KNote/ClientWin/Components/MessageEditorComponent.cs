@@ -109,14 +109,34 @@ namespace KNote.ClientWin.Components
             return true;
         }
 
-        public override Task<bool> DeleteModel(IKntService service, Guid id)
+        public async override Task<bool> DeleteModel(IKntService service, Guid id)
         {
-            throw new NotImplementedException();
+            var result = View.ShowInfo("Are you sure you want to delete this folder?", "Delete note", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes || result == DialogResult.Yes)
+            {
+                try
+                {
+                    var response = await service.Notes.DeleteMessageAsync(id);
+
+                    if (response.IsValid)
+                    {
+                        OnDeletedEntity(response.Entity);
+                        return true;
+                    }
+                    else
+                        View.ShowInfo(response.Message);
+                }
+                catch (Exception ex)
+                {
+                    View.ShowInfo(ex.Message);                    
+                }
+            }
+            return false;
         }
 
-        public override Task<bool> DeleteModel()
+        public async override Task<bool> DeleteModel()
         {
-            throw new NotImplementedException();
+            return await DeleteModel(Service, Model.KMessageId);
         }
 
 

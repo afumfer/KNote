@@ -129,7 +129,7 @@ namespace KNote.ClientWin.Components
                 }
                 catch (Exception ex)
                 {
-                    View.ShowInfo(ex.Message);
+                    View.ShowInfo(ex.Message);                    
                 }
             }
             return false;
