@@ -812,10 +812,13 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listViewAlarms.HideSelection = false;
             this.listViewAlarms.Location = new System.Drawing.Point(6, 34);
+            this.listViewAlarms.MultiSelect = false;
             this.listViewAlarms.Name = "listViewAlarms";
             this.listViewAlarms.Size = new System.Drawing.Size(781, 532);
             this.listViewAlarms.TabIndex = 11;
             this.listViewAlarms.UseCompatibleStateImageBehavior = false;
+            this.listViewAlarms.DoubleClick += new System.EventHandler(this.listViewAlarms_DoubleClick);
+            this.listViewAlarms.Resize += new System.EventHandler(this.listView_Resize);
             // 
             // buttonEditAlarm
             // 

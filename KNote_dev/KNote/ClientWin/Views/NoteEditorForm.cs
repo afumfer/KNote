@@ -294,15 +294,15 @@ namespace KNote.ClientWin.Views
 
         private async void buttonAddAlarm_Click(object sender, EventArgs e)
         {
-            var newMessage = await _com.NewMessage();
-            if (newMessage != null)
-                listViewAlarms.Items.Add(MessageDtoToListViewItem(newMessage));
+            var message = await _com.NewMessage();
+            if (message != null)
+                listViewAlarms.Items.Add(MessageDtoToListViewItem(message));
 
         }
 
         private void buttonEditAlarm_Click(object sender, EventArgs e)
         {
-
+            EditAlarm();
         }
 
         private void buttonDeleteAlarm_Click(object sender, EventArgs e)
@@ -501,23 +501,16 @@ namespace KNote.ClientWin.Views
 
             foreach (var msg in _com.Model.Messages)
             {
-                //var itemList = new ListViewItem(msg.UserFullName);
-                //itemList.Name = msg.KMessageId.ToString();
-                ////itemList.BackColor = Color.LightGray;
-                //itemList.SubItems.Add(msg.AlarmDateTime.ToString());
-                //itemList.SubItems.Add(msg.AlarmActivated.ToString());
-                //listViewAlarms.Items.Add(itemList);
                 listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
             }
 
             // Width of -2 indicates auto-size.            
-            listViewAlarms.Columns.Add("User", 150, HorizontalAlignment.Left);
-            listViewAlarms.Columns.Add("Activated", 100, HorizontalAlignment.Left);
-            listViewAlarms.Columns.Add("Date time", 150, HorizontalAlignment.Left);
-            listViewAlarms.Columns.Add("Alarm periodicity", 150, HorizontalAlignment.Left);
-            listViewAlarms.Columns.Add("Notification type", 150, HorizontalAlignment.Left);
-            listViewAlarms.Columns.Add("Comment", 150, HorizontalAlignment.Left);
-            listViewAlarms.CheckBoxes = true;
+            listViewAlarms.Columns.Add("User", 130, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Activated", 80, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Date time", 130, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Alarm periodicity", 120, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Notification type", 120, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);            
         }
 
         private void UpdatePicResource(byte[] content, string type)
@@ -668,6 +661,17 @@ namespace KNote.ClientWin.Views
             return itemList;
         }
 
+        private void UpdateMessage(KMessageDto message)
+        {
+            var item = listViewAlarms.Items[message.KMessageId.ToString()];
+            item.SubItems[1].Text = message.AlarmActivated.ToString();
+            item.SubItems[2].Text = message.AlarmDateTime.ToString();
+            item.SubItems[3].Text = message.AlarmType.ToString();
+            item.SubItems[4].Text = message.NotificationType.ToString();
+            item.SubItems[5].Text = message.Content.ToString();
+
+        }
+
         private void SizeLastColumn(ListView lv)
         {
             // Hack for control undeterminated error
@@ -698,6 +702,26 @@ namespace KNote.ClientWin.Views
             buttonViewHtml.Enabled = true;
             toolDescriptionHtmlTitles.Visible = false;
             toolDescriptionMarkdown.Visible = true;
+        }
+
+        private void listViewAlarms_DoubleClick(object sender, EventArgs e)
+        {
+            EditAlarm();
+        }
+
+        private async void EditAlarm()
+        {
+
+            if (listViewAlarms.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("There is no selected alert.", "KeyNote");
+                return;
+            }
+            var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
+            var message = await _com.EditMessage(messageId);
+            if (message != null)
+                UpdateMessage(message);
+
         }
 
         #endregion

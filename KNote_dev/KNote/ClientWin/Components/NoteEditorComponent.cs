@@ -212,7 +212,7 @@ namespace KNote.ClientWin.Components
             var messageEditor = new MessageEditorComponent(Store);
             //messageEditor.AutoDBSave = false;  // don't save automatically
 
-            var entityFound = await messageEditor.LoadModelById(Service, messageId);
+            var entityFound = await messageEditor.LoadModelById(Service, messageId, false);
             if (!entityFound)
             {
                 View.ShowInfo("Message/alarm not fount.");

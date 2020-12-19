@@ -23,6 +23,7 @@ namespace KNote.ClientWin.Views
         public MessageEditorForm(MessageEditorComponent com)
         {
             InitializeComponent();
+            PersonalizeControls();
             _com = com;
         }
 
@@ -56,8 +57,8 @@ namespace KNote.ClientWin.Views
         {
             textUserFullName.Text = _com.Model.UserFullName?.ToString();
             textAlarmDateTime.Text = _com.Model.AlarmDateTime.ToString();
-            comboAlarmPeriodicity.ValueMember = _com.Model.AlarmType.ToString();
-            comboNotificationType.ValueMember = _com.Model.NotificationType.ToString();
+            comboAlarmPeriodicity.SelectedIndex = (int)_com.Model.AlarmType;
+            comboNotificationType.SelectedIndex = (int)_com.Model.NotificationType;
             textContent.Text = _com.Model.Content.ToString();
             checkAlarmActivated.Checked = _com.Model.AlarmActivated ?? false;            
         }
@@ -154,7 +155,7 @@ namespace KNote.ClientWin.Views
 
         private void MessageEditorForm_Load(object sender, EventArgs e)
         {
-            PersonalizeControls();
+            
         }
 
         private void PersonalizeControls()

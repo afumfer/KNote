@@ -1017,7 +1017,7 @@ namespace KNote.Repository.Dapper
                         AlarmOk = @AlarmOk, 
                         AlarmActivated = @AlarmActivated, 
                         AlarmDateTime = @AlarmDateTime, 
-                        AlarmMinutes = @AlarmMinutes )
+                        AlarmMinutes = @AlarmMinutes
                     WHERE KMessageId = @KMessageId";
 
                 var r = await db.ExecuteAsync(sql.ToString(),

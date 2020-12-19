@@ -31,9 +31,23 @@ namespace KNote.ClientWin.Components
             return Store.FactoryViews.View(this);
         }
 
-        public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
+        public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Service = service;
+
+                Model = (await Service.Notes.GetMessageAsync(id)).Entity;
+                Model.SetIsDirty(false);
+                if (refreshView)
+                    View.RefreshView();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                return false;
+            }
         }
 
         public override void NewModel(IKntService service)
