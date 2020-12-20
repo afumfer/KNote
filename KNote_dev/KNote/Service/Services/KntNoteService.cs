@@ -111,18 +111,30 @@ namespace KNote.Service.Services
             var result = new Result<NoteExtendedDto>();
             result.Entity = new NoteExtendedDto();
 
-            var resNote = await SaveAsync(entity.Note);
-            result.Entity.Note = resNote.Entity;
-            
+            if (entity.Note.IsDirty())
+            {
+                var resNote = await SaveAsync(entity.Note);
+                result.Entity.Note = resNote.Entity;
+            }
+            else
+                result.Entity.Note = entity.Note;
+
+            var noteEdited = result.Entity.Note;
+
             foreach (var item in entity.Messages)
             {
-                if (item.NoteId == Guid.Empty)
-                    item.NoteId = resNote.Entity.NoteId;
-                var res = await SaveMessageAsync(item);
-                if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
+                if (item.IsDirty())
+                {
+                    if (item.NoteId == Guid.Empty)
+                        item.NoteId = noteEdited.NoteId;
+                    var res = await SaveMessageAsync(item);
+                    if (!res.IsValid)
+                        CopyErrorList(res.ErrorList, result.ErrorList);
+                    else
+                        result.Entity.Messages.Add(res.Entity);
+                }
                 else
-                    result.Entity.Messages.Add(res.Entity);
+                    result.Entity.Messages.Add(item);
             }
             foreach (var item in entity.MessagesDeleted)
             {
@@ -134,13 +146,19 @@ namespace KNote.Service.Services
 
             foreach (var item in entity.Resources)
             {
-                if (item.NoteId == Guid.Empty)
-                    item.NoteId = resNote.Entity.NoteId;
-                var res = await SaveResourceAsync(item);
-                if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
-                else 
-                    result.Entity.Resources.Add(res.Entity);
+                if (item.IsDirty())
+                {
+                    if (item.NoteId == Guid.Empty)
+                        item.NoteId = noteEdited.NoteId;
+                    var res = await SaveResourceAsync(item);
+                    if (!res.IsValid)
+                        CopyErrorList(res.ErrorList, result.ErrorList);
+                    else 
+                        result.Entity.Resources.Add(res.Entity);
+                }
+                else
+                
+                    result.Entity.Resources.Add(item);                
             }
             foreach (var item in entity.ResourcesDeleted)
             {
@@ -152,13 +170,19 @@ namespace KNote.Service.Services
 
             foreach (var item in entity.Tasks)
             {
-                if (item.NoteId == Guid.Empty)
-                    item.NoteId = resNote.Entity.NoteId;
-                var res = await SaveNoteTaskAsync(item);
-                if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
-                else 
-                    result.Entity.Tasks.Add(res.Entity);
+                if (item.IsDirty())
+                {
+                    if (item.NoteId == Guid.Empty)
+                        item.NoteId = noteEdited.NoteId;
+                    var res = await SaveNoteTaskAsync(item);
+                    if (!res.IsValid)
+                        CopyErrorList(res.ErrorList, result.ErrorList);
+                    else 
+                        result.Entity.Tasks.Add(res.Entity);
+                }
+                else
+                    result.Entity.Tasks.Add(item);
+
             }
             foreach (var item in entity.TasksDeleted)
             {

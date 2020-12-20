@@ -199,8 +199,7 @@ namespace KNote.ClientWin.Components
             var res = messageEditor.RunModal();
 
             if(res.Entity == EComponentResult.Executed)
-            {
-                Model.SetIsDirty(true);
+            {                
                 Model.Messages.Add(messageEditor.Model);
                 return messageEditor.Model;
             }            
@@ -209,31 +208,6 @@ namespace KNote.ClientWin.Components
                 View.ShowInfo(res.Message);
                 return null;
             }
-        }
-
-        public async Task<KMessageDto> EditMessageById(Guid messageId) 
-        {
-            var messageEditor = new MessageEditorComponent(Store);
-            messageEditor.AutoDBSave = false;  // don't save automatically
-
-            var entityFound = await messageEditor.LoadModelById(Service, messageId, false);
-            if (!entityFound)
-            {
-                View.ShowInfo("Message/alarm not fount.");
-                return null;
-            }
-
-            var res = messageEditor.RunModal();
-            if (res.Entity == EComponentResult.Executed)
-            {
-                Model.SetIsDirty(true);
-                var itemToRemove = Model.Messages.Single(m => m.KMessageId == messageId);
-                Model.Messages.Remove(itemToRemove);                
-                Model.Messages.Add(messageEditor.Model);
-                return messageEditor.Model;
-            }
-            else
-                return null;
         }
 
         public async Task<KMessageDto> EditMessage(KMessageDto message)
@@ -256,10 +230,9 @@ namespace KNote.ClientWin.Components
 
             var res = messageEditor.RunModal();
             if (res.Entity == EComponentResult.Executed)
-            {
-                Model.SetIsDirty(true);
+            {                
                 var itemToRemove = Model.Messages.Single(m => m.KMessageId == message.KMessageId);
-                Model.Messages.Remove(itemToRemove);
+                Model.Messages.Remove(itemToRemove);                
                 Model.Messages.Add(messageEditor.Model);
                 return messageEditor.Model;
             }
@@ -267,20 +240,22 @@ namespace KNote.ClientWin.Components
                 return null;
         }
 
-        public async Task<bool> DeleteMessage(Guid messageId)
-        {            
+        public async Task<bool> DeleteMessage(KMessageDto message)
+        {
             var messageEditor = new MessageEditorComponent(Store);
             messageEditor.AutoDBSave = false;  // don't save automatically
 
-            var res = await messageEditor.DeleteModel(Service, messageId);
+            var res = await messageEditor.DeleteModel(Service, message.KMessageId);
             if (res)
             {
-                Model.SetIsDirty(true);
-                var msgDel = Model.Messages.SingleOrDefault(m => m.KMessageId == messageId);
+                var msgDel = Model.Messages.SingleOrDefault(m => m.KMessageId == message.KMessageId 
+                    && m.AlarmDateTime == message.AlarmDateTime && m.Content == message.Content && m.AlarmActivated == message.AlarmActivated
+                    && m.AlarmType == message.AlarmType && m.NotificationType == message.NotificationType);
                 Model.Messages.Remove(msgDel);
-                Model.MessagesDeleted.Add(messageId);
-            }            
-                        
+                if (message.KMessageId != Guid.Empty)
+                    Model.MessagesDeleted.Add(message.KMessageId);
+            }
+
             return res;
         }
 

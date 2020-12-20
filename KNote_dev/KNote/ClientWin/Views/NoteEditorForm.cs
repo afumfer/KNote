@@ -312,11 +312,12 @@ namespace KNote.ClientWin.Views
                 MessageBox.Show("There is no selected alert.", "KeyNote");
                 return;
             }
-            var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
-            var res = await _com.DeleteMessage(messageId);
+            //var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
+            var delMsg = GetMessageFromSelectedListView();
+            var res = await _com.DeleteMessage(delMsg);
             if (res)
             {
-                listViewAlarms.Items[messageId.ToString()].Remove();
+                listViewAlarms.Items[delMsg.KMessageId.ToString()].Remove();
             }
         }
 

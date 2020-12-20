@@ -96,18 +96,20 @@ namespace KNote.ClientWin.Components
             {
                 Result<KMessageDto> response;
                 if (AutoDBSave)
+                {
                     response = await Service.Notes.SaveMessageAsync(Model);
+                    Model = response.Entity;
+                    Model.SetIsDirty(false);
+                }
                 else
                 {
                     response = new Result<KMessageDto>();
+                    Model.SetIsDirty(true);
                     response.Entity = Model;
                 }
 
                 if (response.IsValid)
-                {
-                    Model = response.Entity;
-                    Model.SetIsDirty(false);
-
+                {                                        
                     if (!isNew)
                         OnSavedEntity(response.Entity);
                     else
