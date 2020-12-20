@@ -204,7 +204,7 @@ namespace KNote.Model.Dto
             var results = new List<ValidationResult>();
 
             // ---
-            // Capturar las validaciones implementadas vía atributos.
+            // Attributes validations 
             // ---            
 
             Validator.TryValidateProperty(this.Content,
@@ -212,15 +212,15 @@ namespace KNote.Model.Dto
                results);
 
             //----
-            // Validaciones específicas
+            // Specific validations 
             //----
 
-            //if (ModificationDateTime < CreationDateTime)
-            //{
-            //    results.Add(new ValidationResult
-            //     ("KMSG: La fecha de modificación no puede ser mayor que la fecha de creación"
-            //     , new[] { "ModificationDateTime", "CreationDateTime" }));
-            //}
+            if (AlarmDateTime  == null)
+            {
+                results.Add(new ValidationResult
+                 ("KMSG: The message or alarm date-time in mandatory."
+                 , new[] { "AlarmDateTime" }));
+            }
 
             // ---
             // Retornar List<ValidationResult>()

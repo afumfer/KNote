@@ -172,5 +172,18 @@ namespace KNote.ClientWin.Views
             comboNotificationType.DisplayMember = "Value";
             comboNotificationType.SelectedIndex = 0;
         }
+
+        private void buttonSelectDate_Click(object sender, EventArgs e)
+        {
+            DateTime selDate;
+            if (!DateTime.TryParse(textAlarmDateTime.Text, out selDate))
+                selDate = DateTime.Now;
+
+            DateSelectorForm dateSelector = new DateSelectorForm();
+            dateSelector.Date = selDate;
+
+            if (dateSelector.ShowDialog() == DialogResult.OK)
+                textAlarmDateTime.Text = dateSelector.Date.ToString("dd/MM/yyyy HH:mm");
+        }
     }
 }

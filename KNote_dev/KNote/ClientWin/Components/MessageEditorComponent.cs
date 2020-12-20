@@ -50,6 +50,21 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        public void LoadModel(KMessageDto entity)
+        {
+            try
+            {
+                Model = entity;
+                Model.SetIsDirty(false);                
+                View.RefreshView();                
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);                
+            }
+        }
+
+
         public override void NewModel(IKntService service)
         {
             Service = service;
@@ -83,7 +98,10 @@ namespace KNote.ClientWin.Components
                 if (AutoDBSave)
                     response = await Service.Notes.SaveMessageAsync(Model);
                 else
+                {
                     response = new Result<KMessageDto>();
+                    response.Entity = Model;
+                }
 
                 if (response.IsValid)
                 {
@@ -116,10 +134,15 @@ namespace KNote.ClientWin.Components
             {
                 try
                 {
-                    var response = await service.Notes.DeleteMessageAsync(id);
-
+                    Result<KMessageDto> response;
+                    if (AutoDBSave)
+                        response = await service.Notes.DeleteMessageAsync(id);
+                    else                    
+                        response = new Result<KMessageDto>();
+                    
                     if (response.IsValid)
                     {
+                        Model = response.Entity;
                         OnDeletedEntity(response.Entity);
                         return true;
                     }

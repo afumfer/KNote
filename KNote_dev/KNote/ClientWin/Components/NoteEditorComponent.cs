@@ -185,7 +185,7 @@ namespace KNote.ClientWin.Components
         public async Task<KMessageDto> NewMessage()
         {
             var messageEditor = new MessageEditorComponent(Store);
-            //messageEditor.AutoDBSave = false;  // don't save automatically
+            messageEditor.AutoDBSave = false;  // don't save automatically
             
             messageEditor.NewModel(Service);            
             messageEditor.Model.NoteId = Model.Note.NoteId;
@@ -193,11 +193,14 @@ namespace KNote.ClientWin.Components
             var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
             messageEditor.Model.UserId = userDto.UserId;
             messageEditor.Model.UserFullName = userDto.FullName;
-            
+            messageEditor.Model.AlarmActivated = true;
+            messageEditor.Model.AlarmDateTime = DateTime.Now;
+
             var res = messageEditor.RunModal();
 
             if(res.Entity == EComponentResult.Executed)
             {
+                Model.SetIsDirty(true);
                 Model.Messages.Add(messageEditor.Model);
                 return messageEditor.Model;
             }            
@@ -208,10 +211,10 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public async Task<KMessageDto> EditMessage(Guid messageId) 
+        public async Task<KMessageDto> EditMessageById(Guid messageId) 
         {
             var messageEditor = new MessageEditorComponent(Store);
-            //messageEditor.AutoDBSave = false;  // don't save automatically
+            messageEditor.AutoDBSave = false;  // don't save automatically
 
             var entityFound = await messageEditor.LoadModelById(Service, messageId, false);
             if (!entityFound)
@@ -223,8 +226,40 @@ namespace KNote.ClientWin.Components
             var res = messageEditor.RunModal();
             if (res.Entity == EComponentResult.Executed)
             {
+                Model.SetIsDirty(true);
                 var itemToRemove = Model.Messages.Single(m => m.KMessageId == messageId);
                 Model.Messages.Remove(itemToRemove);                
+                Model.Messages.Add(messageEditor.Model);
+                return messageEditor.Model;
+            }
+            else
+                return null;
+        }
+
+        public async Task<KMessageDto> EditMessage(KMessageDto message)
+        {
+            var messageEditor = new MessageEditorComponent(Store);
+            messageEditor.AutoDBSave = false;  // don't save automatically
+
+            var entityFound = await messageEditor.LoadModelById(Service, message.KMessageId, false);
+            if (!entityFound)
+            {
+                View.ShowInfo("Message/alarm not fount.");
+                return null;
+            }
+
+            messageEditor.Model.AlarmDateTime = message.AlarmDateTime;
+            messageEditor.Model.AlarmType = message.AlarmType;
+            messageEditor.Model.NotificationType = message.NotificationType;
+            messageEditor.Model.Content = message.Content;
+            messageEditor.Model.AlarmActivated = message.AlarmActivated;
+
+            var res = messageEditor.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                Model.SetIsDirty(true);
+                var itemToRemove = Model.Messages.Single(m => m.KMessageId == message.KMessageId);
+                Model.Messages.Remove(itemToRemove);
                 Model.Messages.Add(messageEditor.Model);
                 return messageEditor.Model;
             }
@@ -235,15 +270,19 @@ namespace KNote.ClientWin.Components
         public async Task<bool> DeleteMessage(Guid messageId)
         {            
             var messageEditor = new MessageEditorComponent(Store);
-            //messageEditor.AutoDBSave = false;  // don't save automatically
+            messageEditor.AutoDBSave = false;  // don't save automatically
 
             var res = await messageEditor.DeleteModel(Service, messageId);
-            if (res)            
-                Model.Messages.Remove(messageEditor.Model);             
+            if (res)
+            {
+                Model.SetIsDirty(true);
+                var msgDel = Model.Messages.SingleOrDefault(m => m.KMessageId == messageId);
+                Model.Messages.Remove(msgDel);
+                Model.MessagesDeleted.Add(messageId);
+            }            
                         
             return res;
         }
-
 
         #endregion 
     }

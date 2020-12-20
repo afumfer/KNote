@@ -320,6 +320,12 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private void listViewAlarms_DoubleClick(object sender, EventArgs e)
+        {
+            if(_com.EditMode)
+                EditAlarm();
+        }
+
         #endregion
 
         #region Private methods
@@ -714,24 +720,43 @@ namespace KNote.ClientWin.Views
             toolDescriptionMarkdown.Visible = true;
         }
 
-        private void listViewAlarms_DoubleClick(object sender, EventArgs e)
-        {
-            EditAlarm();
-        }
-
         private async void EditAlarm()
         {
-
             if (listViewAlarms.SelectedItems.Count == 0)
             {
                 MessageBox.Show("There is no selected alert.", "KeyNote");
                 return;
             }
-            var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
-            var message = await _com.EditMessage(messageId);
+
+            //var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);            
+            //var message = await _com.EditMessageById(messageId);
+            
+            var message = await _com.EditMessage(GetMessageFromSelectedListView());
+
             if (message != null)
                 UpdateMessage(message);
 
+        }
+
+        private KMessageDto GetMessageFromSelectedListView()
+        {
+            KMessageDto message; // = new KMessageDto();
+            var item = listViewAlarms.SelectedItems[0];
+            if (item != null)
+            {
+                message = new KMessageDto();
+                message.KMessageId = Guid.Parse(item.Name);
+                message.UserFullName = item.Text;
+                message.AlarmActivated = bool.Parse(item.SubItems[1].Text);
+                message.AlarmDateTime = DateTime.Parse(item.SubItems[2].Text);                                
+                message.AlarmType = (EnumAlarmType)Enum.Parse(typeof(EnumAlarmType), item.SubItems[3].Text);                
+                message.NotificationType = (EnumNotificationType)Enum.Parse(typeof(EnumNotificationType), item.SubItems[4].Text);
+                message.Content = item.SubItems[5].Text;
+            }
+            else
+                message = null;
+
+            return message;
         }
 
         #endregion

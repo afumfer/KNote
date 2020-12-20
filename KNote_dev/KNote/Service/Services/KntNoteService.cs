@@ -107,19 +107,67 @@ namespace KNote.Service.Services
         }
 
         public async Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity)
-        {
-            // TODO: !!! pendiente de completar este método ....
-
+        {            
             var result = new Result<NoteExtendedDto>();
             result.Entity = new NoteExtendedDto();
 
-
             var resNote = await SaveAsync(entity.Note);
-
-            // TODO: !!! pendiente de grabar las propiedades adicionales de NoteExtendedDto
-            // ... 
-
             result.Entity.Note = resNote.Entity;
+            
+            foreach (var item in entity.Messages)
+            {
+                if (item.NoteId == Guid.Empty)
+                    item.NoteId = resNote.Entity.NoteId;
+                var res = await SaveMessageAsync(item);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+                else
+                    result.Entity.Messages.Add(res.Entity);
+            }
+            foreach (var item in entity.MessagesDeleted)
+            {
+                var res = await DeleteMessageAsync(item);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+            }
+            entity.MessagesDeleted.Clear();
+
+            foreach (var item in entity.Resources)
+            {
+                if (item.NoteId == Guid.Empty)
+                    item.NoteId = resNote.Entity.NoteId;
+                var res = await SaveResourceAsync(item);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+                else 
+                    result.Entity.Resources.Add(res.Entity);
+            }
+            foreach (var item in entity.ResourcesDeleted)
+            {
+                var res = await DeleteResourceAsync(item);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+            }
+            entity.Resources.Clear();
+
+            foreach (var item in entity.Tasks)
+            {
+                if (item.NoteId == Guid.Empty)
+                    item.NoteId = resNote.Entity.NoteId;
+                var res = await SaveNoteTaskAsync(item);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+                else 
+                    result.Entity.Tasks.Add(res.Entity);
+            }
+            foreach (var item in entity.TasksDeleted)
+            {
+                var res = await DeleteNoteTaskAsync(item);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+            }
+            entity.TasksDeleted.Clear();
+
             return result;
         }
 
@@ -146,18 +194,36 @@ namespace KNote.Service.Services
         }
 
         public async Task<Result<NoteExtendedDto>> DeleteExtendedAsync(Guid id)
-        {
-            // TODO: !!! pendiented de completar este método ....
-
+        {            
             var result = new Result<NoteExtendedDto>();
             result.Entity = new NoteExtendedDto();
 
+            var neForDelete = (await GetExtendedAsync(id)).Entity;
+
+            foreach (var item in neForDelete.Messages)
+            {
+                var res = await DeleteMessageAsync(item.KMessageId);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+            }
+            foreach (var item in neForDelete.Resources)
+            {
+                var res = await DeleteResourceAsync(item.ResourceId);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+            }
+            foreach (var item in neForDelete.Tasks)
+            {
+                var res = await DeleteNoteTaskAsync(item.NoteTaskId);
+                if (!res.IsValid)
+                    CopyErrorList(res.ErrorList, result.ErrorList);
+            }
+
             var resNote = await DeleteAsync(id);
+            if (!resNote.IsValid)
+                CopyErrorList(resNote.ErrorList, result.ErrorList);
 
-            // TODO: !!! pendiente de borrar las propiedades adicionales de NoteExtendedDto
-            // ... 
-
-            result.Entity.Note = resNote.Entity;
+            result.Entity = neForDelete;
 
             return result;
         }

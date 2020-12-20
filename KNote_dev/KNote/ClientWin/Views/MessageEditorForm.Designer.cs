@@ -30,6 +30,7 @@ namespace KNote.ClientWin.Views
         private void InitializeComponent()
         {
             this.panelForm = new System.Windows.Forms.Panel();
+            this.checkAlarmActivated = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
             this.comboNotificationType = new System.Windows.Forms.ComboBox();
             this.buttonSelectDate = new System.Windows.Forms.Button();
@@ -43,7 +44,6 @@ namespace KNote.ClientWin.Views
             this.textUserFullName = new System.Windows.Forms.TextBox();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
-            this.checkAlarmActivated = new System.Windows.Forms.CheckBox();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -68,6 +68,16 @@ namespace KNote.ClientWin.Views
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(407, 325);
             this.panelForm.TabIndex = 0;
+            // 
+            // checkAlarmActivated
+            // 
+            this.checkAlarmActivated.AutoSize = true;
+            this.checkAlarmActivated.Location = new System.Drawing.Point(9, 9);
+            this.checkAlarmActivated.Name = "checkAlarmActivated";
+            this.checkAlarmActivated.Size = new System.Drawing.Size(109, 19);
+            this.checkAlarmActivated.TabIndex = 0;
+            this.checkAlarmActivated.Text = "Alarm activated";
+            this.checkAlarmActivated.UseVisualStyleBackColor = true;
             // 
             // label5
             // 
@@ -95,6 +105,7 @@ namespace KNote.ClientWin.Views
             this.buttonSelectDate.TabIndex = 2;
             this.buttonSelectDate.Text = "...";
             this.buttonSelectDate.UseVisualStyleBackColor = true;
+            this.buttonSelectDate.Click += new System.EventHandler(this.buttonSelectDate_Click);
             // 
             // label4
             // 
@@ -186,16 +197,6 @@ namespace KNote.ClientWin.Views
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
             // 
-            // checkAlarmActivated
-            // 
-            this.checkAlarmActivated.AutoSize = true;
-            this.checkAlarmActivated.Location = new System.Drawing.Point(9, 9);
-            this.checkAlarmActivated.Name = "checkAlarmActivated";
-            this.checkAlarmActivated.Size = new System.Drawing.Size(109, 19);
-            this.checkAlarmActivated.TabIndex = 0;
-            this.checkAlarmActivated.Text = "Alarm activated";
-            this.checkAlarmActivated.UseVisualStyleBackColor = true;
-            // 
             // MessageEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -209,7 +210,7 @@ namespace KNote.ClientWin.Views
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MessageEditorForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Message editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MessageEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.MessageEditorForm_Load);
