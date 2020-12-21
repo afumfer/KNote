@@ -176,7 +176,7 @@ namespace KNote.ClientWin.Views
             string result = converter.Convert(html);
 
             textDescription.Text = result;
-            _com.Model.Note.ContentType = "markdown";
+            _com.Model.ContentType = "markdown";
 
             EnableMarkdownView();
         }
@@ -188,7 +188,7 @@ namespace KNote.ClientWin.Views
             var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
 
             htmlDescription.BodyHtml = HtmlContent;
-            _com.Model.Note.ContentType = "html";
+            _com.Model.ContentType = "html";
 
             EnableHtmlView();
         }
@@ -342,7 +342,7 @@ namespace KNote.ClientWin.Views
             this.textDescription.Dock = DockStyle.Fill;
             this.htmlDescription.Dock = DockStyle.Fill;
 
-            if (_com.Model?.Note?.ContentType == "html")
+            if (_com.Model?.ContentType == "html")
                 EnableHtmlView();
             else
                 EnableMarkdownView();
@@ -375,22 +375,22 @@ namespace KNote.ClientWin.Views
             this.Cursor = Cursors.WaitCursor;
 
             // Basic data
-            textTopic.Text = _com.Model.Note.Topic;                
-            textNoteNumber.Text = "#" + _com.Model.Note.NoteNumber.ToString();
-            textFolder.Text = _com.Model.Note.FolderDto?.Name;
-            textFolderNumber.Text = "#" + _com.Model.Note.FolderDto.FolderNumber.ToString();
-            _selectedFolderId = _com.Model.Note.FolderId;
-            textTags.Text = _com.Model.Note.Tags;            
-            textPriority.Text = _com.Model.Note.Priority.ToString();
+            textTopic.Text = _com.Model.Topic;                
+            textNoteNumber.Text = "#" + _com.Model.NoteNumber.ToString();
+            textFolder.Text = _com.Model.FolderDto?.Name;
+            textFolderNumber.Text = "#" + _com.Model.FolderDto.FolderNumber.ToString();
+            _selectedFolderId = _com.Model.FolderId;
+            textTags.Text = _com.Model.Tags;            
+            textPriority.Text = _com.Model.Priority.ToString();
 
-            if (_com.Model.Note.HtmlFormat)
+            if (_com.Model.HtmlFormat)
             {
                 labelLoadingHtml.Visible = true;
                 labelLoadingHtml.Refresh();
                 textDescription.Visible = false;
                 htmlDescription.Visible = true;
                 htmlDescription.BodyHtml = "";                
-                htmlDescription.BodyHtml = _com.Model.Note.Description;               
+                htmlDescription.BodyHtml = _com.Model.Description;               
                 //                
                 htmlDescription.Refresh();
                 labelLoadingHtml.Visible = false;
@@ -398,12 +398,12 @@ namespace KNote.ClientWin.Views
             else
             {
                 htmlDescription.Visible = false;
-                textDescription.Text = _com.Model.Note.Description;
+                textDescription.Text = _com.Model.Description;
                 textDescription.Visible = true;                
             }
 
             // KAttributes           
-            textNoteType.Text = _com.Model.Note.NoteTypeDto.Name;            
+            textNoteType.Text = _com.Model.NoteTypeDto.Name;            
             ModelToControlsAttributes();
 
             // Resources 
@@ -420,7 +420,7 @@ namespace KNote.ClientWin.Views
             ModelToControlsAlarms();
 
             // Script             
-            textScriptCode.Text = _com.Model.Note.Script;
+            textScriptCode.Text = _com.Model.Script;
 
             // ........
 
@@ -435,7 +435,7 @@ namespace KNote.ClientWin.Views
         {
             listViewAttributes.Clear();
 
-            foreach(var atr in _com.Model.Note.KAttributesDto)
+            foreach(var atr in _com.Model.KAttributesDto)
             {
                 var itemList = new ListViewItem(atr.Name);
                 itemList.Name = atr.NoteKAttributeId.ToString();
@@ -546,21 +546,21 @@ namespace KNote.ClientWin.Views
             // TODO: !!! ojo ... completar implementación 
 
             // Basic data
-            _com.Model.Note.Topic = textTopic.Text;
-            _com.Model.Note.FolderId = _selectedFolderId;
-            _com.Model.Note.FolderDto.FolderId = _selectedFolderId;
-            _com.Model.Note.FolderDto.Name = textFolder.Text;
-            _com.Model.Note.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
-            _com.Model.Note.Tags = textTags.Text;
+            _com.Model.Topic = textTopic.Text;
+            _com.Model.FolderId = _selectedFolderId;
+            _com.Model.FolderDto.FolderId = _selectedFolderId;
+            _com.Model.FolderDto.Name = textFolder.Text;
+            _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
+            _com.Model.Tags = textTags.Text;
 
-            if (_com.Model.Note.ContentType == "html")
-                _com.Model.Note.Description = htmlDescription.BodyHtml;
+            if (_com.Model.ContentType == "html")
+                _com.Model.Description = htmlDescription.BodyHtml;
             else
-                _com.Model.Note.Description = textDescription.Text;
+                _com.Model.Description = textDescription.Text;
 
             int p;
             if (int.TryParse(textPriority.Text, out p))
-                _com.Model.Note.Priority = p;
+                _com.Model.Priority = p;
         }
 
         private async Task<bool> SaveModel()

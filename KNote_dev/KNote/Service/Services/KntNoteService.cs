@@ -47,10 +47,9 @@ namespace KNote.Service.Services
 
         public async Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId)
         {
-            var result = new Result<NoteExtendedDto>();
-            var entity = new NoteExtendedDto();
+            var result = new Result<NoteExtendedDto>();            
 
-            entity.Note = (await _repository.Notes.GetAsync(noteId)).Entity;
+            var entity = (await _repository.Notes.GetAsync(noteId)).Entity.GetSimpleDto<NoteExtendedDto>();
             entity.Resources = (await _repository.Notes.GetResourcesAsync(noteId)).Entity;
             entity.Tasks = (await _repository.Notes.GetNoteTasksAsync(noteId)).Entity;
             entity.Messages = (await _repository.Notes.GetMessagesAsync(noteId)).Entity;
@@ -83,10 +82,9 @@ namespace KNote.Service.Services
         public async Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entityInfo = null)
         {
             var result = new Result<NoteExtendedDto>();
-            var entity = new NoteExtendedDto();
-
-            entity.Note = (await _repository.Notes.NewAsync(entityInfo)).Entity;
-
+            
+            var entity = (await _repository.Notes.NewAsync(entityInfo)).Entity.GetSimpleDto<NoteExtendedDto>();
+            
             result.Entity = entity;
             return result;
         }
@@ -109,17 +107,16 @@ namespace KNote.Service.Services
         public async Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity)
         {            
             var result = new Result<NoteExtendedDto>();
-            result.Entity = new NoteExtendedDto();
-
-            if (entity.Note.IsDirty())
+            
+            if (entity.IsDirty())
             {
-                var resNote = await SaveAsync(entity.Note);
-                result.Entity.Note = resNote.Entity;
+                var resNote = await SaveAsync(entity.GetSimpleDto<NoteDto>());
+                result.Entity = resNote.Entity.GetSimpleDto<NoteExtendedDto>();
             }
             else
-                result.Entity.Note = entity.Note;
+                result.Entity = entity;
 
-            var noteEdited = result.Entity.Note;
+            var noteEdited = result.Entity;
 
             foreach (var item in entity.Messages)
             {
@@ -220,8 +217,7 @@ namespace KNote.Service.Services
         public async Task<Result<NoteExtendedDto>> DeleteExtendedAsync(Guid id)
         {            
             var result = new Result<NoteExtendedDto>();
-            result.Entity = new NoteExtendedDto();
-
+            
             var neForDelete = (await GetExtendedAsync(id)).Entity;
 
             foreach (var item in neForDelete.Messages)

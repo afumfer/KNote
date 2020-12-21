@@ -7,24 +7,8 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class NoteExtendedDto : DtoModelBase
+    public class NoteExtendedDto : NoteDto
     {
-        private NoteDto _note;
-        public NoteDto Note
-        {
-            get
-            {
-                if (_note == null)
-                    _note = new NoteDto();
-                return _note;
-            }
-            set
-            {
-                _note = value;
-            } 
-        }
-
-
         private List<ResourceDto> _resources;
         public List<ResourceDto> Resources
         {
@@ -117,7 +101,7 @@ namespace KNote.Model.Dto
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            var validationsResult = Note.Validate(null);
+            var validationsResult = base.Validate(null);
             
             foreach (var r in Resources)
                 validationsResult.Concat(r.Validate(null));
@@ -133,7 +117,7 @@ namespace KNote.Model.Dto
 
         public override void SetIsDirty(bool isDirty)
         {
-            Note.SetIsDirty(isDirty);
+            _isDirty = isDirty;
 
             foreach (var r in Resources)
                 r.SetIsDirty(isDirty);
@@ -147,7 +131,7 @@ namespace KNote.Model.Dto
 
         public override bool IsDirty()
         {
-            if (Note.IsDirty())
+            if (_isDirty)
                 return true;
 
             foreach (var r in Resources)

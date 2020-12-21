@@ -74,13 +74,13 @@ namespace KNote.ClientWin.Components
                 // Evaluate whether to put the following default values in the service layer 
                 // (null values are by default, we need empty strings so that the IsDirty is 
                 //  not altered after leaving the view when there are no modifications).
-                Model.Note.Topic = "";
-                Model.Note.Tags = "";
-                Model.Note.Description = "";
+                Model.Topic = "";
+                Model.Tags = "";
+                Model.Description = "";
 
                 // Context default values
-                Model.Note.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
-                Model.Note.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+                Model.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
+                Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
 
                 Model.SetIsDirty(false);
 
@@ -97,7 +97,7 @@ namespace KNote.ClientWin.Components
             if (!Model.IsDirty())
                 return true;
 
-            var isNew = (Model.Note.NoteId == Guid.Empty);
+            var isNew = (Model.NoteId == Guid.Empty);
                         
             var msgVal = Model.GetErrorMessage();
             if (!string.IsNullOrEmpty(msgVal))
@@ -137,7 +137,7 @@ namespace KNote.ClientWin.Components
 
         public override async Task<bool> DeleteModel()
         {
-            return await DeleteModel(Service, Model.Note.NoteId);
+            return await DeleteModel(Service, Model.NoteId);
         }
 
         public override async Task<bool> DeleteModel(IKntService service, Guid noteId) 
@@ -188,7 +188,7 @@ namespace KNote.ClientWin.Components
             messageEditor.AutoDBSave = false;  // don't save automatically
             
             messageEditor.NewModel(Service);            
-            messageEditor.Model.NoteId = Model.Note.NoteId;
+            messageEditor.Model.NoteId = Model.NoteId;
             messageEditor.Model.Content = "(Aditional text for message)";
             var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
             messageEditor.Model.UserId = userDto.UserId;

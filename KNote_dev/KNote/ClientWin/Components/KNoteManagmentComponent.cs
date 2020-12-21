@@ -339,31 +339,31 @@ namespace KNote.ClientWin.Components
             // TODO: !!! coger aquí la entidad que viene en el parámetro en lugar de acudir de nuevo a la BD ??        
             if(NotesSelectorComponent.ListEntities.Count == 0)
             {
-                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
-                _selectedNoteInfo = e.Entity.Note.GetSimpleDto<NoteInfoDto>();
+                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.NoteId);
+                _selectedNoteInfo = e.Entity.GetSimpleDto<NoteInfoDto>();
             }
 
-            NotesSelectorComponent.AddItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
+            NotesSelectorComponent.AddItem(e.Entity.GetSimpleDto<NoteInfoDto>());
         }
 
         private async void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
         {
-            if(NoteEditorComponent.Model.Note.NoteId == e.Entity.Note.NoteId)
+            if(NoteEditorComponent.Model.NoteId == e.Entity.NoteId)
             {
                 // TODO: !!! coger el modelo que está en memoria en lugar de volver a cargar desde la BD ??
                 // NoteEditorComponent.RefreshNote(e.Entity);
                 // or ...
-                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.Note.NoteId);
+                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.NoteId);
             }
             else
                 NoteEditorComponent.View.CleanView();
 
-            NotesSelectorComponent.RefreshItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
+            NotesSelectorComponent.RefreshItem(e.Entity.GetSimpleDto<NoteInfoDto>());
         }
 
         private void NoteEditorComponent_DeletedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
         {
-            NotesSelectorComponent.DeleteItem(e.Entity.Note.GetSimpleDto<NoteInfoDto>());
+            NotesSelectorComponent.DeleteItem(e.Entity.GetSimpleDto<NoteInfoDto>());
 
             if (NotesSelectorComponent.ListEntities.Count == 0)
             {
