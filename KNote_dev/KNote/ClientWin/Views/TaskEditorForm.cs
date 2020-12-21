@@ -16,15 +16,25 @@ namespace KNote.ClientWin.Views
 {
     public partial class TaskEditorForm : Form, IEditorView<NoteTaskDto>
     {
+        #region Private fields
+
         private readonly TaskEditorComponent _com;
         private bool _viewFinalized = false;
         private bool _formIsDisty = false;
+
+        #endregion
+
+        #region Constructor
 
         public TaskEditorForm(TaskEditorComponent com)
         {
             InitializeComponent();
             _com = com;
         }
+
+        #endregion
+
+        #region IEditorView implementation 
 
         public Control PanelView()
         {
@@ -47,14 +57,31 @@ namespace KNote.ClientWin.Views
             return MessageBox.Show(info, caption, buttons);
         }
 
+        public void OnClosingView()
+        {
+            _viewFinalized = true;
+            this.Close();
+        }
+       
         public void RefreshView()
         {
-            //ModelToControls();
+            ModelToControls();
         }
 
         public void CleanView()
         {
-            //textXxxxx.Text = "";
+            textUser.Text = "";
+            textTags.Text = "";
+            textPriority.Text = "";
+            textEstimatedTime.Text = "";
+            textSpendTime.Text = "";
+            textExStartDate.Text = "";
+            textExEndDate.Text = "";
+            textDificultyLevel.Text = "";
+            textStartDate.Text = "";
+            textEndDate.Text = "";
+            checkResolved.Checked = false;
+            textDescription.Text = "";
         }
 
         public void ConfigureEmbededMode()
@@ -67,11 +94,9 @@ namespace KNote.ClientWin.Views
             
         }
 
-        public void OnClosingView()
-        {
-            _viewFinalized = true;
-            this.Close();
-        }
+        #endregion
+
+        #region Form event handelrs
 
         private void TaskEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -82,6 +107,43 @@ namespace KNote.ClientWin.Views
                     e.Cancel = true;
             }
         }
+
+        private void TaskEditorForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void buttonAccept_Click(object sender, EventArgs e)
+        {
+            ControlsToModel();
+            var res = await _com.SaveModel();
+            if (res)
+            {
+                _formIsDisty = false;
+                this.DialogResult = DialogResult.OK;
+            }
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            OnCandelEdition();
+        }
+
+        private void TaskEditorForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            _formIsDisty = true;
+        }
+
+        private void TaskEditorForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+                _formIsDisty = true;
+        }
+
+
+        #endregion
+
+        #region Private methods
 
         private bool OnCandelEdition()
         {
@@ -95,5 +157,42 @@ namespace KNote.ClientWin.Views
             _com.CancelEdition();
             return true;
         }
+
+        private void ModelToControls()
+        {
+            textUser.Text = _com.Model.UserFullName;
+            textTags.Text = _com.Model.Tags;
+            textPriority.Text = _com.Model.Priority.ToString();
+            textEstimatedTime.Text = _com.Model.EstimatedTime?.ToString();
+            textSpendTime.Text = _com.Model.SpentTime?.ToString();
+            textExStartDate.Text = _com.Model.ExpectedStartDate?.ToString();
+            textExEndDate.Text = _com.Model.ExpectedEndDate?.ToString();
+            textDificultyLevel.Text = _com.Model.DifficultyLevel?.ToString();
+            textStartDate.Text = _com.Model.StartDate?.ToString();
+            textEndDate.Text = _com.Model.EndDate?.ToString();
+            checkResolved.Checked = _com.Model.Resolved;
+            textDescription.Text = _com.Model.Description;
+        }
+
+        private void ControlsToModel()
+        {
+            _com.Model.UserFullName = textUser.Text;
+            _com.Model.Tags = textTags.Text;
+            _com.Model.Priority = _com.TextToInt(textPriority.Text);
+
+            _com.Model.EstimatedTime = _com.TextToDouble(textEstimatedTime.Text);
+            _com.Model.SpentTime = _com.TextToDouble(textSpendTime.Text);
+            _com.Model.DifficultyLevel = _com.TextToDouble(textDificultyLevel.Text);
+
+            _com.Model.ExpectedStartDate = _com.TextToDateTime(textExStartDate.Text);
+            _com.Model.ExpectedEndDate = _com.TextToDateTime(textExEndDate.Text);
+            _com.Model.StartDate = _com.TextToDateTime(textStartDate.Text);
+            _com.Model.EndDate = _com.TextToDateTime(textEndDate.Text);
+
+            _com.Model.Resolved = checkResolved.Checked;
+            _com.Model.Description = textDescription.Text;
+        }
+
+        #endregion 
     }
 }

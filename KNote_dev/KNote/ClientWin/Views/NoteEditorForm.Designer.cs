@@ -1090,6 +1090,7 @@
             this.buttonTaskEdit.TabIndex = 12;
             this.buttonTaskEdit.Text = "...";
             this.buttonTaskEdit.UseVisualStyleBackColor = true;
+            this.buttonTaskEdit.Click += new System.EventHandler(this.buttonTaskEdit_Click);
             // 
             // buttonTaskDelete
             // 
@@ -1101,6 +1102,7 @@
             this.buttonTaskDelete.TabIndex = 11;
             this.buttonTaskDelete.Text = "-";
             this.buttonTaskDelete.UseVisualStyleBackColor = true;
+            this.buttonTaskDelete.Click += new System.EventHandler(this.buttonTaskDelete_Click);
             // 
             // buttonTaskAdd
             // 
@@ -1112,6 +1114,7 @@
             this.buttonTaskAdd.TabIndex = 10;
             this.buttonTaskAdd.Text = "+";
             this.buttonTaskAdd.UseVisualStyleBackColor = true;
+            this.buttonTaskAdd.Click += new System.EventHandler(this.buttonTaskAdd_Click);
             // 
             // label11
             // 

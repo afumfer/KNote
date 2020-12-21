@@ -15,9 +15,7 @@ using System.ComponentModel.DataAnnotations;
 namespace KNote.ClientWin.Components
 {
     public class MessageEditorComponent : ComponentEditorBase<IEditorView<KMessageDto>, KMessageDto>
-    {
-
-        public bool AutoDBSave { get; set; } = true;
+    {       
 
         public MessageEditorComponent(Store store): base(store)
         {
@@ -37,7 +35,11 @@ namespace KNote.ClientWin.Components
             {
                 Service = service;
 
-                Model = (await Service.Notes.GetMessageAsync(id)).Entity;
+                var res = await Service.Notes.GetMessageAsync(id);
+                if (!res.IsValid)
+                    return false;
+
+                Model = res.Entity;
                 Model.SetIsDirty(false);
                 if (refreshView)
                     View.RefreshView();
@@ -55,15 +57,14 @@ namespace KNote.ClientWin.Components
             try
             {
                 Model = entity;
-                Model.SetIsDirty(false);                
-                View.RefreshView();                
+                Model.SetIsDirty(false);
+                View.RefreshView();
             }
             catch (Exception ex)
             {
-                View.ShowInfo(ex.Message);                
+                View.ShowInfo(ex.Message);
             }
         }
-
 
         public override void NewModel(IKntService service)
         {
@@ -71,6 +72,7 @@ namespace KNote.ClientWin.Components
 
             // TODO: call service for new model
             Model = new KMessageDto();
+            Model.KMessageId = Guid.NewGuid();
         }
 
         public override async Task<bool> SaveModel()
@@ -131,7 +133,7 @@ namespace KNote.ClientWin.Components
 
         public async override Task<bool> DeleteModel(IKntService service, Guid id)
         {
-            var result = View.ShowInfo("Are you sure you want to delete this folder?", "Delete note", MessageBoxButtons.YesNo);
+            var result = View.ShowInfo("Are you sure you want to delete this alert/message?", "Delete message", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes || result == DialogResult.Yes)
             {
                 try

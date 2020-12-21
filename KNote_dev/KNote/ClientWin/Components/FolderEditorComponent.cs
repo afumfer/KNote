@@ -15,22 +15,8 @@ using System.ComponentModel.DataAnnotations;
 namespace KNote.ClientWin.Components
 {
     public class FolderEditorComponent : ComponentEditorBase<IEditorView<FolderDto>, FolderDto>
-    {
-        private FolderDto _folderEdit;
-        public FolderDto FolderDto
-        {
-            set
-            {
-                _folderEdit = value;
-            }
-            get
-            {
-                if (_folderEdit == null)
-                    _folderEdit = new FolderDto();
-                return _folderEdit;
-            }
-        }
 
+    {
         public FolderEditorComponent(Store store): base(store)
         {
             ComponentName = "Folder editor";
@@ -83,14 +69,23 @@ namespace KNote.ClientWin.Components
             }
 
             try
-            {
-                var response = await Service.Folders.SaveAsync(Model);
+            {                
+                Result<FolderDto> response;
+                if (AutoDBSave)
+                {
+                    response = await Service.Folders.SaveAsync(Model);
+                    Model = response.Entity;
+                    Model.SetIsDirty(false);
+                }
+                else
+                {
+                    response = new Result<FolderDto>();
+                    Model.SetIsDirty(true);
+                    response.Entity = Model;
+                }
 
                 if (response.IsValid)
                 {
-                    Model = response.Entity;
-                    Model.SetIsDirty(false);
-
                     if (!isNew)
                         OnSavedEntity(response.Entity);
                     else

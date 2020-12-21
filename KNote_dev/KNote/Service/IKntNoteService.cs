@@ -21,14 +21,16 @@ namespace KNote.Service
         Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity);
         Task<Result<NoteDto>> DeleteAsync(Guid noteId);
         Task<Result<NoteExtendedDto>> DeleteExtendedAsync(Guid noteId);
+        Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);
+        Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId); 
         Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity);
         Task<Result<ResourceDto>> DeleteResourceAsync(Guid noteId);
-        Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);        
-        Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo);
         Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
+        Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId);
+        Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo);       
         Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteId);
         Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId);
-        Task<Result<KMessageDto>> GetMessageAsync(Guid messageId);        
+        Task<Result<KMessageDto>> GetMessageAsync(Guid messageId);
         Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity);        
         Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId);
 

@@ -16,9 +16,15 @@ namespace KNote.ClientWin.Views
 {
     public partial class MessageEditorForm : Form, IEditorView<KMessageDto>
     {
+        #region Private fields
+
         private readonly MessageEditorComponent _com;
         private bool _viewFinalized = false;
         private bool _formIsDisty = false;
+
+        #endregion
+
+        #region Constructor 
 
         public MessageEditorForm(MessageEditorComponent com)
         {
@@ -26,6 +32,10 @@ namespace KNote.ClientWin.Views
             PersonalizeControls();
             _com = com;
         }
+
+        #endregion
+
+        #region IEditorView implementation 
 
         public Control PanelView()
         {
@@ -51,30 +61,6 @@ namespace KNote.ClientWin.Views
         public void RefreshView()
         {
             ModelToControls();
-        }
-
-        private void ModelToControls()
-        {
-            textUserFullName.Text = _com.Model.UserFullName?.ToString();
-            textAlarmDateTime.Text = _com.Model.AlarmDateTime.ToString();
-            comboAlarmPeriodicity.SelectedIndex = (int)_com.Model.AlarmType;
-            comboNotificationType.SelectedIndex = (int)_com.Model.NotificationType;
-            textContent.Text = _com.Model.Content.ToString();
-            checkAlarmActivated.Checked = _com.Model.AlarmActivated ?? false;            
-        }
-
-        private void ControlsToModel()
-        {
-            //  _com.Model.UserFullName = .... ;
-            DateTime alarm;
-            if (DateTime.TryParse(textAlarmDateTime.Text, out alarm))
-                _com.Model.AlarmDateTime = alarm;
-            else
-                _com.Model.AlarmDateTime = null;
-            _com.Model.AlarmType = (EnumAlarmType)comboAlarmPeriodicity.SelectedIndex;
-            _com.Model.NotificationType = (EnumNotificationType)comboNotificationType.SelectedIndex;
-            _com.Model.Content = textContent.Text;
-            _com.Model.AlarmActivated = checkAlarmActivated.Checked;
         }
 
         public void CleanView()
@@ -103,6 +89,10 @@ namespace KNote.ClientWin.Views
             this.Close();
         }
 
+        #endregion
+
+        #region Form event handlers
+
         private void MessageEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
@@ -111,19 +101,6 @@ namespace KNote.ClientWin.Views
                 if (!confirmExit)
                     e.Cancel = true;
             }
-        }
-
-        private bool OnCandelEdition()
-        {
-            if (_formIsDisty)
-            {
-                if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KeyNote", MessageBoxButtons.YesNo) == DialogResult.No)
-                    return false;
-            }
-
-            this.DialogResult = DialogResult.Cancel;
-            _com.CancelEdition();
-            return true;
         }
 
         private async void buttonAccept_Click(object sender, EventArgs e)
@@ -155,7 +132,37 @@ namespace KNote.ClientWin.Views
 
         private void MessageEditorForm_Load(object sender, EventArgs e)
         {
-            
+
+        }
+
+        private void buttonSelectDate_Click(object sender, EventArgs e)
+        {
+            DateTime selDate;
+            if (!DateTime.TryParse(textAlarmDateTime.Text, out selDate))
+                selDate = DateTime.Now;
+
+            DateSelectorForm dateSelector = new DateSelectorForm();
+            dateSelector.Date = selDate;
+
+            if (dateSelector.ShowDialog() == DialogResult.OK)
+                textAlarmDateTime.Text = dateSelector.Date.ToString("dd/MM/yyyy HH:mm");
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private bool OnCandelEdition()
+        {
+            if (_formIsDisty)
+            {
+                if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KeyNote", MessageBoxButtons.YesNo) == DialogResult.No)
+                    return false;
+            }
+
+            this.DialogResult = DialogResult.Cancel;
+            _com.CancelEdition();
+            return true;
         }
 
         private void PersonalizeControls()
@@ -173,17 +180,25 @@ namespace KNote.ClientWin.Views
             comboNotificationType.SelectedIndex = 0;
         }
 
-        private void buttonSelectDate_Click(object sender, EventArgs e)
+        private void ModelToControls()
         {
-            DateTime selDate;
-            if (!DateTime.TryParse(textAlarmDateTime.Text, out selDate))
-                selDate = DateTime.Now;
-
-            DateSelectorForm dateSelector = new DateSelectorForm();
-            dateSelector.Date = selDate;
-
-            if (dateSelector.ShowDialog() == DialogResult.OK)
-                textAlarmDateTime.Text = dateSelector.Date.ToString("dd/MM/yyyy HH:mm");
+            textUserFullName.Text = _com.Model.UserFullName?.ToString();
+            textAlarmDateTime.Text = _com.Model.AlarmDateTime.ToString();
+            comboAlarmPeriodicity.SelectedIndex = (int)_com.Model.AlarmType;
+            comboNotificationType.SelectedIndex = (int)_com.Model.NotificationType;
+            textContent.Text = _com.Model.Content.ToString();
+            checkAlarmActivated.Checked = _com.Model.AlarmActivated ?? false;
         }
+
+        private void ControlsToModel()
+        {
+            _com.Model.AlarmDateTime = _com.TextToDateTime(textAlarmDateTime.Text);
+            _com.Model.AlarmType = (EnumAlarmType)comboAlarmPeriodicity.SelectedIndex;
+            _com.Model.NotificationType = (EnumNotificationType)comboNotificationType.SelectedIndex;
+            _com.Model.Content = textContent.Text;
+            _com.Model.AlarmActivated = checkAlarmActivated.Checked;
+        }
+
+        #endregion 
     }
 }

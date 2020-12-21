@@ -115,6 +115,7 @@ namespace KNote.ClientWin.Components
                     Model = response.Entity;
                     
                     Model.SetIsDirty(false);
+                    Model.SetIsNew(false);
 
                     if (!isNew)
                         OnSavedEntity(response.Entity);
@@ -195,6 +196,7 @@ namespace KNote.ClientWin.Components
             messageEditor.Model.UserFullName = userDto.FullName;
             messageEditor.Model.AlarmActivated = true;
             messageEditor.Model.AlarmDateTime = DateTime.Now;
+            messageEditor.Model.SetIsNew(true);
 
             var res = messageEditor.RunModal();
 
@@ -210,50 +212,96 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public async Task<KMessageDto> EditMessage(KMessageDto message)
+        public KMessageDto EditMessage(Guid messageId)
         {
             var messageEditor = new MessageEditorComponent(Store);
             messageEditor.AutoDBSave = false;  // don't save automatically
 
-            var entityFound = await messageEditor.LoadModelById(Service, message.KMessageId, false);
-            if (!entityFound)
-            {
-                View.ShowInfo("Message/alarm not fount.");
-                return null;
-            }
-
-            messageEditor.Model.AlarmDateTime = message.AlarmDateTime;
-            messageEditor.Model.AlarmType = message.AlarmType;
-            messageEditor.Model.NotificationType = message.NotificationType;
-            messageEditor.Model.Content = message.Content;
-            messageEditor.Model.AlarmActivated = message.AlarmActivated;
+            var message = Model.Messages.Where(_ => _.KMessageId == messageId).SingleOrDefault();
+            messageEditor.Model = message;
 
             var res = messageEditor.RunModal();
             if (res.Entity == EComponentResult.Executed)
             {                
-                var itemToRemove = Model.Messages.Single(m => m.KMessageId == message.KMessageId);
-                Model.Messages.Remove(itemToRemove);                
-                Model.Messages.Add(messageEditor.Model);
                 return messageEditor.Model;
             }
             else
                 return null;
         }
 
-        public async Task<bool> DeleteMessage(KMessageDto message)
+        public async Task<bool> DeleteMessage(Guid messageId)
         {
             var messageEditor = new MessageEditorComponent(Store);
             messageEditor.AutoDBSave = false;  // don't save automatically
 
-            var res = await messageEditor.DeleteModel(Service, message.KMessageId);
+            var res = await messageEditor.DeleteModel(Service, messageId);
             if (res)
             {
-                var msgDel = Model.Messages.SingleOrDefault(m => m.KMessageId == message.KMessageId 
-                    && m.AlarmDateTime == message.AlarmDateTime && m.Content == message.Content && m.AlarmActivated == message.AlarmActivated
-                    && m.AlarmType == message.AlarmType && m.NotificationType == message.NotificationType);
+                var msgDel = Model.Messages.SingleOrDefault(t => t.KMessageId == messageId);
+                if (!msgDel.IsNew())
+                    Model.MessagesDeleted.Add(messageId);
                 Model.Messages.Remove(msgDel);
-                if (message.KMessageId != Guid.Empty)
-                    Model.MessagesDeleted.Add(message.KMessageId);
+            }
+
+            return res;
+        }
+
+        public async Task<NoteTaskDto> NewTask()
+        {
+            var taskEditor = new TaskEditorComponent(Store);
+            taskEditor.AutoDBSave = false;  // don't save automatically
+
+            taskEditor.NewModel(Service);
+            taskEditor.Model.NoteId = Model.NoteId;            
+            var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
+            taskEditor.Model.UserId = userDto.UserId;
+            taskEditor.Model.UserFullName = userDto.FullName;
+            taskEditor.Model.ExpectedStartDate = DateTime.Now;
+            taskEditor.Model.SetIsNew(true);
+
+            var res = taskEditor.RunModal();
+
+            if (res.Entity == EComponentResult.Executed)
+            {
+                Model.Tasks.Add(taskEditor.Model);
+                return taskEditor.Model;
+            }
+            else
+            {
+                View.ShowInfo(res.Message);
+                return null;
+            }
+        }
+
+        public NoteTaskDto EditTask(Guid taskId)
+        {
+            var taskEditor = new TaskEditorComponent(Store);
+            taskEditor.AutoDBSave = false;  // don't save automatically
+
+            var task = Model.Tasks.Where(_ => _.NoteTaskId == taskId).SingleOrDefault();
+            taskEditor.Model = task;
+
+            var res = taskEditor.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                return taskEditor.Model;
+            }
+            else
+                return null;
+        }
+
+        public async Task<bool> DeleteTask(Guid taskId)
+        {
+            var taskEditor = new TaskEditorComponent(Store);
+            taskEditor.AutoDBSave = false;  // don't save automatically
+
+            var res = await taskEditor.DeleteModel(Service, taskId);
+            if (res)
+            {
+                var tskDel = Model.Tasks.SingleOrDefault(t => t.NoteTaskId == taskId);
+                if (!tskDel.IsNew())
+                    Model.TasksDeleted.Add(taskId);
+                Model.Tasks.Remove(tskDel);
             }
 
             return res;

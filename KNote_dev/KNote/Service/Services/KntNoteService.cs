@@ -253,6 +253,11 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetResourcesAsync(idNote);
         }
 
+        public async Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId)
+        {
+            return await _repository.Notes.GetResourceAsync(resourceId);
+        }
+
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity)
         {            
             if (entity.ResourceId == Guid.Empty)
@@ -292,6 +297,11 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetNoteTasksAsync(idNote);
         }
 
+        public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId)
+        {            
+            return await _repository.Notes.GetNoteTaskAsync(noteTaskId);
+        }
+
         public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entity)
         {            
             if (entity.NoteTaskId == Guid.Empty)
@@ -301,7 +311,11 @@ namespace KNote.Service.Services
             }
             else
             {
-                return await _repository.Notes.UpdateNoteTaskAsync(entity);
+                var checkExist = await GetNoteTaskAsync(entity.NoteTaskId);
+                if(checkExist.IsValid)
+                    return await _repository.Notes.UpdateNoteTaskAsync(entity);
+                else                
+                    return await _repository.Notes.AddNoteTaskAsync(entity);                
             }
         }
 
@@ -345,7 +359,11 @@ namespace KNote.Service.Services
             }
             else
             {
-                return await _repository.Notes.UpdateMessageAsync(entity);
+                var checkExist = await GetMessageAsync(entity.KMessageId);
+                if (checkExist.IsValid)
+                    return await _repository.Notes.UpdateMessageAsync(entity);
+                else
+                    return await _repository.Notes.AddMessageAsync(entity);
             }
         }
 

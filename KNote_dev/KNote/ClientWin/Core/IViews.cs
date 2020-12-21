@@ -15,15 +15,15 @@ namespace KNote.ClientWin.Core
         Control PanelView();
         void ShowView();
         Result<EComponentResult> ShowModalView();
-        void OnClosingView();
-        void RefreshView();
+        void OnClosingView();        
         DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK);
     }
 
     public interface IViewConfigurable: IViewBase
     {
         void ConfigureEmbededMode();
-        void ConfigureWindowMode();
+        void ConfigureWindowMode();        
+        void RefreshView();
     }
 
     #endregion
@@ -31,8 +31,10 @@ namespace KNote.ClientWin.Core
     #region Generals views
 
     public interface IEditorView<T> : IViewConfigurable
-    {        
-        void CleanView();        
+    {
+        void CleanView();
+        
+        //...      
         //void RefreshBindingModel();        
     }
 

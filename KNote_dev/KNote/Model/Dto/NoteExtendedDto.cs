@@ -129,6 +129,20 @@ namespace KNote.Model.Dto
                 m.SetIsDirty(isDirty);
         }
 
+        public override void SetIsNew(bool isNew)
+        {
+            _isNew = isNew;
+
+            foreach (var r in Resources)
+                r.SetIsNew(isNew);
+
+            foreach (var t in Tasks)
+                t.SetIsNew(isNew);
+
+            foreach (var m in Messages)
+                m.SetIsNew(isNew);
+        }
+
         public override bool IsDirty()
         {
             if (_isDirty)

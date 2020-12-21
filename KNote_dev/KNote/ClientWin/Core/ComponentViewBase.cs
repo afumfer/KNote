@@ -219,6 +219,8 @@ namespace KNote.ClientWin.Core
 
         protected IKntService Service { get; set; }
 
+        public bool AutoDBSave { get; set; } = true;
+
         #endregion
 
         #region Constructor

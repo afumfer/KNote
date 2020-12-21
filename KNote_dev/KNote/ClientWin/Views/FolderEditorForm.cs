@@ -22,7 +22,9 @@ namespace KNote.ClientWin.Views
         private bool _viewFinalized = false;
         private bool _formIsDisty = false;
 
-        #endregion 
+        #endregion
+
+        #region Constructor 
 
         public FolderEditorForm(FolderEditorComponent com)
         {
@@ -30,8 +32,10 @@ namespace KNote.ClientWin.Views
             _com = com;
         }
 
-        #region IEditorView implementation 
+        #endregion
 
+        #region IEditorView implementation 
+        
         public Control PanelView()
         {
             return panelForm;
@@ -92,6 +96,7 @@ namespace KNote.ClientWin.Views
         {
 
         }
+
         private void FolderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
@@ -118,7 +123,20 @@ namespace KNote.ClientWin.Views
             OnCandelEdition();
         }
 
-        #endregion 
+        private void FolderEditorForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+                _formIsDisty = true;
+        }
+
+        private void FolderEditorForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            _formIsDisty = true;
+        }
+
+        #endregion
+
+        #region Private methods
 
         private bool OnCandelEdition()
         {
@@ -156,15 +174,6 @@ namespace KNote.ClientWin.Views
             // _com.Model.ParentFolder  // TODO ...
         }
 
-        private void FolderEditorForm_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-                _formIsDisty = true;
-        }
-
-        private void FolderEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            _formIsDisty = true;
-        }
+        #endregion 
     }
 }

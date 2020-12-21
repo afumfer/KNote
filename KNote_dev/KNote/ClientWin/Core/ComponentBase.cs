@@ -162,7 +162,7 @@ namespace KNote.ClientWin.Core
             Finalize();
         }
 
-        #region Utils methods
+        #region Utils protected methods
 
         protected void FinalizeViewsComponent()
         {            
@@ -268,6 +268,37 @@ namespace KNote.ClientWin.Core
         }
 
         #endregion
+
+        #region Utils public methods
+
+        public DateTime? TextToDateTime(string text)
+        {
+            DateTime output;
+            if (DateTime.TryParse(text, out output))
+                return output;
+            else
+                return null;
+        }
+
+        public int TextToInt(string text)
+        {
+            int output;
+            if (int.TryParse(text, out output))
+                return output;
+            else
+                return 0;
+        }
+
+        public double? TextToDouble(string text)
+        {
+            double output;
+            if (double.TryParse(text, out output))
+                return output;
+            else
+                return null;
+        }
+
+        #endregion 
     }
 
     #region  Controller typos 

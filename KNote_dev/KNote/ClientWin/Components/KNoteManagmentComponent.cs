@@ -249,7 +249,7 @@ namespace KNote.ClientWin.Components
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            await noteEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
+            await noteEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedNoteInfo.NoteId, false);            
             noteEditorComponent.Run();
         }
 

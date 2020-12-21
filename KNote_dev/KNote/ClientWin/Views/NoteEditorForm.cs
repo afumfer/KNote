@@ -292,6 +292,8 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        #region Messages managment
+
         private async void buttonAddAlarm_Click(object sender, EventArgs e)
         {
             var message = await _com.NewMessage();
@@ -312,12 +314,11 @@ namespace KNote.ClientWin.Views
                 MessageBox.Show("There is no selected alert.", "KeyNote");
                 return;
             }
-            //var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
-            var delMsg = GetMessageFromSelectedListView();
-            var res = await _com.DeleteMessage(delMsg);
+            var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);            
+            var res = await _com.DeleteMessage(messageId);
             if (res)
             {
-                listViewAlarms.Items[delMsg.KMessageId.ToString()].Remove();
+                listViewAlarms.Items[messageId.ToString()].Remove();
             }
         }
 
@@ -326,6 +327,41 @@ namespace KNote.ClientWin.Views
             if(_com.EditMode)
                 EditAlarm();
         }
+
+        #endregion
+
+        #region Tasks managment
+
+        private async void buttonTaskAdd_Click(object sender, EventArgs e)
+        {
+            var task = await _com.NewTask();
+            if (task != null)
+                listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
+        }
+
+        private void buttonTaskEdit_Click(object sender, EventArgs e)
+        {
+            EditTask();
+        }
+
+        private async void buttonTaskDelete_Click(object sender, EventArgs e)
+        {
+            if (listViewTasks.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("There is no task selected .", "KeyNote");
+                return;
+            }
+            //var delTsk = GetNoteTaskFromSelectedListView();
+            var delTsk = listViewTasks.SelectedItems[0].Name;
+            var res = await _com.DeleteTask(Guid.Parse(delTsk));
+            if (res)
+            {
+                listViewTasks.Items[delTsk].Remove();
+            }
+        }
+
+
+        #endregion 
 
         #endregion
 
@@ -476,21 +512,7 @@ namespace KNote.ClientWin.Views
 
             foreach (var task in _com.Model.Tasks)
             {
-                var itemList = new ListViewItem(task.UserFullName.ToString());
-                itemList.Name = task.NoteTaskId.ToString();
-                //itemList.BackColor = Color.LightGray;                
-                itemList.SubItems.Add(task.Tags?.ToString());
-                itemList.SubItems.Add(task.Priority.ToString());
-                itemList.SubItems.Add(task.Resolved.ToString());
-                itemList.SubItems.Add(task.EstimatedTime.ToString());
-                itemList.SubItems.Add(task.SpentTime.ToString());
-                itemList.SubItems.Add(task.DifficultyLevel.ToString());
-                itemList.SubItems.Add(task.ExpectedStartDate.ToString());
-                itemList.SubItems.Add(task.ExpectedEndDate.ToString());
-                itemList.SubItems.Add(task.StartDate.ToString());
-                itemList.SubItems.Add(task.EndDate.ToString());
-                itemList.SubItems.Add(task.Description.ToString());
-                listViewTasks.Items.Add(itemList);
+                listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
             }
 
             // Width of -2 indicates auto-size.
@@ -504,11 +526,11 @@ namespace KNote.ClientWin.Views
             listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
 
-            listViewTasks.Columns.Add("Ex start", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Ex end", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Ex start", 120, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Ex end", 120, HorizontalAlignment.Left);
 
-            listViewTasks.Columns.Add("Start", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("End", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("End", 120, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Description", -2, HorizontalAlignment.Left);
         }
 
@@ -674,19 +696,25 @@ namespace KNote.ClientWin.Views
             itemList.SubItems.Add(message.AlarmType.ToString());
             itemList.SubItems.Add(message.NotificationType.ToString());
             itemList.SubItems.Add(message.Content.ToString());
-
             return itemList;
         }
 
-        private void UpdateMessage(KMessageDto message)
+        private ListViewItem NoteTaskDtoToListViewItem(NoteTaskDto task)
         {
-            var item = listViewAlarms.Items[message.KMessageId.ToString()];
-            item.SubItems[1].Text = message.AlarmActivated.ToString();
-            item.SubItems[2].Text = message.AlarmDateTime.ToString();
-            item.SubItems[3].Text = message.AlarmType.ToString();
-            item.SubItems[4].Text = message.NotificationType.ToString();
-            item.SubItems[5].Text = message.Content.ToString();
-
+            var itemList = new ListViewItem(task.UserFullName);
+            itemList.Name = task.NoteTaskId.ToString();                        
+            itemList.SubItems.Add(task.Tags?.ToString());
+            itemList.SubItems.Add(task.Priority.ToString());
+            itemList.SubItems.Add(task.Resolved.ToString());
+            itemList.SubItems.Add(task.EstimatedTime.ToString());
+            itemList.SubItems.Add(task.SpentTime.ToString());
+            itemList.SubItems.Add(task.DifficultyLevel.ToString());
+            itemList.SubItems.Add(task.ExpectedStartDate.ToString());
+            itemList.SubItems.Add(task.ExpectedEndDate.ToString());
+            itemList.SubItems.Add(task.StartDate.ToString());
+            itemList.SubItems.Add(task.EndDate.ToString());
+            itemList.SubItems.Add(task.Description.ToString());
+            return itemList;
         }
 
         private void SizeLastColumn(ListView lv)
@@ -721,43 +749,57 @@ namespace KNote.ClientWin.Views
             toolDescriptionMarkdown.Visible = true;
         }
 
-        private async void EditAlarm()
+        private void EditAlarm()
         {
             if (listViewAlarms.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no selected alert.", "KeyNote");
+                MessageBox.Show("There is no alert selected.", "KeyNote");
                 return;
             }
-
-            //var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);            
-            //var message = await _com.EditMessageById(messageId);
-            
-            var message = await _com.EditMessage(GetMessageFromSelectedListView());
-
+            var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
+            var message = _com.EditMessage(messageId);
             if (message != null)
                 UpdateMessage(message);
+        }
+
+        private void UpdateMessage(KMessageDto message)
+        {
+            var item = listViewAlarms.Items[message.KMessageId.ToString()];
+            item.SubItems[1].Text = message.AlarmActivated.ToString();
+            item.SubItems[2].Text = message.AlarmDateTime.ToString();
+            item.SubItems[3].Text = message.AlarmType.ToString();
+            item.SubItems[4].Text = message.NotificationType.ToString();
+            item.SubItems[5].Text = message.Content.ToString();
 
         }
 
-        private KMessageDto GetMessageFromSelectedListView()
+        private void EditTask()
         {
-            KMessageDto message; // = new KMessageDto();
-            var item = listViewAlarms.SelectedItems[0];
-            if (item != null)
+            if (listViewTasks.SelectedItems.Count == 0)
             {
-                message = new KMessageDto();
-                message.KMessageId = Guid.Parse(item.Name);
-                message.UserFullName = item.Text;
-                message.AlarmActivated = bool.Parse(item.SubItems[1].Text);
-                message.AlarmDateTime = DateTime.Parse(item.SubItems[2].Text);                                
-                message.AlarmType = (EnumAlarmType)Enum.Parse(typeof(EnumAlarmType), item.SubItems[3].Text);                
-                message.NotificationType = (EnumNotificationType)Enum.Parse(typeof(EnumNotificationType), item.SubItems[4].Text);
-                message.Content = item.SubItems[5].Text;
+                MessageBox.Show("There is no task selected.", "KeyNote");
+                return;
             }
-            else
-                message = null;
+            var idTask = Guid.Parse(listViewTasks.SelectedItems[0].Name);
+            var task = _com.EditTask(idTask);
+            if (task != null)
+                UpdateTask(task);
+        }
 
-            return message;
+        private void UpdateTask(NoteTaskDto task)
+        {
+            var item = listViewTasks.Items[task.NoteTaskId.ToString()];
+            item.SubItems[1].Text = task.Tags;
+            item.SubItems[2].Text = task.Priority.ToString();
+            item.SubItems[3].Text = task.Resolved.ToString();
+            item.SubItems[4].Text = task.EstimatedTime.ToString();
+            item.SubItems[5].Text = task.SpentTime.ToString();
+            item.SubItems[6].Text = task.DifficultyLevel.ToString();
+            item.SubItems[7].Text = task.ExpectedStartDate.ToString();
+            item.SubItems[8].Text = task.ExpectedEndDate.ToString();
+            item.SubItems[9].Text = task.StartDate.ToString();
+            item.SubItems[10].Text = task.EndDate.ToString();
+            item.SubItems[11].Text = task.Description;            
         }
 
         #endregion

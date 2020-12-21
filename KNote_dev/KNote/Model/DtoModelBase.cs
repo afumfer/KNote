@@ -22,6 +22,19 @@ namespace KNote.Model
             _isDirty = isDirty;
         }
 
+        protected bool _isNew = false;
+
+        public virtual bool IsNew()
+        {
+            return _isNew;
+        }
+
+        public virtual void SetIsNew(bool isNew)
+        {
+            _isNew = isNew;
+        }
+
+
         #region INotifyPropertyChanged members
 
         public event PropertyChangedEventHandler PropertyChanged;
