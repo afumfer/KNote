@@ -123,7 +123,7 @@ namespace KNote.Service.Services
                 {
                     if (item.NoteId == Guid.Empty)
                         item.NoteId = noteEdited.NoteId;
-                    var res = await SaveMessageAsync(item);
+                    var res = await SaveMessageAsync(item, true);
                     if (!res.IsValid)
                         CopyErrorList(res.ErrorList, result.ErrorList);
                     else
@@ -146,7 +146,7 @@ namespace KNote.Service.Services
                 {
                     if (item.NoteId == Guid.Empty)
                         item.NoteId = noteEdited.NoteId;
-                    var res = await SaveResourceAsync(item);
+                    var res = await SaveResourceAsync(item, true);
                     if (!res.IsValid)
                         CopyErrorList(res.ErrorList, result.ErrorList);
                     else 
@@ -170,7 +170,7 @@ namespace KNote.Service.Services
                 {
                     if (item.NoteId == Guid.Empty)
                         item.NoteId = noteEdited.NoteId;
-                    var res = await SaveNoteTaskAsync(item);
+                    var res = await SaveNoteTaskAsync(item, true);
                     if (!res.IsValid)
                         CopyErrorList(res.ErrorList, result.ErrorList);
                     else 

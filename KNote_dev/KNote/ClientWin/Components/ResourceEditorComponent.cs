@@ -28,30 +28,124 @@ namespace KNote.ClientWin.Components
             return Store.FactoryViews.View(this);
         }
 
-        public override Task<bool> DeleteModel(IKntService service, Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<bool> DeleteModel()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void NewModel(IKntService service)
         {
-            throw new NotImplementedException();
+            Service = service;
+
+            // TODO: call service for new model
+            Model = new ResourceDto();
+            Model.ResourceId = Guid.NewGuid();
         }
 
-        public override Task<bool> SaveModel()
+        public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Service = service;
+
+                var res = await Service.Notes.GetResourceAsync(id);
+                if (!res.IsValid)
+                    return false;
+
+                Model = res.Entity;
+                Model.SetIsDirty(false);
+                if (refreshView)
+                    View.RefreshView();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                return false;
+            }
         }
+
+        public async override Task<bool> SaveModel()
+        {
+            if (!Model.IsDirty())
+                return true;
+
+            var isNew = (Model.ResourceId == Guid.Empty);
+
+            var msgVal = Model.GetErrorMessage();
+            if (!string.IsNullOrEmpty(msgVal))
+            {
+                View.ShowInfo(msgVal);
+                return false;
+            }
+
+            try
+            {
+                Result<ResourceDto> response;
+                if (AutoDBSave)
+                {
+                    response = await Service.Notes.SaveResourceAsync(Model, true);
+                    Model = response.Entity;
+                    Model.SetIsDirty(false);
+                }
+                else
+                {
+                    response = new Result<ResourceDto>();
+                    Model.SetIsDirty(true);
+                    response.Entity = Model;
+                }
+
+                if (response.IsValid)
+                {
+                    if (!isNew)
+                        OnSavedEntity(response.Entity);
+                    else
+                        OnAddedEntity(response.Entity);
+
+                    Finalize();
+                }
+                else
+                    View.ShowInfo(response.Message);
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        public async override Task<bool> DeleteModel(IKntService service, Guid id)
+        {
+            var result = View.ShowInfo("Are you sure you want to delete this resource?", "Delete resource", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes || result == DialogResult.Yes)
+            {
+                try
+                {
+                    Result<ResourceDto> response;
+                    if (AutoDBSave)
+                        response = await service.Notes.DeleteResourceAsync(id);
+                    else
+                        response = new Result<ResourceDto>();
+
+                    if (response.IsValid)
+                    {
+                        Model = response.Entity;
+                        OnDeletedEntity(response.Entity);
+                        return true;
+                    }
+                    else
+                        View.ShowInfo(response.Message);
+                }
+                catch (Exception ex)
+                {
+                    View.ShowInfo(ex.Message);
+                }
+            }
+            return false;
+        }
+
+        public async override Task<bool> DeleteModel()
+        {
+            return await DeleteModel(Service, Model.ResourceId);
+        }
+
 
         #endregion 
     }

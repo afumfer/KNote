@@ -993,6 +993,7 @@
             this.listViewResources.TabIndex = 14;
             this.listViewResources.UseCompatibleStateImageBehavior = false;
             this.listViewResources.SelectedIndexChanged += new System.EventHandler(this.listViewResources_SelectedIndexChanged);
+            this.listViewResources.DoubleClick += new System.EventHandler(this.listViewResources_DoubleClick);
             this.listViewResources.Resize += new System.EventHandler(this.listView_Resize);
             // 
             // picResource
@@ -1018,6 +1019,7 @@
             this.buttonResourceEdit.TabIndex = 12;
             this.buttonResourceEdit.Text = "...";
             this.buttonResourceEdit.UseVisualStyleBackColor = true;
+            this.buttonResourceEdit.Click += new System.EventHandler(this.buttonResourceEdit_Click);
             // 
             // buttonResourceDelete
             // 
@@ -1029,6 +1031,7 @@
             this.buttonResourceDelete.TabIndex = 11;
             this.buttonResourceDelete.Text = "-";
             this.buttonResourceDelete.UseVisualStyleBackColor = true;
+            this.buttonResourceDelete.Click += new System.EventHandler(this.buttonResourceDelete_Click);
             // 
             // buttonResourceAdd
             // 
@@ -1040,6 +1043,7 @@
             this.buttonResourceAdd.TabIndex = 10;
             this.buttonResourceAdd.Text = "+";
             this.buttonResourceAdd.UseVisualStyleBackColor = true;
+            this.buttonResourceAdd.Click += new System.EventHandler(this.buttonResourceAdd_Click);
             // 
             // label12
             // 
@@ -1078,6 +1082,7 @@
             this.listViewTasks.Size = new System.Drawing.Size(782, 530);
             this.listViewTasks.TabIndex = 13;
             this.listViewTasks.UseCompatibleStateImageBehavior = false;
+            this.listViewTasks.DoubleClick += new System.EventHandler(this.listViewTasks_DoubleClick);
             this.listViewTasks.Resize += new System.EventHandler(this.listView_Resize);
             // 
             // buttonTaskEdit

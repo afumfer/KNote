@@ -52,20 +52,6 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public void LoadModel(KMessageDto entity)
-        {
-            try
-            {
-                Model = entity;
-                Model.SetIsDirty(false);
-                View.RefreshView();
-            }
-            catch (Exception ex)
-            {
-                View.ShowInfo(ex.Message);
-            }
-        }
-
         public override void NewModel(IKntService service)
         {
             Service = service;

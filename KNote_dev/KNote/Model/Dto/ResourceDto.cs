@@ -142,7 +142,19 @@ namespace KNote.Model.Dto
             }
         }
 
-        public string ContentBase64 { get; set; }
+        private string _contentBase64;
+        public string ContentBase64 {
+            get
+            {
+                if (_contentBase64 == null)
+                    _contentBase64 = Convert.ToBase64String(_contentArrayBytes);
+                return _contentBase64;
+            }
+            set
+            {
+                _contentBase64 = value;
+            } 
+        }
 
         public string NameOut
         {

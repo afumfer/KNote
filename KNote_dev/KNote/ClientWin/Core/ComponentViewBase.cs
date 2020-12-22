@@ -198,14 +198,14 @@ namespace KNote.ClientWin.Core
 
     abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TView>
         where TView : IViewConfigurable
-        where TEntity : class, new()        
+        where TEntity : DtoModelBase, new()        
     {
         #region Prperties
 
         private TEntity _model;
         public TEntity Model
         {
-            set
+            protected set
             {
                 _model = value;
             }
@@ -248,6 +248,22 @@ namespace KNote.ClientWin.Core
         {
             OnEditionCanceled(Model);
             Finalize();
+        }
+
+        public virtual void LoadModel(IKntService service, TEntity entity, bool refreshView = true)
+        {
+            try
+            {
+                Service = service;
+                Model = entity;
+                Model.SetIsDirty(false);
+                if (refreshView)
+                    View.RefreshView();
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+            }
         }
 
         #endregion 

@@ -360,8 +360,53 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private void listViewTasks_DoubleClick(object sender, EventArgs e)
+        {
+            if (_com.EditMode)
+                EditTask();
+        }
+
+        #endregion
+
+        #region Resource managment
+
+        private async void buttonResourceAdd_Click(object sender, EventArgs e)
+        {
+            var resource = await _com.NewResource();
+            if (resource != null)
+                listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
+        }
+       
+        private void buttonResourceEdit_Click(object sender, EventArgs e)
+        {
+            EditResource();
+        }
+
+        private async void buttonResourceDelete_Click(object sender, EventArgs e)
+        {
+            if (listViewResources.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("There is no task selected .", "KeyNote");
+                return;
+            }
+            //var delTsk = GetNoteTaskFromSelectedListView();
+            var delRes = listViewResources.SelectedItems[0].Name;
+            var res = await _com.DeleteResource(Guid.Parse(delRes));
+            if (res)
+            {
+                listViewResources.Items[delRes].Remove();
+            }
+        }
+
+
+        private void listViewResources_DoubleClick(object sender, EventArgs e)
+        {
+            if (_com.EditMode)
+                EditResource();
+        }
 
         #endregion 
+
 
         #endregion
 
@@ -491,15 +536,9 @@ namespace KNote.ClientWin.Views
 
             foreach (var res in _com.Model.Resources)
             {
-                var itemList = new ListViewItem(res.NameOut);
-                itemList.Name = res.ResourceId.ToString();                
-                itemList.SubItems.Add(res.FileType);
-                itemList.SubItems.Add(res.Order.ToString());
-                itemList.SubItems.Add(res.Description);
-                listViewResources.Items.Add(itemList);
+                listViewResources.Items.Add(ResourceDtoToListViewItem(res));
             }
 
-            // Width of -2 indicates auto-size.
             listViewResources.Columns.Add("Name", 200, HorizontalAlignment.Left);
             listViewResources.Columns.Add("File type", 100, HorizontalAlignment.Left);
             listViewResources.Columns.Add("Order", 100, HorizontalAlignment.Left);
@@ -717,6 +756,16 @@ namespace KNote.ClientWin.Views
             return itemList;
         }
 
+        private ListViewItem ResourceDtoToListViewItem(ResourceDto resource)
+        {
+            var itemList = new ListViewItem(resource.NameOut);
+            itemList.Name = resource.ResourceId.ToString();
+            itemList.SubItems.Add(resource.FileType);
+            itemList.SubItems.Add(resource.Order.ToString());
+            itemList.SubItems.Add(resource.Description); 
+            return itemList;
+        }
+
         private void SizeLastColumn(ListView lv)
         {
             // Hack for control undeterminated error
@@ -804,6 +853,26 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
+        private void EditResource()
+        {
+            if (listViewResources.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("There is no resource selected.", "KeyNote");
+                return;
+            }
+            var idResource = Guid.Parse(listViewResources.SelectedItems[0].Name);
+            var resource = _com.EditResource(idResource);
+            if (resource != null)
+                UpdateResource(resource);
+        }
+
+        private void UpdateResource(ResourceDto resource)
+        {
+            var item = listViewResources.Items[resource.ResourceId.ToString()];
+            item.SubItems[1].Text = resource.FileType;
+            item.SubItems[2].Text = resource.Order.ToString();
+            item.SubItems[3].Text = resource.Description;
+        }
 
 
         //private void toolInsertarImagenClipboard_Click(object sender, EventArgs e)

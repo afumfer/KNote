@@ -186,6 +186,7 @@ namespace KNote.ClientWin.Components
         public async Task<KMessageDto> NewMessage()
         {
             var messageEditor = new MessageEditorComponent(Store);
+
             messageEditor.AutoDBSave = false;  // don't save automatically
             
             messageEditor.NewModel(Service);            
@@ -206,19 +207,17 @@ namespace KNote.ClientWin.Components
                 return messageEditor.Model;
             }            
             else
-            {
-                View.ShowInfo(res.Message);
-                return null;
-            }
+                return null;            
         }
 
         public KMessageDto EditMessage(Guid messageId)
         {
             var messageEditor = new MessageEditorComponent(Store);
-            messageEditor.AutoDBSave = false;  // don't save automatically
 
-            var message = Model.Messages.Where(_ => _.KMessageId == messageId).SingleOrDefault();
-            messageEditor.Model = message;
+            messageEditor.AutoDBSave = false;  // don't save automatically
+            
+            var message = Model.Messages.Where(_ => _.KMessageId == messageId).SingleOrDefault();            
+            messageEditor.LoadModel(Service, message, false);
 
             var res = messageEditor.RunModal();
             if (res.Entity == EComponentResult.Executed)
@@ -232,6 +231,7 @@ namespace KNote.ClientWin.Components
         public async Task<bool> DeleteMessage(Guid messageId)
         {
             var messageEditor = new MessageEditorComponent(Store);
+
             messageEditor.AutoDBSave = false;  // don't save automatically
 
             var res = await messageEditor.DeleteModel(Service, messageId);
@@ -249,6 +249,7 @@ namespace KNote.ClientWin.Components
         public async Task<NoteTaskDto> NewTask()
         {
             var taskEditor = new TaskEditorComponent(Store);
+
             taskEditor.AutoDBSave = false;  // don't save automatically
 
             taskEditor.NewModel(Service);
@@ -266,20 +267,19 @@ namespace KNote.ClientWin.Components
                 Model.Tasks.Add(taskEditor.Model);
                 return taskEditor.Model;
             }
-            else
-            {
-                View.ShowInfo(res.Message);
+            else                            
                 return null;
-            }
+            
         }
 
         public NoteTaskDto EditTask(Guid taskId)
         {
             var taskEditor = new TaskEditorComponent(Store);
-            taskEditor.AutoDBSave = false;  // don't save automatically
 
-            var task = Model.Tasks.Where(_ => _.NoteTaskId == taskId).SingleOrDefault();
-            taskEditor.Model = task;
+            taskEditor.AutoDBSave = false;  // don't save automatically            
+
+            var task = Model.Tasks.Where(_ => _.NoteTaskId == taskId).SingleOrDefault();            
+            taskEditor.LoadModel(Service, task, false);
 
             var res = taskEditor.RunModal();
             if (res.Entity == EComponentResult.Executed)
@@ -302,6 +302,64 @@ namespace KNote.ClientWin.Components
                 if (!tskDel.IsNew())
                     Model.TasksDeleted.Add(taskId);
                 Model.Tasks.Remove(tskDel);
+            }
+
+            return res;
+        }
+
+        public async Task<ResourceDto> NewResource()
+        {
+            var resource = new ResourceEditorComponent(Store);
+            resource.AutoDBSave = false;  // don't save automatically
+
+            resource.NewModel(Service);
+            resource.Model.NoteId = Model.NoteId;
+            resource.Model.SetIsNew(true);
+
+            var dummy = await Task.FromResult(true);
+
+            var res = resource.RunModal();
+
+            if (res.Entity == EComponentResult.Executed)
+            {
+                Model.Resources.Add(resource.Model);
+                return resource.Model;
+            }
+            else                        
+                return null;
+            
+        }
+
+        public ResourceDto EditResource(Guid resourceId)
+        {
+            var resourceEditor = new ResourceEditorComponent(Store);
+            resourceEditor.AutoDBSave = false;  // don't save automatically
+            
+            var resource = Model.Resources.Where(_ => _.ResourceId == resourceId).SingleOrDefault();            
+            resourceEditor.LoadModel(Service, resource, false);
+
+            var res = resourceEditor.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                return resourceEditor.Model;
+            }
+            else
+                return null;
+        }
+
+        public async Task<bool> DeleteResource(Guid resourceId)
+        {
+            var resource = new ResourceEditorComponent(Store);            
+            resource.AutoDBSave = false;  // don't save automatically
+
+            var res = await resource.DeleteModel(Service, resourceId);
+            if (res)
+            {
+                var resDel = Model.Resources.SingleOrDefault(t => t.ResourceId == resourceId);
+                if (!resDel.IsNew())
+                    if(!resource.AutoDBSave)
+                        Model.ResourcesDeleted.Add(resourceId);
+                Model.Resources.Remove(resDel);
             }
 
             return res;
