@@ -140,6 +140,28 @@ namespace KNote.ClientWin.Views
                 _formIsDisty = true;
         }
 
+        private void buttonSelDate_Click(object sender, EventArgs e)
+        {
+            Button buttonSel;
+            buttonSel = (Button)sender;
+
+            if (buttonSel == buttonSelDateExS)
+            {
+                textExStartDate.Text = SelDate(textExStartDate.Text);
+            }
+            else if (buttonSel == buttonSelDateExE)
+            {
+                textExEndDate.Text = SelDate(textExEndDate.Text);
+            }
+            else if (buttonSel == buttonSelDateStart)
+            {
+                textStartDate.Text = SelDate(textStartDate.Text);
+            }
+            else if (buttonSel == buttonSelDateEnd)
+            {
+                textEndDate.Text = SelDate(textEndDate.Text);
+            }
+        }
 
         #endregion
 
@@ -193,6 +215,23 @@ namespace KNote.ClientWin.Views
             _com.Model.Description = textDescription.Text;
         }
 
-        #endregion 
+        private string SelDate(string date)
+        {
+            DateTime selDateIn;
+            string selDate = "";
+
+            if (!DateTime.TryParse(date, out selDateIn))
+                selDateIn = DateTime.Now;
+
+            DateSelectorForm dateSelector = new DateSelectorForm();
+            dateSelector.Date = selDateIn;
+
+            if (dateSelector.ShowDialog() == DialogResult.OK)
+                selDate = dateSelector.Date.ToString("dd/MM/yyyy HH:mm");
+
+            return selDate;
+        }
+
+        #endregion
     }
 }

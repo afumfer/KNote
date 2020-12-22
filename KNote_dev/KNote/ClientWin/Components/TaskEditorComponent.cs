@@ -86,7 +86,7 @@ namespace KNote.ClientWin.Components
                 Result<NoteTaskDto> response;
                 if (AutoDBSave)
                 {
-                    response = await Service.Notes.SaveNoteTaskAsync(Model);
+                    response = await Service.Notes.SaveNoteTaskAsync(Model, true);
                     Model = response.Entity;
                     Model.SetIsDirty(false);
                 }

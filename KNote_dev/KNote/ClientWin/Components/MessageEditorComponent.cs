@@ -99,7 +99,7 @@ namespace KNote.ClientWin.Components
                 Result<KMessageDto> response;
                 if (AutoDBSave)
                 {
-                    response = await Service.Notes.SaveMessageAsync(Model);
+                    response = await Service.Notes.SaveMessageAsync(Model, true);
                     Model = response.Entity;
                     Model.SetIsDirty(false);
                 }
