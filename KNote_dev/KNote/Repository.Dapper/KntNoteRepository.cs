@@ -603,7 +603,10 @@ namespace KNote.Repository.Dapper
                 var db = GetOpenConnection();
 
                 // TODO: pendiente, parametrizar esto. 
-                entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
+                //entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
+                if(string.IsNullOrEmpty(entity.Container))
+                    entity.Container = KntConst.ContainerResources + DateTime.Now.Year.ToString();
+                // 
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                 var sql = @"INSERT INTO Resources 
@@ -639,8 +642,7 @@ namespace KNote.Repository.Dapper
             {
                 var db = GetOpenConnection();
 
-                // TODO: pendiente, parametrizar esto. 
-                entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
+                // TODO: pendiente, parametrizar esto.                 
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                 var sql = @"UPDATE Resources SET                                                

@@ -70,6 +70,7 @@ namespace KNote.ClientWin.Views
             textDescription.Text = "";
             htmlDescription.BodyHtml = "";
             textPriority.Text = "";
+            textDescriptionResource.Text = "";
             listViewAttributes.Clear();
             listViewResources.Clear();
             listViewTasks.Clear();
@@ -490,9 +491,15 @@ namespace KNote.ClientWin.Views
             // Resources 
             ModelToControlsResources();
             if (_com.Model.Resources.Count > 0)
+            {
                 UpdatePicResource(_com.Model.Resources[0].ContentArrayBytes, _com.Model.Resources[0].FileType);
+                textDescriptionResource.Text = _com.Model.Resources[0].Description;
+            }
             else
+            {
                 UpdatePicResource(null, null);
+                textDescriptionResource.Text = "";
+            }
 
             // Tasks
             ModelToControlsTasks();
@@ -541,8 +548,7 @@ namespace KNote.ClientWin.Views
 
             listViewResources.Columns.Add("Name", 200, HorizontalAlignment.Left);
             listViewResources.Columns.Add("File type", 100, HorizontalAlignment.Left);
-            listViewResources.Columns.Add("Order", 100, HorizontalAlignment.Left);
-            listViewResources.Columns.Add("Description", -2, HorizontalAlignment.Left);
+            listViewResources.Columns.Add("Order", 70, HorizontalAlignment.Left);            
         }
 
         private void ModelToControlsTasks()
@@ -622,6 +628,8 @@ namespace KNote.ClientWin.Views
             int p;
             if (int.TryParse(textPriority.Text, out p))
                 _com.Model.Priority = p;
+
+            _com.Model.Script = textScriptCode.Text;
         }
 
         private async Task<bool> SaveModel()
@@ -711,9 +719,9 @@ namespace KNote.ClientWin.Views
                 {
                     Cursor = Cursors.WaitCursor;                    
                     var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
-                    var content = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.ContentArrayBytes).FirstOrDefault();
-                    var type = _com.Model.Resources.Where(_ => _.ResourceId == idResource).Select(_ => _.FileType).FirstOrDefault();
-                    UpdatePicResource(content, type);
+                    var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();
+                    textDescriptionResource.Text = selRes?.Description;
+                    UpdatePicResource(selRes?.ContentArrayBytes, selRes?.FileType);
                 }
             }
             catch (Exception ex)
@@ -761,8 +769,7 @@ namespace KNote.ClientWin.Views
             var itemList = new ListViewItem(resource.NameOut);
             itemList.Name = resource.ResourceId.ToString();
             itemList.SubItems.Add(resource.FileType);
-            itemList.SubItems.Add(resource.Order.ToString());
-            itemList.SubItems.Add(resource.Description); 
+            itemList.SubItems.Add(resource.Order.ToString());            
             return itemList;
         }
 
@@ -871,7 +878,6 @@ namespace KNote.ClientWin.Views
             var item = listViewResources.Items[resource.ResourceId.ToString()];
             item.SubItems[1].Text = resource.FileType;
             item.SubItems[2].Text = resource.Order.ToString();
-            item.SubItems[3].Text = resource.Description;
         }
 
 

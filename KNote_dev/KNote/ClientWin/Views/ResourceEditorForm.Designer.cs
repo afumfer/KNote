@@ -41,6 +41,7 @@ namespace KNote.ClientWin.Views
             this.buttonSelectFile = new System.Windows.Forms.Button();
             this.labelFileName = new System.Windows.Forms.Label();
             this.htmlPreview = new Pavonis.Html.Editor.HtmlEditorControl();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -109,6 +110,7 @@ namespace KNote.ClientWin.Views
             this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.textDescription.Location = new System.Drawing.Point(11, 122);
+            this.textDescription.MaxLength = 3332767;
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
             this.textDescription.Size = new System.Drawing.Size(261, 329);
@@ -144,7 +146,7 @@ namespace KNote.ClientWin.Views
             this.buttonSelectFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonSelectFile.Location = new System.Drawing.Point(508, 14);
             this.buttonSelectFile.Name = "buttonSelectFile";
-            this.buttonSelectFile.Size = new System.Drawing.Size(102, 25);
+            this.buttonSelectFile.Size = new System.Drawing.Size(111, 25);
             this.buttonSelectFile.TabIndex = 11;
             this.buttonSelectFile.Text = "Select file";
             this.buttonSelectFile.UseVisualStyleBackColor = true;
@@ -167,10 +169,15 @@ namespace KNote.ClientWin.Views
             this.htmlPreview.InnerText = null;
             this.htmlPreview.Location = new System.Drawing.Point(288, 68);
             this.htmlPreview.Name = "htmlPreview";
-            this.htmlPreview.Size = new System.Drawing.Size(322, 383);
+            this.htmlPreview.ReadOnly = true;
+            this.htmlPreview.Size = new System.Drawing.Size(331, 383);
             this.htmlPreview.TabIndex = 9;
             this.htmlPreview.TabStop = false;
             this.htmlPreview.ToolbarVisible = false;
+            // 
+            // openFileDialog
+            // 
+            this.openFileDialog.FileName = "openFileDialog1";
             // 
             // ResourceEditorForm
             // 
@@ -207,5 +214,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelFileName;
         private Pavonis.Html.Editor.HtmlEditorControl htmlPreview;
         private System.Windows.Forms.TextBox textFileName;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
     }
 }

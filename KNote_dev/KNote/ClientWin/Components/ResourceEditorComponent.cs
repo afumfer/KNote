@@ -146,6 +146,20 @@ namespace KNote.ClientWin.Components
             return await DeleteModel(Service, Model.ResourceId);
         }
 
+        public string ExtensionFileToFileType(string extension)
+        {
+            // TODO: study this method ...
+            if (extension == ".jpg")
+                return @"image/jpeg";
+            if (extension == ".jpeg")
+                return @"image/jpeg";
+            else if (extension == ".png")
+                return "image/png";
+            else if (extension == ".pdf")
+                return "application/pdf";
+            else
+                return "";
+        }
 
         #endregion 
     }

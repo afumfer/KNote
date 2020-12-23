@@ -16,6 +16,8 @@ namespace KNote.Model
 
         public static Dictionary<EnumRoles, string> Roles { get; set; }
 
+        public static string ContainerResources { get; set; } = @"NotesResources\";
+
         // EventType
 
         static KntConst()

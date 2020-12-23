@@ -147,6 +147,7 @@ namespace KNote.Model.Dto
             get
             {
                 if (_contentBase64 == null)
+                    if(_contentArrayBytes != null)
                     _contentBase64 = Convert.ToBase64String(_contentArrayBytes);
                 return _contentBase64;
             }

@@ -493,7 +493,8 @@ namespace KNote.Repository.EntityFramework
                 var newEntity = new Resource();
                 newEntity.SetSimpleDto(entity);
                 // TODO: refactorizar la sigueinte línea (generalizar)
-                newEntity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
+                if (string.IsNullOrEmpty(entity.Container))
+                    newEntity.Container = KntConst.ContainerResources + DateTime.Now.Year.ToString();                
                 newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                 var resGenRep = await resources.AddAsync(newEntity);

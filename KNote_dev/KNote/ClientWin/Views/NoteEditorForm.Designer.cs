@@ -109,6 +109,7 @@
             this.buttonAttributeEdit = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.tabResources = new System.Windows.Forms.TabPage();
+            this.textDescriptionResource = new System.Windows.Forms.TextBox();
             this.labelPreview = new System.Windows.Forms.Label();
             this.listViewResources = new System.Windows.Forms.ListView();
             this.picResource = new System.Windows.Forms.PictureBox();
@@ -955,6 +956,7 @@
             // 
             // tabResources
             // 
+            this.tabResources.Controls.Add(this.textDescriptionResource);
             this.tabResources.Controls.Add(this.labelPreview);
             this.tabResources.Controls.Add(this.listViewResources);
             this.tabResources.Controls.Add(this.picResource);
@@ -971,6 +973,16 @@
             this.tabResources.Text = "Resources  ";
             this.tabResources.UseVisualStyleBackColor = true;
             // 
+            // textDescriptionResource
+            // 
+            this.textDescriptionResource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textDescriptionResource.Location = new System.Drawing.Point(396, 506);
+            this.textDescriptionResource.Multiline = true;
+            this.textDescriptionResource.Name = "textDescriptionResource";
+            this.textDescriptionResource.Size = new System.Drawing.Size(392, 59);
+            this.textDescriptionResource.TabIndex = 16;
+            // 
             // labelPreview
             // 
             this.labelPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -983,9 +995,8 @@
             // 
             // listViewResources
             // 
-            this.listViewResources.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewResources.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.listViewResources.HideSelection = false;
             this.listViewResources.Location = new System.Drawing.Point(5, 36);
             this.listViewResources.Name = "listViewResources";
@@ -994,24 +1005,23 @@
             this.listViewResources.UseCompatibleStateImageBehavior = false;
             this.listViewResources.SelectedIndexChanged += new System.EventHandler(this.listViewResources_SelectedIndexChanged);
             this.listViewResources.DoubleClick += new System.EventHandler(this.listViewResources_DoubleClick);
-            this.listViewResources.Resize += new System.EventHandler(this.listView_Resize);
             // 
             // picResource
             // 
-            this.picResource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.picResource.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.picResource.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("picResource.BackgroundImage")));
             this.picResource.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.picResource.Location = new System.Drawing.Point(396, 36);
             this.picResource.Name = "picResource";
-            this.picResource.Size = new System.Drawing.Size(392, 530);
+            this.picResource.Size = new System.Drawing.Size(392, 464);
             this.picResource.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picResource.TabIndex = 13;
             this.picResource.TabStop = false;
             // 
             // buttonResourceEdit
             // 
-            this.buttonResourceEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonResourceEdit.Location = new System.Drawing.Point(360, 10);
             this.buttonResourceEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonResourceEdit.Name = "buttonResourceEdit";
@@ -1023,7 +1033,6 @@
             // 
             // buttonResourceDelete
             // 
-            this.buttonResourceDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonResourceDelete.Location = new System.Drawing.Point(330, 10);
             this.buttonResourceDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonResourceDelete.Name = "buttonResourceDelete";
@@ -1035,7 +1044,6 @@
             // 
             // buttonResourceAdd
             // 
-            this.buttonResourceAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonResourceAdd.Location = new System.Drawing.Point(300, 10);
             this.buttonResourceAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonResourceAdd.Name = "buttonResourceAdd";
@@ -1484,5 +1492,6 @@
         private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS1;
         private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS2;
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownCode;
+        private System.Windows.Forms.TextBox textDescriptionResource;
     }
 }
