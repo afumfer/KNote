@@ -109,6 +109,8 @@
             this.buttonAttributeEdit = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.tabResources = new System.Windows.Forms.TabPage();
+            this.panelPreview = new System.Windows.Forms.Panel();
+            this.linkViewFile = new System.Windows.Forms.LinkLabel();
             this.textDescriptionResource = new System.Windows.Forms.TextBox();
             this.labelPreview = new System.Windows.Forms.Label();
             this.listViewResources = new System.Windows.Forms.ListView();
@@ -127,8 +129,8 @@
             this.textScriptCode = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.tabTraceNotes = new System.Windows.Forms.TabPage();
-            this.listView2 = new System.Windows.Forms.ListView();
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.listViewTraceNoteTo = new System.Windows.Forms.ListView();
+            this.listViewTraceNoteFrom = new System.Windows.Forms.ListView();
             this.textTraceNodeType = new System.Windows.Forms.TextBox();
             this.button3 = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
@@ -149,6 +151,7 @@
             this.tabAlarms.SuspendLayout();
             this.tabAttributes.SuspendLayout();
             this.tabResources.SuspendLayout();
+            this.panelPreview.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).BeginInit();
             this.tabTasks.SuspendLayout();
             this.tabCode.SuspendLayout();
@@ -956,6 +959,7 @@
             // 
             // tabResources
             // 
+            this.tabResources.Controls.Add(this.panelPreview);
             this.tabResources.Controls.Add(this.textDescriptionResource);
             this.tabResources.Controls.Add(this.labelPreview);
             this.tabResources.Controls.Add(this.listViewResources);
@@ -972,6 +976,31 @@
             this.tabResources.TabIndex = 4;
             this.tabResources.Text = "Resources  ";
             this.tabResources.UseVisualStyleBackColor = true;
+            // 
+            // panelPreview
+            // 
+            this.panelPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelPreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelPreview.Controls.Add(this.linkViewFile);
+            this.panelPreview.Location = new System.Drawing.Point(396, 202);
+            this.panelPreview.Name = "panelPreview";
+            this.panelPreview.Size = new System.Drawing.Size(392, 84);
+            this.panelPreview.TabIndex = 18;
+            this.panelPreview.Visible = false;
+            // 
+            // linkViewFile
+            // 
+            this.linkViewFile.AutoSize = true;
+            this.linkViewFile.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.linkViewFile.Location = new System.Drawing.Point(13, 14);
+            this.linkViewFile.Name = "linkViewFile";
+            this.linkViewFile.Size = new System.Drawing.Size(128, 19);
+            this.linkViewFile.TabIndex = 1;
+            this.linkViewFile.TabStop = true;
+            this.linkViewFile.Text = "View resource file ...";
+            this.linkViewFile.Click += new System.EventHandler(this.linkViewFile_Click);
             // 
             // textDescriptionResource
             // 
@@ -1015,7 +1044,7 @@
             this.picResource.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.picResource.Location = new System.Drawing.Point(396, 36);
             this.picResource.Name = "picResource";
-            this.picResource.Size = new System.Drawing.Size(392, 464);
+            this.picResource.Size = new System.Drawing.Size(392, 160);
             this.picResource.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picResource.TabIndex = 13;
             this.picResource.TabStop = false;
@@ -1177,8 +1206,8 @@
             // 
             // tabTraceNotes
             // 
-            this.tabTraceNotes.Controls.Add(this.listView2);
-            this.tabTraceNotes.Controls.Add(this.listView1);
+            this.tabTraceNotes.Controls.Add(this.listViewTraceNoteTo);
+            this.tabTraceNotes.Controls.Add(this.listViewTraceNoteFrom);
             this.tabTraceNotes.Controls.Add(this.textTraceNodeType);
             this.tabTraceNotes.Controls.Add(this.button3);
             this.tabTraceNotes.Controls.Add(this.label5);
@@ -1199,28 +1228,28 @@
             this.tabTraceNotes.Text = "Trace notes  ";
             this.tabTraceNotes.UseVisualStyleBackColor = true;
             // 
-            // listView2
+            // listViewTraceNoteTo
             // 
-            this.listView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.listViewTraceNoteTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listView2.HideSelection = false;
-            this.listView2.Location = new System.Drawing.Point(395, 89);
-            this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(393, 477);
-            this.listView2.TabIndex = 44;
-            this.listView2.UseCompatibleStateImageBehavior = false;
+            this.listViewTraceNoteTo.HideSelection = false;
+            this.listViewTraceNoteTo.Location = new System.Drawing.Point(395, 89);
+            this.listViewTraceNoteTo.Name = "listViewTraceNoteTo";
+            this.listViewTraceNoteTo.Size = new System.Drawing.Size(393, 477);
+            this.listViewTraceNoteTo.TabIndex = 44;
+            this.listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
             // 
-            // listView1
+            // listViewTraceNoteFrom
             // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.listViewTraceNoteFrom.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(11, 89);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(378, 477);
-            this.listView1.TabIndex = 43;
-            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listViewTraceNoteFrom.HideSelection = false;
+            this.listViewTraceNoteFrom.Location = new System.Drawing.Point(11, 89);
+            this.listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
+            this.listViewTraceNoteFrom.Size = new System.Drawing.Size(378, 477);
+            this.listViewTraceNoteFrom.TabIndex = 43;
+            this.listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
             // 
             // textTraceNodeType
             // 
@@ -1369,6 +1398,8 @@
             this.tabAttributes.PerformLayout();
             this.tabResources.ResumeLayout(false);
             this.tabResources.PerformLayout();
+            this.panelPreview.ResumeLayout(false);
+            this.panelPreview.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).EndInit();
             this.tabTasks.ResumeLayout(false);
             this.tabTasks.PerformLayout();
@@ -1460,8 +1491,8 @@
         private System.Windows.Forms.ListView listViewResources;
         private System.Windows.Forms.ListView listViewTasks;
         private System.Windows.Forms.ListView listViewAlarms;
-        private System.Windows.Forms.ListView listView2;
-        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ListView listViewTraceNoteTo;
+        private System.Windows.Forms.ListView listViewTraceNoteFrom;
         private System.Windows.Forms.Label labelLoadingHtml;
         private System.Windows.Forms.Panel panelDescription;
         private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
@@ -1493,5 +1524,7 @@
         private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS2;
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownCode;
         private System.Windows.Forms.TextBox textDescriptionResource;
+        private System.Windows.Forms.Panel panelPreview;
+        private System.Windows.Forms.LinkLabel linkViewFile;
     }
 }

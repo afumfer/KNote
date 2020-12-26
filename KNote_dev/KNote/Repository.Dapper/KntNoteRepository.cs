@@ -605,7 +605,7 @@ namespace KNote.Repository.Dapper
                 // TODO: pendiente, parametrizar esto. 
                 //entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
                 if(string.IsNullOrEmpty(entity.Container))
-                    entity.Container = KntConst.ContainerResources + DateTime.Now.Year.ToString();
+                    entity.Container = KntConst.ContainerResources + @"\" + DateTime.Now.Year.ToString();
                 // 
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 

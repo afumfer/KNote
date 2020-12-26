@@ -38,7 +38,7 @@ namespace KNote.Repository.Dapper
         public KntRepository(DbConnection singletonConnection, bool throwKntException = false)
         {
             _throwKntException = throwKntException;
-            _db = singletonConnection;            
+            _db = singletonConnection;
         }
 
         #endregion

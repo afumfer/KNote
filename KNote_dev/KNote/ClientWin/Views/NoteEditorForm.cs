@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -23,7 +24,8 @@ namespace KNote.ClientWin.Views
         private readonly NoteEditorComponent _com;
         private bool _viewFinalized = false;
 
-        private Guid _selectedFolderId;
+        private Guid _selectedFolderId;        
+        private ResourceDto _selectedResource;
 
         #endregion 
 
@@ -415,11 +417,11 @@ namespace KNote.ClientWin.Views
 
         private void PersonalizeControls()
         {
-            this.panelDescription.Location = new System.Drawing.Point(6, 130);
+            this.panelDescription.Location = new Point(6, 130);
             if (_com.EditMode)
-                this.panelDescription.Size = new System.Drawing.Size(780, 432);
+                this.panelDescription.Size = new Size(780, 432);
             else
-                this.panelDescription.Size = new System.Drawing.Size(780, 458);
+                this.panelDescription.Size = new Size(780, 458);
 
             this.textDescription.Dock = DockStyle.Fill;
             this.htmlDescription.Dock = DockStyle.Fill;
@@ -441,6 +443,20 @@ namespace KNote.ClientWin.Views
 
                 htmlDescription.ToolbarVisible = false;
                 htmlDescription.ReadOnly = true;
+            }
+
+            // Resource viewer
+            picResource.Location = new Point(396, 36);            
+            panelPreview.Location = new Point(396, 36);
+            if (_com.EditMode)
+            {
+                picResource.Size = new Size(392, 464);                
+                panelPreview.Size = new Size(392, 464);
+            }
+            else
+            {
+                picResource.Size = new Size(392, 490);                
+                panelPreview.Size = new Size(392, 490);
             }
 
             PersonalizeListView(listViewAttributes);
@@ -465,14 +481,16 @@ namespace KNote.ClientWin.Views
             textTags.Text = _com.Model.Tags;            
             textPriority.Text = _com.Model.Priority.ToString();
 
+            string desOutput = _com.Model?.Description?.Replace(KntConst.ContainerResources, _com.Store.Config.CacheUrlResources);
+
             if (_com.Model.HtmlFormat)
             {
                 labelLoadingHtml.Visible = true;
                 labelLoadingHtml.Refresh();
                 textDescription.Visible = false;
                 htmlDescription.Visible = true;
-                htmlDescription.BodyHtml = "";                
-                htmlDescription.BodyHtml = _com.Model.Description;               
+                htmlDescription.BodyHtml = "";
+                htmlDescription.BodyHtml = desOutput; //_com.Model.Description;               
                 //                
                 htmlDescription.Refresh();
                 labelLoadingHtml.Visible = false;
@@ -480,7 +498,7 @@ namespace KNote.ClientWin.Views
             else
             {
                 htmlDescription.Visible = false;
-                textDescription.Text = _com.Model.Description;
+                textDescription.Text = desOutput; // _com.Model.Description;
                 textDescription.Visible = true;                
             }
 
@@ -492,14 +510,12 @@ namespace KNote.ClientWin.Views
             ModelToControlsResources();
             if (_com.Model.Resources.Count > 0)
             {
-                UpdatePicResource(_com.Model.Resources[0].ContentArrayBytes, _com.Model.Resources[0].FileType);
-                textDescriptionResource.Text = _com.Model.Resources[0].Description;
+                listViewResources.Items[0].Selected = true;                
+                listViewResources.Select();
             }
-            else
-            {
-                UpdatePicResource(null, null);
-                textDescriptionResource.Text = "";
-            }
+            else            
+                UpdatePreviewResource(null);                
+            
 
             // Tasks
             ModelToControlsTasks();
@@ -510,8 +526,7 @@ namespace KNote.ClientWin.Views
             // Script             
             textScriptCode.Text = _com.Model.Script;
 
-            // ........
-
+            
             // Trace notes
             //From = new List<TraceNote>(),
             //To = new List<TraceNote>()
@@ -597,15 +612,32 @@ namespace KNote.ClientWin.Views
             listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);            
         }
 
-        private void UpdatePicResource(byte[] content, string type)
+        private void UpdatePreviewResource(ResourceDto resource)
         {
-            if (content == null || !type.Contains("image"))
-            {
-                picResource.Image = null;
-                return;
-            }
+            _selectedResource = resource;
 
-            picResource.Image = Image.FromStream(new MemoryStream(content));
+            picResource.Image = null;
+            textDescriptionResource.Text = "";
+
+            if (_selectedResource == null)
+                return;
+
+            textDescriptionResource.Text = _selectedResource.Description;
+
+            if (_selectedResource?.ContentArrayBytes == null)            
+                return;
+                                   
+            if (_selectedResource.FileType.Contains("image"))
+            {            
+                picResource.Visible = true;
+                panelPreview.Visible = false;
+                picResource.Image = Image.FromStream(new MemoryStream(_selectedResource.ContentArrayBytes));                
+            }
+            else // if (_selectedResource.FileType.Contains("pdf"))
+            {
+                picResource.Visible = false;
+                panelPreview.Visible = true;
+            }            
         }
 
         private void ControlsToModel()
@@ -619,11 +651,18 @@ namespace KNote.ClientWin.Views
             _com.Model.FolderDto.Name = textFolder.Text;
             _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
             _com.Model.Tags = textTags.Text;
-
+           
             if (_com.Model.ContentType == "html")
-                _com.Model.Description = htmlDescription.BodyHtml;
+            {
+                string desOutput = htmlDescription.BodyHtml?.Replace(_com.Store.Config.CacheUrlResources, KntConst.ContainerResources);
+                _com.Model.Description = desOutput;
+
+            }
             else
-                _com.Model.Description = textDescription.Text;
+            {
+                string desOutput = textDescription.Text?.Replace(_com.Store.Config.CacheUrlResources, KntConst.ContainerResources);
+                _com.Model.Description = desOutput;
+            }
 
             int p;
             if (int.TryParse(textPriority.Text, out p))
@@ -719,9 +758,8 @@ namespace KNote.ClientWin.Views
                 {
                     Cursor = Cursors.WaitCursor;                    
                     var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
-                    var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();
-                    textDescriptionResource.Text = selRes?.Description;
-                    UpdatePicResource(selRes?.ContentArrayBytes, selRes?.FileType);
+                    var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();                    
+                    UpdatePreviewResource(selRes);
                 }
             }
             catch (Exception ex)
@@ -860,7 +898,7 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
-        private void EditResource()
+        private async void EditResource()
         {
             if (listViewResources.SelectedItems.Count == 0)
             {
@@ -868,7 +906,7 @@ namespace KNote.ClientWin.Views
                 return;
             }
             var idResource = Guid.Parse(listViewResources.SelectedItems[0].Name);
-            var resource = _com.EditResource(idResource);
+            var resource = await _com.EditResource(idResource);
             if (resource != null)
                 UpdateResource(resource);
         }
@@ -876,8 +914,28 @@ namespace KNote.ClientWin.Views
         private void UpdateResource(ResourceDto resource)
         {
             var item = listViewResources.Items[resource.ResourceId.ToString()];
+            item.Text = resource.NameOut;
             item.SubItems[1].Text = resource.FileType;
             item.SubItems[2].Text = resource.Order.ToString();
+            UpdatePreviewResource(resource);
+        }
+
+        private void linkViewFile_Click(object sender, EventArgs e)
+        {
+            var tmpFile = _com.SaveTmpFile(_selectedResource.Container, _selectedResource.Name, _selectedResource.ContentArrayBytes);
+
+            if (tmpFile == null)
+                return;
+
+            ProcessStartInfo startInfo = new ProcessStartInfo(tmpFile) { UseShellExecute = true };
+            try
+            {
+                Process.Start(startInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("The following error has occurred: " + ex.Message, "KeyNote");
+            }
         }
 
 

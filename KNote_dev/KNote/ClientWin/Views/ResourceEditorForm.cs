@@ -124,12 +124,12 @@ namespace KNote.ClientWin.Views
 
         private async void buttonAccept_Click(object sender, EventArgs e)
         {
-            htmlPreview.BodyHtml = "";
-            htmlPreview.Refresh();
             ControlsToModel();
             var res = await _com.SaveModel();
             if (res)
             {
+                htmlPreview.BodyHtml = "";
+                htmlPreview.Refresh();
                 _formIsDisty = false;
                 this.DialogResult = DialogResult.OK;
             }
@@ -151,7 +151,7 @@ namespace KNote.ClientWin.Views
                 textFileName.Text = Path.GetFileName(fileTmp);
                 textDescription.Text = textFileName.Text;
                 varName = _com.Model.ResourceId.ToString() + "_" + textFileName.Text;
-                varContainer = KntConst.ContainerResources + DateTime.Now.Year.ToString();
+                varContainer = KntConst.ContainerResources + @"\" + DateTime.Now.Year.ToString();
                 varFileType = _com.ExtensionFileToFileType(Path.GetExtension(fileTmp));
                 ShowPreview(fileTmp);
             }
@@ -180,15 +180,15 @@ namespace KNote.ClientWin.Views
         {
             textDescription.Text = _com.Model.Description;
             textOrder.Text = _com.Model.Order.ToString();
-           
-            // htmlPreview.BodyHtml = "";            
-
+                      
             textFileName.Text = _com.Model.NameOut;
             varName = _com.Model.Name;
             varContentBase64 = _com.Model.ContentBase64;
             varFileType = _com.Model.FileType;            
             varContainer = _com.Model.Container;
             varContentArrayBytes = _com.Model.ContentArrayBytes;
+            var tmpFile = _com.SaveTmpFile(_com.Model.Container, _com.Model.Name, _com.Model.ContentArrayBytes);
+            ShowPreview(tmpFile, false);
         }
 
         private void ControlsToModel()
@@ -204,11 +204,29 @@ namespace KNote.ClientWin.Views
             _com.Model.ContentArrayBytes = varContentArrayBytes;
         }
 
-        private void ShowPreview(string file)
+        private void ShowPreview(string file, bool includePdf = true)
         {
-            var ext = Path.GetExtension(file);
-            if (".jpg.jpeg.png.pdf".IndexOf(ext) >= 0)
-                htmlPreview.NavigateToUrl(file);
+            if (file == null)
+            {
+                htmlPreview.BodyHtml = "";
+                return;
+            }
+                            
+            var ext = Path.GetExtension(file);          
+            // Hack, ... pdf not work in htmlEditor when edit ... :-( ...
+            var fileTypes = (includePdf) ? ".jpg.jpeg.png.pdf" : ".jpg.jpeg.png";
+            if (fileTypes.IndexOf(ext) >= 0)
+            {
+                try
+                {                    
+                    htmlPreview.BodyHtml = "";
+                    htmlPreview.NavigateToUrl(file);
+                }
+                catch (Exception ex)
+                {
+                    ShowInfo(ex.Message, "KeyNote");
+                }
+            }
             else
                 htmlPreview.BodyHtml = "";
         }

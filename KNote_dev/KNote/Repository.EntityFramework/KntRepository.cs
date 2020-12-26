@@ -45,9 +45,8 @@ namespace KNote.Repository.EntityFramework
         public KntRepository(KntDbContext singletonContext, bool throwKntException = false)
         {
             _throwKntException = throwKntException;
-            _context = singletonContext;
+            _context = singletonContext;            
         }
-
 
         #endregion
 
@@ -138,7 +137,7 @@ namespace KNote.Repository.EntityFramework
                 return _users;
             }
         }
-
+        
         #region Pendiente ....
 
         // TODO: pendiente de re-implementar con patrón IKntRepositoryXxxxxx
@@ -187,7 +186,7 @@ namespace KNote.Repository.EntityFramework
         //    }
         //}
 
-        #endregion 
+        #endregion
 
         #endregion
 

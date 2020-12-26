@@ -13,6 +13,6 @@ namespace KNote.Repository
         IKntFolderRepository Folders { get; }
         IKntKAttributeRepository KAttributes { get; }
         IKntNoteRepository Notes { get; }              
-        IKntUserRepository Users { get; }              
+        IKntUserRepository Users { get; }        
     }
 }

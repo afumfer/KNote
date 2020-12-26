@@ -24,15 +24,15 @@ namespace KNote.Service.Services
         #region Properties
 
         public Guid IdServiceRef { get; }
-
+        
         #endregion 
 
         #region Constructors
 
         public KntService(IKntRepository repository)
         {
-            IdServiceRef = Guid.NewGuid();
             _repository = repository;
+            IdServiceRef = Guid.NewGuid();            
         }
 
         #endregion

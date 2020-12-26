@@ -17,7 +17,7 @@ namespace KNote.Service
         IKntFolderService Folders { get; }
         IKntNoteService Notes { get; }
         IKntNoteTypeService NoteTypes { get; }
-
+       
         //IKntKMessageService KMessages { get; }
         //IKntKEventService KEvents { get; }
     }

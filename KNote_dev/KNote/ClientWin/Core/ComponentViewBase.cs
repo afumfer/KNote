@@ -2,6 +2,7 @@
 using KNote.Service;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -264,6 +265,29 @@ namespace KNote.ClientWin.Core
             {
                 View.ShowInfo(ex.Message);
             }
+        }
+
+        public string SaveTmpFile(string container, string fileName, byte[] arrayContent)
+        {
+            string tmpFile;
+            try
+            {
+                //var dirPath = Path.Combine(new string[] { Path.GetTempPath(), "KeyNote", container });
+                var dirPath = Path.Combine(new string[] { Store.Config.CacheResources, container });                
+                tmpFile = Path.Combine(dirPath, fileName);
+
+                if (!Directory.Exists(dirPath))
+                    Directory.CreateDirectory(dirPath);
+                if (!File.Exists(tmpFile))
+                    File.WriteAllBytes(tmpFile, arrayContent);
+
+            }
+            catch (Exception)
+            {
+                tmpFile = null;
+            }    
+
+            return tmpFile;
         }
 
         #endregion 

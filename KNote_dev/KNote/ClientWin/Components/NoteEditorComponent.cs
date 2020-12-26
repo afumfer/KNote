@@ -330,13 +330,15 @@ namespace KNote.ClientWin.Components
             
         }
 
-        public ResourceDto EditResource(Guid resourceId)
+        public async Task<ResourceDto> EditResource(Guid resourceId)
         {
             var resourceEditor = new ResourceEditorComponent(Store);
             resourceEditor.AutoDBSave = false;  // don't save automatically
             
             var resource = Model.Resources.Where(_ => _.ResourceId == resourceId).SingleOrDefault();            
             resourceEditor.LoadModel(Service, resource, false);
+
+            var dummy = await Task.FromResult(true);
 
             var res = resourceEditor.RunModal();
             if (res.Entity == EComponentResult.Executed)

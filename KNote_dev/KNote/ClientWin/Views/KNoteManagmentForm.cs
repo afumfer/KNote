@@ -151,7 +151,7 @@ namespace KNote.ClientWin.Views
             }
             else
             {
-                MessageBox.Show("Option in development ... ");
+                MessageBox.Show("Option under development ... ");
             }
         }
 

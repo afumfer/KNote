@@ -26,6 +26,9 @@ namespace KNote.ClientWin.Core
 		public int RunCounter { get; set; }
 		public int AutoSaveMinutes { get; set; }
 
+		public string CacheResources { get; set; } = @"D:\Resources\knt";
+		public string CacheUrlResources { get; set; } = @"http://afx.hopto.org/kntres/NotesResources";
+
 		#region TODO: ... other params
 
 		//private byte _rastreoAlarmaMinutos;
