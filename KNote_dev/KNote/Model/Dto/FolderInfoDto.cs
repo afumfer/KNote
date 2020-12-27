@@ -181,7 +181,7 @@ namespace KNote.Model.Dto
             var results = new List<ValidationResult>();
 
             // ---
-            // Capturar las validaciones implementadas vía atributos.
+            // Capture the validations implemented with attributes.
             // TODO: (Esta sección se puede resolver por medio de reflexión).
             // ---
 
@@ -194,7 +194,7 @@ namespace KNote.Model.Dto
                results);
 
             // ---
-            // Validaciones específicas
+            // Specific validations
             // ----
 
 

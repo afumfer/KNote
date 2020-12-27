@@ -55,11 +55,13 @@
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.textDescription = new System.Windows.Forms.TextBox();
             this.toolDescription = new System.Windows.Forms.ToolStrip();
-            this.toolDescriptionHtmlTitles = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolDescriptionHtml = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolDescriptionHtmlTitle1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionHtmlTitle2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionHtmlTitle3 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionHtmlTitle4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionHtmlS3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolDescriptionHtmlEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionMarkdown = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolDescriptionMarkdownH1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionMarkdownH2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,9 +79,6 @@
             this.toolDescriptionMarkdownImage = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionMarkdownTable = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionMarkdownCode = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionUploads = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolDescriptionUploadFromFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionUploadFromClipboard = new System.Windows.Forms.ToolStripMenuItem();
             this.labelLoadingHtml = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.buttonEditMarkdown = new System.Windows.Forms.Button();
@@ -109,6 +108,7 @@
             this.buttonAttributeEdit = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.tabResources = new System.Windows.Forms.TabPage();
+            this.buttonInsertLink = new System.Windows.Forms.Button();
             this.panelPreview = new System.Windows.Forms.Panel();
             this.linkViewFile = new System.Windows.Forms.LinkLabel();
             this.textDescriptionResource = new System.Windows.Forms.TextBox();
@@ -142,6 +142,9 @@
             this.button15 = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
+            this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
+            this.toolDescriptionS3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolDescriptionUploadResource = new System.Windows.Forms.ToolStripButton();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
@@ -417,56 +420,71 @@
             // 
             this.toolDescription.Dock = System.Windows.Forms.DockStyle.Left;
             this.toolDescription.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolDescriptionHtmlTitles,
+            this.toolDescriptionHtml,
             this.toolDescriptionMarkdown,
-            this.toolDescriptionUploads});
+            this.toolDescriptionS3,
+            this.toolDescriptionUploadResource});
             this.toolDescription.Location = new System.Drawing.Point(0, 0);
             this.toolDescription.Name = "toolDescription";
             this.toolDescription.Size = new System.Drawing.Size(30, 376);
             this.toolDescription.TabIndex = 0;
             this.toolDescription.Text = "toolStrip1";
             // 
-            // toolDescriptionHtmlTitles
+            // toolDescriptionHtml
             // 
-            this.toolDescriptionHtmlTitles.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolDescriptionHtmlTitles.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolDescriptionHtml.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolDescriptionHtml.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolDescriptionHtmlTitle1,
             this.toolDescriptionHtmlTitle2,
             this.toolDescriptionHtmlTitle3,
-            this.toolDescriptionHtmlTitle4});
-            this.toolDescriptionHtmlTitles.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionHtmlTitles.Image")));
-            this.toolDescriptionHtmlTitles.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDescriptionHtmlTitles.Name = "toolDescriptionHtmlTitles";
-            this.toolDescriptionHtmlTitles.Size = new System.Drawing.Size(27, 20);
-            this.toolDescriptionHtmlTitles.Text = "H";
+            this.toolDescriptionHtmlTitle4,
+            this.toolDescriptionHtmlS3,
+            this.toolDescriptionHtmlEdit});
+            this.toolDescriptionHtml.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionHtml.Image")));
+            this.toolDescriptionHtml.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolDescriptionHtml.Name = "toolDescriptionHtml";
+            this.toolDescriptionHtml.Size = new System.Drawing.Size(27, 20);
+            this.toolDescriptionHtml.Text = "H";
             // 
             // toolDescriptionHtmlTitle1
             // 
             this.toolDescriptionHtmlTitle1.Name = "toolDescriptionHtmlTitle1";
-            this.toolDescriptionHtmlTitle1.Size = new System.Drawing.Size(105, 22);
+            this.toolDescriptionHtmlTitle1.Size = new System.Drawing.Size(163, 22);
             this.toolDescriptionHtmlTitle1.Text = "Title 1";
-            this.toolDescriptionHtmlTitle1.Click += new System.EventHandler(this.toolDescriptionHtmlTitle_Click);
+            this.toolDescriptionHtmlTitle1.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
             // 
             // toolDescriptionHtmlTitle2
             // 
             this.toolDescriptionHtmlTitle2.Name = "toolDescriptionHtmlTitle2";
-            this.toolDescriptionHtmlTitle2.Size = new System.Drawing.Size(105, 22);
+            this.toolDescriptionHtmlTitle2.Size = new System.Drawing.Size(163, 22);
             this.toolDescriptionHtmlTitle2.Text = "Title 2";
-            this.toolDescriptionHtmlTitle2.Click += new System.EventHandler(this.toolDescriptionHtmlTitle_Click);
+            this.toolDescriptionHtmlTitle2.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
             // 
             // toolDescriptionHtmlTitle3
             // 
             this.toolDescriptionHtmlTitle3.Name = "toolDescriptionHtmlTitle3";
-            this.toolDescriptionHtmlTitle3.Size = new System.Drawing.Size(105, 22);
+            this.toolDescriptionHtmlTitle3.Size = new System.Drawing.Size(163, 22);
             this.toolDescriptionHtmlTitle3.Text = "Title 3";
-            this.toolDescriptionHtmlTitle3.Click += new System.EventHandler(this.toolDescriptionHtmlTitle_Click);
+            this.toolDescriptionHtmlTitle3.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
             // 
             // toolDescriptionHtmlTitle4
             // 
             this.toolDescriptionHtmlTitle4.Name = "toolDescriptionHtmlTitle4";
-            this.toolDescriptionHtmlTitle4.Size = new System.Drawing.Size(105, 22);
+            this.toolDescriptionHtmlTitle4.Size = new System.Drawing.Size(163, 22);
             this.toolDescriptionHtmlTitle4.Text = "Title 4";
-            this.toolDescriptionHtmlTitle4.Click += new System.EventHandler(this.toolDescriptionHtmlTitle_Click);
+            this.toolDescriptionHtmlTitle4.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
+            // 
+            // toolDescriptionHtmlS3
+            // 
+            this.toolDescriptionHtmlS3.Name = "toolDescriptionHtmlS3";
+            this.toolDescriptionHtmlS3.Size = new System.Drawing.Size(160, 6);
+            // 
+            // toolDescriptionHtmlEdit
+            // 
+            this.toolDescriptionHtmlEdit.Name = "toolDescriptionHtmlEdit";
+            this.toolDescriptionHtmlEdit.Size = new System.Drawing.Size(163, 22);
+            this.toolDescriptionHtmlEdit.Text = "Edit html code ...";
+            this.toolDescriptionHtmlEdit.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
             // 
             // toolDescriptionMarkdown
             // 
@@ -601,30 +619,6 @@
             this.toolDescriptionMarkdownCode.Size = new System.Drawing.Size(146, 22);
             this.toolDescriptionMarkdownCode.Text = "Code";
             this.toolDescriptionMarkdownCode.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
-            // 
-            // toolDescriptionUploads
-            // 
-            this.toolDescriptionUploads.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolDescriptionUploads.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolDescriptionUploadFromFile,
-            this.toolDescriptionUploadFromClipboard});
-            this.toolDescriptionUploads.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploads.Image")));
-            this.toolDescriptionUploads.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDescriptionUploads.Name = "toolDescriptionUploads";
-            this.toolDescriptionUploads.Size = new System.Drawing.Size(27, 20);
-            this.toolDescriptionUploads.Text = "I";
-            // 
-            // toolDescriptionUploadFromFile
-            // 
-            this.toolDescriptionUploadFromFile.Name = "toolDescriptionUploadFromFile";
-            this.toolDescriptionUploadFromFile.Size = new System.Drawing.Size(221, 22);
-            this.toolDescriptionUploadFromFile.Text = "Insert image from file";
-            // 
-            // toolDescriptionUploadFromClipboard
-            // 
-            this.toolDescriptionUploadFromClipboard.Name = "toolDescriptionUploadFromClipboard";
-            this.toolDescriptionUploadFromClipboard.Size = new System.Drawing.Size(221, 22);
-            this.toolDescriptionUploadFromClipboard.Text = "Insert image form clipboard";
             // 
             // labelLoadingHtml
             // 
@@ -959,6 +953,7 @@
             // 
             // tabResources
             // 
+            this.tabResources.Controls.Add(this.buttonInsertLink);
             this.tabResources.Controls.Add(this.panelPreview);
             this.tabResources.Controls.Add(this.textDescriptionResource);
             this.tabResources.Controls.Add(this.labelPreview);
@@ -976,6 +971,17 @@
             this.tabResources.TabIndex = 4;
             this.tabResources.Text = "Resources  ";
             this.tabResources.UseVisualStyleBackColor = true;
+            // 
+            // buttonInsertLink
+            // 
+            this.buttonInsertLink.Location = new System.Drawing.Point(396, 10);
+            this.buttonInsertLink.Name = "buttonInsertLink";
+            this.buttonInsertLink.Size = new System.Drawing.Size(32, 23);
+            this.buttonInsertLink.TabIndex = 19;
+            this.buttonInsertLink.Text = "<>";
+            this.toolTipHelps.SetToolTip(this.buttonInsertLink, "Insert resouce link in note description ");
+            this.buttonInsertLink.UseVisualStyleBackColor = true;
+            this.buttonInsertLink.Click += new System.EventHandler(this.buttonInsertLink_Click);
             // 
             // panelPreview
             // 
@@ -1079,6 +1085,7 @@
             this.buttonResourceAdd.Size = new System.Drawing.Size(27, 23);
             this.buttonResourceAdd.TabIndex = 10;
             this.buttonResourceAdd.Text = "+";
+            this.toolTipHelps.SetToolTip(this.buttonResourceAdd, "Add resource");
             this.buttonResourceAdd.UseVisualStyleBackColor = true;
             this.buttonResourceAdd.Click += new System.EventHandler(this.buttonResourceAdd_Click);
             // 
@@ -1366,6 +1373,21 @@
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
             // 
+            // toolDescriptionS3
+            // 
+            this.toolDescriptionS3.Name = "toolDescriptionS3";
+            this.toolDescriptionS3.Size = new System.Drawing.Size(27, 6);
+            // 
+            // toolDescriptionUploadResource
+            // 
+            this.toolDescriptionUploadResource.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolDescriptionUploadResource.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploadResource.Image")));
+            this.toolDescriptionUploadResource.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolDescriptionUploadResource.Name = "toolDescriptionUploadResource";
+            this.toolDescriptionUploadResource.Size = new System.Drawing.Size(27, 20);
+            this.toolDescriptionUploadResource.Text = "Upload resource";
+            this.toolDescriptionUploadResource.Click += new System.EventHandler(this.toolDescriptionUploadResource_Click);
+            // 
             // NoteEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1498,12 +1520,9 @@
         private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
         private System.Windows.Forms.TextBox textDescription;
         private System.Windows.Forms.ToolStrip toolDescription;
-        private System.Windows.Forms.ToolStripDropDownButton toolDescriptionHtmlTitles;
+        private System.Windows.Forms.ToolStripDropDownButton toolDescriptionHtml;
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlTitle1;
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlTitle2;
-        private System.Windows.Forms.ToolStripDropDownButton toolDescriptionUploads;
-        private System.Windows.Forms.ToolStripMenuItem toolDescriptionUploadFromFile;
-        private System.Windows.Forms.ToolStripMenuItem toolDescriptionUploadFromClipboard;
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlTitle3;
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlTitle4;
         private System.Windows.Forms.ToolStripDropDownButton toolDescriptionMarkdown;
@@ -1526,5 +1545,11 @@
         private System.Windows.Forms.TextBox textDescriptionResource;
         private System.Windows.Forms.Panel panelPreview;
         private System.Windows.Forms.LinkLabel linkViewFile;
+        private System.Windows.Forms.Button buttonInsertLink;
+        private System.Windows.Forms.ToolTip toolTipHelps;
+        private System.Windows.Forms.ToolStripSeparator toolDescriptionHtmlS3;
+        private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlEdit;
+        private System.Windows.Forms.ToolStripSeparator toolDescriptionS3;
+        private System.Windows.Forms.ToolStripButton toolDescriptionUploadResource;
     }
 }

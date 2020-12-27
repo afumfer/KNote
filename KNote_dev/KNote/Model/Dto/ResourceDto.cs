@@ -28,7 +28,7 @@ namespace KNote.Model.Dto
         }
 
         private string _name;
-        [Required(ErrorMessage =KMSG)]
+        [Required(ErrorMessage = KMSG)]
         [MaxLength(1024)]
         public string Name
         {
@@ -44,6 +44,7 @@ namespace KNote.Model.Dto
         }
 
         private string _container;
+        [Required(ErrorMessage = KMSG)]
         public string Container
         {
             get { return _container; }
@@ -100,7 +101,7 @@ namespace KNote.Model.Dto
             }
         }
 
-        private bool _contentInDB;
+        private bool _contentInDB = true;
         public bool ContentInDB
         {
             get { return _contentInDB; }
@@ -143,6 +144,7 @@ namespace KNote.Model.Dto
         }
 
         private string _contentBase64;
+        [Required(ErrorMessage = KMSG)]
         public string ContentBase64 {
             get
             {
@@ -189,27 +191,36 @@ namespace KNote.Model.Dto
             var results = new List<ValidationResult>();
 
             // ---
-            // Capturar las validaciones implementadas vía atributos.
+            // Capture the validations implemented with attributes.
             // ---
 
             Validator.TryValidateProperty(this.Name,
                new ValidationContext(this, null, null) { MemberName = "Name" },
                results);
 
+            Validator.TryValidateProperty(this.ContentBase64,
+               new ValidationContext(this, null, null) { MemberName = "ContentBase64" },
+               results);
+
+            Validator.TryValidateProperty(this.Container,
+               new ValidationContext(this, null, null) { MemberName = "Container" },
+               results);
+
+
             //----
-            // Validaciones específicas
+            // Specific validations
             //----
 
             // ---- Ejemplo
             //if (ModificationDateTime < CreationDateTime)
             //{
             //    results.Add(new ValidationResult
-            //     ("KMSG: La fecha de modificación no puede ser mayor que la fecha de creación"
+            //     ("KMSG: The modification date cannot be greater than the creation date "
             //     , new[] { "ModificationDateTime", "CreationDateTime" }));
             //}
 
             // ---
-            // Retornar List<ValidationResult>()
+            // Return List<ValidationResult>()
             // ---           
 
             return results;

@@ -223,7 +223,7 @@ namespace KNote.Model.Dto
             }
 
             // ---
-            // Retornar List<ValidationResult>()
+            // Return List<ValidationResult>()
             // ---           
 
             return results;

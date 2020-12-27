@@ -33,7 +33,7 @@ namespace KNote.Model
             }
 
             if (!string.IsNullOrEmpty(msgVal))            
-                msgVal = "\n - " + msgVal;
+                msgVal = "\n" + msgVal;
 
             return msgVal;            
         }        

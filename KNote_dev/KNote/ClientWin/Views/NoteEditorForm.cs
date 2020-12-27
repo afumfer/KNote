@@ -206,7 +206,7 @@ namespace KNote.ClientWin.Views
             SizeLastColumn((ListView)sender);
         }
 
-        private void toolDescriptionHtmlTitle_Click(object sender, EventArgs e)
+        private void toolDescriptionHtml_Click(object sender, EventArgs e)
         {
             ToolStripItem menuSel;
             menuSel = (ToolStripItem)sender;
@@ -231,6 +231,13 @@ namespace KNote.ClientWin.Views
                 htmlDescription.SelectedHtml = "<h4>Título 1</h4>";
                 htmlDescription.Focus();
             }
+            if (menuSel == toolDescriptionHtmlEdit)
+            {
+                htmlDescription.HtmlContentsEdit();
+                htmlDescription.Focus();
+            }
+
+            //
         }
 
         private void toolDescriptionMarkdown_Click(object sender, EventArgs e)
@@ -264,7 +271,7 @@ namespace KNote.ClientWin.Views
             else if (menuSel == toolDescriptionMarkdownLink)
                 tag = nl + "[xx](http://xx 'xx')";
             else if (menuSel == toolDescriptionMarkdownImage)
-                tag = nl + "[![Title](Address 'Title')](http://url 'Title')";
+                tag = nl + "![Title](Address 'Title')](http://url 'Title')";
             else if (menuSel == toolDescriptionMarkdownCode)
                 tag = nl + "```_```";
             else if (menuSel == toolDescriptionMarkdownTable)
@@ -375,9 +382,14 @@ namespace KNote.ClientWin.Views
 
         private async void buttonResourceAdd_Click(object sender, EventArgs e)
         {
-            var resource = await _com.NewResource();
-            if (resource != null)
-                listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
+            //var resource = await _com.NewResource();
+            //if (resource != null)
+            //{
+            //    listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
+            //    listViewResources.Items[0].Selected = true;
+            //    _selectedResource = resource;
+            //}
+            await AddResource();
         }
        
         private void buttonResourceEdit_Click(object sender, EventArgs e)
@@ -398,9 +410,12 @@ namespace KNote.ClientWin.Views
             if (res)
             {
                 listViewResources.Items[delRes].Remove();
+                picResource.Image = null;
+                textDescriptionResource.Text = "";
+                if (listViewResources.Items.Count > 0)
+                    listViewResources.Items[0].Selected = true;
             }
         }
-
 
         private void listViewResources_DoubleClick(object sender, EventArgs e)
         {
@@ -408,8 +423,56 @@ namespace KNote.ClientWin.Views
                 EditResource();
         }
 
-        #endregion 
+        private void linkViewFile_Click(object sender, EventArgs e)
+        {
+            var tmpFile = _com.GetOrSaveTmpFile(_selectedResource.Container, _selectedResource.Name, _selectedResource.ContentArrayBytes);
 
+            if (tmpFile == null)
+                return;
+
+            ProcessStartInfo startInfo = new ProcessStartInfo(tmpFile) { UseShellExecute = true };
+            try
+            {
+                Process.Start(startInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("The following error has occurred: " + ex.Message, "KeyNote");
+            }
+        }
+
+        private void buttonInsertLink_Click(object sender, EventArgs e)
+        {
+            if (listViewResources.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("There is no resource selected.", "KeyNote");
+                return;
+            }
+
+            InsertLinkSelectedResource(); 
+            
+            //var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
+            //tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            //tmpFile = tmpFile.Replace(KntConst.ContainerResources, _com.Store.Config.CacheUrlResources);
+
+            //if (!buttonViewHtml.Enabled)
+            //{
+            //    string strLink = (_selectedResource.FileType.Contains("image")) ?
+            //        $"<img src='{tmpFile}' alt='{_selectedResource.Description}'/>" :
+            //        $"<a href='{tmpFile}' target='_blank'>{_selectedResource.NameOut}</a>";                
+            //    htmlDescription.SelectedHtml = strLink;
+            //    htmlDescription.Focus();
+            //}
+            //else 
+            //{ 
+            //    string strLink = (_selectedResource.FileType.Contains("image")) ?
+            //        $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
+            //    var selStart = textDescription.SelectionStart;
+            //    textDescription.Text = textDescription.Text.Insert(selStart, strLink);            
+            //}
+        }
+
+        #endregion
 
         #endregion
 
@@ -508,15 +571,11 @@ namespace KNote.ClientWin.Views
 
             // Resources 
             ModelToControlsResources();
-            if (_com.Model.Resources.Count > 0)
-            {
-                listViewResources.Items[0].Selected = true;                
-                listViewResources.Select();
-            }
+            if (_com.Model.Resources.Count > 0)            
+                listViewResources.Items[0].Selected = true;                                            
             else            
                 UpdatePreviewResource(null);                
             
-
             // Tasks
             ModelToControlsTasks();
 
@@ -707,7 +766,7 @@ namespace KNote.ClientWin.Views
             if (c is Button)
             {
                 Button b = (Button)c;
-                b.Enabled = false;
+                b.Visible = false;
                 return;
             }
             if (c is CheckBox)
@@ -829,7 +888,7 @@ namespace KNote.ClientWin.Views
             htmlDescription.Visible = true;
             buttonEditMarkdown.Enabled = true;
             buttonViewHtml.Enabled = false;
-            toolDescriptionHtmlTitles.Visible = true;
+            toolDescriptionHtml.Visible = true;
             toolDescriptionMarkdown.Visible = false;
         }
 
@@ -839,7 +898,7 @@ namespace KNote.ClientWin.Views
             textDescription.Visible = true;
             buttonEditMarkdown.Enabled = false;
             buttonViewHtml.Enabled = true;
-            toolDescriptionHtmlTitles.Visible = false;
+            toolDescriptionHtml.Visible = false;
             toolDescriptionMarkdown.Visible = true;
         }
 
@@ -908,7 +967,45 @@ namespace KNote.ClientWin.Views
             var idResource = Guid.Parse(listViewResources.SelectedItems[0].Name);
             var resource = await _com.EditResource(idResource);
             if (resource != null)
+            {
+                _selectedResource = resource;
                 UpdateResource(resource);
+            }
+        }
+
+        private async Task<ResourceDto> AddResource() 
+        {
+            var resource = await _com.NewResource();
+            if (resource != null)
+            {
+                listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
+                listViewResources.Items[0].Selected = true;
+                _selectedResource = resource;
+            }
+            return resource;
+        }
+
+        private void InsertLinkSelectedResource()
+        {
+            var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
+            tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            tmpFile = tmpFile.Replace(KntConst.ContainerResources, _com.Store.Config.CacheUrlResources);
+
+            if (!buttonViewHtml.Enabled)
+            {
+                string strLink = (_selectedResource.FileType.Contains("image")) ?
+                    $"<img src='{tmpFile}' alt='{_selectedResource.Description}'/>" :
+                    $"<a href='{tmpFile}' target='_blank'>{_selectedResource.NameOut}</a>";
+                htmlDescription.SelectedHtml = strLink;
+                htmlDescription.Focus();
+            }
+            else
+            {
+                string strLink = (_selectedResource.FileType.Contains("image")) ?
+                    $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
+                var selStart = textDescription.SelectionStart;
+                textDescription.Text = textDescription.Text.Insert(selStart, strLink);
+            }
         }
 
         private void UpdateResource(ResourceDto resource)
@@ -920,22 +1017,11 @@ namespace KNote.ClientWin.Views
             UpdatePreviewResource(resource);
         }
 
-        private void linkViewFile_Click(object sender, EventArgs e)
+        private async void toolDescriptionUploadResource_Click(object sender, EventArgs e)
         {
-            var tmpFile = _com.SaveTmpFile(_selectedResource.Container, _selectedResource.Name, _selectedResource.ContentArrayBytes);
-
-            if (tmpFile == null)
-                return;
-
-            ProcessStartInfo startInfo = new ProcessStartInfo(tmpFile) { UseShellExecute = true };
-            try
-            {
-                Process.Start(startInfo);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("The following error has occurred: " + ex.Message, "KeyNote");
-            }
+            var resource = await AddResource();
+            if (resource != null)
+                InsertLinkSelectedResource();
         }
 
 

@@ -267,7 +267,7 @@ namespace KNote.ClientWin.Core
             }
         }
 
-        public string SaveTmpFile(string container, string fileName, byte[] arrayContent)
+        public string GetOrSaveTmpFile(string container, string fileName, byte[] arrayContent)
         {
             string tmpFile;
             try

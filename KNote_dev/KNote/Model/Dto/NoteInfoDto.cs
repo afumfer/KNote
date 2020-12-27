@@ -212,7 +212,7 @@ namespace KNote.Model.Dto
             var results = new List<ValidationResult>();
 
             // ---
-            // Capturar las validaciones implementadas vía atributos.
+            // Capture the validations implemented with attributes.
             // ---
 
             Validator.TryValidateProperty(this.Topic,
@@ -228,7 +228,7 @@ namespace KNote.Model.Dto
                results);
 
             //----
-            // Validaciones específicas
+            // Specific validations
             //----
 
             // TODO: Revisar Esto
@@ -244,7 +244,7 @@ namespace KNote.Model.Dto
             // TODO: .....
 
             // ---
-            // Retornar List<ValidationResult>()
+            // Return List<ValidationResult>()
             // ---           
 
             return results;

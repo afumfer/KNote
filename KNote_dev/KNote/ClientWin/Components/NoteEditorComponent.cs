@@ -261,7 +261,6 @@ namespace KNote.ClientWin.Components
             taskEditor.Model.SetIsNew(true);
 
             var res = taskEditor.RunModal();
-
             if (res.Entity == EComponentResult.Executed)
             {
                 Model.Tasks.Add(taskEditor.Model);
