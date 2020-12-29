@@ -920,7 +920,7 @@ namespace KNote.Repository.EntityFramework
             return lastNote != null ? lastNote.NoteNumber + 1 : 1;
         }
 
-        private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+        public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {
             // TODO: pendiente de refactorizar este método 
 

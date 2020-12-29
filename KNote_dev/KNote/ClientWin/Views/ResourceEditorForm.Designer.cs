@@ -190,6 +190,7 @@ namespace KNote.ClientWin.Views
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ResourceEditorForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Resource editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ResourceEditorForm_FormClosing);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ResourceEditorForm_KeyPress);

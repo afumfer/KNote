@@ -47,7 +47,7 @@
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(552, 495);
+            this.panelForm.Size = new System.Drawing.Size(543, 488);
             this.panelForm.TabIndex = 0;
             // 
             // panelDataGridNotes
@@ -58,7 +58,7 @@
             this.panelDataGridNotes.Controls.Add(this.dataGridNotes);
             this.panelDataGridNotes.Location = new System.Drawing.Point(1, 1);
             this.panelDataGridNotes.Name = "panelDataGridNotes";
-            this.panelDataGridNotes.Size = new System.Drawing.Size(551, 452);
+            this.panelDataGridNotes.Size = new System.Drawing.Size(542, 445);
             this.panelDataGridNotes.TabIndex = 2;
             // 
             // dataGridNotes
@@ -75,7 +75,7 @@
             this.dataGridNotes.ReadOnly = true;
             this.dataGridNotes.RowHeadersWidth = 25;
             this.dataGridNotes.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridNotes.Size = new System.Drawing.Size(550, 450);
+            this.dataGridNotes.Size = new System.Drawing.Size(541, 443);
             this.dataGridNotes.TabIndex = 3;
             this.dataGridNotes.Text = "dataGridView1";
             this.dataGridNotes.SelectionChanged += new System.EventHandler(this.dataGridNotes_SelectionChanged);
@@ -88,13 +88,14 @@
             this.panelBottom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.panelBottom.Controls.Add(this.buttonCancel);
             this.panelBottom.Controls.Add(this.buttonAccept);
-            this.panelBottom.Location = new System.Drawing.Point(0, 451);
+            this.panelBottom.Location = new System.Drawing.Point(-9, 444);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(552, 44);
             this.panelBottom.TabIndex = 1;
             // 
             // buttonCancel
             // 
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.buttonCancel.Location = new System.Drawing.Point(461, 8);
             this.buttonCancel.Name = "buttonCancel";
@@ -106,6 +107,7 @@
             // 
             // buttonAccept
             // 
+            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.buttonAccept.Location = new System.Drawing.Point(376, 8);
             this.buttonAccept.Name = "buttonAccept";
@@ -119,7 +121,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(552, 495);
+            this.ClientSize = new System.Drawing.Size(543, 488);
             this.Controls.Add(this.panelForm);
             this.Name = "NotesSelectorForm";
             this.Text = "Notes selector";

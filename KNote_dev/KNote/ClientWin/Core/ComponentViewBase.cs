@@ -132,7 +132,7 @@ namespace KNote.ClientWin.Core
 
         #region Component virtual / abstract methods
 
-        public abstract void LoadEntities(IKntService service);
+        public abstract Task<bool> LoadEntities(IKntService service, bool refreshView = true);
 
         public virtual void Accept()
         {

@@ -56,10 +56,6 @@ namespace KNote.ClientWin.Views
             {
                 _skipSelectionChanged = true;
 
-                // !!! plan A
-                //dataGridNotes.DataSource = _com.ListNotes;
-
-                // !!! plan B
                 _source.DataSource = _com.ListEntities;                
                 dataGridNotes.DataSource = _source;
 
@@ -98,17 +94,17 @@ namespace KNote.ClientWin.Views
             StartPosition = FormStartPosition.CenterScreen;
         }
 
-        public object SelectItem(NoteInfoDto item)
-        {
-            throw new NotImplementedException();
-        }
-
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             return MessageBox.Show(info, caption, buttons);
         }
 
         #region Extension methods ...
+
+        public object SelectItem(NoteInfoDto item)
+        {
+            throw new NotImplementedException();
+        }
 
         public void AddItem(NoteInfoDto item)
         {
@@ -149,8 +145,6 @@ namespace KNote.ClientWin.Views
 
             GridSelectFirstElement(false);
         }
-
-
 
         public void RefreshItem(NoteInfoDto item)
         {

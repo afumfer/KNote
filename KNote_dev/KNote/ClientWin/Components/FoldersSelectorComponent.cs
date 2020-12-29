@@ -56,7 +56,7 @@ namespace KNote.ClientWin.Components
 
         #region Component methods
 
-        public override void LoadEntities(IKntService service)
+        public override Task<bool> LoadEntities(IKntService service, bool refreshView = true)
         {
             throw new NotImplementedException();
         }

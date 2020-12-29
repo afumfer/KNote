@@ -302,6 +302,17 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private async void buttonNoteType_Click(object sender, EventArgs e)
+        {
+            var changed = await _com.RequestChangeNoteType(_com.Model.NoteTypeId);
+
+            if(changed)
+            {
+                textNoteType.Text = _com.Model.NoteTypeDto.Name;                
+                ModelToControlsAttributes();
+            }
+        }
+        
         #region Messages managment
 
         private async void buttonAddAlarm_Click(object sender, EventArgs e)
@@ -540,7 +551,7 @@ namespace KNote.ClientWin.Views
             textNoteNumber.Text = "#" + _com.Model.NoteNumber.ToString();
             textFolder.Text = _com.Model.FolderDto?.Name;
             textFolderNumber.Text = "#" + _com.Model.FolderDto.FolderNumber.ToString();
-            _selectedFolderId = _com.Model.FolderId;
+            _selectedFolderId = _com.Model.FolderId;                    
             textTags.Text = _com.Model.Tags;            
             textPriority.Text = _com.Model.Priority.ToString();
 
@@ -705,7 +716,7 @@ namespace KNote.ClientWin.Views
 
             // Basic data
             _com.Model.Topic = textTopic.Text;
-            _com.Model.FolderId = _selectedFolderId;
+            _com.Model.FolderId = _selectedFolderId;            
             _com.Model.FolderDto.FolderId = _selectedFolderId;
             _com.Model.FolderDto.Name = textFolder.Text;
             _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
@@ -1023,6 +1034,8 @@ namespace KNote.ClientWin.Views
             if (resource != null)
                 InsertLinkSelectedResource();
         }
+
+
 
 
         //private void toolInsertarImagenClipboard_Click(object sender, EventArgs e)

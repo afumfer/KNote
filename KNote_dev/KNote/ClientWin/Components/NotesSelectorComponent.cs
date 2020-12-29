@@ -44,12 +44,12 @@ namespace KNote.ClientWin.Components
 
         #region Component virtual / abstract public members
 
-        public override void LoadEntities(IKntService service)
+        public override async Task<bool> LoadEntities(IKntService service, bool refreshView = true)
         {
-            throw new NotImplementedException();
+            return await LoadEntities(service, null, refreshView);
         }
 
-        public async Task<bool> LoadEntities(IKntService service, FolderInfoDto folder)
+        public async Task<bool> LoadEntities(IKntService service, FolderInfoDto folder, bool refreshView = true)
         {
             try
             {
@@ -62,13 +62,18 @@ namespace KNote.ClientWin.Components
                 else 
                     f = Folder.FolderId;
 
-                var response = await Service.Notes.GetByFolderAsync(f);
+                Result<List<NoteInfoDto>> response;
+                if(folder == null)
+                    response = await Service.Notes.GetAllAsync();
+                else 
+                    response = await Service.Notes.GetByFolderAsync(f);
 
                 if (response.IsValid)
                 {
                     ListEntities = response.Entity;
 
-                    View.RefreshView();
+                    if(refreshView)
+                        View.RefreshView();
 
                     if (ListEntities?.Count > 0)
                         SelectedEntity = ListEntities[0];

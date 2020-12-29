@@ -247,6 +247,11 @@ namespace KNote.Service.Services
             return result;
         }
 
+        public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+        {
+            return await _repository.Notes.CompleteNoteAttributes(attributesNotes, noteId, noteTypeId);
+        }
+
         public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
         {
             return await _repository.Notes.GetResourcesAsync(idNote);

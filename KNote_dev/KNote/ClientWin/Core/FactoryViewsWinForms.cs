@@ -74,6 +74,11 @@ namespace KNote.ClientWin.Core
             return new TaskEditorForm(component);
         }
 
+        public ISelectorView<NoteTypeDto> View(NoteTypesSelectorComponent component)
+        {
+            return new NoteTypesSelectorForm(component);
+        }
+
 
         #endregion
 

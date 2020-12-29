@@ -453,6 +453,28 @@ namespace KNote.Repository.Dapper
                     return ResultDomainAction(result);
                 }
 
+                // Delete old attributes
+                int rDel = 0;
+                if (entity.NoteTypeId == null)
+                {
+                    sql = @"DELETE [NoteKAttributes] WHERE NoteId = @NoteId AND 
+                                [KAttributeId] NOT IN (SELECT [KAttributeId] FROM [KAttributes] where [NoteTypeId] is null)";
+                    rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId, NoteTypeId = entity.NoteTypeId });
+
+                }
+                else
+                {
+                    sql = @"DELETE [NoteKAttributes] WHERE NoteId = @NoteId AND 
+                                [KAttributeId] NOT IN (SELECT [KAttributeId] FROM [KAttributes] where [NoteTypeId] is null or [NoteTypeId] = @NoteTypeId)";
+                    rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId,  NoteTypeId = entity.NoteTypeId });
+                }
+                //if (rDel == 0)
+                //{
+                //    result.ErrorList.Add("Entity not deleted");
+                //    return ResultDomainAction(result);
+                //}
+
+                // Add new attributes or update 
                 foreach (var atr in entity.KAttributesDto)
                 {
                     if(atr.NoteKAttributeId == Guid.Empty)
@@ -490,23 +512,25 @@ namespace KNote.Repository.Dapper
                 }
 
                 // Delete old attributes
-                sql = "SELECT NoteKAttributeId, NoteId, KAttributeId, [Value] FROM NoteKAttributes WHERE NoteId = @NoteId";
-                var allAtr = (await db.QueryAsync<NoteKAttributeDto>(sql.ToString(), new { entity.NoteId })).ToList();
+                //sql = "SELECT NoteKAttributeId, NoteId, KAttributeId, [Value] FROM NoteKAttributes WHERE NoteId = @NoteId";
+                //var allAtr = (await db.QueryAsync<NoteKAttributeDto>(sql.ToString(), new { entity.NoteId })).ToList();
 
-                foreach (var a in allAtr)
-                {
-                    var delAtr = entity.KAttributesDto.Where(_ => _.NoteKAttributeId == a.NoteKAttributeId).FirstOrDefault();
-                    if (delAtr == null)
-                    {
-                        sql = @"DELETE [NoteKAttributes] WHERE NoteKAttributeId = @NoteKAttributeId";
-                        var rDel = await db.ExecuteAsync(sql.ToString(), new { a.NoteKAttributeId });
-                        if (rDel == 0)
-                        {
-                            result.ErrorList.Add("Entity not deleted");
-                            return ResultDomainAction(result);
-                        }
-                    }
-                }
+                //foreach (var a in allAtr)
+                //{
+                //    var delAtr = entity.KAttributesDto.Where(_ => _.NoteKAttributeId == a.NoteKAttributeId).FirstOrDefault();
+                //    if (delAtr == null)
+                //    {
+                //        sql = @"DELETE [NoteKAttributes] WHERE NoteKAttributeId = @NoteKAttributeId";
+                //        var rDel = await db.ExecuteAsync(sql.ToString(), new { a.NoteKAttributeId });
+                //        if (rDel == 0)
+                //        {
+                //            result.ErrorList.Add("Entity not deleted");
+                //            return ResultDomainAction(result);
+                //        }
+                //    }
+                //}
+
+
 
                 result.Entity = entity;
 
@@ -1181,6 +1205,12 @@ namespace KNote.Repository.Dapper
             if (str != "")
                 str += " AND ";
             return str;
+        }
+
+        public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+        {
+            var db = GetOpenConnection();
+            return await CompleteNoteAttributes(db, attributesNotes, noteId, noteTypeId);
         }
 
         private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(DbConnection conn, List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)

@@ -79,6 +79,8 @@
             this.toolDescriptionMarkdownImage = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionMarkdownTable = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionMarkdownCode = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolDescriptionS3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolDescriptionUploadResource = new System.Windows.Forms.ToolStripButton();
             this.labelLoadingHtml = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.buttonEditMarkdown = new System.Windows.Forms.Button();
@@ -143,8 +145,6 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
-            this.toolDescriptionS3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolDescriptionUploadResource = new System.Windows.Forms.ToolStripButton();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
@@ -341,10 +341,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabNoteData.Controls.Add(this.tabBasicData);
-            this.tabNoteData.Controls.Add(this.tabAlarms);
             this.tabNoteData.Controls.Add(this.tabAttributes);
             this.tabNoteData.Controls.Add(this.tabResources);
             this.tabNoteData.Controls.Add(this.tabTasks);
+            this.tabNoteData.Controls.Add(this.tabAlarms);
             this.tabNoteData.Controls.Add(this.tabCode);
             this.tabNoteData.Controls.Add(this.tabTraceNotes);
             this.tabNoteData.ImageList = this.imageListTabNoteData;
@@ -619,6 +619,21 @@
             this.toolDescriptionMarkdownCode.Size = new System.Drawing.Size(146, 22);
             this.toolDescriptionMarkdownCode.Text = "Code";
             this.toolDescriptionMarkdownCode.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            // 
+            // toolDescriptionS3
+            // 
+            this.toolDescriptionS3.Name = "toolDescriptionS3";
+            this.toolDescriptionS3.Size = new System.Drawing.Size(27, 6);
+            // 
+            // toolDescriptionUploadResource
+            // 
+            this.toolDescriptionUploadResource.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolDescriptionUploadResource.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploadResource.Image")));
+            this.toolDescriptionUploadResource.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolDescriptionUploadResource.Name = "toolDescriptionUploadResource";
+            this.toolDescriptionUploadResource.Size = new System.Drawing.Size(27, 20);
+            this.toolDescriptionUploadResource.Text = "Upload resource";
+            this.toolDescriptionUploadResource.Click += new System.EventHandler(this.toolDescriptionUploadResource_Click);
             // 
             // labelLoadingHtml
             // 
@@ -919,6 +934,7 @@
             this.buttonNoteType.TabIndex = 45;
             this.buttonNoteType.Text = "...";
             this.buttonNoteType.UseVisualStyleBackColor = false;
+            this.buttonNoteType.Click += new System.EventHandler(this.buttonNoteType_Click);
             // 
             // label15
             // 
@@ -1372,21 +1388,6 @@
             this.label14.Size = new System.Drawing.Size(99, 15);
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
-            // 
-            // toolDescriptionS3
-            // 
-            this.toolDescriptionS3.Name = "toolDescriptionS3";
-            this.toolDescriptionS3.Size = new System.Drawing.Size(27, 6);
-            // 
-            // toolDescriptionUploadResource
-            // 
-            this.toolDescriptionUploadResource.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolDescriptionUploadResource.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploadResource.Image")));
-            this.toolDescriptionUploadResource.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDescriptionUploadResource.Name = "toolDescriptionUploadResource";
-            this.toolDescriptionUploadResource.Size = new System.Drawing.Size(27, 20);
-            this.toolDescriptionUploadResource.Text = "Upload resource";
-            this.toolDescriptionUploadResource.Click += new System.EventHandler(this.toolDescriptionUploadResource_Click);
             // 
             // NoteEditorForm
             // 

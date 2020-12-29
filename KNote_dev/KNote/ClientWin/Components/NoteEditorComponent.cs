@@ -183,6 +183,50 @@ namespace KNote.ClientWin.Components
             return null;
         }
 
+        public async Task<bool> RequestChangeNoteType(Guid? oldSelectedId)
+        {
+            var noteTypesSelector = new NoteTypesSelectorComponent(Store);
+            var resCanLoadEntities = await noteTypesSelector.LoadEntities(Service, false);            
+            if (resCanLoadEntities)
+            {
+                var res = noteTypesSelector.RunModal();
+                if (res.Entity == EComponentResult.Executed)
+                {
+                    if (oldSelectedId == noteTypesSelector.SelectedEntity.NoteTypeId)
+                        return false;
+                    else                    
+                        return await AplyChangeNoteType(noteTypesSelector.SelectedEntity);                    
+                }                                    
+            }
+            else
+                View.ShowInfo("Cannot load the list of note types");
+
+            return false ;
+        }
+
+        public async Task<bool> AplyChangeNoteType(NoteTypeDto newType)
+        {
+            try
+            {
+                Model.NoteTypeId = newType.NoteTypeId;
+                Model.NoteTypeDto = newType;
+
+                // Delete old attributes 
+                Model.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
+
+                if (newType == null)
+                    return await Task.FromResult(true);
+
+                // Add new attributes
+                Model.KAttributesDto = await Service.Notes.CompleteNoteAttributes(Model.KAttributesDto, Model.NoteId, newType.NoteTypeId);                
+                return await Task.FromResult(true);
+            }
+            catch (Exception)
+            {
+                return await Task.FromResult(false);
+            }
+        }
+
         public async Task<KMessageDto> NewMessage()
         {
             var messageEditor = new MessageEditorComponent(Store);

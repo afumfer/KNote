@@ -18,6 +18,7 @@ namespace KNote.Repository
         Task<Result<NoteDto>> AddAsync(NoteDto entity);
         Task<Result<NoteDto>> UpdateAsync(NoteDto entity);
         Task<Result> DeleteAsync(Guid id);
+        Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
         Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);
         Task<Result<ResourceDto>> GetResourceAsync(Guid noteResourceId);
         Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity);
@@ -34,6 +35,8 @@ namespace KNote.Repository
         Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity);
         Task<Result> DeleteMessageAsync(Guid messageId);
         Task<Result<int>> CountNotesInFolder(Guid folderId);
+
+
 
         //Task<Result<WindowDto>> SaveWindowAsync(WindowDto entityInfo);
         //Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entityInfo);
