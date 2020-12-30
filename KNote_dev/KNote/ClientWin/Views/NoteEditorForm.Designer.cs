@@ -96,12 +96,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textNoteNumber = new System.Windows.Forms.TextBox();
             this.textFolderNumber = new System.Windows.Forms.TextBox();
-            this.tabAlarms = new System.Windows.Forms.TabPage();
-            this.listViewAlarms = new System.Windows.Forms.ListView();
-            this.buttonEditAlarm = new System.Windows.Forms.Button();
-            this.buttonDeleteAlarm = new System.Windows.Forms.Button();
-            this.buttonAddAlarm = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
             this.tabAttributes = new System.Windows.Forms.TabPage();
             this.listViewAttributes = new System.Windows.Forms.ListView();
             this.textNoteType = new System.Windows.Forms.TextBox();
@@ -127,6 +121,12 @@
             this.buttonTaskDelete = new System.Windows.Forms.Button();
             this.buttonTaskAdd = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
+            this.tabAlarms = new System.Windows.Forms.TabPage();
+            this.listViewAlarms = new System.Windows.Forms.ListView();
+            this.buttonEditAlarm = new System.Windows.Forms.Button();
+            this.buttonDeleteAlarm = new System.Windows.Forms.Button();
+            this.buttonAddAlarm = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
             this.tabCode = new System.Windows.Forms.TabPage();
             this.textScriptCode = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -145,18 +145,19 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
+            this.buttonDeleteType = new System.Windows.Forms.Button();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
             this.tabBasicData.SuspendLayout();
             this.panelDescription.SuspendLayout();
             this.toolDescription.SuspendLayout();
-            this.tabAlarms.SuspendLayout();
             this.tabAttributes.SuspendLayout();
             this.tabResources.SuspendLayout();
             this.panelPreview.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).BeginInit();
             this.tabTasks.SuspendLayout();
+            this.tabAlarms.SuspendLayout();
             this.tabCode.SuspendLayout();
             this.tabTraceNotes.SuspendLayout();
             this.SuspendLayout();
@@ -801,86 +802,9 @@
             this.textFolderNumber.TabStop = false;
             this.textFolderNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
-            // tabAlarms
-            // 
-            this.tabAlarms.Controls.Add(this.listViewAlarms);
-            this.tabAlarms.Controls.Add(this.buttonEditAlarm);
-            this.tabAlarms.Controls.Add(this.buttonDeleteAlarm);
-            this.tabAlarms.Controls.Add(this.buttonAddAlarm);
-            this.tabAlarms.Controls.Add(this.label4);
-            this.tabAlarms.ImageIndex = 0;
-            this.tabAlarms.Location = new System.Drawing.Point(4, 30);
-            this.tabAlarms.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabAlarms.Name = "tabAlarms";
-            this.tabAlarms.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabAlarms.Size = new System.Drawing.Size(794, 569);
-            this.tabAlarms.TabIndex = 1;
-            this.tabAlarms.Text = "Alarms  ";
-            this.tabAlarms.UseVisualStyleBackColor = true;
-            // 
-            // listViewAlarms
-            // 
-            this.listViewAlarms.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewAlarms.HideSelection = false;
-            this.listViewAlarms.Location = new System.Drawing.Point(6, 34);
-            this.listViewAlarms.MultiSelect = false;
-            this.listViewAlarms.Name = "listViewAlarms";
-            this.listViewAlarms.Size = new System.Drawing.Size(781, 532);
-            this.listViewAlarms.TabIndex = 11;
-            this.listViewAlarms.UseCompatibleStateImageBehavior = false;
-            this.listViewAlarms.DoubleClick += new System.EventHandler(this.listViewAlarms_DoubleClick);
-            this.listViewAlarms.Resize += new System.EventHandler(this.listView_Resize);
-            // 
-            // buttonEditAlarm
-            // 
-            this.buttonEditAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonEditAlarm.Location = new System.Drawing.Point(760, 10);
-            this.buttonEditAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonEditAlarm.Name = "buttonEditAlarm";
-            this.buttonEditAlarm.Size = new System.Drawing.Size(27, 23);
-            this.buttonEditAlarm.TabIndex = 11;
-            this.buttonEditAlarm.Text = "...";
-            this.buttonEditAlarm.UseVisualStyleBackColor = true;
-            this.buttonEditAlarm.Click += new System.EventHandler(this.buttonEditAlarm_Click);
-            // 
-            // buttonDeleteAlarm
-            // 
-            this.buttonDeleteAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonDeleteAlarm.Location = new System.Drawing.Point(725, 10);
-            this.buttonDeleteAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonDeleteAlarm.Name = "buttonDeleteAlarm";
-            this.buttonDeleteAlarm.Size = new System.Drawing.Size(27, 23);
-            this.buttonDeleteAlarm.TabIndex = 10;
-            this.buttonDeleteAlarm.Text = "-";
-            this.buttonDeleteAlarm.UseVisualStyleBackColor = true;
-            this.buttonDeleteAlarm.Click += new System.EventHandler(this.buttonDeleteAlarm_Click);
-            // 
-            // buttonAddAlarm
-            // 
-            this.buttonAddAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAlarm.Location = new System.Drawing.Point(690, 10);
-            this.buttonAddAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonAddAlarm.Name = "buttonAddAlarm";
-            this.buttonAddAlarm.Size = new System.Drawing.Size(27, 23);
-            this.buttonAddAlarm.TabIndex = 9;
-            this.buttonAddAlarm.Text = "+";
-            this.buttonAddAlarm.UseVisualStyleBackColor = true;
-            this.buttonAddAlarm.Click += new System.EventHandler(this.buttonAddAlarm_Click);
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 16);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(47, 15);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Alarms:";
-            // 
             // tabAttributes
             // 
+            this.tabAttributes.Controls.Add(this.buttonDeleteType);
             this.tabAttributes.Controls.Add(this.listViewAttributes);
             this.tabAttributes.Controls.Add(this.textNoteType);
             this.tabAttributes.Controls.Add(this.buttonNoteType);
@@ -919,7 +843,7 @@
             this.textNoteType.MaxLength = 255;
             this.textNoteType.Name = "textNoteType";
             this.textNoteType.ShortcutsEnabled = false;
-            this.textNoteType.Size = new System.Drawing.Size(650, 23);
+            this.textNoteType.Size = new System.Drawing.Size(624, 23);
             this.textNoteType.TabIndex = 44;
             // 
             // buttonNoteType
@@ -927,12 +851,13 @@
             this.buttonNoteType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonNoteType.BackColor = System.Drawing.SystemColors.Control;
             this.buttonNoteType.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonNoteType.Location = new System.Drawing.Point(758, 17);
+            this.buttonNoteType.Location = new System.Drawing.Point(758, 16);
             this.buttonNoteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonNoteType.Name = "buttonNoteType";
             this.buttonNoteType.Size = new System.Drawing.Size(27, 23);
             this.buttonNoteType.TabIndex = 45;
             this.buttonNoteType.Text = "...";
+            this.toolTipHelps.SetToolTip(this.buttonNoteType, "Select new type");
             this.buttonNoteType.UseVisualStyleBackColor = false;
             this.buttonNoteType.Click += new System.EventHandler(this.buttonNoteType_Click);
             // 
@@ -1191,6 +1116,84 @@
             this.label11.TabIndex = 5;
             this.label11.Text = "Tasks:";
             // 
+            // tabAlarms
+            // 
+            this.tabAlarms.Controls.Add(this.listViewAlarms);
+            this.tabAlarms.Controls.Add(this.buttonEditAlarm);
+            this.tabAlarms.Controls.Add(this.buttonDeleteAlarm);
+            this.tabAlarms.Controls.Add(this.buttonAddAlarm);
+            this.tabAlarms.Controls.Add(this.label4);
+            this.tabAlarms.ImageIndex = 0;
+            this.tabAlarms.Location = new System.Drawing.Point(4, 30);
+            this.tabAlarms.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabAlarms.Name = "tabAlarms";
+            this.tabAlarms.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tabAlarms.Size = new System.Drawing.Size(794, 569);
+            this.tabAlarms.TabIndex = 1;
+            this.tabAlarms.Text = "Alarms  ";
+            this.tabAlarms.UseVisualStyleBackColor = true;
+            // 
+            // listViewAlarms
+            // 
+            this.listViewAlarms.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewAlarms.HideSelection = false;
+            this.listViewAlarms.Location = new System.Drawing.Point(6, 34);
+            this.listViewAlarms.MultiSelect = false;
+            this.listViewAlarms.Name = "listViewAlarms";
+            this.listViewAlarms.Size = new System.Drawing.Size(781, 532);
+            this.listViewAlarms.TabIndex = 11;
+            this.listViewAlarms.UseCompatibleStateImageBehavior = false;
+            this.listViewAlarms.DoubleClick += new System.EventHandler(this.listViewAlarms_DoubleClick);
+            this.listViewAlarms.Resize += new System.EventHandler(this.listView_Resize);
+            // 
+            // buttonEditAlarm
+            // 
+            this.buttonEditAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonEditAlarm.Location = new System.Drawing.Point(760, 10);
+            this.buttonEditAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonEditAlarm.Name = "buttonEditAlarm";
+            this.buttonEditAlarm.Size = new System.Drawing.Size(27, 23);
+            this.buttonEditAlarm.TabIndex = 11;
+            this.buttonEditAlarm.Text = "...";
+            this.buttonEditAlarm.UseVisualStyleBackColor = true;
+            this.buttonEditAlarm.Click += new System.EventHandler(this.buttonEditAlarm_Click);
+            // 
+            // buttonDeleteAlarm
+            // 
+            this.buttonDeleteAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonDeleteAlarm.Location = new System.Drawing.Point(725, 10);
+            this.buttonDeleteAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonDeleteAlarm.Name = "buttonDeleteAlarm";
+            this.buttonDeleteAlarm.Size = new System.Drawing.Size(27, 23);
+            this.buttonDeleteAlarm.TabIndex = 10;
+            this.buttonDeleteAlarm.Text = "-";
+            this.buttonDeleteAlarm.UseVisualStyleBackColor = true;
+            this.buttonDeleteAlarm.Click += new System.EventHandler(this.buttonDeleteAlarm_Click);
+            // 
+            // buttonAddAlarm
+            // 
+            this.buttonAddAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAddAlarm.Location = new System.Drawing.Point(690, 10);
+            this.buttonAddAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonAddAlarm.Name = "buttonAddAlarm";
+            this.buttonAddAlarm.Size = new System.Drawing.Size(27, 23);
+            this.buttonAddAlarm.TabIndex = 9;
+            this.buttonAddAlarm.Text = "+";
+            this.buttonAddAlarm.UseVisualStyleBackColor = true;
+            this.buttonAddAlarm.Click += new System.EventHandler(this.buttonAddAlarm_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 16);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(47, 15);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "Alarms:";
+            // 
             // tabCode
             // 
             this.tabCode.Controls.Add(this.textScriptCode);
@@ -1389,6 +1392,21 @@
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
             // 
+            // buttonDeleteType
+            // 
+            this.buttonDeleteType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonDeleteType.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonDeleteType.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.buttonDeleteType.Location = new System.Drawing.Point(730, 16);
+            this.buttonDeleteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonDeleteType.Name = "buttonDeleteType";
+            this.buttonDeleteType.Size = new System.Drawing.Size(27, 23);
+            this.buttonDeleteType.TabIndex = 47;
+            this.buttonDeleteType.Text = "X";
+            this.toolTipHelps.SetToolTip(this.buttonDeleteType, "Delete type");
+            this.buttonDeleteType.UseVisualStyleBackColor = false;
+            this.buttonDeleteType.Click += new System.EventHandler(this.buttonDeleteType_Click);
+            // 
             // NoteEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1415,8 +1433,6 @@
             this.panelDescription.PerformLayout();
             this.toolDescription.ResumeLayout(false);
             this.toolDescription.PerformLayout();
-            this.tabAlarms.ResumeLayout(false);
-            this.tabAlarms.PerformLayout();
             this.tabAttributes.ResumeLayout(false);
             this.tabAttributes.PerformLayout();
             this.tabResources.ResumeLayout(false);
@@ -1426,6 +1442,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.picResource)).EndInit();
             this.tabTasks.ResumeLayout(false);
             this.tabTasks.PerformLayout();
+            this.tabAlarms.ResumeLayout(false);
+            this.tabAlarms.PerformLayout();
             this.tabCode.ResumeLayout(false);
             this.tabCode.PerformLayout();
             this.tabTraceNotes.ResumeLayout(false);
@@ -1552,5 +1570,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionHtmlEdit;
         private System.Windows.Forms.ToolStripSeparator toolDescriptionS3;
         private System.Windows.Forms.ToolStripButton toolDescriptionUploadResource;
+        private System.Windows.Forms.Button buttonDeleteType;
     }
 }

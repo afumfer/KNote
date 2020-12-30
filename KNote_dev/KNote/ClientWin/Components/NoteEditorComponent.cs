@@ -208,7 +208,7 @@ namespace KNote.ClientWin.Components
         {
             try
             {
-                Model.NoteTypeId = newType.NoteTypeId;
+                Model.NoteTypeId = newType?.NoteTypeId;
                 Model.NoteTypeDto = newType;
 
                 // Delete old attributes 

@@ -468,11 +468,6 @@ namespace KNote.Repository.Dapper
                                 [KAttributeId] NOT IN (SELECT [KAttributeId] FROM [KAttributes] where [NoteTypeId] is null or [NoteTypeId] = @NoteTypeId)";
                     rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId,  NoteTypeId = entity.NoteTypeId });
                 }
-                //if (rDel == 0)
-                //{
-                //    result.ErrorList.Add("Entity not deleted");
-                //    return ResultDomainAction(result);
-                //}
 
                 // Add new attributes or update 
                 foreach (var atr in entity.KAttributesDto)
@@ -510,27 +505,6 @@ namespace KNote.Repository.Dapper
                         return ResultDomainAction(result);
                     }
                 }
-
-                // Delete old attributes
-                //sql = "SELECT NoteKAttributeId, NoteId, KAttributeId, [Value] FROM NoteKAttributes WHERE NoteId = @NoteId";
-                //var allAtr = (await db.QueryAsync<NoteKAttributeDto>(sql.ToString(), new { entity.NoteId })).ToList();
-
-                //foreach (var a in allAtr)
-                //{
-                //    var delAtr = entity.KAttributesDto.Where(_ => _.NoteKAttributeId == a.NoteKAttributeId).FirstOrDefault();
-                //    if (delAtr == null)
-                //    {
-                //        sql = @"DELETE [NoteKAttributes] WHERE NoteKAttributeId = @NoteKAttributeId";
-                //        var rDel = await db.ExecuteAsync(sql.ToString(), new { a.NoteKAttributeId });
-                //        if (rDel == 0)
-                //        {
-                //            result.ErrorList.Add("Entity not deleted");
-                //            return ResultDomainAction(result);
-                //        }
-                //    }
-                //}
-
-
 
                 result.Entity = entity;
 
@@ -626,11 +600,8 @@ namespace KNote.Repository.Dapper
             {
                 var db = GetOpenConnection();
 
-                // TODO: pendiente, parametrizar esto. 
-                //entity.Container = @"NotesResources\" + DateTime.Now.Year.ToString();
                 if(string.IsNullOrEmpty(entity.Container))
                     entity.Container = KntConst.ContainerResources + @"\" + DateTime.Now.Year.ToString();
-                // 
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                 var sql = @"INSERT INTO Resources 
@@ -659,14 +630,12 @@ namespace KNote.Repository.Dapper
         }
 
         public async Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity)
-        {            
-            // TODO: Pendiente de probar
+        {                        
             var result = new Result<ResourceDto>();
             try
             {
                 var db = GetOpenConnection();
-
-                // TODO: pendiente, parametrizar esto.                 
+                
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                 var sql = @"UPDATE Resources SET                                                
@@ -679,7 +648,6 @@ namespace KNote.Repository.Dapper
                             ContentArrayBytes = @ContentArrayBytes, 
                             NoteId = @NoteId
                     WHERE ResourceId = @ResourceId";
-
                 var r = await db.ExecuteAsync(sql.ToString(),
                     new {
                         entity.ResourceId,
@@ -692,7 +660,6 @@ namespace KNote.Repository.Dapper
                         entity.ContentArrayBytes,
                         entity.NoteId
                     });
-
                 if (r == 0)
                     result.ErrorList.Add("Entity not updated");
 

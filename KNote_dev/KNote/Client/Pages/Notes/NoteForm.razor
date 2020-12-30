@@ -530,13 +530,16 @@
             OnChangeNoteTypeActions();
         }
     }
-    
+
     private async void OnChangeNoteTypeActions()
     {
         if (Note.NoteTypeId == null)
         {
-            if (oldNoteType != null)
-                Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
+            //if (oldNoteType != null)
+                //Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
+            
+            Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
+            
             oldNoteType = null;
             Note.NoteTypeDto = null;
             return;
@@ -554,8 +557,10 @@
         {
             var listA = httpResponse.Response.Entity;
 
-            if (oldNoteType != null)
-                Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
+            //if (oldNoteType != null)
+            //    Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
+
+            Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
 
             foreach (var a in listA)
             {

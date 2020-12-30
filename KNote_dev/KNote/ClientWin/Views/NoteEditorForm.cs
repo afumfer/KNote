@@ -308,7 +308,7 @@ namespace KNote.ClientWin.Views
 
             if(changed)
             {
-                textNoteType.Text = _com.Model.NoteTypeDto.Name;                
+                textNoteType.Text = _com.Model.NoteTypeDto?.Name;                
                 ModelToControlsAttributes();
             }
         }
@@ -1033,6 +1033,16 @@ namespace KNote.ClientWin.Views
             var resource = await AddResource();
             if (resource != null)
                 InsertLinkSelectedResource();
+        }
+
+        private async void buttonDeleteType_Click(object sender, EventArgs e)
+        {
+            var changed = await _com.AplyChangeNoteType(null);
+            if (changed)
+            {
+                textNoteType.Text = _com.Model.NoteTypeDto?.Name;
+                ModelToControlsAttributes();
+            }
         }
 
 
