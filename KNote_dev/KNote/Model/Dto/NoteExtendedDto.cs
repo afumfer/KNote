@@ -102,7 +102,10 @@ namespace KNote.Model.Dto
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var validationsResult = base.Validate(null);
-            
+
+            foreach (var a in KAttributesDto)
+                validationsResult.Concat(a.Validate(null));
+
             foreach (var r in Resources)
                 validationsResult.Concat(r.Validate(null));
 
@@ -119,6 +122,9 @@ namespace KNote.Model.Dto
         {
             _isDirty = isDirty;
 
+            foreach (var a in KAttributesDto)
+                a.SetIsDirty(isDirty);
+
             foreach (var r in Resources)
                 r.SetIsDirty(isDirty);
 
@@ -132,6 +138,9 @@ namespace KNote.Model.Dto
         public override void SetIsNew(bool isNew)
         {
             _isNew = isNew;
+
+            foreach (var a in KAttributesDto)
+                a.SetIsNew(isNew);
 
             foreach (var r in Resources)
                 r.SetIsNew(isNew);
@@ -148,6 +157,9 @@ namespace KNote.Model.Dto
             if (_isDirty)
                 return true;
 
+            foreach (var a in KAttributesDto)
+                if (a.IsDirty())
+                    return true;
             foreach (var r in Resources)
                 if (r.IsDirty())
                     return true;

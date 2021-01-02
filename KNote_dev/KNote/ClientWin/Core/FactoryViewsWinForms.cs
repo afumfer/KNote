@@ -79,6 +79,11 @@ namespace KNote.ClientWin.Core
             return new NoteTypesSelectorForm(component);
         }
 
+        public IEditorView<NoteKAttributeDto> View(NoteAttributeEditorComponent component)
+        {
+            return new NoteAttributeEditorForm(component);
+        }
+
 
         #endregion
 

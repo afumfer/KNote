@@ -482,8 +482,30 @@ namespace KNote.ClientWin.Views
             //    textDescription.Text = textDescription.Text.Insert(selStart, strLink);            
             //}
         }
+        
+        private async void toolDescriptionUploadResource_Click(object sender, EventArgs e)
+        {
+            var resource = await AddResource();
+            if (resource != null)
+                InsertLinkSelectedResource();
+        }
 
         #endregion
+
+        private async void buttonDeleteType_Click(object sender, EventArgs e)
+        {
+            var changed = await _com.AplyChangeNoteType(null);
+            if (changed)
+            {
+                textNoteType.Text = _com.Model.NoteTypeDto?.Name;
+                ModelToControlsAttributes();
+            }
+        }
+
+        private void buttonAttributeEdit_Click(object sender, EventArgs e)
+        {
+            EditNoteAttribute();
+        }
 
         #endregion
 
@@ -965,9 +987,7 @@ namespace KNote.ClientWin.Views
             item.SubItems[10].Text = task.EndDate.ToString();
             item.SubItems[11].Text = task.Description;            
         }
-
-        #endregion
-
+        
         private async void EditResource()
         {
             if (listViewResources.SelectedItems.Count == 0)
@@ -981,6 +1001,25 @@ namespace KNote.ClientWin.Views
             {
                 _selectedResource = resource;
                 UpdateResource(resource);
+                buttonUndo.Enabled = true;
+            }
+        }
+
+        private void EditNoteAttribute()
+        {
+            if (listViewAttributes.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("There is no attribute selected.", "KeyNote");
+                return;
+            }
+            var idAttribute = Guid.Parse(listViewAttributes.SelectedItems[0].Name);
+            var noteAttribute = _com.Model.KAttributesDto.Where(_ => _.NoteKAttributeId == idAttribute).SingleOrDefault();
+            var noteAttributeEdited = _com.EditAttribute(noteAttribute);
+            if (noteAttributeEdited != null)
+            {
+                // Refrescar listView
+                UpdateNoteAttribute(noteAttributeEdited);
+                buttonUndo.Enabled = true;
             }
         }
 
@@ -1028,22 +1067,22 @@ namespace KNote.ClientWin.Views
             UpdatePreviewResource(resource);
         }
 
-        private async void toolDescriptionUploadResource_Click(object sender, EventArgs e)
+        private void UpdateNoteAttribute(NoteKAttributeDto noteAttribute)
         {
-            var resource = await AddResource();
-            if (resource != null)
-                InsertLinkSelectedResource();
+            var item = listViewAttributes.Items[noteAttribute.NoteKAttributeId.ToString()];
+            item.Text = noteAttribute.Name;
+            item.SubItems[1].Text = noteAttribute.Value;
         }
 
-        private async void buttonDeleteType_Click(object sender, EventArgs e)
+        private void listViewAttributes_DoubleClick(object sender, EventArgs e)
         {
-            var changed = await _com.AplyChangeNoteType(null);
-            if (changed)
-            {
-                textNoteType.Text = _com.Model.NoteTypeDto?.Name;
-                ModelToControlsAttributes();
-            }
+            EditNoteAttribute();
         }
+
+
+        #endregion
+
+
 
 
 

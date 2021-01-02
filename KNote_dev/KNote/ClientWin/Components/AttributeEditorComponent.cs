@@ -17,6 +17,8 @@ namespace KNote.ClientWin.Components
     public class AttributeEditorComponent : ComponentEditorBase<IEditorView<KAttributeDto>, KAttributeDto>
     {
 
+        // TODO: .... for Attribute managment
+
         public AttributeEditorComponent(Store store) : base(store)
         {
             ComponentName = "Attribute editor";
@@ -27,16 +29,6 @@ namespace KNote.ClientWin.Components
         protected override IEditorView<KAttributeDto> CreateView()
         {
             return Store.FactoryViews.View(this);
-        }
-
-        public override Task<bool> DeleteModel(IKntService service, Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<bool> DeleteModel()
-        {
-            throw new NotImplementedException();
         }
 
         public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
@@ -53,6 +45,17 @@ namespace KNote.ClientWin.Components
         {
             throw new NotImplementedException();
         }
+
+        public override Task<bool> DeleteModel(IKntService service, Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<bool> DeleteModel()
+        {
+            throw new NotImplementedException();
+        }
+
 
         #endregion 
     }

@@ -183,6 +183,23 @@ namespace KNote.ClientWin.Components
             return null;
         }
 
+        public NoteKAttributeDto EditAttribute(NoteKAttributeDto noteAttribute)
+        {
+            var noteAttributeEditor = new NoteAttributeEditorComponent(Store);
+
+            noteAttributeEditor.AutoDBSave = false;  // don't save automatically
+            
+            noteAttributeEditor.LoadModel(Service, noteAttribute, false);
+
+            var res = noteAttributeEditor.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                return noteAttributeEditor.Model;
+            }
+            else
+                return null;
+        }
+
         public async Task<bool> RequestChangeNoteType(Guid? oldSelectedId)
         {
             var noteTypesSelector = new NoteTypesSelectorComponent(Store);

@@ -17,7 +17,7 @@ namespace KNote.ClientWin.Components
 
         public NoteTypesSelectorComponent(Store store): base(store)
         {
-
+            ComponentName = "Note type selector";
         }
 
         protected override ISelectorView<NoteTypeDto> CreateView()

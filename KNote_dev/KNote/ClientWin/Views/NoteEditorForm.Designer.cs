@@ -97,6 +97,7 @@
             this.textNoteNumber = new System.Windows.Forms.TextBox();
             this.textFolderNumber = new System.Windows.Forms.TextBox();
             this.tabAttributes = new System.Windows.Forms.TabPage();
+            this.buttonDeleteType = new System.Windows.Forms.Button();
             this.listViewAttributes = new System.Windows.Forms.ListView();
             this.textNoteType = new System.Windows.Forms.TextBox();
             this.buttonNoteType = new System.Windows.Forms.Button();
@@ -145,7 +146,6 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
-            this.buttonDeleteType = new System.Windows.Forms.Button();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
@@ -820,6 +820,21 @@
             this.tabAttributes.Text = "Attributes  ";
             this.tabAttributes.UseVisualStyleBackColor = true;
             // 
+            // buttonDeleteType
+            // 
+            this.buttonDeleteType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonDeleteType.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonDeleteType.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.buttonDeleteType.Location = new System.Drawing.Point(730, 16);
+            this.buttonDeleteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonDeleteType.Name = "buttonDeleteType";
+            this.buttonDeleteType.Size = new System.Drawing.Size(27, 23);
+            this.buttonDeleteType.TabIndex = 47;
+            this.buttonDeleteType.Text = "X";
+            this.toolTipHelps.SetToolTip(this.buttonDeleteType, "Delete type");
+            this.buttonDeleteType.UseVisualStyleBackColor = false;
+            this.buttonDeleteType.Click += new System.EventHandler(this.buttonDeleteType_Click);
+            // 
             // listViewAttributes
             // 
             this.listViewAttributes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -831,6 +846,7 @@
             this.listViewAttributes.Size = new System.Drawing.Size(774, 478);
             this.listViewAttributes.TabIndex = 46;
             this.listViewAttributes.UseCompatibleStateImageBehavior = false;
+            this.listViewAttributes.DoubleClick += new System.EventHandler(this.listViewAttributes_DoubleClick);
             this.listViewAttributes.Resize += new System.EventHandler(this.listView_Resize);
             // 
             // textNoteType
@@ -881,6 +897,7 @@
             this.buttonAttributeEdit.TabIndex = 12;
             this.buttonAttributeEdit.Text = "...";
             this.buttonAttributeEdit.UseVisualStyleBackColor = true;
+            this.buttonAttributeEdit.Click += new System.EventHandler(this.buttonAttributeEdit_Click);
             // 
             // label10
             // 
@@ -1391,21 +1408,6 @@
             this.label14.Size = new System.Drawing.Size(99, 15);
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
-            // 
-            // buttonDeleteType
-            // 
-            this.buttonDeleteType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonDeleteType.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonDeleteType.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonDeleteType.Location = new System.Drawing.Point(730, 16);
-            this.buttonDeleteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonDeleteType.Name = "buttonDeleteType";
-            this.buttonDeleteType.Size = new System.Drawing.Size(27, 23);
-            this.buttonDeleteType.TabIndex = 47;
-            this.buttonDeleteType.Text = "X";
-            this.toolTipHelps.SetToolTip(this.buttonDeleteType, "Delete type");
-            this.buttonDeleteType.UseVisualStyleBackColor = false;
-            this.buttonDeleteType.Click += new System.EventHandler(this.buttonDeleteType_Click);
             // 
             // NoteEditorForm
             // 
