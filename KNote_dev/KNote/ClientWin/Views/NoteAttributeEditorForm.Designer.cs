@@ -32,9 +32,13 @@ namespace KNote.ClientWin.Views
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.panelForm = new System.Windows.Forms.Panel();
-            this.textValue = new System.Windows.Forms.TextBox();
-            this.labelDescription = new System.Windows.Forms.Label();
             this.labelAttribute = new System.Windows.Forms.Label();
+            this.labelDescription = new System.Windows.Forms.Label();
+            this.textValue = new System.Windows.Forms.TextBox();
+            this.buttonSelDate = new System.Windows.Forms.Button();
+            this.checkValue = new System.Windows.Forms.CheckBox();
+            this.comboValue = new System.Windows.Forms.ComboBox();
+            this.listViewValue = new System.Windows.Forms.ListView();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -65,38 +69,85 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.Controls.Add(this.listViewValue);
+            this.panelForm.Controls.Add(this.comboValue);
+            this.panelForm.Controls.Add(this.checkValue);
+            this.panelForm.Controls.Add(this.buttonSelDate);
             this.panelForm.Controls.Add(this.labelAttribute);
             this.panelForm.Controls.Add(this.labelDescription);
             this.panelForm.Controls.Add(this.textValue);
-            this.panelForm.Location = new System.Drawing.Point(12, 12);
+            this.panelForm.Location = new System.Drawing.Point(6, 6);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(482, 233);
+            this.panelForm.Size = new System.Drawing.Size(496, 233);
             this.panelForm.TabIndex = 8;
             // 
-            // textValue
+            // labelAttribute
             // 
-            this.textValue.Location = new System.Drawing.Point(10, 91);
-            this.textValue.Name = "textValue";
-            this.textValue.Size = new System.Drawing.Size(427, 23);
-            this.textValue.TabIndex = 0;
+            this.labelAttribute.AutoSize = true;
+            this.labelAttribute.Location = new System.Drawing.Point(10, 14);
+            this.labelAttribute.Name = "labelAttribute";
+            this.labelAttribute.Size = new System.Drawing.Size(54, 15);
+            this.labelAttribute.TabIndex = 2;
+            this.labelAttribute.Text = "Attribute";
             // 
             // labelDescription
             // 
             this.labelDescription.AutoSize = true;
-            this.labelDescription.Location = new System.Drawing.Point(10, 11);
+            this.labelDescription.Location = new System.Drawing.Point(10, 193);
             this.labelDescription.Name = "labelDescription";
             this.labelDescription.Size = new System.Drawing.Size(67, 15);
             this.labelDescription.TabIndex = 1;
             this.labelDescription.Text = "Description";
             // 
-            // labelAttribute
+            // textValue
             // 
-            this.labelAttribute.AutoSize = true;
-            this.labelAttribute.Location = new System.Drawing.Point(10, 73);
-            this.labelAttribute.Name = "labelAttribute";
-            this.labelAttribute.Size = new System.Drawing.Size(54, 15);
-            this.labelAttribute.TabIndex = 2;
-            this.labelAttribute.Text = "Attribute";
+            this.textValue.Location = new System.Drawing.Point(10, 32);
+            this.textValue.Multiline = true;
+            this.textValue.Name = "textValue";
+            this.textValue.Size = new System.Drawing.Size(478, 46);
+            this.textValue.TabIndex = 0;
+            this.textValue.Visible = false;
+            // 
+            // buttonSelDate
+            // 
+            this.buttonSelDate.Location = new System.Drawing.Point(10, 97);
+            this.buttonSelDate.Name = "buttonSelDate";
+            this.buttonSelDate.Size = new System.Drawing.Size(24, 24);
+            this.buttonSelDate.TabIndex = 7;
+            this.buttonSelDate.Text = "...";
+            this.buttonSelDate.UseVisualStyleBackColor = true;
+            this.buttonSelDate.Visible = false;
+            this.buttonSelDate.Click += new System.EventHandler(this.buttonSelDate_Click);
+            // 
+            // checkValue
+            // 
+            this.checkValue.AutoSize = true;
+            this.checkValue.Location = new System.Drawing.Point(58, 101);
+            this.checkValue.Name = "checkValue";
+            this.checkValue.Size = new System.Drawing.Size(100, 19);
+            this.checkValue.TabIndex = 8;
+            this.checkValue.Text = "checkAtribute";
+            this.checkValue.UseVisualStyleBackColor = true;
+            this.checkValue.Visible = false;
+            // 
+            // comboValue
+            // 
+            this.comboValue.FormattingEnabled = true;
+            this.comboValue.Location = new System.Drawing.Point(168, 97);
+            this.comboValue.Name = "comboValue";
+            this.comboValue.Size = new System.Drawing.Size(105, 23);
+            this.comboValue.TabIndex = 9;
+            this.comboValue.Visible = false;
+            // 
+            // listViewValue
+            // 
+            this.listViewValue.HideSelection = false;
+            this.listViewValue.Location = new System.Drawing.Point(301, 96);
+            this.listViewValue.Name = "listViewValue";
+            this.listViewValue.Size = new System.Drawing.Size(112, 76);
+            this.listViewValue.TabIndex = 10;
+            this.listViewValue.UseCompatibleStateImageBehavior = false;
+            this.listViewValue.Visible = false;
             // 
             // NoteAttributeEditorForm
             // 
@@ -129,5 +180,9 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textValue;
         private System.Windows.Forms.Label labelAttribute;
         private System.Windows.Forms.Label labelDescription;
+        private System.Windows.Forms.Button buttonSelDate;
+        private System.Windows.Forms.ListView listViewValue;
+        private System.Windows.Forms.ComboBox comboValue;
+        private System.Windows.Forms.CheckBox checkValue;
     }
 }

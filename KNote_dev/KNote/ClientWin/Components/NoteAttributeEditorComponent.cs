@@ -30,25 +30,6 @@ namespace KNote.ClientWin.Components
         public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
         {
             throw new NotImplementedException();
-        //    // dummy
-        //    Model = new NoteKAttributeDto { Value = "xxx" };
-        //    return await Task.FromResult<bool>(true);
-
-        //    //try
-        //    //{
-        //    //    Service = service;
-
-        //    //   // Model = (await Service.Folders.GetAsync(id)).Entity;
-        //    //    Model.SetIsDirty(false);
-        //    //    if (refreshView)
-        //    //        View.RefreshView();
-        //    //    return true;
-        //    //}
-        //    //catch (Exception ex)
-        //    //{
-        //    //    View.ShowInfo(ex.Message);
-        //    //    return false;
-        //    //}
         }
 
         public override void NewModel(IKntService service)
@@ -61,9 +42,6 @@ namespace KNote.ClientWin.Components
 
         public async override Task<bool> SaveModel()
         {
-            //Finalize();
-            //return await Task.FromResult<bool>(true);
-
             if (!Model.IsDirty())
                 return await Task.FromResult<bool>(true); ;
 

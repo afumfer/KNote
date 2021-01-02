@@ -218,7 +218,7 @@ namespace KNote.ClientWin.Core
             }
         }
 
-        protected IKntService Service { get; set; }
+        public IKntService Service { get; protected set; }
 
         public bool AutoDBSave { get; set; } = true;
 

@@ -31,5 +31,73 @@ namespace KNote.Model.Dto
         public List<KAttributeTabulatedValueDto> TabulatedValues = new List<KAttributeTabulatedValueDto>();
         public List<MultiSelectListDto> TagsValues = new List<MultiSelectListDto>();
 
+        #region Validations
+
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var results = new List<ValidationResult>();
+
+            // ---
+            // Capture the validations implemented with attributes.
+            // ---            
+
+            //Validator.TryValidateProperty(this.Name,
+            //   new ValidationContext(this, null, null) { MemberName = "Name" },
+            //   results);
+
+            //----
+            // Specific validations
+            //----
+
+            // Check datatypes
+            switch (KAttributeDataType)
+            {                
+                case EnumKAttributeDataType.Int:
+                    int outputInt;
+                    if (!int.TryParse(Value, out outputInt))
+                        results.Add(new ValidationResult
+                         ("KMSG: The value must be integer type."
+                         , new[] { "Value" }));
+                    break;                        
+                case EnumKAttributeDataType.Double:
+                    double outputDbl;
+                    if (!double.TryParse(Value, out outputDbl))
+                        results.Add(new ValidationResult
+                         ("KMSG: The value must be double type. "
+                         , new[] { "Value" }));                    
+                    break;
+                case EnumKAttributeDataType.DateTime:
+                    DateTime outputDateTime;
+                    if (!DateTime.TryParse(Value, out outputDateTime))
+                        results.Add(new ValidationResult
+                         ("KMSG: The value must be Date Time type. "
+                         , new[] { "Value" }));
+                    break;
+                case EnumKAttributeDataType.Bool:
+                    bool outputBool;
+                    if (!bool.TryParse(Value, out outputBool))
+                        results.Add(new ValidationResult
+                         ("KMSG: The value must be boolean type. "
+                         , new[] { "Value" }));
+                    break;
+                default:
+                    break;
+            }
+
+            if(RequiredValue && string.IsNullOrEmpty(Value))
+                results.Add(new ValidationResult
+                         ("KMSG: Value is required. "
+                         , new[] { "Value" }));
+
+            // ---
+            // Return List<ValidationResult>()
+            // ---           
+
+            return results;
+        }
+
+
+        #endregion
+
     }
 }

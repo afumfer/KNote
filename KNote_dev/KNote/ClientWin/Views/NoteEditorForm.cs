@@ -1079,6 +1079,29 @@ namespace KNote.ClientWin.Views
             EditNoteAttribute();
         }
 
+        //private void listViewAttributes_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
+        //{
+        //    //e.Graphics.FillRectangle(Brushes.Red, e.Bounds);
+        //    //e.DrawText();
+
+        //    using (var sf = new StringFormat())
+        //    {
+        //        //sf.Alignment = StringAlignment.Center;
+
+        //        using (var headerFont = new Font("Microsoft Sans Serif", 10, FontStyle.Bold))
+        //        {
+        //            e.Graphics.FillRectangle(Brushes.Azure, e.Bounds);
+        //            e.Graphics.DrawString(e.Header.Text, headerFont,
+        //                Brushes.Black, e.Bounds, sf);
+        //        }
+        //    }
+        //}
+
+        //private void listViewAttributes_DrawItem(object sender, DrawListViewItemEventArgs e)
+        //{
+        //    e.DrawText();
+        //}
+
 
         #endregion
 

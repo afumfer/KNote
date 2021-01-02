@@ -75,29 +75,6 @@ namespace KNote.Model.Dto
         {
             var results = new List<ValidationResult>();
 
-            // ---
-            // Capture the validations implemented with attributes.
-            // ---            
-
-            //Validator.TryValidateProperty(this.Name,
-            //   new ValidationContext(this, null, null) { MemberName = "Name" },
-            //   results);
-
-            //----
-            // Specific validations
-            //----
-
-            //if (ModificationDateTime < CreationDateTime)
-            //{
-            //    results.Add(new ValidationResult
-            //     ("KMSG: The modification date cannot be greater than the creation date "
-            //     , new[] { "ModificationDateTime", "CreationDateTime" }));
-            //}
-
-            // ---
-            // Return List<ValidationResult>()
-            // ---           
-
             return results;
         }
 
