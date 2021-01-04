@@ -62,9 +62,7 @@ namespace KNote.Model.Dto
                 }
             }
         } 
-
-        public bool IsNew { get; set; } = false;
-
+        
         // TODO: Eliminar la siguiente propiedad, se deberá implementar en ContentType
         public bool HtmlFormat
         {

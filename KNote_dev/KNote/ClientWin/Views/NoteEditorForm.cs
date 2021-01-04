@@ -50,16 +50,16 @@ namespace KNote.ClientWin.Views
         {
             this.Show();
         }
+        public Result<EComponentResult> ShowModalView()
+        {
+            return _com.DialogResultToComponentResult(this.ShowDialog());
+        }
 
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             return MessageBox.Show(info, caption, buttons);
         }
 
-        public Result<EComponentResult> ShowModalView()
-        {
-            return _com.DialogResultToComponentResult(this.ShowDialog());
-        }
 
         public void CleanView()
         {
@@ -115,6 +115,11 @@ namespace KNote.ClientWin.Views
 
         #region Form events handlers
 
+        private void NoteEditorForm_Load(object sender, EventArgs e)
+        {
+            PersonalizeControls();
+        }
+
         private async void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
@@ -126,11 +131,6 @@ namespace KNote.ClientWin.Views
                     else
                         e.Cancel = true;
             }
-        }
-
-        private void NoteEditorForm_Load(object sender, EventArgs e)
-        {
-            PersonalizeControls();
         }
 
         private async void buttonToolBar_Click(object sender, EventArgs e)
@@ -1106,10 +1106,7 @@ namespace KNote.ClientWin.Views
         #endregion
 
 
-
-
-
-
+        // TODO: 
         //private void toolInsertarImagenClipboard_Click(object sender, EventArgs e)
         //{
         //    Bitmap bm;
@@ -1139,70 +1136,6 @@ namespace KNote.ClientWin.Views
         //    }
 
         //    this.htmlEditor.Focus();
-        //}
-
-        //private void toolInsertarImagen_Click(object sender, EventArgs e)
-        //{
-        //    string origen = string.Empty;
-        //    string destino = ObtenerNombreFicheroImagenDestino();
-
-        //    if (string.IsNullOrEmpty(destino))
-        //        return;
-
-        //    using (OpenFileDialog dialog = new OpenFileDialog())
-        //    {
-        //        dialog.Title = "Seleccionar Imagen";
-        //        dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*";
-        //        dialog.FilterIndex = 1;
-        //        dialog.RestoreDirectory = true;
-        //        dialog.CheckFileExists = true;
-        //        // dialog.InitialDirectory = directorioTrabajo;
-        //        if (dialog.ShowDialog() == DialogResult.OK)
-        //        {
-        //            origen = Path.GetFullPath(dialog.FileName);
-        //            destino += Path.GetExtension(origen);
-
-        //            if (origen != "")
-        //            {
-        //                try
-        //                {
-        //                    // Copiar la imágen en el almacén de imágenes
-        //                    File.Copy(origen, destino);
-        //                    this.htmlEditor.InsertImage(destino);
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    MessageBox.Show("No se ha podido copiar el fichero seleccionado en el contenedor de imágenes" +
-        //                        " de este archivador (" + ex.Message + ")");
-        //                }
-        //            }
-        //        }
-        //    }
-        //    this.htmlEditor.Focus();
-        //}
-
-        //private string ObtenerNombreFicheroImagenDestino()
-        //{
-        //    string destino = string.Empty;
-
-        //    // Debe estar definido el directorio raíz de los recursos del
-        //    // archivador
-        //    if (string.IsNullOrEmpty(NotaEdicion.CarpetaNota.Archivador.PathRecursos))
-        //    {
-        //        MessageBox.Show("No se ha definido la ruta de recursos para el repositorio de ficheros de este archivador." +
-        //            "En las propiedades del archivador debe definir esa ruta raíz.", "ANotas");
-        //        return "";
-        //    }
-
-        //    destino = NotaEdicion.CarpetaNota.Archivador.PathRecursosImgs;
-
-        //    DirectoryInfo d = new DirectoryInfo(destino);
-        //    if (!d.Exists)
-        //        d.Create();
-
-        //    destino += Guid.NewGuid().ToString();
-
-        //    return destino;
         //}
 
     }

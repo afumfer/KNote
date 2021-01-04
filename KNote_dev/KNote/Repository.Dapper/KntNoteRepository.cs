@@ -318,7 +318,7 @@ namespace KNote.Repository.Dapper
                 if (entity != null)
                     newNote.SetSimpleDto(entity);
 
-                newNote.IsNew = true;
+                newNote.SetIsNew(true);
                 newNote.CreationDateTime = DateTime.Now;
                 newNote.ModificationDateTime = DateTime.Now;
                 newNote.KAttributesDto = new List<NoteKAttributeDto>();                

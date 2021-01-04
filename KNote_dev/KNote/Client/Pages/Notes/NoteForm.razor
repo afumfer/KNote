@@ -394,7 +394,7 @@
 
     private void OnNewResource()
     {
-        if (Note.IsNew == true)
+        if (Note.IsNew())
         {
             showMessages.ShowErrorMessage("You must save the note before assigning resources to it.");
         }
@@ -453,7 +453,7 @@
 
     private void OnNewTask()
     {
-        if (Note.IsNew == true)
+        if (Note.IsNew())
         {
             showMessages.ShowErrorMessage("You must save the note before assigning tasks to it.");
         }

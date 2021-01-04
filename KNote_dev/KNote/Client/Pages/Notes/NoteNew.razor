@@ -82,7 +82,7 @@ else
 
     private async Task SaveNote()
     {
-        if (note.IsNew)
+        if (note.IsNew())
         {
             var httpResponse = await dataService.Post<NoteDto, Result<NoteDto>>("api/notes", note);
 
@@ -112,7 +112,7 @@ else
                 }
                 note.NoteNumber = entitySaved.NoteNumber;
                 note.NoteId = entitySaved.NoteId;
-                note.IsNew = false;
+                note.SetIsNew(false);
 
                 await showMessages.ShowOkMessage("Note successfully updated.");
                 title = "Note edit";

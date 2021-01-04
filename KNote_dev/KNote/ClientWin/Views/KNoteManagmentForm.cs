@@ -131,6 +131,11 @@ namespace KNote.ClientWin.Views
             {
                 _com.EditNote();
             }
+            else if (menuSel == menuEditNoteAsPostIt)
+            {
+                _com.EditNotePostIt();
+            }
+            //
             else if (menuSel == menuNewNote)
             {
                 _com.AddNote();

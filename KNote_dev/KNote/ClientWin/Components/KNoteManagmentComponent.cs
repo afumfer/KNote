@@ -253,6 +253,21 @@ namespace KNote.ClientWin.Components
             noteEditorComponent.Run();
         }
 
+        public async void EditNotePostIt()
+        {
+            if (SelectedNoteInfo == null)
+            {
+                View.ShowInfo("There is no note selected to edit.");
+                return;
+            }
+
+            var postItEditorComponent = new PostItEditorComponent(Store);            
+            postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;            
+            postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
+            await postItEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedNoteInfo.NoteId, false);
+            postItEditorComponent.Run();
+        }
+
         public void AddNote()
         {
             if(SelectedServiceRef == null)
@@ -333,6 +348,29 @@ namespace KNote.ClientWin.Components
         #endregion
 
         #region Events handlers for extension components 
+
+        private void PostItEditorComponent_DeletedEntity(object sender, ComponentEventArgs<NoteDto> e)
+        {
+            
+        }
+
+        private async void PostItEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
+        {
+            // TODO: refactor ... 
+            if (NoteEditorComponent.Model.NoteId == e.Entity.NoteId)
+            {
+                // TODO: !!! coger el modelo que está en memoria en lugar de volver a cargar desde la BD ??
+                // NoteEditorComponent.RefreshNote(e.Entity);
+                // or ...
+                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, e.Entity.NoteId);
+            }
+            else
+                NoteEditorComponent.View.CleanView();
+
+            NotesSelectorComponent.RefreshItem(e.Entity.GetSimpleDto<NoteInfoDto>());
+        }
+
+
 
         private async void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
         {

@@ -192,15 +192,17 @@ namespace KNote.ClientWin.Views
 
         private void ModelToControlCheck()
         {
+            labelAttribute.Text = "Check option:";
             checkValue.Location = new Point(10, 32);
             checkValue.Checked = bool.Parse(_com.Model.Value);
+            checkValue.Text = _com.Model.Name;
             checkValue.Visible = true;
         }
 
         private void ModelToControlDateTime()
         {
             ModelToControlText(true);
-            buttonSelDate.Location = new Point(230, 32);
+            buttonSelDate.Location = new Point(216, 32);
             buttonSelDate.Visible = true;
         }
 

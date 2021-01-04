@@ -51,11 +51,12 @@
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.menuEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.menuNewNote = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuNewNoteAsPostIt = new System.Windows.Forms.ToolStripMenuItem();
             this.menuEditNote = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuEditNoteAsPostIt = new System.Windows.Forms.ToolStripMenuItem();
             this.menuDeleteNote = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMoveSelectedNotes = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuUpdateAttributes = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem12 = new System.Windows.Forms.ToolStripSeparator();
             this.menuAlarmaWithin = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAlarm10m = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,6 +68,7 @@
             this.menuAlarm1week = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAlarm1month = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem13 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuUpdateAttributes = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAddTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuRemoveTags = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem16 = new System.Windows.Forms.ToolStripSeparator();
@@ -277,7 +279,9 @@
             // 
             this.menuEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuNewNote,
+            this.menuNewNoteAsPostIt,
             this.menuEditNote,
+            this.menuEditNoteAsPostIt,
             this.menuDeleteNote,
             this.toolStripMenuItem1,
             this.menuMoveSelectedNotes,
@@ -297,48 +301,55 @@
             // 
             this.menuNewNote.Name = "menuNewNote";
             this.menuNewNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.menuNewNote.Size = new System.Drawing.Size(258, 22);
+            this.menuNewNote.Size = new System.Drawing.Size(268, 22);
             this.menuNewNote.Text = "&New note";
             this.menuNewNote.Click += new System.EventHandler(this.menu_Click);
+            // 
+            // menuNewNoteAsPostIt
+            // 
+            this.menuNewNoteAsPostIt.Name = "menuNewNoteAsPostIt";
+            this.menuNewNoteAsPostIt.Size = new System.Drawing.Size(268, 22);
+            this.menuNewNoteAsPostIt.Text = "New note as &PostIt";
+            this.menuNewNoteAsPostIt.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuEditNote
             // 
             this.menuEditNote.Name = "menuEditNote";
             this.menuEditNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.menuEditNote.Size = new System.Drawing.Size(258, 22);
+            this.menuEditNote.Size = new System.Drawing.Size(268, 22);
             this.menuEditNote.Text = "&Edit note";
             this.menuEditNote.Click += new System.EventHandler(this.menu_Click);
+            // 
+            // menuEditNoteAsPostIt
+            // 
+            this.menuEditNoteAsPostIt.Name = "menuEditNoteAsPostIt";
+            this.menuEditNoteAsPostIt.Size = new System.Drawing.Size(268, 22);
+            this.menuEditNoteAsPostIt.Text = "Edit note as PostI&t";
+            this.menuEditNoteAsPostIt.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuDeleteNote
             // 
             this.menuDeleteNote.Name = "menuDeleteNote";
-            this.menuDeleteNote.Size = new System.Drawing.Size(258, 22);
+            this.menuDeleteNote.Size = new System.Drawing.Size(268, 22);
             this.menuDeleteNote.Text = "&Delete note";
             this.menuDeleteNote.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(255, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(265, 6);
             // 
             // menuMoveSelectedNotes
             // 
             this.menuMoveSelectedNotes.Name = "menuMoveSelectedNotes";
-            this.menuMoveSelectedNotes.Size = new System.Drawing.Size(258, 22);
+            this.menuMoveSelectedNotes.Size = new System.Drawing.Size(268, 22);
             this.menuMoveSelectedNotes.Text = "&Move selected notes ...";
             this.menuMoveSelectedNotes.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuUpdateAttributes
-            // 
-            this.menuUpdateAttributes.Name = "menuUpdateAttributes";
-            this.menuUpdateAttributes.Size = new System.Drawing.Size(268, 22);
-            this.menuUpdateAttributes.Text = "Update attributes in selected notes ...";
-            this.menuUpdateAttributes.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem12
             // 
             this.toolStripMenuItem12.Name = "toolStripMenuItem12";
-            this.toolStripMenuItem12.Size = new System.Drawing.Size(255, 6);
+            this.toolStripMenuItem12.Size = new System.Drawing.Size(265, 6);
             // 
             // menuAlarmaWithin
             // 
@@ -414,7 +425,14 @@
             // toolStripMenuItem13
             // 
             this.toolStripMenuItem13.Name = "toolStripMenuItem13";
-            this.toolStripMenuItem13.Size = new System.Drawing.Size(255, 6);
+            this.toolStripMenuItem13.Size = new System.Drawing.Size(265, 6);
+            // 
+            // menuUpdateAttributes
+            // 
+            this.menuUpdateAttributes.Name = "menuUpdateAttributes";
+            this.menuUpdateAttributes.Size = new System.Drawing.Size(268, 22);
+            this.menuUpdateAttributes.Text = "Update attributes in selected notes ...";
+            this.menuUpdateAttributes.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuAddTags
             // 
@@ -433,14 +451,14 @@
             // toolStripMenuItem16
             // 
             this.toolStripMenuItem16.Name = "toolStripMenuItem16";
-            this.toolStripMenuItem16.Size = new System.Drawing.Size(255, 6);
+            this.toolStripMenuItem16.Size = new System.Drawing.Size(265, 6);
             // 
             // menuMoreOptions
             // 
             this.menuMoreOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuExecuteAnTScript});
             this.menuMoreOptions.Name = "menuMoreOptions";
-            this.menuMoreOptions.Size = new System.Drawing.Size(258, 22);
+            this.menuMoreOptions.Size = new System.Drawing.Size(268, 22);
             this.menuMoreOptions.Text = "More note options";
             // 
             // menuExecuteAnTScript
@@ -937,5 +955,8 @@
         private System.Windows.Forms.TabPage tabSearch;
         private System.Windows.Forms.ImageList imageTabExplorer;
         #endregion
+
+        private System.Windows.Forms.ToolStripMenuItem menuNewNoteAsPostIt;
+        private System.Windows.Forms.ToolStripMenuItem menuEditNoteAsPostIt;
     }
 }

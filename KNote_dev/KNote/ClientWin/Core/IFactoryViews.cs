@@ -14,6 +14,7 @@ namespace KNote.ClientWin.Core
         ISelectorView<NoteInfoDto> View(NotesSelectorComponent component);
         IViewConfigurable View(KNoteManagmentComponent component);
         IEditorView<NoteExtendedDto> View(NoteEditorComponent component);
+        IEditorView<NoteDto> View(PostItEditorComponent component);
         IEditorView<FolderDto> View(FolderEditorComponent component);        
         IEditorView<KMessageDto> View(MessageEditorComponent component);        
         IEditorView<ResourceDto> View(ResourceEditorComponent component);        

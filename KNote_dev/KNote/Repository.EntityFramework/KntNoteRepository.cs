@@ -291,7 +291,7 @@ namespace KNote.Repository.EntityFramework
 
                 //if (newNote.NoteId == Guid.Empty)
                 //    newNote.NoteId = Guid.NewGuid();
-                newNote.IsNew = true;
+                newNote.SetIsNew(true);
                 newNote.CreationDateTime = DateTime.Now;
                 newNote.ModificationDateTime = DateTime.Now;
                 newNote.KAttributesDto = new List<NoteKAttributeDto>();
