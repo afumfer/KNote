@@ -32,6 +32,16 @@ namespace KNote.ClientWin.Components
 
         #endregion
 
+        #region Componet specific events 
+
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItEdit;
+        protected virtual void OnPostItEdit()
+        {
+            PostItEdit?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId }));
+        }
+
+        #endregion
+
         #region IEditorView implementation
 
         protected override IEditorView<NoteExtendedDto> CreateView()
@@ -168,7 +178,7 @@ namespace KNote.ClientWin.Components
 
         #endregion
 
-        #region Other public methods
+        #region Component specific methods
 
         public FolderInfoDto GetFolder()
         {
@@ -425,6 +435,12 @@ namespace KNote.ClientWin.Components
             }
 
             return res;
+        }
+
+        public void FinalizeAndPostItEdit()
+        {
+            OnPostItEdit();
+            Finalize();
         }
 
         #endregion 

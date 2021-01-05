@@ -330,6 +330,7 @@
             // menuDeleteNote
             // 
             this.menuDeleteNote.Name = "menuDeleteNote";
+            this.menuDeleteNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
             this.menuDeleteNote.Size = new System.Drawing.Size(268, 22);
             this.menuDeleteNote.Text = "&Delete note";
             this.menuDeleteNote.Click += new System.EventHandler(this.menu_Click);

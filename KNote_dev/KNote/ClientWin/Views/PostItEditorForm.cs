@@ -29,7 +29,8 @@ namespace KNote.ClientWin.Views
         private int _heightRedim;
         private int _widthRedim;
 
-        private Guid _selectedFolderId;
+        // TODO: for select folder managmente
+        // private Guid _selectedFolderId;
 
         #endregion
 
@@ -70,7 +71,6 @@ namespace KNote.ClientWin.Views
         {
             // textXxxx = "";
         }
-
 
         public void OnClosingView()
         {
@@ -122,44 +122,55 @@ namespace KNote.ClientWin.Views
 
             if (menuSel == menuHide)
             {
-                await SaveModel();
-                _com.Finalize();
+                await SaveAndHide();
             }
             else if (menuSel == menuSaveNow)
             {
                 await SaveModel();
             }
-            //else if (menuSel == toolXxxxx)
-            //{
-
-            //}
+            else if (menuSel == menuDelete)
+            {
+                await DeleteModel();
+            }
+            else if (menuSel == menuAlwaysFront)
+            {
+                AlwaysFront();
+            }
+            else if (menuSel == menuExtendedEdition)
+            {
+                await ExtendedEdit();
+            }
         }
 
-        #endregion
-
-        #region private Methods
-
-        private async Task<bool> SaveModel()
+        private async void PostItEditorForm_KeyUp(object sender, KeyEventArgs e)
         {
-            ControlsToModel();            
-            return await _com.SaveModel();
+            if (e.Control)
+            {
+                switch (e.KeyCode)
+                {
+                    case Keys.S:
+                        await SaveModel();
+                        break;
+                    case Keys.H:
+                        await SaveAndHide();
+                        break;
+                    case Keys.D:
+                        await DeleteModel();
+                        break;
+                    case Keys.F:
+                        AlwaysFront();
+                        break;
+                    case Keys.E:
+                        await ExtendedEdit();
+                        break;
+                    case Keys.P:
+                        PostItPropertiesEdit();
+                        break;
+                }
+            }
+            //else if (e.KeyCode == Keys.F5)
+            //    menuExecKntScript_Click(this, null);
         }
-
-        private void ModelToControls()
-        {
-            labelCaption.Text = _com.Model.Topic;
-            textDescription.Text = _com.Model.Description;
-
-            textDescription.SelectionStart = 0;
-        }
-
-        private void ControlsToModel()
-        {
-            _com.Model.Description = textDescription.Text;
-        }
-
-
-        #endregion
 
         private void labelCaption_MouseDown(object sender, MouseEventArgs e)
         {
@@ -200,25 +211,10 @@ namespace KNote.ClientWin.Views
                     heightTmp = heightTmp - (_heightRedim - e.Y);
                     this.Width = widthTmp;
                     this.Height = heightTmp;
-                    //if ( xxShowBorder )
-                        DrawBorder();
+                    DrawFormBorder();
                 }
             }
             catch { }
-        }
-
-        private void DrawBorder()
-        {
-            // Si queremos border
-            Graphics grfx = this.CreateGraphics();
-            Pen pn = new Pen(Color.Black);
-            grfx.Clear(this.BackColor);
-            grfx.DrawRectangle(pn, 0, 0, this.Width - 1, this.Height - 1);
-
-            //Graphics grfx = panelForm.CreateGraphics();
-            //Pen pn = new Pen(Color.Black);
-            //grfx.Clear(this.BackColor);
-            //grfx.DrawRectangle(pn, 0, 0, panelForm.Width - 1, panelForm.Height - 1);
         }
 
         private void picMenu_MouseUp(object sender, MouseEventArgs e)
@@ -228,7 +224,91 @@ namespace KNote.ClientWin.Views
 
         private void PostItEditorForm_Paint(object sender, PaintEventArgs e)
         {
-            DrawBorder();
+            DrawFormBorder();
+        }
+
+        #endregion
+
+        #region private Methods
+
+        private void ModelToControls()
+        {
+            labelCaption.Text = _com.Model.Topic;
+            textDescription.Text = _com.Model.Description;
+            labelStatus.Text = $"[{_com.Model.FolderDto.Name}]";
+
+            // TODO: configure always front
+            // menuAlwaysFront.Checked = xx
+
+            textDescription.SelectionStart = 0;
+        }
+
+        private void ControlsToModel()
+        {
+            _com.Model.Description = textDescription.Text;
+
+            // TODO: save always front
+            //_com.Model.AlwaysTop = menuAlwaysFront.Checked
+        }
+
+        private async Task<bool> SaveModel()
+        {
+            ControlsToModel();
+            return await _com.SaveModel();
+        }
+
+        private async Task<bool> SaveAndHide()
+        {
+            var res = await SaveModel();
+            _com.Finalize();
+            return res;
+        }
+
+        private async Task<bool> DeleteModel()
+        {
+            var res = await _com.DeleteModel();
+            if (res)
+                _com.Finalize();
+            return res;
+        }
+
+        public void AlwaysFront()
+        {
+            menuAlwaysFront.Checked = !menuAlwaysFront.Checked;
+            this.TopMost = menuAlwaysFront.Checked;
+            // it is necessary set focus or select this form
+            this.textDescription.Focus();
+        }
+
+        private async Task<bool> ExtendedEdit()
+        {
+            var res = await SaveModel();
+            _com.FinalizeAndExtendEdit();
+            return res;
+        }
+
+        private void PostItPropertiesEdit()
+        {
+
+        }
+
+        private void DrawFormBorder()
+        {
+            // TODO: 
+            //if ( !ShowBorder )
+            //   return;
+
+            Graphics grfx = this.CreateGraphics();
+            Pen pn = new Pen(Color.Black);
+            grfx.Clear(this.BackColor);
+            grfx.DrawRectangle(pn, 0, 0, this.Width - 1, this.Height - 1);
+        }
+
+        #endregion
+
+        private async void labelCaption_DoubleClick(object sender, EventArgs e)
+        {
+            await ExtendedEdit();
         }
     }
 }

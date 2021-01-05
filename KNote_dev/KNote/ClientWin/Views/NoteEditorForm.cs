@@ -150,6 +150,10 @@ namespace KNote.ClientWin.Views
             {
                 UndoChanges();
             }
+            else if (menuSel == buttonPostIt)
+            {
+                await PostItEdit();
+            }
         }
 
         private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -785,6 +789,13 @@ namespace KNote.ClientWin.Views
                 ModelToControls();
                 buttonUndo.Enabled = false;
             }
+        }
+        
+        private async Task<bool> PostItEdit()
+        {
+            var res = await SaveModel();
+            _com.FinalizeAndPostItEdit();
+            return res;
         }
 
         private void BlockControl(Control c)

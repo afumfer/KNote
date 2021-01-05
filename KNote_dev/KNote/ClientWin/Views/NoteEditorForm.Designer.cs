@@ -227,6 +227,7 @@
             this.buttonPostIt.Name = "buttonPostIt";
             this.buttonPostIt.Size = new System.Drawing.Size(104, 22);
             this.buttonPostIt.Text = "View as Post-It";
+            this.buttonPostIt.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // separador2
             // 

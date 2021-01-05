@@ -70,6 +70,7 @@ namespace KNote.ClientWin.Views
             // 
             this.labelStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.labelStatus.Location = new System.Drawing.Point(3, 316);
             this.labelStatus.Name = "labelStatus";
             this.labelStatus.Size = new System.Drawing.Size(452, 16);
@@ -87,6 +88,7 @@ namespace KNote.ClientWin.Views
             this.labelCaption.Size = new System.Drawing.Size(453, 18);
             this.labelCaption.TabIndex = 6;
             this.labelCaption.Text = "...";
+            this.labelCaption.DoubleClick += new System.EventHandler(this.labelCaption_DoubleClick);
             this.labelCaption.MouseDown += new System.Windows.Forms.MouseEventHandler(this.labelCaption_MouseDown);
             this.labelCaption.MouseMove += new System.Windows.Forms.MouseEventHandler(this.labelCaption_MouseMove);
             // 
@@ -139,50 +141,60 @@ namespace KNote.ClientWin.Views
             this.menuExtendedEdition,
             this.menuPostItProperties});
             this.menuPostIt.Name = "menuPostIt";
-            this.menuPostIt.Size = new System.Drawing.Size(176, 142);
+            this.menuPostIt.Size = new System.Drawing.Size(216, 142);
             // 
             // menuHide
             // 
             this.menuHide.Name = "menuHide";
-            this.menuHide.Size = new System.Drawing.Size(175, 22);
+            this.menuHide.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
+            this.menuHide.Size = new System.Drawing.Size(215, 22);
             this.menuHide.Text = "Hide note";
             this.menuHide.Click += new System.EventHandler(this.postItMenu_Click);
             // 
             // menuAlwaysFront
             // 
             this.menuAlwaysFront.Name = "menuAlwaysFront";
-            this.menuAlwaysFront.Size = new System.Drawing.Size(175, 22);
+            this.menuAlwaysFront.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
+            this.menuAlwaysFront.Size = new System.Drawing.Size(215, 22);
             this.menuAlwaysFront.Text = "Always front";
+            this.menuAlwaysFront.Click += new System.EventHandler(this.postItMenu_Click);
             // 
             // menuSaveNow
             // 
             this.menuSaveNow.Name = "menuSaveNow";
-            this.menuSaveNow.Size = new System.Drawing.Size(175, 22);
+            this.menuSaveNow.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.menuSaveNow.Size = new System.Drawing.Size(215, 22);
             this.menuSaveNow.Text = "Save now";
             this.menuSaveNow.Click += new System.EventHandler(this.postItMenu_Click);
             // 
             // menuDelete
             // 
             this.menuDelete.Name = "menuDelete";
-            this.menuDelete.Size = new System.Drawing.Size(175, 22);
+            this.menuDelete.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
+            this.menuDelete.Size = new System.Drawing.Size(215, 22);
             this.menuDelete.Text = "Delete";
+            this.menuDelete.Click += new System.EventHandler(this.postItMenu_Click);
             // 
             // menuS1
             // 
             this.menuS1.Name = "menuS1";
-            this.menuS1.Size = new System.Drawing.Size(172, 6);
+            this.menuS1.Size = new System.Drawing.Size(212, 6);
             // 
             // menuExtendedEdition
             // 
             this.menuExtendedEdition.Name = "menuExtendedEdition";
-            this.menuExtendedEdition.Size = new System.Drawing.Size(175, 22);
+            this.menuExtendedEdition.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
+            this.menuExtendedEdition.Size = new System.Drawing.Size(215, 22);
             this.menuExtendedEdition.Text = "Extended edition ...";
+            this.menuExtendedEdition.Click += new System.EventHandler(this.postItMenu_Click);
             // 
             // menuPostItProperties
             // 
             this.menuPostItProperties.Name = "menuPostItProperties";
-            this.menuPostItProperties.Size = new System.Drawing.Size(175, 22);
+            this.menuPostItProperties.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
+            this.menuPostItProperties.Size = new System.Drawing.Size(215, 22);
             this.menuPostItProperties.Text = "PostIt properties ...";
+            this.menuPostItProperties.Click += new System.EventHandler(this.postItMenu_Click);
             // 
             // PostItEditorForm
             // 
@@ -193,6 +205,7 @@ namespace KNote.ClientWin.Views
             this.ControlBox = false;
             this.Controls.Add(this.panelForm);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "PostItEditorForm";
@@ -200,6 +213,7 @@ namespace KNote.ClientWin.Views
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PostItEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.PostItEditorForm_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.PostItEditorForm_Paint);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PostItEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResize)).EndInit();

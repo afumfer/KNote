@@ -17,11 +17,24 @@ namespace KNote.ClientWin.Components
 {
     public class PostItEditorComponent : ComponentEditorBase<IEditorView<NoteDto>, NoteDto>
     {
+        #region Constructor
 
         public PostItEditorComponent(Store store): base(store)
         {
             ComponentName = "PostIt editor";
         }
+
+        #endregion 
+
+        #region Componet specific events 
+
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> ExtendedEdit;
+        protected virtual void OnExtendedEdit()
+        {
+            ExtendedEdit?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId }));
+        }
+
+        #endregion
 
         #region IEditorView implementation
 
@@ -65,7 +78,7 @@ namespace KNote.ClientWin.Components
                 // Evaluate whether to put the following default values in the service layer 
                 // (null values are by default, we need empty strings so that the IsDirty is 
                 //  not altered after leaving the view when there are no modifications).
-                Model.Topic = "";
+                Model.Topic = DateTime.Now.ToString();
                 Model.Tags = "";
                 Model.Description = "";
 
@@ -159,5 +172,15 @@ namespace KNote.ClientWin.Components
 
         #endregion 
 
+        #region Component specific methods
+
+        public void FinalizeAndExtendEdit()
+        {            
+            OnExtendedEdit();
+            Finalize();
+        }
+
+        #endregion 
+       
     }
 }
