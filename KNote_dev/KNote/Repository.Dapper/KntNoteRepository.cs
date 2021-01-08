@@ -1056,6 +1056,162 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public async Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId)
+        {
+            var result = new Result<WindowDto>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"
+                    SELECT                        
+                        WindowId, NoteId, UserId, Host, Visible, AlwaysOnTop, PosX, PosY, Width, Height, FontName, 
+                        FontSize, FontBold, FontItalic, FontUnderline, FontStrikethru, ForeColor, 
+                        TitleColor, TextTitleColor, NoteColor, TextNoteColor
+                    FROM Windows  
+                    WHERE NoteId = @NoteId and UserId = @UserId";
+
+                var entity = await db.QueryFirstOrDefaultAsync<WindowDto>(sql.ToString(), new { NoteId = noteId, UserId = userId });
+
+                if (entity == null)
+                    result.AddErrorMessage("Entity not found.");
+
+                result.Entity = entity;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<WindowDto>> AddWindowAsync(WindowDto entity)
+        {
+            var result = new Result<WindowDto>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"INSERT INTO Windows 
+                                (WindowId, NoteId, UserId, Host, Visible, AlwaysOnTop, PosX, PosY, Width, Height, FontName, 
+                                FontSize, FontBold, FontItalic, FontUnderline, FontStrikethru, ForeColor, 
+                                TitleColor, TextTitleColor, NoteColor, TextNoteColor )
+                            VALUES (@WindowId, @NoteId, @UserId, @Host, @Visible, @AlwaysOnTop, @PosX, @PosY, @Width, @Height, @FontName, 
+                                @FontSize, @FontBold, @FontItalic, @FontUnderline, @FontStrikethru, @ForeColor, 
+                                @TitleColor, @TextTitleColor, @NoteColor, @TextNoteColor)";
+
+                var r = await db.ExecuteAsync(sql.ToString(),
+                    new
+                    {
+                        entity.WindowId,
+                        entity.NoteId,
+                        entity.UserId,
+                        entity.Host,
+                        entity.Visible,
+                        entity.AlwaysOnTop,
+                        entity.PosX,
+                        entity.PosY,
+                        entity.Width,
+                        entity.Height,
+                        entity.FontName,
+                        entity.FontSize,
+                        entity.FontBold,
+                        entity.FontItalic,
+                        entity.FontUnderline,
+                        entity.FontStrikethru,
+                        entity.ForeColor,
+                        entity.TitleColor,
+                        entity.TextTitleColor,
+                        entity.NoteColor,
+                        entity.TextNoteColor
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not inserted");
+
+                result.Entity = entity;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity)
+        {
+            var result = new Result<WindowDto>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"UPDATE Windows SET                                                 
+                        NoteId = @NoteId,
+                        UserId = @UserId,
+                        Host = @Host,
+                        Visible = @Visible,
+                        AlwaysOnTop = @AlwaysOnTop,
+                        PosX = @PosX,
+                        PosY = @PosY,
+                        Width = @Width,
+                        Height = @Height,
+                        FontName = @FontName,
+                        FontSize = @FontSize,
+                        FontBold = @FontBold,
+                        FontItalic = @FontItalic,
+                        FontUnderline = @FontUnderline,
+                        FontStrikethru = @FontStrikethru,
+                        ForeColor = @ForeColor,
+                        TitleColor = @TitleColor,
+                        TextTitleColor = @TextTitleColor,
+                        NoteColor = @NoteColor,
+                        TextNoteColor = @TextNoteColor
+                    WHERE WindowId = @WindowId";
+
+                var r = await db.ExecuteAsync(sql.ToString(),
+                    new
+                    {
+                        entity.WindowId,
+                        entity.NoteId,
+                        entity.UserId,
+                        entity.Host,
+                        entity.Visible,
+                        entity.AlwaysOnTop,
+                        entity.PosX,
+                        entity.PosY,
+                        entity.Width,
+                        entity.Height,
+                        entity.FontName,
+                        entity.FontSize,
+                        entity.FontBold,
+                        entity.FontItalic,
+                        entity.FontUnderline,
+                        entity.FontStrikethru,
+                        entity.ForeColor,
+                        entity.TitleColor,
+                        entity.TextTitleColor,
+                        entity.NoteColor,
+                        entity.TextNoteColor
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not updated");
+
+                result.Entity = entity;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
         public async Task<Result<int>> CountNotesInFolder(Guid folderId)
         {
             var result = new Result<int>();
@@ -1075,7 +1231,6 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
-
 
         #endregion
 

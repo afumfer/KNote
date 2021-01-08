@@ -46,12 +46,13 @@ namespace KNote.ClientWin.Components
             }            
         }
 
-        public override void NewModel(IKntService service)
+        public override async Task<bool> NewModel(IKntService service)
         {            
             Service = service;
 
             // TODO: call service for new model
             Model = new FolderDto();
+            return await Task.FromResult<bool>(true);
         }
 
         public override async Task<bool> SaveModel()

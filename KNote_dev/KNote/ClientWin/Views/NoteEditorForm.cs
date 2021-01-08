@@ -581,7 +581,7 @@ namespace KNote.ClientWin.Views
             textTags.Text = _com.Model.Tags;            
             textPriority.Text = _com.Model.Priority.ToString();
 
-            string desOutput = _com.Model?.Description?.Replace(KntConst.ContainerResources, _com.Store.Config.CacheUrlResources);
+            string desOutput = _com.Model?.Description?.Replace(KntConst.ContainerResources, _com.Store.AppConfig.CacheUrlResources);
 
             if (_com.Model.HtmlFormat)
             {
@@ -750,13 +750,13 @@ namespace KNote.ClientWin.Views
            
             if (_com.Model.ContentType == "html")
             {
-                string desOutput = htmlDescription.BodyHtml?.Replace(_com.Store.Config.CacheUrlResources, KntConst.ContainerResources);
+                string desOutput = htmlDescription.BodyHtml?.Replace(_com.Store.AppConfig.CacheUrlResources, KntConst.ContainerResources);
                 _com.Model.Description = desOutput;
 
             }
             else
             {
-                string desOutput = textDescription.Text?.Replace(_com.Store.Config.CacheUrlResources, KntConst.ContainerResources);
+                string desOutput = textDescription.Text?.Replace(_com.Store.AppConfig.CacheUrlResources, KntConst.ContainerResources);
                 _com.Model.Description = desOutput;
             }
 
@@ -1050,7 +1050,7 @@ namespace KNote.ClientWin.Views
         {
             var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
             tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            tmpFile = tmpFile.Replace(KntConst.ContainerResources, _com.Store.Config.CacheUrlResources);
+            tmpFile = tmpFile.Replace(KntConst.ContainerResources, _com.Store.AppConfig.CacheUrlResources);
 
             if (!buttonViewHtml.Enabled)
             {

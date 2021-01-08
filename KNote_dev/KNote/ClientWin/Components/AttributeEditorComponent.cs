@@ -36,7 +36,7 @@ namespace KNote.ClientWin.Components
             throw new NotImplementedException();
         }
 
-        public override void NewModel(IKntService service)
+        public override Task<bool> NewModel(IKntService service)
         {
             throw new NotImplementedException();
         }

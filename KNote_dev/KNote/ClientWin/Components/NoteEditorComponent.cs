@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace KNote.ClientWin.Components
 {    
-    public class NoteEditorComponent : ComponentEditorBase<IEditorView<NoteExtendedDto>, NoteExtendedDto>
+    public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>, NoteExtendedDto>
     {
         #region Properties
        
@@ -72,7 +72,7 @@ namespace KNote.ClientWin.Components
             }
         }
         
-        public override async void NewModel(IKntService service)
+        public override async Task<bool> NewModel(IKntService service)
         {
             try
             {
@@ -95,11 +95,14 @@ namespace KNote.ClientWin.Components
                 Model.SetIsDirty(false);
 
                 View.RefreshView();
+                
+                return true;
             }
             catch (Exception ex)
             {
                 View.ShowInfo(ex.Message);                
             }
+            return false;
         }
 
         public override async Task<bool> SaveModel()
@@ -180,19 +183,6 @@ namespace KNote.ClientWin.Components
 
         #region Component specific methods
 
-        public FolderInfoDto GetFolder()
-        {
-            var folderSelector = new FoldersSelectorComponent(Store);
-            var services = new List<ServiceRef>();
-            services.Add(Store.GetServiceRef(Service.IdServiceRef));
-            folderSelector.ServicesRef = services;
-            var res = folderSelector.RunModal();
-            if (res.Entity == EComponentResult.Executed)
-                return folderSelector.SelectedEntity.FolderInfo;
-
-            return null;
-        }
-
         public NoteKAttributeDto EditAttribute(NoteKAttributeDto noteAttribute)
         {
             var noteAttributeEditor = new NoteAttributeEditorComponent(Store);
@@ -260,7 +250,7 @@ namespace KNote.ClientWin.Components
 
             messageEditor.AutoDBSave = false;  // don't save automatically
             
-            messageEditor.NewModel(Service);            
+            await messageEditor.NewModel(Service);            
             messageEditor.Model.NoteId = Model.NoteId;
             messageEditor.Model.Content = "(Aditional text for message)";
             var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
@@ -323,7 +313,7 @@ namespace KNote.ClientWin.Components
 
             taskEditor.AutoDBSave = false;  // don't save automatically
 
-            taskEditor.NewModel(Service);
+            await taskEditor.NewModel(Service);
             taskEditor.Model.NoteId = Model.NoteId;            
             var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
             taskEditor.Model.UserId = userDto.UserId;
@@ -382,7 +372,7 @@ namespace KNote.ClientWin.Components
             var resource = new ResourceEditorComponent(Store);
             resource.AutoDBSave = false;  // don't save automatically
 
-            resource.NewModel(Service);
+            await resource.NewModel(Service);
             resource.Model.NoteId = Model.NoteId;
             resource.Model.SetIsNew(true);
 

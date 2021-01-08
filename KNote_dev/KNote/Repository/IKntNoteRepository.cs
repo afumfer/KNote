@@ -35,10 +35,11 @@ namespace KNote.Repository
         Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity);
         Task<Result> DeleteMessageAsync(Guid messageId);
         Task<Result<int>> CountNotesInFolder(Guid folderId);
+        Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId);
+        Task<Result<WindowDto>> AddWindowAsync(WindowDto entity);
+        Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity);
 
 
-
-        //Task<Result<WindowDto>> SaveWindowAsync(WindowDto entityInfo);
         //Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entityInfo);
     }
 }

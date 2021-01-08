@@ -237,7 +237,7 @@ namespace KNote.ClientWin.Core
 
         public abstract Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true);
 
-        public abstract void NewModel(IKntService service);
+        public abstract Task<bool> NewModel(IKntService service);
 
         public abstract Task<bool> SaveModel();
 
@@ -273,7 +273,7 @@ namespace KNote.ClientWin.Core
             try
             {
                 //var dirPath = Path.Combine(new string[] { Path.GetTempPath(), "KeyNote", container });
-                var dirPath = Path.Combine(new string[] { Store.Config.CacheResources, container });                
+                var dirPath = Path.Combine(new string[] { Store.AppConfig.CacheResources, container });                
                 tmpFile = Path.Combine(dirPath, fileName);
 
                 if (!Directory.Exists(dirPath))

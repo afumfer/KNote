@@ -28,13 +28,14 @@ namespace KNote.ClientWin.Components
             return Store.FactoryViews.View(this);
         }
 
-        public override void NewModel(IKntService service)
+        public override async Task<bool> NewModel(IKntService service)
         {
             Service = service;
 
             // TODO: call service for new model
             Model = new ResourceDto();
             Model.ResourceId = Guid.NewGuid();
+            return await Task.FromResult<bool>(true);
         }
 
         public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)

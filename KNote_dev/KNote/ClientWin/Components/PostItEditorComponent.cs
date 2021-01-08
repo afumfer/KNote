@@ -15,13 +15,17 @@ using System.Linq;
 
 namespace KNote.ClientWin.Components
 {
-    public class PostItEditorComponent : ComponentEditorBase<IEditorView<NoteDto>, NoteDto>
+    public class PostItEditorComponent : ComponentEditor<IEditorView<NoteDto>, NoteDto>
     {
+        private Guid _userId = Guid.Empty;
+
+        public WindowDto WindowPostIt { get; protected set; }
+
         #region Constructor
 
         public PostItEditorComponent(Store store): base(store)
         {
-            ComponentName = "PostIt editor";
+            ComponentName = "PostIt editor";            
         }
 
         #endregion 
@@ -55,6 +59,15 @@ namespace KNote.ClientWin.Components
 
                 Model = (await Service.Notes.GetAsync(noteId)).Entity;
                 Model.SetIsDirty(false);
+                
+                var resGetWindow = await Service.Notes.GetWindowAsync(Model.NoteId, await GetUserId());
+                if (resGetWindow.IsValid)
+                    WindowPostIt = resGetWindow.Entity;
+                else
+                    WindowPostIt = await GetNewWindowPostIt();
+
+                WindowPostIt.SetIsDirty(false);
+
                 if (refreshView)
                     View.RefreshView();
                 return true;
@@ -66,7 +79,7 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public async override void NewModel(IKntService service)
+        public async override Task<bool> NewModel(IKntService service)
         {
             try
             {
@@ -86,32 +99,39 @@ namespace KNote.ClientWin.Components
                 Model.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
                 Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
 
+                WindowPostIt = await GetNewWindowPostIt();
+
                 Model.SetIsDirty(false);
+                WindowPostIt.SetIsDirty(false);
 
                 View.RefreshView();
+
+                return await Task.FromResult<bool>(true);
             }
             catch (Exception ex)
             {
                 View.ShowInfo(ex.Message);
             }
+
+            return await Task.FromResult<bool>(false);
         }
 
         public async override Task<bool> SaveModel()
         {
-            if (!Model.IsDirty())
+            if (!Model.IsDirty() && !WindowPostIt.IsDirty() )
                 return true;
-
-            var isNew = (Model.NoteId == Guid.Empty);
-
-            var msgVal = Model.GetErrorMessage();
-            if (!string.IsNullOrEmpty(msgVal))
-            {
-                View.ShowInfo(msgVal);
-                return false;
-            }
 
             try
             {
+                var isNew = (Model.NoteId == Guid.Empty);
+
+                var msgVal = Model.GetErrorMessage();
+                if (!string.IsNullOrEmpty(msgVal))
+                {
+                    View.ShowInfo(msgVal);
+                    return false;
+                }
+
                 var response = await Service.Notes.SaveAsync(Model);
 
                 if (response.IsValid)
@@ -120,7 +140,7 @@ namespace KNote.ClientWin.Components
 
                     Model.SetIsDirty(false);
                     Model.SetIsNew(false);
-
+                    
                     if (!isNew)
                         OnSavedEntity(response.Entity);
                     else
@@ -129,7 +149,15 @@ namespace KNote.ClientWin.Components
                     View.RefreshView();
                 }
                 else
+                {
                     View.ShowInfo(response.Message);
+                }
+
+                if (WindowPostIt != null)
+                {
+                    var responseWinPostIt = await Service.Notes.SaveWindowAsync(WindowPostIt);
+                    WindowPostIt.SetIsDirty(false);
+                }
             }
             catch (Exception ex)
             {
@@ -181,6 +209,45 @@ namespace KNote.ClientWin.Components
         }
 
         #endregion 
-       
+
+        private async Task<WindowDto> GetNewWindowPostIt()
+        {            
+            if (Model == null)
+                return null;
+            
+            // TODO: get default values from Store.AppConfig ...
+            return new WindowDto {
+                NoteId = Model.NoteId,
+                UserId = await GetUserId(),
+                PosX = 100,
+                PosY = 100,
+                AlwaysOnTop = true,
+                Width = 400,
+                Height = 300, 
+                FontName = "Segoe UI",
+                FontSize = 10,
+                FontBold = false,
+                FontItalic = false,
+                FontStrikethru = false,
+                FontUnderline = false,
+                ForeColor = 0,
+                NoteColor = 12648447,
+                TitleColor = 8454143,
+                TextNoteColor = 0,
+                TextTitleColor = 0
+            };
+        }
+
+        private async Task<Guid> GetUserId()
+        {
+            if (_userId != Guid.Empty)
+                return _userId;
+         
+            var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
+            if(userDto != null)
+                _userId = userDto.UserId;
+            return _userId;
+        }
+
     }
 }

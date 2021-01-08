@@ -281,43 +281,43 @@ namespace KNote.ClientWin.Components
 
         public void AddNote()
         {
-            if(SelectedServiceRef == null)
+            if(SelectedFolderInfo == null)
             {
-                View.ShowInfo("There is no archiver selected to create new note.");
+                View.ShowInfo("There is no selected folder to create new note.");
                 return;
             }
             AddNote(SelectedServiceRef.Service);
         }
 
-        private void AddNote(IKntService service)
+        private async void AddNote(IKntService service)
         {
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.AddedEntity += NoteEditorComponent_AddedEntity;
             noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
             noteEditorComponent.PostItEdit += NoteEditorComponent_PostItEdit;
-            noteEditorComponent.NewModel(service);
+            await noteEditorComponent.NewModel(service);
             noteEditorComponent.Run();
         }
 
         public void AddNotePostIt()
         {
-            if (SelectedNoteInfo == null)
+            if (SelectedFolderInfo == null)
             {
-                View.ShowInfo("There is no note selected to edit.");
+                View.ShowInfo("There is no selected folder to create new note.");
                 return;
             }
             AddNotePostIt(SelectedServiceRef.Service);
         }
 
-        private void AddNotePostIt(IKntService service)
+        private async void AddNotePostIt(IKntService service)
         {
             var postItEditorComponent = new PostItEditorComponent(Store);
             postItEditorComponent.AddedEntity += PostItEditorComponent_AddedEntity;
             postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
             postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
             postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
-            postItEditorComponent.NewModel(service);
+            await postItEditorComponent.NewModel(service);
             postItEditorComponent.Run();
         }
 
@@ -334,10 +334,10 @@ namespace KNote.ClientWin.Components
             await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
         }
 
-        public void NewFolder()
+        public async void NewFolder()
         {
             var folderEditorComponent = new FolderEditorComponent(Store);
-            folderEditorComponent.NewModel(SelectedServiceRef.Service);
+            await folderEditorComponent.NewModel(SelectedServiceRef.Service);
             folderEditorComponent.Model.ParentId = SelectedFolderInfo.FolderId;
             folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo.GetSimpleDto<FolderDto>();
             var res = folderEditorComponent.RunModal();

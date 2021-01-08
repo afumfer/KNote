@@ -886,6 +886,103 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(response);
         }
 
+        public async Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId)
+        {            
+            var response = new Result<WindowDto>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var windows = new GenericRepositoryEF<KntDbContext, Window>(ctx, ThrowKntException);
+
+                var resGenRep = await windows.GetAsync(_ => _.NoteId == noteId && _.UserId == userId);
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<WindowDto>();
+                response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
+
+        }
+
+        public async Task<Result<WindowDto>> AddWindowAsync(WindowDto entity)
+        {            
+            var response = new Result<WindowDto>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var windows = new GenericRepositoryEF<KntDbContext, Window>(ctx, ThrowKntException);
+
+                var newEntity = new Window();
+                newEntity.SetSimpleDto(entity);
+
+                var resGenRep = await windows.AddAsync(newEntity);
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<WindowDto>();
+                response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+            return ResultDomainAction(response);
+
+        }
+
+        public async Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity)
+        {
+            var resGenRep = new Result<Window>();
+            var response = new Result<WindowDto>();
+
+            try
+            {
+                var ctx = GetOpenConnection();
+                var window = new GenericRepositoryEF<KntDbContext, Window>(ctx, ThrowKntException);
+
+                bool flagThrowKntException = false;
+                if (window.ThrowKntException == true)
+                {
+                    flagThrowKntException = true;
+                    window.ThrowKntException = false;
+                }
+
+                var resGenRepGet = await window.GetAsync(entity.WindowId);
+                Window entityForUpdate;
+
+                if (flagThrowKntException == true)
+                    window.ThrowKntException = true;
+
+                if (resGenRepGet.IsValid)
+                {
+                    entityForUpdate = resGenRepGet.Entity;
+                    entityForUpdate.SetSimpleDto(entity);
+                    resGenRep = await window.UpdateAsync(entityForUpdate);
+                }
+                else
+                {
+                    resGenRep.Entity = null;
+                    resGenRep.AddErrorMessage("Can't find entity for update.");
+                }
+
+                response.Entity = resGenRep.Entity?.GetSimpleDto<WindowDto>();
+                response.ErrorList = resGenRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+            }
+
+            return ResultDomainAction(response);
+        }
+
         public async Task<Result<int>> CountNotesInFolder(Guid folderId)
         {
             Result<int> response = new Result<int>();

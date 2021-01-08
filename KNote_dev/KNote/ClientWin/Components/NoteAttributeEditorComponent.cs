@@ -32,12 +32,13 @@ namespace KNote.ClientWin.Components
             throw new NotImplementedException();
         }
 
-        public override void NewModel(IKntService service)
+        public override async Task<bool> NewModel(IKntService service)
         {
             Service = service;
 
             // TODO: call service for new model
             Model = new NoteKAttributeDto();
+            return await Task.FromResult<bool>(true);
         }
 
         public async override Task<bool> SaveModel()

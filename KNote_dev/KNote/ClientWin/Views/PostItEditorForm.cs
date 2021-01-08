@@ -28,9 +28,8 @@ namespace KNote.ClientWin.Views
         private int _topPosition;
         private int _heightRedim;
         private int _widthRedim;
-
-        // TODO: for select folder managmente
-        // private Guid _selectedFolderId;
+        
+        private Guid _selectedFolderId;
 
         #endregion
 
@@ -93,8 +92,8 @@ namespace KNote.ClientWin.Views
         #region Form events handlers
 
         private void PostItEditorForm_Load(object sender, EventArgs e)
-        {
-            
+        {            
+            ModelToControlsPostIt();
         }
 
         private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -151,7 +150,7 @@ namespace KNote.ClientWin.Views
                     case Keys.S:
                         await SaveModel();
                         break;
-                    case Keys.H:
+                    case Keys.Q:
                         await SaveAndHide();
                         break;
                     case Keys.D:
@@ -236,6 +235,11 @@ namespace KNote.ClientWin.Views
             labelCaption.Text = _com.Model.Topic;
             textDescription.Text = _com.Model.Description;
             labelStatus.Text = $"[{_com.Model.FolderDto.Name}]";
+            _selectedFolderId = _com.Model.FolderId;
+
+            //this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
+            //this.Top = _com.WindowPostIt.PosY;
+            //this.Left = _com.WindowPostIt.PosX;
 
             // TODO: configure always front
             // menuAlwaysFront.Checked = xx
@@ -246,9 +250,10 @@ namespace KNote.ClientWin.Views
         private void ControlsToModel()
         {
             _com.Model.Description = textDescription.Text;
+            _com.Model.FolderId = _selectedFolderId;
 
-            // TODO: save always front
-            //_com.Model.AlwaysTop = menuAlwaysFront.Checked
+            ControlsToModelPostIt();
+
         }
 
         private async Task<bool> SaveModel()
@@ -310,5 +315,73 @@ namespace KNote.ClientWin.Views
         {
             await ExtendedEdit();
         }
+
+        private void labelStatus_DoubleClick(object sender, EventArgs e)
+        {
+            var folder = _com.GetFolder();
+            if (folder != null)
+            {
+                _selectedFolderId = folder.FolderId;
+                labelStatus.Text = $"[{folder?.Name}]";
+            }
+        }
+
+        private void ModelToControlsPostIt()
+        {
+            // Avoid positions outside the view zone
+            if (_com.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
+                _com.WindowPostIt.PosX = SystemInformation.VirtualScreen.Width - _com.WindowPostIt.Width;
+            if (_com.WindowPostIt.PosY > SystemInformation.VirtualScreen.Height - 50)
+                _com.WindowPostIt.PosY = SystemInformation.VirtualScreen.Height - _com.WindowPostIt.Height;
+
+            this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
+            this.Size = new System.Drawing.Size(_com.WindowPostIt.Width, _com.WindowPostIt.Height);
+            
+            FontStyle style = new FontStyle();
+            if (_com.WindowPostIt.FontBold)
+                style = FontStyle.Bold;
+            if (_com.WindowPostIt.FontItalic)
+                style = style | FontStyle.Italic;
+            if (_com.WindowPostIt.FontUnderline)
+                style = style | FontStyle.Underline;
+            if (_com.WindowPostIt.FontStrikethru)
+                style = style | FontStyle.Strikeout;
+            Font font = new Font(_com.WindowPostIt.FontName, _com.WindowPostIt.FontSize, style);
+            textDescription.Font = font;
+
+            // Color     Beige            
+            textDescription.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
+            labelCaption.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.TitleColor);
+            textDescription.ForeColor = ColorTranslator.FromOle(_com.WindowPostIt.TextNoteColor);
+            labelCaption.ForeColor = ColorTranslator.FromOle(_com.WindowPostIt.TextTitleColor);
+            this.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
+            labelStatus.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
+             
+            this.TopMost = menuAlwaysFront.Checked = _com.WindowPostIt.AlwaysOnTop;
+        }
+
+        private void ControlsToModelPostIt()
+        {
+            _com.WindowPostIt.PosY = this.Top;
+            _com.WindowPostIt.PosX = this.Left;
+            _com.WindowPostIt.Width = this.Width;
+            _com.WindowPostIt.Height = this.Height;
+
+            _com.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
+
+            // TODO: managmente in style editor
+            //var font = textDescription.Font;
+            //_com.WindowPostIt.FontName = font.OriginalFontName;
+            //_com.WindowPostIt.FontSize = (byte)font.Size;
+            
+            //_com.WindowPostIt.NoteColor = ColorTranslator.ToOle(textDescription.BackColor);
+            //_com.WindowPostIt.TitleColor = ColorTranslator.ToOle(labelCaption.BackColor);
+            //_com.WindowPostIt.TextNoteColor = ColorTranslator.ToOle(textDescription.ForeColor);
+            //_com.WindowPostIt.TextTitleColor = ColorTranslator.ToOle(labelCaption.ForeColor);
+            //_com.WindowPostIt.NoteColor = ColorTranslator.ToOle(this.BackColor);
+            //_com.WindowPostIt.NoteColor = ColorTranslator.ToOle(labelStatus.BackColor);
+
+        }
+
     }
 }

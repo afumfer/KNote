@@ -25,7 +25,7 @@ namespace KNote.ClientWin.Core
 
         private readonly List<ComponentBase> _listComponents;
 
-        public AppConfig Config { get; protected set; }
+        public AppConfig AppConfig { get; protected set; }
 
         public ServiceRef PersonalServiceRef 
         {
@@ -48,8 +48,8 @@ namespace KNote.ClientWin.Core
 
         public Store(IFactoryViews factoryViews)
         {
-            if (Config == null)
-                Config = new AppConfig();
+            if (AppConfig == null)
+                AppConfig = new AppConfig();
 
             _listComponents = new List<ComponentBase>();
             _servicesRefs = new List<ServiceRef>();
@@ -58,7 +58,7 @@ namespace KNote.ClientWin.Core
 
         public Store(AppConfig config, IFactoryViews factoryViews) : this (factoryViews)
         {
-            Config = config;
+            AppConfig = config;
         }
 
         #endregion

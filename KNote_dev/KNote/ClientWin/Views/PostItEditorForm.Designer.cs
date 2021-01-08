@@ -76,6 +76,7 @@ namespace KNote.ClientWin.Views
             this.labelStatus.Size = new System.Drawing.Size(452, 16);
             this.labelStatus.TabIndex = 7;
             this.labelStatus.Text = "...";
+            this.labelStatus.DoubleClick += new System.EventHandler(this.labelStatus_DoubleClick);
             // 
             // labelCaption
             // 
@@ -121,7 +122,7 @@ namespace KNote.ClientWin.Views
             this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textDescription.BackColor = System.Drawing.SystemColors.Info;
+            this.textDescription.BackColor = System.Drawing.Color.Beige;
             this.textDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textDescription.Location = new System.Drawing.Point(3, 24);
             this.textDescription.Margin = new System.Windows.Forms.Padding(6);
@@ -146,7 +147,7 @@ namespace KNote.ClientWin.Views
             // menuHide
             // 
             this.menuHide.Name = "menuHide";
-            this.menuHide.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
+            this.menuHide.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
             this.menuHide.Size = new System.Drawing.Size(215, 22);
             this.menuHide.Text = "Hide note";
             this.menuHide.Click += new System.EventHandler(this.postItMenu_Click);

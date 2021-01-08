@@ -418,6 +418,35 @@ namespace KNote.Service.Services
             return result;
         }
 
+        public async Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId)
+        {
+            return await _repository.Notes.GetWindowAsync(noteId, userId);
+        }
+
+        public async Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false)
+        {
+            if (entity.WindowId == Guid.Empty)
+            {
+                entity.WindowId = Guid.NewGuid();
+                return await _repository.Notes.AddWindowAsync(entity);
+            }
+            else
+            {
+                if (!forceNew)
+                {
+                    return await _repository.Notes.UpdateWindowAsync(entity);
+                }
+                else
+                {
+                    var checkExist = await GetWindowAsync(entity.NoteId, entity.UserId);
+                    if (checkExist.IsValid)
+                        return await _repository.Notes.UpdateWindowAsync(entity);
+                    else
+                        return await _repository.Notes.AddWindowAsync(entity);
+                }
+            }
+        }
+
         #endregion
 
     }
