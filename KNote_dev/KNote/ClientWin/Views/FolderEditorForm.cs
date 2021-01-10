@@ -101,7 +101,7 @@ namespace KNote.ClientWin.Views
         {
             if (!_viewFinalized)
             {
-                var confirmExit = OnCandelEdition();
+                var confirmExit = OnCancelEdition();
                 if (!confirmExit)
                     e.Cancel = true;
             }
@@ -120,7 +120,7 @@ namespace KNote.ClientWin.Views
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            OnCandelEdition();
+            OnCancelEdition();
         }
 
         private void FolderEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -138,7 +138,7 @@ namespace KNote.ClientWin.Views
 
         #region Private methods
 
-        private bool OnCandelEdition()
+        private bool OnCancelEdition()
         {
             if (_formIsDisty)
             {

@@ -19,7 +19,7 @@ namespace KNote.ClientWin.Components
     {
         private Guid _userId = Guid.Empty;
 
-        public WindowDto WindowPostIt { get; protected set; }
+        public WindowDto WindowPostIt { get; set; }
 
         #region Constructor
 
@@ -206,6 +206,17 @@ namespace KNote.ClientWin.Components
         {            
             OnExtendedEdit();
             Finalize();
+        }
+
+        public virtual WindowDto GetWindow()
+        {
+            var window = new PostItPropertiesComponent(Store);
+            window.LoadModel(Service, WindowPostIt, false);
+            var res = window.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+                return window.Model;
+
+            return null;
         }
 
         #endregion 

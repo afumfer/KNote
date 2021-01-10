@@ -48,6 +48,12 @@ namespace KNote.ClientWin.Core
             return new PostItEditorForm(component);
         }
 
+        public IEditorView<WindowDto> View(PostItPropertiesComponent component)
+        {
+            return new PostItPropertiesForm(component);
+        }
+
+
         public IEditorView<FolderDto> View(FolderEditorComponent component)
         {
             return new FolderEditorForm(component);

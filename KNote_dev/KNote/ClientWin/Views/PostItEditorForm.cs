@@ -139,6 +139,10 @@ namespace KNote.ClientWin.Views
             {
                 await ExtendedEdit();
             }
+            else if (menuSel == menuPostItProperties)
+            {
+                PostItPropertiesEdit();
+            }
         }
 
         private async void PostItEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -294,7 +298,12 @@ namespace KNote.ClientWin.Views
 
         private void PostItPropertiesEdit()
         {
-
+            var window = _com.GetWindow();
+            if (window != null)
+            {
+                _com.WindowPostIt = window;
+                ModelToControlsPostIt();
+            }
         }
 
         private void DrawFormBorder()
