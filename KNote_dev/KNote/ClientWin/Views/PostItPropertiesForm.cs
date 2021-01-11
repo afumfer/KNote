@@ -94,13 +94,47 @@ namespace KNote.ClientWin.Views
 
         private void ModelToControls()
         {
+            FontStyle style = new FontStyle();
+            if (_com.Model.FontBold)
+                style = FontStyle.Bold;
+            if (_com.Model.FontItalic)
+                style = style | FontStyle.Italic;
+            if (_com.Model.FontUnderline)
+                style = style | FontStyle.Underline;
+            if (_com.Model.FontStrikethru)
+                style = style | FontStyle.Strikeout;
+            Font font = new Font(_com.Model.FontName, _com.Model.FontSize, style);
+            labelText.Font = font;
+            labelText.Text = font.OriginalFontName;
 
+            labelCaption.BackColor = ColorTranslator.FromOle(_com.Model.TitleColor);
+            labelCaption.ForeColor = ColorTranslator.FromOle(_com.Model.TextTitleColor);
+
+            labelNote.BackColor = ColorTranslator.FromOle(_com.Model.NoteColor);            
+            labelNote.ForeColor = ColorTranslator.FromOle(_com.Model.TextNoteColor);
+
+            labelText.BackColor = ColorTranslator.FromOle(_com.Model.NoteColor);
+            labelText.ForeColor = ColorTranslator.FromOle(_com.Model.TextNoteColor);
         }
 
         private void ControlsToModel()
         {
+            _com.Model.TitleColor = ColorTranslator.ToOle(labelCaption.BackColor);
+            _com.Model.TextTitleColor = ColorTranslator.ToOle(labelCaption.ForeColor);
 
+            _com.Model.NoteColor = ColorTranslator.ToOle(labelNote.BackColor);
+            _com.Model.TextNoteColor = ColorTranslator.ToOle(labelText.ForeColor);
+
+            _com.Model.FontName = labelText.Font.Name;
+            _com.Model.FontSize = (byte)labelText.Font.Size;
+            _com.Model.FontBold = labelText.Font.Bold;
+            _com.Model.FontItalic = labelText.Font.Italic;
+            _com.Model.FontUnderline = labelText.Font.Underline;
+            _com.Model.FontStrikethru = labelText.Font.Strikeout;
+            _com.Model.ForeColor = ColorTranslator.ToOle(labelText.ForeColor);            
         }
+
+
 
         private async void buttonAccept_Click(object sender, EventArgs e)
         {
@@ -136,5 +170,108 @@ namespace KNote.ClientWin.Views
             // TODO: ... for debug ....
             _formIsDisty = true;
         }
+
+        private void buttonStyle_Click(object sender, EventArgs e)
+        {
+            Button b = (Button)sender;
+            if (b == buttonYellow)
+                SelctStyle(0);
+            else if (b == buttonBlue)
+                SelctStyle(1);
+            else if (b == buttonGray)
+                SelctStyle(2);
+            else if (b == buttonCaptionColor)
+                ChangeCaptionColor();
+            else if (b == buttonCaptionTextColor)
+                ChangeCaptionTextColor();
+            else if (b == buttonNoteColor)
+                ChangeNoteColor();
+            else if (b == buttonNoteFont)
+                ChangeNoteFont();
+        }
+
+        private void ChangeCaptionColor()
+        {
+            colorDialog.Color = labelCaption.BackColor;
+            if (colorDialog.ShowDialog() == DialogResult.OK)            
+                labelCaption.BackColor = colorDialog.Color;                            
+        }
+
+        private void ChangeCaptionTextColor()
+        {
+            colorDialog.Color = labelCaption.ForeColor;
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+                labelCaption.ForeColor = colorDialog.Color;
+        }
+
+
+        private void ChangeNoteColor() 
+        {
+            colorDialog.Color = labelNote.BackColor;
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                labelNote.BackColor = colorDialog.Color;
+                labelText.BackColor = colorDialog.Color;                
+            }
+        }
+
+        private void ChangeNoteFont()
+        {
+            fontDialog.Font = labelText.Font;
+            if (fontDialog.ShowDialog() == DialogResult.OK)
+            {
+                labelText.Font = fontDialog.Font;
+                labelText.Text = fontDialog.Font.Name;
+                labelText.ForeColor = fontDialog.Color;
+            }
+        }
+
+        private void SelctStyle(int estilo)
+        {
+            FontStyle style;
+            Font font;
+
+            switch (estilo)
+            {
+                default:
+                    labelCaption.ForeColor = ColorTranslator.FromOle(0);
+                    labelCaption.BackColor = ColorTranslator.FromOle(8454143);                    
+                    labelNote.ForeColor = ColorTranslator.FromOle(0);
+                    labelNote.BackColor = ColorTranslator.FromOle(12648447);
+                    labelText.ForeColor = ColorTranslator.FromOle(0);
+                    labelText.BackColor = ColorTranslator.FromOle(12648447);
+                    style = new FontStyle();
+                    font = new Font("Comic Sans MS", 10, style);
+                    break;
+
+                case 1:
+                    labelCaption.ForeColor = ColorTranslator.FromOle(16777215);
+                    labelCaption.BackColor = ColorTranslator.FromOle(6697728);
+                    labelNote.ForeColor = ColorTranslator.FromOle(16777215);
+                    labelNote.BackColor = ColorTranslator.FromOle(8404992);
+                    labelText.ForeColor = ColorTranslator.FromOle(16777215);
+                    labelText.BackColor = ColorTranslator.FromOle(8404992);
+                    style = new FontStyle();
+                    font = new Font("Times New Roman", 12, style);
+                    break;
+
+                case 2:
+                    labelCaption.ForeColor = ColorTranslator.FromOle(16777215);
+                    labelCaption.BackColor = ColorTranslator.FromOle(0);
+                    labelNote.ForeColor = ColorTranslator.FromOle(16777215);
+                    labelNote.BackColor = ColorTranslator.FromOle(4605510);
+                    labelText.ForeColor = ColorTranslator.FromOle(16777215);
+                    labelText.BackColor = ColorTranslator.FromOle(4605510);
+                    style = new FontStyle();
+                    font = new Font("Courier New", 11, style);
+                    break;
+            }
+            
+            labelText.Font = font;
+            labelText.Text = font.OriginalFontName;
+        }
+
+
+
     }
 }

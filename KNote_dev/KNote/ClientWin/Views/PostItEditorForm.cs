@@ -230,6 +230,21 @@ namespace KNote.ClientWin.Views
             DrawFormBorder();
         }
 
+        private async void labelCaption_DoubleClick(object sender, EventArgs e)
+        {
+            await ExtendedEdit();
+        }
+
+        private void labelStatus_DoubleClick(object sender, EventArgs e)
+        {
+            var folder = _com.GetFolder();
+            if (folder != null)
+            {
+                _selectedFolderId = folder.FolderId;
+                labelStatus.Text = $"[{folder?.Name}]";
+            }
+        }
+
         #endregion
 
         #region private Methods
@@ -240,13 +255,6 @@ namespace KNote.ClientWin.Views
             textDescription.Text = _com.Model.Description;
             labelStatus.Text = $"[{_com.Model.FolderDto.Name}]";
             _selectedFolderId = _com.Model.FolderId;
-
-            //this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
-            //this.Top = _com.WindowPostIt.PosY;
-            //this.Left = _com.WindowPostIt.PosX;
-
-            // TODO: configure always front
-            // menuAlwaysFront.Checked = xx
 
             textDescription.SelectionStart = 0;
         }
@@ -298,12 +306,15 @@ namespace KNote.ClientWin.Views
 
         private void PostItPropertiesEdit()
         {
+            var copyTopMost = this.TopMost;
+            this.TopMost = false;
             var window = _com.GetWindow();
             if (window != null)
             {
                 _com.WindowPostIt = window;
-                ModelToControlsPostIt();
+                ModelToControlsPostIt(false);
             }
+            this.TopMost = copyTopMost;
         }
 
         private void DrawFormBorder()
@@ -317,34 +328,23 @@ namespace KNote.ClientWin.Views
             grfx.Clear(this.BackColor);
             grfx.DrawRectangle(pn, 0, 0, this.Width - 1, this.Height - 1);
         }
+       
 
-        #endregion
-
-        private async void labelCaption_DoubleClick(object sender, EventArgs e)
+        private void ModelToControlsPostIt(bool updateSizeAndLocatio = true)
         {
-            await ExtendedEdit();
-        }
-
-        private void labelStatus_DoubleClick(object sender, EventArgs e)
-        {
-            var folder = _com.GetFolder();
-            if (folder != null)
+            if(updateSizeAndLocatio)
             {
-                _selectedFolderId = folder.FolderId;
-                labelStatus.Text = $"[{folder?.Name}]";
+                // Avoid positions outside the view zone
+                if (_com.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
+                    _com.WindowPostIt.PosX = SystemInformation.VirtualScreen.Width - _com.WindowPostIt.Width;
+                if (_com.WindowPostIt.PosY > SystemInformation.VirtualScreen.Height - 50)
+                    _com.WindowPostIt.PosY = SystemInformation.VirtualScreen.Height - _com.WindowPostIt.Height;
+
+                this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
+                this.Size = new System.Drawing.Size(_com.WindowPostIt.Width, _com.WindowPostIt.Height);
+
+                this.TopMost = menuAlwaysFront.Checked = _com.WindowPostIt.AlwaysOnTop;
             }
-        }
-
-        private void ModelToControlsPostIt()
-        {
-            // Avoid positions outside the view zone
-            if (_com.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
-                _com.WindowPostIt.PosX = SystemInformation.VirtualScreen.Width - _com.WindowPostIt.Width;
-            if (_com.WindowPostIt.PosY > SystemInformation.VirtualScreen.Height - 50)
-                _com.WindowPostIt.PosY = SystemInformation.VirtualScreen.Height - _com.WindowPostIt.Height;
-
-            this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
-            this.Size = new System.Drawing.Size(_com.WindowPostIt.Width, _com.WindowPostIt.Height);
             
             FontStyle style = new FontStyle();
             if (_com.WindowPostIt.FontBold)
@@ -357,16 +357,13 @@ namespace KNote.ClientWin.Views
                 style = style | FontStyle.Strikeout;
             Font font = new Font(_com.WindowPostIt.FontName, _com.WindowPostIt.FontSize, style);
             textDescription.Font = font;
-
-            // Color     Beige            
+                     
             textDescription.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
             labelCaption.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.TitleColor);
             textDescription.ForeColor = ColorTranslator.FromOle(_com.WindowPostIt.TextNoteColor);
             labelCaption.ForeColor = ColorTranslator.FromOle(_com.WindowPostIt.TextTitleColor);
-            this.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
-            labelStatus.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
-             
-            this.TopMost = menuAlwaysFront.Checked = _com.WindowPostIt.AlwaysOnTop;
+            BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
+            labelStatus.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);                         
         }
 
         private void ControlsToModelPostIt()
@@ -392,5 +389,6 @@ namespace KNote.ClientWin.Views
 
         }
 
+        #endregion
     }
 }
