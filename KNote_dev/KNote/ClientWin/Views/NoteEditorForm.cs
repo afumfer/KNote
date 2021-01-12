@@ -590,7 +590,7 @@ namespace KNote.ClientWin.Views
                 textDescription.Visible = false;
                 htmlDescription.Visible = true;
                 htmlDescription.BodyHtml = "";
-                htmlDescription.BodyHtml = desOutput; //_com.Model.Description;               
+                htmlDescription.BodyHtml = desOutput; 
                 //                
                 htmlDescription.Refresh();
                 labelLoadingHtml.Visible = false;
@@ -598,7 +598,7 @@ namespace KNote.ClientWin.Views
             else
             {
                 htmlDescription.Visible = false;
-                textDescription.Text = desOutput; // _com.Model.Description;
+                textDescription.Text = desOutput;
                 textDescription.Visible = true;                
             }
 
@@ -737,9 +737,7 @@ namespace KNote.ClientWin.Views
         }
 
         private void ControlsToModel()
-        {
-            // TODO: !!! ojo ... completar implementación 
-
+        {            
             // Basic data
             _com.Model.Topic = textTopic.Text;
             _com.Model.FolderId = _selectedFolderId;            

@@ -151,9 +151,9 @@ namespace KNote.ClientWin.Views
             // labelText
             // 
             this.labelText.BackColor = System.Drawing.Color.LemonChiffon;
-            this.labelText.Location = new System.Drawing.Point(188, 57);
+            this.labelText.Location = new System.Drawing.Point(188, 52);
             this.labelText.Name = "labelText";
-            this.labelText.Size = new System.Drawing.Size(168, 129);
+            this.labelText.Size = new System.Drawing.Size(168, 134);
             this.labelText.TabIndex = 6;
             this.labelText.Text = "...";
             // 
@@ -162,7 +162,7 @@ namespace KNote.ClientWin.Views
             this.labelNote.BackColor = System.Drawing.Color.LemonChiffon;
             this.labelNote.Location = new System.Drawing.Point(171, 37);
             this.labelNote.Name = "labelNote";
-            this.labelNote.Size = new System.Drawing.Size(202, 163);
+            this.labelNote.Size = new System.Drawing.Size(202, 169);
             this.labelNote.TabIndex = 5;
             // 
             // label2

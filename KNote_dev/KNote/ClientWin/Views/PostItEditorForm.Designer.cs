@@ -32,6 +32,7 @@ namespace KNote.ClientWin.Views
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             this.panelForm = new System.Windows.Forms.Panel();
+            this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.labelStatus = new System.Windows.Forms.Label();
             this.labelCaption = new System.Windows.Forms.Label();
             this.picResize = new System.Windows.Forms.PictureBox();
@@ -56,6 +57,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.Controls.Add(this.htmlDescription);
             this.panelForm.Controls.Add(this.labelStatus);
             this.panelForm.Controls.Add(this.labelCaption);
             this.panelForm.Controls.Add(this.picResize);
@@ -65,6 +67,16 @@ namespace KNote.ClientWin.Views
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(479, 337);
             this.panelForm.TabIndex = 3;
+            // 
+            // htmlDescription
+            // 
+            this.htmlDescription.InnerText = null;
+            this.htmlDescription.Location = new System.Drawing.Point(11, 103);
+            this.htmlDescription.Name = "htmlDescription";
+            this.htmlDescription.Size = new System.Drawing.Size(277, 125);
+            this.htmlDescription.TabIndex = 9;
+            this.htmlDescription.ToolbarVisible = false;
+            this.htmlDescription.Visible = false;
             // 
             // labelStatus
             // 
@@ -119,16 +131,13 @@ namespace KNote.ClientWin.Views
             // 
             // textDescription
             // 
-            this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.textDescription.BackColor = System.Drawing.Color.Beige;
             this.textDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textDescription.Location = new System.Drawing.Point(3, 24);
             this.textDescription.Margin = new System.Windows.Forms.Padding(6);
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
-            this.textDescription.Size = new System.Drawing.Size(472, 286);
+            this.textDescription.Size = new System.Drawing.Size(163, 70);
             this.textDescription.TabIndex = 3;
             // 
             // menuPostIt
@@ -239,5 +248,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripSeparator menuS1;
         private System.Windows.Forms.ToolStripMenuItem menuExtendedEdition;
         private System.Windows.Forms.ToolStripMenuItem menuPostItProperties;
+        private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
     }
 }
