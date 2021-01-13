@@ -229,6 +229,13 @@ namespace KNote.ClientWin.Components
 
         #region Component public methods
 
+        private MessagesManagmentComponent messagesManagment;
+        public void StartMessageManagment()
+        {
+            messagesManagment = new MessagesManagmentComponent(Store);
+            messagesManagment.Run();
+        }
+
         public void ShowKntScriptConsole()
         {
             var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(Store));
