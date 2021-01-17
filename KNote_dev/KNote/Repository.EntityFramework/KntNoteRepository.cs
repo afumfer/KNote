@@ -1004,6 +1004,27 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(response);
         }
 
+        public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId)
+        {
+            var resService = new Result<List<Guid>>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var notes = new GenericRepositoryEF<KntDbContext, Window>(ctx, ThrowKntException);
+
+                var resRep = await notes.GetAllAsync(w => w.UserId == userId && w.Visible == true);
+                resService.Entity = resRep.Entity?.Select(w => w.NoteId).ToList();
+                resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
         #endregion 
 
 

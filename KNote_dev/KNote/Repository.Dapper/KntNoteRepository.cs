@@ -1232,6 +1232,27 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId)
+        {
+            var result = new Result<List<Guid>>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = "SELECT [NoteId] from [Windows] where UserId = @userId and Visible = 1;";
+                
+                var entity = await db.QueryAsync<Guid>(sql.ToString(), new { userId });
+                result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
         #endregion
 
         #region Private methods
@@ -1382,6 +1403,5 @@ namespace KNote.Repository.Dapper
         }
 
         #endregion
-
     }
 }

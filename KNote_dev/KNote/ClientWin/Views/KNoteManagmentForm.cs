@@ -152,12 +152,10 @@ namespace KNote.ClientWin.Views
             {
                 _com.ShowKntScriptConsole();
             }
-            else if (menuSel == menuHide)
-            {
-                _com.StartMessageManagment();
-            }
-
-
+            //else if (menuSel == menuHide)
+            //{
+                
+            //}
             else if (menuSel == menuExit)
             {
                 if (MessageBox.Show("Are you sure exit KNote?", "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)                

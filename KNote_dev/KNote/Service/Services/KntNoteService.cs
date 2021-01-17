@@ -447,6 +447,17 @@ namespace KNote.Service.Services
             }
         }
 
+        public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName)
+        {
+            var userId = Guid.Empty;
+
+            var userDto = (await _repository.Users.GetByUserNameAsync(userName)).Entity;
+            if (userDto != null)
+                userId = userDto.UserId;
+
+            return await _repository.Notes.GetVisibleNotesIdAsync(userId);
+        }
+
         #endregion
 
     }

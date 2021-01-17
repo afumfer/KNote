@@ -34,10 +34,8 @@ namespace KNote.Service
         Task<Result<KMessageDto>> GetMessageAsync(Guid messageId);
         Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false);        
         Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId);
-
         Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId);
         Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false);
-
-        //Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entityInfo);
+        Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName);        
     }
 }

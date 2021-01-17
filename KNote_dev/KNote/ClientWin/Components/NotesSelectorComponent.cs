@@ -103,8 +103,8 @@ namespace KNote.ClientWin.Components
         }
 
         public override void RefreshItem(NoteInfoDto note)
-        {
-            var updateNote = ListEntities.FirstOrDefault(_ => _.NoteId == note.NoteId);
+        {            
+            var updateNote = ListEntities?.FirstOrDefault(_ => _.NoteId == note.NoteId);
             if (updateNote == null)
                 return;
 

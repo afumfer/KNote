@@ -17,20 +17,24 @@ namespace KNote.ClientWin.Components
 {
     public class MessagesManagmentComponent : ComponentBase
     {
-        static System.Windows.Forms.Timer kntTimer;        
+        static Timer kntTimer;        
         static int alarmCounter = 1;
         //static bool exitFlag = false;
-
+        
         public MessagesManagmentComponent(Store store): base(store)
         {
 
         }
 
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItEdit;
+
         protected override Result<EComponentResult> OnInitialized()
         {
             try
             {
-                kntTimer = new System.Windows.Forms.Timer();
+                VisibleWindows();
+
+                kntTimer = new Timer();
                 kntTimer.Tick += KntTimer_Tick;
                 kntTimer.Interval = 2000;
                 kntTimer.Start();
@@ -44,22 +48,49 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        private void KntTimer_Tick(object sender, EventArgs e)
+        private void KntTimer_Tick(object sender, EventArgs e)        
         {
-            kntTimer.Stop();
+            //// TODO: .................................. demo 1
+            //kntTimer.Stop();
+            //if (MessageBox.Show("Continue running?", "Count is: " + alarmCounter,
+            //    MessageBoxButtons.YesNo) == DialogResult.Yes)
+            //{
+            //    // Restarts the timer and increments the counter.
+            //    alarmCounter += 1;
+            //    kntTimer.Enabled = true;
+            //}
+            //else
+            //{
+            //    // Stops the component.
+            //    Finalize();
+            //}
+            // .........................................
 
-            if (MessageBox.Show("Continue running?", "Count is: " + alarmCounter,
-                MessageBoxButtons.YesNo) == DialogResult.Yes)
+            kntTimer.Stop();
+            alarmCounter++;
+
+            AlarmsWindows();
+
+            kntTimer.Enabled = true;
+        }
+
+        private async void VisibleWindows()
+        {
+            foreach(var store in Store.GetAllServiceRef())
             {
-                // Restarts the timer and increments the counter.
-                alarmCounter += 1;
-                kntTimer.Enabled = true;
-            }
-            else
-            {
-                // Stops the component.
-                Finalize();
+                var service = store.Service;
+                var res = await service.Notes.GetVisibleNotesIdAsync(Store.AppUserName);
+                foreach(var id in res.Entity)
+                {                    
+                    PostItEdit?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+                }
             }
         }
+
+        private void AlarmsWindows()
+        {
+
+        }
+
     }
 }

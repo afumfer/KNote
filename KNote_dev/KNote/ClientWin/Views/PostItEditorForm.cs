@@ -252,7 +252,7 @@ namespace KNote.ClientWin.Views
         private void ModelToControls()
         {
             labelCaption.Text = _com.Model.Topic;            
-            labelStatus.Text = $"[{_com.Model.FolderDto.Name}]";
+            labelStatus.Text = $"({_com.ServiceRef?.Alias} >> [{_com.Model.FolderDto.Name}] )";
             _selectedFolderId = _com.Model.FolderId;
 
             string desOutput = _com.Model?.Description?.Replace(KntConst.ContainerResources, _com.Store.AppConfig.CacheUrlResources);
@@ -294,6 +294,7 @@ namespace KNote.ClientWin.Views
 
         private async Task<bool> SaveAndHide()
         {
+            _com.WindowPostIt.Visible = false;
             var res = await SaveModel();
             _com.Finalize();
             return res;
@@ -317,6 +318,7 @@ namespace KNote.ClientWin.Views
 
         private async Task<bool> ExtendedEdit()
         {
+            _com.WindowPostIt.Visible = false;
             var res = await SaveModel();
             _com.FinalizeAndExtendEdit();
             return res;

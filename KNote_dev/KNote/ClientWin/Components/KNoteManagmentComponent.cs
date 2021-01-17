@@ -95,6 +95,7 @@ namespace KNote.ClientWin.Components
                     NotesSelectorComponent.Run();
                     FoldersSelectorComponent.Run();
                     NoteEditorComponent.Run();
+                    MessagesManagment.Run();
                 }
             }
             catch (Exception ex)
@@ -223,17 +224,29 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        private MessagesManagmentComponent _messagesManagment;
+        public MessagesManagmentComponent MessagesManagment
+        {
+            get
+            {
+                if(_messagesManagment == null)
+                {
+                    _messagesManagment = new MessagesManagmentComponent(Store);
+                    _messagesManagment.PostItEdit += MessagesManagment_PostItEdit;                    
+                }
+                return _messagesManagment;
+            }
+        }
+
         #endregion
 
         #endregion
 
         #region Component public methods
 
-        private MessagesManagmentComponent messagesManagment;
-        public void StartMessageManagment()
+        private async void MessagesManagment_PostItEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
         {
-            messagesManagment = new MessagesManagmentComponent(Store);
-            messagesManagment.Run();
+            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
         }
 
         public void ShowKntScriptConsole()
@@ -256,34 +269,36 @@ namespace KNote.ClientWin.Components
             EditNote(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
         }
 
-        public async void EditNote(IKntService service, Guid noteId)
+        public async Task<bool> EditNote(IKntService service, Guid noteId)
         {
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
             noteEditorComponent.PostItEdit += NoteEditorComponent_PostItEdit;
-            await noteEditorComponent.LoadModelById(service, noteId, false);
+            var res = await noteEditorComponent.LoadModelById(service, noteId, false);
             noteEditorComponent.Run();
+            return await Task.FromResult<bool>(res);
         }
 
-        public void EditNotePostIt()
+        public async void EditNotePostIt()
         {
             if (SelectedNoteInfo == null)
             {
                 View.ShowInfo("There is no note selected to edit.");
                 return;
             }
-            EditNotePostIt(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
+            await EditNotePostIt(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
         }
 
-        public async void EditNotePostIt(IKntService service, Guid noteId)
+        public async Task<bool> EditNotePostIt(IKntService service, Guid noteId)
         {
             var postItEditorComponent = new PostItEditorComponent(Store);
             postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
             postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
             postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
-            await postItEditorComponent.LoadModelById(service, noteId, false);
+            var res = await postItEditorComponent.LoadModelById(service, noteId, false);
             postItEditorComponent.Run();
+            return await Task.FromResult(res);
         }
 
         public void AddNote()
@@ -430,9 +445,9 @@ namespace KNote.ClientWin.Components
             EditNote(e.Entity.Service, e.Entity.NoteId);
         }
 
-        private void NoteEditorComponent_PostItEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        private async void NoteEditorComponent_PostItEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
         {
-            EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
+            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
         }
 
         private async void OnNoteEditorSaved(NoteInfoDto noteInfo)

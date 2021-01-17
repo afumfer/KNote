@@ -790,7 +790,7 @@ namespace KNote.ClientWin.Views
         }
         
         private async Task<bool> PostItEdit()
-        {
+        {            
             var res = await SaveModel();
             _com.FinalizeAndPostItEdit();
             return res;

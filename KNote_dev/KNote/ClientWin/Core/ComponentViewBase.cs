@@ -220,6 +220,17 @@ namespace KNote.ClientWin.Core
 
         public IKntService Service { get; protected set; }
 
+
+        public ServiceRef ServiceRef
+        {
+            get
+            {
+                var service = Store.GetServiceRef(Service.IdServiceRef);
+                return service;
+            }
+        }
+
+
         public bool AutoDBSave { get; set; } = true;
 
         #endregion

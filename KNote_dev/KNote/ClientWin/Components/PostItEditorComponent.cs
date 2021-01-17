@@ -66,6 +66,8 @@ namespace KNote.ClientWin.Components
                 else
                     WindowPostIt = await GetNewWindowPostIt();
 
+                WindowPostIt.Visible = true;
+                await Service.Notes.SaveWindowAsync(WindowPostIt);                
                 WindowPostIt.SetIsDirty(false);
 
                 if (refreshView)
