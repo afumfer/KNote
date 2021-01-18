@@ -36,6 +36,7 @@ namespace KNote.Service
         Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId);
         Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId);
         Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false);
-        Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName);        
+        Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName);
+        Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName);
     }
 }

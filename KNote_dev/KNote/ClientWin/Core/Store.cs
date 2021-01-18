@@ -6,12 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using KNote.Model;
+using KNote.ClientWin.Components;
 
 namespace KNote.ClientWin.Core
 {
     public class Store
     {
         #region Application state 
+
+        public AppConfig AppConfig { get; protected set; }
 
         public string AppUserName { get; set; }
         public string ComputerName { get; set; }
@@ -24,17 +27,7 @@ namespace KNote.ClientWin.Core
         private readonly List<ServiceRef> _servicesRefs;
 
         private readonly List<ComponentBase> _listComponents;
-
-        public AppConfig AppConfig { get; protected set; }
-
-        public ServiceRef PersonalServiceRef 
-        {
-            get { return _servicesRefs[0]; }
-                 
-        }
-
-        //public User ActiveUser { get; protected set;}
-
+        
         public FolderWithServiceRef _activeFolderWithServiceRef;
         public FolderWithServiceRef ActiveFolderWithServiceRef
         {
@@ -162,6 +155,35 @@ namespace KNote.ClientWin.Core
                 throw;
             }
         }
+
+        //_listComponents
+
+        public async Task<bool> CheckNoteIsActive(Guid noteId)
+        {
+            foreach(var com in _listComponents)
+            {
+                if (com is NoteEditorComponent)
+                {
+                    var comNote = (NoteEditorComponent)com;
+                    if (comNote.Model.NoteId == noteId && comNote.EditMode == true )
+                        return await Task.FromResult<bool>(true);
+
+                }
+            }
+            return await Task.FromResult<bool>(false);
+        }
+
+        public async Task<bool> CheckPostItIsActive(Guid noteId)
+        {
+            foreach (var com in _listComponents)
+            {
+                if (com is PostItEditorComponent)
+                    if (((PostItEditorComponent)com).Model.NoteId == noteId)
+                        return await Task.FromResult<bool>(true);
+            }
+            return await Task.FromResult<bool>(false);
+        }
+
 
         #endregion
     }

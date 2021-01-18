@@ -108,6 +108,13 @@ namespace KNote.ClientWin.Components
             if (updateNote == null)
                 return;
 
+            if (Folder == null)
+            {
+                updateNote.SetSimpleDto(note);
+                View.RefreshItem(updateNote);
+                return;
+            }
+
             if (Folder.FolderId == note.FolderId)
             {
                 updateNote.SetSimpleDto(note);

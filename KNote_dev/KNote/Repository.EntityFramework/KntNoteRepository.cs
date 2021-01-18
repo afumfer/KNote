@@ -1025,6 +1025,28 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
+        public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId)
+        {
+            var resService = new Result<List<Guid>>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var notes = new GenericRepositoryEF<KntDbContext, KMessage>(ctx, ThrowKntException);
+
+                var resRep = await notes.GetAllAsync(m => m.UserId == userId && m.AlarmOk != true && m.AlarmActivated == true && m.AlarmDateTime <= DateTime.Now && m.NoteId != null);
+                resService.Entity = resRep.Entity?.Select(w => (Guid)w.NoteId).ToList();
+                resService.ErrorList = resRep.ErrorList;
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            }
+            return ResultDomainAction(resService);
+        }
+
+
         #endregion 
 
 

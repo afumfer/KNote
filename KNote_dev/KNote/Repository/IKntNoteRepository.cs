@@ -39,6 +39,7 @@ namespace KNote.Repository
         Task<Result<WindowDto>> AddWindowAsync(WindowDto entity);
         Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity);
         Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId);
-        
+        Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId);
+
     }
 }

@@ -74,10 +74,10 @@ namespace KNote.ClientWin.Views
             this.Close();
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
+        public DialogResult ShowInfo(string info, string caption = "KeyNoteX", MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             if(info != null)
-                return MessageBox.Show(info);
+                return MessageBox.Show(info, caption, buttons);
 
             if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
                 labelFolerName.Text = "(No folder selected)";

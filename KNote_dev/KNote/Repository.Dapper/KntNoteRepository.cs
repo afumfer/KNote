@@ -1253,6 +1253,30 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId)
+        {
+            var result = new Result<List<Guid>>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var alarm = DateTime.Now;
+
+                var sql = "SELECT [NoteId] from [KMessages] where UserId = @userId and [AlarmDateTime] <= @alarm and (AlarmOk <> 1 or AlarmOk is null) and [AlarmActivated] = 1 and NoteId is not null";
+
+                var entity = await db.QueryAsync<Guid>(sql.ToString(), new { userId, alarm });
+                result.Entity = entity.ToList();
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+
         #endregion
 
         #region Private methods
@@ -1401,6 +1425,7 @@ namespace KNote.Repository.Dapper
             }
             return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
         }
+
 
         #endregion
     }

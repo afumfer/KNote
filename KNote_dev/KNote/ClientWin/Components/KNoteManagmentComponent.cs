@@ -224,6 +224,10 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        #endregion
+
+        #region Messages Managment component
+
         private MessagesManagmentComponent _messagesManagment;
         public MessagesManagmentComponent MessagesManagment
         {
@@ -232,10 +236,17 @@ namespace KNote.ClientWin.Components
                 if(_messagesManagment == null)
                 {
                     _messagesManagment = new MessagesManagmentComponent(Store);
-                    _messagesManagment.PostItEdit += MessagesManagment_PostItEdit;                    
+                    _messagesManagment.PostItVisible += MessagesManagment_PostItVisible;                    
                 }
                 return _messagesManagment;
             }
+        }
+
+        private async void MessagesManagment_PostItVisible(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        {
+            if (await Store.CheckPostItIsActive(e.Entity.NoteId))                            
+                return;            
+            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
         }
 
         #endregion
@@ -243,11 +254,6 @@ namespace KNote.ClientWin.Components
         #endregion
 
         #region Component public methods
-
-        private async void MessagesManagment_PostItEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
-        {
-            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
-        }
 
         public void ShowKntScriptConsole()
         {
@@ -259,14 +265,20 @@ namespace KNote.ClientWin.Components
             kntScriptCom.Run();
         }
 
-        public void EditNote()
+        public async void EditNote()
         {
             if (SelectedNoteInfo == null)
             {
                 View.ShowInfo("There is no note selected to edit.");
                 return;
+            }            
+            if (await Store.CheckNoteIsActive(SelectedNoteInfo.NoteId) || await Store.CheckPostItIsActive(SelectedNoteInfo.NoteId))
+            {
+                View.ShowInfo("This note is already active.");
+                return;
             }
-            EditNote(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
+
+            await EditNote(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
         }
 
         public async Task<bool> EditNote(IKntService service, Guid noteId)
@@ -287,11 +299,16 @@ namespace KNote.ClientWin.Components
                 View.ShowInfo("There is no note selected to edit.");
                 return;
             }
+            if (await Store.CheckNoteIsActive(SelectedNoteInfo.NoteId) || await Store.CheckPostItIsActive(SelectedNoteInfo.NoteId))
+            {
+                View.ShowInfo("This note is already active.");
+                return;
+            }
             await EditNotePostIt(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
         }
 
-        public async Task<bool> EditNotePostIt(IKntService service, Guid noteId)
-        {
+        public async Task<bool> EditNotePostIt(IKntService service, Guid noteId, bool isAlarm = false)
+        {            
             var postItEditorComponent = new PostItEditorComponent(Store);
             postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
             postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
@@ -440,9 +457,9 @@ namespace KNote.ClientWin.Components
             OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>()); 
         }
 
-        private void PostItEditorComponent_ExtendedEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        private async void PostItEditorComponent_ExtendedEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
         {
-            EditNote(e.Entity.Service, e.Entity.NoteId);
+            await EditNote(e.Entity.Service, e.Entity.NoteId);
         }
 
         private async void NoteEditorComponent_PostItEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)

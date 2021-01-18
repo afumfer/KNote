@@ -26,7 +26,8 @@ namespace KNote.ClientWin.Components
 
         }
 
-        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItEdit;
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItVisible;
+        //public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItAlarm;
 
         protected override Result<EComponentResult> OnInitialized()
         {
@@ -36,7 +37,7 @@ namespace KNote.ClientWin.Components
 
                 kntTimer = new Timer();
                 kntTimer.Tick += KntTimer_Tick;
-                kntTimer.Interval = 2000;
+                kntTimer.Interval = 30 * 1000;   // TODO: magic number refactor 
                 kntTimer.Start();
                 return new Result<EComponentResult>(EComponentResult.Executed);
 
@@ -50,27 +51,9 @@ namespace KNote.ClientWin.Components
 
         private void KntTimer_Tick(object sender, EventArgs e)        
         {
-            //// TODO: .................................. demo 1
-            //kntTimer.Stop();
-            //if (MessageBox.Show("Continue running?", "Count is: " + alarmCounter,
-            //    MessageBoxButtons.YesNo) == DialogResult.Yes)
-            //{
-            //    // Restarts the timer and increments the counter.
-            //    alarmCounter += 1;
-            //    kntTimer.Enabled = true;
-            //}
-            //else
-            //{
-            //    // Stops the component.
-            //    Finalize();
-            //}
-            // .........................................
-
             kntTimer.Stop();
             alarmCounter++;
-
             AlarmsWindows();
-
             kntTimer.Enabled = true;
         }
 
@@ -82,14 +65,25 @@ namespace KNote.ClientWin.Components
                 var res = await service.Notes.GetVisibleNotesIdAsync(Store.AppUserName);
                 foreach(var id in res.Entity)
                 {                    
-                    PostItEdit?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+                    PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
                 }
             }
         }
 
-        private void AlarmsWindows()
+        private async void AlarmsWindows()
         {
+            foreach (var store in Store.GetAllServiceRef())
+            {
+                var service = store.Service;
+                var res = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName);
+                foreach (var id in res.Entity)
+                {
+                    PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
 
+                    // TODO: Set AlarmOK.
+
+                }
+            }
         }
 
     }

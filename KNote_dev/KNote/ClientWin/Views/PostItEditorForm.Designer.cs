@@ -219,6 +219,7 @@ namespace KNote.ClientWin.Views
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "PostItEditorForm";
+            this.ShowInTaskbar = false;
             this.Text = "PostIt rditor form";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PostItEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.PostItEditorForm_Load);

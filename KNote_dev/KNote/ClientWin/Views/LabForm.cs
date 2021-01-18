@@ -299,14 +299,14 @@ namespace KNote.ClientWin.Views
 
         #region Trash
 
-        //private async Task LoadNotes()  // opción 2
-        private async void LoadNotes()   // opción 3
-        {
-            var service = _store.PersonalServiceRef.Service;
-            var notes = (await service.Notes.HomeNotesAsync()).Entity;
-            foreach (var note in notes)
-                listMessages.Items.Add(note.Topic);
-        }
+        ////private async Task LoadNotes()  // opción 2
+        //private async void LoadNotes()   // opción 3
+        //{
+        //    var service = _store.PersonalServiceRef.Service;
+        //    var notes = (await service.Notes.HomeNotesAsync()).Entity;
+        //    foreach (var note in notes)
+        //        listMessages.Items.Add(note.Topic);
+        //}
 
         private void Trash_oldCode()
         {
