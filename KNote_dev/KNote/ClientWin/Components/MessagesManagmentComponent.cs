@@ -63,10 +63,8 @@ namespace KNote.ClientWin.Components
             {
                 var service = store.Service;
                 var res = await service.Notes.GetVisibleNotesIdAsync(Store.AppUserName);
-                foreach(var id in res.Entity)
-                {                    
-                    PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
-                }
+                foreach(var id in res.Entity)                                    
+                    PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));                
             }
         }
 
@@ -77,12 +75,7 @@ namespace KNote.ClientWin.Components
                 var service = store.Service;
                 var res = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName);
                 foreach (var id in res.Entity)
-                {
-                    PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
-
-                    // TODO: Set AlarmOK.
-
-                }
+                    PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));                                    
             }
         }
 

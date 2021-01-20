@@ -130,6 +130,7 @@ namespace KNote.ClientWin.Views
                         _com.Finalize();
                     else
                         e.Cancel = true;
+                _com.Finalize();
             }
         }
 

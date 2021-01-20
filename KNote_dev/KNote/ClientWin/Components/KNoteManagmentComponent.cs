@@ -244,8 +244,8 @@ namespace KNote.ClientWin.Components
 
         private async void MessagesManagment_PostItVisible(object sender, ComponentEventArgs<ServiceWithNoteId> e)
         {
-            if (await Store.CheckPostItIsActive(e.Entity.NoteId))                            
-                return;            
+            if (await Store.CheckPostItIsActive(e.Entity.NoteId))
+                return;
             await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
         }
 
@@ -307,7 +307,7 @@ namespace KNote.ClientWin.Components
             await EditNotePostIt(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
         }
 
-        public async Task<bool> EditNotePostIt(IKntService service, Guid noteId, bool isAlarm = false)
+        public async Task<bool> EditNotePostIt(IKntService service, Guid noteId)
         {            
             var postItEditorComponent = new PostItEditorComponent(Store);
             postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;

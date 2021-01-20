@@ -1256,16 +1256,29 @@ namespace KNote.Repository.Dapper
         public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId)
         {
             var result = new Result<List<Guid>>();
+            //var messageList = new Result<List<KMessageDto>>();
             try
             {
                 var db = GetOpenConnection();
-
                 var alarm = DateTime.Now;
 
-                var sql = "SELECT [NoteId] from [KMessages] where UserId = @userId and [AlarmDateTime] <= @alarm and (AlarmOk <> 1 or AlarmOk is null) and [AlarmActivated] = 1 and NoteId is not null";
+                // ... v1 old ...
+                //var sql = "SELECT [NoteId] from [KMessages] where UserId = @userId and [AlarmDateTime] <= @alarm and (AlarmOk <> 1 or AlarmOk is null) and [AlarmActivated] = 1 and NoteId is not null";
+                //var entity = await db.QueryAsync<Guid>(sql.ToString(), new { userId, alarm });
+                //result.Entity = entity.ToList();
 
-                var entity = await db.QueryAsync<Guid>(sql.ToString(), new { userId, alarm });
-                result.Entity = entity.ToList();
+                var sql = "SELECT * from [KMessages] where UserId = @userId and [AlarmDateTime] <= @alarm and (AlarmOk <> 1 or AlarmOk is null) and [AlarmActivated] = 1 and NoteId is not null";
+                var messageList = await db.QueryAsync<KMessageDto>(sql.ToString(), new { userId, alarm });
+
+                foreach (var m in messageList)
+                {
+                    ApplyAlarmControl(m);
+                    await UpdateMessageAsync(m);
+                }
+
+                result.Entity = messageList.Select(m => (Guid)m.NoteId).ToList();
+
+                // TODO: update AlarmControl
 
                 await CloseIsTempConnection(db);
             }
@@ -1280,6 +1293,78 @@ namespace KNote.Repository.Dapper
         #endregion
 
         #region Private methods
+
+        // TODO refactor (duplicated code)
+        private void ApplyAlarmControl(KMessageDto message)
+        {
+            switch (message.AlarmType)
+            {
+
+                case EnumAlarmType.Standard:
+                    message.AlarmActivated = false;
+                    //message.AlarmDateTime = null; 
+                    message.AlarmOk = true;
+                    break;
+
+                case EnumAlarmType.Annual:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddYears(1);
+                    message.AlarmOk = false;
+                    break;
+
+                case EnumAlarmType.Monthly:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMonths(1);
+                    message.AlarmOk = false;
+                    break;
+
+                case EnumAlarmType.Weekly:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(7);
+                    message.AlarmOk = false;
+                    break;
+
+                case EnumAlarmType.Daily:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(1);
+                    message.AlarmOk = false;
+                    break;
+
+                case EnumAlarmType.InMinutes:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);
+                    message.AlarmOk = false;
+                    break;
+
+
+                //// TODO: !!! Esto hay que pensarlo mejor - es ineficiente
+                //// progresar hora hasta la hora actual luego sumar x horas
+                //case ETipoAlarma.Cada1Hora:
+                //    while (n.Alarma < DateTime.Now)
+                //        n.Alarma = n.Alarma.AddHours(1);
+                //    n.AlarmaOk = false;
+                //    break;
+                //case ETipoAlarma.Cada4Horas:
+                //    while (n.Alarma < DateTime.Now)
+                //        n.Alarma = n.Alarma.AddHours(4);
+                //    n.AlarmaOk = false;
+                //    break;
+                //case ETipoAlarma.Cada8Horas:
+                //    while (n.Alarma < DateTime.Now)
+                //        n.Alarma = n.Alarma.AddHours(8);
+                //    n.AlarmaOk = false;
+                //    break;
+                //case ETipoAlarma.Cada12Horas:
+                //    while (n.Alarma < DateTime.Now)
+                //        n.Alarma = n.Alarma.AddHours(12);
+                //    n.AlarmaOk = false;
+                //    break;
+
+                default:
+                    message.AlarmOk = true;
+                    break;
+            }
+        }
 
         private int GetNextNoteNumber(DbConnection db)
         {

@@ -1034,6 +1034,13 @@ namespace KNote.Repository.EntityFramework
                 var notes = new GenericRepositoryEF<KntDbContext, KMessage>(ctx, ThrowKntException);
 
                 var resRep = await notes.GetAllAsync(m => m.UserId == userId && m.AlarmOk != true && m.AlarmActivated == true && m.AlarmDateTime <= DateTime.Now && m.NoteId != null);
+
+                foreach (var m in resRep.Entity)
+                {
+                    ApplyAlarmControl(m);
+                    await UpdateMessageAsync(m.GetSimpleDto<KMessageDto>());
+                }
+
                 resService.Entity = resRep.Entity?.Select(w => (Guid)w.NoteId).ToList();
                 resService.ErrorList = resRep.ErrorList;
 
@@ -1050,7 +1057,81 @@ namespace KNote.Repository.EntityFramework
         #endregion 
 
 
+
         #region Utils methods 
+
+        // TODO refactor (duplicated code)
+        private void ApplyAlarmControl(KMessage message)
+        {
+            switch (message.AlarmType)
+            {
+
+                case KNote.Repository.Entities.EnumAlarmType.Standard:
+                    message.AlarmActivated = false;
+                    //message.AlarmDateTime = null;
+                    message.AlarmOk = true;
+                    break;
+
+                case KNote.Repository.Entities.EnumAlarmType.Annual:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddYears(1);
+                    message.AlarmOk = false;
+                    break;
+
+                case KNote.Repository.Entities.EnumAlarmType.Monthly:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMonths(1);
+                    message.AlarmOk = false;
+                    break;
+
+                case KNote.Repository.Entities.EnumAlarmType.Weekly:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(7);
+                    message.AlarmOk = false;
+                    break;
+
+                case KNote.Repository.Entities.EnumAlarmType.Daily:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(1);
+                    message.AlarmOk = false;
+                    break;
+
+                case KNote.Repository.Entities.EnumAlarmType.InMinutes:
+                    while (message.AlarmDateTime < DateTime.Now)
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);
+                    message.AlarmOk = false;
+                    break;
+
+
+                //// TODO: !!! Esto hay que pensarlo mejor - es ineficiente
+                //// progresar hora hasta la hora actual luego sumar x horas
+                //case ETipoAlarma.Cada1Hora:
+                //    while (n.Alarma < DateTime.Now)
+                //        n.Alarma = n.Alarma.AddHours(1);
+                //    n.AlarmaOk = false;
+                //    break;
+                //case ETipoAlarma.Cada4Horas:
+                //    while (n.Alarma < DateTime.Now)
+                //        n.Alarma = n.Alarma.AddHours(4);
+                //    n.AlarmaOk = false;
+                //    break;
+                //case ETipoAlarma.Cada8Horas:
+                //    while (n.Alarma < DateTime.Now)
+                //        n.Alarma = n.Alarma.AddHours(8);
+                //    n.AlarmaOk = false;
+                //    break;
+                //case ETipoAlarma.Cada12Horas:
+                //    while (n.Alarma < DateTime.Now)
+                //        n.Alarma = n.Alarma.AddHours(12);
+                //    n.AlarmaOk = false;
+                //    break;
+
+                default:
+                    message.AlarmOk = true;
+                    break;
+            }
+        }
+
 
         private int GetNextNoteNumber(GenericRepositoryEF<KntDbContext, Note> notes)
         {
