@@ -225,6 +225,14 @@ namespace KNote.Model.Dto
                  , new[] { "AlarmDateTime" }));
             }
 
+            //
+            if(AlarmType == EnumAlarmType.InMinutes && AlarmMinutes < 1)
+            {
+                results.Add(new ValidationResult
+                 ("KMSG: The minutes are mandatory in types of periodic alarms 'in minutes'."
+                 , new[] { "AlarmMinutes" }));
+            }
+
             // ---
             // Return List<ValidationResult>()
             // ---           

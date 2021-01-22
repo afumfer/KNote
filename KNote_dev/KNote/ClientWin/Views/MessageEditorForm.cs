@@ -188,6 +188,7 @@ namespace KNote.ClientWin.Views
             comboNotificationType.SelectedIndex = (int)_com.Model.NotificationType;
             textContent.Text = _com.Model.Content.ToString();
             checkAlarmActivated.Checked = _com.Model.AlarmActivated ?? false;
+            textMinutes.Text = _com.Model.AlarmMinutes?.ToString();            
         }
 
         private void ControlsToModel()
@@ -197,8 +198,25 @@ namespace KNote.ClientWin.Views
             _com.Model.NotificationType = (EnumNotificationType)comboNotificationType.SelectedIndex;
             _com.Model.Content = textContent.Text;
             _com.Model.AlarmActivated = checkAlarmActivated.Checked;
+            _com.Model.AlarmMinutes = _com.TextToInt(textMinutes.Text);
         }
 
-        #endregion 
+        #endregion
+
+        private void comboAlarmPeriodicity_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selected = (KeyValuePair<EnumAlarmType,string>)comboAlarmPeriodicity.SelectedItem;
+            
+            if (selected.Key == EnumAlarmType.InMinutes)
+            {
+                textMinutes.Visible = true;
+                labelMinutes.Visible = true;
+            }
+            else
+            {
+                textMinutes.Visible = false;
+                labelMinutes.Visible = false;
+            }
+        }
     }
 }

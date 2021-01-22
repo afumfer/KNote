@@ -50,6 +50,7 @@ namespace KNote.ClientWin.Views
         {
             this.Show();
         }
+
         public Result<EComponentResult> ShowModalView()
         {
             return _com.DialogResultToComponentResult(this.ShowDialog());
@@ -59,7 +60,6 @@ namespace KNote.ClientWin.Views
         {
             return MessageBox.Show(info, caption, buttons);
         }
-
 
         public void CleanView()
         {
@@ -705,6 +705,7 @@ namespace KNote.ClientWin.Views
             listViewAlarms.Columns.Add("Activated", 80, HorizontalAlignment.Left);
             listViewAlarms.Columns.Add("Date time", 130, HorizontalAlignment.Left);
             listViewAlarms.Columns.Add("Alarm periodicity", 120, HorizontalAlignment.Left);
+            listViewAlarms.Columns.Add("Min", 50, HorizontalAlignment.Left);
             listViewAlarms.Columns.Add("Notification type", 120, HorizontalAlignment.Left);
             listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);            
         }
@@ -881,6 +882,7 @@ namespace KNote.ClientWin.Views
             itemList.SubItems.Add(message.AlarmActivated.ToString());
             itemList.SubItems.Add(message.AlarmDateTime.ToString());
             itemList.SubItems.Add(message.AlarmType.ToString());
+            itemList.SubItems.Add(message.AlarmMinutes.ToString());
             itemList.SubItems.Add(message.NotificationType.ToString());
             itemList.SubItems.Add(message.Content.ToString());
             return itemList;
@@ -964,8 +966,9 @@ namespace KNote.ClientWin.Views
             item.SubItems[1].Text = message.AlarmActivated.ToString();
             item.SubItems[2].Text = message.AlarmDateTime.ToString();
             item.SubItems[3].Text = message.AlarmType.ToString();
-            item.SubItems[4].Text = message.NotificationType.ToString();
-            item.SubItems[5].Text = message.Content.ToString();
+            item.SubItems[4].Text = message.AlarmMinutes.ToString();
+            item.SubItems[5].Text = message.NotificationType.ToString();
+            item.SubItems[6].Text = message.Content.ToString();
 
         }
 

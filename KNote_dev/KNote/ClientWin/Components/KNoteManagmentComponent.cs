@@ -256,9 +256,8 @@ namespace KNote.ClientWin.Components
         }
 
         private async void _messagesManagment_PostItAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
-        {            
-            // TODO: regiter alarm 
-            if (await Store.CheckPostItIsActive(e.Entity.NoteId))
+        {                        
+            if (await Store.CheckPostItIsActive(e.Entity.NoteId) || await Store.CheckNoteIsActive(e.Entity.NoteId))
                 return;
             await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
         }
