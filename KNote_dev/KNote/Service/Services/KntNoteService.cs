@@ -458,7 +458,7 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetVisibleNotesIdAsync(userId);
         }
 
-        public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName)
+        public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null)
         {
             var userId = Guid.Empty;
 
@@ -466,7 +466,7 @@ namespace KNote.Service.Services
             if (userDto != null)
                 userId = userDto.UserId;
 
-            return await _repository.Notes.GetAlarmNotesIdAsync(userId);
+            return await _repository.Notes.GetAlarmNotesIdAsync(userId, notificationType);
         }
 
         #endregion

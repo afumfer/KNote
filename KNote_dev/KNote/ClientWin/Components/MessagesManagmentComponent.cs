@@ -27,7 +27,9 @@ namespace KNote.ClientWin.Components
         }
 
         public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItVisible;
-        //public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItAlarm;
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItAlarm;
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> EMailAlarm;
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> AppAlarm;
 
         protected override Result<EComponentResult> OnInitialized()
         {
@@ -73,9 +75,24 @@ namespace KNote.ClientWin.Components
             foreach (var store in Store.GetAllServiceRef())
             {
                 var service = store.Service;
-                var res = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName);
-                foreach (var id in res.Entity)
-                    PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));                                    
+
+                // TODO .... remove this when implement all alarm types
+                var resPostIt = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.PostIt);
+                foreach (var id in resPostIt.Entity)
+                    PostItAlarm?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+
+                // TODO: all alarms types
+                //var resPostIt = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.PostIt);
+                //foreach (var id in resPostIt.Entity)
+                //    PostItAlarm?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+
+                //var resEMail = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.Email);
+                //foreach (var id in resEMail.Entity)
+                //    EMailAlarm?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+
+                //var resAppInfo = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.AppInfo);
+                //foreach (var id in resAppInfo.Entity)
+                //    AppAlarm?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
             }
         }
 

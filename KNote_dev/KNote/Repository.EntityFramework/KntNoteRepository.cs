@@ -1025,7 +1025,7 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId)
+        public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId, EnumNotificationType? notificationType = null)
         {
             var resService = new Result<List<Guid>>();
             try
@@ -1033,7 +1033,13 @@ namespace KNote.Repository.EntityFramework
                 var ctx = GetOpenConnection();
                 var notes = new GenericRepositoryEF<KntDbContext, KMessage>(ctx, ThrowKntException);
 
-                var resRep = await notes.GetAllAsync(m => m.UserId == userId && m.AlarmOk != true && m.AlarmActivated == true && m.AlarmDateTime <= DateTime.Now && m.NoteId != null);
+                Result<List<KMessage>> resRep;
+                
+                if(notificationType == null)
+                    resRep = await notes.GetAllAsync(m => m.UserId == userId && m.AlarmActivated == true && m.AlarmDateTime <= DateTime.Now && m.NoteId != null);
+                else
+                    resRep = await notes.GetAllAsync(m => m.UserId == userId && m.AlarmActivated == true 
+                        && m.AlarmDateTime <= DateTime.Now && m.NoteId != null && m.NotificationType == (EnumNotificationType)notificationType);
 
                 foreach (var m in resRep.Entity)
                 {
@@ -1053,85 +1059,43 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-
         #endregion 
-
-
 
         #region Utils methods 
 
-        // TODO refactor (duplicated code)
+        // TODO refactor (duplicated code in dapper repository )
         private void ApplyAlarmControl(KMessage message)
         {
             switch (message.AlarmType)
             {
-
-                case KNote.Repository.Entities.EnumAlarmType.Standard:
-                    message.AlarmActivated = false;
-                    //message.AlarmDateTime = null;
-                    message.AlarmOk = true;
+                case EnumAlarmType.Standard:
+                    message.AlarmActivated = false;                                        
                     break;
-
-                case KNote.Repository.Entities.EnumAlarmType.Annual:
+                case EnumAlarmType.Annual:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddYears(1);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddYears(1);                    
                     break;
-
-                case KNote.Repository.Entities.EnumAlarmType.Monthly:
+                case EnumAlarmType.Monthly:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMonths(1);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMonths(1);                    
                     break;
-
-                case KNote.Repository.Entities.EnumAlarmType.Weekly:
+                case EnumAlarmType.Weekly:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(7);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(7);                    
                     break;
-
-                case KNote.Repository.Entities.EnumAlarmType.Daily:
+                case EnumAlarmType.Daily:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(1);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(1);                    
                     break;
-
-                case KNote.Repository.Entities.EnumAlarmType.InMinutes:
+                case EnumAlarmType.InMinutes:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);                    
                     break;
-
-
-                //// TODO: !!! Esto hay que pensarlo mejor - es ineficiente
-                //// progresar hora hasta la hora actual luego sumar x horas
-                //case ETipoAlarma.Cada1Hora:
-                //    while (n.Alarma < DateTime.Now)
-                //        n.Alarma = n.Alarma.AddHours(1);
-                //    n.AlarmaOk = false;
-                //    break;
-                //case ETipoAlarma.Cada4Horas:
-                //    while (n.Alarma < DateTime.Now)
-                //        n.Alarma = n.Alarma.AddHours(4);
-                //    n.AlarmaOk = false;
-                //    break;
-                //case ETipoAlarma.Cada8Horas:
-                //    while (n.Alarma < DateTime.Now)
-                //        n.Alarma = n.Alarma.AddHours(8);
-                //    n.AlarmaOk = false;
-                //    break;
-                //case ETipoAlarma.Cada12Horas:
-                //    while (n.Alarma < DateTime.Now)
-                //        n.Alarma = n.Alarma.AddHours(12);
-                //    n.AlarmaOk = false;
-                //    break;
-
                 default:
                     message.AlarmOk = true;
                     break;
             }
         }
-
 
         private int GetNextNoteNumber(GenericRepositoryEF<KntDbContext, Note> notes)
         {

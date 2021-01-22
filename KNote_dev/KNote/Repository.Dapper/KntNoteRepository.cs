@@ -973,9 +973,22 @@ namespace KNote.Repository.Dapper
                                 @AlarmActivated, @AlarmDateTime, @AlarmMinutes)";
 
                 var r = await db.ExecuteAsync(sql.ToString(),
-                    new { entity.KMessageId, entity.UserId, entity.NoteId, entity.ActionType, entity.NotificationType, 
-                        entity.AlarmType, entity.Disabled, entity.Content, entity.Forward, entity.AlarmOk, 
-                        entity.AlarmActivated, entity.AlarmDateTime,  entity.AlarmMinutes});
+                    new
+                    {
+                        entity.KMessageId,
+                        entity.UserId,
+                        entity.NoteId,
+                        entity.ActionType,
+                        entity.NotificationType,
+                        entity.AlarmType,
+                        entity.Disabled,
+                        entity.Content,
+                        entity.Forward,
+                        entity.AlarmOk,
+                        entity.AlarmActivated,
+                        entity.AlarmDateTime,
+                        entity.AlarmMinutes
+                    });
 
                 if (r == 0)
                     result.ErrorList.Add("Entity not inserted");
@@ -1015,7 +1028,7 @@ namespace KNote.Repository.Dapper
 
                 var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.KMessageId, entity.UserId, entity.NoteId, entity.ActionType, entity.NotificationType,
-                        entity.AlarmType, entity.Disabled, entity.Content, entity.Forward, entity.AlarmOk,
+                        entity.AlarmType, entity.Disabled, entity.Content, entity.Forward, entity.AlarmOk, 
                         entity.AlarmActivated, entity.AlarmDateTime, entity.AlarmMinutes
                     });
 
@@ -1253,22 +1266,24 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId)
+        public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId, EnumNotificationType? notificationType = null)
         {
-            var result = new Result<List<Guid>>();
-            //var messageList = new Result<List<KMessageDto>>();
+            var result = new Result<List<Guid>>();            
             try
             {
                 var db = GetOpenConnection();
                 var alarm = DateTime.Now;
+                EnumNotificationType notType = EnumNotificationType.PostIt;
 
-                // ... v1 old ...
-                //var sql = "SELECT [NoteId] from [KMessages] where UserId = @userId and [AlarmDateTime] <= @alarm and (AlarmOk <> 1 or AlarmOk is null) and [AlarmActivated] = 1 and NoteId is not null";
-                //var entity = await db.QueryAsync<Guid>(sql.ToString(), new { userId, alarm });
-                //result.Entity = entity.ToList();
+                var sql = "SELECT * from [KMessages] where UserId = @userId and [AlarmDateTime] <= @alarm and [AlarmActivated] = 1 and NoteId is not null";
 
-                var sql = "SELECT * from [KMessages] where UserId = @userId and [AlarmDateTime] <= @alarm and (AlarmOk <> 1 or AlarmOk is null) and [AlarmActivated] = 1 and NoteId is not null";
-                var messageList = await db.QueryAsync<KMessageDto>(sql.ToString(), new { userId, alarm });
+                if(notificationType != null)
+                {
+                    notType = (EnumNotificationType)notificationType;
+                    sql += " and NotificationType = @notType";
+                }                                   
+                
+                var messageList = await db.QueryAsync<KMessageDto>(sql.ToString(), new { userId, alarm, notType });
 
                 foreach (var m in messageList)
                 {
@@ -1278,8 +1293,7 @@ namespace KNote.Repository.Dapper
 
                 result.Entity = messageList.Select(m => (Guid)m.NoteId).ToList();
 
-                // TODO: update AlarmControl
-
+                
                 await CloseIsTempConnection(db);
             }
             catch (Exception ex)
@@ -1294,74 +1308,36 @@ namespace KNote.Repository.Dapper
 
         #region Private methods
 
-        // TODO refactor (duplicated code)
+        // TODO refactor (duplicated code in EntityFramework repository)
         private void ApplyAlarmControl(KMessageDto message)
         {
             switch (message.AlarmType)
             {
-
                 case EnumAlarmType.Standard:
                     message.AlarmActivated = false;
-                    //message.AlarmDateTime = null; 
-                    message.AlarmOk = true;
                     break;
-
                 case EnumAlarmType.Annual:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddYears(1);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddYears(1);                    
                     break;
-
                 case EnumAlarmType.Monthly:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMonths(1);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMonths(1);                    
                     break;
-
                 case EnumAlarmType.Weekly:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(7);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(7);                    
                     break;
-
                 case EnumAlarmType.Daily:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(1);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(1);                    
                     break;
-
                 case EnumAlarmType.InMinutes:
                     while (message.AlarmDateTime < DateTime.Now)
-                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);
-                    message.AlarmOk = false;
+                        message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);                    
                     break;
-
-
-                //// TODO: !!! Esto hay que pensarlo mejor - es ineficiente
-                //// progresar hora hasta la hora actual luego sumar x horas
-                //case ETipoAlarma.Cada1Hora:
-                //    while (n.Alarma < DateTime.Now)
-                //        n.Alarma = n.Alarma.AddHours(1);
-                //    n.AlarmaOk = false;
-                //    break;
-                //case ETipoAlarma.Cada4Horas:
-                //    while (n.Alarma < DateTime.Now)
-                //        n.Alarma = n.Alarma.AddHours(4);
-                //    n.AlarmaOk = false;
-                //    break;
-                //case ETipoAlarma.Cada8Horas:
-                //    while (n.Alarma < DateTime.Now)
-                //        n.Alarma = n.Alarma.AddHours(8);
-                //    n.AlarmaOk = false;
-                //    break;
-                //case ETipoAlarma.Cada12Horas:
-                //    while (n.Alarma < DateTime.Now)
-                //        n.Alarma = n.Alarma.AddHours(12);
-                //    n.AlarmaOk = false;
-                //    break;
-
                 default:
-                    message.AlarmOk = true;
+                    message.AlarmActivated = false;
                     break;
             }
         }

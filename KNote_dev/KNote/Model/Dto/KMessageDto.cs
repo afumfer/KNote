@@ -95,6 +95,7 @@ namespace KNote.Model.Dto
             }
         }
 
+        //TODO: deprecated
         private bool _disabled;
         public bool Disabled
         {
@@ -123,6 +124,7 @@ namespace KNote.Model.Dto
             }
         }
 
+        //TODO: deprecated
         private string _forward;
         public string Forward
         {
@@ -137,6 +139,7 @@ namespace KNote.Model.Dto
             }
         }
 
+        //TODO: deprecated
         private bool? _alarmOk;
         public bool? AlarmOk
         {

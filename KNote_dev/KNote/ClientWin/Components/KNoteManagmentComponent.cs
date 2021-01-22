@@ -237,9 +237,30 @@ namespace KNote.ClientWin.Components
                 {
                     _messagesManagment = new MessagesManagmentComponent(Store);
                     _messagesManagment.PostItVisible += MessagesManagment_PostItVisible;                    
+                    _messagesManagment.PostItAlarm += _messagesManagment_PostItAlarm;
+                    _messagesManagment.EMailAlarm += _messagesManagment_EMailAlarm;
+                    _messagesManagment.AppAlarm += _messagesManagment_AppAlarm;                   
                 }
                 return _messagesManagment;
             }
+        }
+
+        private void _messagesManagment_AppAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void _messagesManagment_EMailAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async void _messagesManagment_PostItAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        {            
+            // TODO: regiter alarm 
+            if (await Store.CheckPostItIsActive(e.Entity.NoteId))
+                return;
+            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
         }
 
         private async void MessagesManagment_PostItVisible(object sender, ComponentEventArgs<ServiceWithNoteId> e)

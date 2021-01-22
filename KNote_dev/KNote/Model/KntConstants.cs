@@ -53,10 +53,10 @@ namespace KNote.Model
             };
 
             NotificationType = new Dictionary<EnumNotificationType, string> 
-            {
-                { EnumNotificationType.AppInfo, "Application info" },
+            {                
                 { EnumNotificationType.PostIt, "PostIt" },
-                { EnumNotificationType.Email, "Email" }
+                { EnumNotificationType.Email, "Email" },
+                { EnumNotificationType.AppInfo, "Application info" }
             };
 
             ActionType = new Dictionary<EnumActionType, string> 
@@ -103,10 +103,10 @@ namespace KNote.Model
     }
 
     public enum EnumNotificationType
-    {
-        AppInfo,
+    {        
         PostIt,
-        Email
+        Email,
+        AppInfo
     }
 
     public enum EnumActionType
