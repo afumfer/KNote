@@ -74,10 +74,10 @@ namespace KNote.ClientWin.Views
             this.Close();
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNoteX", MessageBoxButtons buttons = MessageBoxButtons.OK)
+        public DialogResult ShowInfo(string info, string caption = "KeyNoteX", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
         {
             if(info != null)
-                return MessageBox.Show(info, caption, buttons);
+                return MessageBox.Show(info, caption, buttons, icon);
 
             if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
                 labelFolerName.Text = "(No folder selected)";
@@ -104,7 +104,7 @@ namespace KNote.ClientWin.Views
 
         #region Form events handlers
 
-        private void menu_Click(object sender, EventArgs e)
+        private async void menu_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem menuSel;
             menuSel = (ToolStripMenuItem)sender;
@@ -158,8 +158,9 @@ namespace KNote.ClientWin.Views
             //}
             else if (menuSel == menuExit)
             {
-                if (MessageBox.Show("Are you sure exit KNote?", "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)                
-                    _com.Finalize();                
+                //if (MessageBox.Show("Are you sure exit KNote?", "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)                
+                //    _com.Finalize();                
+                await _com.FinalizeApp();
             }
             else
             {
@@ -186,10 +187,15 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        private void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
+        private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // TODO: in future hide form (not finalize app). 
+
             if (!_viewFinalized)
-                _com.Finalize();
+            {                
+                if (! await _com.FinalizeApp())
+                    e.Cancel = true;
+            }
         }
 
         #endregion

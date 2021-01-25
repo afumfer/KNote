@@ -46,6 +46,7 @@ namespace KNote.ClientWin.Components
 
         public async override Task<bool> SaveModel()
         {
+            View.RefreshModel();
             Finalize();
             return await Task.FromResult<bool>(true);
         }

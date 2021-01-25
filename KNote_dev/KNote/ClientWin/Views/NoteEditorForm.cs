@@ -56,9 +56,9 @@ namespace KNote.ClientWin.Views
             return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
         {
-            return MessageBox.Show(info, caption, buttons);
+            return MessageBox.Show(info, caption, buttons, icon);
         }
 
         public void CleanView()
@@ -82,6 +82,11 @@ namespace KNote.ClientWin.Views
         public void RefreshView()
         {
             ModelToControls();
+        }
+
+        public void RefreshModel()
+        {
+            ControlsToModel();
         }
 
         public void OnClosingView()
@@ -768,8 +773,7 @@ namespace KNote.ClientWin.Views
         }
 
         private async Task<bool> SaveModel()
-        {
-            ControlsToModel();            
+        {            
             buttonUndo.Enabled = false;
             return await _com.SaveModel();
         }

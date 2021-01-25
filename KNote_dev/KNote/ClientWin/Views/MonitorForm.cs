@@ -39,7 +39,7 @@ namespace KNote.ClientWin.Views
             Application.DoEvents();
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
         {
             listBoxMessages.Items.Add(info);
             int visibleItems = listBoxMessages.ClientSize.Height / listBoxMessages.ItemHeight;

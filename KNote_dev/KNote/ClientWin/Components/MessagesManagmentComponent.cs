@@ -42,7 +42,6 @@ namespace KNote.ClientWin.Components
                 kntTimer.Interval = 30 * 1000;   // TODO: magic number refactor 
                 kntTimer.Start();
                 return new Result<EComponentResult>(EComponentResult.Executed);
-
             }
             catch (Exception)
             {
@@ -56,6 +55,7 @@ namespace KNote.ClientWin.Components
             kntTimer.Stop();
             alarmCounter++;
             AlarmsWindows();
+            SaveNotes();
             kntTimer.Enabled = true;
         }
 
@@ -94,6 +94,11 @@ namespace KNote.ClientWin.Components
                 //foreach (var id in resAppInfo.Entity)
                 //    AppAlarm?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
             }
+        }
+
+        private async void SaveNotes()
+        {
+            await Store.SaveActiveNotes();
         }
 
     }

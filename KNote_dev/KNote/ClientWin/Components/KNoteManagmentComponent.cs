@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 
 using KNote.ClientWin.Core;
@@ -247,11 +248,13 @@ namespace KNote.ClientWin.Components
 
         private void _messagesManagment_AppAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
         {
+            // TODO: ... for next major version 
             throw new NotImplementedException();
         }
 
         private void _messagesManagment_EMailAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
         {
+            // TODO: ... for next major version 
             throw new NotImplementedException();
         }
 
@@ -274,6 +277,17 @@ namespace KNote.ClientWin.Components
         #endregion
 
         #region Component public methods
+
+        public async Task<bool> FinalizeApp()
+        {
+            if (View.ShowInfo("Are you sure exit KNote?", "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                await Store.SaveActiveNotes();
+                Finalize();
+                return true;
+            }                
+            return false;
+        }
 
         public void ShowKntScriptConsole()
         {

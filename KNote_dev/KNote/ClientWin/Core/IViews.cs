@@ -16,7 +16,7 @@ namespace KNote.ClientWin.Core
         void ShowView();
         Result<EComponentResult> ShowModalView();
         void OnClosingView();        
-        DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK);
+        DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);
     }
 
     public interface IViewConfigurable: IViewBase
@@ -33,7 +33,7 @@ namespace KNote.ClientWin.Core
     public interface IEditorView<T> : IViewConfigurable
     {
         void CleanView();
-        
+        void RefreshModel();
         //...      
         //void RefreshBindingModel();        
     }

@@ -52,14 +52,19 @@ namespace KNote.ClientWin.Views
             return res;
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK)
+        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
         {
-            return MessageBox.Show(info, caption, buttons);
+            return MessageBox.Show(info, caption, buttons, icon);
         }
 
         public void RefreshView()
         {
             ModelToControls();
+        }
+
+        public void RefreshModel()
+        {
+            ControlsToModel();
         }
 
         public void CleanView()
@@ -90,8 +95,7 @@ namespace KNote.ClientWin.Views
         #region Form events handlers
 
         private async void buttonAccept_Click(object sender, EventArgs e)
-        {
-            ControlsToModel();
+        {            
             var res = await _com.SaveModel();
             if (res)
             {

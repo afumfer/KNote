@@ -63,12 +63,9 @@ namespace KNote.ClientWin.Components
         }
 
         public override async Task<bool> SaveModel()
-        {            
-            //// For test
-            //Finalize();
-            //return await Task.FromResult(true);
-            //// ...
-
+        {
+            View.RefreshModel();
+            
             if (!Model.IsDirty())
                 return true;
 

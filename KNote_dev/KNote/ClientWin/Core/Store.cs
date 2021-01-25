@@ -155,9 +155,7 @@ namespace KNote.ClientWin.Core
                 throw;
             }
         }
-
-        //_listComponents
-
+        
         public async Task<bool> CheckNoteIsActive(Guid noteId)
         {
             foreach(var com in _listComponents)
@@ -182,6 +180,31 @@ namespace KNote.ClientWin.Core
                         return await Task.FromResult<bool>(true);
             }
             return await Task.FromResult<bool>(false);
+        }
+
+        public async Task<bool> SaveActiveNotes()
+        {
+            try
+            {
+                foreach (var com in _listComponents)
+                {
+                    if (com is PostItEditorComponent)
+                        await ((PostItEditorComponent)com).SaveModel();
+
+                    if (com is NoteEditorComponent)
+                    {
+                        var comNote = (NoteEditorComponent)com;
+                        if (comNote.EditMode)
+                            await comNote.SaveModel();
+                    }
+                }
+
+                return await Task.FromResult<bool>(true);
+            }
+            catch (Exception)
+            {
+                return await Task.FromResult<bool>(false);
+            }
         }
 
 

@@ -120,6 +120,8 @@ namespace KNote.ClientWin.Components
 
         public async override Task<bool> SaveModel()
         {
+            View.RefreshModel();
+
             if (!Model.IsDirty() && !WindowPostIt.IsDirty() )
                 return true;
 
@@ -146,9 +148,7 @@ namespace KNote.ClientWin.Components
                     if (!isNew)
                         OnSavedEntity(response.Entity);
                     else
-                        OnAddedEntity(response.Entity);
-
-                    View.RefreshView();
+                        OnAddedEntity(response.Entity);                    
                 }
                 else
                 {
