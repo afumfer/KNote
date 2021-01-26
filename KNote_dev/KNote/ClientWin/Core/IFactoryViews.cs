@@ -12,7 +12,7 @@ namespace KNote.ClientWin.Core
         IViewConfigurable View(KntScriptConsoleComponent component);
         ISelectorView<FolderWithServiceRef> View(FoldersSelectorComponent component);
         ISelectorView<NoteInfoDto> View(NotesSelectorComponent component);
-        IViewConfigurable View(KNoteManagmentComponent component);
+        IManagmentView View(KNoteManagmentComponent component);
         IEditorView<NoteExtendedDto> View(NoteEditorComponent component);
         IEditorView<NoteDto> View(PostItEditorComponent component);
         IEditorView<WindowDto> View(PostItPropertiesComponent component);

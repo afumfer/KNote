@@ -33,7 +33,7 @@ namespace KNote.ClientWin.Core
             return new NotesSelectorForm(component);
         }
 
-        public IViewConfigurable View(KNoteManagmentComponent component)
+        public IManagmentView View(KNoteManagmentComponent component)
         {
             return new KNoteManagmentForm(component);
         }

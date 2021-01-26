@@ -40,7 +40,7 @@ namespace KNote.ClientWin.Views
             // ...
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+        public DialogResult ShowInfo(string info, string caption = "KeyNotex", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
         {
             return MessageBox.Show(info, caption, buttons, icon);
         }
@@ -59,7 +59,6 @@ namespace KNote.ClientWin.Views
         {
             
         }
-
 
         #endregion
 
@@ -92,37 +91,37 @@ namespace KNote.ClientWin.Views
 
         private void menuNewNote_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("pendiente de implementar");
+            MessageBox.Show("TODO: ....");
         }
 
         private void menuShowKNoteManagment_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("pendiente de implementar");
+            _com.ShowKNoteManagment();
         }
 
         private void menuPostItsVisibles_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("pendiente de implementar");
+            MessageBox.Show("TODO: ....");
         }
 
         private void menuKNoteOptions_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("pendiente de implementar");
+            MessageBox.Show("TODO: ....");
         }
 
         private void menuHelp_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("pendiente de implementar");
+            MessageBox.Show("TODO: ....");
         }
 
         private void menuAbout_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("pendiente de implementar");
+            MessageBox.Show("TODO: ....");
         }
 
         private void menuExit_Click(object sender, EventArgs e)
         {            
-            _com?.Finalize();
+            _com?.FinalizeApp();
         }
 
         #endregion

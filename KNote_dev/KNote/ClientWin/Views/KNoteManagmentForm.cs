@@ -13,7 +13,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views
 {
-    public partial class KNoteManagmentForm : Form, IViewConfigurable
+    public partial class KNoteManagmentForm : Form, IManagmentView
     {
         private readonly KNoteManagmentComponent _com;
         private bool _viewFinalized = false;
@@ -56,16 +56,24 @@ namespace KNote.ClientWin.Views
             this.Show();
         }
 
+        public void HideView()
+        {
+            this.Hide();
+        }
+
+        public void ActivateView()
+        {
+            this.Show();            
+            this.Select();
+            if (this.WindowState == FormWindowState.Minimized)
+                this.WindowState = FormWindowState.Normal;
+        }
+
         Result<EComponentResult> IViewBase.ShowModalView()
         {
             LinkComponents();
             Application.DoEvents();
             return _com.DialogResultToComponentResult(this.ShowDialog());
-        }
-
-        public void RefreshView()
-        {
-            //
         }
 
         public void OnClosingView()
@@ -99,6 +107,10 @@ namespace KNote.ClientWin.Views
             
         }
 
+        public void RefreshView()
+        {
+            
+        }
 
         #endregion
 
@@ -152,14 +164,12 @@ namespace KNote.ClientWin.Views
             {
                 _com.ShowKntScriptConsole();
             }
-            //else if (menuSel == menuHide)
-            //{
-                
-            //}
+            else if (menuSel == menuHide)
+            {
+                _com.HideKNoteManagment();
+            }
             else if (menuSel == menuExit)
             {
-                //if (MessageBox.Show("Are you sure exit KNote?", "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)                
-                //    _com.Finalize();                
                 await _com.FinalizeApp();
             }
             else
@@ -187,14 +197,12 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // TODO: in future hide form (not finalize app). 
-
             if (!_viewFinalized)
-            {                
-                if (! await _com.FinalizeApp())
-                    e.Cancel = true;
+            {
+                this.Hide();
+                e.Cancel = true;
             }
         }
 

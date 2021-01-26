@@ -16,7 +16,7 @@ using KntScript;
 
 namespace KNote.ClientWin.Components
 {
-    public class KNoteManagmentComponent : ComponentViewBase<IViewConfigurable>
+    public class KNoteManagmentComponent : ComponentViewBase<IManagmentView>
     {
         #region Properties
 
@@ -59,7 +59,7 @@ namespace KNote.ClientWin.Components
 
         #region Views
 
-        protected override IViewConfigurable CreateView()
+        protected override IManagmentView CreateView()
         {
             return Store.FactoryViews.View(this);
         }
@@ -96,7 +96,9 @@ namespace KNote.ClientWin.Components
                     NotesSelectorComponent.Run();
                     FoldersSelectorComponent.Run();
                     NoteEditorComponent.Run();
-                    MessagesManagment.Run();
+                    MessagesManagmentComponent.Run();
+
+                    NotifyView.ShowView();
                 }
             }
             catch (Exception ex)
@@ -106,11 +108,6 @@ namespace KNote.ClientWin.Components
             
             return result;
         }
-
-        //protected override Result OnFinalized()
-        //{
-        //    return base.OnFinalized();
-        //}
 
         #endregion 
         
@@ -229,20 +226,20 @@ namespace KNote.ClientWin.Components
 
         #region Messages Managment component
 
-        private MessagesManagmentComponent _messagesManagment;
-        public MessagesManagmentComponent MessagesManagment
+        private MessagesManagmentComponent _messagesManagmentComponent;
+        public MessagesManagmentComponent MessagesManagmentComponent
         {
             get
             {
-                if(_messagesManagment == null)
+                if(_messagesManagmentComponent == null)
                 {
-                    _messagesManagment = new MessagesManagmentComponent(Store);
-                    _messagesManagment.PostItVisible += MessagesManagment_PostItVisible;                    
-                    _messagesManagment.PostItAlarm += _messagesManagment_PostItAlarm;
-                    _messagesManagment.EMailAlarm += _messagesManagment_EMailAlarm;
-                    _messagesManagment.AppAlarm += _messagesManagment_AppAlarm;                   
+                    _messagesManagmentComponent = new MessagesManagmentComponent(Store);
+                    _messagesManagmentComponent.PostItVisible += MessagesManagment_PostItVisible;                    
+                    _messagesManagmentComponent.PostItAlarm += _messagesManagment_PostItAlarm;
+                    _messagesManagmentComponent.EMailAlarm += _messagesManagment_EMailAlarm;
+                    _messagesManagmentComponent.AppAlarm += _messagesManagment_AppAlarm;                   
                 }
-                return _messagesManagment;
+                return _messagesManagmentComponent;
             }
         }
 
@@ -453,6 +450,16 @@ namespace KNote.ClientWin.Components
             {                
                 FoldersSelectorComponent.DeleteItem(SelectedFolderWithServiceRef);
             }            
+        }
+
+        public void ShowKNoteManagment() 
+        {
+            View.ActivateView();            
+        }
+
+        public void HideKNoteManagment()
+        {                        
+            View.HideView();            
         }
 
         #endregion

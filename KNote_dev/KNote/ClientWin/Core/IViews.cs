@@ -19,6 +19,12 @@ namespace KNote.ClientWin.Core
         DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);
     }
 
+    public interface IManagmentView : IViewConfigurable
+    {
+        void HideView();
+        void ActivateView();
+    }
+
     public interface IViewConfigurable: IViewBase
     {
         void ConfigureEmbededMode();

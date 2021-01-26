@@ -47,8 +47,8 @@
             // 
             // notifyKNote
             // 
-            this.notifyKNote.BalloonTipText = "KNote notigy";
-            this.notifyKNote.BalloonTipTitle = "KNote";
+            this.notifyKNote.BalloonTipText = "KeyNotex notify";
+            this.notifyKNote.BalloonTipTitle = "KeyNotex";
             this.notifyKNote.ContextMenuStrip = this.contextKNoteMenu;
             this.notifyKNote.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyKNote.Icon")));
             this.notifyKNote.Text = "KNote";
