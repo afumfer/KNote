@@ -34,10 +34,10 @@ namespace KNote.ClientWin.Views
             this.panelForm = new System.Windows.Forms.Panel();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.labelStatus = new System.Windows.Forms.Label();
-            this.labelCaption = new System.Windows.Forms.Label();
             this.picResize = new System.Windows.Forms.PictureBox();
             this.picMenu = new System.Windows.Forms.PictureBox();
             this.textDescription = new System.Windows.Forms.TextBox();
+            this.labelCaption = new System.Windows.Forms.Label();
             this.menuPostIt = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuHide = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAlwaysFront = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,10 +59,10 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelForm.Controls.Add(this.htmlDescription);
             this.panelForm.Controls.Add(this.labelStatus);
-            this.panelForm.Controls.Add(this.labelCaption);
             this.panelForm.Controls.Add(this.picResize);
             this.panelForm.Controls.Add(this.picMenu);
             this.panelForm.Controls.Add(this.textDescription);
+            this.panelForm.Controls.Add(this.labelCaption);
             this.panelForm.Location = new System.Drawing.Point(1, 1);
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(479, 337);
@@ -90,21 +90,6 @@ namespace KNote.ClientWin.Views
             this.labelStatus.Text = "...";
             this.labelStatus.DoubleClick += new System.EventHandler(this.labelStatus_DoubleClick);
             // 
-            // labelCaption
-            // 
-            this.labelCaption.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelCaption.BackColor = System.Drawing.Color.PaleGoldenrod;
-            this.labelCaption.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelCaption.Location = new System.Drawing.Point(22, 3);
-            this.labelCaption.Name = "labelCaption";
-            this.labelCaption.Size = new System.Drawing.Size(453, 18);
-            this.labelCaption.TabIndex = 6;
-            this.labelCaption.Text = "...";
-            this.labelCaption.DoubleClick += new System.EventHandler(this.labelCaption_DoubleClick);
-            this.labelCaption.MouseDown += new System.Windows.Forms.MouseEventHandler(this.labelCaption_MouseDown);
-            this.labelCaption.MouseMove += new System.Windows.Forms.MouseEventHandler(this.labelCaption_MouseMove);
-            // 
             // picResize
             // 
             this.picResize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -122,9 +107,10 @@ namespace KNote.ClientWin.Views
             // 
             this.picMenu.Cursor = System.Windows.Forms.Cursors.Hand;
             this.picMenu.Image = ((System.Drawing.Image)(resources.GetObject("picMenu.Image")));
-            this.picMenu.Location = new System.Drawing.Point(2, 2);
+            this.picMenu.Location = new System.Drawing.Point(5, 5);
             this.picMenu.Name = "picMenu";
-            this.picMenu.Size = new System.Drawing.Size(18, 16);
+            this.picMenu.Size = new System.Drawing.Size(16, 16);
+            this.picMenu.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picMenu.TabIndex = 4;
             this.picMenu.TabStop = false;
             this.picMenu.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picMenu_MouseUp);
@@ -139,6 +125,22 @@ namespace KNote.ClientWin.Views
             this.textDescription.Name = "textDescription";
             this.textDescription.Size = new System.Drawing.Size(163, 70);
             this.textDescription.TabIndex = 3;
+            // 
+            // labelCaption
+            // 
+            this.labelCaption.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelCaption.BackColor = System.Drawing.Color.PaleGoldenrod;
+            this.labelCaption.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.labelCaption.Location = new System.Drawing.Point(3, 3);
+            this.labelCaption.Name = "labelCaption";
+            this.labelCaption.Padding = new System.Windows.Forms.Padding(20, 2, 0, 0);
+            this.labelCaption.Size = new System.Drawing.Size(472, 20);
+            this.labelCaption.TabIndex = 6;
+            this.labelCaption.Text = "...";
+            this.labelCaption.DoubleClick += new System.EventHandler(this.labelCaption_DoubleClick);
+            this.labelCaption.MouseDown += new System.Windows.Forms.MouseEventHandler(this.labelCaption_MouseDown);
+            this.labelCaption.MouseMove += new System.Windows.Forms.MouseEventHandler(this.labelCaption_MouseMove);
             // 
             // menuPostIt
             // 
