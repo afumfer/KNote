@@ -17,7 +17,7 @@ using System.Windows.Forms;
 
 namespace KNote.ClientWin.Views
 {
-    public partial class PostItEditorForm : Form, IEditorView<NoteDto>
+    public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
     {
         #region Private fields
 
@@ -64,6 +64,16 @@ namespace KNote.ClientWin.Views
         public void RefreshView()
         {
             ModelToControls();
+        }
+
+        public void HideView()
+        {
+            this.Hide();
+        }
+
+        public void ActivateView()
+        {
+            this.Show();
         }
 
         public void RefreshModel()

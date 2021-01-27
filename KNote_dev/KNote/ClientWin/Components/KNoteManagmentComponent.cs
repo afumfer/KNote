@@ -16,7 +16,7 @@ using KntScript;
 
 namespace KNote.ClientWin.Components
 {
-    public class KNoteManagmentComponent : ComponentViewBase<IManagmentView>
+    public class KNoteManagmentComponent : ComponentViewBase<IViewConfigurableExt>
     {
         #region Properties
 
@@ -59,7 +59,7 @@ namespace KNote.ClientWin.Components
 
         #region Views
 
-        protected override IManagmentView CreateView()
+        protected override IViewConfigurableExt CreateView()
         {
             return Store.FactoryViews.View(this);
         }

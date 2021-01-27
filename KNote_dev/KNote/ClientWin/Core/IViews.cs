@@ -8,28 +8,30 @@ using System.Windows.Forms;
 
 namespace KNote.ClientWin.Core
 {
+    //TODO: refactor view hierarchy
+
     #region  Base view
 
     public interface IViewBase
-    {
-        Control PanelView();
+    {        
         void ShowView();
         Result<EComponentResult> ShowModalView();
         void OnClosingView();        
         DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);
     }
-
-    public interface IManagmentView : IViewConfigurable
-    {
-        void HideView();
-        void ActivateView();
-    }
-
+    
     public interface IViewConfigurable: IViewBase
     {
+        Control PanelView();
         void ConfigureEmbededMode();
         void ConfigureWindowMode();        
         void RefreshView();
+    }
+
+    public interface IViewConfigurableExt : IViewConfigurable
+    {
+        void HideView();
+        void ActivateView();
     }
 
     #endregion
@@ -39,9 +41,13 @@ namespace KNote.ClientWin.Core
     public interface IEditorView<T> : IViewConfigurable
     {
         void CleanView();
+        void RefreshModel();                
+    }
+
+    public interface IEditorViewExt<T> : IViewConfigurableExt
+    {
+        void CleanView();
         void RefreshModel();
-        //...      
-        //void RefreshBindingModel();        
     }
 
     public interface ISelectorView<TItem> : IViewConfigurable

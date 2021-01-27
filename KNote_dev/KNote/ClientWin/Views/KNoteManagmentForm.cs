@@ -13,7 +13,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views
 {
-    public partial class KNoteManagmentForm : Form, IManagmentView
+    public partial class KNoteManagmentForm : Form, IViewConfigurableExt
     {
         private readonly KNoteManagmentComponent _com;
         private bool _viewFinalized = false;

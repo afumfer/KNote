@@ -41,7 +41,6 @@
             this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.timerKNote = new System.Windows.Forms.Timer(this.components);
             this.contextKNoteMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,6 +52,7 @@
             this.notifyKNote.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyKNote.Icon")));
             this.notifyKNote.Text = "KNote";
             this.notifyKNote.Visible = true;
+            this.notifyKNote.DoubleClick += new System.EventHandler(this.notifyKNote_DoubleClick);
             // 
             // contextKNoteMenu
             // 
@@ -131,11 +131,6 @@
             this.menuExit.Text = "Exit";
             this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
             // 
-            // timerKNote
-            // 
-            this.timerKNote.Interval = 60000;
-            this.timerKNote.Tick += new System.EventHandler(this.timerKNote_Tick);
-            // 
             // NotifyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -156,7 +151,6 @@
         #endregion
 
         internal System.Windows.Forms.NotifyIcon notifyKNote;
-        internal System.Windows.Forms.Timer timerKNote;
         private System.Windows.Forms.ContextMenuStrip contextKNoteMenu;
         private System.Windows.Forms.ToolStripMenuItem menuNewNote;
         private System.Windows.Forms.ToolStripMenuItem menuShowKNoteManagment;

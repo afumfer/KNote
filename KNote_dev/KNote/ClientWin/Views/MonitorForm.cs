@@ -23,20 +23,10 @@ namespace KNote.ClientWin.Views
             _com = com;
         }
 
-        public Control PanelView()
-        {
-            return null; 
-        }
-
         public void OnClosingView()
         {
             _viewFinalized = true;
             this.Close();
-        }
-
-        public void RefreshView()
-        {
-            Application.DoEvents();
         }
 
         public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -70,14 +60,23 @@ namespace KNote.ClientWin.Views
 
         public void ConfigureEmbededMode()
         {
-            
+
         }
 
         public void ConfigureWindowMode()
         {
-            
+
         }
 
+        public Control PanelView()
+        {
+            return null;
+        }
+
+        public void RefreshView()
+        {
+            //
+        }
 
     }
 }

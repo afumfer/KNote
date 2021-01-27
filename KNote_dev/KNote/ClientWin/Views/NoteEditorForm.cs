@@ -578,7 +578,8 @@ namespace KNote.ClientWin.Views
         {
             this.Cursor = Cursors.WaitCursor;
 
-            // Basic data
+            // Basic data            
+            this.Text = $"Note editor [{_com.ServiceRef?.Alias}]";
             textTopic.Text = _com.Model.Topic;                
             textNoteNumber.Text = "#" + _com.Model.NoteNumber.ToString();
             textFolder.Text = _com.Model.FolderDto?.Name;

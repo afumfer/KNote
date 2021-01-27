@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace KNote.ClientWin.Components
 {
-    public class PostItEditorComponent : ComponentEditor<IEditorView<NoteDto>, NoteDto>
+    public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, NoteDto>
     {
         private Guid _userId = Guid.Empty;
 
@@ -42,7 +42,7 @@ namespace KNote.ClientWin.Components
 
         #region IEditorView implementation
 
-        protected override IEditorView<NoteDto> CreateView()
+        protected override IEditorViewExt<NoteDto> CreateView()
         {
             return Store.FactoryViews.View(this);
         }
@@ -219,6 +219,16 @@ namespace KNote.ClientWin.Components
                 return window.Model;
 
             return null;
+        }
+
+        public void HidePostIt() 
+        {
+            View.HideView();
+        }
+
+        public void ActivatePostIt()
+        {
+            View.ActivateView();
         }
 
         #endregion 

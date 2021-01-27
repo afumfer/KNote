@@ -207,6 +207,24 @@ namespace KNote.ClientWin.Core
             }
         }
 
+        public void HidePostIts()
+        {
+            foreach (var com in _listComponents)
+            {
+                if (com is PostItEditorComponent)
+                    ((PostItEditorComponent)com).HidePostIt();                        
+            }            
+        }
+
+        public void ActivatePostIts()
+        {
+            foreach (var com in _listComponents)
+            {
+                if (com is PostItEditorComponent)
+                    ((PostItEditorComponent)com).ActivatePostIt();
+            }
+        }
+
 
         #endregion
     }

@@ -62,36 +62,16 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
-        #region Timer
-
-        private void timerKNote_Tick(object sender, EventArgs e)
-        {
-            // TODO: Pendiente implementar
-            //ContadorSegundosAlarma += 1;
-            //if (ContadorSegundosAlarma >= Ctrl.Contexto.RastreoAlarmaMinutos)
-            //{
-            //    try
-            //    {
-            //        Ctrl.MostrarNotasPostItTimer();
-            //    }
-            //    catch (Exception miEx)
-            //    {
-            //        MessageBox.Show("Ha ocurrido el siguiente error:" + miEx.Message.ToString());
-            //    }
-            //    finally
-            //    {
-            //        ContadorSegundosAlarma = 0;
-            //    }
-            //}
-        }
-
-        #endregion
-
         #region Menu events handlers 
+
+        private void notifyKNote_DoubleClick(object sender, EventArgs e)
+        {
+            _com.AddNotePostIt();
+        }
 
         private void menuNewNote_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("TODO: ....");
+            _com.AddNotePostIt();
         }
 
         private void menuShowKNoteManagment_Click(object sender, EventArgs e)
@@ -101,7 +81,10 @@ namespace KNote.ClientWin.Views
 
         private void menuPostItsVisibles_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("TODO: ....");
+            if (menuPostItsVisibles.Checked)
+                _com.Store.ActivatePostIts();
+            else
+                _com.Store.HidePostIts();
         }
 
         private void menuKNoteOptions_Click(object sender, EventArgs e)
@@ -125,5 +108,6 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
+
     }
 }

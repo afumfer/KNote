@@ -33,7 +33,7 @@ namespace KNote.ClientWin.Core
             return new NotesSelectorForm(component);
         }
 
-        public IManagmentView View(KNoteManagmentComponent component)
+        public IViewConfigurableExt View(KNoteManagmentComponent component)
         {
             return new KNoteManagmentForm(component);
         }
@@ -43,7 +43,7 @@ namespace KNote.ClientWin.Core
             return new NoteEditorForm(component);
         }
 
-        public IEditorView<NoteDto> View(PostItEditorComponent component)
+        public IEditorViewExt<NoteDto> View(PostItEditorComponent component)
         {
             return new PostItEditorForm(component);
         }
