@@ -57,8 +57,8 @@ namespace KNote.ClientWin
             Application.Run(applicationContext);            
         }
 
-        //static async Task LoadAppStore(Store store)
-        static void LoadAppStore(Store store)
+        static async Task LoadAppStore(Store store)
+        //static void LoadAppStore(Store store)
         {            
             var appFileConfig = Path.Combine(Application.StartupPath, "KNoteData.config");
 
@@ -67,6 +67,16 @@ namespace KNote.ClientWin
             if (appConfig == null)
             {
                 // Add some repository for development environment ...
+
+                var r3 = new RepositoryRef
+                {
+                    Alias = "Tasks db3 (Sqlite)",
+                    ConnectionString = @"Data Source=D:\DBs\KNote02DB_Sqlite.db",
+                    Provider = "Microsoft.Data.Sqlite",
+                    Orm = "EntityFramework"
+                };
+                store.AddServiceRef(new ServiceRef(r3));
+
 
                 var r1 = new RepositoryRef
                 {
@@ -86,15 +96,6 @@ namespace KNote.ClientWin
                     Orm = "Dapper" 
                 };
                 store.AddServiceRef(new ServiceRef(r2));
-
-                var r3 = new RepositoryRef
-                { 
-                    Alias = "Tasks db3 (Sqlite)",
-                    ConnectionString = @"Data Source=D:\DBs\KNote02DB_Sqlite.db",
-                    Provider = "Microsoft.Data.Sqlite",
-                    Orm = "EntityFramework" 
-                };            
-                store.AddServiceRef(new ServiceRef(r3));
 
                 appConfig = new AppConfig();
                 appConfig.RespositoryRefs.Add(r1);
@@ -122,10 +123,9 @@ namespace KNote.ClientWin
             store.SaveConfig(appConfig, appFileConfig);
 
             // default folder
-            //var folder = (await defaultServiceRef.Service.Folders.GetHomeAsync()).Entity;
-            //FolderInfoDto folder = null ;
-            //store.UpdateActiveFolder(new FolderWithServiceRef { FolderInfo = folder, ServiceRef = defaultServiceRef });
-
+            var firstService = store.GetFirstServiceRef();
+            var folder = (await firstService.Service.Folders.GetHomeAsync()).Entity;
+            store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
 
             #region Doc data for repositories
 

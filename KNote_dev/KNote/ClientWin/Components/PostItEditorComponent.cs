@@ -21,6 +21,8 @@ namespace KNote.ClientWin.Components
 
         public WindowDto WindowPostIt { get; set; }
 
+        public FolderWithServiceRef FolderWithServiceRef { get; set; }
+
         #region Constructor
 
         public PostItEditorComponent(Store store): base(store)
@@ -59,7 +61,9 @@ namespace KNote.ClientWin.Components
 
                 Model = (await Service.Notes.GetAsync(noteId)).Entity;
                 Model.SetIsDirty(false);
-                
+
+                FolderWithServiceRef = new FolderWithServiceRef { ServiceRef = Store.GetServiceRef(service.IdServiceRef), FolderInfo = Model?.FolderDto };
+
                 var resGetWindow = await Service.Notes.GetWindowAsync(Model.NoteId, await GetUserId());
                 if (resGetWindow.IsValid)
                     WindowPostIt = resGetWindow.Entity;
@@ -98,8 +102,10 @@ namespace KNote.ClientWin.Components
                 Model.Description = "";
 
                 // Context default values
-                Model.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
-                Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+                if (FolderWithServiceRef == null)
+                    FolderWithServiceRef = Store.ActiveFolderWithServiceRef;
+                Model.FolderId = FolderWithServiceRef.FolderInfo.FolderId;
+                Model.FolderDto = FolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
 
                 WindowPostIt = await GetNewWindowPostIt();
 

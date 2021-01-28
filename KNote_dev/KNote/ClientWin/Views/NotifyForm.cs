@@ -66,12 +66,12 @@ namespace KNote.ClientWin.Views
 
         private void notifyKNote_DoubleClick(object sender, EventArgs e)
         {
-            _com.AddNotePostIt();
+            _com.AddDefaultNotePostIt();
         }
 
         private void menuNewNote_Click(object sender, EventArgs e)
         {
-            _com.AddNotePostIt();
+            _com.AddDefaultNotePostIt();
         }
 
         private void menuShowKNoteManagment_Click(object sender, EventArgs e)

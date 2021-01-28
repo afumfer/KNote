@@ -26,6 +26,11 @@ namespace KNote.ClientWin.Components
             set { Store.ActiveFolderWithServiceRef = value; } 
         }
 
+        public FolderWithServiceRef DefaultFolderWithServiceRef
+        {
+            get { return Store.DefaultFolderWithServiceRef; }            
+        }
+
         public FolderInfoDto SelectedFolderInfo
         {
             get { return SelectedFolderWithServiceRef?.FolderInfo; }
@@ -377,17 +382,32 @@ namespace KNote.ClientWin.Components
                 View.ShowInfo("There is no selected folder to create new note.");
                 return;
             }
-            AddNotePostIt(SelectedServiceRef.Service);
+
+            AddNotePostIt(SelectedFolderWithServiceRef);
         }
 
-        private async void AddNotePostIt(IKntService service)
+        public void AddDefaultNotePostIt()
+        {
+            if (Store.DefaultFolderWithServiceRef == null)
+            {
+                View.ShowInfo("A default folder has not been defined for personal notes.");
+                return;
+            }
+
+            AddNotePostIt(DefaultFolderWithServiceRef);
+        }
+
+
+        // FolderWithServiceRef
+        private async void AddNotePostIt(FolderWithServiceRef folderWithServiceRef)  // IKntService service
         {
             var postItEditorComponent = new PostItEditorComponent(Store);
             postItEditorComponent.AddedEntity += PostItEditorComponent_AddedEntity;
             postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
             postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
             postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
-            await postItEditorComponent.NewModel(service);
+            postItEditorComponent.FolderWithServiceRef = folderWithServiceRef;
+            await postItEditorComponent.NewModel(folderWithServiceRef.ServiceRef.Service);
             postItEditorComponent.Run();
         }
 
@@ -478,6 +498,9 @@ namespace KNote.ClientWin.Components
 
         private async void OnNoteEditorAdded(NoteInfoDto noteInfo)
         {
+            if (NotesSelectorComponent.ListEntities == null)
+                return;
+
             if (NotesSelectorComponent.ListEntities.Count == 0)
             {
                 await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);

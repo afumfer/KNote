@@ -35,6 +35,13 @@ namespace KNote.ClientWin.Core
             get { return _activeFolderWithServiceRef; }            
         }
 
+        public FolderWithServiceRef _dafaultFolderWithServiceRef;
+        public FolderWithServiceRef DefaultFolderWithServiceRef
+        {
+            set { _dafaultFolderWithServiceRef = value; }
+            get { return _dafaultFolderWithServiceRef; }
+        }
+
         #endregion
 
         #region Constructor 
@@ -84,6 +91,10 @@ namespace KNote.ClientWin.Core
             return _servicesRefs.Where(_ => _.IdServiceRef == id).FirstOrDefault();
         }
 
+        public ServiceRef GetFirstServiceRef()
+        {
+            return _servicesRefs.FirstOrDefault();
+        }
 
         public event EventHandler<ComponentEventArgs<EComponentState>> ComponentsStateChanged;
         public void AddComponent(ComponentBase controller)
