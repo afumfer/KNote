@@ -33,7 +33,14 @@ namespace KNote.ClientWin.Components
 
         public ServiceRef SelectedServiceRef
         {
-            get { return SelectedFolderWithServiceRef?.ServiceRef; }
+            get {
+            //    if (SelectedFolderWithServiceRef != null)
+                    return SelectedFolderWithServiceRef?.ServiceRef;
+            //    else if (SelectedFilterWithServiceRef != null)
+            //        return SelectedFilterWithServiceRef?.ServiceRef;
+            //    else
+            //        return null;
+            }
         }
 
         private NoteInfoDto _selectedNoteInfo;
@@ -158,9 +165,10 @@ namespace KNote.ClientWin.Components
             if (e.Entity == null)                            
                 return;
 
-            NotifyMessage($"Loading notes list for foler {e.Entity.FolderInfo?.FolderNumber}");
+            NotifyMessage($"Loading notes list for folder {e.Entity.FolderInfo?.FolderNumber}");
 
             SelectedFolderWithServiceRef = e.Entity;
+            SelectedFilterWithServiceRef = null;
             FolderPath = FoldersSelectorComponent.Path;            
             
             _selectedNoteInfo = null;            
@@ -170,7 +178,7 @@ namespace KNote.ClientWin.Components
             CountNotes = NotesSelectorComponent.ListEntities?.Count;
             
             View.ShowInfo(null);
-            NotifyMessage($"Loaded notes list for foler {e.Entity.FolderInfo?.FolderNumber}");
+            NotifyMessage($"Loaded notes list for folder {e.Entity.FolderInfo?.FolderNumber}");
         }
 
         #endregion
@@ -303,9 +311,31 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        private void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
+        private async void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
         {
+            // ... for debug
+            var x = await Task.FromResult<bool>(true);
             View.ShowInfo(e.Entity.NotesFilter.TextSearch);
+
+            //if (e.Entity == null)
+            //    return;
+
+            //NotifyMessage($"Loading notes filter: {e.Entity.NotesFilter?.TextSearch}");
+
+            //// TODO: !!! corregir esto
+            //SelectedFolderWithServiceRef = null;
+
+            //SelectedFilterWithServiceRef = e.Entity;
+            //FolderPath = $"Notes filter: {e.Entity.NotesFilter?.TextSearch}";
+
+            //_selectedNoteInfo = null;
+            //NoteEditorComponent.View.CleanView();
+
+            //await NotesSelectorComponent.LoadFilteredEntities(e.Entity.ServiceRef.Service, e.Entity.NotesFilter);
+            //CountNotes = NotesSelectorComponent.ListEntities?.Count;
+
+            //View.ShowInfo(null);
+            //NotifyMessage($"Loaded notes filter {e.Entity.NotesFilter?.TextSearch}");
         }
 
         #endregion

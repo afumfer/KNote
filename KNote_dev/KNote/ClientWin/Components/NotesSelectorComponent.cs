@@ -21,7 +21,14 @@ namespace KNote.ClientWin.Components
             get;
             private set;
         }
-       
+
+        public NotesFilterDto NotesFilter
+        {
+            get;
+            private set;
+        }
+
+
         #endregion
 
         #region Constructor
@@ -55,6 +62,7 @@ namespace KNote.ClientWin.Components
             {
                 Service = service;
                 Folder = folder;
+                NotesFilter = null;
 
                 Guid f;
                 if (Folder == null)
@@ -73,6 +81,49 @@ namespace KNote.ClientWin.Components
                     ListEntities = response.Entity;
 
                     if(refreshView)
+                        View.RefreshView();
+
+                    if (ListEntities?.Count > 0)
+                        SelectedEntity = ListEntities[0];
+                    else
+                        SelectedEntity = null;
+
+                    NotifySelectedEntity();
+                }
+                else
+                {
+                    View.ShowInfo(response.Message);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> LoadFilteredEntities(IKntService service, NotesFilterDto notesFilter, bool refreshView = true)
+        {
+            try
+            {
+                Service = service;
+                Folder = null;
+                NotesFilter = notesFilter;
+
+                // TODO: hack for get all (app win don't have pagination) 
+                NotesFilter.Pagination.NumRecords = 99999;
+
+                Result<List<NoteInfoDto>> response;
+                response = await Service.Notes.GetFilter(notesFilter);
+
+                if (response.IsValid)
+                {
+                    ListEntities = response.Entity;
+
+                    if (refreshView)
                         View.RefreshView();
 
                     if (ListEntities?.Count > 0)

@@ -70,7 +70,7 @@ namespace KNote.ClientWin.Views
             this.checkSearchInDescription.Location = new System.Drawing.Point(7, 147);
             this.checkSearchInDescription.Name = "checkSearchInDescription";
             this.checkSearchInDescription.Size = new System.Drawing.Size(163, 19);
-            this.checkSearchInDescription.TabIndex = 7;
+            this.checkSearchInDescription.TabIndex = 1;
             this.checkSearchInDescription.Text = "Search in note description";
             this.checkSearchInDescription.UseVisualStyleBackColor = true;
             // 
@@ -91,7 +91,7 @@ namespace KNote.ClientWin.Views
             this.buttonClean.Location = new System.Drawing.Point(259, 9);
             this.buttonClean.Name = "buttonClean";
             this.buttonClean.Size = new System.Drawing.Size(65, 27);
-            this.buttonClean.TabIndex = 5;
+            this.buttonClean.TabIndex = 3;
             this.buttonClean.Text = "&Clean";
             this.buttonClean.UseVisualStyleBackColor = true;
             this.buttonClean.Click += new System.EventHandler(this.buttonClean_Click);
@@ -113,7 +113,7 @@ namespace KNote.ClientWin.Views
             this.buttonSearch.Location = new System.Drawing.Point(330, 9);
             this.buttonSearch.Name = "buttonSearch";
             this.buttonSearch.Size = new System.Drawing.Size(99, 27);
-            this.buttonSearch.TabIndex = 3;
+            this.buttonSearch.TabIndex = 4;
             this.buttonSearch.Text = "&Search";
             this.buttonSearch.UseVisualStyleBackColor = true;
             this.buttonSearch.Click += new System.EventHandler(this.buttonSearch_Click);
@@ -136,7 +136,7 @@ namespace KNote.ClientWin.Views
             this.textTextSearch.Location = new System.Drawing.Point(7, 118);
             this.textTextSearch.Name = "textTextSearch";
             this.textTextSearch.Size = new System.Drawing.Size(420, 23);
-            this.textTextSearch.TabIndex = 1;
+            this.textTextSearch.TabIndex = 0;
             // 
             // label1
             // 
@@ -163,7 +163,7 @@ namespace KNote.ClientWin.Views
             this.buttonCancel.Location = new System.Drawing.Point(347, 11);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
-            this.buttonCancel.TabIndex = 12;
+            this.buttonCancel.TabIndex = 6;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -174,12 +174,12 @@ namespace KNote.ClientWin.Views
             this.buttonAccept.Location = new System.Drawing.Point(260, 11);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 11;
+            this.buttonAccept.TabIndex = 5;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
             // 
-            // FilterParamForm
+            // FiltersSelectorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -189,7 +189,7 @@ namespace KNote.ClientWin.Views
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "FilterParamForm";
+            this.Name = "FiltersSelectorForm";
             this.Text = "Filter parameters";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FilterParamForm_FormClosing);
             this.panelForm.ResumeLayout(false);
