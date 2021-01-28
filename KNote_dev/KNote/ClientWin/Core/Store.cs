@@ -27,7 +27,14 @@ namespace KNote.ClientWin.Core
         private readonly List<ServiceRef> _servicesRefs;
 
         private readonly List<ComponentBase> _listComponents;
-        
+
+        public FolderWithServiceRef _dafaultFolderWithServiceRef;
+        public FolderWithServiceRef DefaultFolderWithServiceRef
+        {
+            set { _dafaultFolderWithServiceRef = value; }
+            get { return _dafaultFolderWithServiceRef; }
+        }
+
         public FolderWithServiceRef _activeFolderWithServiceRef;
         public FolderWithServiceRef ActiveFolderWithServiceRef
         {
@@ -35,11 +42,11 @@ namespace KNote.ClientWin.Core
             get { return _activeFolderWithServiceRef; }            
         }
 
-        public FolderWithServiceRef _dafaultFolderWithServiceRef;
-        public FolderWithServiceRef DefaultFolderWithServiceRef
+        public NotesFilterWithServiceRef _activeFilterWithServiceRef;
+        public NotesFilterWithServiceRef ActiveFilterWithServiceRef
         {
-            set { _dafaultFolderWithServiceRef = value; }
-            get { return _dafaultFolderWithServiceRef; }
+            set { _activeFilterWithServiceRef = value; }
+            get { return _activeFilterWithServiceRef; }
         }
 
         #endregion

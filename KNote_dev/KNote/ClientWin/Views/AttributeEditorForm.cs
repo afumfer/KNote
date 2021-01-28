@@ -26,6 +26,8 @@ namespace KNote.ClientWin.Views
             _com = com;
         }
 
+        #region IEditorView implementation
+
         public Control PanelView()
         {
             return panelForm;
@@ -78,6 +80,8 @@ namespace KNote.ClientWin.Views
             _viewFinalized = true;
             this.Close();
         }
+
+        #endregion 
 
         private void AttributeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {

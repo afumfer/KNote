@@ -26,11 +26,6 @@ namespace KNote.ClientWin.Components
             set { Store.ActiveFolderWithServiceRef = value; } 
         }
 
-        public FolderWithServiceRef DefaultFolderWithServiceRef
-        {
-            get { return Store.DefaultFolderWithServiceRef; }            
-        }
-
         public FolderInfoDto SelectedFolderInfo
         {
             get { return SelectedFolderWithServiceRef?.FolderInfo; }
@@ -45,6 +40,17 @@ namespace KNote.ClientWin.Components
         public NoteInfoDto SelectedNoteInfo
         {
             get { return _selectedNoteInfo; }
+        }
+
+        public FolderWithServiceRef DefaultFolderWithServiceRef
+        {
+            get { return Store.DefaultFolderWithServiceRef; }
+        }
+
+        public NotesFilterWithServiceRef SelectedFilterWithServiceRef
+        {
+            get { return Store.ActiveFilterWithServiceRef; }
+            set { Store.ActiveFilterWithServiceRef = value; }
         }
 
         public string FolderPath { get; set; }
@@ -100,6 +106,7 @@ namespace KNote.ClientWin.Components
                 {
                     NotesSelectorComponent.Run();
                     FoldersSelectorComponent.Run();
+                    FilterParamComponent.Run();
                     NoteEditorComponent.Run();
                     MessagesManagmentComponent.Run();
 
@@ -241,8 +248,8 @@ namespace KNote.ClientWin.Components
                     _messagesManagmentComponent = new MessagesManagmentComponent(Store);
                     _messagesManagmentComponent.PostItVisible += MessagesManagment_PostItVisible;                    
                     _messagesManagmentComponent.PostItAlarm += _messagesManagment_PostItAlarm;
-                    _messagesManagmentComponent.EMailAlarm += _messagesManagment_EMailAlarm;
-                    _messagesManagmentComponent.AppAlarm += _messagesManagment_AppAlarm;                   
+                    //_messagesManagmentComponent.EMailAlarm += _messagesManagment_EMailAlarm;
+                    //_messagesManagmentComponent.AppAlarm += _messagesManagment_AppAlarm;                   
                 }
                 return _messagesManagmentComponent;
             }
@@ -272,6 +279,33 @@ namespace KNote.ClientWin.Components
             if (await Store.CheckPostItIsActive(e.Entity.NoteId))
                 return;
             await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
+        }
+
+        #endregion
+
+        #region FilterParam component
+
+        private FiltersSelectorComponent _filterParamComponent;
+        public FiltersSelectorComponent FilterParamComponent
+        {
+            get
+            {
+                if (_filterParamComponent == null)
+                {
+                    _filterParamComponent = new FiltersSelectorComponent(Store);
+                    _filterParamComponent.EmbededMode = true;
+
+                    _filterParamComponent.EntitySelection += _filterParamComponent_EntitySelection;
+
+                    //_filterParamComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
+                }
+                return _filterParamComponent;
+            }
+        }
+
+        private void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
+        {
+            View.ShowInfo(e.Entity.NotesFilter.TextSearch);
         }
 
         #endregion

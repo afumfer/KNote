@@ -53,14 +53,11 @@ namespace KNote.ClientWin.Core
             return new PostItPropertiesForm(component);
         }
 
-
         public IEditorView<FolderDto> View(FolderEditorComponent component)
         {
             return new FolderEditorForm(component);
         }
-
-        #region Secondary views
-
+       
         public IViewBase NotifyView(KNoteManagmentComponent component)
         {
             return new NotifyForm(component);
@@ -96,8 +93,9 @@ namespace KNote.ClientWin.Core
             return new NoteAttributeEditorForm(component);
         }
 
-
-        #endregion
-
+        public ISelectorView<NotesFilterWithServiceRef> View(FiltersSelectorComponent component)
+        {
+            return new FiltersSelectorForm(component);
+        }        
     }
 }

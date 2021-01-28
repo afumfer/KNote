@@ -213,6 +213,7 @@ namespace KNote.ClientWin.Views
         private void LinkComponents()
         {
             tabTreeFolders.Controls.Add(_com.FoldersSelectorComponent.View.PanelView());
+            tabSearch.Controls.Add(_com.FilterParamComponent.View.PanelView());
             splitContainer2.Panel1.Controls.Add(_com.NotesSelectorComponent.View.PanelView());
             splitContainer2.Panel2.Controls.Add(_com.NoteEditorComponent.View.PanelView());           
         }

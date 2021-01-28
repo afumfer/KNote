@@ -28,8 +28,8 @@ namespace KNote.ClientWin.Components
 
         public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItVisible;
         public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItAlarm;
-        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> EMailAlarm;
-        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> AppAlarm;
+        //public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> EMailAlarm;
+        //public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> AppAlarm;
 
         protected override Result<EComponentResult> OnInitialized()
         {

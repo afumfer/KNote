@@ -248,20 +248,6 @@ namespace KNote.ClientWin.Core
 
         public abstract Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true);
 
-        public abstract Task<bool> NewModel(IKntService service);
-
-        public abstract Task<bool> SaveModel();
-
-        public abstract Task<bool> DeleteModel(IKntService service, Guid id);
-
-        public abstract Task<bool> DeleteModel();
-
-        public virtual void CancelEdition()
-        {
-            OnEditionCanceled(Model);
-            Finalize();
-        }
-
         public virtual void LoadModel(IKntService service, TEntity entity, bool refreshView = true)
         {
             try
@@ -276,6 +262,20 @@ namespace KNote.ClientWin.Core
             {
                 View.ShowInfo(ex.Message);
             }
+        }
+
+        public abstract Task<bool> NewModel(IKntService service);
+
+        public abstract Task<bool> SaveModel();
+
+        public abstract Task<bool> DeleteModel(IKntService service, Guid id);
+
+        public abstract Task<bool> DeleteModel();
+
+        public virtual void CancelEdition()
+        {
+            OnEditionCanceled(Model);
+            Finalize();
         }
 
         public string GetOrSaveTmpFile(string container, string fileName, byte[] arrayContent)
