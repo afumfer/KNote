@@ -26,38 +26,51 @@ namespace KNote.ClientWin.Components
             set { Store.ActiveFolderWithServiceRef = value; } 
         }
 
+        public NotesFilterWithServiceRef SelectedFilterWithServiceRef
+        {
+            get { return Store.ActiveFilterWithServiceRef; }
+            set { Store.ActiveFilterWithServiceRef = value; }
+        }
+
         public FolderInfoDto SelectedFolderInfo
         {
             get { return SelectedFolderWithServiceRef?.FolderInfo; }
         }
 
+        public NotesFilterDto SelectedNotesFilter
+        {
+            get { return SelectedFilterWithServiceRef?.NotesFilter; }
+        }
+
         public ServiceRef SelectedServiceRef
         {
             get {
-            //    if (SelectedFolderWithServiceRef != null)
+                //    if (SelectedFolderWithServiceRef != null)
+                //        return SelectedFolderWithServiceRef?.ServiceRef;
+                //    else if (SelectedFilterWithServiceRef != null)
+                //        return SelectedFilterWithServiceRef?.ServiceRef;
+                //    else
+                //        return null;
+
+                if(SelectMode == EnumSelectMode.Filters)
+                    return SelectedFilterWithServiceRef?.ServiceRef;
+                else
                     return SelectedFolderWithServiceRef?.ServiceRef;
-            //    else if (SelectedFilterWithServiceRef != null)
-            //        return SelectedFilterWithServiceRef?.ServiceRef;
-            //    else
-            //        return null;
             }
         }
 
-        private NoteInfoDto _selectedNoteInfo;
-        public NoteInfoDto SelectedNoteInfo
-        {
-            get { return _selectedNoteInfo; }
-        }
+        public EnumSelectMode SelectMode { get; set; } = EnumSelectMode.Folders;
+
 
         public FolderWithServiceRef DefaultFolderWithServiceRef
         {
             get { return Store.DefaultFolderWithServiceRef; }
         }
 
-        public NotesFilterWithServiceRef SelectedFilterWithServiceRef
+        private NoteInfoDto _selectedNoteInfo;
+        public NoteInfoDto SelectedNoteInfo
         {
-            get { return Store.ActiveFilterWithServiceRef; }
-            set { Store.ActiveFilterWithServiceRef = value; }
+            get { return _selectedNoteInfo; }
         }
 
         public string FolderPath { get; set; }
@@ -165,10 +178,11 @@ namespace KNote.ClientWin.Components
             if (e.Entity == null)                            
                 return;
 
+            SelectMode = EnumSelectMode.Folders;
+
             NotifyMessage($"Loading notes list for folder {e.Entity.FolderInfo?.FolderNumber}");
 
-            SelectedFolderWithServiceRef = e.Entity;
-            SelectedFilterWithServiceRef = null;
+            SelectedFolderWithServiceRef = e.Entity;            
             FolderPath = FoldersSelectorComponent.Path;            
             
             _selectedNoteInfo = null;            
@@ -312,30 +326,26 @@ namespace KNote.ClientWin.Components
         }
 
         private async void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
-        {
-            // ... for debug
-            var x = await Task.FromResult<bool>(true);
-            View.ShowInfo(e.Entity.NotesFilter.TextSearch);
-
+        {            
             //if (e.Entity == null)
+            //{                
             //    return;
+            //}
+            SelectMode = EnumSelectMode.Filters;
 
-            //NotifyMessage($"Loading notes filter: {e.Entity.NotesFilter?.TextSearch}");
+            NotifyMessage($"Loading notes filter: {e.Entity?.NotesFilter?.TextSearch}");
 
-            //// TODO: !!! corregir esto
-            //SelectedFolderWithServiceRef = null;
+            SelectedFilterWithServiceRef = e.Entity;
+            FolderPath = $"Notes filter: {e.Entity?.NotesFilter?.TextSearch}";
 
-            //SelectedFilterWithServiceRef = e.Entity;
-            //FolderPath = $"Notes filter: {e.Entity.NotesFilter?.TextSearch}";
+            _selectedNoteInfo = null;
+            NoteEditorComponent.View.CleanView();
 
-            //_selectedNoteInfo = null;
-            //NoteEditorComponent.View.CleanView();
+            await NotesSelectorComponent.LoadFilteredEntities(e.Entity?.ServiceRef?.Service, e.Entity?.NotesFilter);
+            CountNotes = NotesSelectorComponent.ListEntities?.Count;
 
-            //await NotesSelectorComponent.LoadFilteredEntities(e.Entity.ServiceRef.Service, e.Entity.NotesFilter);
-            //CountNotes = NotesSelectorComponent.ListEntities?.Count;
-
-            //View.ShowInfo(null);
-            //NotifyMessage($"Loaded notes filter {e.Entity.NotesFilter?.TextSearch}");
+            View.ShowInfo(null);
+            NotifyMessage($"Loaded notes filter {e.Entity?.NotesFilter?.TextSearch}");
         }
 
         #endregion
@@ -460,9 +470,7 @@ namespace KNote.ClientWin.Components
 
             AddNotePostIt(DefaultFolderWithServiceRef);
         }
-
-
-        // FolderWithServiceRef
+        
         private async void AddNotePostIt(FolderWithServiceRef folderWithServiceRef)  // IKntService service
         {
             var postItEditorComponent = new PostItEditorComponent(Store);
@@ -544,6 +552,16 @@ namespace KNote.ClientWin.Components
         public void HideKNoteManagment()
         {                        
             View.HideView();            
+        }
+
+        public void GoActiveFolder()
+        {
+            _folderSelectorComponent_EntitySelection(this, new ComponentEventArgs<FolderWithServiceRef>(SelectedFolderWithServiceRef));
+        }
+
+        public void GoActiveFilter()
+        {
+            _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
         }
 
         #endregion
@@ -628,5 +646,13 @@ namespace KNote.ClientWin.Components
         }
 
         #endregion 
+
     }
+
+    public enum EnumSelectMode
+    {
+        Folders,
+        Filters
+    }
+
 }

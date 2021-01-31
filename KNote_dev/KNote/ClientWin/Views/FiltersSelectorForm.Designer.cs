@@ -87,8 +87,7 @@ namespace KNote.ClientWin.Views
             // 
             // buttonClean
             // 
-            this.buttonClean.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonClean.Location = new System.Drawing.Point(259, 9);
+            this.buttonClean.Location = new System.Drawing.Point(7, 9);
             this.buttonClean.Name = "buttonClean";
             this.buttonClean.Size = new System.Drawing.Size(65, 27);
             this.buttonClean.TabIndex = 3;

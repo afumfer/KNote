@@ -110,13 +110,17 @@ namespace KNote.ClientWin.Views
         private void buttonClean_Click(object sender, EventArgs e)
         {
             CleanView();
+            buttonSearch_Click(this, e);
         }
 
         private void buttonSearch_Click(object sender, EventArgs e)
         {
             var filter = new NotesFilterWithServiceRef();
             filter.ServiceRef = (ServiceRef)comboRepositories.SelectedItem;
-            filter.NotesFilter = new NotesFilterDto { TextSearch = textTextSearch.Text };
+            if(!checkSearchInDescription.Checked)
+                filter.NotesFilter = new NotesFilterDto { TextSearch = textTextSearch.Text };
+            else
+                filter.NotesFilter = new NotesFilterDto { TextSearch = $"*** {textTextSearch.Text}"  };
 
             _com.SelectedEntity = filter;            
             _com.NotifySelectedEntity();
@@ -151,6 +155,7 @@ namespace KNote.ClientWin.Views
         private void CleanView()
         {
             textTextSearch.Text = "";
+            checkSearchInDescription.Checked = false;
         }
 
     }

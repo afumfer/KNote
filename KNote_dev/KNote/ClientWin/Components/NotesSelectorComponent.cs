@@ -109,15 +109,24 @@ namespace KNote.ClientWin.Components
         {
             try
             {
+                Result<List<NoteInfoDto>> response;
+
                 Service = service;
                 Folder = null;
-                NotesFilter = notesFilter;
-
-                // TODO: hack for get all (app win don't have pagination) 
-                NotesFilter.Pagination.NumRecords = 99999;
-
-                Result<List<NoteInfoDto>> response;
-                response = await Service.Notes.GetFilter(notesFilter);
+                NotesFilter = notesFilter;                
+                
+                if (string.IsNullOrEmpty(NotesFilter?.TextSearch.Trim()) || service == null || notesFilter == null)
+                {
+                    response = new Result<List<NoteInfoDto>>();
+                    response.Entity = new List<NoteInfoDto>();                    
+                }
+                else
+                {
+                    // TODO: hack for get all (app win don't have pagination) 
+                    //response = await Service.Notes.GetFilter(notesFilter);   //TODO: future
+                    NotesFilter.Pagination.NumRecords = 99999;
+                    response = await Service.Notes.GetSearch(notesFilter);
+                }
 
                 if (response.IsValid)
                 {

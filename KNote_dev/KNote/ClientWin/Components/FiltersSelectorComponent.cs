@@ -38,16 +38,6 @@ namespace KNote.ClientWin.Components
             // ListEntities == TODO: ... load all stores filters 
         }
 
-        #region Basura ...
-        //public event EventHandler<ComponentEventArgs<NotesFilterWithServiceRef>> NotesFilterSelection;
-        //public void OnNotesFilterSelection()
-        //{
-        //    //NotesFilterSelection?.Invoke(this, new ComponentEventArgs<NotesFilterWithServiceRef>(
-        //    //    new NotesFilterWithServiceRef { ServiceRef = SelectedServiceRef, NotesFilter = Model }));
-        //}
-
-        #endregion
-
         #region ComponentEditorBase implementation 
 
         protected override ISelectorView<NotesFilterWithServiceRef> CreateView()

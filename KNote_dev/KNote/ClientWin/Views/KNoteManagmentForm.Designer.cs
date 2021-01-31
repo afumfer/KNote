@@ -785,6 +785,7 @@
             this.tabExplorers.SelectedIndex = 0;
             this.tabExplorers.Size = new System.Drawing.Size(286, 560);
             this.tabExplorers.TabIndex = 0;
+            this.tabExplorers.SelectedIndexChanged += new System.EventHandler(this.tabExplorers_SelectedIndexChanged);
             // 
             // tabTreeFolders
             // 

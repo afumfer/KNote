@@ -87,10 +87,16 @@ namespace KNote.ClientWin.Views
             if(info != null)
                 return MessageBox.Show(info, caption, buttons, icon);
 
-            if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
-                labelFolerName.Text = "(No folder selected)";
+            if(_com.SelectMode == EnumSelectMode.Folders)
+            {
+                if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
+                    labelFolerName.Text = "(No folder selected)";
+                else
+                    labelFolerName.Text = _com.SelectedFolderInfo?.Name;
+            }
             else
-                labelFolerName.Text = _com.SelectedFolderInfo?.Name;
+                labelFolerName.Text = "(Filtered notes)";
+
             labelFolderDetail.Text = $"{_com.FolderPath?.ToString()} ";
             statusLabel1.Text = $"Notes: {_com.CountNotes.ToString()}";
             
@@ -220,6 +226,15 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
+        private void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabExplorers.SelectedIndex == 0)
+                _com.GoActiveFolder();
+            else
+            {
+                _com.GoActiveFilter();
+            }
+        }
     }
 
     public class WaitCursor : IDisposable

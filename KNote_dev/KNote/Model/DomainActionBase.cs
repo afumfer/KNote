@@ -66,7 +66,7 @@ namespace KNote.Model
 
         protected int ExtractNoteNumberSearch(string textSearch)
         {
-            if (textSearch == null)
+            if (string.IsNullOrEmpty(textSearch.Trim()))
                 return 0;
 
             var n = 0;
