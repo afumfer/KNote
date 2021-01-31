@@ -78,6 +78,7 @@
             this.dataGridNotes.Size = new System.Drawing.Size(541, 443);
             this.dataGridNotes.TabIndex = 3;
             this.dataGridNotes.Text = "dataGridView1";
+            this.dataGridNotes.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridNotes_ColumnHeaderMouseClick);
             this.dataGridNotes.SelectionChanged += new System.EventHandler(this.dataGridNotes_SelectionChanged);
             this.dataGridNotes.DoubleClick += new System.EventHandler(this.dataGridNotes_DoubleClick);
             this.dataGridNotes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridNotes_KeyDown);
