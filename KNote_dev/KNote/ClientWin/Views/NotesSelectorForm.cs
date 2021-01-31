@@ -20,10 +20,8 @@ namespace KNote.ClientWin.Views
         private bool _viewFinalized = false;
         private bool _configuredGrid = false;
         private UInt32 _countRepetition = 0;
-        private bool _skipSelectionChanged = false;
-        
+        private bool _skipSelectionChanged = false;        
         private BindingSource _source = new BindingSource();
-
 
         public NotesSelectorForm(NotesSelectorComponent com)
         {
@@ -178,6 +176,19 @@ namespace KNote.ClientWin.Views
             _countRepetition++;
         }
 
+        private void dataGridNotes_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            int iColNumber = e.ColumnIndex;
+            SortOrder strSortOrder = getSortOrder(iColNumber);
+
+            if (strSortOrder == SortOrder.Descending)
+                _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[iColNumber].Name).GetValue(o));
+            else if (strSortOrder == SortOrder.Ascending)
+                _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[iColNumber].Name).GetValue(o));
+
+            dataGridNotes.Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection = strSortOrder;
+        }
+
         private void NotesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
@@ -274,29 +285,6 @@ namespace KNote.ClientWin.Views
                 return null;
             else
             {
-                // TODO: valorar si buscar el item en la colección ListNotes
-                //return new NoteInfoDto
-                //{
-                //    NoteId = (Guid)dgr.Cells[0].Value,
-                //    NoteNumber = (int)dgr.Cells[1].Value,
-                //    Topic = (string)dgr.Cells[2].Value,
-                //    Priority = (int)dgr.Cells[3].Value,
-                //    Tags = (string)dgr.Cells[4].Value,
-                //    CreationDateTime = (DateTime)dgr.Cells[5].Value,
-                //    ModificationDateTime = (DateTime)dgr.Cells[6].Value,
-                //    FolderId = (Guid)dgr.Cells[7].Value                    
-                //};
-
-
-                //n.NoteId = (Guid)dgr.Cells[0].Value;
-                //n.NoteNumber = (int)dgr.Cells[1].Value;
-                //n.Topic = (string)dgr.Cells[2].Value;
-                //n.Priority = (int)dgr.Cells[3].Value;
-                //n.Tags = (string)dgr.Cells[4].Value;
-                //n.CreationDateTime = (DateTime)dgr.Cells[5].Value;
-                //n.ModificationDateTime = (DateTime)dgr.Cells[6].Value;
-                //n.FolderId = (Guid)dgr.Cells[7].Value;
-
                 n.NoteId = (Guid)dgr.Cells[0].Value;
                 n.NoteNumber = (int)dgr.Cells[1].Value;
                 n.Topic = (string)dgr.Cells[2].Value;
@@ -313,19 +301,6 @@ namespace KNote.ClientWin.Views
                     n.NoteTypeId = (Guid)dgr.Cells[12].Value;
                 else
                     n.NoteTypeId = null;
-
-
-                //n.ContentType = (string)dgr.Cells[5].Value;
-                //n.Script = (string)dgr.Cells[6].Value;
-                //n.InternalTags = (string)dgr.Cells[7].Value;
-                //n.Tags = (string)dgr.Cells[8].Value;
-                //n.Priority = (int)dgr.Cells[9].Value;
-                //n.FolderId = (Guid)dgr.Cells[10].Value;
-                //if (dgr.Cells[12].Value != null)
-                //    n.NoteTypeId = (Guid)dgr.Cells[11].Value;
-                //else
-                //    n.NoteTypeId = null;
-
                 return n;
             }
         }
@@ -337,22 +312,6 @@ namespace KNote.ClientWin.Views
             dataGridNotes.CurrentCell = dataGridNotes.Rows[0].Cells[1];            
             dataGridNotes.Rows[0].Selected = true;
             _skipSelectionChanged = false;           
-        }
-
-
-        #endregion
-
-        private void dataGridNotes_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            int iColNumber = e.ColumnIndex; 
-            SortOrder strSortOrder = getSortOrder(iColNumber);
-
-            if (strSortOrder == SortOrder.Descending)
-                _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[iColNumber].Name).GetValue(o));
-            else if (strSortOrder == SortOrder.Ascending)
-                _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[iColNumber].Name).GetValue(o));
-
-            dataGridNotes.Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection = strSortOrder;
         }
 
         private SortOrder getSortOrder(int columnIndex)
@@ -369,6 +328,8 @@ namespace KNote.ClientWin.Views
                 return SortOrder.Descending;
             }
         }
+
+        #endregion
 
     }
 }
