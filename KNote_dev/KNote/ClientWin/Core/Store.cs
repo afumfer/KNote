@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using KNote.Model;
 using KNote.ClientWin.Components;
+using KntScript;
+using KNote.ClientWin.Views;
+using System.Threading;
 
 namespace KNote.ClientWin.Core
 {
@@ -243,6 +246,22 @@ namespace KNote.ClientWin.Core
             }
         }
 
+        public void RunScript(string code, bool newThread = true)
+        {
+            if (string.IsNullOrEmpty(code))
+                return;
+
+            var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this));
+                                  
+            if (newThread)
+            {
+                var t = new Thread(() => kntScript.Run(code));
+                t.IsBackground = false;
+                t.Start();
+            }
+            else
+                kntScript.Run(code);
+        }
 
         #endregion
     }

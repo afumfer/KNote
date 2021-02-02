@@ -89,50 +89,39 @@ namespace KNote.ClientWin.Views
         }
 
         private void buttonInteract_Click(object sender, EventArgs e)
-        {            
-            ////
-            //// Demo, inject variables and personalized api library 
-            ////
+        {
+            //
+            // Demo, inject variables and personalized api library 
+            //
 
-            //var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary());
-            
-            //var a = new DocumentDummy();
-            //a.Description = "My object, to inject in script.";
+            var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
 
-            //// inject variable
-            //kntScript.AddVar("_a", a);
+            var a = new FolderDto();
+            a.Name = "My folder, to inject in script.";
+            a.Tags = "my tags";
+            a.CreationDateTime = DateTime.Now;
 
-            //var code = @"printline ""Demo external variables / KNoteScriptLibrary injected"";
+            // inject variable
+            kntScript.AddVar("_a", a);
 
-            //            ' This variable (_a) comes from the host application
-            //            printline _a.Description;
-            //            printline _a.IdDocument;
-            //            printline _a.CreationDateTime;
-            //            printline _a.Folder.Name;
-            //            _a.DocumentTestMethodA("" param A "");
-            //            var b = _a.DocumentTestMethodB("" == param C =="");
-            //            printline b;
+            var code = @"printline ""Demo external variables / KNoteScriptLibrary injected"";
 
-            //            ' Test KNoteScriptLibrary (injected library)
-            //            printline """";
-            //            printline ""Test KNoteScriptLibrary"";
-            //            var colec = ColecDocDemo();
-            //            foreach x in colec
-            //                printline x.Description;
-            //            end foreach;
+                        ' This variable (_a) comes from the host application
+                        printline _a.Name;
+                        printline _a.Tags;
+                        printline _a.CreationDateTime;                        
 
-            //            printline """";
-            //            _a.Description = ""KntScript - changed description property !!"";                                                
-            //            printline _a.Description;
-            //            printline """";
+                        _a.Name = ""KntScript - changed description property !!"";                                                
+                        printline _a.Name;
+                        printline """";
 
-            //            printline ""<< end >>""; 
-            //            ";
+                        printline ""<< end >>""; 
+                        ";
 
-            //kntScript.Run(code);
+            kntScript.Run(code);
 
-            //var b = (DocumentDummy)kntScript.GetVar("_a");  // -> a 
-            //MessageBox.Show(a.Description + " <==> " + b.Description);
+            var b = (FolderDto)kntScript.GetVar("_a");  // -> a 
+            MessageBox.Show(a.Name + " <==> " + b.Name);
         }
 
         private void buttonRunBackground_Click(object sender, EventArgs e)

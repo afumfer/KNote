@@ -18,12 +18,7 @@ namespace KNote.ClientWin.Core
     {
         private readonly Store _store;
 
-        //public KNoteScriptLibrary()
-        //{
-
-        //}
-
-        public KNoteScriptLibrary(Store store) // :this()
+        public KNoteScriptLibrary(Store store) 
         {
             _store = store;
         }

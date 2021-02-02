@@ -106,7 +106,7 @@
             // 
             this.buttonTest4.Location = new System.Drawing.Point(13, 120);
             this.buttonTest4.Name = "buttonTest4";
-            this.buttonTest4.Size = new System.Drawing.Size(195, 28);
+            this.buttonTest4.Size = new System.Drawing.Size(300, 28);
             this.buttonTest4.TabIndex = 5;
             this.buttonTest4.Text = "Test modal component";
             this.buttonTest4.UseVisualStyleBackColor = true;
@@ -116,7 +116,7 @@
             // 
             this.buttonTest3.Location = new System.Drawing.Point(13, 86);
             this.buttonTest3.Name = "buttonTest3";
-            this.buttonTest3.Size = new System.Drawing.Size(195, 28);
+            this.buttonTest3.Size = new System.Drawing.Size(300, 28);
             this.buttonTest3.TabIndex = 4;
             this.buttonTest3.Text = "Run managment component";
             this.buttonTest3.UseVisualStyleBackColor = true;
@@ -126,7 +126,7 @@
             // 
             this.buttonTest2.Location = new System.Drawing.Point(12, 51);
             this.buttonTest2.Name = "buttonTest2";
-            this.buttonTest2.Size = new System.Drawing.Size(196, 29);
+            this.buttonTest2.Size = new System.Drawing.Size(301, 29);
             this.buttonTest2.TabIndex = 3;
             this.buttonTest2.Text = "Run components";
             this.buttonTest2.UseVisualStyleBackColor = true;
@@ -136,7 +136,7 @@
             // 
             this.buttonTest1.Location = new System.Drawing.Point(12, 16);
             this.buttonTest1.Name = "buttonTest1";
-            this.buttonTest1.Size = new System.Drawing.Size(196, 29);
+            this.buttonTest1.Size = new System.Drawing.Size(301, 29);
             this.buttonTest1.TabIndex = 2;
             this.buttonTest1.Text = "Run monitor";
             this.buttonTest1.UseVisualStyleBackColor = true;
@@ -145,7 +145,7 @@
             // labelInfo2
             // 
             this.labelInfo2.AutoSize = true;
-            this.labelInfo2.Location = new System.Drawing.Point(290, 44);
+            this.labelInfo2.Location = new System.Drawing.Point(329, 51);
             this.labelInfo2.Name = "labelInfo2";
             this.labelInfo2.Size = new System.Drawing.Size(38, 15);
             this.labelInfo2.TabIndex = 1;
@@ -154,7 +154,7 @@
             // labelInfo1
             // 
             this.labelInfo1.AutoSize = true;
-            this.labelInfo1.Location = new System.Drawing.Point(290, 16);
+            this.labelInfo1.Location = new System.Drawing.Point(329, 23);
             this.labelInfo1.Name = "labelInfo1";
             this.labelInfo1.Size = new System.Drawing.Size(38, 15);
             this.labelInfo1.TabIndex = 0;
@@ -184,14 +184,14 @@
             this.groupSamples.Controls.Add(this.listSamples);
             this.groupSamples.Location = new System.Drawing.Point(16, 154);
             this.groupSamples.Name = "groupSamples";
-            this.groupSamples.Size = new System.Drawing.Size(451, 379);
+            this.groupSamples.Size = new System.Drawing.Size(476, 379);
             this.groupSamples.TabIndex = 8;
             this.groupSamples.TabStop = false;
             this.groupSamples.Text = "Samples";
             // 
             // buttonRunSample
             // 
-            this.buttonRunSample.Location = new System.Drawing.Point(262, 59);
+            this.buttonRunSample.Location = new System.Drawing.Point(297, 59);
             this.buttonRunSample.Name = "buttonRunSample";
             this.buttonRunSample.Size = new System.Drawing.Size(173, 30);
             this.buttonRunSample.TabIndex = 5;
@@ -201,7 +201,7 @@
             // 
             // buttonShowSample
             // 
-            this.buttonShowSample.Location = new System.Drawing.Point(262, 22);
+            this.buttonShowSample.Location = new System.Drawing.Point(297, 22);
             this.buttonShowSample.Name = "buttonShowSample";
             this.buttonShowSample.Size = new System.Drawing.Size(173, 31);
             this.buttonShowSample.TabIndex = 4;
@@ -217,7 +217,7 @@
             this.listSamples.ItemHeight = 15;
             this.listSamples.Location = new System.Drawing.Point(13, 19);
             this.listSamples.Name = "listSamples";
-            this.listSamples.Size = new System.Drawing.Size(230, 349);
+            this.listSamples.Size = new System.Drawing.Size(269, 349);
             this.listSamples.TabIndex = 2;
             this.listSamples.SelectedIndexChanged += new System.EventHandler(this.listSamples_SelectedIndexChanged);
             // 
@@ -225,7 +225,7 @@
             // 
             this.buttonRunBackground.Location = new System.Drawing.Point(16, 82);
             this.buttonRunBackground.Name = "buttonRunBackground";
-            this.buttonRunBackground.Size = new System.Drawing.Size(243, 31);
+            this.buttonRunBackground.Size = new System.Drawing.Size(282, 31);
             this.buttonRunBackground.TabIndex = 6;
             this.buttonRunBackground.Text = "Run simple script in bakground";
             this.buttonRunBackground.UseVisualStyleBackColor = true;
@@ -235,7 +235,7 @@
             // 
             this.buttonInteract.Location = new System.Drawing.Point(16, 48);
             this.buttonInteract.Name = "buttonInteract";
-            this.buttonInteract.Size = new System.Drawing.Size(243, 28);
+            this.buttonInteract.Size = new System.Drawing.Size(282, 28);
             this.buttonInteract.TabIndex = 5;
             this.buttonInteract.Text = "Interacting with kntscript (embedded code)";
             this.buttonInteract.UseVisualStyleBackColor = true;
@@ -245,7 +245,7 @@
             // 
             this.buttonShowConsole.Location = new System.Drawing.Point(16, 119);
             this.buttonShowConsole.Name = "buttonShowConsole";
-            this.buttonShowConsole.Size = new System.Drawing.Size(243, 29);
+            this.buttonShowConsole.Size = new System.Drawing.Size(282, 29);
             this.buttonShowConsole.TabIndex = 7;
             this.buttonShowConsole.Text = "Show KntConsole";
             this.buttonShowConsole.UseVisualStyleBackColor = true;
@@ -255,7 +255,7 @@
             // 
             this.buttonRunScript.Location = new System.Drawing.Point(16, 14);
             this.buttonRunScript.Name = "buttonRunScript";
-            this.buttonRunScript.Size = new System.Drawing.Size(243, 28);
+            this.buttonRunScript.Size = new System.Drawing.Size(282, 28);
             this.buttonRunScript.TabIndex = 4;
             this.buttonRunScript.Text = "Run simple script (embedded code)";
             this.buttonRunScript.UseVisualStyleBackColor = true;

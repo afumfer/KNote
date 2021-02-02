@@ -45,13 +45,6 @@ namespace KNote.ClientWin.Components
         public ServiceRef SelectedServiceRef
         {
             get {
-                //    if (SelectedFolderWithServiceRef != null)
-                //        return SelectedFolderWithServiceRef?.ServiceRef;
-                //    else if (SelectedFilterWithServiceRef != null)
-                //        return SelectedFilterWithServiceRef?.ServiceRef;
-                //    else
-                //        return null;
-
                 if(SelectMode == EnumSelectMode.Filters)
                     return SelectedFilterWithServiceRef?.ServiceRef;
                 else
@@ -155,14 +148,8 @@ namespace KNote.ClientWin.Components
                 if (_folderSelectorComponent == null)
                 {
                     _folderSelectorComponent = new FoldersSelectorComponent(Store);
-                    _folderSelectorComponent.EmbededMode = true;
-                    
+                    _folderSelectorComponent.EmbededMode = true;                    
                     _folderSelectorComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
-
-                    // TODO: lo siguiente podría estar sobrando, delegar en _folderSelectorComponent la responsabilidad
-                    //       de activar la carpeta por defecto.
-                    //if (Store.ActiveFolderWithServiceRef != null)
-                    //    _folderSelectorComponent.SelectedEntity = Store.ActiveFolderWithServiceRef;
 
                     // TODO: ... ¿las extensiones se definen aquí?
                     //SelectorPlanificaciones.Extensiones.Add("Definir nueva planificación ...", new ExtensionesEventHandler<Planificacion>(ExtenderNuevaPlanificacion));
@@ -208,10 +195,8 @@ namespace KNote.ClientWin.Components
                 {
                     _notesSelectorComponent = new NotesSelectorComponent(Store);
                     _notesSelectorComponent.EmbededMode = true;                    
-
                     _notesSelectorComponent.EntitySelection += _notesSelectorComponent_EntitySelection;
                     _notesSelectorComponent.EntitySelectionDoubleClick += _notesSelectorComponent_EntitySelectionDoubleClick;
-
                 }
                 return _notesSelectorComponent;
             }
@@ -271,10 +256,18 @@ namespace KNote.ClientWin.Components
                     _messagesManagmentComponent.PostItVisible += MessagesManagment_PostItVisible;                    
                     _messagesManagmentComponent.PostItAlarm += _messagesManagment_PostItAlarm;
                     //_messagesManagmentComponent.EMailAlarm += _messagesManagment_EMailAlarm;
-                    //_messagesManagmentComponent.AppAlarm += _messagesManagment_AppAlarm;                   
+                    //_messagesManagmentComponent.AppAlarm += _messagesManagment_AppAlarm;    
+                    _messagesManagmentComponent.ExecuteKntScript += _messagesManagmentComponent_ExecuteKntScript;
                 }
                 return _messagesManagmentComponent;
             }
+        }
+
+        private async void _messagesManagmentComponent_ExecuteKntScript(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        {
+            var service = e.Entity.Service;
+            var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
+            Store.RunScript(note?.Script);
         }
 
         private void _messagesManagment_AppAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
@@ -327,10 +320,6 @@ namespace KNote.ClientWin.Components
 
         private async void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
         {            
-            //if (e.Entity == null)
-            //{                
-            //    return;
-            //}
             SelectMode = EnumSelectMode.Filters;
 
             NotifyMessage($"Loading notes filter: {e.Entity?.NotesFilter?.TextSearch}");
@@ -562,6 +551,11 @@ namespace KNote.ClientWin.Components
         public void GoActiveFilter()
         {
             _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
+        }
+
+        public void RunScriptSelectedNote()
+        {
+            Store.RunScript(SelectedNoteInfo.Script);
         }
 
         #endregion

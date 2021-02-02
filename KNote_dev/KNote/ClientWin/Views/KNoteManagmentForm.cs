@@ -163,8 +163,11 @@ namespace KNote.ClientWin.Views
             }            
             else if (menuSel == menuDeleteNote)
             {
-                _com.DeleteNote();
-                
+                _com.DeleteNote();                
+            }
+            else if (menuSel == menuExecuteKntScript)
+            {
+                _com.RunScriptSelectedNote();
             }
             else if (menuSel == menuKntScriptConsole)
             {

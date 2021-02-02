@@ -73,7 +73,7 @@
             this.menuRemoveTags = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem16 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMoreOptions = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuExecuteAnTScript = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuExecuteKntScript = new System.Windows.Forms.ToolStripMenuItem();
             this.menuView = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFoldersExplorer = new System.Windows.Forms.ToolStripMenuItem();
             this.menuSearchPanel = new System.Windows.Forms.ToolStripMenuItem();
@@ -457,18 +457,18 @@
             // menuMoreOptions
             // 
             this.menuMoreOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuExecuteAnTScript});
+            this.menuExecuteKntScript});
             this.menuMoreOptions.Name = "menuMoreOptions";
             this.menuMoreOptions.Size = new System.Drawing.Size(268, 22);
             this.menuMoreOptions.Text = "More note options";
             // 
-            // menuExecuteAnTScript
+            // menuExecuteKntScript
             // 
-            this.menuExecuteAnTScript.Name = "menuExecuteAnTScript";
-            this.menuExecuteAnTScript.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.menuExecuteAnTScript.Size = new System.Drawing.Size(316, 22);
-            this.menuExecuteAnTScript.Text = "Execute AnTScript code for selected  notes";
-            this.menuExecuteAnTScript.Click += new System.EventHandler(this.menu_Click);
+            this.menuExecuteKntScript.Name = "menuExecuteKntScript";
+            this.menuExecuteKntScript.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.menuExecuteKntScript.Size = new System.Drawing.Size(313, 22);
+            this.menuExecuteKntScript.Text = "Execute KntScript code for selected  notes";
+            this.menuExecuteKntScript.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuView
             // 
@@ -918,7 +918,7 @@
         private System.Windows.Forms.ToolStripMenuItem menuRemoveTags;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem16;
         private System.Windows.Forms.ToolStripMenuItem menuMoreOptions;
-        private System.Windows.Forms.ToolStripMenuItem menuExecuteAnTScript;
+        private System.Windows.Forms.ToolStripMenuItem menuExecuteKntScript;
         private System.Windows.Forms.ToolStripMenuItem menuView;
         private System.Windows.Forms.ToolStripMenuItem menuFoldersExplorer;
         private System.Windows.Forms.ToolStripMenuItem menuSearchPanel;

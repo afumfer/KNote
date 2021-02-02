@@ -433,6 +433,11 @@ namespace KNote.ClientWin.Components
             Finalize();
         }
 
+        public void RunScript()
+        {
+            Store.RunScript(Model.Script);
+        }
+
         #endregion 
     }
 }

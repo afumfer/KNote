@@ -160,6 +160,12 @@ namespace KNote.ClientWin.Views
             {
                 await PostItEdit();
             }
+            else if (menuSel == buttonExecuteKntScript)
+            {
+                _com.Model.Script = textScriptCode.Text;
+                _com.RunScript();
+            }
+
         }
 
         private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)

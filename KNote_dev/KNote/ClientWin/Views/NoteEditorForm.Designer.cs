@@ -44,7 +44,7 @@
             this.buttonTools = new System.Windows.Forms.ToolStripDropDownButton();
             this.buttonInsertTemplate = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
-            this.buttonExecuteAntScript = new System.Windows.Forms.ToolStripMenuItem();
+            this.buttonExecuteKntScript = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonWordWrap = new System.Windows.Forms.ToolStripMenuItem();
             this.imageListTabNoteData = new System.Windows.Forms.ImageList(this.components);
@@ -268,7 +268,7 @@
             this.buttonTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.buttonInsertTemplate,
             this.toolStripMenuItem3,
-            this.buttonExecuteAntScript,
+            this.buttonExecuteKntScript,
             this.toolStripMenuItem2,
             this.buttonWordWrap});
             this.buttonTools.Image = ((System.Drawing.Image)(resources.GetObject("buttonTools.Image")));
@@ -289,13 +289,14 @@
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(214, 6);
             // 
-            // buttonExecuteAntScript
+            // buttonExecuteKntScript
             // 
-            this.buttonExecuteAntScript.Image = ((System.Drawing.Image)(resources.GetObject("buttonExecuteAntScript.Image")));
-            this.buttonExecuteAntScript.Name = "buttonExecuteAntScript";
-            this.buttonExecuteAntScript.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.buttonExecuteAntScript.Size = new System.Drawing.Size(217, 22);
-            this.buttonExecuteAntScript.Text = "Execute AntScript code";
+            this.buttonExecuteKntScript.Image = ((System.Drawing.Image)(resources.GetObject("buttonExecuteKntScript.Image")));
+            this.buttonExecuteKntScript.Name = "buttonExecuteKntScript";
+            this.buttonExecuteKntScript.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.buttonExecuteKntScript.Size = new System.Drawing.Size(217, 22);
+            this.buttonExecuteKntScript.Text = "Execute AntScript code";
+            this.buttonExecuteKntScript.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -1472,7 +1473,7 @@
         private System.Windows.Forms.ToolStripDropDownButton buttonTools;
         private System.Windows.Forms.ToolStripMenuItem buttonInsertTemplate;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
-        private System.Windows.Forms.ToolStripMenuItem buttonExecuteAntScript;
+        private System.Windows.Forms.ToolStripMenuItem buttonExecuteKntScript;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem buttonWordWrap;
         private System.Windows.Forms.ImageList imageListTabNoteData;
