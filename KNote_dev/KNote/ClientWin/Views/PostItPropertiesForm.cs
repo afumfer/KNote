@@ -112,23 +112,21 @@ namespace KNote.ClientWin.Views
             labelText.Font = font;
             labelText.Text = font.OriginalFontName;
 
-            labelCaption.BackColor = ColorTranslator.FromOle(_com.Model.TitleColor);
-            labelCaption.ForeColor = ColorTranslator.FromOle(_com.Model.TextTitleColor);
-
-            labelNote.BackColor = ColorTranslator.FromOle(_com.Model.NoteColor);            
-            labelNote.ForeColor = ColorTranslator.FromOle(_com.Model.TextNoteColor);
-
-            labelText.BackColor = ColorTranslator.FromOle(_com.Model.NoteColor);
-            labelText.ForeColor = ColorTranslator.FromOle(_com.Model.TextNoteColor);
+            labelCaption.BackColor = ColorTranslator.FromHtml(_com.Model.TitleColor);
+            labelCaption.ForeColor = ColorTranslator.FromHtml(_com.Model.TextTitleColor);
+            labelNote.BackColor = ColorTranslator.FromHtml(_com.Model.NoteColor);            
+            labelNote.ForeColor = ColorTranslator.FromHtml(_com.Model.TextNoteColor);
+            labelText.BackColor = ColorTranslator.FromHtml(_com.Model.NoteColor);
+            labelText.ForeColor = ColorTranslator.FromHtml(_com.Model.TextNoteColor);
         }
 
         private void ControlsToModel()
         {
-            _com.Model.TitleColor = ColorTranslator.ToOle(labelCaption.BackColor);
-            _com.Model.TextTitleColor = ColorTranslator.ToOle(labelCaption.ForeColor);
+            _com.Model.TitleColor = ColorTranslator.ToHtml(labelCaption.BackColor);
+            _com.Model.TextTitleColor = ColorTranslator.ToHtml(labelCaption.ForeColor);
 
-            _com.Model.NoteColor = ColorTranslator.ToOle(labelNote.BackColor);
-            _com.Model.TextNoteColor = ColorTranslator.ToOle(labelText.ForeColor);
+            _com.Model.NoteColor = ColorTranslator.ToHtml(labelNote.BackColor);
+            _com.Model.TextNoteColor = ColorTranslator.ToHtml(labelText.ForeColor);
 
             _com.Model.FontName = labelText.Font.Name;
             _com.Model.FontSize = (byte)labelText.Font.Size;
@@ -136,10 +134,8 @@ namespace KNote.ClientWin.Views
             _com.Model.FontItalic = labelText.Font.Italic;
             _com.Model.FontUnderline = labelText.Font.Underline;
             _com.Model.FontStrikethru = labelText.Font.Strikeout;
-            _com.Model.ForeColor = ColorTranslator.ToOle(labelText.ForeColor);            
+            _com.Model.ForeColor = ColorTranslator.ToHtml(labelText.ForeColor);            
         }
-
-
 
         private async void buttonAccept_Click(object sender, EventArgs e)
         {            

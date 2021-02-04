@@ -364,7 +364,7 @@ namespace KNote.ClientWin.Views
         }
        
 
-        private void ModelToControlsPostIt(bool updateSizeAndLocatio = true)
+        private void ModelToControlsPostIt(bool updateSizeAndLocation = true)
         {
             if (_com.Model?.ContentType == "html")
             {                
@@ -393,16 +393,12 @@ namespace KNote.ClientWin.Views
                     style = style | FontStyle.Strikeout;
                 Font font = new Font(_com.WindowPostIt.FontName, _com.WindowPostIt.FontSize, style);
                 textDescription.Font = font;
-                textDescription.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
-                textDescription.ForeColor = ColorTranslator.FromOle(_com.WindowPostIt.TextNoteColor);
+                textDescription.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
+                textDescription.ForeColor = ColorTranslator.FromHtml(_com.WindowPostIt.TextNoteColor);
                 textDescription.Visible = true;
             }
 
-
-
-
-
-            if (updateSizeAndLocatio)
+            if (updateSizeAndLocation)
             {
                 // Avoid positions outside the view zone
                 if (_com.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
@@ -416,39 +412,10 @@ namespace KNote.ClientWin.Views
                 this.TopMost = menuAlwaysFront.Checked = _com.WindowPostIt.AlwaysOnTop;
             }
 
-            labelCaption.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.TitleColor);
-            labelCaption.ForeColor = ColorTranslator.FromOle(_com.WindowPostIt.TextTitleColor);
-            BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
-            labelStatus.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
-
-            //if (_com.Model?.ContentType == "html")
-            //{
-
-            //}
-            //else
-            //{
-            //this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            //| System.Windows.Forms.AnchorStyles.Left)
-            //| System.Windows.Forms.AnchorStyles.Right)));
-            //this.textDescription.Location = new System.Drawing.Point(3, 24);
-            //this.textDescription.Size = new System.Drawing.Size(472, 286);
-            // this.textDescription.Size = new System.Drawing.Size(450, 250);
-            //FontStyle style = new FontStyle();
-            //if (_com.WindowPostIt.FontBold)
-            //    style = FontStyle.Bold;
-            //if (_com.WindowPostIt.FontItalic)
-            //    style = style | FontStyle.Italic;
-            //if (_com.WindowPostIt.FontUnderline)
-            //    style = style | FontStyle.Underline;
-            //if (_com.WindowPostIt.FontStrikethru)
-            //    style = style | FontStyle.Strikeout;
-            //Font font = new Font(_com.WindowPostIt.FontName, _com.WindowPostIt.FontSize, style);
-            //textDescription.Font = font;                     
-            //textDescription.BackColor = ColorTranslator.FromOle(_com.WindowPostIt.NoteColor);
-            //textDescription.ForeColor = ColorTranslator.FromOle(_com.WindowPostIt.TextNoteColor);
-            //}
-
-
+            labelCaption.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.TitleColor);
+            labelCaption.ForeColor = ColorTranslator.FromHtml(_com.WindowPostIt.TextTitleColor);
+            BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
+            labelStatus.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
         }
 
         private void ControlsToModelPostIt()
@@ -459,19 +426,6 @@ namespace KNote.ClientWin.Views
             _com.WindowPostIt.Height = this.Height;
 
             _com.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
-
-            // TODO: managmente in style editor
-            //var font = textDescription.Font;
-            //_com.WindowPostIt.FontName = font.OriginalFontName;
-            //_com.WindowPostIt.FontSize = (byte)font.Size;
-            
-            //_com.WindowPostIt.NoteColor = ColorTranslator.ToOle(textDescription.BackColor);
-            //_com.WindowPostIt.TitleColor = ColorTranslator.ToOle(labelCaption.BackColor);
-            //_com.WindowPostIt.TextNoteColor = ColorTranslator.ToOle(textDescription.ForeColor);
-            //_com.WindowPostIt.TextTitleColor = ColorTranslator.ToOle(labelCaption.ForeColor);
-            //_com.WindowPostIt.NoteColor = ColorTranslator.ToOle(this.BackColor);
-            //_com.WindowPostIt.NoteColor = ColorTranslator.ToOle(labelStatus.BackColor);
-
         }
 
         #endregion

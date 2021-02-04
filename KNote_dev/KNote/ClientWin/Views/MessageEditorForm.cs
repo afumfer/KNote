@@ -190,7 +190,7 @@ namespace KNote.ClientWin.Views
             textAlarmDateTime.Text = _com.Model.AlarmDateTime.ToString();
             comboAlarmPeriodicity.SelectedIndex = (int)_com.Model.AlarmType;
             comboNotificationType.SelectedIndex = (int)_com.Model.NotificationType;
-            textContent.Text = _com.Model.Content.ToString();
+            textContent.Text = _com.Model.Comment.ToString();
             checkAlarmActivated.Checked = _com.Model.AlarmActivated ?? false;
             textMinutes.Text = _com.Model.AlarmMinutes?.ToString();            
         }
@@ -200,7 +200,7 @@ namespace KNote.ClientWin.Views
             _com.Model.AlarmDateTime = _com.TextToDateTime(textAlarmDateTime.Text);
             _com.Model.AlarmType = (EnumAlarmType)comboAlarmPeriodicity.SelectedIndex;
             _com.Model.NotificationType = (EnumNotificationType)comboNotificationType.SelectedIndex;
-            _com.Model.Content = textContent.Text;
+            _com.Model.Comment = textContent.Text;
             _com.Model.AlarmActivated = checkAlarmActivated.Checked;
             _com.Model.AlarmMinutes = _com.TextToInt(textMinutes.Text);
         }

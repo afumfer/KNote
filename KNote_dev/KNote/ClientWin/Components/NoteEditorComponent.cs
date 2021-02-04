@@ -252,7 +252,7 @@ namespace KNote.ClientWin.Components
             
             await messageEditor.NewModel(Service);            
             messageEditor.Model.NoteId = Model.NoteId;
-            messageEditor.Model.Content = "(Aditional text for message)";
+            messageEditor.Model.Comment = "(Aditional text for message)";
             var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
             messageEditor.Model.UserId = userDto.UserId;
             messageEditor.Model.UserFullName = userDto.FullName;
@@ -268,6 +268,7 @@ namespace KNote.ClientWin.Components
                 return messageEditor.Model;
             }            
             else
+                // TODO: show error here 
                 return null;            
         }
 

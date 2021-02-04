@@ -907,8 +907,8 @@ namespace KNote.Repository.Dapper
                 var sql = @"
                     SELECT                        
                         KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
-                        KMessages.AlarmType, KMessages.Disabled, KMessages.[Content], KMessages.Forward, KMessages.AlarmOk, 
-                        KMessages.AlarmActivated, KMessages.AlarmDateTime, KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
+                        KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
+                        KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
                     FROM  KMessages INNER JOIN
                          Users ON KMessages.UserId = Users.UserId
                     WHERE (KMessages.NoteId = @noteId)
@@ -936,8 +936,8 @@ namespace KNote.Repository.Dapper
                 var sql = @"
                     SELECT                        
                         KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
-                        KMessages.AlarmType, KMessages.Disabled, KMessages.[Content], KMessages.Forward, KMessages.AlarmOk, 
-                        KMessages.AlarmActivated, KMessages.AlarmDateTime, KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
+                        KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
+                        KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
                     FROM  KMessages INNER JOIN
                          Users ON KMessages.UserId = Users.UserId  
                     WHERE KMessageId = @Id";
@@ -966,10 +966,10 @@ namespace KNote.Repository.Dapper
                 var db = GetOpenConnection();
 
                 var sql = @"INSERT INTO KMessages (KMessageId, UserId, NoteId, ActionType, 
-                                NotificationType, AlarmType, [Disabled], Content, Forward, AlarmOk, 
+                                NotificationType, AlarmType, Comment,
                                 AlarmActivated, AlarmDateTime, AlarmMinutes )
                             VALUES (@KMessageId, @UserId, @NoteId, @ActionType, 
-                                @NotificationType, @AlarmType, @Disabled, @Content, @Forward, @AlarmOk, 
+                                @NotificationType, @AlarmType, @Comment, 
                                 @AlarmActivated, @AlarmDateTime, @AlarmMinutes)";
 
                 var r = await db.ExecuteAsync(sql.ToString(),
@@ -980,11 +980,8 @@ namespace KNote.Repository.Dapper
                         entity.NoteId,
                         entity.ActionType,
                         entity.NotificationType,
-                        entity.AlarmType,
-                        entity.Disabled,
-                        entity.Content,
-                        entity.Forward,
-                        entity.AlarmOk,
+                        entity.AlarmType,                        
+                        entity.Comment,
                         entity.AlarmActivated,
                         entity.AlarmDateTime,
                         entity.AlarmMinutes
@@ -1016,11 +1013,8 @@ namespace KNote.Repository.Dapper
                         NoteId = @NoteId, 
                         ActionType = @ActionType, 
                         NotificationType = @NotificationType, 
-                        AlarmType = @AlarmType, 
-                        [Disabled] = @Disabled, 
-                        Content = @Content, 
-                        Forward = @Forward, 
-                        AlarmOk = @AlarmOk, 
+                        AlarmType = @AlarmType,                         
+                        Comment = @Comment,                                                 
                         AlarmActivated = @AlarmActivated, 
                         AlarmDateTime = @AlarmDateTime, 
                         AlarmMinutes = @AlarmMinutes
@@ -1028,8 +1022,7 @@ namespace KNote.Repository.Dapper
 
                 var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.KMessageId, entity.UserId, entity.NoteId, entity.ActionType, entity.NotificationType,
-                        entity.AlarmType, entity.Disabled, entity.Content, entity.Forward, entity.AlarmOk, 
-                        entity.AlarmActivated, entity.AlarmDateTime, entity.AlarmMinutes
+                        entity.AlarmType, entity.Comment,  entity.AlarmActivated, entity.AlarmDateTime, entity.AlarmMinutes
                     });
 
                 if (r == 0)

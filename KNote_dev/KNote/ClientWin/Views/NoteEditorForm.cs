@@ -895,7 +895,7 @@ namespace KNote.ClientWin.Views
             itemList.SubItems.Add(message.AlarmType.ToString());
             itemList.SubItems.Add(message.AlarmMinutes.ToString());
             itemList.SubItems.Add(message.NotificationType.ToString());
-            itemList.SubItems.Add(message.Content.ToString());
+            itemList.SubItems.Add(message.Comment.ToString());
             return itemList;
         }
 
@@ -979,8 +979,7 @@ namespace KNote.ClientWin.Views
             item.SubItems[3].Text = message.AlarmType.ToString();
             item.SubItems[4].Text = message.AlarmMinutes.ToString();
             item.SubItems[5].Text = message.NotificationType.ToString();
-            item.SubItems[6].Text = message.Content.ToString();
-
+            item.SubItems[6].Text = message.Comment.ToString();
         }
 
         private void EditTask()

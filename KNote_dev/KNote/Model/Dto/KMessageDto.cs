@@ -95,64 +95,64 @@ namespace KNote.Model.Dto
             }
         }
 
-        //TODO: deprecated
-        private bool _disabled;
-        public bool Disabled
+        ////TODO: deprecated
+        //private bool _disabled;
+        //public bool Disabled
+        //{
+        //    get { return _disabled; }
+        //    set
+        //    {
+        //        if (_disabled != value)
+        //        {
+        //            _disabled = value;
+        //            OnPropertyChanged("Disabled");
+        //        }
+        //    }
+        //}
+
+        private string _comment;
+        public string Comment
         {
-            get { return _disabled; }
+            get { return _comment; }
             set
             {
-                if (_disabled != value)
+                if (_comment != value)
                 {
-                    _disabled = value;
-                    OnPropertyChanged("Disabled");
+                    _comment = value;
+                    OnPropertyChanged("Comment");
                 }
             }
         }
 
-        private string _content;
-        public string Content
-        {
-            get { return _content; }
-            set
-            {
-                if (_content != value)
-                {
-                    _content = value;
-                    OnPropertyChanged("Content");
-                }
-            }
-        }
+        ////TODO: deprecated
+        //private string _forward;
+        //public string Forward
+        //{
+        //    get { return _forward; }
+        //    set
+        //    {
+        //        if (_forward != value)
+        //        {
+        //            _forward = value;
+        //            OnPropertyChanged("Forward");
+        //        }
+        //    }
+        //}
 
-        //TODO: deprecated
-        private string _forward;
-        public string Forward
-        {
-            get { return _forward; }
-            set
-            {
-                if (_forward != value)
-                {
-                    _forward = value;
-                    OnPropertyChanged("Forward");
-                }
-            }
-        }
-
-        //TODO: deprecated
-        private bool? _alarmOk;
-        public bool? AlarmOk
-        {
-            get { return _alarmOk; }
-            set
-            {
-                if (_alarmOk != value)
-                {
-                    _alarmOk = value;
-                    OnPropertyChanged("AlarmOk");
-                }
-            }
-        }
+        ////TODO: deprecated
+        //private bool? _alarmOk;
+        //public bool? AlarmOk
+        //{
+        //    get { return _alarmOk; }
+        //    set
+        //    {
+        //        if (_alarmOk != value)
+        //        {
+        //            _alarmOk = value;
+        //            OnPropertyChanged("AlarmOk");
+        //        }
+        //    }
+        //}
 
         private bool? _alarmActivated;
         public bool? AlarmActivated
@@ -210,8 +210,8 @@ namespace KNote.Model.Dto
             // Attributes validations 
             // ---            
 
-            Validator.TryValidateProperty(this.Content,
-               new ValidationContext(this, null, null) { MemberName = "Content" },
+            Validator.TryValidateProperty(this.Comment,
+               new ValidationContext(this, null, null) { MemberName = "Comment" },
                results);
 
             //----

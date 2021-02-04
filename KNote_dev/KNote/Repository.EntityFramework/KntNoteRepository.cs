@@ -1091,8 +1091,7 @@ namespace KNote.Repository.EntityFramework
                     while (message.AlarmDateTime < DateTime.Now)
                         message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);                    
                     break;
-                default:
-                    message.AlarmOk = true;
+                default:                    
                     break;
             }
         }

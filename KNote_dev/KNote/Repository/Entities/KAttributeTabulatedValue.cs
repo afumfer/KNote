@@ -24,6 +24,7 @@ namespace KNote.Repository.Entities
         public Guid KAttributeId { get; set; }
         
         [Required(ErrorMessage = "KMSG: El valor para el atributo es requerido")]
+        [MaxLength(256)]
         public string Value { get; set; }
         
         public string Description { get; set; }

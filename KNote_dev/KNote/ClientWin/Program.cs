@@ -18,8 +18,7 @@ namespace KNote.ClientWin
         ///  The main entry point for the application.
         /// </summary>        
         [STAThread]
-        //static async Task Main()
-        static void Main()
+        static void Main()        
         {
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
@@ -57,8 +56,7 @@ namespace KNote.ClientWin
             Application.Run(applicationContext);            
         }
 
-        static async Task LoadAppStore(Store store)
-        //static void LoadAppStore(Store store)
+        static async void LoadAppStore(Store store)        
         {            
             var appFileConfig = Path.Combine(Application.StartupPath, "KNoteData.config");
 
@@ -71,7 +69,7 @@ namespace KNote.ClientWin
                 var r3 = new RepositoryRef
                 {
                     Alias = "Tasks db3 (Sqlite)",
-                    ConnectionString = @"Data Source=D:\DBs\KNote02DB_Sqlite.db",
+                    ConnectionString = @"Data Source=D:\DBs\KNote05DB_Sqlite.db",
                     Provider = "Microsoft.Data.Sqlite",
                     Orm = "EntityFramework"
                 };
@@ -81,8 +79,8 @@ namespace KNote.ClientWin
                 var r1 = new RepositoryRef
                 {
                     Alias = "Test db1 (SQL Server Prod - Dapper)",                    
-                    // ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
-                    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote02DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
+                    // ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
+                    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
                     Provider = "Microsoft.Data.SqlClient",
                     Orm = "Dapper"  // Dapper / EntityFramework
                 };             
@@ -91,7 +89,7 @@ namespace KNote.ClientWin
                 var r2 = new RepositoryRef
                 {
                     Alias = "Test db2 (SQL Server Desa - Dapper)",                    
-                    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote02DesaDB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
+                    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DesaDB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
                     Provider = "Microsoft.Data.SqlClient",
                     Orm = "Dapper" 
                 };

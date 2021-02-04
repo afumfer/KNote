@@ -278,8 +278,8 @@ namespace KNote.Repository.Dapper
                 var sql = @"
                     SELECT                        
                         KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
-                        KMessages.AlarmType, KMessages.Disabled, KMessages.[Content], KMessages.Forward, KMessages.AlarmOk, 
-                        KMessages.AlarmActivated, KMessages.AlarmDateTime, KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
+                        KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
+                        KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
                     FROM  KMessages INNER JOIN
                          Users ON KMessages.UserId = Users.UserId
                     WHERE (KMessages.UserId = @userId)

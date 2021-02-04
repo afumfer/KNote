@@ -35,7 +35,7 @@ namespace KNote.Repository.Entities
         
         public string Description { get; set; }
         
-        [MaxLength(1024)]
+        [MaxLength(64)]
         public string ContentType { get; set; }
         
         public string Script { get; set; }

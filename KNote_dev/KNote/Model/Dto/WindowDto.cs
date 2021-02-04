@@ -166,8 +166,8 @@ namespace KNote.Model.Dto
             }
         }
 
-        private byte _fontSize;
-        public byte FontSize
+        private float _fontSize;
+        public float FontSize
         {
             get { return _fontSize; }
             set
@@ -236,8 +236,8 @@ namespace KNote.Model.Dto
             }
         }
 
-        private int _foreColor;
-        public int ForeColor
+        private string _foreColor;
+        public string ForeColor
         {
             get { return _foreColor; }
             set
@@ -250,8 +250,8 @@ namespace KNote.Model.Dto
             }
         }
 
-        private int _titleColor;
-        public int TitleColor
+        private string _titleColor;
+        public string TitleColor
         {
             get { return _titleColor; }
             set
@@ -264,8 +264,8 @@ namespace KNote.Model.Dto
             }
         }
 
-        private int _textTitleColor;
-        public int TextTitleColor
+        private string _textTitleColor;
+        public string TextTitleColor
         {
             get { return _textTitleColor; }
             set
@@ -278,8 +278,8 @@ namespace KNote.Model.Dto
             }
         }
 
-        private int _noteColor;
-        public int NoteColor
+        private string _noteColor;
+        public string NoteColor
         {
             get { return _noteColor; }
             set
@@ -292,8 +292,8 @@ namespace KNote.Model.Dto
             }
         }
 
-        private int _textNoteColor;
-        public int TextNoteColor
+        private string _textNoteColor;
+        public string TextNoteColor
         {
             get { return _textNoteColor; }
             set

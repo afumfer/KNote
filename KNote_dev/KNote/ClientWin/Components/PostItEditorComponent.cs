@@ -243,7 +243,7 @@ namespace KNote.ClientWin.Components
         {            
             if (Model == null)
                 return null;
-            
+
             // TODO: get default values from Store.AppConfig ...
             return new WindowDto {
                 NoteId = Model.NoteId,
@@ -252,18 +252,18 @@ namespace KNote.ClientWin.Components
                 PosY = 100,
                 AlwaysOnTop = true,
                 Width = 400,
-                Height = 300, 
+                Height = 300,
                 FontName = "Segoe UI",
                 FontSize = 10,
                 FontBold = false,
                 FontItalic = false,
                 FontStrikethru = false,
                 FontUnderline = false,
-                ForeColor = 0,
-                NoteColor = 12648447,
-                TitleColor = 8454143,
-                TextNoteColor = 0,
-                TextTitleColor = 0
+                ForeColor = "Black",  // ole color 0
+                NoteColor = "#FFFFC0", // ole color 12648447
+                TitleColor = "#FFFF80", // ole color 8454143
+                TextNoteColor = "Black",
+                TextTitleColor = "Black"
             };
         }
 

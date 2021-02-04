@@ -36,7 +36,7 @@ namespace KNote.Repository.Entities
         [MaxLength(1024)]
         public string Tags { get; set; }
         
-        [MaxLength(400)]
+        [MaxLength(512)]
         public string PathFolder { get; set; }
         
         public int Order { get; set; }

@@ -23,8 +23,7 @@ namespace KNote.Repository.Entities
         public Guid NoteId { get; set; }
         
         public Guid UserId { get; set; }
-
-        // info del host / entorno del usuario         
+        
         public string Host { get; set; }
         
         public bool Visible { get; set; }
@@ -41,7 +40,7 @@ namespace KNote.Repository.Entities
         
         public string FontName { get; set; }
         
-        public byte FontSize { get; set; }
+        public float FontSize { get; set; }
         
         public bool FontBold { get; set; }
 
@@ -51,15 +50,20 @@ namespace KNote.Repository.Entities
         
         public bool FontStrikethru { get; set; }
         
-        public int ForeColor { get; set; }
-        
-        public int TitleColor { get; set; }
-        
-        public int TextTitleColor { get; set; }
-        
-        public int NoteColor { get; set; }
-        
-        public int TextNoteColor { get; set; }
+        [MaxLength(32)]
+        public string ForeColor { get; set; }
+
+        [MaxLength(32)]
+        public string TitleColor { get; set; }
+
+        [MaxLength(32)]
+        public string TextTitleColor { get; set; }
+
+        [MaxLength(32)]
+        public string NoteColor { get; set; }
+
+        [MaxLength(32)]
+        public string TextNoteColor { get; set; }
 
         #region Virtual - navigation properties
         
