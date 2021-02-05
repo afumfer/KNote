@@ -17,7 +17,8 @@ namespace KNote.ClientWin.Components
 {
     public class MessagesManagmentComponent : ComponentBase
     {
-        static Timer kntTimer;        
+        static Timer kntTimerAlarms;
+        static Timer kntTimerAutoSave;
         static int alarmCounter = 1;
         //static bool exitFlag = false;
         
@@ -38,10 +39,16 @@ namespace KNote.ClientWin.Components
             {
                 VisibleWindows();
 
-                kntTimer = new Timer();
-                kntTimer.Tick += KntTimer_Tick;
-                kntTimer.Interval = 30 * 1000;   // TODO: magic number refactor 
-                kntTimer.Start();
+                kntTimerAlarms = new Timer();
+                kntTimerAlarms.Tick += kntTimerAlarms_Tick;
+                kntTimerAlarms.Interval = 60 * 1000;   // TODO: magic number refactor 
+                kntTimerAlarms.Start();
+
+                kntTimerAutoSave = new Timer();
+                kntTimerAutoSave.Tick += KntTimerAutoSave_Tick;
+                kntTimerAutoSave.Interval = 105 * 1000;   // TODO: magic number refactor 
+                kntTimerAutoSave.Start();
+
                 return new Result<EComponentResult>(EComponentResult.Executed);
             }
             catch (Exception)
@@ -51,13 +58,19 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        private void KntTimer_Tick(object sender, EventArgs e)        
+        private void KntTimerAutoSave_Tick(object sender, EventArgs e)
+        {            
+            kntTimerAutoSave.Stop();                        
+            SaveNotes();             
+            kntTimerAutoSave.Enabled = true;
+        }
+
+        private void kntTimerAlarms_Tick(object sender, EventArgs e)        
         {
-            kntTimer.Stop();
+            kntTimerAlarms.Stop();            
             alarmCounter++;
-            AlarmsWindows();
-            SaveNotes();
-            kntTimer.Enabled = true;
+            AlarmsWindows();            
+            kntTimerAlarms.Enabled = true;            
         }
 
         private async void VisibleWindows()

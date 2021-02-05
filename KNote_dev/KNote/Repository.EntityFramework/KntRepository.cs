@@ -35,14 +35,14 @@ namespace KNote.Repository.EntityFramework
 
         #region Constructors
 
-        public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = false)
+        public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = true)
         {
             _throwKntException = throwKntException;
             _strConn = strConn;
-            _strProvider = strProvider;            
+            _strProvider = strProvider;
         }
 
-        public KntRepository(KntDbContext singletonContext, bool throwKntException = false)
+        public KntRepository(KntDbContext singletonContext, bool throwKntException = true)
         {
             _throwKntException = throwKntException;
             _context = singletonContext;            

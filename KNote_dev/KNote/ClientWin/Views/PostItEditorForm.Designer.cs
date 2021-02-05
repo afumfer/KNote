@@ -65,13 +65,13 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.labelCaption);
             this.panelForm.Location = new System.Drawing.Point(1, 1);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(479, 337);
+            this.panelForm.Size = new System.Drawing.Size(479, 340);
             this.panelForm.TabIndex = 3;
             // 
             // htmlDescription
             // 
             this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(11, 103);
+            this.htmlDescription.Location = new System.Drawing.Point(25, 129);
             this.htmlDescription.Name = "htmlDescription";
             this.htmlDescription.Size = new System.Drawing.Size(277, 125);
             this.htmlDescription.TabIndex = 9;
@@ -83,7 +83,7 @@ namespace KNote.ClientWin.Views
             this.labelStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.labelStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.labelStatus.Location = new System.Drawing.Point(3, 316);
+            this.labelStatus.Location = new System.Drawing.Point(3, 319);
             this.labelStatus.Name = "labelStatus";
             this.labelStatus.Size = new System.Drawing.Size(452, 16);
             this.labelStatus.TabIndex = 7;
@@ -95,7 +95,7 @@ namespace KNote.ClientWin.Views
             this.picResize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.picResize.Cursor = System.Windows.Forms.Cursors.SizeNWSE;
             this.picResize.Image = ((System.Drawing.Image)(resources.GetObject("picResize.Image")));
-            this.picResize.Location = new System.Drawing.Point(463, 321);
+            this.picResize.Location = new System.Drawing.Point(463, 324);
             this.picResize.Name = "picResize";
             this.picResize.Size = new System.Drawing.Size(16, 16);
             this.picResize.TabIndex = 5;
@@ -119,7 +119,7 @@ namespace KNote.ClientWin.Views
             // 
             this.textDescription.BackColor = System.Drawing.Color.Beige;
             this.textDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textDescription.Location = new System.Drawing.Point(3, 24);
+            this.textDescription.Location = new System.Drawing.Point(25, 50);
             this.textDescription.Margin = new System.Windows.Forms.Padding(6);
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
@@ -213,7 +213,7 @@ namespace KNote.ClientWin.Views
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Info;
-            this.ClientSize = new System.Drawing.Size(481, 339);
+            this.ClientSize = new System.Drawing.Size(481, 342);
             this.ControlBox = false;
             this.Controls.Add(this.panelForm);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;

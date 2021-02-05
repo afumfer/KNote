@@ -301,6 +301,70 @@ namespace KNote.ClientWin.Views
             ControlsToModelPostIt();
         }
 
+        private void ModelToControlsPostIt(bool updateSizeAndLocation = true)
+        {
+            if (_com.Model?.ContentType == "html")
+            {
+                htmlDescription.Location = new System.Drawing.Point(3, 28);
+                htmlDescription.Size = new System.Drawing.Size(472, 286);
+                htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                    | System.Windows.Forms.AnchorStyles.Left)
+                    | System.Windows.Forms.AnchorStyles.Right)));
+                htmlDescription.Visible = true;
+            }
+            else
+            {
+                textDescription.Location = new System.Drawing.Point(3, 28);
+                textDescription.Size = new System.Drawing.Size(472, 286);
+                textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                    | System.Windows.Forms.AnchorStyles.Left)
+                    | System.Windows.Forms.AnchorStyles.Right)));
+                FontStyle style = new FontStyle();
+                if (_com.WindowPostIt.FontBold)
+                    style = FontStyle.Bold;
+                if (_com.WindowPostIt.FontItalic)
+                    style = style | FontStyle.Italic;
+                if (_com.WindowPostIt.FontUnderline)
+                    style = style | FontStyle.Underline;
+                if (_com.WindowPostIt.FontStrikethru)
+                    style = style | FontStyle.Strikeout;
+                Font font = new Font(_com.WindowPostIt.FontName, _com.WindowPostIt.FontSize, style);
+                textDescription.Font = font;
+                textDescription.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
+                textDescription.ForeColor = ColorTranslator.FromHtml(_com.WindowPostIt.TextNoteColor);
+                textDescription.Visible = true;
+            }
+
+            if (updateSizeAndLocation)
+            {
+                // Avoid positions outside the view zone
+                if (_com.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
+                    _com.WindowPostIt.PosX = SystemInformation.VirtualScreen.Width - _com.WindowPostIt.Width;
+                if (_com.WindowPostIt.PosY > SystemInformation.VirtualScreen.Height - 50)
+                    _com.WindowPostIt.PosY = SystemInformation.VirtualScreen.Height - _com.WindowPostIt.Height;
+
+                this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
+                this.Size = new System.Drawing.Size(_com.WindowPostIt.Width, _com.WindowPostIt.Height);
+
+                this.TopMost = menuAlwaysFront.Checked = _com.WindowPostIt.AlwaysOnTop;
+            }
+
+            labelCaption.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.TitleColor);
+            labelCaption.ForeColor = ColorTranslator.FromHtml(_com.WindowPostIt.TextTitleColor);
+            BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
+            labelStatus.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
+        }
+
+        private void ControlsToModelPostIt()
+        {
+            _com.WindowPostIt.PosY = this.Top;
+            _com.WindowPostIt.PosX = this.Left;
+            _com.WindowPostIt.Width = this.Width;
+            _com.WindowPostIt.Height = this.Height;
+
+            _com.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
+        }
+
         private async Task<bool> SaveModel()
         {            
             return await _com.SaveModel();
@@ -363,71 +427,6 @@ namespace KNote.ClientWin.Views
             grfx.DrawRectangle(pn, 0, 0, this.Width - 1, this.Height - 1);
         }
        
-
-        private void ModelToControlsPostIt(bool updateSizeAndLocation = true)
-        {
-            if (_com.Model?.ContentType == "html")
-            {                
-                htmlDescription.Location = new System.Drawing.Point(3, 24);
-                htmlDescription.Size = new System.Drawing.Size(472, 286);
-                htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                    | System.Windows.Forms.AnchorStyles.Left)
-                    | System.Windows.Forms.AnchorStyles.Right)));
-                htmlDescription.Visible = true;
-            }
-            else
-            {
-                textDescription.Location = new System.Drawing.Point(3, 24);
-                textDescription.Size = new System.Drawing.Size(472, 286);
-                textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                    | System.Windows.Forms.AnchorStyles.Left)
-                    | System.Windows.Forms.AnchorStyles.Right)));
-                FontStyle style = new FontStyle();
-                if (_com.WindowPostIt.FontBold)
-                    style = FontStyle.Bold;
-                if (_com.WindowPostIt.FontItalic)
-                    style = style | FontStyle.Italic;
-                if (_com.WindowPostIt.FontUnderline)
-                    style = style | FontStyle.Underline;
-                if (_com.WindowPostIt.FontStrikethru)
-                    style = style | FontStyle.Strikeout;
-                Font font = new Font(_com.WindowPostIt.FontName, _com.WindowPostIt.FontSize, style);
-                textDescription.Font = font;
-                textDescription.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
-                textDescription.ForeColor = ColorTranslator.FromHtml(_com.WindowPostIt.TextNoteColor);
-                textDescription.Visible = true;
-            }
-
-            if (updateSizeAndLocation)
-            {
-                // Avoid positions outside the view zone
-                if (_com.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
-                    _com.WindowPostIt.PosX = SystemInformation.VirtualScreen.Width - _com.WindowPostIt.Width;
-                if (_com.WindowPostIt.PosY > SystemInformation.VirtualScreen.Height - 50)
-                    _com.WindowPostIt.PosY = SystemInformation.VirtualScreen.Height - _com.WindowPostIt.Height;
-
-                this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
-                this.Size = new System.Drawing.Size(_com.WindowPostIt.Width, _com.WindowPostIt.Height);
-
-                this.TopMost = menuAlwaysFront.Checked = _com.WindowPostIt.AlwaysOnTop;
-            }
-
-            labelCaption.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.TitleColor);
-            labelCaption.ForeColor = ColorTranslator.FromHtml(_com.WindowPostIt.TextTitleColor);
-            BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
-            labelStatus.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
-        }
-
-        private void ControlsToModelPostIt()
-        {
-            _com.WindowPostIt.PosY = this.Top;
-            _com.WindowPostIt.PosX = this.Left;
-            _com.WindowPostIt.Width = this.Width;
-            _com.WindowPostIt.Height = this.Height;
-
-            _com.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
-        }
-
         #endregion
     }
 }
