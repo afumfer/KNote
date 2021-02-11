@@ -13,8 +13,8 @@ using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
 using KNote.Model.Dto;
 using KntScript;
-
-
+using System.Xml.Serialization;
+using KNote.Service;
 
 namespace KNote.ClientWin.Views
 {
@@ -260,11 +260,153 @@ namespace KNote.ClientWin.Views
             _knoteManagment.Run();
         }
 
-        private void buttonTest4_Click(object sender, EventArgs e)
+        private async void buttonTest4_Click(object sender, EventArgs e)
         {
-            var noteEditor = new NoteEditorComponent(_store);
-            noteEditor.RunModal();            
+            if(_store.ActiveFolderWithServiceRef == null)
+            {
+                MessageBox.Show("There is no archive selected ");
+                return;
+            }
+
+            var serviceRef = _store.ActiveFolderWithServiceRef.ServiceRef;
+            var service = serviceRef.Service;
+            var xmlFile = "";
+
+            openFileDialog.Title = "Get import ANotas xml file";
+            openFileDialog.InitialDirectory = "c:\\";
+            openFileDialog.Filter = "fichero xml (*.xml)|*.xml";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                xmlFile = openFileDialog.FileName;
+            }
+            
+            try
+            {
+                if (!File.Exists(xmlFile))
+                {
+                    MessageBox.Show("Invalid file");
+                    return;
+                }
+
+                ANotasExport anotasImport;
+                TextReader reader = new StreamReader(xmlFile);
+                XmlSerializer serializer = new XmlSerializer(typeof(ANotasExport));
+                anotasImport = (ANotasExport)serializer.Deserialize(reader);
+                reader.Close();
+
+                foreach(var c in anotasImport.Carpetas)
+                {
+                    // listMessages.Items.Add($"Folder: {c.NombreCarpeta}");
+                    await SaveFolderDto(service, c, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);                
+            }
         }
+
+        private async Task<bool> SaveFolderDto(IKntService service, CarpetaExport carpetaExport, Guid? parent)
+        {
+            var newFolderDto = new FolderDto
+            {
+                FolderNumber = carpetaExport.IdCarpeta,
+                Name = carpetaExport.NombreCarpeta,
+                Order = carpetaExport.Orden,
+                OrderNotes = carpetaExport.OrdenNotas,
+                ParentId = parent
+            };
+            
+            var resNewFolder = await service.Folders.SaveAsync(newFolderDto);
+            listMessages.Items.Add($"Added folder: {resNewFolder.Entity?.Name}");
+
+            var folder = resNewFolder.Entity;
+
+            foreach(var n in carpetaExport.Notas)
+            {
+                var newNote = new NoteExtendedDto
+                {
+                    FolderId = folder.FolderId,
+                    NoteNumber = n.IdNota,
+                    Description = n.DescripcionNota,
+                    Tags = n.Asunto
+                    // ...
+                };
+
+                // Add alarm
+
+                // Add Window
+
+                // Add resource
+
+                // Add task
+
+                // Save note
+                var resNewNote = await service.Notes.SaveExtendedAsync(newNote);
+                listMessages.Items.Add($"Added folder: {resNewNote.Entity?.Topic}");
+            }
+
+            // For each folder child all recursively  to this method
+            foreach(var c in carpetaExport.CarpetasHijas)
+            {
+                await SaveFolderDto(service, c, folder.FolderId);
+            }
+
+            return await Task.FromResult<bool>(true);
+        }
+
+
+        //// General
+        //Usuario
+        //FechaHoraCreacion
+        //UsuarioModificacion
+        //FechaModificacion
+        //PalabrasClave
+
+        //// Internal tag
+        //Vinculo
+
+        //// External resource
+        //NotaEx
+
+        ////Task
+        //Prioridad
+        //NivelDificultad
+        //Resuelto
+        //TiempoEstimado
+        //TiempoInvertido
+        //FechaPrevistaInicio
+        //FechaPrevistaFin
+        //FechaInicio
+        //FechaResolucion
+
+        //// Alarm 
+        //Ok
+        //Alarma
+        //Estilo
+        //TipoAlarma
+        //AlarmaOk
+        //ActivarAlarma
+
+        //// Window
+        //Visible
+        //SiempreArriba
+        //PosX
+        //PosY
+        //Alto
+        //Ancho
+        //FontName
+        //FontSize
+        //FontStrikethru
+        //FontUnderline
+        //FontItalic
+        //FontBold
+        //ColorNota
+        //ColorTextoBanda
+        //ColorBanda
+        //ForeColor
+        //Estilo
+
 
         #endregion 
 

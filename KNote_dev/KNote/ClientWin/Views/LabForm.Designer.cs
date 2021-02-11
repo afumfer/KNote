@@ -49,6 +49,7 @@
             this.buttonRunScript = new System.Windows.Forms.Button();
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -108,7 +109,7 @@
             this.buttonTest4.Name = "buttonTest4";
             this.buttonTest4.Size = new System.Drawing.Size(300, 28);
             this.buttonTest4.TabIndex = 5;
-            this.buttonTest4.Text = "Test modal component";
+            this.buttonTest4.Text = "Import anotas xml";
             this.buttonTest4.UseVisualStyleBackColor = true;
             this.buttonTest4.Click += new System.EventHandler(this.buttonTest4_Click);
             // 
@@ -325,5 +326,6 @@
         private System.Windows.Forms.Button buttonTest2;
         private System.Windows.Forms.TabPage tabRichEditor;
         private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
     }
 }

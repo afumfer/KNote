@@ -10,25 +10,6 @@ namespace KNote.Model
 {
     public static class ModelExtensions
     {
-        // TODO: Refactorizar esto, hay código repetido aquí. 
-
-        //public static TInfo GetInfo<TEntity, TInfo>(this TEntity entity)
-        //    where TEntity : ModelBase // , new()
-        //    where TInfo : new()
-        //{
-        //    var info = new TInfo();
-        //    UtilCopyProperties(info, entity);
-        //    return info;
-        //}
-
-        //public static void SetInfo<TEntity, TInfo>(this TEntity entity, TInfo info)
-        //    where TEntity : ModelBase // , new()
-        //    //where TInfo : new()
-        //{
-        //    if (info != null)
-        //        UtilCopyProperties(entity, info);
-        //}
-
         public static TInfo GetSimpleDto<TInfo>(this ModelBase entity)
             where TInfo : ModelBase, new()
         {
@@ -42,20 +23,6 @@ namespace KNote.Model
             if (source != null)
                 UtilCopyProperties(dest, source);
         }
-
-        //public static TInfo GetSimpleDto<TInfo>(this object entity)
-        //    where TInfo : new()
-        //{
-        //    var info = new TInfo();
-        //    UtilCopyProperties(info, entity);
-        //    return info;
-        //}
-
-        //public static void SetSimpleDto(this object dest, object source)
-        //{
-        //    if (source != null)
-        //        UtilCopyProperties(dest, source);
-        //}
 
         static void UtilCopyProperties(object dest, object src)
         {
@@ -74,6 +41,5 @@ namespace KNote.Model
                     pi.SetValue(dest, piSrc.GetValue(src, null), null);
             }
         }
-
     }
 }
