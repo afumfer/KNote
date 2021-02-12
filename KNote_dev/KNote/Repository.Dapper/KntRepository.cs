@@ -28,14 +28,14 @@ namespace KNote.Repository.Dapper
 
         #region Constructor
 
-        public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = true)
+        public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = false)
         {
             _throwKntException = throwKntException;
             _strConn = strConn;
             _strProvider = strProvider;            
         }
 
-        public KntRepository(DbConnection singletonConnection, bool throwKntException = true)
+        public KntRepository(DbConnection singletonConnection, bool throwKntException = false)
         {
             _throwKntException = throwKntException;
             _db = singletonConnection;

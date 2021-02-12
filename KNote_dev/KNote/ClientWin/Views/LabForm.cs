@@ -11,6 +11,7 @@ using System.Windows.Forms;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
+using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
 using System.Xml.Serialization;
@@ -27,16 +28,6 @@ namespace KNote.ClientWin.Views
 
         private Store _store;
 
-        private FoldersSelectorComponent _folderSelector;
-        private NotesSelectorComponent _notesSelector;
-
-        private KNoteManagmentComponent _knoteManagment;
-
-        private NoteEditorComponent _noteEditor;
-
-        private FolderWithServiceRef temp;
-
-
         #endregion
 
         #region Constructors
@@ -49,16 +40,6 @@ namespace KNote.ClientWin.Views
         public LabForm(Store store) : this()
         {
             _store = store;
-            _folderSelector = new FoldersSelectorComponent(_store);
-            _notesSelector = new NotesSelectorComponent(_store);
-
-            _knoteManagment = new KNoteManagmentComponent(_store);
-
-            _noteEditor = new NoteEditorComponent(_store);
-
-            _folderSelector.EntitySelection += _folderSelector_EntitySelection;
-            _notesSelector.EntitySelection += _notesSelector_EntitySelection;
-
         }
 
         #endregion 
@@ -199,65 +180,10 @@ namespace KNote.ClientWin.Views
 
         #region Form events handlers (app lab)
 
-        private async void _notesSelector_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
-        {
-            if (e.Entity == null)
-            {
-                labelInfo1.Text = "";
-                return;
-            }
-
-            labelInfo2.Text = $" {e.Entity.Topic} - {e.Entity.NoteId}";
-
-            await _noteEditor.LoadModelById(temp.ServiceRef.Service, e.Entity.NoteId);
-        }
-
-        private async void _folderSelector_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
-        {
-            if (e.Entity == null)
-            {
-                labelInfo1.Text = "";
-                return;
-            }
-
-            labelInfo1.Text = $" {e.Entity.ServiceRef.Alias} - {e.Entity.FolderInfo?.Name}";
-            if (_notesSelector != null)
-                await _notesSelector.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
-
-            temp = e.Entity;
-        }
-
         private void buttonTest1_Click(object sender, EventArgs e)
         {
-            #region Old code 
-            // opción 1
-            //var service = _store.PersonalServiceRef.Service;
-
-            //var notes = (await service.Notes.HomeNotesAsync()).Entity;
-            //foreach (var note in notes)
-            //    listTest.Items.Add(note.Topic);
-
-            // or 
-
-            //await LoadNotes();  // opción 2
-
-            //LoadNotes();   // opción 3
-            #endregion 
-
             var monitor = new MonitorComponent(_store);
             monitor.Run();
-        }
-
-        private void buttonTest2_Click(object sender, EventArgs e)
-        {
-            _folderSelector.Run();
-            _notesSelector.Run();
-            _noteEditor.Run();
-        }
-
-        private void buttonTest3_Click(object sender, EventArgs e)
-        {
-            _knoteManagment.Run();
         }
 
         private async void buttonTest4_Click(object sender, EventArgs e)
@@ -270,8 +196,20 @@ namespace KNote.ClientWin.Views
 
             var serviceRef = _store.ActiveFolderWithServiceRef.ServiceRef;
             var service = serviceRef.Service;
-            var xmlFile = "";
 
+
+            Guid? userId = null;
+            var userDto = (await service.Users.GetByUserNameAsync(_store.AppUserName)).Entity;
+            if (userDto != null)
+                userId = userDto.UserId;
+            
+            if(userId == null)
+            {
+                MessageBox.Show("There is no valid user to import data ");
+                return;
+            }
+
+            var xmlFile = "";
             openFileDialog.Title = "Get import ANotas xml file";
             openFileDialog.InitialDirectory = "c:\\";
             openFileDialog.Filter = "fichero xml (*.xml)|*.xml";
@@ -297,17 +235,23 @@ namespace KNote.ClientWin.Views
                 foreach(var c in anotasImport.Carpetas)
                 {
                     // listMessages.Items.Add($"Folder: {c.NombreCarpeta}");
-                    await SaveFolderDto(service, c, null);
+                    await SaveFolderDto(service, userId, c, null);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);                
             }
+
+            MessageBox.Show("Process finished ");
+
         }
 
-        private async Task<bool> SaveFolderDto(IKntService service, CarpetaExport carpetaExport, Guid? parent)
+        private async Task<bool> SaveFolderDto(IKntService service, Guid? userId, CarpetaExport carpetaExport, Guid? parent)
         {
+            string c1 = "\r\n";
+            string c2 = "\n";
+
             var newFolderDto = new FolderDto
             {
                 FolderNumber = carpetaExport.IdCarpeta,
@@ -318,95 +262,134 @@ namespace KNote.ClientWin.Views
             };
             
             var resNewFolder = await service.Folders.SaveAsync(newFolderDto);
-            listMessages.Items.Add($"Added folder: {resNewFolder.Entity?.Name}");
+            label1.Text = $"Added folder: {resNewFolder.Entity?.Name}";
+            label1.Refresh();
 
             var folder = resNewFolder.Entity;
 
             foreach(var n in carpetaExport.Notas)
             {
-                var newNote = new NoteExtendedDto
+                if (n.DescripcionNota.Contains(c2))
                 {
+                    //MessageBox.Show(c2.ToString());
+                    n.DescripcionNota = n.DescripcionNota.Replace(c2, c1);
+                }
+
+                var newNote = new NoteExtendedDto
+                {                   
                     FolderId = folder.FolderId,
                     NoteNumber = n.IdNota,
                     Description = n.DescripcionNota,
-                    Tags = n.Asunto
-                    // ...
+                    Topic = n.Asunto, 
+                    CreationDateTime = n.FechaHoraCreacion,
+                    ModificationDateTime = n.FechaModificacion,
+                    Tags = n.PalabrasClave,
+                    InternalTags = n.Vinculo,
+                    Priority = n.Prioridad                    
                 };
+              
 
                 // Add alarm
+                if (n.Alarma > new DateTime(1901,1,1) )
+                {
+                    var message = new KMessageDto
+                    {
+                        NoteId = Guid.Empty,
+                        UserId = userId,
+                        AlarmActivated = n.ActivarAlarma,
+                        ActionType = EnumActionType.UserAlarm,
+                        Comment = "(import ANotas)",
+                        AlarmDateTime = n.Alarma
+                    };
+
+                    // Alarm type
+                    switch (n.TipoAlarma)
+                    {
+                        case 0:  // estandar
+                            message.AlarmType = EnumAlarmType.Standard;    
+                            break;
+                        case 1:  // diaria
+                            message.AlarmType = EnumAlarmType.Daily;
+                            break;
+                        case 2:  // semanal
+                            message.AlarmType = EnumAlarmType.Weekly;
+                            break;
+                        case 3:  // mensual
+                            message.AlarmType = EnumAlarmType.Monthly;
+                            break;
+                        case 4:  // anual
+                            message.AlarmType = EnumAlarmType.Annual;
+                            break;
+                        case 5:  // cada hora
+                            message.AlarmType = EnumAlarmType.InMinutes;
+                            message.AlarmMinutes = 60;
+                            break;
+                        case 6:  // 4 horas
+                            message.AlarmType = EnumAlarmType.InMinutes;
+                            message.AlarmMinutes = 60 * 4;
+                            break;
+                        case 7:  // 8 horas
+                            message.AlarmType = EnumAlarmType.InMinutes;
+                            message.AlarmMinutes = 60 * 8;
+                            break;
+                        case 8:  // 12 diaria
+                            message.AlarmType = EnumAlarmType.InMinutes;
+                            message.AlarmMinutes = 60 * 12;
+                            break;
+                        default:
+                            message.AlarmType = EnumAlarmType.Standard;
+                            break;
+                    }
+
+                    newNote.Messages.Add(message);
+                }
 
                 // Add Window
+                //public int Estilo { get; set; }
+                //public bool Visible { get; set; }
+                //public bool SiempreArriba { get; set; }
+                //public int PosX { get; set; }
+                //public int PosY { get; set; }
+                //public int Alto { get; set; }
+                //public int Ancho { get; set; }
+                //public string FontName { get; set; }
+                //public int FontSize { get; set; }
+                //public bool FontStrikethru { get; set; }
+                //public bool FontUnderline { get; set; }
+                //public bool FontItalic { get; set; }
+                //public bool FontBold { get; set; }
+                //public int ColorNota { get; set; }
+                //public int ColorTextoBanda { get; set; }
+                //public int ColorBanda { get; set; }
+                //public int ForeColor { get; set; }
 
-                // Add resource
+                // Add resource                
+                //NotaEx
 
                 // Add task
+                //public int NivelDificultad { get; set; }
+                //public bool Resuelto { get; set; }
+                //public double TiempoEstimado { get; set; }
+                //public double TiempoInvertido { get; set; }
+                //public DateTime? FechaPrevistaInicio { get; set; }
+                //public DateTime? FechaPrevistaFin { get; set; }
+                //public DateTime? FechaInicio { get; set; }
+                //public DateTime? FechaResolucion { get; set; }
 
                 // Save note
                 var resNewNote = await service.Notes.SaveExtendedAsync(newNote);
-                listMessages.Items.Add($"Added folder: {resNewNote.Entity?.Topic}");
+                label2.Text = $"Added note: {resNewNote.Entity?.Topic}";
+                label2.Refresh();
             }
 
             // For each folder child all recursively  to this method
             foreach(var c in carpetaExport.CarpetasHijas)
             {
-                await SaveFolderDto(service, c, folder.FolderId);
+                await SaveFolderDto(service, userId, c, folder.FolderId);
             }
 
             return await Task.FromResult<bool>(true);
         }
-
-
-        //// General
-        //Usuario
-        //FechaHoraCreacion
-        //UsuarioModificacion
-        //FechaModificacion
-        //PalabrasClave
-
-        //// Internal tag
-        //Vinculo
-
-        //// External resource
-        //NotaEx
-
-        ////Task
-        //Prioridad
-        //NivelDificultad
-        //Resuelto
-        //TiempoEstimado
-        //TiempoInvertido
-        //FechaPrevistaInicio
-        //FechaPrevistaFin
-        //FechaInicio
-        //FechaResolucion
-
-        //// Alarm 
-        //Ok
-        //Alarma
-        //Estilo
-        //TipoAlarma
-        //AlarmaOk
-        //ActivarAlarma
-
-        //// Window
-        //Visible
-        //SiempreArriba
-        //PosX
-        //PosY
-        //Alto
-        //Ancho
-        //FontName
-        //FontSize
-        //FontStrikethru
-        //FontUnderline
-        //FontItalic
-        //FontBold
-        //ColorNota
-        //ColorTextoBanda
-        //ColorBanda
-        //ForeColor
-        //Estilo
-
 
         #endregion 
 
@@ -428,66 +411,6 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
-        #region Trash
-
-        ////private async Task LoadNotes()  // opción 2
-        //private async void LoadNotes()   // opción 3
-        //{
-        //    var service = _store.PersonalServiceRef.Service;
-        //    var notes = (await service.Notes.HomeNotesAsync()).Entity;
-        //    foreach (var note in notes)
-        //        listMessages.Items.Add(note.Topic);
-        //}
-
-        private void Trash_oldCode()
-        {
-
-            //var res1 = _folderSelector.RunModal();
-            //labelInfo1.Text = res1.Entity.ToString();
-
-            //var res2 = _notesSelector.RunModal();
-            //labelInfo2.Text = res2.Entity.ToString();
-
-            //var res3 = _knoteManagment.RunModal();
-            //labelInfo3.Text = res3.Entity.ToString();
-
-
-            //_folderSelector.EmbededMode = true;
-            //_folderSelector.ModalMode = false;
-
-            //panelTest1.Controls.Add((Control)_folderSelector.View.PanelView());
-            //_folderSelector.Run();
-
-            //Form1 f = new Form1();
-            //panelTest1.Controls.Add((Control)f.p1);
-            //f.Show();
-
-            //_notesSelector.Finalize();
-            //labelInfo3.Text = "***" + _notesSelector.SelectedEntity?.Topic;
-
-            // _folderSelector.Finalize();
-            // labelInfo2.Text = _folderSelector.SelectedEntity.FolderInfo?.Name;
-            // _folderSelector.SelectFolder(temp);
-
-            //temp = _folderSelector.SelectedEntity;
-
-            //KNoteManagmentForm f = new KNoteManagmentForm(null);
-            //f.Show();
-
-            //NoteEditorForm n = new NoteEditorForm(null);
-            //n.Show();
-
-            //SplashForm f = new SplashForm(null);
-            //f.Show();
-
-            //NotifyForm nf = new NotifyForm(null);
-            //nf.Show();
-
-            //ServerCOMForm sc = new ServerCOMForm();
-            //sc.Show();
-
-        }
-
-        #endregion 
     }
+
 }

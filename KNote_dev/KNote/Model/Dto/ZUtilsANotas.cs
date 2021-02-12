@@ -58,8 +58,18 @@ namespace KNote.Model.Dto
         public bool ActivarAlarma { get; set; }
         public int PosX { get; set; }
         public int PosY { get; set; }
+        public int Alto { get; set; }
+        public int Ancho { get; set; }
         public string FontName { get; set; }
         public int FontSize { get; set; }
+        public bool FontStrikethru { get; set; }
+        public bool FontUnderline { get; set; }
+        public bool FontItalic { get; set; }
+        public bool FontBold { get; set; }
+        public int ColorNota { get; set; }
+        public int ColorTextoBanda { get; set; }
+        public int ColorBanda { get; set; }
+        public int ForeColor { get; set; }
         public bool OcultarEnInternet { get; set; }
         public bool EstaEnArchivadorPersonal { get; set; }
         public bool SincroAlarmaGoogleCalendar { get; set; }

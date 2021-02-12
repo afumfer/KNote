@@ -30,14 +30,9 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
-            this.panelTest1 = new System.Windows.Forms.Panel();
             this.listMessages = new System.Windows.Forms.ListBox();
             this.buttonTest4 = new System.Windows.Forms.Button();
-            this.buttonTest3 = new System.Windows.Forms.Button();
-            this.buttonTest2 = new System.Windows.Forms.Button();
             this.buttonTest1 = new System.Windows.Forms.Button();
-            this.labelInfo2 = new System.Windows.Forms.Label();
-            this.labelInfo1 = new System.Windows.Forms.Label();
             this.tabKntScriptLab = new System.Windows.Forms.TabPage();
             this.groupSamples = new System.Windows.Forms.GroupBox();
             this.buttonRunSample = new System.Windows.Forms.Button();
@@ -50,6 +45,8 @@
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -70,14 +67,11 @@
             // 
             // tabAppLab
             // 
-            this.tabAppLab.Controls.Add(this.panelTest1);
+            this.tabAppLab.Controls.Add(this.label2);
+            this.tabAppLab.Controls.Add(this.label1);
             this.tabAppLab.Controls.Add(this.listMessages);
             this.tabAppLab.Controls.Add(this.buttonTest4);
-            this.tabAppLab.Controls.Add(this.buttonTest3);
-            this.tabAppLab.Controls.Add(this.buttonTest2);
             this.tabAppLab.Controls.Add(this.buttonTest1);
-            this.tabAppLab.Controls.Add(this.labelInfo2);
-            this.tabAppLab.Controls.Add(this.labelInfo1);
             this.tabAppLab.Location = new System.Drawing.Point(4, 24);
             this.tabAppLab.Name = "tabAppLab";
             this.tabAppLab.Padding = new System.Windows.Forms.Padding(3);
@@ -86,52 +80,27 @@
             this.tabAppLab.Text = "Lab app components";
             this.tabAppLab.UseVisualStyleBackColor = true;
             // 
-            // panelTest1
-            // 
-            this.panelTest1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelTest1.Location = new System.Drawing.Point(329, 222);
-            this.panelTest1.Name = "panelTest1";
-            this.panelTest1.Size = new System.Drawing.Size(311, 304);
-            this.panelTest1.TabIndex = 7;
-            // 
             // listMessages
             // 
+            this.listMessages.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listMessages.FormattingEnabled = true;
             this.listMessages.ItemHeight = 15;
-            this.listMessages.Location = new System.Drawing.Point(13, 223);
+            this.listMessages.Location = new System.Drawing.Point(13, 255);
             this.listMessages.Name = "listMessages";
-            this.listMessages.Size = new System.Drawing.Size(300, 304);
+            this.listMessages.Size = new System.Drawing.Size(636, 274);
             this.listMessages.TabIndex = 6;
             // 
             // buttonTest4
             // 
-            this.buttonTest4.Location = new System.Drawing.Point(13, 120);
+            this.buttonTest4.Location = new System.Drawing.Point(12, 51);
             this.buttonTest4.Name = "buttonTest4";
             this.buttonTest4.Size = new System.Drawing.Size(300, 28);
             this.buttonTest4.TabIndex = 5;
             this.buttonTest4.Text = "Import anotas xml";
             this.buttonTest4.UseVisualStyleBackColor = true;
             this.buttonTest4.Click += new System.EventHandler(this.buttonTest4_Click);
-            // 
-            // buttonTest3
-            // 
-            this.buttonTest3.Location = new System.Drawing.Point(13, 86);
-            this.buttonTest3.Name = "buttonTest3";
-            this.buttonTest3.Size = new System.Drawing.Size(300, 28);
-            this.buttonTest3.TabIndex = 4;
-            this.buttonTest3.Text = "Run managment component";
-            this.buttonTest3.UseVisualStyleBackColor = true;
-            this.buttonTest3.Click += new System.EventHandler(this.buttonTest3_Click);
-            // 
-            // buttonTest2
-            // 
-            this.buttonTest2.Location = new System.Drawing.Point(12, 51);
-            this.buttonTest2.Name = "buttonTest2";
-            this.buttonTest2.Size = new System.Drawing.Size(301, 29);
-            this.buttonTest2.TabIndex = 3;
-            this.buttonTest2.Text = "Run components";
-            this.buttonTest2.UseVisualStyleBackColor = true;
-            this.buttonTest2.Click += new System.EventHandler(this.buttonTest2_Click);
             // 
             // buttonTest1
             // 
@@ -142,24 +111,6 @@
             this.buttonTest1.Text = "Run monitor";
             this.buttonTest1.UseVisualStyleBackColor = true;
             this.buttonTest1.Click += new System.EventHandler(this.buttonTest1_Click);
-            // 
-            // labelInfo2
-            // 
-            this.labelInfo2.AutoSize = true;
-            this.labelInfo2.Location = new System.Drawing.Point(329, 51);
-            this.labelInfo2.Name = "labelInfo2";
-            this.labelInfo2.Size = new System.Drawing.Size(38, 15);
-            this.labelInfo2.TabIndex = 1;
-            this.labelInfo2.Text = "label1";
-            // 
-            // labelInfo1
-            // 
-            this.labelInfo1.AutoSize = true;
-            this.labelInfo1.Location = new System.Drawing.Point(329, 23);
-            this.labelInfo1.Name = "labelInfo1";
-            this.labelInfo1.Size = new System.Drawing.Size(38, 15);
-            this.labelInfo1.TabIndex = 0;
-            this.labelInfo1.Text = "label1";
             // 
             // tabKntScriptLab
             // 
@@ -283,6 +234,24 @@
             this.htmlDescription.Size = new System.Drawing.Size(634, 287);
             this.htmlDescription.TabIndex = 10;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(13, 194);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(38, 15);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "label1";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(13, 209);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(38, 15);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "label2";
+            // 
             // LabForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -316,16 +285,13 @@
         private System.Windows.Forms.Button buttonRunSample;
         private System.Windows.Forms.Button buttonShowSample;
         private System.Windows.Forms.ListBox listSamples;
-        private System.Windows.Forms.Label labelInfo2;
-        private System.Windows.Forms.Label labelInfo1;
         private System.Windows.Forms.Button buttonTest1;
-        private System.Windows.Forms.Panel panelTest1;
         private System.Windows.Forms.ListBox listMessages;
         private System.Windows.Forms.Button buttonTest4;
-        private System.Windows.Forms.Button buttonTest3;
-        private System.Windows.Forms.Button buttonTest2;
         private System.Windows.Forms.TabPage tabRichEditor;
         private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }
