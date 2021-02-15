@@ -183,7 +183,7 @@ namespace KNote.ClientWin.Components
             {
                 try
                 {
-                    var response = await service.Notes.DeleteAsync(noteId);
+                    var response = await service.Notes.DeleteExtendedAsync(noteId);                    
 
                     if (response.IsValid)
                     {

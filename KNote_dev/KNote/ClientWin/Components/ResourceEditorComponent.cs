@@ -151,17 +151,7 @@ namespace KNote.ClientWin.Components
 
         public string ExtensionFileToFileType(string extension)
         {
-            // TODO: study this method ...
-            if (extension == ".jpg")
-                return @"image/jpeg";
-            if (extension == ".jpeg")
-                return @"image/jpeg";
-            else if (extension == ".png")
-                return "image/png";
-            else if (extension == ".pdf")
-                return "application/pdf";
-            else
-                return "";
+            return Store.ExtensionFileToFileType(extension);
         }
 
         #endregion 

@@ -344,6 +344,44 @@ namespace KNote.ClientWin.Views
                     newNote.Messages.Add(message);
                 }
 
+                // Add resource                
+                if (!string.IsNullOrEmpty(n.NotaEx))
+                {
+                    // TODO: Refactor this line
+                    var root = @"C:\ANotas\Docs";
+
+                    var fileFullName = $"{root}{n.NotaEx}";
+
+                    if (File.Exists(fileFullName))
+                    {
+                        var fileArrayBytes = File.ReadAllBytes(fileFullName);
+                        var contentBase64 = Convert.ToBase64String(fileArrayBytes);
+                        ResourceDto resource = new ResourceDto
+                        {
+                            NoteId = Guid.Empty,
+                            ContentInDB = true,
+                            Order = 1,                        
+                            Container = KntConst.ContainerResources + "\\" + DateTime.Now.Year.ToString(),
+                            Name = $"{Guid.NewGuid()}_{Path.GetFileName(fileFullName)}",
+                            Description = $"(ANotas import {n.NotaEx})",
+                            ContentArrayBytes = fileArrayBytes,
+                            ContentBase64 = contentBase64,
+                            FileType = _store.ExtensionFileToFileType(Path.GetExtension(fileFullName))
+                        };
+                        newNote.Resources.Add(resource);
+                    }
+                }
+
+                // Add task
+                //public int NivelDificultad { get; set; }
+                //public bool Resuelto { get; set; }
+                //public double TiempoEstimado { get; set; }
+                //public double TiempoInvertido { get; set; }
+                //public DateTime? FechaPrevistaInicio { get; set; }
+                //public DateTime? FechaPrevistaFin { get; set; }
+                //public DateTime? FechaInicio { get; set; }
+                //public DateTime? FechaResolucion { get; set; }
+
                 // Add Window
                 //public int Estilo { get; set; }
                 //public bool Visible { get; set; }
@@ -362,19 +400,6 @@ namespace KNote.ClientWin.Views
                 //public int ColorTextoBanda { get; set; }
                 //public int ColorBanda { get; set; }
                 //public int ForeColor { get; set; }
-
-                // Add resource                
-                //NotaEx
-
-                // Add task
-                //public int NivelDificultad { get; set; }
-                //public bool Resuelto { get; set; }
-                //public double TiempoEstimado { get; set; }
-                //public double TiempoInvertido { get; set; }
-                //public DateTime? FechaPrevistaInicio { get; set; }
-                //public DateTime? FechaPrevistaFin { get; set; }
-                //public DateTime? FechaInicio { get; set; }
-                //public DateTime? FechaResolucion { get; set; }
 
                 // Save note
                 var resNewNote = await service.Notes.SaveExtendedAsync(newNote);
