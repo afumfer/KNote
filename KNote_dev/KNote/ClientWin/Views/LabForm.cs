@@ -373,37 +373,62 @@ namespace KNote.ClientWin.Views
                 }
 
                 // Add task
-                //public int NivelDificultad { get; set; }
-                //public bool Resuelto { get; set; }
-                //public double TiempoEstimado { get; set; }
-                //public double TiempoInvertido { get; set; }
-                //public DateTime? FechaPrevistaInicio { get; set; }
-                //public DateTime? FechaPrevistaFin { get; set; }
-                //public DateTime? FechaInicio { get; set; }
-                //public DateTime? FechaResolucion { get; set; }
+                if (n.FechaInicio > new DateTime(1901, 1, 1) ||
+                    n.FechaResolucion > new DateTime(1901, 1, 1) ||
+                    n.FechaPrevistaInicio > new DateTime(1901, 1, 1) ||
+                    n.FechaPrevistaFin > new DateTime(1901, 1, 1) ||
+                    n.Resuelto == true )
+                {
+                    NoteTaskDto task = new NoteTaskDto
+                    {
+                        NoteId = Guid.Empty,
+                        UserId = (Guid)userId,
+                        CreationDateTime = n.FechaHoraCreacion,
+                        ModificationDateTime = n.FechaModificacion,
+                        Description = newNote.Topic,
+                        Tags = "(ANotas import)",
+                        Priority = 1,
+                        Resolved = n.Resuelto,
+                        EstimatedTime = n.TiempoEstimado,
+                        SpentTime = n.TiempoInvertido,
+                        DifficultyLevel = n.NivelDificultad,
+                        ExpectedEndDate = n.FechaPrevistaFin,
+                        ExpectedStartDate = n.FechaPrevistaInicio,
+                        EndDate = n.FechaResolucion,
+                        StartDate = n.FechaInicio
+                    };
+                    newNote.Tasks.Add(task);
+                }
+                
+                // Save note and PostIt
+                var resNewNote = await service.Notes.SaveExtendedAsync(newNote);
 
                 // Add Window
-                //public int Estilo { get; set; }
-                //public bool Visible { get; set; }
-                //public bool SiempreArriba { get; set; }
-                //public int PosX { get; set; }
-                //public int PosY { get; set; }
-                //public int Alto { get; set; }
-                //public int Ancho { get; set; }
-                //public string FontName { get; set; }
-                //public int FontSize { get; set; }
-                //public bool FontStrikethru { get; set; }
-                //public bool FontUnderline { get; set; }
-                //public bool FontItalic { get; set; }
-                //public bool FontBold { get; set; }
-                //public int ColorNota { get; set; }
-                //public int ColorTextoBanda { get; set; }
-                //public int ColorBanda { get; set; }
-                //public int ForeColor { get; set; }
+                WindowDto windowPostIt = new WindowDto
+                {
+                    NoteId = resNewNote.Entity.NoteId,
+                    UserId = (Guid)userId,
+                    Visible = n.Visible,
+                    AlwaysOnTop = n.SiempreArriba,
+                    PosX = n.PosX,
+                    PosY = n.PosY,
+                    Width = n.Ancho,
+                    Height = n.Alto,
+                    FontName = n.FontName,
+                    FontSize = n.FontSize,
+                    FontBold = n.FontBold,
+                    FontItalic = n.FontItalic,
+                    FontUnderline = n.FontUnderline,
+                    FontStrikethru = n.FontStrikethru,
+                    ForeColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor)),
+                    TitleColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ColorBanda)),
+                    TextTitleColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor)),
+                    NoteColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ColorNota)),
+                    TextNoteColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor))
+                };
+                var resNewPostIt = await service.Notes.SaveWindowAsync(windowPostIt);
 
-                // Save note
-                var resNewNote = await service.Notes.SaveExtendedAsync(newNote);
-                label2.Text = $"Added note: {resNewNote.Entity?.Topic}";
+                label2.Text = $"Added note: {resNewNote.Entity?.Topic} - {resNewPostIt.Entity?.WindowId.ToString()}";
                 label2.Refresh();
             }
 
