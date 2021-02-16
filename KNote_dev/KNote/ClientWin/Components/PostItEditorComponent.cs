@@ -23,6 +23,8 @@ namespace KNote.ClientWin.Components
 
         public FolderWithServiceRef FolderWithServiceRef { get; set; }
 
+        public bool ForceAlwaysTop { get; set; }
+
         #region Constructor
 
         public PostItEditorComponent(Store store): base(store)

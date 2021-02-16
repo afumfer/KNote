@@ -286,7 +286,7 @@ namespace KNote.ClientWin.Components
         {                        
             if (await Store.CheckPostItIsActive(e.Entity.NoteId) || await Store.CheckNoteIsActive(e.Entity.NoteId))
                 return;
-            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
+            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId, true);
         }
 
         private async void MessagesManagment_PostItVisible(object sender, ComponentEventArgs<ServiceWithNoteId> e)
@@ -406,13 +406,15 @@ namespace KNote.ClientWin.Components
             await EditNotePostIt(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
         }
 
-        public async Task<bool> EditNotePostIt(IKntService service, Guid noteId)
+        public async Task<bool> EditNotePostIt(IKntService service, Guid noteId, bool alwaysTop = false)
         {            
             var postItEditorComponent = new PostItEditorComponent(Store);
             postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
             postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
             postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
             var res = await postItEditorComponent.LoadModelById(service, noteId, false);
+            if(alwaysTop)
+                postItEditorComponent.ForceAlwaysTop = true;
             postItEditorComponent.Run();
             return await Task.FromResult(res);
         }

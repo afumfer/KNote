@@ -108,7 +108,7 @@ namespace KNote.ClientWin.Views
 
         private void PostItEditorForm_Load(object sender, EventArgs e)
         {            
-            ModelToControlsPostIt();
+            ModelToControlsPostIt(true, _com.ForceAlwaysTop);
         }
 
         private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -301,12 +301,12 @@ namespace KNote.ClientWin.Views
             ControlsToModelPostIt();
         }
 
-        private void ModelToControlsPostIt(bool updateSizeAndLocation = true)
+        private void ModelToControlsPostIt(bool updateSizeAndLocation = true, bool forceAlwaysTop = false)
         {
             if (_com.Model?.ContentType == "html")
             {
                 htmlDescription.Location = new System.Drawing.Point(3, 28);
-                htmlDescription.Size = new System.Drawing.Size(472, 286);
+                htmlDescription.Size = new System.Drawing.Size(472, 292);
                 htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                     | System.Windows.Forms.AnchorStyles.Left)
                     | System.Windows.Forms.AnchorStyles.Right)));
@@ -315,7 +315,7 @@ namespace KNote.ClientWin.Views
             else
             {
                 textDescription.Location = new System.Drawing.Point(3, 28);
-                textDescription.Size = new System.Drawing.Size(472, 286);
+                textDescription.Size = new System.Drawing.Size(472, 292);
                 textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                     | System.Windows.Forms.AnchorStyles.Left)
                     | System.Windows.Forms.AnchorStyles.Right)));
@@ -346,6 +346,8 @@ namespace KNote.ClientWin.Views
                 this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
                 this.Size = new System.Drawing.Size(_com.WindowPostIt.Width, _com.WindowPostIt.Height);
 
+                if (forceAlwaysTop)
+                    _com.WindowPostIt.AlwaysOnTop = true;
                 this.TopMost = menuAlwaysFront.Checked = _com.WindowPostIt.AlwaysOnTop;
             }
 

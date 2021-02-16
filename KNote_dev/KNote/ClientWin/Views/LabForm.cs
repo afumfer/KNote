@@ -249,8 +249,12 @@ namespace KNote.ClientWin.Views
 
         private async Task<bool> SaveFolderDto(IKntService service, Guid? userId, CarpetaExport carpetaExport, Guid? parent)
         {
-            string c1 = "\r\n";
-            string c2 = "\n";
+            string r11 = "\r\n";
+            string r12 = "\n";
+            
+            string r21 = "&#x";
+            string r22 = "$$$";
+
 
             var newFolderDto = new FolderDto
             {
@@ -269,10 +273,11 @@ namespace KNote.ClientWin.Views
 
             foreach(var n in carpetaExport.Notas)
             {
-                if (n.DescripcionNota.Contains(c2))
+                if (n.DescripcionNota.Contains(r12))
                 {
-                    //MessageBox.Show(c2.ToString());
-                    n.DescripcionNota = n.DescripcionNota.Replace(c2, c1);
+                    // Hack for problems in deserialization                    
+                    n.DescripcionNota = n.DescripcionNota.Replace(r12, r11);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r22, r21);
                 }
 
                 var newNote = new NoteExtendedDto

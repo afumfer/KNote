@@ -23,7 +23,9 @@ namespace KNote.ClientWin.Core
         public string ComputerName { get; set; }
         public string LogFile { get; set; }
 
-        public bool LogActivated = false;
+        public bool LogActivated { get; set; } = false;
+        public bool AlarmActivated { get; set; } = true;
+        public bool AutoSaveActivated { get; set; } = true;
 
         public readonly IFactoryViews FactoryViews;
 

@@ -83,9 +83,9 @@ namespace KNote.ClientWin.Views
             this.labelStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.labelStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.labelStatus.Location = new System.Drawing.Point(3, 319);
+            this.labelStatus.Location = new System.Drawing.Point(3, 322);
             this.labelStatus.Name = "labelStatus";
-            this.labelStatus.Size = new System.Drawing.Size(452, 16);
+            this.labelStatus.Size = new System.Drawing.Size(456, 14);
             this.labelStatus.TabIndex = 7;
             this.labelStatus.Text = "...";
             this.labelStatus.DoubleClick += new System.EventHandler(this.labelStatus_DoubleClick);
