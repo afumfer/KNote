@@ -106,8 +106,8 @@ namespace KNote.Repository.EntityFramework
         public static void Seed(this ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SystemValue>().HasData(
-                new SystemValue { SystemValueId = Guid.NewGuid(), Scope = "SYSTEM", Key = "APP_VERSION", Value = "0.0.1" },
-                new SystemValue { SystemValueId = Guid.NewGuid(), Scope = "SYSTEM", Key = "DB_VERSION", Value = "0.0.1" }
+                new SystemValue { SystemValueId = Guid.NewGuid(), Scope = "SYSTEM", Key = "APP_VERSION", Value = "0.0.5.2" },
+                new SystemValue { SystemValueId = Guid.NewGuid(), Scope = "SYSTEM", Key = "DB_VERSION", Value = "0.0.5.2" }
             );
 
             var idUser1 = Guid.NewGuid();
