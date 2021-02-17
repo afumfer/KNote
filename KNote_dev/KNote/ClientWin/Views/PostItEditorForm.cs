@@ -56,7 +56,7 @@ namespace KNote.ClientWin.Views
             return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+        public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
         {
             return MessageBox.Show(info, caption, buttons, icon);
         }
@@ -118,7 +118,7 @@ namespace KNote.ClientWin.Views
                 var savedOk = await SaveModel();
                 if (!savedOk)
                 {
-                    //if (MessageBox.Show("Do yo want exit?", "KeyNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    //if (MessageBox.Show("Do yo want exit?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     //    _com.Finalize();
                     //else
                     //    e.Cancel = true;

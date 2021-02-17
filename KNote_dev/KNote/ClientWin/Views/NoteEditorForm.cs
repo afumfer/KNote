@@ -56,7 +56,7 @@ namespace KNote.ClientWin.Views
             return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+        public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
         {
             return MessageBox.Show(info, caption, buttons, icon);
         }
@@ -131,7 +131,7 @@ namespace KNote.ClientWin.Views
             {
                 var savedOk = await SaveModel();
                 if (!savedOk)
-                    if (MessageBox.Show("Do yo want exit?", "KeyNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    if (MessageBox.Show("Do yo want exit?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
                         _com.Finalize();
                     else
                         e.Cancel = true;
@@ -348,7 +348,7 @@ namespace KNote.ClientWin.Views
         {
             if (listViewAlarms.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no selected alert.", "KeyNote");
+                MessageBox.Show("There is no selected alert.", "KaNote");
                 return;
             }
             var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);            
@@ -385,7 +385,7 @@ namespace KNote.ClientWin.Views
         {
             if (listViewTasks.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no task selected .", "KeyNote");
+                MessageBox.Show("There is no task selected .", "KaNote");
                 return;
             }
             //var delTsk = GetNoteTaskFromSelectedListView();
@@ -428,7 +428,7 @@ namespace KNote.ClientWin.Views
         {
             if (listViewResources.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no task selected .", "KeyNote");
+                MessageBox.Show("There is no task selected .", "KaNote");
                 return;
             }
             //var delTsk = GetNoteTaskFromSelectedListView();
@@ -464,7 +464,7 @@ namespace KNote.ClientWin.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("The following error has occurred: " + ex.Message, "KeyNote");
+                MessageBox.Show("The following error has occurred: " + ex.Message, "KaNote");
             }
         }
 
@@ -472,7 +472,7 @@ namespace KNote.ClientWin.Views
         {
             if (listViewResources.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no resource selected.", "KeyNote");
+                MessageBox.Show("There is no resource selected.", "KaNote");
                 return;
             }
 
@@ -794,7 +794,7 @@ namespace KNote.ClientWin.Views
 
         private void UndoChanges()
         {
-            var res = MessageBox.Show("Are you sure you want to undo changes?", "KeyNote", MessageBoxButtons.YesNo);
+            var res = MessageBox.Show("Are you sure you want to undo changes?", "KaNote", MessageBoxButtons.YesNo);
             if(res == DialogResult.Yes)
             {
                 ModelToControls();
@@ -962,7 +962,7 @@ namespace KNote.ClientWin.Views
         {
             if (listViewAlarms.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no alert selected.", "KeyNote");
+                MessageBox.Show("There is no alert selected.", "KaNote");
                 return;
             }
             var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
@@ -986,7 +986,7 @@ namespace KNote.ClientWin.Views
         {
             if (listViewTasks.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no task selected.", "KeyNote");
+                MessageBox.Show("There is no task selected.", "KaNote");
                 return;
             }
             var idTask = Guid.Parse(listViewTasks.SelectedItems[0].Name);
@@ -1015,7 +1015,7 @@ namespace KNote.ClientWin.Views
         {
             if (listViewResources.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no resource selected.", "KeyNote");
+                MessageBox.Show("There is no resource selected.", "KaNote");
                 return;
             }
             var idResource = Guid.Parse(listViewResources.SelectedItems[0].Name);
@@ -1032,7 +1032,7 @@ namespace KNote.ClientWin.Views
         {
             if (listViewAttributes.SelectedItems.Count == 0)
             {
-                MessageBox.Show("There is no attribute selected.", "KeyNote");
+                MessageBox.Show("There is no attribute selected.", "KaNote");
                 return;
             }
             var idAttribute = Guid.Parse(listViewAttributes.SelectedItems[0].Name);

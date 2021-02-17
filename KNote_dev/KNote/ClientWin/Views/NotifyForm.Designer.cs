@@ -50,7 +50,7 @@
             this.notifyKNote.BalloonTipTitle = "KeyNotex";
             this.notifyKNote.ContextMenuStrip = this.contextKNoteMenu;
             this.notifyKNote.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyKNote.Icon")));
-            this.notifyKNote.Text = "KNote";
+            this.notifyKNote.Text = "KaNote";
             this.notifyKNote.Visible = true;
             this.notifyKNote.DoubleClick += new System.EventHandler(this.notifyKNote_DoubleClick);
             // 
@@ -141,7 +141,7 @@
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "NotifyForm";
             this.ShowInTaskbar = false;
-            this.Text = "KNote";
+            this.Text = "KaNote";
             this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.contextKNoteMenu.ResumeLayout(false);
             this.ResumeLayout(false);

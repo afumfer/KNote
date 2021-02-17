@@ -117,7 +117,7 @@ namespace KNote.ClientWin.Views
                 return null;
         }
 
-        public DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+        public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
         {
             return MessageBox.Show(info, caption, buttons, icon);
         }
@@ -140,7 +140,7 @@ namespace KNote.ClientWin.Views
                 treeViewFolders.SelectedNode = newNode;
             }
             else
-                _com.ShowMessage("KMSG: The parent node of the new node is not correct.", "KeyNote");
+                _com.ShowMessage("KMSG: The parent node of the new node is not correct.", "KaNote");
         }
 
         public void DeleteItem(FolderWithServiceRef item)

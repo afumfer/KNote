@@ -163,7 +163,7 @@ namespace KNote.Repository.EntityFramework
                     FolderNumber = 2,
                     CreationDateTime = DateTime.Now,
                     ModificationDateTime = DateTime.Now,
-                    Name = "KNote Documentation",
+                    Name = "KaNote Documentation",
                     //ParentId = idFolder1
                 },
                 new Folder
@@ -193,10 +193,10 @@ namespace KNote.Repository.EntityFramework
                 {
                     NoteId = Guid.NewGuid(),
                     NoteNumber = 2,
-                    Topic = "KNote documentation",
+                    Topic = "KaNote documentation",
                     CreationDateTime = DateTime.Now,
                     ModificationDateTime = DateTime.Now,
-                    Description = "KNote documentation .... TODO: ....",
+                    Description = "KaNote documentation .... TODO: ....",
                     FolderId = idFolder1,
                     Priority = 90
                 },

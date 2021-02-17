@@ -16,14 +16,14 @@ namespace KNote.Client.Shared
             set { _appMode = value; NotifyStateChanged(); }
         }
 
-        private string _appName = "KNote";
+        private string _appName = "KaNote";
         public string AppName
         {
             get { return _appName; }
             set { _appName = value; NotifyStateChanged(); }
         }
 
-        private string _appDescription = "Other keynotes management for people's group (ver 0.0.4.6)";
+        private string _appDescription = "Another keynotes management for people's group (ver 0.0.5.1)";
         public string AppDescription
         {
             get { return _appDescription; }

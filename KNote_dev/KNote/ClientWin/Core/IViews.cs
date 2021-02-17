@@ -17,7 +17,7 @@ namespace KNote.ClientWin.Core
         void ShowView();
         Result<EComponentResult> ShowModalView();
         void OnClosingView();        
-        DialogResult ShowInfo(string info, string caption = "KeyNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);
+        DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);
     }
     
     public interface IViewConfigurable: IViewBase

@@ -138,7 +138,7 @@
             this.menuMangment.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
             this.menuMangment.Size = new System.Drawing.Size(1014, 24);
             this.menuMangment.TabIndex = 2;
-            this.menuMangment.Text = "KNote menu managment";
+            this.menuMangment.Text = "KaNote menu managment";
             // 
             // menuFile
             // 
@@ -855,7 +855,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "KNoteManagmentForm";
-            this.Text = "KeyNote Managment";
+            this.Text = "KaNote Managment";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KNoteManagmentForm_FormClosing);
             this.menuMangment.ResumeLayout(false);
             this.menuMangment.PerformLayout();

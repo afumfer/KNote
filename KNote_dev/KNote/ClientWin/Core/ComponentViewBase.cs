@@ -283,7 +283,7 @@ namespace KNote.ClientWin.Core
             string tmpFile;
             try
             {
-                //var dirPath = Path.Combine(new string[] { Path.GetTempPath(), "KeyNote", container });
+                //var dirPath = Path.Combine(new string[] { Path.GetTempPath(), "KaNote", container });
                 var dirPath = Path.Combine(new string[] { Store.AppConfig.CacheResources, container });                
                 tmpFile = Path.Combine(dirPath, fileName);
 

@@ -345,7 +345,7 @@ namespace KNote.ClientWin.Components
 
         public async Task<bool> FinalizeApp()
         {
-            if (View.ShowInfo("Are you sure exit KNote?", "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (View.ShowInfo("Are you sure exit KaNote?", "KaNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 await Store.SaveActiveNotes();
                 Finalize();
