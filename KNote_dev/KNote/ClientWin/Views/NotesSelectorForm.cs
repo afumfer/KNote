@@ -135,7 +135,7 @@ namespace KNote.ClientWin.Views
 
         public void DeleteItem(NoteInfoDto item)
         {
-            // En este caso no se usa item, la actualizació se resuelve con ResetBindings
+            // En este caso no se usa item, la actualización se resuelve con ResetBindings
             _skipSelectionChanged = true;
             _source.ResetBindings(false);            
             

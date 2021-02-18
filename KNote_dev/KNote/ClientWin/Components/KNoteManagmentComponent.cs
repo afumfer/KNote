@@ -587,8 +587,6 @@ namespace KNote.ClientWin.Components
             NotesSelectorComponent.AddItem(noteInfo);
         }
 
-        //
-
         private void PostItEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
         {
             OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>());
@@ -613,12 +611,8 @@ namespace KNote.ClientWin.Components
         {
             if (NoteEditorComponent.Model.NoteId == noteInfo.NoteId)            
                 await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);            
-            //else
-            //    NoteEditorComponent.View.CleanView();
             NotesSelectorComponent.RefreshItem(noteInfo);
         }
-
-        //
 
         private void PostItEditorComponent_DeletedEntity(object sender, ComponentEventArgs<NoteDto> e)
         {
@@ -634,7 +628,7 @@ namespace KNote.ClientWin.Components
         {
             NotesSelectorComponent.DeleteItem(noteInfo);
 
-            if (NotesSelectorComponent.ListEntities.Count == 0)
+            if (NotesSelectorComponent.ListEntities?.Count == 0)
             {
                 NoteEditorComponent.View.CleanView();
                 _selectedNoteInfo = null;

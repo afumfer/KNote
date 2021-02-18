@@ -294,9 +294,9 @@ namespace KNote.ClientWin.Views
             {
                 string desOutput = textDescription.Text?.Replace(_com.Store.AppConfig.CacheUrlResources, KntConst.ContainerResources);
                 _com.Model.Description = desOutput;
-            }            
-                        
+            }                                    
             _com.Model.FolderId = _selectedFolderId;
+            _com.Model.Topic = labelCaption.Text;
 
             ControlsToModelPostIt();
         }

@@ -189,7 +189,10 @@ namespace KNote.ClientWin.Components
 
         public override void AddItem(NoteInfoDto note)
         {
-            if (Folder.FolderId == note.FolderId)
+            if (Folder == null)
+                return;
+
+            if (Folder.FolderId == note?.FolderId)
             {                
                 ListEntities.Add(note);
                 View.AddItem(note);             
@@ -198,11 +201,13 @@ namespace KNote.ClientWin.Components
 
         public override void DeleteItem(NoteInfoDto note)
         {
-            if (Folder.FolderId == note.FolderId)
-            {                                
-                ListEntities.RemoveAll( _ => _.NoteId == note.NoteId);                
-                View.DeleteItem(note);             
+            var entiesFoud = ListEntities?.Where(_ => _.NoteId == note.NoteId).Select(_ => _.NoteId).ToList();
+            if (entiesFoud?.Count > 0)
+            {
+                ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
+                View.DeleteItem(note);
             }
+
         }
 
         #endregion

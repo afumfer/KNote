@@ -111,8 +111,8 @@ namespace KNote.ClientWin.Components
 
                 WindowPostIt = await GetNewWindowPostIt();
 
-                Model.SetIsDirty(false);
-                WindowPostIt.SetIsDirty(false);
+                Model.SetIsDirty(true);
+                WindowPostIt.SetIsDirty(true);
 
                 View.RefreshView();
 
@@ -185,6 +185,9 @@ namespace KNote.ClientWin.Components
             {
                 try
                 {
+                    if (noteId == Guid.Empty)
+                        return await Task.FromResult<bool>(true);
+
                     var response = await service.Notes.DeleteExtendedAsync(noteId);                    
 
                     if (response.IsValid)
