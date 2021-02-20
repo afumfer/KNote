@@ -207,7 +207,6 @@ namespace KNote.ClientWin.Components
                 ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
                 View.DeleteItem(note);
             }
-
         }
 
         #endregion

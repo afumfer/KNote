@@ -17,11 +17,12 @@ namespace KNote.ClientWin.Views
     public partial class NotesSelectorForm : Form, ISelectorView<NoteInfoDto>
     {
         private readonly NotesSelectorComponent _com;
-        private bool _viewFinalized = false;
-        private bool _configuredGrid = false;
+        private bool _viewFinalized = false;        
         private UInt32 _countRepetition = 0;
         private bool _skipSelectionChanged = false;        
         private BindingSource _source = new BindingSource();
+        private int _orderColNumber = 0;
+        private SortOrder _sortOrder;
 
         public NotesSelectorForm(NotesSelectorComponent com)
         {
@@ -53,14 +54,14 @@ namespace KNote.ClientWin.Views
                 return;
             else
             {
-                _skipSelectionChanged = true;
-
-                _source.DataSource = _com.ListEntities;                
-                dataGridNotes.DataSource = _source;
-
-                _skipSelectionChanged = false;
-
                 CoonfigureGridStd();
+
+                if (_orderColNumber == 0)
+                {
+                    _orderColNumber = 1;
+                    _sortOrder = getSortOrder(_orderColNumber);
+                }
+                RefreshDataGridNotes();
 
                 if(_com.ListEntities.Count > 0)
                     GridSelectFirstElement();
@@ -107,18 +108,11 @@ namespace KNote.ClientWin.Views
 
         public void AddItem(NoteInfoDto item)
         {
-            // TODO: !!! Revisar esta implementación. Esto es hack para:
-            //    a) refrescar el nuevo item en la lista, 
-            //    b) mantener activo el último item seleccionado 
-            // (Se está forzando artificialmente si item es null entonces significa que venimos de un alta)   
-            // 
-            _skipSelectionChanged = true;
-            _source.ResetBindings(false);            
-            
-            // dejar seleccionado el último item.
-            int index = 0;
+            // En este caso no se usa item, la actualización se resuelve con databindig
+            RefreshDataGridNotes();
 
-            if(_com.SelectedEntity != null)
+            int index = 0;
+            if (_com.SelectedEntity != null)
             {
                 foreach (DataGridViewRow r in dataGridNotes.Rows)
                 {
@@ -129,16 +123,15 @@ namespace KNote.ClientWin.Views
                     }
                 }
             }
-            _skipSelectionChanged = false;
+            dataGridNotes.ClearSelection();
             dataGridNotes.Rows[index].Selected = true;
         }
 
         public void DeleteItem(NoteInfoDto item)
         {
-            // En este caso no se usa item, la actualización se resuelve con ResetBindings
-            _skipSelectionChanged = true;
-            _source.ResetBindings(false);            
-            
+            // En este caso no se usa item, la actualización se resuelve con databindig
+            RefreshDataGridNotes();
+
             if (_com.ListEntities.Count == 0)
                 return;
 
@@ -178,15 +171,26 @@ namespace KNote.ClientWin.Views
 
         private void dataGridNotes_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            int iColNumber = e.ColumnIndex;
-            SortOrder strSortOrder = getSortOrder(iColNumber);
+            _orderColNumber = e.ColumnIndex;
+            _sortOrder = getSortOrder(_orderColNumber);            
+            RefreshDataGridNotes();
+        }
 
-            if (strSortOrder == SortOrder.Descending)
-                _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[iColNumber].Name).GetValue(o));
-            else if (strSortOrder == SortOrder.Ascending)
-                _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[iColNumber].Name).GetValue(o));
+        private void RefreshDataGridNotes()
+        {
+            _skipSelectionChanged = true;
+            
+            CoonfigureGridStd();
 
-            dataGridNotes.Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection = strSortOrder;
+            if (_sortOrder == SortOrder.Descending)
+                _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[_orderColNumber].Name).GetValue(o));
+            else if (_sortOrder == SortOrder.Ascending)
+                _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[_orderColNumber].Name).GetValue(o));
+
+            if(dataGridNotes.Columns.Count > 0)
+                dataGridNotes.Columns[_orderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
+
+            _skipSelectionChanged = false;
         }
 
         private void NotesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -239,8 +243,11 @@ namespace KNote.ClientWin.Views
 
         private void CoonfigureGridStd()
         {
-            if (_configuredGrid)
+            if (dataGridNotes.Columns.Count > 0)
                 return;
+            
+            _source.DataSource = new List<NoteInfoDto>();
+            dataGridNotes.DataSource = _source;
 
             dataGridNotes.Columns[0].Visible = false;  // NoteId
             dataGridNotes.Columns[0].DataPropertyName = "NoteId";
@@ -272,9 +279,7 @@ namespace KNote.ClientWin.Views
             //dataGridNotes.Columns[3].DataPropertyName = "Priority";
 
             dataGridNotes.Columns[11].Visible = false;  // FolderId 
-            dataGridNotes.Columns[12].Visible = false;  // NoteTypeId
-
-            _configuredGrid = true;
+            dataGridNotes.Columns[12].Visible = false;  // NoteTypeId                       
         }
 
         private NoteInfoDto DataGridViewRowToNoteItemList(DataGridViewRow dgr)
