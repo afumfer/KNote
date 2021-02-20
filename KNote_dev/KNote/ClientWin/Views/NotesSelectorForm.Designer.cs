@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NotesSelectorForm));
             this.panelForm = new System.Windows.Forms.Panel();
             this.panelDataGridNotes = new System.Windows.Forms.Panel();
             this.dataGridNotes = new System.Windows.Forms.DataGridView();
@@ -124,6 +125,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(543, 488);
             this.Controls.Add(this.panelForm);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "NotesSelectorForm";
             this.Text = "Notes selector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NotesSelectorForm_FormClosing);

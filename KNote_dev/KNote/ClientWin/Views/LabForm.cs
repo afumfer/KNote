@@ -48,7 +48,8 @@ namespace KNote.ClientWin.Views
 
         private void DemoForm_Load(object sender, EventArgs e)
         {
-            LoadListScripts(_pathSampleScripts);
+            if(Directory.Exists(_pathSampleScripts))
+                LoadListScripts(_pathSampleScripts);
         }
 
         private void buttonRunScript_Click(object sender, EventArgs e)
@@ -151,7 +152,7 @@ namespace KNote.ClientWin.Views
 
             var com = new KntScriptConsoleComponent(_store);
             com.KntSEngine = kntEngine;
-            com.CodeFile = _pathSampleScripts + _selectedFile;
+            com.CodeFile = Path.Combine(_pathSampleScripts , _selectedFile);
 
             com.Run();
             //KntScriptConsoleForm f = new KntScriptConsoleForm(com);
@@ -466,6 +467,20 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
+        private void buttonSelectScriptDirectory_Click(object sender, EventArgs e)
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                DialogResult result = fbd.ShowDialog();
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                {
+                    _pathSampleScripts = fbd.SelectedPath;
+                    listSamples.Items.Clear();
+                    LoadListScripts(_pathSampleScripts);
+                }
+            }
+        }
     }
 
 }

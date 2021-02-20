@@ -217,12 +217,13 @@ namespace KNote.ClientWin.Views
             this.ControlBox = false;
             this.Controls.Add(this.panelForm);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "PostItEditorForm";
             this.ShowInTaskbar = false;
-            this.Text = "PostIt rditor form";
+            this.Text = "PostIt editor form";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PostItEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.PostItEditorForm_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.PostItEditorForm_Paint);

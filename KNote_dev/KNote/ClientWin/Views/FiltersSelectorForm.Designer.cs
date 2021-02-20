@@ -67,6 +67,8 @@ namespace KNote.ClientWin.Views
             // checkSearchInDescription
             // 
             this.checkSearchInDescription.AutoSize = true;
+            this.checkSearchInDescription.Checked = true;
+            this.checkSearchInDescription.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkSearchInDescription.Location = new System.Drawing.Point(7, 147);
             this.checkSearchInDescription.Name = "checkSearchInDescription";
             this.checkSearchInDescription.Size = new System.Drawing.Size(163, 19);
@@ -136,6 +138,7 @@ namespace KNote.ClientWin.Views
             this.textTextSearch.Name = "textTextSearch";
             this.textTextSearch.Size = new System.Drawing.Size(420, 23);
             this.textTextSearch.TabIndex = 0;
+            this.textTextSearch.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textTextSearch_KeyUp);
             // 
             // label1
             // 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Forms;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -107,15 +107,17 @@ namespace KNote.ClientWin.Components
 
         public async Task<bool> LoadFilteredEntities(IKntService service, NotesFilterDto notesFilter, bool refreshView = true)
         {
+            bool resLoad = false;
             try
             {
-                Result<List<NoteInfoDto>> response;
+                // TODO: provisional, hay que buscar una solución más generalista a los estados de espera. 
+                Cursor.Current = Cursors.WaitCursor;
 
+                Result<List<NoteInfoDto>> response;
                 Service = service;
-                Folder = null;
-                NotesFilter = notesFilter;                
-                
-                if (string.IsNullOrEmpty(NotesFilter?.TextSearch.Trim()) || service == null || notesFilter == null)
+                Folder = null;                                
+                                
+                if (string.IsNullOrEmpty(notesFilter?.TextSearch.Trim()) || service == null || notesFilter == null)
                 {
                     response = new Result<List<NoteInfoDto>>();
                     response.Entity = new List<NoteInfoDto>();                    
@@ -123,14 +125,16 @@ namespace KNote.ClientWin.Components
                 else
                 {
                     // TODO: hack for get all (app win don't have pagination) 
-                    //response = await Service.Notes.GetFilter(notesFilter);   //TODO: future
-                    NotesFilter.Pagination.NumRecords = 99999;
+                    //response = await Service.Notes.GetFilter(notesFilter);   //TODO: future                    
+                    notesFilter.NumRecords = 99999;
+                    var xx = notesFilter.Pagination.NumRecords;
                     response = await Service.Notes.GetSearch(notesFilter);
                 }
 
                 if (response.IsValid)
                 {
                     ListEntities = response.Entity;
+                    NotesFilter = notesFilter;
 
                     if (refreshView)
                         View.RefreshView();
@@ -141,20 +145,25 @@ namespace KNote.ClientWin.Components
                         SelectedEntity = null;
 
                     NotifySelectedEntity();
+                    resLoad = await Task.FromResult<bool>(true);
                 }
                 else
                 {
                     View.ShowInfo(response.Message);
-                    return false;
+                    resLoad = await Task.FromResult<bool>(false); 
                 }
             }
             catch (Exception ex)
             {
                 View.ShowInfo(ex.Message);
-                return false;
+                resLoad = await Task.FromResult<bool>(false);
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
             }
 
-            return true;
+            return resLoad;
         }
 
         public override void SelectItem(NoteInfoDto item)

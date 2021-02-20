@@ -330,11 +330,11 @@ namespace KNote.ClientWin.Components
             _selectedNoteInfo = null;
             NoteEditorComponent.View.CleanView();
 
-            await NotesSelectorComponent.LoadFilteredEntities(e.Entity?.ServiceRef?.Service, e.Entity?.NotesFilter);
+            await NotesSelectorComponent.LoadFilteredEntities(e.Entity?.ServiceRef?.Service, e.Entity?.NotesFilter);            
             CountNotes = NotesSelectorComponent.ListEntities?.Count;
 
             View.ShowInfo(null);
-            NotifyMessage($"Loaded notes filter {e.Entity?.NotesFilter?.TextSearch}");
+            NotifyMessage($"Loaded notes filter {e.Entity?.NotesFilter?.TextSearch}");            
         }
 
         #endregion

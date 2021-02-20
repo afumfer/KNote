@@ -134,7 +134,10 @@ namespace KNote.ClientWin.Views
                     if (MessageBox.Show("Do yo want exit?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
                         _com.Finalize();
                     else
+                    {
                         e.Cancel = true;
+                        return;
+                    }
                 _com.Finalize();
             }
         }

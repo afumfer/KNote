@@ -30,6 +30,8 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.listMessages = new System.Windows.Forms.ListBox();
             this.buttonTest4 = new System.Windows.Forms.Button();
             this.buttonTest1 = new System.Windows.Forms.Button();
@@ -45,8 +47,7 @@
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.buttonSelectScriptDirectory = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -79,6 +80,24 @@
             this.tabAppLab.TabIndex = 0;
             this.tabAppLab.Text = "Lab app components";
             this.tabAppLab.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(13, 209);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(38, 15);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "label2";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(13, 194);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(38, 15);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "label1";
             // 
             // listMessages
             // 
@@ -131,6 +150,7 @@
             // 
             this.groupSamples.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupSamples.Controls.Add(this.buttonSelectScriptDirectory);
             this.groupSamples.Controls.Add(this.buttonRunSample);
             this.groupSamples.Controls.Add(this.buttonShowSample);
             this.groupSamples.Controls.Add(this.listSamples);
@@ -143,7 +163,7 @@
             // 
             // buttonRunSample
             // 
-            this.buttonRunSample.Location = new System.Drawing.Point(297, 59);
+            this.buttonRunSample.Location = new System.Drawing.Point(297, 101);
             this.buttonRunSample.Name = "buttonRunSample";
             this.buttonRunSample.Size = new System.Drawing.Size(173, 30);
             this.buttonRunSample.TabIndex = 5;
@@ -153,7 +173,7 @@
             // 
             // buttonShowSample
             // 
-            this.buttonShowSample.Location = new System.Drawing.Point(297, 22);
+            this.buttonShowSample.Location = new System.Drawing.Point(297, 64);
             this.buttonShowSample.Name = "buttonShowSample";
             this.buttonShowSample.Size = new System.Drawing.Size(173, 31);
             this.buttonShowSample.TabIndex = 4;
@@ -167,9 +187,9 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.listSamples.FormattingEnabled = true;
             this.listSamples.ItemHeight = 15;
-            this.listSamples.Location = new System.Drawing.Point(13, 19);
+            this.listSamples.Location = new System.Drawing.Point(13, 64);
             this.listSamples.Name = "listSamples";
-            this.listSamples.Size = new System.Drawing.Size(269, 349);
+            this.listSamples.Size = new System.Drawing.Size(269, 304);
             this.listSamples.TabIndex = 2;
             this.listSamples.SelectedIndexChanged += new System.EventHandler(this.listSamples_SelectedIndexChanged);
             // 
@@ -234,23 +254,15 @@
             this.htmlDescription.Size = new System.Drawing.Size(634, 287);
             this.htmlDescription.TabIndex = 10;
             // 
-            // label1
+            // buttonSelectScriptDirectory
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 194);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 15);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "label1";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(13, 209);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(38, 15);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "label2";
+            this.buttonSelectScriptDirectory.Location = new System.Drawing.Point(15, 21);
+            this.buttonSelectScriptDirectory.Name = "buttonSelectScriptDirectory";
+            this.buttonSelectScriptDirectory.Size = new System.Drawing.Size(157, 27);
+            this.buttonSelectScriptDirectory.TabIndex = 6;
+            this.buttonSelectScriptDirectory.Text = "Select script directory";
+            this.buttonSelectScriptDirectory.UseVisualStyleBackColor = true;
+            this.buttonSelectScriptDirectory.Click += new System.EventHandler(this.buttonSelectScriptDirectory_Click);
             // 
             // LabForm
             // 
@@ -293,5 +305,6 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button buttonSelectScriptDirectory;
     }
 }
