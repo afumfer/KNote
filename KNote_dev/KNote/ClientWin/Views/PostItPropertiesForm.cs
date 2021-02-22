@@ -166,13 +166,12 @@ namespace KNote.ClientWin.Views
         }
 
         private void PostItPropertiesForm_Load(object sender, EventArgs e)
-        {
-            // TODO: ... for debug ....
-            _formIsDisty = true;
+        {            
+            _formIsDisty = false;
         }
 
         private void buttonStyle_Click(object sender, EventArgs e)
-        {
+        {            
             Button b = (Button)sender;
             if (b == buttonYellow)
                 SelctStyle(0);
@@ -193,15 +192,21 @@ namespace KNote.ClientWin.Views
         private void ChangeCaptionColor()
         {
             colorDialog.Color = labelCaption.BackColor;
-            if (colorDialog.ShowDialog() == DialogResult.OK)            
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
                 labelCaption.BackColor = colorDialog.Color;                            
+                _formIsDisty = true;
+            }
         }
 
         private void ChangeCaptionTextColor()
         {
             colorDialog.Color = labelCaption.ForeColor;
             if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
                 labelCaption.ForeColor = colorDialog.Color;
+                _formIsDisty = true;
+            }
         }
 
 
@@ -211,7 +216,8 @@ namespace KNote.ClientWin.Views
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
                 labelNote.BackColor = colorDialog.Color;
-                labelText.BackColor = colorDialog.Color;                
+                labelText.BackColor = colorDialog.Color;
+                _formIsDisty = true;
             }
         }
 
@@ -223,6 +229,7 @@ namespace KNote.ClientWin.Views
                 labelText.Font = fontDialog.Font;
                 labelText.Text = fontDialog.Font.Name;
                 labelText.ForeColor = fontDialog.Color;
+                _formIsDisty = true;
             }
         }
 
@@ -230,7 +237,7 @@ namespace KNote.ClientWin.Views
         {
             FontStyle style;
             Font font;
-
+                        
             switch (estilo)
             {
                 default:
@@ -269,9 +276,8 @@ namespace KNote.ClientWin.Views
             
             labelText.Font = font;
             labelText.Text = font.OriginalFontName;
+            _formIsDisty = true;
         }
-
-
 
     }
 }
