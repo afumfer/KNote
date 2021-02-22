@@ -155,23 +155,20 @@ namespace KNote.ClientWin.Views
         private void CleanView()
         {
             textTextSearch.Text = "";
-            checkSearchInDescription.Checked = false;
+            checkSearchInDescription.Checked = true;
         }
 
         private void textTextSearch_KeyUp(object sender, KeyEventArgs e)
-        {
-            //if (e.Control)
-            
-                switch (e.KeyCode)
-                {
-                    case Keys.Enter:
-                        buttonSearch_Click(this, new EventArgs());
-                        break;
-                    case Keys.Escape:
-                        buttonClean_Click(this, new EventArgs());
-                        break;
-                }
-            
+        {                        
+            switch (e.KeyCode)
+            {
+                case Keys.Enter:
+                    buttonSearch_Click(this, new EventArgs());
+                    break;
+                case Keys.Escape:
+                    buttonClean_Click(this, new EventArgs());
+                    break;
+            }            
         }
     }
 }

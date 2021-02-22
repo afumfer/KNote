@@ -176,23 +176,6 @@ namespace KNote.ClientWin.Views
             RefreshDataGridNotes();
         }
 
-        private void RefreshDataGridNotes()
-        {
-            _skipSelectionChanged = true;
-            
-            CoonfigureGridStd();
-
-            if (_sortOrder == SortOrder.Descending)
-                _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[_orderColNumber].Name).GetValue(o));
-            else if (_sortOrder == SortOrder.Ascending)
-                _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[_orderColNumber].Name).GetValue(o));
-
-            if(dataGridNotes.Columns.Count > 0)
-                dataGridNotes.Columns[_orderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
-
-            _skipSelectionChanged = false;
-        }
-
         private void NotesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
@@ -212,6 +195,23 @@ namespace KNote.ClientWin.Views
         #endregion
 
         #region Private methods
+
+        private void RefreshDataGridNotes()
+        {
+            _skipSelectionChanged = true;
+
+            CoonfigureGridStd();
+
+            if (_sortOrder == SortOrder.Descending)
+                _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[_orderColNumber].Name).GetValue(o));
+            else if (_sortOrder == SortOrder.Ascending)
+                _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[_orderColNumber].Name).GetValue(o));
+
+            if (dataGridNotes.Columns.Count > 0)
+                dataGridNotes.Columns[_orderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
+
+            _skipSelectionChanged = false;
+        }
 
         private void OnSelectedNoteItemChanged()
         {
@@ -249,37 +249,49 @@ namespace KNote.ClientWin.Views
             _source.DataSource = new List<NoteInfoDto>();
             dataGridNotes.DataSource = _source;
 
-            dataGridNotes.Columns[0].Visible = false;  // NoteId
             dataGridNotes.Columns[0].DataPropertyName = "NoteId";
-            
-            dataGridNotes.Columns[1].Width = 80;
-            dataGridNotes.Columns[1].HeaderText = "Number";            
+            dataGridNotes.Columns[0].Visible = false;  // NoteId
+
             dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
+            dataGridNotes.Columns[1].Width = 80;
+            dataGridNotes.Columns[1].HeaderText = "Number";
+            dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
+            dataGridNotes.Columns[2].DataPropertyName = "Topic";
             dataGridNotes.Columns[2].Width = 500;  // Topic
-            //dataGridNotes.Columns[2].DataPropertyName = "Topic";
+            dataGridNotes.Columns[2].HeaderText = "Topic";
 
-            dataGridNotes.Columns[3].Width = 125;  // CreationDateTime
-            dataGridNotes.Columns[3].HeaderText = "Creation date";
-            //dataGridNotes.Columns[5].DataPropertyName = "CreationDateTime";            
+            dataGridNotes.Columns[3].DataPropertyName = "Priority";
+            dataGridNotes.Columns[3].Width = 75;  // Priority
+            dataGridNotes.Columns[3].HeaderText = "Priority";
+            dataGridNotes.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
-            dataGridNotes.Columns[4].Width = 125;  // ModificationDateTime
-            dataGridNotes.Columns[4].HeaderText = "Modification date";
-            //dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
-            
-            dataGridNotes.Columns[5].Visible = false;  // Description 
-            dataGridNotes.Columns[6].Visible = false;  // ContentType
-            dataGridNotes.Columns[7].Visible = false;  // Script
-            dataGridNotes.Columns[8].Visible = false;  // InternalTags
+            dataGridNotes.Columns[4].DataPropertyName = "Tags";
+            dataGridNotes.Columns[4].Width = 200;  // Tags
+            dataGridNotes.Columns[4].HeaderText = "Tags";
 
-            dataGridNotes.Columns[9].Width = 200;  // Tags
-            //dataGridNotes.Columns[9].DataPropertyName = "Tags";
+            dataGridNotes.Columns[5].DataPropertyName = "ModificationDateTime";
+            dataGridNotes.Columns[5].Width = 125;  // ModificationDateTime
+            dataGridNotes.Columns[5].HeaderText = "Modification date";
+            dataGridNotes.Columns[5].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
-            dataGridNotes.Columns[10].Width = 75;  // Priority
-            //dataGridNotes.Columns[3].DataPropertyName = "Priority";
+            dataGridNotes.Columns[6].DataPropertyName = "CreationDateTime";
+            dataGridNotes.Columns[6].Width = 125;  // CreationDateTime
+            dataGridNotes.Columns[6].HeaderText = "Creation date";
+            dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
+            dataGridNotes.Columns[7].Visible = false;  // Description 
+            dataGridNotes.Columns[7].DataPropertyName = "Description";
+            dataGridNotes.Columns[8].Visible = false;  // ContentType
+            dataGridNotes.Columns[8].DataPropertyName = "ContentType";
+            dataGridNotes.Columns[9].Visible = false;  // Script
+            dataGridNotes.Columns[9].DataPropertyName = "Script";
+            dataGridNotes.Columns[10].Visible = false;  // InternalTags
+            dataGridNotes.Columns[10].DataPropertyName = "InternalTags";
             dataGridNotes.Columns[11].Visible = false;  // FolderId 
-            dataGridNotes.Columns[12].Visible = false;  // NoteTypeId                       
+            dataGridNotes.Columns[11].DataPropertyName = "FolderId";
+            dataGridNotes.Columns[12].Visible = false;  // NoteTypeId
+            dataGridNotes.Columns[12].DataPropertyName = "NoteTypeId";            
         }
 
         private NoteInfoDto DataGridViewRowToNoteItemList(DataGridViewRow dgr)
@@ -290,20 +302,20 @@ namespace KNote.ClientWin.Views
                 return null;
             else
             {
-                n.NoteId = (Guid)dgr.Cells[0].Value;
-                n.NoteNumber = (int)dgr.Cells[1].Value;
-                n.Topic = (string)dgr.Cells[2].Value;
-                n.CreationDateTime = (DateTime)dgr.Cells[3].Value;
-                n.ModificationDateTime = (DateTime)dgr.Cells[4].Value;
-                n.Description = (string)dgr.Cells[5].Value;
-                n.ContentType = (string)dgr.Cells[6].Value;
-                n.Script = (string)dgr.Cells[7].Value;
-                n.InternalTags = (string)dgr.Cells[8].Value;
-                n.Tags = (string)dgr.Cells[9].Value;
-                n.Priority = (int)dgr.Cells[10].Value;
-                n.FolderId = (Guid)dgr.Cells[11].Value;
+                n.NoteId = (Guid)dgr.Cells["NoteId"].Value;
+                n.NoteNumber = (int)dgr.Cells["NoteNumber"].Value;
+                n.Topic = (string)dgr.Cells["Topic"].Value;
+                n.Priority = (int)dgr.Cells["Priority"].Value;
+                n.Tags = (string)dgr.Cells["Tags"].Value;                
+                n.ModificationDateTime = (DateTime)dgr.Cells["ModificationDateTime"].Value;
+                n.CreationDateTime = (DateTime)dgr.Cells["CreationDateTime"].Value;
+                n.Description = (string)dgr.Cells["Description"].Value;
+                n.ContentType = (string)dgr.Cells["ContentType"].Value;
+                n.Script = (string)dgr.Cells["Script"].Value;
+                n.InternalTags = (string)dgr.Cells["InternalTags"].Value;                                
+                n.FolderId = (Guid)dgr.Cells["FolderId"].Value;
                 if (dgr.Cells[12].Value != null)
-                    n.NoteTypeId = (Guid)dgr.Cells[12].Value;
+                    n.NoteTypeId = (Guid)dgr.Cells["NoteTypeId"].Value;
                 else
                     n.NoteTypeId = null;
                 return n;

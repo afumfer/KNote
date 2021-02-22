@@ -57,17 +57,31 @@ namespace KNote.Model.Dto
             }
         }
 
-        private DateTime _creationDateTime;
-        [Required]
-        public DateTime CreationDateTime
+        private int _priority;
+        public int Priority
         {
-            get { return _creationDateTime; }
+            get { return _priority; }
             set
             {
-                if (_creationDateTime != value)
+                if (_priority != value)
                 {
-                    _creationDateTime = value;
-                    OnPropertyChanged("CreationDateTime");
+                    _priority = value;
+                    OnPropertyChanged("Priority");
+                }
+            }
+        }
+
+        private string _tags;
+        [MaxLength(1024)]
+        public string Tags
+        {
+            get { return _tags; }
+            set
+            {
+                if (_tags != value)
+                {
+                    _tags = value;
+                    OnPropertyChanged("Tags");
                 }
             }
         }
@@ -83,6 +97,21 @@ namespace KNote.Model.Dto
                 {
                     _modificationDateTime = value;
                     OnPropertyChanged("ModificationDateTime");
+                }
+            }
+        }
+
+        private DateTime _creationDateTime;
+        [Required]
+        public DateTime CreationDateTime
+        {
+            get { return _creationDateTime; }
+            set
+            {
+                if (_creationDateTime != value)
+                {
+                    _creationDateTime = value;
+                    OnPropertyChanged("CreationDateTime");
                 }
             }
         }
@@ -141,35 +170,6 @@ namespace KNote.Model.Dto
                 {
                     _internalTags = value;
                     OnPropertyChanged("InternalTags");
-                }
-            }
-        }
-
-        private string _tags;
-        [MaxLength(1024)]
-        public string Tags
-        {
-            get { return _tags; }
-            set
-            {
-                if (_tags != value)
-                {
-                    _tags = value;
-                    OnPropertyChanged("Tags");
-                }
-            }
-        }
-
-        private int _priority;
-        public int Priority
-        {
-            get { return _priority; }
-            set
-            {
-                if (_priority != value)
-                {
-                    _priority = value;
-                    OnPropertyChanged("Priority");
                 }
             }
         }
