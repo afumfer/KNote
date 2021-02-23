@@ -309,10 +309,7 @@ namespace KNote.ClientWin.Components
                 {
                     _filterParamComponent = new FiltersSelectorComponent(Store);
                     _filterParamComponent.EmbededMode = true;
-
-                    _filterParamComponent.EntitySelection += _filterParamComponent_EntitySelection;
-
-                    //_filterParamComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
+                    _filterParamComponent.EntitySelection += _filterParamComponent_EntitySelection;                    
                 }
                 return _filterParamComponent;
             }

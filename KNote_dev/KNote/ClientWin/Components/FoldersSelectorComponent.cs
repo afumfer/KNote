@@ -81,11 +81,10 @@ namespace KNote.ClientWin.Components
 
         public override void RefreshItem(FolderWithServiceRef item)
         {
-            if (SelectedEntity.FolderInfo.FolderId == item.FolderInfo.FolderId)
-            {
+            if (SelectedEntity.FolderInfo.FolderId == item.FolderInfo.FolderId)            
                 SelectedEntity.FolderInfo.SetSimpleDto(item.FolderInfo);
-                View.RefreshItem(SelectedEntity);
-            }
+            
+            View.RefreshItem(SelectedEntity);
         }
 
         public override void AddItem(FolderWithServiceRef item)

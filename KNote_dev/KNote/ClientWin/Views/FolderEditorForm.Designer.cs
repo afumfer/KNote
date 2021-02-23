@@ -43,6 +43,7 @@ namespace KNote.ClientWin.Views
             this.textName = new System.Windows.Forms.TextBox();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
+            this.buttonFolderSearch = new System.Windows.Forms.Button();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -51,6 +52,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.Controls.Add(this.buttonFolderSearch);
             this.panelForm.Controls.Add(this.label5);
             this.panelForm.Controls.Add(this.label4);
             this.panelForm.Controls.Add(this.label3);
@@ -128,8 +130,9 @@ namespace KNote.ClientWin.Views
             this.textParentFolder.Location = new System.Drawing.Point(8, 200);
             this.textParentFolder.Name = "textParentFolder";
             this.textParentFolder.ReadOnly = true;
-            this.textParentFolder.Size = new System.Drawing.Size(480, 23);
+            this.textParentFolder.Size = new System.Drawing.Size(448, 23);
             this.textParentFolder.TabIndex = 4;
+            this.textParentFolder.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textParentFolder_KeyUp);
             // 
             // textOrderNotes
             // 
@@ -181,6 +184,20 @@ namespace KNote.ClientWin.Views
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
+            // buttonFolderSearch
+            // 
+            this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.buttonFolderSearch.Location = new System.Drawing.Point(460, 199);
+            this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonFolderSearch.Name = "buttonFolderSearch";
+            this.buttonFolderSearch.Size = new System.Drawing.Size(27, 25);
+            this.buttonFolderSearch.TabIndex = 11;
+            this.buttonFolderSearch.Text = "...";
+            this.buttonFolderSearch.UseVisualStyleBackColor = false;
+            this.buttonFolderSearch.Click += new System.EventHandler(this.buttonFolderSearch_Click);
+            // 
             // FolderEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -222,5 +239,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textOrder;
         private System.Windows.Forms.TextBox textTags;
         private System.Windows.Forms.TextBox textName;
+        private System.Windows.Forms.Button buttonFolderSearch;
     }
 }

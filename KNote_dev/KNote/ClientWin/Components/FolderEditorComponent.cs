@@ -14,7 +14,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KNote.ClientWin.Components
 {
-    public class FolderEditorComponent : ComponentEditorBase<IEditorView<FolderDto>, FolderDto>
+    public class FolderEditorComponent : ComponentEditor<IEditorView<FolderDto>, FolderDto>
 
     {
         public FolderEditorComponent(Store store): base(store)

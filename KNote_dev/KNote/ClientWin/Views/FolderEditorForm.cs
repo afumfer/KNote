@@ -19,9 +19,11 @@ namespace KNote.ClientWin.Views
         #region Private fields
 
         private readonly FolderEditorComponent _com;
+        private Guid? _selectedParentFolderId;
+        private FolderDto _selectedParentFolder;
         private bool _viewFinalized = false;
         private bool _formIsDisty = false;
-
+        
         #endregion
 
         #region Constructor 
@@ -138,6 +140,27 @@ namespace KNote.ClientWin.Views
             _formIsDisty = true;
         }
 
+        private void buttonFolderSearch_Click(object sender, EventArgs e)
+        {
+            var folder = _com.GetFolder();
+            if (folder != null)
+            {
+                _selectedParentFolderId = folder.FolderId;
+                _selectedParentFolder = folder.GetSimpleDto<FolderDto>();
+                textParentFolder.Text = folder?.Name;
+            }
+        }
+
+        private void textParentFolder_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                _selectedParentFolder = null;
+                _selectedParentFolderId = null;
+                textParentFolder.Text = "(root)";
+            }
+        }
+
         #endregion
 
         #region Private methods
@@ -174,10 +197,10 @@ namespace KNote.ClientWin.Views
                 _com.Model.Order = o;
 
             _com.Model.OrderNotes = textOrderNotes.Text;
-
-            // _com.Model.ParentFolder  // TODO ...
+            _com.Model.ParentId = _selectedParentFolderId;
+            _com.Model.ParentFolderDto = _selectedParentFolder;
         }
 
-        #endregion 
+        #endregion
     }
 }
