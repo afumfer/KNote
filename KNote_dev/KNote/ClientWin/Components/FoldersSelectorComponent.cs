@@ -33,6 +33,8 @@ namespace KNote.ClientWin.Components
 
         public string Path { get; set; }
 
+        public Guid? OldParent { get; set; }
+
         #endregion 
 
         #region Constructor
@@ -81,10 +83,9 @@ namespace KNote.ClientWin.Components
 
         public override void RefreshItem(FolderWithServiceRef item)
         {
+            View.RefreshItem(item);
             if (SelectedEntity.FolderInfo.FolderId == item.FolderInfo.FolderId)            
-                SelectedEntity.FolderInfo.SetSimpleDto(item.FolderInfo);
-            
-            View.RefreshItem(SelectedEntity);
+                SelectedEntity.FolderInfo.SetSimpleDto(item.FolderInfo);                        
         }
 
         public override void AddItem(FolderWithServiceRef item)

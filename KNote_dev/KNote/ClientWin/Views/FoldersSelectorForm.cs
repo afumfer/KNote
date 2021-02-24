@@ -155,13 +155,40 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        public void RefreshItem(FolderWithServiceRef item)
+        public void RefreshItem(FolderWithServiceRef newItem)
         {
-            if (SelectItem(item) != null)
+            var selected = SelectItem(newItem);
+
+            if (selected == null)
+                return;
+
+            var selectedNode = (TreeNode)selected;
+            var selectedItem = (FolderWithServiceRef)selectedNode.Tag;
+
+            if (selectedItem.FolderInfo == null)
+                return;
+            
+            treeViewFolders.SelectedNode.Tag = newItem;
+            treeViewFolders.SelectedNode.Text = newItem.FolderInfo.Name;
+            if (_com.OldParent == newItem.FolderInfo.ParentId)            
+                return;
+                       
+            TreeNode[] treeNodes;
+            if (newItem.FolderInfo.ParentId != null)
+                treeNodes = treeViewFolders.Nodes.Find(newItem.FolderInfo.ParentId.ToString(), true);
+            else
             {
-                treeViewFolders.SelectedNode.Tag = item;
-                treeViewFolders.SelectedNode.Text = item.FolderInfo.Name;
+                treeNodes = new TreeNode[1];
+                treeNodes[0] = treeViewFolders.TopNode;
             }
+
+            if (treeNodes?.Length > 0)
+            {                               
+                var node = treeNodes[0];
+                selectedNode.Parent.Nodes.Remove(selectedNode);
+                node.Nodes.Add(selectedNode);
+                treeViewFolders.SelectedNode = selectedNode;
+            }            
         }
 
         #endregion 

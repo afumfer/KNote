@@ -508,9 +508,10 @@ namespace KNote.ClientWin.Components
 
             var folderEditorComponent = new FolderEditorComponent(Store);
             await folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
+            FoldersSelectorComponent.OldParent = folderEditorComponent.Model.ParentId;
             var res = folderEditorComponent.RunModal();
             if (res.Entity == EComponentResult.Executed)
-            {
+            {                
                 SelectedFolderWithServiceRef.FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>();
                 FoldersSelectorComponent.RefreshItem(SelectedFolderWithServiceRef);
             }            

@@ -147,7 +147,7 @@ namespace KNote.ClientWin.Views
             {
                 _selectedParentFolderId = folder.FolderId;
                 _selectedParentFolder = folder.GetSimpleDto<FolderDto>();
-                textParentFolder.Text = folder?.Name;
+                textParentFolder.Text = folder?.Name;                
             }
         }
 
@@ -186,6 +186,8 @@ namespace KNote.ClientWin.Views
             textOrder.Text = _com.Model.Order.ToString();
             textOrderNotes.Text = _com.Model.OrderNotes;
             textParentFolder.Text = (_com.Model.ParentFolderDto?.Name == null) ? "(root)" : _com.Model.ParentFolderDto?.Name;
+            _selectedParentFolderId = _com.Model.ParentId;
+            _selectedParentFolder = _com.Model.ParentFolderDto;            
         }
 
         private void ControlsToModel()
@@ -198,7 +200,7 @@ namespace KNote.ClientWin.Views
 
             _com.Model.OrderNotes = textOrderNotes.Text;
             _com.Model.ParentId = _selectedParentFolderId;
-            _com.Model.ParentFolderDto = _selectedParentFolder;
+            _com.Model.ParentFolderDto = _selectedParentFolder;            
         }
 
         #endregion
