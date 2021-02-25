@@ -151,10 +151,10 @@ namespace KNote.ClientWin.Components
                     _folderSelectorComponent.EmbededMode = true;                    
                     _folderSelectorComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
 
-                    // TODO: ... ¿las extensiones se definen aquí?
-                    //SelectorPlanificaciones.Extensiones.Add("Definir nueva planificación ...", new ExtensionesEventHandler<Planificacion>(ExtenderNuevaPlanificacion));
-                    //SelectorPlanificaciones.Extensiones.Add("Editar planificación ...", new ExtensionesEventHandler<Planificacion>(ExtenderEditarPlanificacion));
-                    //SelectorPlanificaciones.Extensiones.Add("Borrar planificación ...", new ExtensionesEventHandler<Planificacion>(ExtenderBorrarPlanificacion));
+                    _folderSelectorComponent.Extensions.Add("New folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendNewFolder));
+                    _folderSelectorComponent.Extensions.Add("Edit folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendEditFolder));
+                    _folderSelectorComponent.Extensions.Add("Delete folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendDeleteFolder));
+
                 }
                 return _folderSelectorComponent;
             }
@@ -182,6 +182,21 @@ namespace KNote.ClientWin.Components
             NotifyMessage($"Loaded notes list for folder {e.Entity.FolderInfo?.FolderNumber}");
         }
 
+        private void ExtendNewFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        {
+            NewFolder();
+        }
+
+        private void ExtendEditFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        {
+            EditFolder();
+        }
+
+        private void ExtendDeleteFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        {
+            DeleteFolder();
+        }
+
         #endregion
 
         #region NotesSelector component
@@ -197,6 +212,12 @@ namespace KNote.ClientWin.Components
                     _notesSelectorComponent.EmbededMode = true;                    
                     _notesSelectorComponent.EntitySelection += _notesSelectorComponent_EntitySelection;
                     _notesSelectorComponent.EntitySelectionDoubleClick += _notesSelectorComponent_EntitySelectionDoubleClick;
+
+                    _notesSelectorComponent.Extensions.Add("New note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddNote));
+                    _notesSelectorComponent.Extensions.Add("New note as PostIt...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddNoteAsPostIt));
+                    _notesSelectorComponent.Extensions.Add("Edit note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNote));
+                    _notesSelectorComponent.Extensions.Add("Edit note as PostIt ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNoteAsPostIt));
+                    _notesSelectorComponent.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendDeleteNote));
                 }
                 return _notesSelectorComponent;
             }
@@ -221,6 +242,31 @@ namespace KNote.ClientWin.Components
             await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
 
             NotifyMessage($"Loaded note details for note {e.Entity.NoteNumber}");
+        }
+
+        private void ExtendAddNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            AddNote();
+        }
+
+        private void ExtendAddNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            AddNotePostIt();
+        }
+
+        private void ExtendEditNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            EditNote();
+        }
+
+        private void ExtendEditNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            EditNotePostIt();
+        }
+
+        private void ExtendDeleteNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            DeleteNote();
         }
 
         #endregion
@@ -488,8 +534,8 @@ namespace KNote.ClientWin.Components
         {
             var folderEditorComponent = new FolderEditorComponent(Store);
             await folderEditorComponent.NewModel(SelectedServiceRef.Service);
-            folderEditorComponent.Model.ParentId = SelectedFolderInfo.FolderId;
-            folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo.GetSimpleDto<FolderDto>();
+            folderEditorComponent.Model.ParentId = SelectedFolderInfo?.FolderId;
+            folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo?.GetSimpleDto<FolderDto>();
             var res = folderEditorComponent.RunModal();
             if (res.Entity == EComponentResult.Executed)
             {                

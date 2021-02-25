@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FoldersSelectorForm));
             this.imageListFolders = new System.Windows.Forms.ImageList(this.components);
-            this.contextMenuFolders = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.panelForm = new System.Windows.Forms.Panel();
             this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
@@ -50,10 +50,10 @@
             this.imageListFolders.Images.SetKeyName(1, "folderLight_16.png");
             this.imageListFolders.Images.SetKeyName(2, "database_16.png");
             // 
-            // contextMenuFolders
+            // contextMenu
             // 
-            this.contextMenuFolders.Name = "contextMenuFolders";
-            this.contextMenuFolders.Size = new System.Drawing.Size(61, 4);
+            this.contextMenu.Name = "contextMenuFolders";
+            this.contextMenu.Size = new System.Drawing.Size(61, 4);
             // 
             // panelForm
             // 
@@ -101,6 +101,7 @@
             // 
             // treeViewFolders
             // 
+            this.treeViewFolders.ContextMenuStrip = this.contextMenu;
             this.treeViewFolders.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeViewFolders.ImageIndex = 0;
             this.treeViewFolders.ImageList = this.imageListFolders;
@@ -129,7 +130,7 @@
 
         #endregion
         private System.Windows.Forms.ImageList imageListFolders;
-        private System.Windows.Forms.ContextMenuStrip contextMenuFolders;
+        private System.Windows.Forms.ContextMenuStrip contextMenu;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonCancel;

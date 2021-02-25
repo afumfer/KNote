@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LabForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
             this.label2 = new System.Windows.Forms.Label();
@@ -37,6 +38,7 @@
             this.buttonTest1 = new System.Windows.Forms.Button();
             this.tabKntScriptLab = new System.Windows.Forms.TabPage();
             this.groupSamples = new System.Windows.Forms.GroupBox();
+            this.buttonSelectScriptDirectory = new System.Windows.Forms.Button();
             this.buttonRunSample = new System.Windows.Forms.Button();
             this.buttonShowSample = new System.Windows.Forms.Button();
             this.listSamples = new System.Windows.Forms.ListBox();
@@ -47,7 +49,6 @@
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.buttonSelectScriptDirectory = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -161,6 +162,16 @@
             this.groupSamples.TabStop = false;
             this.groupSamples.Text = "Samples";
             // 
+            // buttonSelectScriptDirectory
+            // 
+            this.buttonSelectScriptDirectory.Location = new System.Drawing.Point(15, 21);
+            this.buttonSelectScriptDirectory.Name = "buttonSelectScriptDirectory";
+            this.buttonSelectScriptDirectory.Size = new System.Drawing.Size(157, 27);
+            this.buttonSelectScriptDirectory.TabIndex = 6;
+            this.buttonSelectScriptDirectory.Text = "Select script directory";
+            this.buttonSelectScriptDirectory.UseVisualStyleBackColor = true;
+            this.buttonSelectScriptDirectory.Click += new System.EventHandler(this.buttonSelectScriptDirectory_Click);
+            // 
             // buttonRunSample
             // 
             this.buttonRunSample.Location = new System.Drawing.Point(297, 101);
@@ -254,16 +265,6 @@
             this.htmlDescription.Size = new System.Drawing.Size(634, 287);
             this.htmlDescription.TabIndex = 10;
             // 
-            // buttonSelectScriptDirectory
-            // 
-            this.buttonSelectScriptDirectory.Location = new System.Drawing.Point(15, 21);
-            this.buttonSelectScriptDirectory.Name = "buttonSelectScriptDirectory";
-            this.buttonSelectScriptDirectory.Size = new System.Drawing.Size(157, 27);
-            this.buttonSelectScriptDirectory.TabIndex = 6;
-            this.buttonSelectScriptDirectory.Text = "Select script directory";
-            this.buttonSelectScriptDirectory.UseVisualStyleBackColor = true;
-            this.buttonSelectScriptDirectory.Click += new System.EventHandler(this.buttonSelectScriptDirectory_Click);
-            // 
             // LabForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -271,6 +272,7 @@
             this.ClientSize = new System.Drawing.Size(689, 601);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "LabForm";
             this.Text = "KntScript AppHost demo";

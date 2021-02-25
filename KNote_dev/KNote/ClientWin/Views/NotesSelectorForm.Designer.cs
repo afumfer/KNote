@@ -28,10 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NotesSelectorForm));
             this.panelForm = new System.Windows.Forms.Panel();
             this.panelDataGridNotes = new System.Windows.Forms.Panel();
             this.dataGridNotes = new System.Windows.Forms.DataGridView();
+            this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
@@ -70,6 +72,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridNotes.BackgroundColor = System.Drawing.SystemColors.Window;
             this.dataGridNotes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridNotes.ContextMenuStrip = this.contextMenu;
             this.dataGridNotes.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
             this.dataGridNotes.Location = new System.Drawing.Point(0, 0);
             this.dataGridNotes.Name = "dataGridNotes";
@@ -84,6 +87,11 @@
             this.dataGridNotes.DoubleClick += new System.EventHandler(this.dataGridNotes_DoubleClick);
             this.dataGridNotes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridNotes_KeyDown);
             this.dataGridNotes.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dataGridNotes_KeyUp);
+            // 
+            // contextMenu
+            // 
+            this.contextMenu.Name = "contextMenu";
+            this.contextMenu.Size = new System.Drawing.Size(61, 4);
             // 
             // panelBottom
             // 
@@ -145,5 +153,6 @@
         private System.Windows.Forms.Button buttonAccept;
         private System.Windows.Forms.Panel panelDataGridNotes;
         private System.Windows.Forms.DataGridView dataGridNotes;
+        private System.Windows.Forms.ContextMenuStrip contextMenu;
     }
 }

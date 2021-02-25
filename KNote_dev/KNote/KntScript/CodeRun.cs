@@ -549,7 +549,7 @@ namespace KntScript
             catch (Exception ex)
             {
                 if ( !((bool)CodeReadSymbol(new Variable { Ident = "_KNTERRORTRAP" })))
-                    throw ex;
+                    throw;
                 else
                 {
                     CodeSpecialStoreObject("_KNTERRORCODE", 10);
@@ -585,9 +585,9 @@ namespace KntScript
                 else
                     throw new Exception("Can not be instantiated " + newObject.ClassName);                
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 

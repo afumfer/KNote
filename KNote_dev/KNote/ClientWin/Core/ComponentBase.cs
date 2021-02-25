@@ -63,7 +63,6 @@ namespace KNote.ClientWin.Core
             OnStateComponentChanged(EComponentState.NotStarted);           
             Store = store;
             Store.AddComponent(this);
-            AddExtensions();
         }
 
         #endregion
@@ -95,11 +94,6 @@ namespace KNote.ClientWin.Core
         }
 
         protected virtual Result<EComponentResult> OnFinalized() 
-        {
-            return new Result<EComponentResult>(EComponentResult.Executed);
-        }
-
-        protected virtual Result<EComponentResult> AddExtensions()
         {
             return new Result<EComponentResult>(EComponentResult.Executed);
         }

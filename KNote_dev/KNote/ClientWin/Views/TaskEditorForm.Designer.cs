@@ -29,6 +29,7 @@ namespace KNote.ClientWin.Views
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TaskEditorForm));
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.panelForm = new System.Windows.Forms.Panel();
@@ -364,11 +365,12 @@ namespace KNote.ClientWin.Views
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "TaskEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "TaskEditorForm";
+            this.Text = "Task editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TaskEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.TaskEditorForm_Load);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TaskEditorForm_KeyPress);

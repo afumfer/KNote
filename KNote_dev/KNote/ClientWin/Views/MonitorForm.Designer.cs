@@ -68,7 +68,7 @@
             this.Controls.Add(this.buttonClearMessages);
             this.Controls.Add(this.listBoxMessages);
             this.Name = "MonitorForm";
-            this.Text = "MonitorForm";
+            this.Text = "KaNote monitor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MonitorForm_FormClosing);
             this.ResumeLayout(false);
 

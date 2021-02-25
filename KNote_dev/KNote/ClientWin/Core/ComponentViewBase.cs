@@ -119,6 +119,9 @@ namespace KNote.ClientWin.Core
 
         public List<TEntity> ListEntities { get; protected set; }
 
+        public Dictionary<string, ExtensionsEventHandler<TEntity>> Extensions { get; set; } =
+            new Dictionary<string, ExtensionsEventHandler<TEntity>>();
+
         #endregion
 
         #region Constructor

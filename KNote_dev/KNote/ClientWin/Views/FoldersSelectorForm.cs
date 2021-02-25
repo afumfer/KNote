@@ -268,5 +268,36 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
+
+        #region Extensions
+
+        // TODO: Esto es más código repetido, hay que pasar a una clase base 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            this.SuspendLayout();
+
+            if (_com.Extensions.Keys.Count > 0)
+                foreach (string s in _com.Extensions.Keys)
+                    if (s.StartsWith("--"))
+                        contextMenu.Items.Add("-", null, extension_Click);
+                    else
+                        contextMenu.Items.Add(s, null, extension_Click);
+
+            this.ResumeLayout();
+        }
+
+        private void extension_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem menuSel;
+            menuSel = (ToolStripMenuItem)sender;
+
+            _com.Extensions[menuSel.Text](this, new ComponentEventArgs<FolderWithServiceRef>(_com.SelectedEntity));
+        }
+
+        #endregion
+
+
     }
 }
