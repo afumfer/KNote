@@ -46,6 +46,20 @@ namespace KNote.ClientWin.Views
             this.menuS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuExtendedEdition = new System.Windows.Forms.ToolStripMenuItem();
             this.menuPostItProperties = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuS2 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuAlarmWithin = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm10m = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm30m = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm1h = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm2h = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm4h = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm8h = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm10h = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm12h = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm24h = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm1week = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm1month = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFastAlarm1year = new System.Windows.Forms.ToolStripMenuItem();
             this.panelForm.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picMenu)).BeginInit();
@@ -151,9 +165,11 @@ namespace KNote.ClientWin.Views
             this.menuDelete,
             this.menuS1,
             this.menuExtendedEdition,
-            this.menuPostItProperties});
+            this.menuPostItProperties,
+            this.menuS2,
+            this.menuAlarmWithin});
             this.menuPostIt.Name = "menuPostIt";
-            this.menuPostIt.Size = new System.Drawing.Size(216, 142);
+            this.menuPostIt.Size = new System.Drawing.Size(216, 170);
             // 
             // menuHide
             // 
@@ -208,6 +224,114 @@ namespace KNote.ClientWin.Views
             this.menuPostItProperties.Text = "PostIt properties ...";
             this.menuPostItProperties.Click += new System.EventHandler(this.postItMenu_Click);
             // 
+            // menuS2
+            // 
+            this.menuS2.Name = "menuS2";
+            this.menuS2.Size = new System.Drawing.Size(212, 6);
+            // 
+            // menuAlarmWithin
+            // 
+            this.menuAlarmWithin.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuFastAlarm10m,
+            this.menuFastAlarm30m,
+            this.menuFastAlarm1h,
+            this.menuFastAlarm2h,
+            this.menuFastAlarm4h,
+            this.menuFastAlarm8h,
+            this.menuFastAlarm10h,
+            this.menuFastAlarm12h,
+            this.menuFastAlarm24h,
+            this.menuFastAlarm1week,
+            this.menuFastAlarm1month,
+            this.menuFastAlarm1year});
+            this.menuAlarmWithin.Name = "menuAlarmWithin";
+            this.menuAlarmWithin.Size = new System.Drawing.Size(215, 22);
+            this.menuAlarmWithin.Text = "Activate note &alarm within";
+            // 
+            // menuFastAlarm10m
+            // 
+            this.menuFastAlarm10m.Name = "menuFastAlarm10m";
+            this.menuFastAlarm10m.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm10m.Text = "10 minutes";
+            this.menuFastAlarm10m.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm30m
+            // 
+            this.menuFastAlarm30m.Name = "menuFastAlarm30m";
+            this.menuFastAlarm30m.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm30m.Text = "30 minutes";
+            this.menuFastAlarm30m.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm1h
+            // 
+            this.menuFastAlarm1h.Name = "menuFastAlarm1h";
+            this.menuFastAlarm1h.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm1h.Text = "1 hour";
+            this.menuFastAlarm1h.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm2h
+            // 
+            this.menuFastAlarm2h.Name = "menuFastAlarm2h";
+            this.menuFastAlarm2h.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm2h.Text = "2 hours";
+            this.menuFastAlarm2h.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm4h
+            // 
+            this.menuFastAlarm4h.Name = "menuFastAlarm4h";
+            this.menuFastAlarm4h.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm4h.Text = "4 hours";
+            this.menuFastAlarm4h.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm8h
+            // 
+            this.menuFastAlarm8h.Name = "menuFastAlarm8h";
+            this.menuFastAlarm8h.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm8h.Text = "8 hours";
+            this.menuFastAlarm8h.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm10h
+            // 
+            this.menuFastAlarm10h.Name = "menuFastAlarm10h";
+            this.menuFastAlarm10h.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm10h.Text = "10 hours";
+            this.menuFastAlarm10h.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm12h
+            // 
+            this.menuFastAlarm12h.Name = "menuFastAlarm12h";
+            this.menuFastAlarm12h.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm12h.Text = "12 hours";
+            this.menuFastAlarm12h.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm24h
+            // 
+            this.menuFastAlarm24h.Name = "menuFastAlarm24h";
+            this.menuFastAlarm24h.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm24h.Text = "24 hours";
+            this.menuFastAlarm24h.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm1week
+            // 
+            this.menuFastAlarm1week.Name = "menuFastAlarm1week";
+            this.menuFastAlarm1week.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm1week.Text = "1 week";
+            this.menuFastAlarm1week.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm1month
+            // 
+            this.menuFastAlarm1month.Name = "menuFastAlarm1month";
+            this.menuFastAlarm1month.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm1month.Text = "1 month";
+            this.menuFastAlarm1month.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
+            // menuFastAlarm1year
+            // 
+            this.menuFastAlarm1year.Name = "menuFastAlarm1year";
+            this.menuFastAlarm1year.Size = new System.Drawing.Size(132, 22);
+            this.menuFastAlarm1year.Text = "1 year";
+            this.menuFastAlarm1year.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
             // PostItEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -253,5 +377,19 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripMenuItem menuExtendedEdition;
         private System.Windows.Forms.ToolStripMenuItem menuPostItProperties;
         private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
+        private System.Windows.Forms.ToolStripSeparator menuS2;
+        private System.Windows.Forms.ToolStripMenuItem menuAlarmWithin;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm10m;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm30m;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm1h;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm2h;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm4h;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm8h;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm10h;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm12h;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm24h;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm1week;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm1month;
+        private System.Windows.Forms.ToolStripMenuItem menuFastAlarm1year;
     }
 }

@@ -158,6 +158,54 @@ namespace KNote.ClientWin.Views
             {
                 PostItPropertiesEdit();
             }
+            else if (menuSel == menuFastAlarm10m)
+            {
+                await FastAlarmAndHide("m", 10);
+            }
+            else if (menuSel == menuFastAlarm30m)
+            {
+                await FastAlarmAndHide("m", 30);
+            }
+            else if (menuSel == menuFastAlarm1h)
+            {
+                await FastAlarmAndHide("h", 1);
+            }
+            else if (menuSel == menuFastAlarm2h)
+            {
+                await FastAlarmAndHide("h", 2);
+            }
+            else if (menuSel == menuFastAlarm4h)
+            {
+                await FastAlarmAndHide("h", 4);
+            }
+            else if (menuSel == menuFastAlarm8h)
+            {
+                await FastAlarmAndHide("h", 8);
+            }
+            else if (menuSel == menuFastAlarm10h)
+            {
+                await FastAlarmAndHide("h", 10);
+            }
+            else if (menuSel == menuFastAlarm12h)
+            {
+                await FastAlarmAndHide("h", 12);
+            }
+            else if (menuSel == menuFastAlarm24h)
+            {
+                await FastAlarmAndHide("h", 24);
+            }
+            else if (menuSel == menuFastAlarm1week)
+            {
+                await FastAlarmAndHide("week", 1);
+            }
+            else if (menuSel == menuFastAlarm1month)
+            {
+                await FastAlarmAndHide("month", 1);
+            }
+            else if (menuSel == menuFastAlarm1year)
+            {
+                await FastAlarmAndHide("year", 1);
+            }
         }
 
         private async void PostItEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -415,6 +463,14 @@ namespace KNote.ClientWin.Views
                 ModelToControlsPostIt(false);
             }
             this.TopMost = copyTopMost;
+        }
+
+        private async Task<bool> FastAlarmAndHide(string unitTime, int value)
+        {
+            var resAlarm = await _com.SaveFastAlarm(unitTime, value);
+
+            var resSave = await SaveAndHide();
+            return resSave;
         }
 
         private void DrawFormBorder()

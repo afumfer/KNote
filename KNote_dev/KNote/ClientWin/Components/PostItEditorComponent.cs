@@ -211,6 +211,13 @@ namespace KNote.ClientWin.Components
             return await DeleteModel(Service, Model.NoteId);
         }
 
+        public async Task<bool> SaveFastAlarm(string unitTime, int value)
+        {
+            View.ShowInfo(unitTime + value.ToString());
+            return await Task.FromResult<bool>(true);
+        }
+
+
         #endregion 
 
         #region Component specific methods

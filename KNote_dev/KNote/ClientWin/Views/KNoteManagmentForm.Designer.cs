@@ -58,16 +58,6 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMoveSelectedNotes = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem12 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuAlarmaWithin = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlarm10m = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlarm30m = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlarm1h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlarm4h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlarm8h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlarm24h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlarm1week = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlarm1month = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem13 = new System.Windows.Forms.ToolStripSeparator();
             this.menuUpdateAttributes = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAddTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuRemoveTags = new System.Windows.Forms.ToolStripMenuItem();
@@ -286,8 +276,6 @@
             this.toolStripMenuItem1,
             this.menuMoveSelectedNotes,
             this.toolStripMenuItem12,
-            this.menuAlarmaWithin,
-            this.toolStripMenuItem13,
             this.menuUpdateAttributes,
             this.menuAddTags,
             this.menuRemoveTags,
@@ -351,82 +339,6 @@
             // 
             this.toolStripMenuItem12.Name = "toolStripMenuItem12";
             this.toolStripMenuItem12.Size = new System.Drawing.Size(265, 6);
-            // 
-            // menuAlarmaWithin
-            // 
-            this.menuAlarmaWithin.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuAlarm10m,
-            this.menuAlarm30m,
-            this.menuAlarm1h,
-            this.menuAlarm4h,
-            this.menuAlarm8h,
-            this.menuAlarm24h,
-            this.menuAlarm1week,
-            this.menuAlarm1month});
-            this.menuAlarmaWithin.Name = "menuAlarmaWithin";
-            this.menuAlarmaWithin.Size = new System.Drawing.Size(268, 22);
-            this.menuAlarmaWithin.Text = "Activate note &alarm within";
-            // 
-            // menuAlarm10m
-            // 
-            this.menuAlarm10m.Name = "menuAlarm10m";
-            this.menuAlarm10m.Size = new System.Drawing.Size(132, 22);
-            this.menuAlarm10m.Text = "10 minutes";
-            this.menuAlarm10m.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuAlarm30m
-            // 
-            this.menuAlarm30m.Name = "menuAlarm30m";
-            this.menuAlarm30m.Size = new System.Drawing.Size(132, 22);
-            this.menuAlarm30m.Text = "30 minutes";
-            this.menuAlarm30m.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuAlarm1h
-            // 
-            this.menuAlarm1h.Name = "menuAlarm1h";
-            this.menuAlarm1h.Size = new System.Drawing.Size(132, 22);
-            this.menuAlarm1h.Text = "1 hour";
-            this.menuAlarm1h.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuAlarm4h
-            // 
-            this.menuAlarm4h.Name = "menuAlarm4h";
-            this.menuAlarm4h.Size = new System.Drawing.Size(132, 22);
-            this.menuAlarm4h.Text = "4 hours";
-            this.menuAlarm4h.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuAlarm8h
-            // 
-            this.menuAlarm8h.Name = "menuAlarm8h";
-            this.menuAlarm8h.Size = new System.Drawing.Size(132, 22);
-            this.menuAlarm8h.Text = "8 hours";
-            this.menuAlarm8h.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuAlarm24h
-            // 
-            this.menuAlarm24h.Name = "menuAlarm24h";
-            this.menuAlarm24h.Size = new System.Drawing.Size(132, 22);
-            this.menuAlarm24h.Text = "24 hours";
-            this.menuAlarm24h.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuAlarm1week
-            // 
-            this.menuAlarm1week.Name = "menuAlarm1week";
-            this.menuAlarm1week.Size = new System.Drawing.Size(132, 22);
-            this.menuAlarm1week.Text = "1 week";
-            this.menuAlarm1week.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuAlarm1month
-            // 
-            this.menuAlarm1month.Name = "menuAlarm1month";
-            this.menuAlarm1month.Size = new System.Drawing.Size(132, 22);
-            this.menuAlarm1month.Text = "1 month";
-            this.menuAlarm1month.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // toolStripMenuItem13
-            // 
-            this.toolStripMenuItem13.Name = "toolStripMenuItem13";
-            this.toolStripMenuItem13.Size = new System.Drawing.Size(265, 6);
             // 
             // menuUpdateAttributes
             // 
@@ -905,16 +817,6 @@
         private System.Windows.Forms.ToolStripMenuItem menuMoveSelectedNotes;
         private System.Windows.Forms.ToolStripMenuItem menuUpdateAttributes;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem12;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarmaWithin;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarm10m;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarm30m;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarm1h;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarm4h;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarm8h;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarm24h;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarm1week;
-        private System.Windows.Forms.ToolStripMenuItem menuAlarm1month;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem13;
         private System.Windows.Forms.ToolStripMenuItem menuAddTags;
         private System.Windows.Forms.ToolStripMenuItem menuRemoveTags;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem16;

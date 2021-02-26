@@ -1236,6 +1236,7 @@
             this.textScriptCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textScriptCode.Multiline = true;
             this.textScriptCode.Name = "textScriptCode";
+            this.textScriptCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textScriptCode.Size = new System.Drawing.Size(780, 532);
             this.textScriptCode.TabIndex = 6;
             // 
