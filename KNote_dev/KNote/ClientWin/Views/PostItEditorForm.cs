@@ -467,10 +467,23 @@ namespace KNote.ClientWin.Views
 
         private async Task<bool> FastAlarmAndHide(string unitTime, int value)
         {
-            var resAlarm = await _com.SaveFastAlarm(unitTime, value);
-
-            var resSave = await SaveAndHide();
-            return resSave;
+            _com.WindowPostIt.Visible = false;
+            var resSave = await SaveModel();
+                    
+            if (resSave)
+            {
+                var resAlarm = await _com.SaveFastAlarm(unitTime, value);
+                if(resAlarm)
+                    _com.Finalize();
+                else
+                    MessageBox.Show("The alarm could not be saved.");
+                return resAlarm;
+            }
+            else
+            {
+                MessageBox.Show("This note could not be saved.");
+                return await Task.FromResult<bool>(false);
+            }
         }
 
         private void DrawFormBorder()

@@ -212,9 +212,47 @@ namespace KNote.ClientWin.Components
         }
 
         public async Task<bool> SaveFastAlarm(string unitTime, int value)
-        {
-            View.ShowInfo(unitTime + value.ToString());
-            return await Task.FromResult<bool>(true);
+        {                                    
+            DateTime? alarmDateTime = null;
+
+            switch (unitTime)
+            {
+                case "m":
+                    alarmDateTime = DateTime.Now.AddMinutes(value);
+                    break;
+                case "h":
+                    alarmDateTime = DateTime.Now.AddMinutes(value * 60);
+                    break;
+                case "week":
+                    alarmDateTime = DateTime.Now.AddDays(7);
+                    break;
+                case "month":
+                    alarmDateTime = DateTime.Now.AddMonths(1);
+                    break;
+                case "year":
+                    alarmDateTime = DateTime.Now.AddYears(1);
+                    break;
+                default:
+                    break;
+            }
+
+            var alarm = new KMessageDto
+            {
+                NoteId = Model.NoteId,
+                UserId = await GetUserId(),
+                ActionType = EnumActionType.NoteAlarm,
+                NotificationType = EnumNotificationType.PostIt,
+                AlarmType = EnumAlarmType.Standard,
+                AlarmDateTime = alarmDateTime,
+                AlarmMinutes = 0,
+                Comment = "(Fast alarm)",
+                AlarmActivated = true
+
+            };
+
+            var resSaveMsg = await Service.Notes.SaveMessageAsync(alarm, true);
+
+            return await Task.FromResult<bool>(resSaveMsg.IsValid);
         }
 
 
