@@ -24,26 +24,7 @@ namespace KNote.ClientWin.Views
             _com = com;
         }
 
-        #region IManagmentView implementation
-        public Control PanelView()
-        {
-            return null;
-        }
-
-        public void CloseView()
-        {
-            this.Close();
-        }
-
-        public void RefreshView()
-        {
-            // ...
-        }
-
-        public DialogResult ShowInfo(string info, string caption = "KeyNotex", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-        {
-            return MessageBox.Show(info, caption, buttons, icon);
-        }
+        #region IViewBase implementation
 
         public void ShowView()
         {
@@ -53,6 +34,11 @@ namespace KNote.ClientWin.Views
         Result<EComponentResult> IViewBase.ShowModalView()
         {
             return _com.DialogResultToComponentResult(this.ShowDialog());
+        }
+
+        public DialogResult ShowInfo(string info, string caption = "KeyNotex", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+        {
+            return MessageBox.Show(info, caption, buttons, icon);
         }
 
         public void OnClosingView()

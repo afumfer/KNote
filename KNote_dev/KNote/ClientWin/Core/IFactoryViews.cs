@@ -23,6 +23,7 @@ namespace KNote.ClientWin.Core
         ISelectorView<NoteTypeDto> View(NoteTypesSelectorComponent component);
         IEditorView<NoteKAttributeDto> View(NoteAttributeEditorComponent component);
         IViewBase NotifyView(KNoteManagmentComponent component);
+        IViewBase AboutView(KNoteManagmentComponent component);
         IEditorView<KAttributeDto> View(AttributeEditorComponent component);
         ISelectorView<NotesFilterWithServiceRef> View(FiltersSelectorComponent component);
     }

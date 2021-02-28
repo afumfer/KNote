@@ -101,6 +101,20 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        private IViewBase _aboutView;
+        public IViewBase AboutView
+        {
+            get
+            {
+                if (_aboutView == null)
+                {
+                    _aboutView = Store.FactoryViews.AboutView(this);
+                }
+                return _aboutView;
+            }
+        }
+
+
         #endregion
 
         #region Component override methods
@@ -602,6 +616,11 @@ namespace KNote.ClientWin.Components
         public void RunScriptSelectedNote()
         {
             Store.RunScript(SelectedNoteInfo.Script);
+        }
+
+        public void About()
+        {
+            AboutView.ShowModalView();
         }
 
         #endregion

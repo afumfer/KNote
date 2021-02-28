@@ -63,6 +63,11 @@ namespace KNote.ClientWin.Core
             return new NotifyForm(component);
         }
 
+        public IViewBase AboutView(KNoteManagmentComponent component)
+        {
+            return new KNoteAboutForm(component);
+        }
+
         public IEditorView<KMessageDto> View(MessageEditorComponent component)
         {
             return new MessageEditorForm(component);
@@ -96,6 +101,7 @@ namespace KNote.ClientWin.Core
         public ISelectorView<NotesFilterWithServiceRef> View(FiltersSelectorComponent component)
         {
             return new FiltersSelectorForm(component);
-        }        
+        }
+
     }
 }

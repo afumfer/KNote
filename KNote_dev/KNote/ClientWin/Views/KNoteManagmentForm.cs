@@ -177,6 +177,10 @@ namespace KNote.ClientWin.Views
             {
                 _com.HideKNoteManagment();
             }
+            else if (menuSel == menuAbout)
+            {
+                _com.About();
+            }
             else if (menuSel == menuExit)
             {
                 await _com.FinalizeApp();
@@ -215,6 +219,16 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabExplorers.SelectedIndex == 0)
+                _com.GoActiveFolder();
+            else
+            {
+                _com.GoActiveFilter();
+            }
+        }
+
         #endregion
 
         #region Private methods
@@ -229,15 +243,6 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
-        private void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (tabExplorers.SelectedIndex == 0)
-                _com.GoActiveFolder();
-            else
-            {
-                _com.GoActiveFilter();
-            }
-        }
     }
 
     public class WaitCursor : IDisposable
