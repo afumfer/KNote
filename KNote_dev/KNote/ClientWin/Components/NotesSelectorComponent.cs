@@ -219,5 +219,15 @@ namespace KNote.ClientWin.Components
         }
 
         #endregion
+
+        #region Extra methods
+        
+        public List<NoteInfoDto> GetSelectedListNotesInfo()
+        {
+            return View.GetSelectedListItem();
+        }
+
+        #endregion 
+
     }
 }

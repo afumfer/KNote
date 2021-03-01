@@ -38,5 +38,6 @@ namespace KNote.Service
         Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false);
         Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName);
         Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null);
+        Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId);
     }
 }

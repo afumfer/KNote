@@ -469,6 +469,11 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetAlarmNotesIdAsync(userId, notificationType);
         }
 
+        public async Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId)
+        {
+            return await _repository.Notes.PatchFolder(noteId, folderId);
+        }
+
         #endregion
 
     }

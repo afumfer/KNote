@@ -1059,6 +1059,42 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
+        public async Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId)
+        {
+            Result<Note> resRep = null;
+            var result = new Result<bool>();
+
+            try
+            {
+                var ctx = GetOpenConnection();
+                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx, ThrowKntException);
+
+                var entityForUpdate = await notes.DbSet.Where(n => n.NoteId == noteId).SingleOrDefaultAsync();                
+
+                if (entityForUpdate != null)
+                {                    
+                    entityForUpdate.FolderId = folderId;
+                    resRep = await notes.UpdateAsync(entityForUpdate);                    
+                    result.Entity = resRep.IsValid;
+                }
+                else
+                {
+                    result.Entity = false;
+                    result.AddErrorMessage("Can't find entity for update.");
+                }
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resRep.ErrorList);
+            }
+
+            result.ErrorList = resRep.ErrorList;
+            return ResultDomainAction(result); ;
+        }
+
+
         #endregion 
 
         #region Utils methods 

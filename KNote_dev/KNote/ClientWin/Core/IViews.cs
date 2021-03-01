@@ -56,6 +56,7 @@ namespace KNote.ClientWin.Core
         void DeleteItem(TItem item);
         void AddItem(TItem item);
         object SelectItem(TItem item);
+        List<TItem> GetSelectedListItem();
     }
 
     #endregion

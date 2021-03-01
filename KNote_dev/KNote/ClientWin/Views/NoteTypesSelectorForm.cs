@@ -109,6 +109,11 @@ namespace KNote.ClientWin.Views
             throw new NotImplementedException();
         }
 
+        public List<NoteTypeDto> GetSelectedListItem()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         #region Form events handlers

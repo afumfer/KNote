@@ -1296,6 +1296,37 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public async Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var db = GetOpenConnection();
+
+                var sql = @"UPDATE Notes SET                         
+                        FolderId = @FolderId  
+                    WHERE NoteId = @NoteId";
+
+                var r = await db.ExecuteAsync(sql.ToString(),
+                    new
+                    {                        
+                        NoteId = noteId,
+                        FolderId = folderId,
+                    });
+
+                if (r == 0)
+                    result.ErrorList.Add("Entity not updated");
+
+                result.Entity = true;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
 
         #endregion
 
@@ -1479,7 +1510,6 @@ namespace KNote.Repository.Dapper
             }
             return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
         }
-
 
         #endregion
     }

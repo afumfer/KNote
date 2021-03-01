@@ -26,7 +26,7 @@ namespace KNote.ClientWin.Views
             _com = com;            
         }
 
-        #region IEditorView implementation
+        #region ISelectorView implementation
 
         public Control PanelView()
         {
@@ -95,6 +95,11 @@ namespace KNote.ClientWin.Views
         }
 
         public object SelectItem(NotesFilterWithServiceRef item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<NotesFilterWithServiceRef> GetSelectedListItem()
         {
             throw new NotImplementedException();
         }

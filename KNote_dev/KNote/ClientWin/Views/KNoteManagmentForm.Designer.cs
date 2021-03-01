@@ -58,7 +58,6 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMoveSelectedNotes = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem12 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuUpdateAttributes = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAddTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuRemoveTags = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem16 = new System.Windows.Forms.ToolStripSeparator();
@@ -276,7 +275,6 @@
             this.toolStripMenuItem1,
             this.menuMoveSelectedNotes,
             this.toolStripMenuItem12,
-            this.menuUpdateAttributes,
             this.menuAddTags,
             this.menuRemoveTags,
             this.toolStripMenuItem16,
@@ -339,13 +337,6 @@
             // 
             this.toolStripMenuItem12.Name = "toolStripMenuItem12";
             this.toolStripMenuItem12.Size = new System.Drawing.Size(265, 6);
-            // 
-            // menuUpdateAttributes
-            // 
-            this.menuUpdateAttributes.Name = "menuUpdateAttributes";
-            this.menuUpdateAttributes.Size = new System.Drawing.Size(268, 22);
-            this.menuUpdateAttributes.Text = "Update attributes in selected notes ...";
-            this.menuUpdateAttributes.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuAddTags
             // 
@@ -815,7 +806,6 @@
         private System.Windows.Forms.ToolStripMenuItem menuDeleteNote;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem menuMoveSelectedNotes;
-        private System.Windows.Forms.ToolStripMenuItem menuUpdateAttributes;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem12;
         private System.Windows.Forms.ToolStripMenuItem menuAddTags;
         private System.Windows.Forms.ToolStripMenuItem menuRemoveTags;

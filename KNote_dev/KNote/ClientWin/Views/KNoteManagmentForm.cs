@@ -181,6 +181,10 @@ namespace KNote.ClientWin.Views
             {
                 _com.About();
             }
+            else if (menuSel == menuMoveSelectedNotes)
+            {
+                _com.MoveSelectedNotes();
+            }
             else if (menuSel == menuExit)
             {
                 await _com.FinalizeApp();

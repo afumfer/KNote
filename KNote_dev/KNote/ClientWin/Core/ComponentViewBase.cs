@@ -1,4 +1,6 @@
-﻿using KNote.Model;
+﻿using KNote.ClientWin.Components;
+using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Service;
 using System;
 using System.Collections.Generic;
@@ -116,7 +118,7 @@ namespace KNote.ClientWin.Core
         public IKntService Service { get; protected set; }
 
         public TEntity SelectedEntity { get; set; }
-
+        
         public List<TEntity> ListEntities { get; protected set; }
 
         public Dictionary<string, ExtensionsEventHandler<TEntity>> Extensions { get; set; } =

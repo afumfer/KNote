@@ -191,6 +191,11 @@ namespace KNote.ClientWin.Views
             }            
         }
 
+        public List<FolderWithServiceRef> GetSelectedListItem()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion 
 
         #endregion
@@ -297,7 +302,5 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
-
     }
 }

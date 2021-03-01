@@ -226,7 +226,7 @@ namespace KNote.ClientWin.Views
                 {
                     this.Cursor = Cursors.WaitCursor;
                     var sr = dataGridNotes.SelectedRows[0];
-                    _com.SelectedEntity = DataGridViewRowToNoteItemList(sr);                    
+                    _com.SelectedEntity = DataGridViewRowToNoteInfo(sr);                    
                     _com.NotifySelectedEntity();
                 }
             }
@@ -294,14 +294,14 @@ namespace KNote.ClientWin.Views
             dataGridNotes.Columns[12].DataPropertyName = "NoteTypeId";            
         }
 
-        private NoteInfoDto DataGridViewRowToNoteItemList(DataGridViewRow dgr)
-        {
-            var n = new NoteInfoDto();
-
+        private NoteInfoDto DataGridViewRowToNoteInfo(DataGridViewRow dgr)
+        {            
             if (dgr == null)
                 return null;
             else
             {
+                var n = new NoteInfoDto();
+
                 n.NoteId = (Guid)dgr.Cells["NoteId"].Value;
                 n.NoteNumber = (int)dgr.Cells["NoteNumber"].Value;
                 n.Topic = (string)dgr.Cells["Topic"].Value;
@@ -320,6 +320,16 @@ namespace KNote.ClientWin.Views
                     n.NoteTypeId = null;
                 return n;
             }
+        }
+
+        public List<NoteInfoDto> GetSelectedListItem()
+        {
+            var listNoteInfo = new List<NoteInfoDto>();
+
+            foreach(var dg in dataGridNotes.SelectedRows)            
+                listNoteInfo.Add(DataGridViewRowToNoteInfo((DataGridViewRow)dg));
+            
+            return listNoteInfo;
         }
 
         private void GridSelectFirstElement(bool skipSelectionChanged = true)
@@ -376,6 +386,5 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
     }
 }

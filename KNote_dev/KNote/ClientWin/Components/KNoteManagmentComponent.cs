@@ -232,6 +232,8 @@ namespace KNote.ClientWin.Components
                     _notesSelectorComponent.Extensions.Add("Edit note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNote));
                     _notesSelectorComponent.Extensions.Add("Edit note as PostIt ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNoteAsPostIt));
                     _notesSelectorComponent.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendDeleteNote));
+                    _notesSelectorComponent.Extensions.Add("--", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
+                    _notesSelectorComponent.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendMoveSelectedNotes));
                 }
                 return _notesSelectorComponent;
             }
@@ -281,6 +283,16 @@ namespace KNote.ClientWin.Components
         private void ExtendDeleteNote(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
             DeleteNote();
+        }
+
+        private void ExtendMoveSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            MoveSelectedNotes();
+        }
+
+        private void ExtendNull(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            
         }
 
         #endregion
@@ -616,6 +628,34 @@ namespace KNote.ClientWin.Components
         public void RunScriptSelectedNote()
         {
             Store.RunScript(SelectedNoteInfo.Script);
+        }
+        
+        public async void MoveSelectedNotes()
+        {
+            var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
+
+            if(selectedNotes == null || selectedNotes?.Count == 0)
+            {                
+                View.ShowInfo("You have not selected notes .");
+                return;
+            }
+
+            var folderSelector = new FoldersSelectorComponent(Store);
+            var services = new List<ServiceRef>();
+            services.Add(SelectedServiceRef);
+            folderSelector.ServicesRef = services;
+            var res = folderSelector.RunModal();
+            if (res.Entity != EComponentResult.Executed)
+                return;
+
+            var newFolderId = folderSelector.SelectedEntity.FolderInfo.FolderId;                          
+            foreach (var n in selectedNotes)                            
+                await SelectedServiceRef.Service.Notes.PatchFolder(n.NoteId, newFolderId);
+            
+            if (SelectMode == EnumSelectMode.Folders)
+                _folderSelectorComponent_EntitySelection(this, new ComponentEventArgs<FolderWithServiceRef>(SelectedFolderWithServiceRef));
+            else if (SelectMode == EnumSelectMode.Filters)
+                _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
         }
 
         public void About()
