@@ -49,6 +49,7 @@
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.button1 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -69,6 +70,7 @@
             // 
             // tabAppLab
             // 
+            this.tabAppLab.Controls.Add(this.button1);
             this.tabAppLab.Controls.Add(this.label2);
             this.tabAppLab.Controls.Add(this.label1);
             this.tabAppLab.Controls.Add(this.listMessages);
@@ -265,6 +267,16 @@
             this.htmlDescription.Size = new System.Drawing.Size(634, 287);
             this.htmlDescription.TabIndex = 10;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(16, 113);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(295, 25);
+            this.button1.TabIndex = 9;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // LabForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -308,5 +320,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button buttonSelectScriptDirectory;
+        private System.Windows.Forms.Button button1;
     }
 }

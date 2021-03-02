@@ -474,6 +474,11 @@ namespace KNote.Service.Services
             return await _repository.Notes.PatchFolder(noteId, folderId);
         }
 
+        public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
+        {                        
+            return await _repository.Notes.PatchChangeTags(noteId,  oldTag, newTag);
+        }
+
         #endregion
 
     }

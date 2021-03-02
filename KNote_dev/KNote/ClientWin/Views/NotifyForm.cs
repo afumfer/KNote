@@ -85,7 +85,7 @@ namespace KNote.ClientWin.Views
 
         private void menuAbout_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("TODO: ....");
+            _com.About();
         }
 
         private void menuExit_Click(object sender, EventArgs e)

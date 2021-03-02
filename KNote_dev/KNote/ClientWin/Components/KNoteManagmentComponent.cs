@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using System.Text;
@@ -234,6 +235,8 @@ namespace KNote.ClientWin.Components
                     _notesSelectorComponent.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendDeleteNote));
                     _notesSelectorComponent.Extensions.Add("--", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
                     _notesSelectorComponent.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendMoveSelectedNotes));
+                    _notesSelectorComponent.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddTagSelectedNotes));
+                    _notesSelectorComponent.Extensions.Add("Remove tag from selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendRemoveTagSelectedNotes));
                 }
                 return _notesSelectorComponent;
             }
@@ -293,6 +296,15 @@ namespace KNote.ClientWin.Components
         private void ExtendNull(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
             
+        }
+        private void ExtendAddTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            AddTagsSelectedNotes();
+        }
+
+        private void ExtendRemoveTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            RemoveTagsSelectedNotes();
         }
 
         #endregion
@@ -633,7 +645,6 @@ namespace KNote.ClientWin.Components
         public async void MoveSelectedNotes()
         {
             var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
-
             if(selectedNotes == null || selectedNotes?.Count == 0)
             {                
                 View.ShowInfo("You have not selected notes .");
@@ -657,6 +668,63 @@ namespace KNote.ClientWin.Components
             else if (SelectMode == EnumSelectMode.Filters)
                 _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
         }
+
+        public async void AddTagsSelectedNotes()
+        {
+            var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
+            if (selectedNotes == null || selectedNotes?.Count == 0)
+            {
+                View.ShowInfo("You have not selected notes for add tags .");
+                return;
+            }
+
+            var listVars = new List<ReadVarItem> {new ReadVarItem
+            {
+                Label = "Type new tag:",
+                VarIdent = "Tag",
+                VarValue = "",
+                VarNewValueText = ""
+            } };
+
+            var formReadVar = new ReadVarForm(listVars);
+            formReadVar.Text = "Tags for selected notes";
+            formReadVar.Size = new Size(500, 150);
+            var result = formReadVar.ShowDialog();
+
+            if (result == DialogResult.Cancel)
+                return;
+            else
+            {
+                var newTag = listVars[0].VarNewValueText;
+                foreach (var note in selectedNotes)
+                    await SelectedServiceRef.Service.Notes.PatchChangeTags(note.NoteId, "", newTag);
+
+                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
+            }
+        }
+
+        public void RemoveTagsSelectedNotes()
+        {
+            MessageBox.Show("Remove tags");
+        }
+
+        public void RunScriptSelectedNotes()
+        {
+            var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
+
+            if (selectedNotes == null || selectedNotes?.Count == 0)
+            {
+                View.ShowInfo("You have not selected notes for run scripts .");
+                return;
+            }
+
+            foreach (var note in selectedNotes)
+            {
+                if (!string.IsNullOrEmpty(note.Script))
+                    Store.RunScript(note.Script);
+            }
+        }
+
 
         public void About()
         {

@@ -39,5 +39,6 @@ namespace KNote.Service
         Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName);
         Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null);
         Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId);
+        Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag);
     }
 }

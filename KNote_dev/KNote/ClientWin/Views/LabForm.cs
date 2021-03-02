@@ -481,6 +481,33 @@ namespace KNote.ClientWin.Views
                 }
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var listVars = new List<ReadVarItem>();
+
+            listVars.Add(new ReadVarItem
+            {
+                Label = "Type new tag:",
+                VarIdent = "Tag",
+                VarValue = "",
+                VarNewValueText = ""
+            });
+
+            var formReadVar = new ReadVarForm(listVars);
+            formReadVar.Text = "Tags for selected notes";
+            formReadVar.Size = new Size(500, 150);
+            var result = formReadVar.ShowDialog();
+
+            if(result == DialogResult.Cancel)
+                MessageBox.Show("Cancel");
+            else
+            {
+                var xx = listVars[0].VarNewValueText;
+                MessageBox.Show(xx);
+            }
+
+        }
     }
 
 }

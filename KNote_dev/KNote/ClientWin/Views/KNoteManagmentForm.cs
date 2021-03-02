@@ -165,10 +165,6 @@ namespace KNote.ClientWin.Views
             {
                 _com.DeleteNote();                
             }
-            else if (menuSel == menuExecuteKntScript)
-            {
-                _com.RunScriptSelectedNote();
-            }
             else if (menuSel == menuKntScriptConsole)
             {
                 _com.ShowKntScriptConsole();
@@ -184,6 +180,18 @@ namespace KNote.ClientWin.Views
             else if (menuSel == menuMoveSelectedNotes)
             {
                 _com.MoveSelectedNotes();
+            }
+            else if (menuSel == menuAddTags)
+            {
+                _com.AddTagsSelectedNotes();
+            }
+            else if (menuSel == menuRemoveTags)
+            {
+                _com.RemoveTagsSelectedNotes();
+            }
+            else if (menuSel == menuExecuteKntScript)
+            {
+                _com.RunScriptSelectedNotes();
             }
             else if (menuSel == menuExit)
             {

@@ -1094,6 +1094,51 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result); ;
         }
 
+        public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
+        {
+            var result = new Result<bool>();
+
+            if (string.IsNullOrEmpty(oldTag) && string.IsNullOrEmpty(newTag))
+            {
+                result.AddErrorMessage("Invalid tags parameters.");
+                return result;
+            }
+
+            Result<Note> resRep = null;
+            
+            try
+            {
+                var ctx = GetOpenConnection();
+                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx, ThrowKntException);
+
+                var entityForUpdate = await notes.DbSet.Where(n => n.NoteId == noteId).SingleOrDefaultAsync();
+
+                if (entityForUpdate != null)
+                {
+                    if (string.IsNullOrEmpty(oldTag))
+                        entityForUpdate.Tags += " " + newTag;
+                    else
+                        entityForUpdate.Tags.Replace(oldTag, newTag);                    
+                    resRep = await notes.UpdateAsync(entityForUpdate);
+                    result.Entity = resRep.IsValid;
+                }
+                else
+                {
+                    result.Entity = false;
+                    result.AddErrorMessage("Can't find entity for update.");
+                }
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, resRep.ErrorList);
+            }
+
+            result.ErrorList = resRep.ErrorList;
+            return ResultDomainAction(result); ;
+        }
+
 
         #endregion 
 

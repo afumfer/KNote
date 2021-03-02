@@ -1328,6 +1328,11 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         #region Private methods
