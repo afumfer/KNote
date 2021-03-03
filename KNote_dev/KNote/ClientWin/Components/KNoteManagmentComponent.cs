@@ -676,73 +676,6 @@ namespace KNote.ClientWin.Components
             ChangeTags(EnumChangeTag.Remove);
         }
 
-        enum EnumChangeTag
-        {
-            Add,
-            Remove
-        }
-
-        private async void ChangeTags(EnumChangeTag action)
-        {
-            var strTmp = "";
-
-            var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
-            if (selectedNotes == null || selectedNotes?.Count == 0)
-            {
-                if(action == EnumChangeTag.Add)
-                    View.ShowInfo("You have not selected notes for add tags .");
-                else
-                    View.ShowInfo("You have not selected notes for remove tags .");
-                return;
-            }
-
-            if (action == EnumChangeTag.Add)
-                strTmp = "Type new tag:";
-            else
-                strTmp = "Type tag for remove:";
-
-            var listVars = new List<ReadVarItem> {new ReadVarItem
-            {
-                
-                Label = strTmp,
-                VarIdent = "Tag",
-                VarValue = "",
-                VarNewValueText = ""
-            } };
-
-            var formReadVar = new ReadVarForm(listVars);
-            if(action == EnumChangeTag.Add)
-                formReadVar.Text = "New tags for selected notes";
-            else
-                formReadVar.Text = "Remove tags in selected notes";
-            formReadVar.Size = new Size(500, 150);
-            var result = formReadVar.ShowDialog();
-
-            if (result == DialogResult.Cancel)
-                return;
-            else
-            {
-                var tag = listVars[0].VarNewValueText;
-                foreach (var note in selectedNotes)
-                    if (action == EnumChangeTag.Add)
-                        await SelectedServiceRef.Service.Notes.PatchChangeTags(note.NoteId, "", tag);
-                    else
-                        await SelectedServiceRef.Service.Notes.PatchChangeTags(note.NoteId, tag, "");
-
-                //await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
-                ForceRefreshListNotes();
-            }
-        }
-
-        private void ForceRefreshListNotes()
-        {
-            if (SelectMode == EnumSelectMode.Folders)
-                _folderSelectorComponent_EntitySelection(this, new ComponentEventArgs<FolderWithServiceRef>(SelectedFolderWithServiceRef));
-            else if (SelectMode == EnumSelectMode.Filters)
-                _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
-        }
-
-
         public void RunScriptSelectedNotes()
         {
             var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
@@ -759,7 +692,6 @@ namespace KNote.ClientWin.Components
                     Store.RunScript(note.Script);
             }
         }
-
 
         public void About()
         {
@@ -840,6 +772,82 @@ namespace KNote.ClientWin.Components
                 _selectedNoteInfo = null;
             }
         }
+
+        #endregion
+
+        #region Private methods
+
+        private void ForceRefreshListNotes()
+        {
+            if (SelectMode == EnumSelectMode.Folders)
+                _folderSelectorComponent_EntitySelection(this, new ComponentEventArgs<FolderWithServiceRef>(SelectedFolderWithServiceRef));
+            else if (SelectMode == EnumSelectMode.Filters)
+                _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
+        }
+
+
+        private async void ChangeTags(EnumChangeTag action)
+        {
+            var strTmp = "";
+
+            var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
+            if (selectedNotes == null || selectedNotes?.Count == 0)
+            {
+                if (action == EnumChangeTag.Add)
+                    View.ShowInfo("You have not selected notes for add tags .");
+                else
+                    View.ShowInfo("You have not selected notes for remove tags .");
+                return;
+            }
+
+            if (action == EnumChangeTag.Add)
+                strTmp = "Type new tag:";
+            else
+                strTmp = "Type tag for remove:";
+
+            var listVars = new List<ReadVarItem> {new ReadVarItem
+            {
+
+                Label = strTmp,
+                VarIdent = "Tag",
+                VarValue = "",
+                VarNewValueText = ""
+            } };
+
+            var formReadVar = new ReadVarForm(listVars);
+            if (action == EnumChangeTag.Add)
+                formReadVar.Text = "New tags for selected notes";
+            else
+                formReadVar.Text = "Remove tags in selected notes";
+            formReadVar.Size = new Size(500, 150);
+            var result = formReadVar.ShowDialog();
+
+            if (result == DialogResult.Cancel)
+                return;
+            else
+            {
+                var tag = listVars[0].VarNewValueText;
+                foreach (var note in selectedNotes)
+                    if (action == EnumChangeTag.Add)
+                        await SelectedServiceRef.Service.Notes.PatchChangeTags(note.NoteId, "", tag);
+                    else
+                        await SelectedServiceRef.Service.Notes.PatchChangeTags(note.NoteId, tag, "");
+
+                ForceRefreshListNotes();
+            }
+        }
+
+        #endregion
+
+        #region Private Enums
+
+        enum EnumChangeTag
+        {
+            Add,
+            Remove
+        }
+
+
 
         #endregion 
 

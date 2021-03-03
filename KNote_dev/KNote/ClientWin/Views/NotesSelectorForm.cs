@@ -61,10 +61,8 @@ namespace KNote.ClientWin.Views
                     _orderColNumber = 1;
                     _sortOrder = getSortOrder(_orderColNumber);
                 }
-                RefreshDataGridNotes();
 
-                if(_com.ListEntities.Count > 0)
-                    GridSelectFirstElement();
+                RefreshDataGridNotes();
             }
         }
 
@@ -108,7 +106,7 @@ namespace KNote.ClientWin.Views
 
         public void AddItem(NoteInfoDto item)
         {
-            // En este caso no se usa item, la actualización se resuelve con databindig
+            // In this case item is not used, the update is resolved with databindig 
             RefreshDataGridNotes();
 
             int index = 0;
@@ -129,7 +127,7 @@ namespace KNote.ClientWin.Views
 
         public void DeleteItem(NoteInfoDto item)
         {
-            // En este caso no se usa item, la actualización se resuelve con databindig
+            // In this case item is not used, the update is resolved with databindig 
             RefreshDataGridNotes();
 
             if (_com.ListEntities.Count == 0)
@@ -210,7 +208,10 @@ namespace KNote.ClientWin.Views
             if (dataGridNotes.Columns.Count > 0)
                 dataGridNotes.Columns[_orderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
 
-            _skipSelectionChanged = false;
+            if (_com.ListEntities.Count > 0)            
+                ActiveCurrentRow();
+            
+            _skipSelectionChanged = false;            
         }
 
         private void OnSelectedNoteItemChanged()
@@ -221,14 +222,11 @@ namespace KNote.ClientWin.Views
             {
                 if (_com.ListEntities == null)
                     return;
-
-                if (dataGridNotes.SelectedRows.Count > 0)
-                {
-                    this.Cursor = Cursors.WaitCursor;
-                    var sr = dataGridNotes.SelectedRows[0];
-                    _com.SelectedEntity = DataGridViewRowToNoteInfo(sr);                    
-                    _com.NotifySelectedEntity();
-                }
+                
+                this.Cursor = Cursors.WaitCursor;
+                if (dataGridNotes.SelectedRows.Count > 0)                                    
+                    ActiveCurrentRow();
+                
             }
             catch (Exception ex)
             {
@@ -238,7 +236,13 @@ namespace KNote.ClientWin.Views
             {
                 this.Cursor = Cursors.Default;
             }
+        }
 
+        private void ActiveCurrentRow()
+        {
+            var sr = dataGridNotes.SelectedRows[0];
+            _com.SelectedEntity = DataGridViewRowToNoteInfo(sr);
+            _com.NotifySelectedEntity();
         }
 
         private void CoonfigureGridStd()
@@ -337,7 +341,7 @@ namespace KNote.ClientWin.Views
             _skipSelectionChanged = skipSelectionChanged;
             dataGridNotes.ClearSelection();            
             dataGridNotes.CurrentCell = dataGridNotes.Rows[0].Cells[1];            
-            dataGridNotes.Rows[0].Selected = true;
+            dataGridNotes.Rows[0].Selected = true;            
             _skipSelectionChanged = false;           
         }
 
