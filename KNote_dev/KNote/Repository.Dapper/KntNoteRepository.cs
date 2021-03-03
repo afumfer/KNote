@@ -1328,9 +1328,36 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
+        public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
         {
-            throw new NotImplementedException();
+            var result = new Result<bool>();
+            var sql = "";
+            try
+            {
+                var db = GetOpenConnection();
+
+                sql = @"Select Tags FROM Notes WHERE NoteId = @NoteId";                
+                var actualTag = await db.ExecuteScalarAsync<string>(sql.ToString(), new { NoteId = noteId });                
+                if (string.IsNullOrEmpty(oldTag))
+                    actualTag += " " + newTag;
+                else
+                    actualTag = (actualTag.Replace(oldTag, newTag));
+                actualTag = actualTag.Trim();
+
+                sql = @"UPDATE Notes SET Tags = @NewTag  WHERE NoteId = @NoteId";
+                var r = await db.ExecuteAsync(sql.ToString(), new { NoteId = noteId, NewTag = actualTag });
+                if (r == 0)
+                    result.ErrorList.Add("Entity not updated");
+
+                result.Entity = true;
+
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
         }
 
         #endregion

@@ -413,6 +413,7 @@
             this.textDescription.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.textDescription.Location = new System.Drawing.Point(40, 14);
             this.textDescription.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textDescription.MaxLength = 0;
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
             this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;

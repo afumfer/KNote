@@ -1118,7 +1118,8 @@ namespace KNote.Repository.EntityFramework
                     if (string.IsNullOrEmpty(oldTag))
                         entityForUpdate.Tags += " " + newTag;
                     else
-                        entityForUpdate.Tags.Replace(oldTag, newTag);                    
+                        entityForUpdate.Tags = entityForUpdate.Tags.Replace(oldTag, newTag);
+                    entityForUpdate.Tags = entityForUpdate.Tags.Trim();
                     resRep = await notes.UpdateAsync(entityForUpdate);
                     result.Entity = resRep.IsValid;
                 }
