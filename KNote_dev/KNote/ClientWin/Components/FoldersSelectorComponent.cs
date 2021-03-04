@@ -101,5 +101,14 @@ namespace KNote.ClientWin.Components
         }
 
         #endregion
+
+        #region Component extra methods
+
+        public void Refresh()
+        {
+            View.RefreshView();
+        }
+
+        #endregion
     }
 }

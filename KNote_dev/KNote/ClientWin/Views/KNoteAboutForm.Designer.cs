@@ -67,17 +67,17 @@ namespace KNote.ClientWin.Views
             this.iconoANotas.ErrorImage = ((System.Drawing.Image)(resources.GetObject("iconoANotas.ErrorImage")));
             this.iconoANotas.Image = ((System.Drawing.Image)(resources.GetObject("iconoANotas.Image")));
             this.iconoANotas.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.iconoANotas.Location = new System.Drawing.Point(19, 17);
+            this.iconoANotas.Location = new System.Drawing.Point(30, 17);
             this.iconoANotas.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.iconoANotas.Name = "iconoANotas";
-            this.iconoANotas.Size = new System.Drawing.Size(89, 88);
+            this.iconoANotas.Size = new System.Drawing.Size(74, 79);
             this.iconoANotas.TabIndex = 15;
             this.iconoANotas.TabStop = false;
             // 
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(328, 357);
+            this.buttonAccept.Location = new System.Drawing.Point(346, 357);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
             this.buttonAccept.TabIndex = 18;
@@ -95,7 +95,7 @@ namespace KNote.ClientWin.Views
             this.labelInfo.Location = new System.Drawing.Point(116, 88);
             this.labelInfo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelInfo.Name = "labelInfo";
-            this.labelInfo.Size = new System.Drawing.Size(293, 255);
+            this.labelInfo.Size = new System.Drawing.Size(299, 255);
             this.labelInfo.TabIndex = 19;
             this.labelInfo.Text = "Info ...";
             // 
@@ -104,7 +104,7 @@ namespace KNote.ClientWin.Views
             this.AcceptButton = this.buttonAccept;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(421, 398);
+            this.ClientSize = new System.Drawing.Size(439, 398);
             this.Controls.Add(this.labelInfo);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.labelVersion);

@@ -434,6 +434,11 @@ namespace KNote.ClientWin.Components
             Finalize();
         }
 
+        public void CleanView()
+        {
+            View.CleanView();
+        }
+
         public void RunScript()
         {
             Store.RunScript(Model.Script);

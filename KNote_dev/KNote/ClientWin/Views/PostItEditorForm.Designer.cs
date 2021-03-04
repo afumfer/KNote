@@ -135,6 +135,7 @@ namespace KNote.ClientWin.Views
             this.textDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textDescription.Location = new System.Drawing.Point(25, 50);
             this.textDescription.Margin = new System.Windows.Forms.Padding(6);
+            this.textDescription.MaxLength = 0;
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
             this.textDescription.Size = new System.Drawing.Size(163, 70);

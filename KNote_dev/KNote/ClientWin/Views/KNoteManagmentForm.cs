@@ -192,6 +192,10 @@ namespace KNote.ClientWin.Views
             else if (menuSel == menuExecuteKntScript)
             {
                 _com.RunScriptSelectedNotes();
+            }            
+            else if (menuSel == menuRefreshTreeFolders)
+            {
+                _com.Refresh();
             }
             else if (menuSel == menuExit)
             {

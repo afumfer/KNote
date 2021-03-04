@@ -225,6 +225,12 @@ namespace KNote.ClientWin.Components
             return View.GetSelectedListItem();
         }
 
+        public void CleanView()
+        {
+            ListEntities = new List<NoteInfoDto>();            
+            View.RefreshView();
+        }
+
         #endregion 
 
     }

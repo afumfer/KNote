@@ -40,7 +40,7 @@
             // 
             this.labelVersion.ForeColor = System.Drawing.Color.White;
             this.labelVersion.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelVersion.Location = new System.Drawing.Point(131, 84);
+            this.labelVersion.Location = new System.Drawing.Point(121, 84);
             this.labelVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelVersion.Name = "labelVersion";
             this.labelVersion.Size = new System.Drawing.Size(188, 17);
@@ -65,7 +65,7 @@
             this.labelANotas.Font = new System.Drawing.Font("Courier New", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.labelANotas.ForeColor = System.Drawing.Color.White;
             this.labelANotas.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelANotas.Location = new System.Drawing.Point(128, 46);
+            this.labelANotas.Location = new System.Drawing.Point(119, 46);
             this.labelANotas.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelANotas.Name = "labelANotas";
             this.labelANotas.Size = new System.Drawing.Size(190, 28);
@@ -80,7 +80,7 @@
             this.iconoANotas.Location = new System.Drawing.Point(35, 46);
             this.iconoANotas.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.iconoANotas.Name = "iconoANotas";
-            this.iconoANotas.Size = new System.Drawing.Size(89, 88);
+            this.iconoANotas.Size = new System.Drawing.Size(76, 80);
             this.iconoANotas.TabIndex = 11;
             this.iconoANotas.TabStop = false;
             // 
@@ -89,7 +89,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(352, 217);
+            this.ClientSize = new System.Drawing.Size(348, 213);
             this.ControlBox = false;
             this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.labelMessage);

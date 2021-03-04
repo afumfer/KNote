@@ -1337,10 +1337,14 @@ namespace KNote.Repository.Dapper
                 var db = GetOpenConnection();
 
                 sql = @"Select Tags FROM Notes WHERE NoteId = @NoteId";                
-                var actualTag = await db.ExecuteScalarAsync<string>(sql.ToString(), new { NoteId = noteId });                
+                var actualTag = await db.ExecuteScalarAsync<string>(sql.ToString(), new { NoteId = noteId });         
+                
                 if (string.IsNullOrEmpty(oldTag))
-                    actualTag += " " + newTag;
-                else
+                {
+                    if (!(actualTag.IndexOf(newTag) >= 0))
+                        actualTag += " " + newTag;
+                }
+                else                    
                     actualTag = (actualTag.Replace(oldTag, newTag));
                 actualTag = actualTag.Trim();
 

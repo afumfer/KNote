@@ -188,7 +188,7 @@ namespace KNote.ClientWin.Components
             FolderPath = FoldersSelectorComponent.Path;            
             
             _selectedNoteInfo = null;            
-            NoteEditorComponent.View.CleanView();
+            NoteEditorComponent.CleanView();
             
             await NotesSelectorComponent.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
             CountNotes = NotesSelectorComponent.ListEntities?.Count;
@@ -692,6 +692,15 @@ namespace KNote.ClientWin.Components
                     Store.RunScript(note.Script);
             }
         }
+        
+        public void Refresh()
+        {
+            SelectedFilterWithServiceRef = null;
+            SelectedFolderWithServiceRef = null;
+            FoldersSelectorComponent.Refresh();            
+            NoteEditorComponent.CleanView();
+            NotesSelectorComponent.CleanView();
+        }
 
         public void About()
         {
@@ -846,8 +855,6 @@ namespace KNote.ClientWin.Components
             Add,
             Remove
         }
-
-
 
         #endregion 
 
