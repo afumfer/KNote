@@ -197,6 +197,22 @@ namespace KNote.ClientWin.Views
             {
                 _com.Refresh();
             }
+            else if (menuSel == menuSearchPanel)
+            {
+                if (tabExplorers.SelectedIndex == 1)
+                    return;
+                SelectTab(1);
+            }            
+            else if (menuSel == menuFoldersExplorer)
+            {
+                if (tabExplorers.SelectedIndex == 0)
+                    return;
+                SelectTab(0);
+            }
+            //else if (menuSel == menuPanelHeaderVisible)
+            //{
+            //    panelSupManagment.Visible = !panelSupManagment.Visible;
+            //}
             else if (menuSel == menuExit)
             {
                 await _com.FinalizeApp();
@@ -237,17 +253,30 @@ namespace KNote.ClientWin.Views
 
         private void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (tabExplorers.SelectedIndex == 0)
-                _com.GoActiveFolder();
-            else
-            {
-                _com.GoActiveFilter();
-            }
+            SelectTab(tabExplorers.SelectedIndex);
         }
 
         #endregion
 
         #region Private methods
+
+        private void SelectTab(int tabIndex)
+        {
+            if(tabIndex == 0)
+            {
+                tabExplorers.SelectedTab = tabExplorers.TabPages[0];
+                menuFoldersExplorer.Checked = true;
+                menuSearchPanel.Checked = false;
+                _com.GoActiveFolder();
+            }
+            else if (tabIndex == 1)
+            {
+                tabExplorers.SelectedTab = tabExplorers.TabPages[1];
+                menuFoldersExplorer.Checked = false;
+                menuSearchPanel.Checked = true;
+                _com.GoActiveFilter();
+            }
+        }
 
         private void LinkComponents()
         {
