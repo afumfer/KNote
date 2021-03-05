@@ -209,10 +209,10 @@ namespace KNote.ClientWin.Views
                     return;
                 SelectTab(0);
             }
-            //else if (menuSel == menuPanelHeaderVisible)
-            //{
-            //    panelSupManagment.Visible = !panelSupManagment.Visible;
-            //}
+            else if (menuSel == menuHeaderPanelVisible)
+            {
+                panelSupManagment.Visible = !panelSupManagment.Visible;
+            }
             else if (menuSel == menuExit)
             {
                 await _com.FinalizeApp();

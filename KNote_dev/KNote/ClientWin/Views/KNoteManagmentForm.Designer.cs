@@ -66,6 +66,7 @@
             this.menuView = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFoldersExplorer = new System.Windows.Forms.ToolStripMenuItem();
             this.menuSearchPanel = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuHeaderPanelVisible = new System.Windows.Forms.ToolStripMenuItem();
             this.menuTools = new System.Windows.Forms.ToolStripMenuItem();
             this.menuReports = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
@@ -287,14 +288,14 @@
             // 
             this.menuNewNote.Name = "menuNewNote";
             this.menuNewNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.menuNewNote.Size = new System.Drawing.Size(268, 22);
+            this.menuNewNote.Size = new System.Drawing.Size(261, 22);
             this.menuNewNote.Text = "&New note";
             this.menuNewNote.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuNewNoteAsPostIt
             // 
             this.menuNewNoteAsPostIt.Name = "menuNewNoteAsPostIt";
-            this.menuNewNoteAsPostIt.Size = new System.Drawing.Size(268, 22);
+            this.menuNewNoteAsPostIt.Size = new System.Drawing.Size(261, 22);
             this.menuNewNoteAsPostIt.Text = "New note as &PostIt";
             this.menuNewNoteAsPostIt.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -302,14 +303,14 @@
             // 
             this.menuEditNote.Name = "menuEditNote";
             this.menuEditNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.menuEditNote.Size = new System.Drawing.Size(268, 22);
+            this.menuEditNote.Size = new System.Drawing.Size(261, 22);
             this.menuEditNote.Text = "&Edit note";
             this.menuEditNote.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuEditNoteAsPostIt
             // 
             this.menuEditNoteAsPostIt.Name = "menuEditNoteAsPostIt";
-            this.menuEditNoteAsPostIt.Size = new System.Drawing.Size(268, 22);
+            this.menuEditNoteAsPostIt.Size = new System.Drawing.Size(261, 22);
             this.menuEditNoteAsPostIt.Text = "Edit note as PostI&t";
             this.menuEditNoteAsPostIt.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -317,52 +318,52 @@
             // 
             this.menuDeleteNote.Name = "menuDeleteNote";
             this.menuDeleteNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.menuDeleteNote.Size = new System.Drawing.Size(268, 22);
+            this.menuDeleteNote.Size = new System.Drawing.Size(261, 22);
             this.menuDeleteNote.Text = "&Delete note";
             this.menuDeleteNote.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(265, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(258, 6);
             // 
             // menuMoveSelectedNotes
             // 
             this.menuMoveSelectedNotes.Name = "menuMoveSelectedNotes";
-            this.menuMoveSelectedNotes.Size = new System.Drawing.Size(268, 22);
+            this.menuMoveSelectedNotes.Size = new System.Drawing.Size(261, 22);
             this.menuMoveSelectedNotes.Text = "&Move selected notes ...";
             this.menuMoveSelectedNotes.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem12
             // 
             this.toolStripMenuItem12.Name = "toolStripMenuItem12";
-            this.toolStripMenuItem12.Size = new System.Drawing.Size(265, 6);
+            this.toolStripMenuItem12.Size = new System.Drawing.Size(258, 6);
             // 
             // menuAddTags
             // 
             this.menuAddTags.Name = "menuAddTags";
-            this.menuAddTags.Size = new System.Drawing.Size(268, 22);
+            this.menuAddTags.Size = new System.Drawing.Size(261, 22);
             this.menuAddTags.Text = "Add tags to selected notes ...";
             this.menuAddTags.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuRemoveTags
             // 
             this.menuRemoveTags.Name = "menuRemoveTags";
-            this.menuRemoveTags.Size = new System.Drawing.Size(268, 22);
+            this.menuRemoveTags.Size = new System.Drawing.Size(261, 22);
             this.menuRemoveTags.Text = "Remove tags from selected notes ...";
             this.menuRemoveTags.Click += new System.EventHandler(this.menu_Click);
             // 
             // toolStripMenuItem16
             // 
             this.toolStripMenuItem16.Name = "toolStripMenuItem16";
-            this.toolStripMenuItem16.Size = new System.Drawing.Size(265, 6);
+            this.toolStripMenuItem16.Size = new System.Drawing.Size(258, 6);
             // 
             // menuMoreOptions
             // 
             this.menuMoreOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuExecuteKntScript});
             this.menuMoreOptions.Name = "menuMoreOptions";
-            this.menuMoreOptions.Size = new System.Drawing.Size(268, 22);
+            this.menuMoreOptions.Size = new System.Drawing.Size(261, 22);
             this.menuMoreOptions.Text = "More note options";
             // 
             // menuExecuteKntScript
@@ -377,7 +378,8 @@
             // 
             this.menuView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuFoldersExplorer,
-            this.menuSearchPanel});
+            this.menuSearchPanel,
+            this.menuHeaderPanelVisible});
             this.menuView.Name = "menuView";
             this.menuView.Size = new System.Drawing.Size(44, 20);
             this.menuView.Text = "&View";
@@ -388,7 +390,7 @@
             this.menuFoldersExplorer.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuFoldersExplorer.Name = "menuFoldersExplorer";
             this.menuFoldersExplorer.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.menuFoldersExplorer.Size = new System.Drawing.Size(177, 22);
+            this.menuFoldersExplorer.Size = new System.Drawing.Size(180, 22);
             this.menuFoldersExplorer.Text = "&Folders explorer";
             this.menuFoldersExplorer.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -396,9 +398,19 @@
             // 
             this.menuSearchPanel.Name = "menuSearchPanel";
             this.menuSearchPanel.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.menuSearchPanel.Size = new System.Drawing.Size(177, 22);
+            this.menuSearchPanel.Size = new System.Drawing.Size(180, 22);
             this.menuSearchPanel.Text = "Search panel";
             this.menuSearchPanel.Click += new System.EventHandler(this.menu_Click);
+            // 
+            // menuHeaderPanelVisible
+            // 
+            this.menuHeaderPanelVisible.Checked = true;
+            this.menuHeaderPanelVisible.CheckOnClick = true;
+            this.menuHeaderPanelVisible.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.menuHeaderPanelVisible.Name = "menuHeaderPanelVisible";
+            this.menuHeaderPanelVisible.Size = new System.Drawing.Size(180, 22);
+            this.menuHeaderPanelVisible.Text = "Header panel visible";
+            this.menuHeaderPanelVisible.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuTools
             // 
@@ -853,5 +865,6 @@
 
         private System.Windows.Forms.ToolStripMenuItem menuNewNoteAsPostIt;
         private System.Windows.Forms.ToolStripMenuItem menuEditNoteAsPostIt;
+        private System.Windows.Forms.ToolStripMenuItem menuHeaderPanelVisible;
     }
 }
