@@ -242,12 +242,19 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        private void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
+        private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)
             {
                 this.Hide();
-                e.Cancel = true;
+                if(e.CloseReason == CloseReason.WindowsShutDown)
+                {
+                    await _com.FinalizeApp();
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
             }
         }
 

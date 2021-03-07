@@ -164,7 +164,9 @@ namespace KNote.ClientWin.Components
                 }
 
                 if (WindowPostIt != null)
-                {
+                {                    
+                    if (WindowPostIt.NoteId == Guid.Empty)
+                        WindowPostIt.NoteId = Model.NoteId;
                     var responseWinPostIt = await Service.Notes.SaveWindowAsync(WindowPostIt);
                     WindowPostIt.SetIsDirty(false);
                 }
@@ -300,6 +302,7 @@ namespace KNote.ClientWin.Components
                 UserId = await GetUserId(),
                 PosX = 100,
                 PosY = 100,
+                Visible = true,                
                 AlwaysOnTop = true,
                 Width = 400,
                 Height = 300,
