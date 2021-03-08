@@ -60,6 +60,7 @@ namespace KNote.ClientWin.Views
                 
                 treeViewFolders.Nodes.Clear();
                 _com.ListEntities.Clear();
+                _com.ServicesRef = null;
 
                 foreach (var serviceRef in _com.ServicesRef)
                 {

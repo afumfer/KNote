@@ -617,6 +617,51 @@ namespace KNote.ClientWin.Components
             }            
         }
 
+        public void AddRepositoryLink()
+        {
+            View.ShowInfo("AddRepositoryLink");
+        }
+
+        public async void RemoveRepositoryLink()
+        {
+            if (SelectedServiceRef == null)
+            {
+                View.ShowInfo("There is no repository selected to remove.");
+                return;
+            }
+            var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+            var res = await repositoryEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef);
+            if (res)
+            {
+                RefreshRepositoryAndFolderTree();
+            }
+        }
+
+        public void CreateRepository()
+        {
+            View.ShowInfo("CreateRepository");
+        }
+
+        public void ManagmentRepository()
+        {
+            if (SelectedServiceRef == null)
+            {
+                View.ShowInfo("There is no repository selected to remove.");
+                return;
+            }
+            var aliasRep = SelectedServiceRef?.Alias;
+            View.ShowInfo($"ManagmentRepository - {aliasRep}");
+        }
+
+        public void RefreshRepositoryAndFolderTree()
+        {
+            SelectedFilterWithServiceRef = null;
+            SelectedFolderWithServiceRef = null;
+            FoldersSelectorComponent.Refresh();
+            NoteEditorComponent.CleanView();
+            NotesSelectorComponent.CleanView();
+        }
+
         public void ShowKNoteManagment() 
         {
             View.ActivateView();            
@@ -693,15 +738,6 @@ namespace KNote.ClientWin.Components
             }
         }
         
-        public void Refresh()
-        {
-            SelectedFilterWithServiceRef = null;
-            SelectedFolderWithServiceRef = null;
-            FoldersSelectorComponent.Refresh();            
-            NoteEditorComponent.CleanView();
-            NotesSelectorComponent.CleanView();
-        }
-
         public void About()
         {
             AboutView.ShowModalView();

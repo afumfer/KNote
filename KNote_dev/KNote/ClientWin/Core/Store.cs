@@ -10,6 +10,7 @@ using KNote.ClientWin.Components;
 using KntScript;
 using KNote.ClientWin.Views;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace KNote.ClientWin.Core
 {
@@ -87,8 +88,9 @@ namespace KNote.ClientWin.Core
         
         public event EventHandler<ComponentEventArgs<ServiceRef>> RemovedServiceRef;
         public void RemoveServiceRef(ServiceRef serviceRef)
-        {
+        {            
             _servicesRefs.Remove(serviceRef);
+            AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);
             if (RemovedServiceRef != null)
                 RemovedServiceRef(this, new ComponentEventArgs<ServiceRef>(serviceRef));
         }
@@ -142,43 +144,43 @@ namespace KNote.ClientWin.Core
                 ActiveFolderChanged(this, new ComponentEventArgs<FolderWithServiceRef>(activeFolder));
         }
 
-        public void SaveConfig(AppConfig appConfig, string configFile = @"KNoteData.config")
+        public void SaveConfig(string configFile = null)
         {
+            if(string.IsNullOrEmpty(configFile))
+                configFile = Path.Combine(Application.StartupPath, "KNoteData.config"); ;
             try
-            {                
+            {
                 TextWriter w = new StreamWriter(configFile);
                 XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
-                serializer.Serialize(w, appConfig);
+                serializer.Serialize(w, AppConfig);
                 w.Close();
-            }
-            catch (Exception )
-            {
-                throw;
-            }
-        }
-
-        public AppConfig LoadConfig(string configFile = @"KNoteData.config")
-        {
-            try
-            {                
-                if (!File.Exists(configFile))
-                    return null;
-
-                AppConfig appConfig;                
-                TextReader reader = new StreamReader(configFile);                
-                XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
-                appConfig = (AppConfig)serializer.Deserialize(reader);
-                appConfig.LastDateTimeStart = DateTime.Now;
-                appConfig.RunCounter++;
-                reader.Close();
-                return appConfig;
             }
             catch (Exception)
             {
                 throw;
             }
         }
-        
+
+        public void LoadConfig(string configFile = @"KNoteData.config")
+        {
+            try
+            {
+                if (!File.Exists(configFile))
+                    return;
+                
+                TextReader reader = new StreamReader(configFile);
+                XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
+                AppConfig = (AppConfig)serializer.Deserialize(reader);
+                AppConfig.LastDateTimeStart = DateTime.Now;
+                AppConfig.RunCounter++;
+                reader.Close();                
+            }
+            catch (Exception)
+            {
+                throw;
+            }            
+        }
+
         public async Task<bool> CheckNoteIsActive(Guid noteId)
         {
             foreach(var com in _listComponents)

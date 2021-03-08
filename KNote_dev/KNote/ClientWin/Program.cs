@@ -56,13 +56,13 @@ namespace KNote.ClientWin
             Application.Run(applicationContext);            
         }
 
-        static async void LoadAppStore(Store store)        
-        {            
+        static async void LoadAppStore(Store store)
+        {
             var appFileConfig = Path.Combine(Application.StartupPath, "KNoteData.config");
 
-            var appConfig = store.LoadConfig(appFileConfig);
-           
-            if (appConfig == null)
+            store.LoadConfig(appFileConfig);
+
+            if (store.AppConfig == null)
             {
                 // Add some repository for development environment ...
 
@@ -75,37 +75,36 @@ namespace KNote.ClientWin
                 };
                 store.AddServiceRef(new ServiceRef(r3));
 
-
                 var r1 = new RepositoryRef
                 {
-                    Alias = "Test db1 (SQL Server Prod - Dapper)",                    
+                    Alias = "Test db1 (SQL Server Prod - Dapper)",
                     // ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
                     ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
                     Provider = "Microsoft.Data.SqlClient",
                     Orm = "Dapper"  // Dapper / EntityFramework
-                };             
+                };
                 store.AddServiceRef(new ServiceRef(r1));
 
                 var r2 = new RepositoryRef
                 {
-                    Alias = "Test db2 (SQL Server Desa - Dapper)",                    
+                    Alias = "Test db2 (SQL Server Desa - Dapper)",
                     ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DesaDB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
                     Provider = "Microsoft.Data.SqlClient",
-                    Orm = "Dapper" 
+                    Orm = "Dapper"
                 };
                 store.AddServiceRef(new ServiceRef(r2));
 
-                appConfig = new AppConfig();
-                appConfig.RespositoryRefs.Add(r1);
-                appConfig.RespositoryRefs.Add(r2);
-                appConfig.RespositoryRefs.Add(r3);
-                appConfig.AutoSaveMinutes = 10;
-                appConfig.LastDateTimeStart = DateTime.Now;
-                appConfig.RunCounter = 1;
+                //store.AppConfig = new AppConfig();
+                store.AppConfig.RespositoryRefs.Add(r1);
+                store.AppConfig.RespositoryRefs.Add(r2);
+                store.AppConfig.RespositoryRefs.Add(r3);
+                store.AppConfig.AutoSaveMinutes = 10;
+                store.AppConfig.LastDateTimeStart = DateTime.Now;
+                store.AppConfig.RunCounter = 1;
             }
             else
             {
-                foreach(var r in appConfig.RespositoryRefs)
+                foreach (var r in store.AppConfig.RespositoryRefs)
                 {
                     store.AddServiceRef(new ServiceRef(r));
                 }
@@ -118,7 +117,7 @@ namespace KNote.ClientWin
             store.LogFile = Application.StartupPath + @"\KNoteWinApp.log";
             store.LogActivated = false;
 
-            store.SaveConfig(appConfig, appFileConfig);
+            store.SaveConfig(appFileConfig);
 
             // default folder
             var firstService = store.GetFirstServiceRef();
@@ -138,5 +137,6 @@ namespace KNote.ClientWin
 
             #endregion
         }
+
     }
 }

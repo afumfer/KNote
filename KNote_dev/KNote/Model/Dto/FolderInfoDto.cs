@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 namespace KNote.Model.Dto
 {
     public class FolderInfoDto : DtoModelBase
-    {
-        private const string KMSG = "Attribute {0} is required. ";
-
+    {        
         #region Properties 
 
         private Guid _folderId;

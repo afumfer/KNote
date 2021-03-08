@@ -90,12 +90,12 @@ namespace KNote.ClientWin.Views
             if(_com.SelectMode == EnumSelectMode.Folders)
             {
                 if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
-                    labelFolerName.Text = "(No folder selected)";
+                    labelFolder.Text = "(No folder selected)";
                 else
-                    labelFolerName.Text = _com.SelectedFolderInfo?.Name;
+                    labelFolder.Text = _com.SelectedFolderInfo?.Name;
             }
             else
-                labelFolerName.Text = "(Filtered notes)";
+                labelFolder.Text = "(Filtered notes)";
 
             labelFolderDetail.Text = $"{_com.FolderPath?.ToString()} ";
             statusLabel1.Text = $"Notes: {_com.CountNotes.ToString()}";
@@ -145,6 +145,26 @@ namespace KNote.ClientWin.Views
             {
                 _com.DeleteFolder();
             }
+            else if (menuSel == menuRemoveRepositoryLink)
+            {
+                _com.RemoveRepositoryLink();
+            }
+            else if (menuSel == menuAddRepositoryLink)
+            {
+                _com.AddRepositoryLink();
+            }
+            else if (menuSel == menuCreateRepository)
+            {
+                _com.CreateRepository();
+            }
+            else if (menuSel == menuManagmentRepository)
+            {
+                _com.ManagmentRepository();
+            }
+            else if (menuSel == menuRefreshTreeFolders)
+            {
+                _com.RefreshRepositoryAndFolderTree();
+            }
             else if (menuSel == menuEditNote)
             {
                 _com.EditNote();
@@ -193,10 +213,6 @@ namespace KNote.ClientWin.Views
             {
                 _com.RunScriptSelectedNotes();
             }            
-            else if (menuSel == menuRefreshTreeFolders)
-            {
-                _com.Refresh();
-            }
             else if (menuSel == menuSearchPanel)
             {
                 if (tabExplorers.SelectedIndex == 1)

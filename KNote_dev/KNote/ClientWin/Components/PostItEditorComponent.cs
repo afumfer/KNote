@@ -257,7 +257,6 @@ namespace KNote.ClientWin.Components
             return await Task.FromResult<bool>(resSaveMsg.IsValid);
         }
 
-
         #endregion 
 
         #region Component specific methods
@@ -296,12 +295,14 @@ namespace KNote.ClientWin.Components
             if (Model == null)
                 return null;
 
+            var random = new Random();
+
             // TODO: get default values from Store.AppConfig ...
             return new WindowDto {
                 NoteId = Model.NoteId,
                 UserId = await GetUserId(),
-                PosX = 100,
-                PosY = 100,
+                PosX = random.Next(50, 150),
+                PosY = random.Next(50, 150),
                 Visible = true,                
                 AlwaysOnTop = true,
                 Width = 400,
@@ -312,9 +313,9 @@ namespace KNote.ClientWin.Components
                 FontItalic = false,
                 FontStrikethru = false,
                 FontUnderline = false,
-                ForeColor = "Black",  // ole color 0
-                NoteColor = "#FFFFC0", // ole color 12648447
-                TitleColor = "#FFFF80", // ole color 8454143
+                ForeColor = "Black",
+                NoteColor = "#FFFFC0",
+                TitleColor = "#FFFF80",
                 TextNoteColor = "Black",
                 TextTitleColor = "Black"
             };

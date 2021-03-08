@@ -1,0 +1,80 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using System.Windows.Forms;
+
+using KNote.ClientWin.Core;
+using KNote.Model;
+using KNote.Model.Dto;
+using KNote.Service;
+using System.ComponentModel.DataAnnotations;
+
+namespace KNote.ClientWin.Components
+{
+    public class RepositoryEditorComponent : ComponentEditor<IEditorView<RepositoryRef>, RepositoryRef>
+    {
+        #region Constructor 
+
+        public RepositoryEditorComponent(Store store) : base(store)
+        {
+            ComponentName = "Repository editor";
+        }
+
+        #endregion
+
+        #region ComponentEditor implementation 
+
+        protected override IEditorView<RepositoryRef> CreateView()
+        {
+            return Store.FactoryViews.View(this);
+        }
+
+        public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<bool> NewModel(IKntService service)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<bool> SaveModel()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async override Task<bool> DeleteModel()
+        {
+            return await DeleteModel(Service, Service.IdServiceRef);
+        }
+
+        public async override Task<bool> DeleteModel(IKntService service, Guid id)
+        {            
+            Service = service;
+            var serviceForDelete = Store.GetServiceRef(id);
+
+            var result = View.ShowInfo($"Are you sure you want remove {serviceForDelete?.RepositoryRef.Alias} repository link?", "Delete note", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes || result == DialogResult.Yes)
+            {
+                try
+                {                    
+                    Store.RemoveServiceRef(serviceForDelete);
+                    Store.SaveConfig();
+                    OnDeletedEntity(serviceForDelete.RepositoryRef);
+                    return await Task.FromResult<bool>(true);
+                }
+                catch (Exception ex)
+                {
+                    View.ShowInfo(ex.Message);
+                }
+            }
+            return await Task.FromResult<bool>(false);
+        }
+
+        #endregion 
+    }
+}

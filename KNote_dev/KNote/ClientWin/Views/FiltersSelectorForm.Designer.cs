@@ -49,7 +49,6 @@ namespace KNote.ClientWin.Views
             // 
             // panelForm
             // 
-            this.panelForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelForm.Controls.Add(this.checkSearchInDescription);
             this.panelForm.Controls.Add(this.pictureBox1);
             this.panelForm.Controls.Add(this.buttonClean);
@@ -83,7 +82,7 @@ namespace KNote.ClientWin.Views
             this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox1.Location = new System.Drawing.Point(5, 40);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(423, 1);
+            this.pictureBox1.Size = new System.Drawing.Size(425, 1);
             this.pictureBox1.TabIndex = 6;
             this.pictureBox1.TabStop = false;
             // 
@@ -111,7 +110,7 @@ namespace KNote.ClientWin.Views
             this.buttonSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonSearch.Image = ((System.Drawing.Image)(resources.GetObject("buttonSearch.Image")));
             this.buttonSearch.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonSearch.Location = new System.Drawing.Point(330, 9);
+            this.buttonSearch.Location = new System.Drawing.Point(332, 9);
             this.buttonSearch.Name = "buttonSearch";
             this.buttonSearch.Size = new System.Drawing.Size(99, 27);
             this.buttonSearch.TabIndex = 4;
@@ -127,7 +126,7 @@ namespace KNote.ClientWin.Views
             this.comboRepositories.FormattingEnabled = true;
             this.comboRepositories.Location = new System.Drawing.Point(5, 67);
             this.comboRepositories.Name = "comboRepositories";
-            this.comboRepositories.Size = new System.Drawing.Size(422, 23);
+            this.comboRepositories.Size = new System.Drawing.Size(424, 23);
             this.comboRepositories.TabIndex = 2;
             // 
             // textTextSearch
@@ -136,7 +135,7 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textTextSearch.Location = new System.Drawing.Point(7, 118);
             this.textTextSearch.Name = "textTextSearch";
-            this.textTextSearch.Size = new System.Drawing.Size(420, 23);
+            this.textTextSearch.Size = new System.Drawing.Size(422, 23);
             this.textTextSearch.TabIndex = 0;
             this.textTextSearch.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textTextSearch_KeyUp);
             // 

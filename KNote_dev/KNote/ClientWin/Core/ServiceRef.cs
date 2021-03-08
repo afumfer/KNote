@@ -16,6 +16,8 @@ namespace KNote.ClientWin.Core
 {
     public class ServiceRef
     {
+        #region Properties 
+
         public Guid IdServiceRef 
         {
             get
@@ -39,8 +41,7 @@ namespace KNote.ClientWin.Core
             get
             {
                 if (_repository == null)
-                {
-                    //_service = new KntService(ConnectionString, Provider);
+                {                    
                     if (RepositoryRef.Orm == "Dapper")
                         _repository = new DP.KntRepository(RepositoryRef.ConnectionString, RepositoryRef.Provider);
                     else if (RepositoryRef.Orm == "EntityFramework")
@@ -62,6 +63,10 @@ namespace KNote.ClientWin.Core
             }
         }
 
+        #endregion
+
+        #region Constructor
+
         public ServiceRef (string name, string connectionString, string provider, string orm)
         {            
             RepositoryRef = new RepositoryRef { Alias = name, ConnectionString = connectionString, Provider = provider, Orm = orm };
@@ -72,5 +77,6 @@ namespace KNote.ClientWin.Core
             RepositoryRef = repositoryRef;
         }
 
+        #endregion 
     }
 }

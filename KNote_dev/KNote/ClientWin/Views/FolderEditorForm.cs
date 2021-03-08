@@ -99,11 +99,6 @@ namespace KNote.ClientWin.Views
 
         #region Form events handler
 
-        private void FolderEditorForm_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void FolderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!_viewFinalized)

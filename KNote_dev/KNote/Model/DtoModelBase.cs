@@ -11,6 +11,8 @@ namespace KNote.Model
     public abstract class DtoModelBase : ModelBase, INotifyPropertyChanged
     {
         protected bool _isDirty = false;
+        
+        protected const string KMSG = "Attribute {0} is required. ";
 
         public virtual bool IsDirty()
         {

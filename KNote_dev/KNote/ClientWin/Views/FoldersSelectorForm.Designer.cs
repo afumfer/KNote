@@ -101,6 +101,7 @@
             // 
             // treeViewFolders
             // 
+            this.treeViewFolders.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.treeViewFolders.ContextMenuStrip = this.contextMenu;
             this.treeViewFolders.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeViewFolders.ImageIndex = 0;

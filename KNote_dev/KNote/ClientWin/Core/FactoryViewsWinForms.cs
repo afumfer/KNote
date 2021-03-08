@@ -57,7 +57,12 @@ namespace KNote.ClientWin.Core
         {
             return new FolderEditorForm(component);
         }
-       
+
+        public IEditorView<RepositoryRef> View(RepositoryEditorComponent component)
+        {
+            return new RepositoryEditorForm(component);
+        }
+
         public IViewBase NotifyView(KNoteManagmentComponent component)
         {
             return new NotifyForm(component);
@@ -102,6 +107,5 @@ namespace KNote.ClientWin.Core
         {
             return new FiltersSelectorForm(component);
         }
-
     }
 }
