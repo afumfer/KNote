@@ -426,7 +426,7 @@ namespace KNote.ClientWin.Components
 
         public async Task<bool> FinalizeApp()
         {
-            if (View.ShowInfo("Are you sure exit KaNote?", "KaNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (View.ShowInfo("Are you sure exit KaNote?", "KaNote (*)", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 await Store.SaveActiveNotes();
                 Finalize();
@@ -617,11 +617,6 @@ namespace KNote.ClientWin.Components
             }            
         }
 
-        public void AddRepositoryLink()
-        {
-            View.ShowInfo("AddRepositoryLink");
-        }
-
         public async void RemoveRepositoryLink()
         {
             if (SelectedServiceRef == null)
@@ -637,20 +632,35 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public void CreateRepository()
+        public void AddRepositoryLink()
         {
-            View.ShowInfo("CreateRepository");
+            var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+            repositoryEditorComponent.RunModal();
+
         }
 
-        public void ManagmentRepository()
+        public void CreateRepository()
+        {
+            var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+            repositoryEditorComponent.RunModal();
+        }
+
+        public async void ManagmentRepository()
         {
             if (SelectedServiceRef == null)
             {
                 View.ShowInfo("There is no repository selected to remove.");
                 return;
+            }                        
+            var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+            await repositoryEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef, false);
+            var res = repositoryEditorComponent.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                // Do action 
+                RefreshRepositoryAndFolderTree();
             }
-            var aliasRep = SelectedServiceRef?.Alias;
-            View.ShowInfo($"ManagmentRepository - {aliasRep}");
+
         }
 
         public void RefreshRepositoryAndFolderTree()

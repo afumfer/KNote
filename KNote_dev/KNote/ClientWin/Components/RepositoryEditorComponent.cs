@@ -32,19 +32,39 @@ namespace KNote.ClientWin.Components
             return Store.FactoryViews.View(this);
         }
 
-        public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
+        public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Service = service;                
+                
+                var repositoryForEdit = Store.GetServiceRef(id).RepositoryRef;
+                
+                Model.Alias = repositoryForEdit.Alias;
+                Model.ConnectionString = repositoryForEdit.ConnectionString;
+                Model.Provider = repositoryForEdit.Provider;
+                Model.Orm = repositoryForEdit.Orm;
+                Model.SetIsDirty(false);
+                
+                if (refreshView)
+                    View.RefreshView();
+                return await Task.FromResult<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                return await Task.FromResult<bool>(false);
+            }
         }
 
-        public override Task<bool> NewModel(IKntService service)
+        public async override Task<bool> NewModel(IKntService service)
         {
-            throw new NotImplementedException();
+            return await Task.FromResult<bool>(true);
         }
 
-        public override Task<bool> SaveModel()
+        public async override Task<bool> SaveModel()
         {
-            throw new NotImplementedException();
+            return await Task.FromResult<bool>(true);
         }
 
         public async override Task<bool> DeleteModel()

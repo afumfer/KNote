@@ -126,7 +126,7 @@ namespace KNote.ClientWin.Views
         {
             ToolStripMenuItem menuSel;
             menuSel = (ToolStripMenuItem)sender;
-            
+
             if (menuSel == menuKNoteLab)
             {
                 // For test ...
@@ -212,22 +212,27 @@ namespace KNote.ClientWin.Views
             else if (menuSel == menuExecuteKntScript)
             {
                 _com.RunScriptSelectedNotes();
-            }            
-            else if (menuSel == menuSearchPanel)
-            {
-                if (tabExplorers.SelectedIndex == 1)
-                    return;
-                SelectTab(1);
-            }            
+            }
             else if (menuSel == menuFoldersExplorer)
             {
                 if (tabExplorers.SelectedIndex == 0)
                     return;
                 SelectTab(0);
             }
+            else if (menuSel == menuSearchPanel)
+            {
+                if (tabExplorers.SelectedIndex == 1)
+                    return;
+                SelectTab(1);
+            }            
             else if (menuSel == menuHeaderPanelVisible)
             {
                 panelSupManagment.Visible = !panelSupManagment.Visible;
+            }
+            else if (menuSel == menuMainVisible)
+            {
+                menuMangment.Visible = !menuMangment.Visible;
+                menuMainVisible.Checked = !menuMainVisible.Checked;
             }
             else if (menuSel == menuExit)
             {
@@ -235,7 +240,7 @@ namespace KNote.ClientWin.Views
             }
             else
             {
-                MessageBox.Show("Option under development ... ");
+                MessageBox.Show("In construction ... ");
             }
         }
 

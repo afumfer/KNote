@@ -163,20 +163,17 @@ namespace KNote.ClientWin.Components
                 {
                     var response = await service.Notes.DeleteExtendedAsync(noteId);
                     
-                    if (response.IsValid)
-                    {
-                        OnDeletedEntity(response.Entity);
-                        return true;
-                    }
-                    else
-                        View.ShowInfo(response.Message);
+                    if (response.IsValid)                    
+                        OnDeletedEntity(response.Entity);                        
+                    
+                    return await Task.FromResult<bool>(true);
                 }
                 catch (Exception ex)
                 {
                     View.ShowInfo(ex.Message);
                 }
             }
-            return false;
+            return await Task.FromResult<bool>(false);
         }
 
         #endregion

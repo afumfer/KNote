@@ -126,7 +126,17 @@ namespace KNote.ClientWin.Views
 
         private void ModelToControls()
         {
-
+            textAliasName.Text = _com.Model.Alias;
+            if (_com.Model.Provider == "Microsoft.Data.Sqlite")
+            {
+                // ...
+                radioSqLite.Checked = true;
+            }
+            else
+            {
+                // ...
+                radioSqLite.Checked = false;
+            }
         }
 
         private void ControlsToModel()
@@ -147,10 +157,35 @@ namespace KNote.ClientWin.Views
             return true;
         }
 
-
-
         #endregion
 
+        private void RepositoryEditorForm_Load(object sender, EventArgs e)
+        {
+            this.Height = 350;
+            // 
+            panelSqLite.BorderStyle = BorderStyle.None;
+            panelMSSqlServer.BorderStyle = BorderStyle.None;
+            panelMSSqlServer.Top = panelSqLite.Top;
+            panelMSSqlServer.Left = panelSqLite.Left;
+
+            radioSqLite.Checked = true;
+            panelSqLite.Visible = true;
+            panelMSSqlServer.Visible = false;
+        }
+
+        private void radioDataBase_CheckedChanged(object sender, EventArgs e)
+        {
+            if(radioSqLite.Checked == true)
+            {
+                panelSqLite.Visible = true;
+                panelMSSqlServer.Visible = false;
+            }
+            else
+            {
+                panelSqLite.Visible = false;
+                panelMSSqlServer.Visible = true;
+            }
+        }
 
     }
 }

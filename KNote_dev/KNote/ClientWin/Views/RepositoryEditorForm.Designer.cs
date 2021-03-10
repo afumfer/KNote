@@ -33,23 +33,32 @@ namespace KNote.ClientWin.Views
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.panelForm = new System.Windows.Forms.Panel();
-            this.buttonFolderSearch = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.panelMSSqlServer = new System.Windows.Forms.Panel();
+            this.textSQLDataBase = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.textNumber = new System.Windows.Forms.TextBox();
-            this.textOrderNotes = new System.Windows.Forms.TextBox();
-            this.textOrder = new System.Windows.Forms.TextBox();
-            this.textTags = new System.Windows.Forms.TextBox();
-            this.textName = new System.Windows.Forms.TextBox();
+            this.textSQLServer = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.panelSqLite = new System.Windows.Forms.Panel();
+            this.textSqLiteDataBase = new System.Windows.Forms.TextBox();
+            this.labelSqLiteDataBase = new System.Windows.Forms.Label();
+            this.textSqLiteDirectory = new System.Windows.Forms.TextBox();
+            this.labelDirectory = new System.Windows.Forms.Label();
+            this.groupRepositoryType = new System.Windows.Forms.GroupBox();
+            this.radioMSSqlServer = new System.Windows.Forms.RadioButton();
+            this.radioSqLite = new System.Windows.Forms.RadioButton();
+            this.buttonFolderSearch = new System.Windows.Forms.Button();
+            this.labelAlias = new System.Windows.Forms.Label();
+            this.textAliasName = new System.Windows.Forms.TextBox();
             this.panelForm.SuspendLayout();
+            this.panelMSSqlServer.SuspendLayout();
+            this.panelSqLite.SuspendLayout();
+            this.groupRepositoryType.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(471, 266);
+            this.buttonCancel.Location = new System.Drawing.Point(428, 489);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(64, 29);
             this.buttonCancel.TabIndex = 5;
@@ -60,7 +69,7 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(401, 266);
+            this.buttonAccept.Location = new System.Drawing.Point(358, 489);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(64, 29);
             this.buttonAccept.TabIndex = 4;
@@ -73,27 +82,146 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.Controls.Add(this.panelMSSqlServer);
+            this.panelForm.Controls.Add(this.panelSqLite);
+            this.panelForm.Controls.Add(this.groupRepositoryType);
             this.panelForm.Controls.Add(this.buttonFolderSearch);
-            this.panelForm.Controls.Add(this.label4);
-            this.panelForm.Controls.Add(this.label3);
-            this.panelForm.Controls.Add(this.label2);
-            this.panelForm.Controls.Add(this.label1);
-            this.panelForm.Controls.Add(this.textNumber);
-            this.panelForm.Controls.Add(this.textOrderNotes);
-            this.panelForm.Controls.Add(this.textOrder);
-            this.panelForm.Controls.Add(this.textTags);
-            this.panelForm.Controls.Add(this.textName);
+            this.panelForm.Controls.Add(this.labelAlias);
+            this.panelForm.Controls.Add(this.textAliasName);
             this.panelForm.Location = new System.Drawing.Point(4, 5);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(541, 244);
+            this.panelForm.Size = new System.Drawing.Size(504, 478);
             this.panelForm.TabIndex = 3;
+            // 
+            // panelMSSqlServer
+            // 
+            this.panelMSSqlServer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelMSSqlServer.Controls.Add(this.textSQLDataBase);
+            this.panelMSSqlServer.Controls.Add(this.label1);
+            this.panelMSSqlServer.Controls.Add(this.textSQLServer);
+            this.panelMSSqlServer.Controls.Add(this.label5);
+            this.panelMSSqlServer.Location = new System.Drawing.Point(8, 264);
+            this.panelMSSqlServer.Name = "panelMSSqlServer";
+            this.panelMSSqlServer.Size = new System.Drawing.Size(496, 117);
+            this.panelMSSqlServer.TabIndex = 14;
+            // 
+            // textSQLDataBase
+            // 
+            this.textSQLDataBase.Location = new System.Drawing.Point(1, 83);
+            this.textSQLDataBase.Name = "textSQLDataBase";
+            this.textSQLDataBase.Size = new System.Drawing.Size(478, 23);
+            this.textSQLDataBase.TabIndex = 12;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(1, 65);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(61, 15);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Data base:";
+            // 
+            // textSQLServer
+            // 
+            this.textSQLServer.Location = new System.Drawing.Point(1, 28);
+            this.textSQLServer.Name = "textSQLServer";
+            this.textSQLServer.Size = new System.Drawing.Size(478, 23);
+            this.textSQLServer.TabIndex = 9;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(1, 10);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(115, 15);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "SQL Server\\instance:";
+            // 
+            // panelSqLite
+            // 
+            this.panelSqLite.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelSqLite.Controls.Add(this.textSqLiteDataBase);
+            this.panelSqLite.Controls.Add(this.labelSqLiteDataBase);
+            this.panelSqLite.Controls.Add(this.textSqLiteDirectory);
+            this.panelSqLite.Controls.Add(this.labelDirectory);
+            this.panelSqLite.Location = new System.Drawing.Point(8, 127);
+            this.panelSqLite.Name = "panelSqLite";
+            this.panelSqLite.Size = new System.Drawing.Size(496, 121);
+            this.panelSqLite.TabIndex = 13;
+            // 
+            // textSqLiteDataBase
+            // 
+            this.textSqLiteDataBase.Location = new System.Drawing.Point(1, 83);
+            this.textSqLiteDataBase.Name = "textSqLiteDataBase";
+            this.textSqLiteDataBase.Size = new System.Drawing.Size(478, 23);
+            this.textSqLiteDataBase.TabIndex = 11;
+            // 
+            // labelSqLiteDataBase
+            // 
+            this.labelSqLiteDataBase.AutoSize = true;
+            this.labelSqLiteDataBase.Location = new System.Drawing.Point(1, 65);
+            this.labelSqLiteDataBase.Name = "labelSqLiteDataBase";
+            this.labelSqLiteDataBase.Size = new System.Drawing.Size(61, 15);
+            this.labelSqLiteDataBase.TabIndex = 10;
+            this.labelSqLiteDataBase.Text = "Data base:";
+            // 
+            // textSqLiteDirectory
+            // 
+            this.textSqLiteDirectory.Location = new System.Drawing.Point(1, 28);
+            this.textSqLiteDirectory.Name = "textSqLiteDirectory";
+            this.textSqLiteDirectory.Size = new System.Drawing.Size(478, 23);
+            this.textSqLiteDirectory.TabIndex = 9;
+            // 
+            // labelDirectory
+            // 
+            this.labelDirectory.AutoSize = true;
+            this.labelDirectory.Location = new System.Drawing.Point(1, 10);
+            this.labelDirectory.Name = "labelDirectory";
+            this.labelDirectory.Size = new System.Drawing.Size(58, 15);
+            this.labelDirectory.TabIndex = 8;
+            this.labelDirectory.Text = "Directory:";
+            // 
+            // groupRepositoryType
+            // 
+            this.groupRepositoryType.Controls.Add(this.radioMSSqlServer);
+            this.groupRepositoryType.Controls.Add(this.radioSqLite);
+            this.groupRepositoryType.Location = new System.Drawing.Point(8, 7);
+            this.groupRepositoryType.Name = "groupRepositoryType";
+            this.groupRepositoryType.Size = new System.Drawing.Size(480, 61);
+            this.groupRepositoryType.TabIndex = 12;
+            this.groupRepositoryType.TabStop = false;
+            this.groupRepositoryType.Text = "Reposoty database type";
+            // 
+            // radioMSSqlServer
+            // 
+            this.radioMSSqlServer.AutoSize = true;
+            this.radioMSSqlServer.Location = new System.Drawing.Point(156, 22);
+            this.radioMSSqlServer.Name = "radioMSSqlServer";
+            this.radioMSSqlServer.Size = new System.Drawing.Size(135, 19);
+            this.radioMSSqlServer.TabIndex = 1;
+            this.radioMSSqlServer.TabStop = true;
+            this.radioMSSqlServer.Text = "Microsoft SQL Server";
+            this.radioMSSqlServer.UseVisualStyleBackColor = true;
+            this.radioMSSqlServer.CheckedChanged += new System.EventHandler(this.radioDataBase_CheckedChanged);
+            // 
+            // radioSqLite
+            // 
+            this.radioSqLite.AutoSize = true;
+            this.radioSqLite.Location = new System.Drawing.Point(35, 22);
+            this.radioSqLite.Name = "radioSqLite";
+            this.radioSqLite.Size = new System.Drawing.Size(57, 19);
+            this.radioSqLite.TabIndex = 0;
+            this.radioSqLite.TabStop = true;
+            this.radioSqLite.Text = "SqLite";
+            this.radioSqLite.UseVisualStyleBackColor = true;
+            this.radioSqLite.CheckedChanged += new System.EventHandler(this.radioDataBase_CheckedChanged);
             // 
             // buttonFolderSearch
             // 
             this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
             this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonFolderSearch.Location = new System.Drawing.Point(801, 199);
+            this.buttonFolderSearch.Location = new System.Drawing.Point(764, 199);
             this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonFolderSearch.Name = "buttonFolderSearch";
             this.buttonFolderSearch.Size = new System.Drawing.Size(27, 25);
@@ -101,85 +229,27 @@ namespace KNote.ClientWin.Views
             this.buttonFolderSearch.Text = "...";
             this.buttonFolderSearch.UseVisualStyleBackColor = false;
             // 
-            // label4
+            // labelAlias
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(86, 124);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(72, 15);
-            this.label4.TabIndex = 9;
-            this.label4.Text = "Order notes:";
+            this.labelAlias.AutoSize = true;
+            this.labelAlias.Location = new System.Drawing.Point(8, 80);
+            this.labelAlias.Name = "labelAlias";
+            this.labelAlias.Size = new System.Drawing.Size(68, 15);
+            this.labelAlias.TabIndex = 6;
+            this.labelAlias.Text = "Alias name:";
             // 
-            // label3
+            // textAliasName
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(8, 124);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(40, 15);
-            this.label3.TabIndex = 8;
-            this.label3.Text = "Order:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 64);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(33, 15);
-            this.label2.TabIndex = 7;
-            this.label2.Text = "Tags:";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(8, 11);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(42, 15);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "Name:";
-            // 
-            // textNumber
-            // 
-            this.textNumber.BackColor = System.Drawing.SystemColors.Control;
-            this.textNumber.Location = new System.Drawing.Point(439, 29);
-            this.textNumber.Name = "textNumber";
-            this.textNumber.ReadOnly = true;
-            this.textNumber.Size = new System.Drawing.Size(49, 23);
-            this.textNumber.TabIndex = 5;
-            this.textNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // textOrderNotes
-            // 
-            this.textOrderNotes.Location = new System.Drawing.Point(86, 142);
-            this.textOrderNotes.Name = "textOrderNotes";
-            this.textOrderNotes.Size = new System.Drawing.Size(402, 23);
-            this.textOrderNotes.TabIndex = 3;
-            // 
-            // textOrder
-            // 
-            this.textOrder.Location = new System.Drawing.Point(8, 142);
-            this.textOrder.Name = "textOrder";
-            this.textOrder.Size = new System.Drawing.Size(72, 23);
-            this.textOrder.TabIndex = 2;
-            // 
-            // textTags
-            // 
-            this.textTags.Location = new System.Drawing.Point(8, 82);
-            this.textTags.Name = "textTags";
-            this.textTags.Size = new System.Drawing.Size(480, 23);
-            this.textTags.TabIndex = 1;
-            // 
-            // textName
-            // 
-            this.textName.Location = new System.Drawing.Point(8, 29);
-            this.textName.Name = "textName";
-            this.textName.Size = new System.Drawing.Size(434, 23);
-            this.textName.TabIndex = 0;
+            this.textAliasName.Location = new System.Drawing.Point(10, 98);
+            this.textAliasName.Name = "textAliasName";
+            this.textAliasName.Size = new System.Drawing.Size(478, 23);
+            this.textAliasName.TabIndex = 0;
             // 
             // RepositoryEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(547, 307);
+            this.ClientSize = new System.Drawing.Size(520, 530);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);
@@ -192,10 +262,17 @@ namespace KNote.ClientWin.Views
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Repository editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RepositoryEditorForm_FormClosing);
+            this.Load += new System.EventHandler(this.RepositoryEditorForm_Load);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.RepositoryEditorForm_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.RepositoryEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
+            this.panelMSSqlServer.ResumeLayout(false);
+            this.panelMSSqlServer.PerformLayout();
+            this.panelSqLite.ResumeLayout(false);
+            this.panelSqLite.PerformLayout();
+            this.groupRepositoryType.ResumeLayout(false);
+            this.groupRepositoryType.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -206,14 +283,20 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Button buttonAccept;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Button buttonFolderSearch;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label labelAlias;
+        private System.Windows.Forms.TextBox textAliasName;
+        private System.Windows.Forms.GroupBox groupRepositoryType;
+        private System.Windows.Forms.RadioButton radioMSSqlServer;
+        private System.Windows.Forms.RadioButton radioSqLite;
+        private System.Windows.Forms.Panel panelMSSqlServer;
+        private System.Windows.Forms.TextBox textSQLDataBase;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textNumber;
-        private System.Windows.Forms.TextBox textOrderNotes;
-        private System.Windows.Forms.TextBox textOrder;
-        private System.Windows.Forms.TextBox textTags;
-        private System.Windows.Forms.TextBox textName;
+        private System.Windows.Forms.TextBox textSQLServer;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Panel panelSqLite;
+        private System.Windows.Forms.TextBox textSqLiteDataBase;
+        private System.Windows.Forms.Label labelSqLiteDataBase;
+        private System.Windows.Forms.TextBox textSqLiteDirectory;
+        private System.Windows.Forms.Label labelDirectory;
     }
 }
