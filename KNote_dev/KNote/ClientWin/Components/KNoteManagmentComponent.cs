@@ -71,6 +71,7 @@ namespace KNote.ClientWin.Components
 
         public int? CountNotes { get; set; }
 
+
         #endregion 
 
         #region Constructor
@@ -122,7 +123,7 @@ namespace KNote.ClientWin.Components
 
         protected override Result<EComponentResult> OnInitialized()
         {
-            ComponentName = "Key note managment";
+            ComponentName = "KaNote managment";
 
             var result = base.OnInitialized();
 
@@ -435,6 +436,13 @@ namespace KNote.ClientWin.Components
             return false;
         }
 
+        public async Task<bool> FinalizeAppForce()
+        {
+            await Store.SaveActiveNotes();
+            Finalize();
+            return true;
+        }
+
         public void ShowKntScriptConsole()
         {
             var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(Store));
@@ -665,11 +673,13 @@ namespace KNote.ClientWin.Components
 
         public void RefreshRepositoryAndFolderTree()
         {
+            NotifyMessage("Refreshing tree folder ...");
             SelectedFilterWithServiceRef = null;
             SelectedFolderWithServiceRef = null;
             FoldersSelectorComponent.Refresh();
             NoteEditorComponent.CleanView();
             NotesSelectorComponent.CleanView();
+            NotifyMessage("Refreshed tree folder ...");
         }
 
         public void ShowKNoteManagment() 

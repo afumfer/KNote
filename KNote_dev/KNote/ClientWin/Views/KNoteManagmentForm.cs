@@ -87,17 +87,29 @@ namespace KNote.ClientWin.Views
             if(info != null)
                 return MessageBox.Show(info, caption, buttons, icon);
 
-            if(_com.SelectMode == EnumSelectMode.Folders)
+            string msg1;
+            string msg2;
+
+            if (_com.SelectMode == EnumSelectMode.Folders)
             {
                 if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
-                    labelFolder.Text = "(No folder selected)";
+                    msg1 = "(No folder selected)";
                 else
-                    labelFolder.Text = _com.SelectedFolderInfo?.Name;
+                    msg1 = _com.SelectedFolderInfo?.Name;
             }
             else
-                labelFolder.Text = "(Filtered notes)";
+                msg1 = "(Filtered notes)";
 
-            labelFolderDetail.Text = $"{_com.FolderPath?.ToString()} ";
+            msg2 = $"{_com.FolderPath?.ToString()} ";
+
+            if (menuHeaderPanelVisible.Checked)
+            {
+                labelFolder.Text = msg1;
+                labelFolderDetail.Text = msg2;                
+            }
+            else
+                Text = $"KaNote Managment - {msg2} ";
+
             statusLabel1.Text = $"Notes: {_com.CountNotes.ToString()}";
             
             return DialogResult.OK;
@@ -133,86 +145,50 @@ namespace KNote.ClientWin.Views
                 var labForm = new LabForm(_com.Store);
                 labForm.Show();
             }
-            else if (menuSel == menuNewFolder)
-            {
-                _com.NewFolder();
-            }
-            else if (menuSel == menuEditFolder)
-            {
-                _com.EditFolder();
-            }
-            else if (menuSel == menuDeleteFolder)
-            {
-                _com.DeleteFolder();
-            }
+            else if (menuSel == menuNewFolder)            
+                _com.NewFolder();            
+            else if (menuSel == menuEditFolder)            
+                _com.EditFolder();            
+            else if (menuSel == menuDeleteFolder)            
+                _com.DeleteFolder();           
             else if (menuSel == menuRemoveRepositoryLink)
-            {
-                _com.RemoveRepositoryLink();
-            }
-            else if (menuSel == menuAddRepositoryLink)
-            {
-                _com.AddRepositoryLink();
-            }
+                _com.RemoveRepositoryLink();            
+            else if (menuSel == menuAddRepositoryLink)            
+                _com.AddRepositoryLink();            
             else if (menuSel == menuCreateRepository)
-            {
                 _com.CreateRepository();
-            }
+            
             else if (menuSel == menuManagmentRepository)
-            {
-                _com.ManagmentRepository();
-            }
+                _com.ManagmentRepository();            
             else if (menuSel == menuRefreshTreeFolders)
             {
+                Text = "KaNote Managment";
                 _com.RefreshRepositoryAndFolderTree();
             }
             else if (menuSel == menuEditNote)
-            {
-                _com.EditNote();
-            }
+                _com.EditNote();            
             else if (menuSel == menuEditNoteAsPostIt)
-            {
-                _com.EditNotePostIt();
-            }
+                _com.EditNotePostIt();            
             else if (menuSel == menuNewNote)
-            {
-                _com.AddNote();
-            }
+                _com.AddNote();            
             else if (menuSel == menuNewNoteAsPostIt)
-            {
-                _com.AddNotePostIt();
-            }            
+                _com.AddNotePostIt();                        
             else if (menuSel == menuDeleteNote)
-            {
-                _com.DeleteNote();                
-            }
+                _com.DeleteNote();                            
             else if (menuSel == menuKntScriptConsole)
-            {
-                _com.ShowKntScriptConsole();
-            }
+                _com.ShowKntScriptConsole();            
             else if (menuSel == menuHide)
-            {
                 _com.HideKNoteManagment();
-            }
-            else if (menuSel == menuAbout)
-            {
-                _com.About();
-            }
+            else if (menuSel == menuAbout)            
+                _com.About();            
             else if (menuSel == menuMoveSelectedNotes)
-            {
-                _com.MoveSelectedNotes();
-            }
+                _com.MoveSelectedNotes();            
             else if (menuSel == menuAddTags)
-            {
-                _com.AddTagsSelectedNotes();
-            }
+                _com.AddTagsSelectedNotes();            
             else if (menuSel == menuRemoveTags)
-            {
-                _com.RemoveTagsSelectedNotes();
-            }
+                _com.RemoveTagsSelectedNotes();            
             else if (menuSel == menuExecuteKntScript)
-            {
-                _com.RunScriptSelectedNotes();
-            }
+                _com.RunScriptSelectedNotes();            
             else if (menuSel == menuFoldersExplorer)
             {
                 if (tabExplorers.SelectedIndex == 0)
@@ -227,6 +203,8 @@ namespace KNote.ClientWin.Views
             }            
             else if (menuSel == menuHeaderPanelVisible)
             {
+                if(!panelSupManagment.Visible)
+                    Text = "KaNote Managment";
                 panelSupManagment.Visible = !panelSupManagment.Visible;
             }
             else if (menuSel == menuMainVisible)
@@ -235,13 +213,9 @@ namespace KNote.ClientWin.Views
                 menuMainVisible.Checked = !menuMainVisible.Checked;
             }
             else if (menuSel == menuExit)
-            {
-                await _com.FinalizeApp();
-            }
+                await _com.FinalizeApp();            
             else
-            {
-                MessageBox.Show("In construction ... ");
-            }
+                MessageBox.Show("In construction ... ");            
         }
 
         private void buttonToolBar_Click(object sender, EventArgs e)
@@ -269,8 +243,8 @@ namespace KNote.ClientWin.Views
             {
                 this.Hide();
                 if(e.CloseReason == CloseReason.WindowsShutDown)
-                {
-                    await _com.FinalizeApp();
+                {                    
+                    await _com.FinalizeAppForce();
                 }
                 else
                 {

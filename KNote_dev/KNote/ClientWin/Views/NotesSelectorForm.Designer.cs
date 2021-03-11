@@ -71,6 +71,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridNotes.BackgroundColor = System.Drawing.SystemColors.Window;
+            this.dataGridNotes.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dataGridNotes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridNotes.ContextMenuStrip = this.contextMenu;
             this.dataGridNotes.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
