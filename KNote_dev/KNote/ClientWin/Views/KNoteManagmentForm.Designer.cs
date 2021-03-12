@@ -69,6 +69,7 @@
             this.menuSearchPanel = new System.Windows.Forms.ToolStripMenuItem();
             this.menuHeaderPanelVisible = new System.Windows.Forms.ToolStripMenuItem();
             this.menuMainVisible = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuVerticalPanelForNotes = new System.Windows.Forms.ToolStripMenuItem();
             this.menuTools = new System.Windows.Forms.ToolStripMenuItem();
             this.menuReports = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
@@ -390,7 +391,8 @@
             this.menuFoldersExplorer,
             this.menuSearchPanel,
             this.menuHeaderPanelVisible,
-            this.menuMainVisible});
+            this.menuMainVisible,
+            this.menuVerticalPanelForNotes});
             this.menuView.Name = "menuView";
             this.menuView.Size = new System.Drawing.Size(44, 20);
             this.menuView.Text = "&View";
@@ -433,6 +435,13 @@
             this.menuMainVisible.Size = new System.Drawing.Size(266, 22);
             this.menuMainVisible.Text = "Main menu visible";
             this.menuMainVisible.Click += new System.EventHandler(this.menu_Click);
+            // 
+            // menuVerticalPanelForNotes
+            // 
+            this.menuVerticalPanelForNotes.Name = "menuVerticalPanelForNotes";
+            this.menuVerticalPanelForNotes.Size = new System.Drawing.Size(266, 22);
+            this.menuVerticalPanelForNotes.Text = "Vertical panel for list notes";
+            this.menuVerticalPanelForNotes.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuTools
             // 
@@ -874,5 +883,6 @@
         private System.Windows.Forms.ToolStripMenuItem menuHeaderPanelVisible;
         private System.Windows.Forms.ToolStripMenuItem menuExportData;
         private System.Windows.Forms.ToolStripMenuItem menuMainVisible;
+        private System.Windows.Forms.ToolStripMenuItem menuVerticalPanelForNotes;
     }
 }

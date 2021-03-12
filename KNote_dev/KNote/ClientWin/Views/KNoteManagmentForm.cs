@@ -212,6 +212,19 @@ namespace KNote.ClientWin.Views
                 menuMangment.Visible = !menuMangment.Visible;
                 menuMainVisible.Checked = !menuMainVisible.Checked;
             }
+            else if (menuSel == menuVerticalPanelForNotes)
+            {
+                if(splitContainer2.Orientation == Orientation.Horizontal)
+                {
+                    splitContainer2.Orientation = Orientation.Vertical;
+                    menuVerticalPanelForNotes.Checked = true;
+                }
+                else
+                {
+                    splitContainer2.Orientation = Orientation.Horizontal;
+                    menuVerticalPanelForNotes.Checked = false;
+                }
+            }            
             else if (menuSel == menuExit)
                 await _com.FinalizeApp();            
             else
