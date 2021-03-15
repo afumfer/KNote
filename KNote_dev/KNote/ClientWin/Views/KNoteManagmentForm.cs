@@ -139,12 +139,10 @@ namespace KNote.ClientWin.Views
             ToolStripMenuItem menuSel;
             menuSel = (ToolStripMenuItem)sender;
 
-            if (menuSel == menuKNoteLab)
-            {
+            if (menuSel == menuKNoteLab) {
                 // For test ...
                 var labForm = new LabForm(_com.Store);
-                labForm.Show();
-            }
+                labForm.Show(); }
             else if (menuSel == menuNewFolder)            
                 _com.NewFolder();            
             else if (menuSel == menuEditFolder)            
@@ -156,15 +154,12 @@ namespace KNote.ClientWin.Views
             else if (menuSel == menuAddRepositoryLink)            
                 _com.AddRepositoryLink();            
             else if (menuSel == menuCreateRepository)
-                _com.CreateRepository();
-            
+                _com.CreateRepository();            
             else if (menuSel == menuManagmentRepository)
                 _com.ManagmentRepository();            
-            else if (menuSel == menuRefreshTreeFolders)
-            {
+            else if (menuSel == menuRefreshTreeFolders) {
                 Text = "KaNote Managment";
-                _com.RefreshRepositoryAndFolderTree();
-            }
+                _com.RefreshRepositoryAndFolderTree(); }
             else if (menuSel == menuEditNote)
                 _com.EditNote();            
             else if (menuSel == menuEditNoteAsPostIt)
@@ -189,42 +184,28 @@ namespace KNote.ClientWin.Views
                 _com.RemoveTagsSelectedNotes();            
             else if (menuSel == menuExecuteKntScript)
                 _com.RunScriptSelectedNotes();            
-            else if (menuSel == menuFoldersExplorer)
-            {
+            else if (menuSel == menuFoldersExplorer) {
                 if (tabExplorers.SelectedIndex == 0)
                     return;
-                SelectTab(0);
-            }
-            else if (menuSel == menuSearchPanel)
-            {
+                SelectTab(0); }
+            else if (menuSel == menuSearchPanel) {
                 if (tabExplorers.SelectedIndex == 1)
                     return;
-                SelectTab(1);
-            }            
-            else if (menuSel == menuHeaderPanelVisible)
-            {
+                SelectTab(1); }            
+            else if (menuSel == menuHeaderPanelVisible) {
                 if(!panelSupManagment.Visible)
                     Text = "KaNote Managment";
-                panelSupManagment.Visible = !panelSupManagment.Visible;
-            }
-            else if (menuSel == menuMainVisible)
-            {
+                panelSupManagment.Visible = !panelSupManagment.Visible; }
+            else if (menuSel == menuMainVisible) {
                 menuMangment.Visible = !menuMangment.Visible;
-                menuMainVisible.Checked = !menuMainVisible.Checked;
-            }
-            else if (menuSel == menuVerticalPanelForNotes)
-            {
-                if(splitContainer2.Orientation == Orientation.Horizontal)
-                {
+                menuMainVisible.Checked = !menuMainVisible.Checked; }
+            else if (menuSel == menuVerticalPanelForNotes) {
+                if(splitContainer2.Orientation == Orientation.Horizontal) {
                     splitContainer2.Orientation = Orientation.Vertical;
-                    menuVerticalPanelForNotes.Checked = true;
-                }
-                else
-                {
+                    menuVerticalPanelForNotes.Checked = true; }
+                else {
                     splitContainer2.Orientation = Orientation.Horizontal;
-                    menuVerticalPanelForNotes.Checked = false;
-                }
-            }            
+                    menuVerticalPanelForNotes.Checked = false; } }            
             else if (menuSel == menuExit)
                 await _com.FinalizeApp();            
             else

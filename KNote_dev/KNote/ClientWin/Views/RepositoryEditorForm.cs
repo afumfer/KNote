@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -120,28 +121,78 @@ namespace KNote.ClientWin.Views
                 _formIsDisty = true;
         }
 
+        private void RepositoryEditorForm_Load(object sender, EventArgs e)
+        {
+            this.Height = 350;            
+            panelSqLite.BorderStyle = BorderStyle.None;
+            panelMSSqlServer.BorderStyle = BorderStyle.None;
+            panelMSSqlServer.Top = panelSqLite.Top;
+            panelMSSqlServer.Left = panelSqLite.Left;
+        }
+
+        private void radioDataBase_CheckedChanged(object sender, EventArgs e)
+        {
+            RefreshRadioDatabase();
+        }
+
         #endregion 
 
         #region Private methods
 
         private void ModelToControls()
         {
+            switch (_com.EditorMode)
+            {
+                case EnumRepositoryEditorMode.AddLink:
+                    Text = "Add link to existing repository";
+                    break;
+                case EnumRepositoryEditorMode.Create:
+                    Text = "Create new repository";
+                    break;
+                case EnumRepositoryEditorMode.Managment:
+                    //Text = "Managment repository";
+                    Text = "Edit repository properties";
+                    groupRepositoryType.Enabled = false;
+                    panelSqLite.Enabled = false;
+                    panelMSSqlServer.Enabled = false;
+                    break;
+            }
+
             textAliasName.Text = _com.Model.Alias;
+
+            var connecionValues = GetConnectionValues(_com.Model.ConnectionString);
             if (_com.Model.Provider == "Microsoft.Data.Sqlite")
             {
-                // ...
-                radioSqLite.Checked = true;
+                // @"Data Source=D:\DBs\KNote05DB_Sqlite.db",                
+                textSqLiteDirectory.Text = Path.GetDirectoryName(connecionValues["Data Source"]) ;
+                textSqLiteDataBase.Text = Path.GetFileName(connecionValues["Data Source"]);
+                radioSqLite.Checked = true;                
             }
             else
             {
-                // ...
-                radioSqLite.Checked = false;
+                // @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;                
+                textSQLServer.Text = connecionValues["Data Source"];
+                textSQLDataBase.Text = connecionValues["Initial Catalog"];
+                radioMSSqlServer.Checked = true;                
             }
         }
 
         private void ControlsToModel()
         {
+            _com.Model.Alias = textAliasName.Text;
+            if (radioSqLite.Checked)
+            {
+                _com.Model.Provider = "Microsoft.Data.Sqlite";
+                _com.Model.ConnectionString = Path.Combine(textSqLiteDirectory.Text, textSqLiteDataBase.Text);
+            }
+            else
+            {
+                _com.Model.Provider = "Microsoft.Data.SqlClient";
+                _com.Model.ConnectionString = $"Data Source={textSQLServer.Text}; Initial Catalog={textSQLDataBase.Text}; Trusted_Connection=True; Connection Timeout=60; MultipleActiveResultSets=true;";
+            }
 
+            if (_com.EditorMode == EnumRepositoryEditorMode.AddLink || _com.EditorMode == EnumRepositoryEditorMode.Create)
+                _com.Model.Orm = "EntityFramework";
         }
 
         private bool OnCancelEdition()
@@ -157,25 +208,36 @@ namespace KNote.ClientWin.Views
             return true;
         }
 
-        #endregion
-
-        private void RepositoryEditorForm_Load(object sender, EventArgs e)
+        private Dictionary<string, string> GetConnectionValues(string connectionString)
         {
-            this.Height = 350;
-            // 
-            panelSqLite.BorderStyle = BorderStyle.None;
-            panelMSSqlServer.BorderStyle = BorderStyle.None;
-            panelMSSqlServer.Top = panelSqLite.Top;
-            panelMSSqlServer.Left = panelSqLite.Left;
+            if (string.IsNullOrEmpty(connectionString))
+                throw new ArgumentException("Invalid connection string");
 
-            radioSqLite.Checked = true;
-            panelSqLite.Visible = true;
-            panelMSSqlServer.Visible = false;
+            try
+            {
+                var connectValues = new Dictionary<string, string>();
+                var arrayValues = connectionString.Split(';');
+
+                foreach(var strCon in arrayValues)
+                {
+                    if (!string.IsNullOrEmpty(strCon))
+                    {
+                        var keyValue = strCon.Trim().Split("=");
+                        connectValues.Add(keyValue[0], keyValue[1]);
+                    }
+                }
+
+                return connectValues;
+            }
+            catch (Exception)
+            {
+                throw;
+            }            
         }
 
-        private void radioDataBase_CheckedChanged(object sender, EventArgs e)
+        private void RefreshRadioDatabase()
         {
-            if(radioSqLite.Checked == true)
+            if (radioSqLite.Checked == true)
             {
                 panelSqLite.Visible = true;
                 panelMSSqlServer.Visible = false;
@@ -186,6 +248,8 @@ namespace KNote.ClientWin.Views
                 panelMSSqlServer.Visible = true;
             }
         }
+
+        #endregion
 
     }
 }

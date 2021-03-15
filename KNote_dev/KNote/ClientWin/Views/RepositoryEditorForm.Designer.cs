@@ -58,7 +58,7 @@ namespace KNote.ClientWin.Views
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(428, 489);
+            this.buttonCancel.Location = new System.Drawing.Point(444, 489);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(64, 29);
             this.buttonCancel.TabIndex = 5;
@@ -69,7 +69,7 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(358, 489);
+            this.buttonAccept.Location = new System.Drawing.Point(374, 489);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(64, 29);
             this.buttonAccept.TabIndex = 4;
@@ -90,7 +90,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.textAliasName);
             this.panelForm.Location = new System.Drawing.Point(4, 5);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(504, 478);
+            this.panelForm.Size = new System.Drawing.Size(517, 478);
             this.panelForm.TabIndex = 3;
             // 
             // panelMSSqlServer
@@ -102,14 +102,14 @@ namespace KNote.ClientWin.Views
             this.panelMSSqlServer.Controls.Add(this.label5);
             this.panelMSSqlServer.Location = new System.Drawing.Point(8, 264);
             this.panelMSSqlServer.Name = "panelMSSqlServer";
-            this.panelMSSqlServer.Size = new System.Drawing.Size(496, 117);
+            this.panelMSSqlServer.Size = new System.Drawing.Size(505, 117);
             this.panelMSSqlServer.TabIndex = 14;
             // 
             // textSQLDataBase
             // 
             this.textSQLDataBase.Location = new System.Drawing.Point(1, 83);
             this.textSQLDataBase.Name = "textSQLDataBase";
-            this.textSQLDataBase.Size = new System.Drawing.Size(478, 23);
+            this.textSQLDataBase.Size = new System.Drawing.Size(494, 23);
             this.textSQLDataBase.TabIndex = 12;
             // 
             // label1
@@ -125,7 +125,7 @@ namespace KNote.ClientWin.Views
             // 
             this.textSQLServer.Location = new System.Drawing.Point(1, 28);
             this.textSQLServer.Name = "textSQLServer";
-            this.textSQLServer.Size = new System.Drawing.Size(478, 23);
+            this.textSQLServer.Size = new System.Drawing.Size(494, 23);
             this.textSQLServer.TabIndex = 9;
             // 
             // label5
@@ -146,14 +146,14 @@ namespace KNote.ClientWin.Views
             this.panelSqLite.Controls.Add(this.labelDirectory);
             this.panelSqLite.Location = new System.Drawing.Point(8, 127);
             this.panelSqLite.Name = "panelSqLite";
-            this.panelSqLite.Size = new System.Drawing.Size(496, 121);
+            this.panelSqLite.Size = new System.Drawing.Size(505, 121);
             this.panelSqLite.TabIndex = 13;
             // 
             // textSqLiteDataBase
             // 
             this.textSqLiteDataBase.Location = new System.Drawing.Point(1, 83);
             this.textSqLiteDataBase.Name = "textSqLiteDataBase";
-            this.textSqLiteDataBase.Size = new System.Drawing.Size(478, 23);
+            this.textSqLiteDataBase.Size = new System.Drawing.Size(494, 23);
             this.textSqLiteDataBase.TabIndex = 11;
             // 
             // labelSqLiteDataBase
@@ -169,7 +169,7 @@ namespace KNote.ClientWin.Views
             // 
             this.textSqLiteDirectory.Location = new System.Drawing.Point(1, 28);
             this.textSqLiteDirectory.Name = "textSqLiteDirectory";
-            this.textSqLiteDirectory.Size = new System.Drawing.Size(478, 23);
+            this.textSqLiteDirectory.Size = new System.Drawing.Size(494, 23);
             this.textSqLiteDirectory.TabIndex = 9;
             // 
             // labelDirectory
@@ -187,7 +187,7 @@ namespace KNote.ClientWin.Views
             this.groupRepositoryType.Controls.Add(this.radioSqLite);
             this.groupRepositoryType.Location = new System.Drawing.Point(8, 7);
             this.groupRepositoryType.Name = "groupRepositoryType";
-            this.groupRepositoryType.Size = new System.Drawing.Size(480, 61);
+            this.groupRepositoryType.Size = new System.Drawing.Size(496, 61);
             this.groupRepositoryType.TabIndex = 12;
             this.groupRepositoryType.TabStop = false;
             this.groupRepositoryType.Text = "Reposoty database type";
@@ -221,7 +221,7 @@ namespace KNote.ClientWin.Views
             this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
             this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonFolderSearch.Location = new System.Drawing.Point(764, 199);
+            this.buttonFolderSearch.Location = new System.Drawing.Point(777, 199);
             this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonFolderSearch.Name = "buttonFolderSearch";
             this.buttonFolderSearch.Size = new System.Drawing.Size(27, 25);
@@ -242,7 +242,7 @@ namespace KNote.ClientWin.Views
             // 
             this.textAliasName.Location = new System.Drawing.Point(10, 98);
             this.textAliasName.Name = "textAliasName";
-            this.textAliasName.Size = new System.Drawing.Size(478, 23);
+            this.textAliasName.Size = new System.Drawing.Size(494, 23);
             this.textAliasName.TabIndex = 0;
             // 
             // RepositoryEditorForm

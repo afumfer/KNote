@@ -135,7 +135,10 @@ namespace KNote.ClientWin.Components
                     if (!isNew)
                         OnSavedEntity(response.Entity);
                     else
-                        OnAddedEntity(response.Entity);                    
+                        OnAddedEntity(response.Entity);
+                    
+                    // TODO: future version ... notify actions.
+                    // NotifyMessage($"Note {Model?.NoteNumber.ToString()} saved");
                 }
                 else            
                     View.ShowInfo(response.Message);

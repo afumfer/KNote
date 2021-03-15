@@ -14,9 +14,19 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KNote.ClientWin.Components
 {
+    public enum EnumRepositoryEditorMode
+    {
+        AddLink,
+        Create,
+        Managment
+    }
+
     public class RepositoryEditorComponent : ComponentEditor<IEditorView<RepositoryRef>, RepositoryRef>
     {
         #region Constructor 
+
+        public EnumRepositoryEditorMode EditorMode { get; set; }
+
 
         public RepositoryEditorComponent(Store store) : base(store)
         {

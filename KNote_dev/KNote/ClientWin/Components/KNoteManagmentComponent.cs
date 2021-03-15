@@ -429,18 +429,16 @@ namespace KNote.ClientWin.Components
         {
             if (View.ShowInfo("Are you sure exit KaNote?", "KaNote (*)", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                await Store.SaveActiveNotes();
-                Finalize();
-                return true;
+                return await FinalizeAppForce();
             }                
             return false;
         }
 
         public async Task<bool> FinalizeAppForce()
         {
-            await Store.SaveActiveNotes();
+            var res = await Store.SaveActiveNotes();
             Finalize();
-            return true;
+            return res;
         }
 
         public void ShowKntScriptConsole()
@@ -661,6 +659,7 @@ namespace KNote.ClientWin.Components
                 return;
             }                        
             var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+            repositoryEditorComponent.EditorMode = EnumRepositoryEditorMode.Managment;
             await repositoryEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef, false);
             var res = repositoryEditorComponent.RunModal();
             if (res.Entity == EComponentResult.Executed)
@@ -668,7 +667,6 @@ namespace KNote.ClientWin.Components
                 // Do action 
                 RefreshRepositoryAndFolderTree();
             }
-
         }
 
         public void RefreshRepositoryAndFolderTree()
