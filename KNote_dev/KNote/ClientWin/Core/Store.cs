@@ -81,11 +81,16 @@ namespace KNote.ClientWin.Core
         public event EventHandler<ComponentEventArgs<ServiceRef>> AddedServiceRef;
         public void AddServiceRef(ServiceRef serviceRef)
         {
-            _servicesRefs.Add(serviceRef);
+            _servicesRefs.Add(serviceRef);            
             if (AddedServiceRef != null)
                 AddedServiceRef(this, new ComponentEventArgs<ServiceRef>(serviceRef));
         }
-        
+
+        public void AddServiceRefInAppConfig(ServiceRef serviceRef)
+        {
+            AppConfig.RespositoryRefs.Add(serviceRef.RepositoryRef);
+        }
+
         public event EventHandler<ComponentEventArgs<ServiceRef>> RemovedServiceRef;
         public void RemoveServiceRef(ServiceRef serviceRef)
         {            

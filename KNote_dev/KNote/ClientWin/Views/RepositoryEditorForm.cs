@@ -160,21 +160,27 @@ namespace KNote.ClientWin.Views
 
             textAliasName.Text = _com.Model.Alias;
 
-            var connecionValues = GetConnectionValues(_com.Model.ConnectionString);
-            if (_com.Model.Provider == "Microsoft.Data.Sqlite")
-            {
-                // @"Data Source=D:\DBs\KNote05DB_Sqlite.db",                
-                textSqLiteDirectory.Text = Path.GetDirectoryName(connecionValues["Data Source"]) ;
-                textSqLiteDataBase.Text = Path.GetFileName(connecionValues["Data Source"]);
-                radioSqLite.Checked = true;                
+            if (!string.IsNullOrEmpty(_com.Model.ConnectionString))
+            { 
+                var connecionValues = GetConnectionValues(_com.Model.ConnectionString);
+                if (_com.Model.Provider == "Microsoft.Data.Sqlite")
+                {
+                    // @"Data Source=D:\DBs\KNote05DB_Sqlite.db",                
+                    textSqLiteDirectory.Text = Path.GetDirectoryName(connecionValues["Data Source"]) ;
+                    textSqLiteDataBase.Text = Path.GetFileName(connecionValues["Data Source"]);
+                    radioSqLite.Checked = true;
+                }
+                else
+                {
+                    // @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;                
+                    textSQLServer.Text = connecionValues["Data Source"];
+                    textSQLDataBase.Text = connecionValues["Initial Catalog"];
+                    radioMSSqlServer.Checked = true;                
+                }            
             }
-            else
-            {
-                // @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;                
-                textSQLServer.Text = connecionValues["Data Source"];
-                textSQLDataBase.Text = connecionValues["Initial Catalog"];
-                radioMSSqlServer.Checked = true;                
-            }
+            else 
+                radioSqLite.Checked = true;
+
         }
 
         private void ControlsToModel()
@@ -183,7 +189,7 @@ namespace KNote.ClientWin.Views
             if (radioSqLite.Checked)
             {
                 _com.Model.Provider = "Microsoft.Data.Sqlite";
-                _com.Model.ConnectionString = Path.Combine(textSqLiteDirectory.Text, textSqLiteDataBase.Text);
+                _com.Model.ConnectionString = $"Data Source={Path.Combine(textSqLiteDirectory.Text, textSqLiteDataBase.Text)}";
             }
             else
             {
@@ -191,6 +197,7 @@ namespace KNote.ClientWin.Views
                 _com.Model.ConnectionString = $"Data Source={textSQLServer.Text}; Initial Catalog={textSQLDataBase.Text}; Trusted_Connection=True; Connection Timeout=60; MultipleActiveResultSets=true;";
             }
 
+            // TODO: hack, EntityFramework is default orm when repository is created. (Daper no suport create repository). 
             if (_com.EditorMode == EnumRepositoryEditorMode.AddLink || _com.EditorMode == EnumRepositoryEditorMode.Create)
                 _com.Model.Orm = "EntityFramework";
         }

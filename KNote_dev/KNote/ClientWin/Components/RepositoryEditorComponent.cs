@@ -67,13 +67,69 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public async override Task<bool> NewModel(IKntService service)
+        public async override Task<bool> NewModel(IKntService service = null)
         {
+            Service = service;
+
+            Model = new RepositoryRef();
+
             return await Task.FromResult<bool>(true);
         }
 
         public async override Task<bool> SaveModel()
         {
+            View.RefreshModel();
+
+            if (!Model.IsDirty())
+                return await Task.FromResult<bool>(true);
+
+            var msgVal = Model.GetErrorMessage();
+            if (!string.IsNullOrEmpty(msgVal))
+            {
+                View.ShowInfo(msgVal);
+                return await Task.FromResult<bool>(false);
+            }
+
+            try
+            {
+                if (EditorMode == EnumRepositoryEditorMode.Managment)
+                {
+                    var repositoryForEdit = Store.GetServiceRef(Service.IdServiceRef).RepositoryRef;
+                    repositoryForEdit.Alias = Model.Alias;
+                    repositoryForEdit.ConnectionString = Model.ConnectionString ;
+                    repositoryForEdit.Provider = Model.Provider ;
+                    repositoryForEdit.Orm = Model.Orm;
+                    Model.SetIsDirty(false);
+                    Store.SaveConfig();
+                    OnSavedEntity(Model);
+                }
+
+                else if (EditorMode == EnumRepositoryEditorMode.AddLink)
+                {
+                    // TODO add link 
+                    var newService = new ServiceRef(Model);
+                    Store.AddServiceRef(newService);                    
+                    Store.AddServiceRefInAppConfig(newService);
+                    Model.SetIsDirty(false);
+                    Store.SaveConfig();
+                    OnAddedEntity(Model);
+                }
+
+                else if (EditorMode == EnumRepositoryEditorMode.Create)
+                {
+                    // Create repository and add link
+                    OnAddedEntity(Model);
+                }
+
+
+                Finalize();
+            }
+            catch (Exception ex)
+            {
+                View.ShowInfo(ex.Message);
+                return await Task.FromResult<bool>(false);
+            }
+
             return await Task.FromResult<bool>(true);
         }
 

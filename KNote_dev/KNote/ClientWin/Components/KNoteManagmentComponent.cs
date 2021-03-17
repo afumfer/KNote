@@ -638,10 +638,16 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public void AddRepositoryLink()
+        public async void AddRepositoryLink()
         {
             var repositoryEditorComponent = new RepositoryEditorComponent(Store);
-            repositoryEditorComponent.RunModal();
+            repositoryEditorComponent.EditorMode = EnumRepositoryEditorMode.AddLink;
+            await repositoryEditorComponent.NewModel();
+            var res = repositoryEditorComponent.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {                
+                RefreshRepositoryAndFolderTree();
+            }
 
         }
 

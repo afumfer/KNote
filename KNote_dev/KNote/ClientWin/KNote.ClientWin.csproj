@@ -14,7 +14,7 @@
     <PackageReference Include="Markdig" Version="0.23.0" />
     <PackageReference Include="ReverseMarkdown" Version="3.19.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
-    <PackageReference Include="System.IO.Ports" Version="5.0.0" />
+    <PackageReference Include="System.IO.Ports" Version="5.0.1" />
   </ItemGroup>
 
   <ItemGroup>
