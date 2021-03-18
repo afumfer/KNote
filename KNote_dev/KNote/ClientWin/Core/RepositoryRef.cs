@@ -70,6 +70,40 @@ namespace KNote.ClientWin.Core
             }
         }
 
+
+        // TODO: thinking ....
+
+        //private string _dataSource;
+        //[Required(ErrorMessage = KMSG)]
+        //public string DataSource
+        //{
+        //    get { return _dataSource; }
+        //    set
+        //    {
+        //        if (_dataSource != value)
+        //        {
+        //            _dataSource = value;
+        //            OnPropertyChanged("DataSource");
+        //        }
+        //    }
+        //}
+
+        //private string _dataBase;
+        //[Required(ErrorMessage = KMSG)]
+        //public string DataBase
+        //{
+        //    get { return _dataBase; }
+        //    set
+        //    {
+        //        if (_dataBase != value)
+        //        {
+        //            _dataBase = value;
+        //            OnPropertyChanged("DataBase");
+        //        }
+        //    }
+        //}
+
+
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var results = new List<ValidationResult>();

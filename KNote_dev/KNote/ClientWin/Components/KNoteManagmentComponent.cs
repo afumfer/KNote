@@ -65,12 +65,12 @@ namespace KNote.ClientWin.Components
         public NoteInfoDto SelectedNoteInfo
         {
             get { return _selectedNoteInfo; }
+            protected set { _selectedNoteInfo = value; }
         }
 
         public string FolderPath { get; set; }
 
         public int? CountNotes { get; set; }
-
 
         #endregion 
 
@@ -253,7 +253,7 @@ namespace KNote.ClientWin.Components
 
         private async void _notesSelectorComponent_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
-            if (e.Entity == null)
+            if (e.Entity == null || SelectedServiceRef == null)
                 return;
 
             NotifyMessage($"Loading note details for note {e.Entity.NoteNumber}");
@@ -549,18 +549,6 @@ namespace KNote.ClientWin.Components
             AddNotePostIt(DefaultFolderWithServiceRef);
         }
         
-        private async void AddNotePostIt(FolderWithServiceRef folderWithServiceRef)  // IKntService service
-        {
-            var postItEditorComponent = new PostItEditorComponent(Store);
-            postItEditorComponent.AddedEntity += PostItEditorComponent_AddedEntity;
-            postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
-            postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
-            postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
-            postItEditorComponent.FolderWithServiceRef = folderWithServiceRef;
-            await postItEditorComponent.NewModel(folderWithServiceRef.ServiceRef.Service);
-            postItEditorComponent.Run();
-        }
-
         public async void DeleteNote()
         {
             if (SelectedNoteInfo == null)
@@ -638,23 +626,14 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        public async void AddRepositoryLink()
+        public void AddRepositoryLink()
         {
-            var repositoryEditorComponent = new RepositoryEditorComponent(Store);
-            repositoryEditorComponent.EditorMode = EnumRepositoryEditorMode.AddLink;
-            await repositoryEditorComponent.NewModel();
-            var res = repositoryEditorComponent.RunModal();
-            if (res.Entity == EComponentResult.Executed)
-            {                
-                RefreshRepositoryAndFolderTree();
-            }
-
+            NewRepository(EnumRepositoryEditorMode.AddLink);
         }
 
         public void CreateRepository()
         {
-            var repositoryEditorComponent = new RepositoryEditorComponent(Store);
-            repositoryEditorComponent.RunModal();
+            NewRepository(EnumRepositoryEditorMode.Create);
         }
 
         public async void ManagmentRepository()
@@ -680,9 +659,13 @@ namespace KNote.ClientWin.Components
             NotifyMessage("Refreshing tree folder ...");
             SelectedFilterWithServiceRef = null;
             SelectedFolderWithServiceRef = null;
+            SelectedNoteInfo = null;
+            FolderPath = "";
+            CountNotes = 0;
             FoldersSelectorComponent.Refresh();
             NoteEditorComponent.CleanView();
             NotesSelectorComponent.CleanView();
+            View.ShowInfo(null);
             NotifyMessage("Refreshed tree folder ...");
         }
 
@@ -854,7 +837,6 @@ namespace KNote.ClientWin.Components
                 _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
         }
 
-
         private async void ChangeTags(EnumChangeTag action)
         {
             var strTmp = "";
@@ -906,6 +888,30 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        private async void NewRepository(EnumRepositoryEditorMode mode)
+        {
+            var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+            repositoryEditorComponent.EditorMode = mode;
+            await repositoryEditorComponent.NewModel();
+            var res = repositoryEditorComponent.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                RefreshRepositoryAndFolderTree();
+            }
+        }
+
+        private async void AddNotePostIt(FolderWithServiceRef folderWithServiceRef)
+        {
+            var postItEditorComponent = new PostItEditorComponent(Store);
+            postItEditorComponent.AddedEntity += PostItEditorComponent_AddedEntity;
+            postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
+            postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
+            postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
+            postItEditorComponent.FolderWithServiceRef = folderWithServiceRef;
+            await postItEditorComponent.NewModel(folderWithServiceRef.ServiceRef.Service);
+            postItEditorComponent.Run();
+        }
+
         #endregion
 
         #region Private Enums
@@ -920,10 +926,13 @@ namespace KNote.ClientWin.Components
 
     }
 
+    #region Public enums 
+
     public enum EnumSelectMode
     {
         Folders,
         Filters
     }
 
+    #endregion 
 }

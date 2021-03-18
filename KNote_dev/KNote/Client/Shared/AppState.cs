@@ -23,7 +23,7 @@ namespace KNote.Client.Shared
             set { _appName = value; NotifyStateChanged(); }
         }
 
-        private string _appDescription = "Another keynotes management for people's group (ver 0.0.5.2)";
+        private string _appDescription = "Another keynotes management for people's group (ver 0.0.5.7)";
         public string AppDescription
         {
             get { return _appDescription; }

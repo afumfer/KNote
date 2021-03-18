@@ -171,7 +171,7 @@
             // 
             this.menuManagmentRepository.Name = "menuManagmentRepository";
             this.menuManagmentRepository.Size = new System.Drawing.Size(282, 22);
-            this.menuManagmentRepository.Text = "Managment repository ...";
+            this.menuManagmentRepository.Text = "Edit repository properties ...";
             this.menuManagmentRepository.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuAddRepositoryLink
