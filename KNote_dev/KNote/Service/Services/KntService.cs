@@ -32,7 +32,7 @@ namespace KNote.Service.Services
         public KntService(IKntRepository repository)
         {
             _repository = repository;
-            IdServiceRef = Guid.NewGuid();            
+            IdServiceRef = Guid.NewGuid();                        
         }
 
         #endregion
@@ -104,29 +104,26 @@ namespace KNote.Service.Services
                 return _noteTypes;
             }
         }
-        
-        //private IKntKMessageService _kMessages;
-        //public IKntKMessageService KMessages
-        //{
-        //    get
-        //    {
-        //        if (_kMessages == null)
-        //            _kMessages = new KntKMessageService(_repository);
-        //        return _kMessages;
-        //    }
-        //}
 
-        //private IKntKEventService _kEvents;
-        //public IKntKEventService KEvents
-        //{
-        //    get
-        //    {
-        //        if (_kEvents == null)
-        //            _kEvents = new KntKEventService(_repository);
-        //        return _kEvents;
-        //    }
-        //}
+        public async Task<bool> TestDbConnection()
+        {
+            return await _repository.TestDbConnection();
+        }
 
+        public async Task<bool> CreateDataBase()
+        {
+            try
+            {
+                var res = await SystemValues.GetAllAsync();
+                if (!res.IsValid)
+                    return await Task.FromResult<bool>(false);
+            }
+            catch (Exception)
+            {
+                return await Task.FromResult<bool>(false);
+            }
+            return await Task.FromResult<bool>(true);
+        }
 
         #endregion
 
@@ -140,6 +137,6 @@ namespace KNote.Service.Services
                 _repository.Dispose();
         }
 
-        #endregion 
+        #endregion
     }
 }

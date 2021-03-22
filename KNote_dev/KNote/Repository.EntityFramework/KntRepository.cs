@@ -52,7 +52,6 @@ namespace KNote.Repository.EntityFramework
 
         #region IKntRepository
 
-
         private IKntNoteTypeRepository _noteTypes;
         public IKntNoteTypeRepository NoteTypes 
         {
@@ -137,56 +136,32 @@ namespace KNote.Repository.EntityFramework
                 return _users;
             }
         }
-        
-        #region Pendiente ....
 
-        // TODO: pendiente de re-implementar con patrón IKntRepositoryXxxxxx
+        public async Task<bool> TestDbConnection()
+        {
+            try
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
 
-        //private IGenericRepositoryEF<KntDbContext, KEvent> _kEvents;
-        //public IGenericRepositoryEF<KntDbContext, KEvent> KEvents
-        //{
-        //    get
-        //    {
-        //        if (_kEvents == null)
-        //            _kEvents = new GenericRepositoryEF<KntDbContext, KEvent>(_context, _throwKntException);
-        //        return _kEvents;
-        //    }
-        //}
+                if (_strProvider == "Microsoft.Data.SqlClient")
+                    optionsBuilder.UseSqlServer(_strConn);
+                else if (_strProvider == "Microsoft.Data.Sqlite")
+                    optionsBuilder.UseSqlite(_strConn);
+                else
+                    return false;
 
-        //private IGenericRepositoryEF<KntDbContext, KMessage> _kMessages;
-        //public IGenericRepositoryEF<KntDbContext, KMessage> KMessages
-        //{
-        //    get
-        //    {
-        //        if (_kMessages == null)
-        //            _kMessages = new GenericRepositoryEF<KntDbContext, KMessage>(_context, _throwKntException);
-        //        return _kMessages;
-        //    }
-        //}
-
-        //private IGenericRepositoryEF<KntDbContext, KLog> _kLogs;
-        //public IGenericRepositoryEF<KntDbContext, KLog> KLogs
-        //{
-        //    get
-        //    {
-        //        if (_kLogs == null)
-        //            _kLogs = new GenericRepositoryEF<KntDbContext, KLog>(_context, _throwKntException);
-        //        return _kLogs;
-        //    }
-        //}
-
-        //private IGenericRepositoryEF<KntDbContext, TraceNoteType> _traceNoteTypes;
-        //public IGenericRepositoryEF<KntDbContext, TraceNoteType> TraceNoteTypes
-        //{
-        //    get
-        //    {
-        //        if (_traceNoteTypes == null)
-        //            _traceNoteTypes = new GenericRepositoryEF<KntDbContext, TraceNoteType>(_context, _throwKntException);
-        //        return _traceNoteTypes;
-        //    }
-        //}
-
-        #endregion
+                var dbContext = new KntDbContext(optionsBuilder.Options, false);
+                var systemValues = new KntSystemValuesRepository(dbContext, true);
+                var res = await systemValues.GetAllAsync();
+                if (!res.IsValid)
+                    return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
 
         #endregion
 
@@ -231,26 +206,6 @@ namespace KNote.Repository.EntityFramework
 
             if (Context != null)
                 Context.Dispose();
-        }
-
-        #endregion
-
-        #region  Private methods
-
-        public KntDbContext GetKntDbContext(string connectionString, string provider, bool throwKntException = false)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
-
-            if (provider == "Microsoft.Data.SqlClient")                                    
-                optionsBuilder.UseSqlServer(connectionString);                                    
-            else if (provider == "Microsoft.Data.Sqlite")                
-                optionsBuilder.UseSqlite(connectionString);                
-            else
-                throw new Exception("Data provider not suported (KntEx)");
-
-            _throwKntException = throwKntException;
-
-            return new KntDbContext(optionsBuilder.Options);            
         }
 
         #endregion

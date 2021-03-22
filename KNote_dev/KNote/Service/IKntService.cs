@@ -17,7 +17,9 @@ namespace KNote.Service
         IKntFolderService Folders { get; }
         IKntNoteService Notes { get; }
         IKntNoteTypeService NoteTypes { get; }
-       
+        Task<bool> TestDbConnection();
+        Task<bool> CreateDataBase();
+
         //IKntKMessageService KMessages { get; }
         //IKntKEventService KEvents { get; }
     }

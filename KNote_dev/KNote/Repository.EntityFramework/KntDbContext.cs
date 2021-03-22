@@ -35,36 +35,12 @@ namespace KNote.Repository.EntityFramework
         {
         }
 
-        public KntDbContext(DbContextOptions<KntDbContext> options)
+        public KntDbContext(DbContextOptions<KntDbContext> options, bool ensureCreated = true)
            : base(options)
-        {
-            //Database.EnsureDeleted();
-            Database.EnsureCreated();
+        {            
+            if(ensureCreated)
+                Database.EnsureCreated();
         }
-
-        #region Auxiliar properties
-
-        // TODO: !!! Pendiente de eliminar, ver si con Sqlite hace falta algo similar a esto  (Se usaba en compact SQL) 
-        public int? KntCommandTimeout 
-        {
-            // TODO: esta propiedad no es válida para EntityFramwork
-            //       se debe disparar una excepción cuando se intente mofificar
-            //get { return Database.CommandTimeout; }
-            //set { Database.CommandTimeout = value; }
-
-            get; set;
-        }
-
-        // TODO: !!! Pendiente de eliminar, ver si con Sqlite hace falta algo similar a esto  (Se usaba en compact SQL) 
-        public bool KntLazyLoadingEnabled
-        {
-            //get { return this.Configuration.LazyLoadingEnabled; }
-            //set { this.Configuration.LazyLoadingEnabled = value; }
-
-            get; set;
-        }
-
-        #endregion 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -92,9 +68,7 @@ namespace KNote.Repository.EntityFramework
             if (errors.Count > 0)
                 throw new KntEntityValidationException(errors);
             else
-                return await base.SaveChangesAsync(cancellationToken);
-            
-            //return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+                return await base.SaveChangesAsync(cancellationToken);                        
         }
 
         private List<KntEntityValidationInfo> GetKntEntityValidationsInfo()

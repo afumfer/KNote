@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,40 +71,34 @@ namespace KNote.ClientWin.Core
             }
         }
 
+        public Dictionary<string, string> GetConnectionProperties()
+        {
+            try
+            {
+                var connectValues = new Dictionary<string, string>();
 
-        // TODO: thinking ....
+                if (string.IsNullOrEmpty(ConnectionString))
+                    return connectValues;
 
-        //private string _dataSource;
-        //[Required(ErrorMessage = KMSG)]
-        //public string DataSource
-        //{
-        //    get { return _dataSource; }
-        //    set
-        //    {
-        //        if (_dataSource != value)
-        //        {
-        //            _dataSource = value;
-        //            OnPropertyChanged("DataSource");
-        //        }
-        //    }
-        //}
+                var arrayValues = ConnectionString.Split(';');
 
-        //private string _dataBase;
-        //[Required(ErrorMessage = KMSG)]
-        //public string DataBase
-        //{
-        //    get { return _dataBase; }
-        //    set
-        //    {
-        //        if (_dataBase != value)
-        //        {
-        //            _dataBase = value;
-        //            OnPropertyChanged("DataBase");
-        //        }
-        //    }
-        //}
+                foreach (var strCon in arrayValues)
+                {
+                    if (!string.IsNullOrEmpty(strCon))
+                    {
+                        var keyValue = strCon.Trim().Split("=");
+                        connectValues.Add(keyValue[0], keyValue[1]);
+                    }
+                }
 
-
+                return connectValues;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var results = new List<ValidationResult>();
@@ -133,6 +128,52 @@ namespace KNote.ClientWin.Core
             // Specific validations
             // ----
 
+            if(Provider != "Microsoft.Data.Sqlite" && Provider != "Microsoft.Data.SqlClient")
+            {
+                results.Add(new ValidationResult
+                 ("KMSG: Provider is invalid. (Supported providers are Microsoft.Data.SqlClient or Microsoft.Data.Sqlite."
+                 , new[] { "ConnectionString" }));
+            }
+
+            if(Orm != "Dapper" && Orm != "EntityFramework")
+            {
+                results.Add(new ValidationResult
+                 ("KMSG: ORM is invalid. (Supported ORMs are Dapper or EntityFramework."
+                 , new[] { "ConnectionString" }));
+            }
+
+            var connProperties = GetConnectionProperties();
+            if (Provider == "Microsoft.Data.Sqlite")
+            {
+                // example connection "Data Source=D:\xx\MySqliteDataBase.db"              
+                var directory = Path.GetDirectoryName(connProperties["Data Source"]);
+                var dataBase = Path.GetFileName(connProperties["Data Source"]);
+                if(string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(dataBase))
+                {
+                    results.Add(new ValidationResult
+                     ("KMSG: Database directory and file name cannot be empty."
+                     , new[] { "ConnectionString" }));
+                }
+
+                if (!Directory.Exists(directory))
+                {
+                    results.Add(new ValidationResult
+                     ("KMSG: Database directory does not exist."
+                     , new[] { "ConnectionString" }));
+                }
+            }
+            else if (Provider == "Microsoft.Data.SqlClient")
+            {
+                // example "Data Source=.\sqlexpress;Initial Catalog=MyDataBase;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;
+                var sqlServer = connProperties["Data Source"];
+                var dataBase = connProperties["Initial Catalog"];
+                if (string.IsNullOrEmpty(sqlServer) || string.IsNullOrEmpty(dataBase))
+                {
+                    results.Add(new ValidationResult
+                     ("KMSG: Database and sql server name cannot be empty."
+                     , new[] { "ConnectionString" }));
+                }
+            }
 
             return results;
         }

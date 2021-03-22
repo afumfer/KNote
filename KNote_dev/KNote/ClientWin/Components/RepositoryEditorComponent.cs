@@ -105,22 +105,42 @@ namespace KNote.ClientWin.Components
                 }
 
                 else if (EditorMode == EnumRepositoryEditorMode.AddLink)
-                {
-                    // TODO add link 
+                {                    
+                    // Add link repository
                     var newService = new ServiceRef(Model);
-                    Store.AddServiceRef(newService);                    
-                    Store.AddServiceRefInAppConfig(newService);
-                    Model.SetIsDirty(false);
-                    Store.SaveConfig();
-                    OnAddedEntity(Model);
+                    if (await newService.Service.TestDbConnection())
+                    {
+                        Store.AddServiceRef(newService);                    
+                        Store.AddServiceRefInAppConfig(newService);
+                        Model.SetIsDirty(false);
+                        Store.SaveConfig();
+                        OnAddedEntity(Model);
+                    }
+                    else
+                    {
+                        View.ShowInfo("Invalid database.");
+                        return await Task.FromResult<bool>(false);
+                    }
                 }
 
                 else if (EditorMode == EnumRepositoryEditorMode.Create)
                 {
-                    // Create repository and add link
-                    OnAddedEntity(Model);
+                    // Create repository and add link                    
+                    var newService = new ServiceRef(Model);
+                    if (await newService.Service.CreateDataBase())
+                    {
+                        Store.AddServiceRef(newService);
+                        Store.AddServiceRefInAppConfig(newService);
+                        Model.SetIsDirty(false);
+                        Store.SaveConfig();
+                        OnAddedEntity(Model);
+                    }
+                    else
+                    {
+                        View.ShowInfo("Can't create database.");
+                        return await Task.FromResult<bool>(false);
+                    }
                 }
-
 
                 Finalize();
             }

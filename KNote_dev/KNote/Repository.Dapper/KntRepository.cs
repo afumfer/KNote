@@ -129,6 +129,39 @@ namespace KNote.Repository.Dapper
             }
         }
 
+        public async Task<bool> TestDbConnection()
+        {
+            try
+            {                
+                if (_strProvider == "Microsoft.Data.SqlClient")
+                {
+                    var db = new SqlConnection(_strConn);
+                    var systemValues = new KntSystemValuesRepository(db, true);
+                    var testValues = systemValues.GetAllAsync();
+                }                    
+                else if (_strProvider == "Microsoft.Data.Sqlite")
+                {
+                    SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
+                    SqlMapper.AddTypeHandler(new GuidHandler());
+                    SqlMapper.AddTypeHandler(new TimeSpanHandler());
+                    var db = new SqliteConnection(_strConn);
+
+                    var systemValues = new KntSystemValuesRepository(db, true);
+                    var res = await systemValues.GetAllAsync();
+                    if (!res.IsValid)
+                        return false;
+                }
+                else
+                    return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+
         #endregion
 
         #region IDisposable
@@ -176,32 +209,6 @@ namespace KNote.Repository.Dapper
 
         #endregion
 
-        #region Private methods
-
-        public DbConnection GetKntDbConnection(string connectionString, string provider, bool throwKntException = false)
-        {
-            _throwKntException = throwKntException;
-
-            if (provider == "Microsoft.Data.SqlClient")
-            {
-                return new SqlConnection(connectionString);                
-            }
-            else if (provider == "Microsoft.Data.Sqlite")
-            {
-                // TODO: Estudiar poner esto en otro sitio, una clase estática. 
-                //       SqlMapper es estático.                    
-                SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
-                SqlMapper.AddTypeHandler(new GuidHandler());
-                SqlMapper.AddTypeHandler(new TimeSpanHandler());
-                // ---
-                return new SqliteConnection(connectionString);
-            }
-            else
-                throw new Exception("Data provider not suported (KntEx)");
-
-        }
-
-        #endregion 
     }
 
     #region Sqlite personalization 

@@ -39,6 +39,8 @@ namespace KNote.ClientWin.Views
             this.textSQLServer = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.panelSqLite = new System.Windows.Forms.Panel();
+            this.buttonSelectFile = new System.Windows.Forms.Button();
+            this.buttonSelectDirectory = new System.Windows.Forms.Button();
             this.textSqLiteDataBase = new System.Windows.Forms.TextBox();
             this.labelSqLiteDataBase = new System.Windows.Forms.Label();
             this.textSqLiteDirectory = new System.Windows.Forms.TextBox();
@@ -61,7 +63,7 @@ namespace KNote.ClientWin.Views
             this.buttonCancel.Location = new System.Drawing.Point(444, 489);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(64, 29);
-            this.buttonCancel.TabIndex = 5;
+            this.buttonCancel.TabIndex = 9;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -72,7 +74,7 @@ namespace KNote.ClientWin.Views
             this.buttonAccept.Location = new System.Drawing.Point(374, 489);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(64, 29);
-            this.buttonAccept.TabIndex = 4;
+            this.buttonAccept.TabIndex = 8;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
@@ -110,7 +112,7 @@ namespace KNote.ClientWin.Views
             this.textSQLDataBase.Location = new System.Drawing.Point(1, 83);
             this.textSQLDataBase.Name = "textSQLDataBase";
             this.textSQLDataBase.Size = new System.Drawing.Size(494, 23);
-            this.textSQLDataBase.TabIndex = 12;
+            this.textSQLDataBase.TabIndex = 7;
             // 
             // label1
             // 
@@ -126,7 +128,7 @@ namespace KNote.ClientWin.Views
             this.textSQLServer.Location = new System.Drawing.Point(1, 28);
             this.textSQLServer.Name = "textSQLServer";
             this.textSQLServer.Size = new System.Drawing.Size(494, 23);
-            this.textSQLServer.TabIndex = 9;
+            this.textSQLServer.TabIndex = 6;
             // 
             // label5
             // 
@@ -140,6 +142,8 @@ namespace KNote.ClientWin.Views
             // panelSqLite
             // 
             this.panelSqLite.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelSqLite.Controls.Add(this.buttonSelectFile);
+            this.panelSqLite.Controls.Add(this.buttonSelectDirectory);
             this.panelSqLite.Controls.Add(this.textSqLiteDataBase);
             this.panelSqLite.Controls.Add(this.labelSqLiteDataBase);
             this.panelSqLite.Controls.Add(this.textSqLiteDirectory);
@@ -149,12 +153,33 @@ namespace KNote.ClientWin.Views
             this.panelSqLite.Size = new System.Drawing.Size(505, 121);
             this.panelSqLite.TabIndex = 13;
             // 
+            // buttonSelectFile
+            // 
+            this.buttonSelectFile.Location = new System.Drawing.Point(471, 82);
+            this.buttonSelectFile.Name = "buttonSelectFile";
+            this.buttonSelectFile.Size = new System.Drawing.Size(24, 23);
+            this.buttonSelectFile.TabIndex = 11;
+            this.buttonSelectFile.Text = "...";
+            this.buttonSelectFile.UseVisualStyleBackColor = true;
+            this.buttonSelectFile.Visible = false;
+            this.buttonSelectFile.Click += new System.EventHandler(this.buttonSelectFile_Click);
+            // 
+            // buttonSelectDirectory
+            // 
+            this.buttonSelectDirectory.Location = new System.Drawing.Point(471, 28);
+            this.buttonSelectDirectory.Name = "buttonSelectDirectory";
+            this.buttonSelectDirectory.Size = new System.Drawing.Size(24, 23);
+            this.buttonSelectDirectory.TabIndex = 4;
+            this.buttonSelectDirectory.Text = "...";
+            this.buttonSelectDirectory.UseVisualStyleBackColor = true;
+            this.buttonSelectDirectory.Click += new System.EventHandler(this.buttonSelectDirectory_Click);
+            // 
             // textSqLiteDataBase
             // 
             this.textSqLiteDataBase.Location = new System.Drawing.Point(1, 83);
             this.textSqLiteDataBase.Name = "textSqLiteDataBase";
             this.textSqLiteDataBase.Size = new System.Drawing.Size(494, 23);
-            this.textSqLiteDataBase.TabIndex = 11;
+            this.textSqLiteDataBase.TabIndex = 5;
             // 
             // labelSqLiteDataBase
             // 
@@ -169,8 +194,8 @@ namespace KNote.ClientWin.Views
             // 
             this.textSqLiteDirectory.Location = new System.Drawing.Point(1, 28);
             this.textSqLiteDirectory.Name = "textSqLiteDirectory";
-            this.textSqLiteDirectory.Size = new System.Drawing.Size(494, 23);
-            this.textSqLiteDirectory.TabIndex = 9;
+            this.textSqLiteDirectory.Size = new System.Drawing.Size(464, 23);
+            this.textSqLiteDirectory.TabIndex = 3;
             // 
             // labelDirectory
             // 
@@ -243,7 +268,7 @@ namespace KNote.ClientWin.Views
             this.textAliasName.Location = new System.Drawing.Point(10, 98);
             this.textAliasName.Name = "textAliasName";
             this.textAliasName.Size = new System.Drawing.Size(494, 23);
-            this.textAliasName.TabIndex = 0;
+            this.textAliasName.TabIndex = 2;
             // 
             // RepositoryEditorForm
             // 
@@ -298,5 +323,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelSqLiteDataBase;
         private System.Windows.Forms.TextBox textSqLiteDirectory;
         private System.Windows.Forms.Label labelDirectory;
+        private System.Windows.Forms.Button buttonSelectDirectory;
+        private System.Windows.Forms.Button buttonSelectFile;
     }
 }

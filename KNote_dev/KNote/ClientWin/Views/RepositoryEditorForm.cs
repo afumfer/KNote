@@ -135,6 +135,35 @@ namespace KNote.ClientWin.Views
             RefreshRadioDatabase();
         }
 
+        private void buttonSelectDirectory_Click(object sender, EventArgs e)
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                DialogResult result = fbd.ShowDialog();
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                {
+                    textSqLiteDirectory.Text = fbd.SelectedPath;
+                }
+            }
+        }
+
+        private void buttonSelectFile_Click(object sender, EventArgs e)
+        {
+            using (var ofd = new OpenFileDialog())
+            {
+                if (Directory.Exists(textSqLiteDirectory.Text))
+                    ofd.InitialDirectory = textSqLiteDirectory.Text;
+                ofd.DefaultExt = "db";
+                ofd.Filter = "Sqlite database (*.db)|*.db";
+                DialogResult result = ofd.ShowDialog();
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(ofd.FileName))
+                {
+                    textSqLiteDataBase.Text = ofd.FileName;
+                }
+            }
+        }
+
         #endregion 
 
         #region Private methods
@@ -145,6 +174,8 @@ namespace KNote.ClientWin.Views
             {
                 case EnumRepositoryEditorMode.AddLink:
                     Text = "Add link to existing repository";
+                    buttonSelectFile.Visible = true;
+                    textSqLiteDataBase.Width = 464;
                     break;
                 case EnumRepositoryEditorMode.Create:
                     Text = "Create new repository";
@@ -161,18 +192,19 @@ namespace KNote.ClientWin.Views
             textAliasName.Text = _com.Model.Alias;
 
             if (!string.IsNullOrEmpty(_com.Model.ConnectionString))
-            { 
-                var connecionValues = GetConnectionValues(_com.Model.ConnectionString);
+            {
+                //var connecionValues = GetConnectionProperties(_com.Model.ConnectionString);
+                var connecionValues = _com.Model.GetConnectionProperties();
                 if (_com.Model.Provider == "Microsoft.Data.Sqlite")
                 {
-                    // @"Data Source=D:\DBs\KNote05DB_Sqlite.db",                
+                    // example connection "Data Source=D:\xx\MySqliteDataBase.db"              
                     textSqLiteDirectory.Text = Path.GetDirectoryName(connecionValues["Data Source"]) ;
                     textSqLiteDataBase.Text = Path.GetFileName(connecionValues["Data Source"]);
                     radioSqLite.Checked = true;
                 }
                 else
                 {
-                    // @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;                
+                    // example "Data Source=.\sqlexpress;Initial Catalog=MyDataBase;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;
                     textSQLServer.Text = connecionValues["Data Source"];
                     textSQLDataBase.Text = connecionValues["Initial Catalog"];
                     radioMSSqlServer.Checked = true;                
@@ -215,33 +247,6 @@ namespace KNote.ClientWin.Views
             return true;
         }
 
-        private Dictionary<string, string> GetConnectionValues(string connectionString)
-        {
-            if (string.IsNullOrEmpty(connectionString))
-                throw new ArgumentException("Invalid connection string");
-
-            try
-            {
-                var connectValues = new Dictionary<string, string>();
-                var arrayValues = connectionString.Split(';');
-
-                foreach(var strCon in arrayValues)
-                {
-                    if (!string.IsNullOrEmpty(strCon))
-                    {
-                        var keyValue = strCon.Trim().Split("=");
-                        connectValues.Add(keyValue[0], keyValue[1]);
-                    }
-                }
-
-                return connectValues;
-            }
-            catch (Exception)
-            {
-                throw;
-            }            
-        }
-
         private void RefreshRadioDatabase()
         {
             if (radioSqLite.Checked == true)
@@ -257,6 +262,5 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
     }
 }
