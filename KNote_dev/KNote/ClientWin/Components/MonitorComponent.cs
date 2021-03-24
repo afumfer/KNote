@@ -107,10 +107,10 @@ namespace KNote.ClientWin.Components
         {
             View.ShowInfo(info);
 
-            if (!Store.LogActivated)
+            if (!Store.AppConfig.LogActivated)
                 return;
 
-            using (StreamWriter outputFile = new StreamWriter(Store.LogFile, true))
+            using (StreamWriter outputFile = new StreamWriter(Store.AppConfig.LogFile, true))
             {
                 outputFile.WriteLine(info);
             }

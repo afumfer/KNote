@@ -1,191 +1,218 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KNote.Model;
 
 namespace KNote.ClientWin.Core
 {
-
     [Serializable]
-    public class AppConfig
-    {
-		private List<RepositoryRef> _respositoryRef;
-		public List<RepositoryRef> RespositoryRefs 
-		{ 
-			get 
-			{
-				if (_respositoryRef == null)
-					_respositoryRef = new List<RepositoryRef>();
-				return _respositoryRef;
-			}
-			set { _respositoryRef = value; }
-		}
+    public class AppConfig : DtoModelBase
+	{
+        #region Properties 
 
-        public DateTime LastDateTimeStart { get; set; }
-		public int RunCounter { get; set; }
-		public int AutoSaveMinutes { get; set; }
+        private DateTime _lastDateTimeStart;
+        public DateTime LastDateTimeStart
+        {
+            get { return _lastDateTimeStart; }
+            set
+            {
+                if (_lastDateTimeStart != value)
+                {
+                    _lastDateTimeStart = value;
+                    OnPropertyChanged("LastDateTimeStart");
+                }
+            }
+        }
 
-		public string CacheResources { get; set; } = @"D:\Resources\knt";
-		public string CacheUrlResources { get; set; } = @"http://afx.hopto.org/kntres/NotesResources";
+        private int _runCounter;
+        public int RunCounter
+        {
+            get { return _runCounter; }
+            set
+            {
+                if (_runCounter != value)
+                {
+                    _runCounter = value;
+                    OnPropertyChanged("RunCounter");
+                }
+            }
+        }
 
-		#region TODO: ... other params
+        private string _cacheResources;
+        public string CacheResources
+        {
+            get { return _cacheResources; }
+            set
+            {
+                if (_cacheResources != value)
+                {
+                    _cacheResources = value;
+                    OnPropertyChanged("CacheResources");
+                }
+            }
+        }
 
-		//private byte _rastreoAlarmaMinutos;
-		//public byte RastreoAlarmaMinutos
-		//{
-		//	get { return _rastreoAlarmaMinutos; }
-		//	set { _rastreoAlarmaMinutos = value; }
-		//}
+        private string _cacheUrlResources;
+        public string CacheUrlResources
+        {
+            get { return _cacheUrlResources; }
+            set
+            {
+                if (_cacheUrlResources != value)
+                {
+                    _cacheUrlResources = value;
+                    OnPropertyChanged("CacheUrlResources");
+                }
+            }
+        }
 
-		//private byte _autograbarMinutos;
-		//public byte AutograbarMinutos
-		//{
-		//	get { return _autograbarMinutos; }
-		//	set { _autograbarMinutos = value; }
-		//}
+        private string _logFile;
+        public string LogFile
+        {
+            get { return _logFile; }
+            set
+            {
+                if (_logFile != value)
+                {
+                    _logFile = value;
+                    OnPropertyChanged("LogFile");
+                }
+            }
+        }
 
-		//private bool _activarMensajes;
-		//public bool ActivarMensajes
-		//{
-		//	get { return _activarMensajes; }
-		//	set { _activarMensajes = value; }
-		//}
+        private bool _logActivated;
+        public bool LogActivated
+        {
+            get { return _logActivated; }
+            set
+            {
+                if (_logActivated != value)
+                {
+                    _logActivated = value;
+                    OnPropertyChanged("LogActivated");
+                }
+            }
+        }
 
-		//private bool _altaPrimerPlano;
-		//public bool AltaPrimerPlano
-		//{
-		//	get { return _altaPrimerPlano; }
-		//	set { _altaPrimerPlano = value; }
-		//}
+        private bool _alarmActivated;
+        public bool AlarmActivated
+        {
+            get { return _alarmActivated; }
+            set
+            {
+                if (_alarmActivated != value)
+                {
+                    _alarmActivated = value;
+                    OnPropertyChanged("AlarmActivated");
+                }
+            }
+        }
 
-		//private bool _archivadorVisible = true;
-		//public bool ArchivadorVisible
-		//{
-		//	get { return _archivadorVisible; }
-		//	set { _archivadorVisible = value; }
-		//}
+        private bool _autoSaveActivated;
+        public bool AutoSaveActivated
+        {
+            get { return _autoSaveActivated; }
+            set
+            {
+                if (_autoSaveActivated != value)
+                {
+                    _autoSaveActivated = value;
+                    OnPropertyChanged("AutoSaveActivated");
+                }
+            }
+        }
 
-		//private bool _soloModoTareasTmp;
-		//public bool SoloModoTareasTmp
-		//{
-		//	get { return _soloModoTareasTmp; }
-		//	set { _soloModoTareasTmp = value; }
-		//}
+        public int _alarmSeconds;
+        public int AlarmSeconds
+        {
+            get { return _alarmSeconds; }
+            set
+            {
+                if (_alarmSeconds != value)
+                {
+                    _alarmSeconds = value;
+                    OnPropertyChanged("AlarmSeconds");
+                }
+            }
+        }
 
-		//private bool _archivadorMaximizado;
-		//public bool ArchivadorMaximizado
-		//{
-		//	get { return _archivadorMaximizado; }
-		//	set { _archivadorMaximizado = value; }
-		//}
+        private int _atoSaveSeconds;
+        public int AutoSaveSeconds
+        {
+            get { return _atoSaveSeconds; }
+            set
+            {
+                if (_atoSaveSeconds != value)
+                {
+                    _atoSaveSeconds = value;
+                    OnPropertyChanged("AutoSaveSeconds");
+                }
+            }
+        }
 
-		//private int _archivadorTop;
-		//public int ArchivadorTop
-		//{
-		//	get
-		//	{
-		//		if (_archivadorTop < 0)
-		//			_archivadorTop = 0;
-		//		return _archivadorTop;
-		//	}
-		//	set
-		//	{
-		//		_archivadorTop = value;
-		//		if (_archivadorTop < 0)
-		//			_archivadorTop = 0;
-		//	}
-		//}
+        private List<RepositoryRef> _respositoryRef;
+        public List<RepositoryRef> RespositoryRefs
+        {
+            get
+            {
+                if (_respositoryRef == null)
+                    _respositoryRef = new List<RepositoryRef>();
+                return _respositoryRef;
+            }
+            set 
+            {
+                if(_respositoryRef != value)
+                {
+                    _respositoryRef = value;
+                    OnPropertyChanged("RespositoryRefs");
+                }
+            }
+        }
 
-		//private int _archivadorLeft;
-		//public int ArchivadorLeft
-		//{
-		//	get
-		//	{
-		//		if (_archivadorLeft < 0)
-		//			_archivadorLeft = 0;
-		//		return _archivadorLeft;
-		//	}
-		//	set
-		//	{
-		//		_archivadorLeft = value;
-		//		if (_archivadorLeft < 0)
-		//			_archivadorLeft = 0;
-		//	}
-		//}
+        #endregion 
 
-		//private int _archivadorWidth;
-		//public int ArchivadorWidth
-		//{
-		//	get { return _archivadorWidth; }
-		//	set { _archivadorWidth = value; }
-		//}
+        #region TODO: ... other params
 
-		//private int _archivadorHeight;
-		//public int ArchivadorHeight
-		//{
-		//	get { return _archivadorHeight; }
-		//	set { _archivadorHeight = value; }
-		//}
+        // KNoteManagmentForm: size, location(in desktop dimension), minimized (?), maximized (?), visible (?), hide note number (?)
 
-		//private int _contadorEjecucion;
-		//public int ContadorEjecucion
-		//{
-		//	get { return _contadorEjecucion; }
-		//	set { _contadorEjecucion = value; }
-		//}
+        // PostIts: always top, style 
 
-		//private DateTime _fechaHoraUltimoInicio;
-		//public DateTime FechaHoraUltimoInicio
-		//{
-		//	get { return _fechaHoraUltimoInicio; }
-		//	set { _fechaHoraUltimoInicio = value; }
+        // Path initial folder 
 
-		//}
+        #endregion
 
-		//private string _usuarioRed = "";
-		//public string UsuarioRed
-		//{
-		//	get { return _usuarioRed; }
-		//	set { _usuarioRed = value; }
-		//}
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var results = new List<ValidationResult>();
 
-		//private string _nombreComputadora = "";
-		//public string NombreComputadora
-		//{
-		//	get { return _nombreComputadora; }
-		//	set { _nombreComputadora = value; }
-		//}
+            // ---
+            // Capture the validations implemented with attributes.
+            // TODO: (Esta sección se puede resolver por medio de reflexión).
+            // ---
 
-		//private EstiloNota _estiloNotaDefecto;
-		//public EstiloNota EstiloNotaDefecto
-		//{
-		//	get { return _estiloNotaDefecto; }
-		//	set { _estiloNotaDefecto = value; }
-		//}
+            //Validator.TryValidateProperty(this.Xxproperty,
+            //   new ValidationContext(this, null, null) { MemberName = "Xxproperty" },
+            //   results);
 
-		//private bool _mostrarBordePostIt;
-		//public bool MostrarBordePostIt
-		//{
-		//	get { return _mostrarBordePostIt; }
-		//	set { _mostrarBordePostIt = value; }
-		//}
 
-		//private string _rutaIdsArbolCarpetas;
-		//public string RutaIdsArbolCarpetas
-		//{
-		//	get { return _rutaIdsArbolCarpetas; }
-		//	set { _rutaIdsArbolCarpetas = value; }
-		//}
 
-		//private bool _ocultarIdNota;
-		//public bool OcultarIdNota
-		//{
-		//	get { return _ocultarIdNota; }
-		//	set { _ocultarIdNota = value; }
-		//}
+            // ---
+            // Specific validations
+            // ----
 
-		#endregion
+            //if (YyProperty != "xxxxxx" )
+            //{
+            //    results.Add(new ValidationResult
+            //     ("KMSG: xxxxxxxx."
+            //     , new[] { "YyProperty" }));
+            //}
 
-	}
+            return results;
+
+        }
+
+    }
 }

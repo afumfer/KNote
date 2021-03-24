@@ -26,6 +26,10 @@ namespace KNote.ClientWin.Views
 
             _com.Store.ComponentNotification += Store_ComponentNotification;
 
+            // TODO: reports ... for next version
+            menuReports.Visible = false;
+            menuToolsS1.Visible = false;
+
 #if DEBUG
             menuKNoteLab.Visible = true;
 #endif

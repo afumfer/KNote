@@ -16,23 +16,23 @@ namespace KNote.ClientWin.Core
 {
     public class Store
     {
-        #region Application state 
-
-        public AppConfig AppConfig { get; protected set; }
-
-        public string AppUserName { get; set; }
-        public string ComputerName { get; set; }
-        public string LogFile { get; set; }
-
-        public bool LogActivated { get; set; } = false;
-        public bool AlarmActivated { get; set; } = true;
-        public bool AutoSaveActivated { get; set; } = true;
-
-        public readonly IFactoryViews FactoryViews;
+        #region Private fields
 
         private readonly List<ServiceRef> _servicesRefs;
 
         private readonly List<ComponentBase> _listComponents;
+
+        #endregion 
+
+        #region Public properties, application state 
+
+        public AppConfig AppConfig { get; protected set; }
+
+        public string AppUserName { get; set; }
+
+        public string ComputerName { get; set; }
+
+        public readonly IFactoryViews FactoryViews;
 
         public FolderWithServiceRef _dafaultFolderWithServiceRef;
         public FolderWithServiceRef DefaultFolderWithServiceRef

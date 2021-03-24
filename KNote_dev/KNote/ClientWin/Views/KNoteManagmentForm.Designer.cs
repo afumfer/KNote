@@ -46,9 +46,9 @@
             this.menuNewFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.menuEditFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.menuDeleteFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolMenuFilesS1 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuFileS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuHide = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolMenuFilesS2 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuFilesS2 = new System.Windows.Forms.ToolStripSeparator();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.menuEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.menuNewNote = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,12 +56,12 @@
             this.menuEditNote = new System.Windows.Forms.ToolStripMenuItem();
             this.menuEditNoteAsPostIt = new System.Windows.Forms.ToolStripMenuItem();
             this.menuDeleteNote = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuEditS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMoveSelectedNotes = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem12 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuEditS2 = new System.Windows.Forms.ToolStripSeparator();
             this.menuAddTags = new System.Windows.Forms.ToolStripMenuItem();
             this.menuRemoveTags = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem16 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuEditS3 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMoreOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.menuExecuteKntScript = new System.Windows.Forms.ToolStripMenuItem();
             this.menuView = new System.Windows.Forms.ToolStripMenuItem();
@@ -72,10 +72,10 @@
             this.menuVerticalPanelForNotes = new System.Windows.Forms.ToolStripMenuItem();
             this.menuTools = new System.Windows.Forms.ToolStripMenuItem();
             this.menuReports = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuToolsS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuKntScriptConsole = new System.Windows.Forms.ToolStripMenuItem();
             this.menuKNoteLab = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuToolsS2 = new System.Windows.Forms.ToolStripSeparator();
             this.menuOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.menuHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.menuHelpDoc = new System.Windows.Forms.ToolStripMenuItem();
@@ -136,9 +136,9 @@
             this.menuFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuRepositories,
             this.menuFolders,
-            this.toolMenuFilesS1,
+            this.menuFileS1,
             this.menuHide,
-            this.toolMenuFilesS2,
+            this.menuFilesS2,
             this.menuExit});
             this.menuFile.Name = "menuFile";
             this.menuFile.Size = new System.Drawing.Size(37, 20);
@@ -252,10 +252,10 @@
             this.menuDeleteFolder.Text = "Delete folder ...";
             this.menuDeleteFolder.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolMenuFilesS1
+            // menuFileS1
             // 
-            this.toolMenuFilesS1.Name = "toolMenuFilesS1";
-            this.toolMenuFilesS1.Size = new System.Drawing.Size(200, 6);
+            this.menuFileS1.Name = "menuFileS1";
+            this.menuFileS1.Size = new System.Drawing.Size(200, 6);
             // 
             // menuHide
             // 
@@ -264,10 +264,10 @@
             this.menuHide.Text = "&Hide KNote managment";
             this.menuHide.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolMenuFilesS2
+            // menuFilesS2
             // 
-            this.toolMenuFilesS2.Name = "toolMenuFilesS2";
-            this.toolMenuFilesS2.Size = new System.Drawing.Size(200, 6);
+            this.menuFilesS2.Name = "menuFilesS2";
+            this.menuFilesS2.Size = new System.Drawing.Size(200, 6);
             // 
             // menuExit
             // 
@@ -284,12 +284,12 @@
             this.menuEditNote,
             this.menuEditNoteAsPostIt,
             this.menuDeleteNote,
-            this.toolStripMenuItem1,
+            this.menuEditS1,
             this.menuMoveSelectedNotes,
-            this.toolStripMenuItem12,
+            this.menuEditS2,
             this.menuAddTags,
             this.menuRemoveTags,
-            this.toolStripMenuItem16,
+            this.menuEditS3,
             this.menuMoreOptions});
             this.menuEdit.Name = "menuEdit";
             this.menuEdit.Size = new System.Drawing.Size(39, 20);
@@ -333,10 +333,10 @@
             this.menuDeleteNote.Text = "&Delete note";
             this.menuDeleteNote.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolStripMenuItem1
+            // menuEditS1
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(258, 6);
+            this.menuEditS1.Name = "menuEditS1";
+            this.menuEditS1.Size = new System.Drawing.Size(258, 6);
             // 
             // menuMoveSelectedNotes
             // 
@@ -345,10 +345,10 @@
             this.menuMoveSelectedNotes.Text = "&Move selected notes ...";
             this.menuMoveSelectedNotes.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolStripMenuItem12
+            // menuEditS2
             // 
-            this.toolStripMenuItem12.Name = "toolStripMenuItem12";
-            this.toolStripMenuItem12.Size = new System.Drawing.Size(258, 6);
+            this.menuEditS2.Name = "menuEditS2";
+            this.menuEditS2.Size = new System.Drawing.Size(258, 6);
             // 
             // menuAddTags
             // 
@@ -364,10 +364,10 @@
             this.menuRemoveTags.Text = "Remove tags from selected notes ...";
             this.menuRemoveTags.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolStripMenuItem16
+            // menuEditS3
             // 
-            this.toolStripMenuItem16.Name = "toolStripMenuItem16";
-            this.toolStripMenuItem16.Size = new System.Drawing.Size(258, 6);
+            this.menuEditS3.Name = "menuEditS3";
+            this.menuEditS3.Size = new System.Drawing.Size(258, 6);
             // 
             // menuMoreOptions
             // 
@@ -447,10 +447,10 @@
             // 
             this.menuTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuReports,
-            this.toolStripMenuItem6,
+            this.menuToolsS1,
             this.menuKntScriptConsole,
             this.menuKNoteLab,
-            this.toolStripMenuItem7,
+            this.menuToolsS2,
             this.menuOptions});
             this.menuTools.Name = "menuTools";
             this.menuTools.Size = new System.Drawing.Size(46, 20);
@@ -463,10 +463,10 @@
             this.menuReports.Text = "&Reports ...";
             this.menuReports.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolStripMenuItem6
+            // menuToolsS1
             // 
-            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(182, 6);
+            this.menuToolsS1.Name = "menuToolsS1";
+            this.menuToolsS1.Size = new System.Drawing.Size(182, 6);
             // 
             // menuKntScriptConsole
             // 
@@ -485,10 +485,10 @@
             this.menuKNoteLab.Visible = false;
             this.menuKNoteLab.Click += new System.EventHandler(this.menu_Click);
             // 
-            // toolStripMenuItem7
+            // menuToolsS2
             // 
-            this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-            this.toolStripMenuItem7.Size = new System.Drawing.Size(182, 6);
+            this.menuToolsS2.Name = "menuToolsS2";
+            this.menuToolsS2.Size = new System.Drawing.Size(182, 6);
             // 
             // menuOptions
             // 
@@ -825,20 +825,20 @@
         private System.Windows.Forms.ToolStripMenuItem menuNewFolder;
         private System.Windows.Forms.ToolStripMenuItem menuEditFolder;
         private System.Windows.Forms.ToolStripMenuItem menuDeleteFolder;
-        private System.Windows.Forms.ToolStripSeparator toolMenuFilesS1;
+        private System.Windows.Forms.ToolStripSeparator menuFileS1;
         private System.Windows.Forms.ToolStripMenuItem menuHide;
-        private System.Windows.Forms.ToolStripSeparator toolMenuFilesS2;
+        private System.Windows.Forms.ToolStripSeparator menuFilesS2;
         private System.Windows.Forms.ToolStripMenuItem menuExit;
         private System.Windows.Forms.ToolStripMenuItem menuEdit;
         private System.Windows.Forms.ToolStripMenuItem menuNewNote;
         private System.Windows.Forms.ToolStripMenuItem menuEditNote;
         private System.Windows.Forms.ToolStripMenuItem menuDeleteNote;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripSeparator menuEditS1;
         private System.Windows.Forms.ToolStripMenuItem menuMoveSelectedNotes;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem12;
+        private System.Windows.Forms.ToolStripSeparator menuEditS2;
         private System.Windows.Forms.ToolStripMenuItem menuAddTags;
         private System.Windows.Forms.ToolStripMenuItem menuRemoveTags;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem16;
+        private System.Windows.Forms.ToolStripSeparator menuEditS3;
         private System.Windows.Forms.ToolStripMenuItem menuMoreOptions;
         private System.Windows.Forms.ToolStripMenuItem menuExecuteKntScript;
         private System.Windows.Forms.ToolStripMenuItem menuView;
@@ -846,8 +846,8 @@
         private System.Windows.Forms.ToolStripMenuItem menuSearchPanel;
         private System.Windows.Forms.ToolStripMenuItem menuTools;
         private System.Windows.Forms.ToolStripMenuItem menuReports;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
+        private System.Windows.Forms.ToolStripSeparator menuToolsS1;
+        private System.Windows.Forms.ToolStripSeparator menuToolsS2;
         private System.Windows.Forms.ToolStripMenuItem menuKntScriptConsole;
         private System.Windows.Forms.ToolStripMenuItem menuKNoteLab;
         private System.Windows.Forms.ToolStripMenuItem menuOptions;

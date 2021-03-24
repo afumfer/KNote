@@ -41,26 +41,25 @@ namespace KNote.ClientWin.Components
 
                 kntTimerAlarms = new Timer();
                 kntTimerAlarms.Tick += kntTimerAlarms_Tick;
-                kntTimerAlarms.Interval = 30 * 1000;   // TODO: magic number refactor 
+                kntTimerAlarms.Interval = Store.AppConfig.AlarmSeconds * 1000;
                 kntTimerAlarms.Start();
 
                 kntTimerAutoSave = new Timer();
                 kntTimerAutoSave.Tick += KntTimerAutoSave_Tick;
-                kntTimerAutoSave.Interval = 105 * 1000;   // TODO: magic number refactor 
+                kntTimerAutoSave.Interval = Store.AppConfig.AutoSaveSeconds * 1000; 
                 kntTimerAutoSave.Start();
 
                 return new Result<EComponentResult>(EComponentResult.Executed);
             }
             catch (Exception)
             {
-
                 return new Result<EComponentResult>(EComponentResult.Error);
             }
         }
 
         private void KntTimerAutoSave_Tick(object sender, EventArgs e)
         {
-            if (!Store.AutoSaveActivated)
+            if (!Store.AppConfig.AutoSaveActivated)
                 return;
             kntTimerAutoSave.Stop();                        
             SaveNotes();             
@@ -69,7 +68,7 @@ namespace KNote.ClientWin.Components
 
         private void kntTimerAlarms_Tick(object sender, EventArgs e)        
         {
-            if (!Store.AlarmActivated)
+            if (!Store.AppConfig.AlarmActivated)
                 return;
             kntTimerAlarms.Stop();            
             alarmCounter++;
