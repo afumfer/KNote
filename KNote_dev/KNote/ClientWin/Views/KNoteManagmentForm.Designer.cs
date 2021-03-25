@@ -102,6 +102,7 @@
             this.tabSearch = new System.Windows.Forms.TabPage();
             this.imageTabExplorer = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.menuViewS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMangment.SuspendLayout();
             this.statusBarManagment.SuspendLayout();
             this.toolBarManagment.SuspendLayout();
@@ -390,6 +391,7 @@
             this.menuView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuFoldersExplorer,
             this.menuSearchPanel,
+            this.menuViewS1,
             this.menuHeaderPanelVisible,
             this.menuMainVisible,
             this.menuVerticalPanelForNotes});
@@ -774,6 +776,11 @@
             this.splitContainer2.SplitterWidth = 7;
             this.splitContainer2.TabIndex = 0;
             // 
+            // menuViewS1
+            // 
+            this.menuViewS1.Name = "menuViewS1";
+            this.menuViewS1.Size = new System.Drawing.Size(6, 6);
+            // 
             // KNoteManagmentForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -884,5 +891,6 @@
         private System.Windows.Forms.ToolStripMenuItem menuExportData;
         private System.Windows.Forms.ToolStripMenuItem menuMainVisible;
         private System.Windows.Forms.ToolStripMenuItem menuVerticalPanelForNotes;
+        private System.Windows.Forms.ToolStripSeparator menuViewS1;
     }
 }

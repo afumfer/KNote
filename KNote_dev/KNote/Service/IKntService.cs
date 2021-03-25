@@ -18,9 +18,6 @@ namespace KNote.Service
         IKntNoteService Notes { get; }
         IKntNoteTypeService NoteTypes { get; }
         Task<bool> TestDbConnection();
-        Task<bool> CreateDataBase();
-
-        //IKntKMessageService KMessages { get; }
-        //IKntKEventService KEvents { get; }
+        Task<bool> CreateDataBase(string newOwner = null);        
     }
 }

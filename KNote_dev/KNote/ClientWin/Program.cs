@@ -58,43 +58,54 @@ namespace KNote.ClientWin
 
         static async void LoadAppStore(Store store)
         {
-            var rootAppPath = Application.StartupPath;
+            var pathApp = Application.StartupPath;
 
-            var appFileConfig = Path.Combine(rootAppPath, "KNoteData.config");
-
-            store.LoadConfig(appFileConfig);
-
-            if (store.AppConfig == null)
+            var appFileConfig = Path.Combine(pathApp, "KNoteData.config");
+            
+            if (!File.Exists(appFileConfig))
             {
                 // Create default repository and add link
-
-                // TODO: 
+                
                 // - Crear si no existe el directroio por defecto para la base de datos
-                // - Crear el directorio por defecto para la caché de recursos. 
-                // - Crear la base de datos con el nombre de usuario
-                // - Añadir a la lista de repositorios
-                // - OJO: añadir por defecto el usuario que crea el repositorio como usuario-admin
+                var pathData = Path.Combine(pathApp, "Data");
+                if (!Directory.Exists(pathData))
+                    Directory.CreateDirectory(pathData);
+                var dbFile = Path.Combine(pathData, $"knote_{SystemInformation.UserName}.db");
 
+                // - Crear el directorio por defecto para la caché de recursos. 
+                var pathResourcesCache = Path.Combine(pathApp, "ResourcesCache");
+                if (!Directory.Exists(pathResourcesCache))
+                    Directory.CreateDirectory(pathResourcesCache);
+
+                // - Crear la base de datos con el nombre de usuario                            
+                // - OJO: añadir por defecto el usuario que crea el repositorio como usuario-admin
                 var r0 = new RepositoryRef
                 {
                     Alias = "Personal respository",
-                    ConnectionString = @"Data Source=D:\DBs\KNote05DB_Sqlite.db",
+                    //ConnectionString = @"Data Source=D:\DBs\KNote05DB_Sqlite.db",
+                    ConnectionString = $"Data Source={dbFile}",
                     Provider = "Microsoft.Data.Sqlite",
                     Orm = "EntityFramework"
                 };
-                store.AddServiceRef(new ServiceRef(r0));
-                store.AppConfig.RespositoryRefs.Add(r0);
+                var initialServiceRef = new ServiceRef(r0);
+                var resCreateDB = await initialServiceRef.Service.CreateDataBase(SystemInformation.UserName);
 
+                // - Añadir a la lista de repositorios
+                if (resCreateDB)
+                {
+                    store.AddServiceRef(new ServiceRef(r0));
+                    store.AppConfig.RespositoryRefs.Add(r0);
+                }
 
                 // Default values
                 store.AppConfig.AutoSaveSeconds = 105;
                 store.AppConfig.AlarmSeconds = 30;
                 store.AppConfig.LastDateTimeStart = DateTime.Now;
                 store.AppConfig.RunCounter = 1;
-                store.AppConfig.LogFile = rootAppPath + @"\KNoteWinApp.log";
+                store.AppConfig.LogFile = pathApp + @"\KNoteWinApp.log";
                 store.AppConfig.LogActivated = false;
-                store.AppConfig.CacheResources = @"D:\Resources\knt";
-                store.AppConfig.CacheUrlResources = @"http://afx.hopto.org/kntres/NotesResources";
+                store.AppConfig.CacheResources = pathResourcesCache;    // @"D:\Resources\knt";
+                store.AppConfig.CacheUrlResources = ""; // @"http://afx.hopto.org/kntres/NotesResources";
 
                 #region Examples info for repositories
 
@@ -145,6 +156,7 @@ namespace KNote.ClientWin
             }
             else
             {
+                store.LoadConfig(appFileConfig);
                 foreach (var r in store.AppConfig.RespositoryRefs)                
                     store.AddServiceRef(new ServiceRef(r));                
             }
@@ -161,7 +173,6 @@ namespace KNote.ClientWin
             var firstService = store.GetFirstServiceRef();
             var folder = (await firstService.Service.Folders.GetHomeAsync()).Entity;
             store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
-
         }
 
     }

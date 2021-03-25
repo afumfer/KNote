@@ -110,13 +110,27 @@ namespace KNote.Service.Services
             return await _repository.TestDbConnection();
         }
 
-        public async Task<bool> CreateDataBase()
+        public async Task<bool> CreateDataBase(string newOwner = null)
         {
             try
             {
                 var res = await SystemValues.GetAllAsync();
                 if (!res.IsValid)
                     return await Task.FromResult<bool>(false);
+
+                if (!string.IsNullOrEmpty(newOwner))
+                {
+                    var resGetU = await Users.GetByUserNameAsync("owner");
+                    if (resGetU.IsValid)
+                    {
+                        resGetU.Entity.UserName = newOwner;
+                        var resUpdateU = await Users.SaveAsync(resGetU.Entity);
+                        if(!resUpdateU.IsValid)
+                            return await Task.FromResult<bool>(false);
+                    }
+                    else
+                        return await Task.FromResult<bool>(false);
+                }
             }
             catch (Exception)
             {

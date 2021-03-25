@@ -127,7 +127,7 @@ namespace KNote.ClientWin.Components
                 {
                     // Create repository and add link                    
                     var newService = new ServiceRef(Model);
-                    if (await newService.Service.CreateDataBase())
+                    if (await newService.Service.CreateDataBase(SystemInformation.UserName))
                     {
                         Store.AddServiceRef(newService);
                         Store.AddServiceRefInAppConfig(newService);
