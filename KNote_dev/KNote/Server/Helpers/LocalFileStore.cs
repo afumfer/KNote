@@ -63,8 +63,8 @@ namespace KNote.Server.Helpers
 
         private string GetContainerResourcesPath()
         {
-            if (!string.IsNullOrEmpty(KntConst.ContainerResourcesRootPath))
-                return KntConst.ContainerResourcesRootPath;
+            if (!string.IsNullOrEmpty(KntConst.ContainerResourcesCacheRootPath))
+                return KntConst.ContainerResourcesCacheRootPath;
             else
                 return env.WebRootPath;
         }

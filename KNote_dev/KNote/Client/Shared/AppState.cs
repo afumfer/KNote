@@ -46,7 +46,7 @@ namespace KNote.Client.Shared
             }
         }
 
-        // Only use in KntFoldersTreeView  (hack)
+        // Only used in KntFoldersTreeView  (hack)
         public FolderDto folderOldSelected { get; set; }
 
         private List<FolderDto> _foldersTree;

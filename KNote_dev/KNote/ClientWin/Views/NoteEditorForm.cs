@@ -100,8 +100,7 @@ namespace KNote.ClientWin.Views
             TopLevel = false;
             Dock = DockStyle.Fill;
             FormBorderStyle = FormBorderStyle.None;
-            toolBarNoteEditor.Visible = false;
-            //toolDescription.Visible = false;
+            toolBarNoteEditor.Visible = false;            
             _com.EditMode = false;
         }
 
@@ -110,8 +109,7 @@ namespace KNote.ClientWin.Views
             TopLevel = true;
             Dock = DockStyle.None;
             FormBorderStyle = FormBorderStyle.Sizable;
-            toolBarNoteEditor.Visible = true;
-            //toolDescription.Visible = true;
+            toolBarNoteEditor.Visible = true;            
             StartPosition = FormStartPosition.CenterScreen;
             _com.EditMode = true;
         }
@@ -596,7 +594,7 @@ namespace KNote.ClientWin.Views
             _selectedFolderId = _com.Model.FolderId;                    
             textTags.Text = _com.Model.Tags;            
             textPriority.Text = _com.Model.Priority.ToString();
-
+            
             string desOutput = _com.Model?.Description?.Replace(KntConst.ContainerResources, _com.Store.AppConfig.CacheUrlResources);
 
             if (_com.Model.HtmlFormat)

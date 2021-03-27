@@ -123,7 +123,7 @@ namespace KNote.ClientWin.Views
 
         private void RepositoryEditorForm_Load(object sender, EventArgs e)
         {
-            this.Height = 350;            
+            this.Height = 500;            
             panelSqLite.BorderStyle = BorderStyle.None;
             panelMSSqlServer.BorderStyle = BorderStyle.None;
             panelMSSqlServer.Top = panelSqLite.Top;
@@ -140,7 +140,6 @@ namespace KNote.ClientWin.Views
             using (var fbd = new FolderBrowserDialog())
             {
                 DialogResult result = fbd.ShowDialog();
-
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
                 {
                     textSqLiteDirectory.Text = fbd.SelectedPath;
@@ -164,6 +163,17 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private void buttonSelectDirectoryResources_Click(object sender, EventArgs e)
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                DialogResult result = fbd.ShowDialog();
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                {
+                    textResourcesContainerRoot.Text = fbd.SelectedPath;
+                }
+            }
+        }
         #endregion 
 
         #region Private methods
@@ -190,6 +200,9 @@ namespace KNote.ClientWin.Views
             }
 
             textAliasName.Text = _com.Model.Alias;
+            textResourcesContainer.Text = _com.Model.ResourcesContainer;
+            textResourcesContainerRoot.Text = _com.Model.ResourcesContainerCacheRootPath;
+            textResourcesContainerUrl.Text = _com.Model.ResourcesContainerCacheRootUrl;
 
             if (!string.IsNullOrEmpty(_com.Model.ConnectionString))
             {
@@ -218,6 +231,9 @@ namespace KNote.ClientWin.Views
         private void ControlsToModel()
         {
             _com.Model.Alias = textAliasName.Text;
+            _com.Model.ResourcesContainer = textResourcesContainer.Text;
+            _com.Model.ResourcesContainerCacheRootPath = textResourcesContainerRoot.Text;
+            _com.Model.ResourcesContainerCacheRootUrl = textResourcesContainerUrl.Text;
             if (radioSqLite.Checked)
             {
                 _com.Model.Provider = "Microsoft.Data.Sqlite";
@@ -262,5 +278,6 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
+        
     }
 }

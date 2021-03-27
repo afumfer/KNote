@@ -64,7 +64,6 @@ namespace KNote.Server
             services.Configure<AppSettings>(appSettingsSection);
             
             var appSettings = appSettingsSection.Get<AppSettings>();
-            KntConst.ContainerResources = appSettings.ContainerResources;
 
             // TODO: Experimental  .....
             //   Implementar en el futuro. Si hay distinta a la app para la caché de recursos
@@ -72,8 +71,14 @@ namespace KNote.Server
             //   habría que incluirla / o la url completa. (Estudiar alternativas). 
             //   Par ahora forzamos que no haya una raíz alternativa (o directorio virtual)
             //   para la caché de recursos.
-            // KntConst.ContainerResourcesRootPath = appSettings.ContainerResourcesRootPath;            
-            KntConst.ContainerResourcesRootPath = "";
+            // KntConst.ContainerResourcesRootPath = appSettings.ContainerResourcesRootPath;
+            // KntConst.ContainerResourcesRootPath = "D:\\Resources\\knt";
+            // KntConst.ContainerResources = appSettings.ContainerResources;
+            // KntConst.ContainerResourcesRootUrl = appSettings.ContainerResourcesRootUrl;
+            //
+            KntConst.ContainerResources = "NotesResources";
+            KntConst.ContainerResourcesCacheRootPath = "";
+            KntConst.ContainerResourcesCacheRootUrl = "";
             // .......................................
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

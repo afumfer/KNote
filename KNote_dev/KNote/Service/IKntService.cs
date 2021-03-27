@@ -18,6 +18,6 @@ namespace KNote.Service
         IKntNoteService Notes { get; }
         IKntNoteTypeService NoteTypes { get; }
         Task<bool> TestDbConnection();
-        Task<bool> CreateDataBase(string newOwner = null);        
+        Task<bool> CreateDataBase(string newOwner = null);
     }
 }

@@ -65,32 +65,29 @@ namespace KNote.ClientWin
             if (!File.Exists(appFileConfig))
             {
                 // Create default repository and add link
-                
-                // - Crear si no existe el directroio por defecto para la base de datos
+                                
                 var pathData = Path.Combine(pathApp, "Data");
                 if (!Directory.Exists(pathData))
                     Directory.CreateDirectory(pathData);
                 var dbFile = Path.Combine(pathData, $"knote_{SystemInformation.UserName}.db");
-
-                // - Crear el directorio por defecto para la caché de recursos. 
+                
                 var pathResourcesCache = Path.Combine(pathApp, "ResourcesCache");
                 if (!Directory.Exists(pathResourcesCache))
                     Directory.CreateDirectory(pathResourcesCache);
 
-                // - Crear la base de datos con el nombre de usuario                            
-                // - OJO: añadir por defecto el usuario que crea el repositorio como usuario-admin
                 var r0 = new RepositoryRef
                 {
-                    Alias = "Personal respository",
-                    //ConnectionString = @"Data Source=D:\DBs\KNote05DB_Sqlite.db",
+                    Alias = "Personal respository",                    
                     ConnectionString = $"Data Source={dbFile}",
                     Provider = "Microsoft.Data.Sqlite",
-                    Orm = "EntityFramework"
+                    Orm = "EntityFramework",
+                    ResourcesContainer = "NotesResources",
+                    ResourcesContainerCacheRootPath = pathResourcesCache,
+                    ResourcesContainerCacheRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
                 };
                 var initialServiceRef = new ServiceRef(r0);
                 var resCreateDB = await initialServiceRef.Service.CreateDataBase(SystemInformation.UserName);
 
-                // - Añadir a la lista de repositorios
                 if (resCreateDB)
                 {
                     store.AddServiceRef(new ServiceRef(r0));
@@ -103,9 +100,7 @@ namespace KNote.ClientWin
                 store.AppConfig.LastDateTimeStart = DateTime.Now;
                 store.AppConfig.RunCounter = 1;
                 store.AppConfig.LogFile = pathApp + @"\KNoteWinApp.log";
-                store.AppConfig.LogActivated = false;
-                store.AppConfig.CacheResources = pathResourcesCache;    // @"D:\Resources\knt";
-                store.AppConfig.CacheUrlResources = ""; // @"http://afx.hopto.org/kntres/NotesResources";
+                store.AppConfig.LogActivated = false;                                
 
                 #region Examples info for repositories
 
@@ -167,6 +162,10 @@ namespace KNote.ClientWin
             store.AppConfig.LastDateTimeStart = DateTime.Now;
             store.AppConfig.RunCounter += 1;
 
+            // TODO: refactor, move to RepositoryRef
+            store.AppConfig.CacheResources = @"D:\Resources\knt";
+            store.AppConfig.CacheUrlResources = @"http://afx.hopto.org/NotesResources"; // @"http://afx.hopto.org/kntres/NotesResources";
+            
             store.SaveConfig(appFileConfig);
 
             // default folder
@@ -174,6 +173,5 @@ namespace KNote.ClientWin
             var folder = (await firstService.Service.Folders.GetHomeAsync()).Entity;
             store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
         }
-
     }
 }

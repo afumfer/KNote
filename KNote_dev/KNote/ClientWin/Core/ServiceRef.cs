@@ -63,14 +63,24 @@ namespace KNote.ClientWin.Core
             }
         }
 
+        public string ContainerResources
+        {
+            get { return RepositoryRef?.ResourcesContainer; }
+        }
+
+        public string ContainerResourcesCacheRootPath
+        {
+            get { return RepositoryRef?.ResourcesContainerCacheRootPath; }
+        }
+
+        public string ContainerResourcesCacheRootUrl
+        {
+            get { return RepositoryRef?.ResourcesContainerCacheRootUrl; }
+        }
+
         #endregion
 
         #region Constructor
-
-        public ServiceRef (string name, string connectionString, string provider, string orm)
-        {            
-            RepositoryRef = new RepositoryRef { Alias = name, ConnectionString = connectionString, Provider = provider, Orm = orm };
-        }
 
         public ServiceRef(RepositoryRef repositoryRef)
         {         

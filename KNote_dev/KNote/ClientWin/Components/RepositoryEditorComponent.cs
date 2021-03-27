@@ -54,6 +54,9 @@ namespace KNote.ClientWin.Components
                 Model.ConnectionString = repositoryForEdit.ConnectionString;
                 Model.Provider = repositoryForEdit.Provider;
                 Model.Orm = repositoryForEdit.Orm;
+                Model.ResourcesContainer = repositoryForEdit.ResourcesContainer;
+                Model.ResourcesContainerCacheRootPath = repositoryForEdit.ResourcesContainerCacheRootPath;
+                Model.ResourcesContainerCacheRootUrl = repositoryForEdit.ResourcesContainerCacheRootUrl;
                 Model.SetIsDirty(false);
                 
                 if (refreshView)
@@ -99,6 +102,9 @@ namespace KNote.ClientWin.Components
                     repositoryForEdit.ConnectionString = Model.ConnectionString ;
                     repositoryForEdit.Provider = Model.Provider ;
                     repositoryForEdit.Orm = Model.Orm;
+                    repositoryForEdit.ResourcesContainer = Model.ResourcesContainer;
+                    repositoryForEdit.ResourcesContainerCacheRootPath = Model.ResourcesContainerCacheRootPath;
+                    repositoryForEdit.ResourcesContainerCacheRootUrl = Model.ResourcesContainerCacheRootUrl;
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
                     OnSavedEntity(Model);
