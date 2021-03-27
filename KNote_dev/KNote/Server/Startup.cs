@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 
 using KNote.Repository;
+using KNote.Model;
 using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 
@@ -63,6 +64,17 @@ namespace KNote.Server
             services.Configure<AppSettings>(appSettingsSection);
             
             var appSettings = appSettingsSection.Get<AppSettings>();
+            KntConst.ContainerResources = appSettings.ContainerResources;
+
+            // TODO: Experimental  .....
+            //   Implementar en el futuro. Si hay distinta a la app para la caché de recursos
+            //   entonces hay que repensar la inserción de recursos dentro de los textos. 
+            //   habría que incluirla / o la url completa. (Estudiar alternativas). 
+            //   Par ahora forzamos que no haya una raíz alternativa (o directorio virtual)
+            //   para la caché de recursos.
+            // KntConst.ContainerResourcesRootPath = appSettings.ContainerResourcesRootPath;            
+            KntConst.ContainerResourcesRootPath = "";
+            // .......................................
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>

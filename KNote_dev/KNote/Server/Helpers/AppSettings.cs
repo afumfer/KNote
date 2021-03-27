@@ -8,12 +8,9 @@ namespace KNote.Server.Helpers
     public class AppSettings
     {
         public string Secret { get; set; }
-
-        //TODO: Poner otras propiedades, aquí y en el json como
-        //"ApplicationName": "MyApp",
-        // "Version": "1.0.0"
-
         public string ApplicationName { get; set; }
         public string Version { get; set; }
+        public string ContainerResources { get; set; }
+        public string ContainerResourcesRootPath { get; set; }        
     }
 }

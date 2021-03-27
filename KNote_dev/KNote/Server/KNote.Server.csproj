@@ -26,11 +26,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\NotesResources\" />
+    <None Include="..\..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\.editorconfig" Link=".editorconfig" />
+    <Folder Include="wwwroot\" />
+    <Folder Include="wwwroot\NotesResources\2021\" />
   </ItemGroup>
 
 </Project>

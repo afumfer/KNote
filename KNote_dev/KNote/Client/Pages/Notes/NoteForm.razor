@@ -536,10 +536,10 @@
         if (Note.NoteTypeId == null)
         {
             //if (oldNoteType != null)
-                //Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
-            
+            //Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
+
             Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
-            
+
             oldNoteType = null;
             Note.NoteTypeDto = null;
             return;

@@ -42,7 +42,7 @@ namespace KNote.Model.Dto
         }
 
         private string _container;
-        [Required(ErrorMessage = KMSG)]
+        //[Required(ErrorMessage = KMSG)]
         public string Container
         {
             get { return _container; }
