@@ -7,6 +7,7 @@ using System.IO;
 
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Service;
 
 namespace KNote.ClientWin.Components
 {

@@ -19,7 +19,7 @@ namespace KNote.Repository.Dapper
 
         protected readonly string ConnectionString;
         protected readonly string Provider;
-        protected readonly DbConnection SingletonConnection;
+        protected readonly DbConnection SingletonConnection;        
 
         public KntRepositoryBase(DbConnection singletonConnection, bool throwKntException = false)
         {

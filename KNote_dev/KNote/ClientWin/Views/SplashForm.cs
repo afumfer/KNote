@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using KNote.ClientWin.Core;
+using KNote.Service;
 
 namespace KNote.ClientWin.Views
 {
@@ -20,7 +21,6 @@ namespace KNote.ClientWin.Views
             InitializeComponent();
 
             appContext.AddedServiceRef += AppContext_AddedServiceRef; 
-
         }
 
         private void AppContext_AddedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)

@@ -599,7 +599,7 @@ namespace KNote.Repository.Dapper
             try
             {
                 var db = GetOpenConnection();
-
+                                
                 if(string.IsNullOrEmpty(entity.Container))
                     entity.Container = KntConst.ContainerResources + @"\" + DateTime.Now.Year.ToString();
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);

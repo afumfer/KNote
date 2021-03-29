@@ -10,6 +10,7 @@ using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Service;
 
 namespace KNote.ClientWin.Views
 {

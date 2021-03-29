@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Views;
+using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
 

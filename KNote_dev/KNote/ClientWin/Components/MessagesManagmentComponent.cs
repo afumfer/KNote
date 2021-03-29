@@ -18,9 +18,7 @@ namespace KNote.ClientWin.Components
     public class MessagesManagmentComponent : ComponentBase
     {
         static Timer kntTimerAlarms;
-        static Timer kntTimerAutoSave;
-        static int alarmCounter = 1;
-        //static bool exitFlag = false;
+        static Timer kntTimerAutoSave;        
         
         public MessagesManagmentComponent(Store store): base(store)
         {
@@ -70,8 +68,7 @@ namespace KNote.ClientWin.Components
         {
             if (!Store.AppConfig.AlarmActivated)
                 return;
-            kntTimerAlarms.Stop();            
-            alarmCounter++;
+            kntTimerAlarms.Stop();                        
             AlarmsWindows();            
             kntTimerAlarms.Enabled = true;            
         }
@@ -115,6 +112,5 @@ namespace KNote.ClientWin.Components
         {
             await Store.SaveActiveNotes();
         }
-
     }
 }

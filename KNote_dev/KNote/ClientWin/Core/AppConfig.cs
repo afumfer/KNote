@@ -125,7 +125,7 @@ namespace KNote.ClientWin.Core
             }
         }
 
-        public int _alarmSeconds;
+        private int _alarmSeconds;
         public int AlarmSeconds
         {
             get { return _alarmSeconds; }

@@ -12,6 +12,8 @@ using Microsoft.Data.Sqlite;
 using Dapper;
 using System.Data;
 
+using KNote.Model;
+
 namespace KNote.Repository.Dapper
 {
     public class KntRepository : IKntRepository
@@ -19,8 +21,10 @@ namespace KNote.Repository.Dapper
         #region Private/protected fields
         
         private bool _throwKntException;
+        
         private readonly string _strConn;
         private readonly string _strProvider;
+        private readonly RepositoryRef _repositoryRef;
 
         private readonly DbConnection _db;
 
@@ -35,11 +39,11 @@ namespace KNote.Repository.Dapper
             _strProvider = strProvider;            
         }
 
-        public KntRepository(DbConnection singletonConnection, bool throwKntException = false)
-        {
-            _throwKntException = throwKntException;
-            _db = singletonConnection;
-        }
+        //public KntRepository(DbConnection singletonConnection, bool throwKntException = false)
+        //{
+        //    _throwKntException = throwKntException;
+        //    _db = singletonConnection;
+        //}
 
         #endregion
 

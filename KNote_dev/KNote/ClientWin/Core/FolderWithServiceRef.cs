@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using KNote.Model.Dto;
+using KNote.Service;
 
 namespace KNote.ClientWin.Core
 {

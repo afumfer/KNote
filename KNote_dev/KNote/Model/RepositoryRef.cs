@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using KNote.Model;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
 
-namespace KNote.ClientWin.Core
+namespace KNote.Model
 {
-    public class RepositoryRef: DtoModelBase
+    public class RepositoryRef : DtoModelBase
     {
         private string _alias;
-        [Required(ErrorMessage = KMSG)]        
+        [Required(ErrorMessage = KMSG)]
         public string Alias
         {
             get { return _alias; }
@@ -27,7 +26,7 @@ namespace KNote.ClientWin.Core
         }
 
         private string _connectionString;
-        [Required(ErrorMessage = KMSG)]        
+        [Required(ErrorMessage = KMSG)]
         public string ConnectionString
         {
             get { return _connectionString; }
@@ -57,7 +56,7 @@ namespace KNote.ClientWin.Core
         }
 
         private string _orm;
-        [Required(ErrorMessage = KMSG)]        
+        [Required(ErrorMessage = KMSG)]
         public string Orm
         {
             get { return _orm; }
@@ -70,7 +69,7 @@ namespace KNote.ClientWin.Core
                 }
             }
         }
-        
+
         private string _resourcesContainer;
         [Required(ErrorMessage = "Resources continer name is required.")]
         public string ResourcesContainer
@@ -85,7 +84,7 @@ namespace KNote.ClientWin.Core
                 }
             }
         }
-        
+
         private string _resourcesContainerCacheRootPath;
         [Required(ErrorMessage = "Resources continer root folder is required.")]
         public string ResourcesContainerCacheRootPath
@@ -100,7 +99,7 @@ namespace KNote.ClientWin.Core
                 }
             }
         }
-        
+
         private string _resourcesContainerCacheRootUrl;
         [Required(ErrorMessage = "Resources continer URL is required.")]
         public string ResourcesContainerCacheRootUrl
@@ -143,7 +142,7 @@ namespace KNote.ClientWin.Core
                 throw;
             }
         }
-        
+
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var results = new List<ValidationResult>();
@@ -208,10 +207,10 @@ namespace KNote.ClientWin.Core
 
             var connProperties = GetConnectionProperties();
             if (Provider == "Microsoft.Data.Sqlite")
-            {                
+            {
                 var directory = Path.GetDirectoryName(connProperties["Data Source"]);
                 var dataBase = Path.GetFileName(connProperties["Data Source"]);
-                if(string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(dataBase))
+                if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(dataBase))
                 {
                     results.Add(new ValidationResult
                      ("KMSG: Database directory and file name cannot be empty."
@@ -226,7 +225,7 @@ namespace KNote.ClientWin.Core
                 }
             }
             else if (Provider == "Microsoft.Data.SqlClient")
-            {                
+            {
                 var sqlServer = connProperties["Data Source"];
                 var dataBase = connProperties["Initial Catalog"];
                 if (string.IsNullOrEmpty(sqlServer) || string.IsNullOrEmpty(dataBase))

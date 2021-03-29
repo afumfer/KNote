@@ -1,4 +1,5 @@
 ﻿using KNote.ClientWin.Components;
+using KNote.Model;
 using KNote.Model.Dto;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -7,8 +8,8 @@ using System.Windows.Forms;
 using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
-using KNote.Model.Dto;
-using System.IO;
+using KNote.Model;
+using KNote.Service;
 
 namespace KNote.ClientWin
 {
@@ -95,7 +96,9 @@ namespace KNote.ClientWin
                 }
 
                 // Default values
+                store.AppConfig.AutoSaveActivated = true;
                 store.AppConfig.AutoSaveSeconds = 105;
+                store.AppConfig.AlarmActivated = true;
                 store.AppConfig.AlarmSeconds = 30;
                 store.AppConfig.LastDateTimeStart = DateTime.Now;
                 store.AppConfig.RunCounter = 1;
@@ -162,10 +165,12 @@ namespace KNote.ClientWin
             store.AppConfig.LastDateTimeStart = DateTime.Now;
             store.AppConfig.RunCounter += 1;
 
+            //////
             // TODO: refactor, move to RepositoryRef
             store.AppConfig.CacheResources = @"D:\Resources\knt";
             store.AppConfig.CacheUrlResources = @"http://afx.hopto.org/NotesResources"; // @"http://afx.hopto.org/kntres/NotesResources";
-            
+            //////
+
             store.SaveConfig(appFileConfig);
 
             // default folder

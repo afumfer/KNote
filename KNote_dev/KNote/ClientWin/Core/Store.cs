@@ -9,6 +9,7 @@ using KNote.Model;
 using KNote.ClientWin.Components;
 using KntScript;
 using KNote.ClientWin.Views;
+using KNote.Service;
 using System.Threading;
 using System.Windows.Forms;
 

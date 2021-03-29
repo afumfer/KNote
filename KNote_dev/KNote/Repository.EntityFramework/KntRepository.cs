@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using KNote.Model;
 
 namespace KNote.Repository.EntityFramework
 {
@@ -17,6 +18,7 @@ namespace KNote.Repository.EntityFramework
         private bool _throwKntException;
         private readonly string _strConn;
         private readonly string _strProvider;
+        private readonly RepositoryRef _repositoryRef;
         
         #endregion
 
@@ -39,14 +41,14 @@ namespace KNote.Repository.EntityFramework
         {
             _throwKntException = throwKntException;
             _strConn = strConn;
-            _strProvider = strProvider;
+            _strProvider = strProvider;            
         }
 
-        public KntRepository(KntDbContext singletonContext, bool throwKntException = false)
-        {
-            _throwKntException = throwKntException;
-            _context = singletonContext;            
-        }
+        //public KntRepository(KntDbContext singletonContext, bool throwKntException = false)
+        //{
+        //    _throwKntException = throwKntException;
+        //    _context = singletonContext;            
+        //}
 
         #endregion
 

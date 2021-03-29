@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using KNote.Model.Dto;
+using KNote.Service;
 
 namespace KNote.ClientWin.Core
 {
