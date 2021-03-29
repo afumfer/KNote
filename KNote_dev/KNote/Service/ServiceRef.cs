@@ -41,10 +41,10 @@ namespace KNote.Service
             {
                 if (_repository == null)
                 {
-                    if (RepositoryRef.Orm == "Dapper")
-                        _repository = new DP.KntRepository(RepositoryRef.ConnectionString, RepositoryRef.Provider);
-                    else if (RepositoryRef.Orm == "EntityFramework")
-                        _repository = new EF.KntRepository(RepositoryRef.ConnectionString, RepositoryRef.Provider);
+                    if (RepositoryRef.Orm == "Dapper")                        
+                        _repository = new DP.KntRepository(RepositoryRef);
+                    else if (RepositoryRef.Orm == "EntityFramework")                        
+                        _repository = new EF.KntRepository(RepositoryRef);
                 }
                 return _repository;
             }

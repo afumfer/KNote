@@ -453,7 +453,11 @@ namespace KNote.ClientWin.Views
 
         private void linkViewFile_Click(object sender, EventArgs e)
         {
-            var tmpFile = _com.GetOrSaveTmpFile(_selectedResource.Container, _selectedResource.Name, _selectedResource.ContentArrayBytes);
+            var tmpFile = _com.GetOrSaveTmpFile(
+                _com.Service.RespositoryRef.ResourcesContainerCacheRootPath,
+                _selectedResource.Container, 
+                _selectedResource.Name, 
+                _selectedResource.ContentArrayBytes);
 
             if (tmpFile == null)
                 return;
@@ -594,8 +598,13 @@ namespace KNote.ClientWin.Views
             _selectedFolderId = _com.Model.FolderId;                    
             textTags.Text = _com.Model.Tags;            
             textPriority.Text = _com.Model.Priority.ToString();
-            
-            string desOutput = _com.Model?.Description?.Replace(KntConst.ContainerResources, _com.Store.AppConfig.CacheUrlResources);
+                        
+
+            string desOutput = _com.Model?.Description?
+                .Replace(_com.Service.RespositoryRef.ResourcesContainer,
+                        _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl
+                        //_com.Store.AppConfig.CacheUrlResources
+                        );
 
             if (_com.Model.HtmlFormat)
             {
@@ -761,15 +770,20 @@ namespace KNote.ClientWin.Views
             _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
             _com.Model.Tags = textTags.Text;
            
+            
             if (_com.Model.ContentType == "html")
             {
-                string desOutput = htmlDescription.BodyHtml?.Replace(_com.Store.AppConfig.CacheUrlResources, KntConst.ContainerResources);
+                string desOutput = htmlDescription.BodyHtml?
+                    .Replace(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl, 
+                    _com.Service.RespositoryRef.ResourcesContainer);
                 _com.Model.Description = desOutput;
 
             }
             else
             {
-                string desOutput = textDescription.Text?.Replace(_com.Store.AppConfig.CacheUrlResources, KntConst.ContainerResources);
+                string desOutput = textDescription.Text?
+                    .Replace(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl, 
+                    _com.Service.RespositoryRef.ResourcesContainer);
                 _com.Model.Description = desOutput;
             }
 
@@ -1063,7 +1077,7 @@ namespace KNote.ClientWin.Views
         {
             var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
             tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            tmpFile = tmpFile.Replace(KntConst.ContainerResources, _com.Store.AppConfig.CacheUrlResources);
+            tmpFile = tmpFile.Replace(_com.Service.RespositoryRef.ResourcesContainer, _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl);
 
             if (!buttonViewHtml.Enabled)
             {
@@ -1102,30 +1116,6 @@ namespace KNote.ClientWin.Views
         {
             EditNoteAttribute();
         }
-
-        //private void listViewAttributes_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
-        //{
-        //    //e.Graphics.FillRectangle(Brushes.Red, e.Bounds);
-        //    //e.DrawText();
-
-        //    using (var sf = new StringFormat())
-        //    {
-        //        //sf.Alignment = StringAlignment.Center;
-
-        //        using (var headerFont = new Font("Microsoft Sans Serif", 10, FontStyle.Bold))
-        //        {
-        //            e.Graphics.FillRectangle(Brushes.Azure, e.Bounds);
-        //            e.Graphics.DrawString(e.Header.Text, headerFont,
-        //                Brushes.Black, e.Bounds, sf);
-        //        }
-        //    }
-        //}
-
-        //private void listViewAttributes_DrawItem(object sender, DrawListViewItemEventArgs e)
-        //{
-        //    e.DrawText();
-        //}
-
 
         #endregion
 

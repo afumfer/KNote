@@ -167,8 +167,8 @@ namespace KNote.ClientWin
 
             //////
             // TODO: refactor, move to RepositoryRef
-            store.AppConfig.CacheResources = @"D:\Resources\knt";
-            store.AppConfig.CacheUrlResources = @"http://afx.hopto.org/NotesResources"; // @"http://afx.hopto.org/kntres/NotesResources";
+            //store.AppConfig.CacheResources = @"D:\Resources\knt";
+            //store.AppConfig.CacheUrlResources = @"http://afx.hopto.org/NotesResources"; // @"http://afx.hopto.org/kntres/NotesResources";
             //////
 
             store.SaveConfig(appFileConfig);

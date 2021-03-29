@@ -14,16 +14,15 @@ namespace KNote.Repository.EntityFramework
     {
         #region Constructor
 
-        public KntNoteRepository(KntDbContext singletonContext, bool throwKntException)
-            : base(singletonContext, throwKntException)
+        public KntNoteRepository(KntDbContext singletonContext, RepositoryRef repositoryRef, bool throwKntException)
+            : base(singletonContext, repositoryRef, throwKntException)
         {
         }
 
-        public KntNoteRepository(string conn, string provider, bool throwKntException = false)
-            : base(conn, provider, throwKntException)
+        public KntNoteRepository(RepositoryRef repositoryRef, bool throwKntException = false)
+            : base(repositoryRef, throwKntException)
         {
         }
-
 
         #endregion
 
@@ -60,7 +59,7 @@ namespace KNote.Repository.EntityFramework
             {
                 var ctx = GetOpenConnection();
                 var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx, ThrowKntException);
-                var folders = new KntFolderRepository(ctx, ThrowKntException);
+                var folders = new KntFolderRepository(ctx, _repositoryRef, ThrowKntException);
 
                 var idFolderHome = (await folders.GetHomeAsync()).Entity?.FolderId;
 
@@ -494,7 +493,7 @@ namespace KNote.Repository.EntityFramework
                 newEntity.SetSimpleDto(entity);
                 // TODO: refactorizar la sigueinte línea (generalizar)
                 if (string.IsNullOrEmpty(entity.Container))
-                    newEntity.Container = KntConst.ContainerResources + @"\" + DateTime.Now.Year.ToString();                
+                    newEntity.Container = _repositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();                
                 newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                 var resGenRep = await resources.AddAsync(newEntity);
@@ -1191,11 +1190,9 @@ namespace KNote.Repository.EntityFramework
         }
 
         public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
-        {
-            // TODO: pendiente de refactorizar este método 
-
+        {            
             var ctx = GetOpenConnection();            
-            var kattributes = new KntKAttributeRepository(ctx, ThrowKntException);
+            var kattributes = new KntKAttributeRepository(ctx, _repositoryRef, ThrowKntException);
 
             var attributes = (await kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
             foreach (KAttributeInfoDto a in attributes)

@@ -8,19 +8,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework
-{
-    // TODO: Pendiente de probar
-
+{    
     public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepository
     {        
 
-        public KntSystemValuesRepository(KntDbContext singletonContext, bool throwKntException)
-            : base(singletonContext, throwKntException)
+        public KntSystemValuesRepository(KntDbContext singletonContext, RepositoryRef repositoryRef, bool throwKntException)
+            : base(singletonContext, repositoryRef, throwKntException)
         {
         }
 
-        public KntSystemValuesRepository(string conn, string provider, bool throwKntException = false)
-            : base(conn, provider, throwKntException)
+        public KntSystemValuesRepository(RepositoryRef repositoryRef, bool throwKntException = false)
+            : base(repositoryRef, throwKntException)
         {
         }
 

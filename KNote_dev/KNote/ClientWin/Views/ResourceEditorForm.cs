@@ -155,7 +155,7 @@ namespace KNote.ClientWin.Views
                 textFileName.Text = Path.GetFileName(fileTmp);
                 textDescription.Text = textFileName.Text;
                 varName = _com.Model.ResourceId.ToString() + "_" + textFileName.Text;
-                varContainer = KntConst.ContainerResources + @"\" + DateTime.Now.Year.ToString();
+                varContainer = _com.Service.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
                 varFileType = _com.ExtensionFileToFileType(Path.GetExtension(fileTmp));
                 ShowPreview(fileTmp);
             }
@@ -191,7 +191,11 @@ namespace KNote.ClientWin.Views
             varFileType = _com.Model.FileType;            
             varContainer = _com.Model.Container;
             varContentArrayBytes = _com.Model.ContentArrayBytes;
-            var tmpFile = _com.GetOrSaveTmpFile(_com.Model.Container, _com.Model.Name, _com.Model.ContentArrayBytes);
+            var tmpFile = _com.GetOrSaveTmpFile(
+                _com.Service.RespositoryRef.ResourcesContainerCacheRootPath,
+                _com.Model.Container, 
+                _com.Model.Name, 
+                _com.Model.ContentArrayBytes);
             ShowPreview(tmpFile, false);
         }
 
@@ -207,7 +211,11 @@ namespace KNote.ClientWin.Views
             _com.Model.Container = varContainer;
             _com.Model.ContentArrayBytes = varContentArrayBytes;
 
-            _com.GetOrSaveTmpFile(_com.Model.Container, _com.Model.Name, _com.Model.ContentArrayBytes);
+            _com.GetOrSaveTmpFile(
+                _com.Service.RespositoryRef.ResourcesContainerCacheRootPath,
+                _com.Model.Container, 
+                _com.Model.Name, 
+                _com.Model.ContentArrayBytes);
         }
 
         private void ShowPreview(string file, bool includePdf = true)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KNote.Model;
 
 namespace KNote.Repository
 {
@@ -15,5 +16,6 @@ namespace KNote.Repository
         IKntNoteRepository Notes { get; }              
         IKntUserRepository Users { get; }
         Task<bool> TestDbConnection();
+        RepositoryRef RespositoryRef { get;  }
     }
 }

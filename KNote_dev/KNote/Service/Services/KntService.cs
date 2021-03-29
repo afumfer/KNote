@@ -10,6 +10,7 @@ using KNote.Repository;
 using KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 using KNote.Model.Dto;
+using KNote.Model;
 
 namespace KNote.Service.Services
 {
@@ -103,6 +104,11 @@ namespace KNote.Service.Services
                     _noteTypes = new KntNoteTypeService(_repository);
                 return _noteTypes;
             }
+        }
+
+        public RepositoryRef RespositoryRef
+        {
+            get { return _repository.RespositoryRef; }
         }
 
         public async Task<bool> TestDbConnection()

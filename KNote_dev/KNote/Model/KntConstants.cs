@@ -16,11 +16,8 @@ namespace KNote.Model
 
         public static Dictionary<EnumRoles, string> Roles { get; set; }
 
-        public static string ContainerResources { get; set; } = "NotesResources";
-        public static string ContainerResourcesCacheRootPath { get; set; }
-        public static string ContainerResourcesCacheRootUrl { get; set; }
-
-        // EventType
+        //public static string ContainerResources { get; set; } = "NotesResources";
+        //public static string ContainerResourcesCacheRootPath { get; set; }
 
         static KntConst()
         {

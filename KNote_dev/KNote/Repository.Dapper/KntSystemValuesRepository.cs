@@ -12,18 +12,15 @@ using KNote.Model.Dto;
 
 namespace KNote.Repository.Dapper
 {
-
-    // TODO: Pendiente de probar
-
     public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepository
-    {
-        
-        public KntSystemValuesRepository(DbConnection singletonConnection, bool throwKntException) : base(singletonConnection, throwKntException)
+    {        
+        public KntSystemValuesRepository(DbConnection singletonConnection, RepositoryRef repositoryRef, bool throwKntException) 
+            : base(singletonConnection, repositoryRef, throwKntException)
         {
         }
 
-        public KntSystemValuesRepository(string conn, string provider, bool throwKntException = false)
-             : base(conn, provider, throwKntException)
+        public KntSystemValuesRepository(RepositoryRef repositoryRef, bool throwKntException = false)
+             : base(repositoryRef, throwKntException)
         {
         }
 

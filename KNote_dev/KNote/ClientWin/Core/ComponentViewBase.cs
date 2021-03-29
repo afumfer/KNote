@@ -283,13 +283,13 @@ namespace KNote.ClientWin.Core
             Finalize();
         }
 
-        public string GetOrSaveTmpFile(string container, string fileName, byte[] arrayContent)
+        public string GetOrSaveTmpFile(string rootCacheResource, string container, string fileName, byte[] arrayContent)
         {
             string tmpFile;
             try
             {
                 //var dirPath = Path.Combine(new string[] { Path.GetTempPath(), "KaNote", container });
-                var dirPath = Path.Combine(new string[] { Store.AppConfig.CacheResources, container });                
+                var dirPath = Path.Combine(new string[] { rootCacheResource, container });                
                 tmpFile = Path.Combine(dirPath, fileName);
 
                 if (!Directory.Exists(dirPath))

@@ -367,7 +367,7 @@ namespace KNote.ClientWin.Views
                             NoteId = Guid.Empty,
                             ContentInDB = true,
                             Order = 1,                        
-                            Container = KntConst.ContainerResources + "\\" + DateTime.Now.Year.ToString(),
+                            Container = service.RespositoryRef.ResourcesContainer + "\\" + DateTime.Now.Year.ToString(),
                             Name = $"{Guid.NewGuid()}_{Path.GetFileName(fileFullName)}",
                             Description = $"(ANotas import {n.NotaEx})",
                             ContentArrayBytes = fileArrayBytes,

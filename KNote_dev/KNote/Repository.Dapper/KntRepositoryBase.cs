@@ -16,22 +16,21 @@ namespace KNote.Repository.Dapper
 {
     public abstract class KntRepositoryBase : DomainActionBase, IDisposable
     {
-
-        protected readonly string ConnectionString;
-        protected readonly string Provider;
+        protected internal readonly RepositoryRef _repositoryRef;
         protected readonly DbConnection SingletonConnection;        
 
-        public KntRepositoryBase(DbConnection singletonConnection, bool throwKntException = false)
+        public KntRepositoryBase(DbConnection singletonConnection, RepositoryRef repositoryRef, bool throwKntException = false)
         {
             SingletonConnection = singletonConnection;
             ThrowKntException = throwKntException;
+            _repositoryRef = repositoryRef;
+            _repositoryRef.ConnectionString = singletonConnection.ConnectionString;            
         }
 
-        public KntRepositoryBase(string connectionString, string provider, bool throwKntException = false)
+        public KntRepositoryBase(RepositoryRef repositoryRef, bool throwKntException = false)
         {
-            ConnectionString = connectionString;
-            Provider = provider;
             ThrowKntException = throwKntException;
+            _repositoryRef = repositoryRef;
         }
 
         public virtual DbConnection GetOpenConnection()
@@ -39,11 +38,11 @@ namespace KNote.Repository.Dapper
             if (SingletonConnection != null)
                 return SingletonConnection;
             
-            if (Provider == "Microsoft.Data.SqlClient")
+            if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
             {
-                return new SqlConnection(ConnectionString);                
+                return new SqlConnection(_repositoryRef.ConnectionString);                
             }
-            else if (Provider == "Microsoft.Data.Sqlite")
+            else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
             {
                 // TODO: Estudiar poner esto en otro sitio, una clase estática. 
                 //       SqlMapper es estático.                    
@@ -51,7 +50,7 @@ namespace KNote.Repository.Dapper
                 SqlMapper.AddTypeHandler(new GuidHandler());
                 SqlMapper.AddTypeHandler(new TimeSpanHandler());
                 // ---
-                return new SqliteConnection(ConnectionString);                
+                return new SqliteConnection(_repositoryRef.ConnectionString);                
             }
             else
                 throw new Exception("Data provider not suported (KntEx)");            

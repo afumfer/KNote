@@ -33,8 +33,7 @@ namespace KNote.Server
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
-        {
-            //services.AddCors();
+        {            
             services.AddCors( o => o.AddPolicy("KntPolicy", buider =>
             {
                 buider.AllowAnyOrigin()
@@ -42,45 +41,41 @@ namespace KNote.Server
                     .AllowAnyHeader();
             }));
 
-            // For test, use DbContext 
-            //services.AddDbContext<KntDbContext>(options =>
-            //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-            
-            // Inject repository (see appconfig).
+            var appSettingsSection = configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+            var appSettings = appSettingsSection.Get<AppSettings>();
+
+            // TODO: Provisional, hay que pasar esto a RepositoryRef. 
+            //KntConst.ContainerResources = appSettings.ContainerResources;
+            // .... 
+
             var orm = configuration["ConnectionStrings:DefaultORM"]; ;
             var prov = configuration["ConnectionStrings:DefaultProvider"];
             var conn = configuration["ConnectionStrings:DefaultConnection"];
+            var repositoryRef = new RepositoryRef
+            {
+                Alias = "KaNote",
+                ConnectionString = conn,
+                Provider = prov,
+                Orm = orm,
+                ResourcesContainer = appSettings.ContainerResources,
+                ResourcesContainerCacheRootPath = appSettings.ContainerResourcesRootPath,
+                ResourcesContainerCacheRootUrl = appSettings.ContainerResourcesRootUrl
+            };
 
-            if(orm == "Dapper")
-                services.AddScoped<IKntRepository>(provider => new DP.KntRepository(conn, prov));
-            else if (orm == "EntityFramework")                
-                services.AddScoped<IKntRepository>(provider => new EF.KntRepository(conn, prov));
+            if(orm == "Dapper")                
+                services.AddScoped<IKntRepository>(provider => new DP.KntRepository(repositoryRef));
+            else if (orm == "EntityFramework")                                
+                services.AddScoped<IKntRepository>(provider => new EF.KntRepository(repositoryRef));
 
             services.AddScoped<IKntService, KntService>();
 
-            //services.AddSingleton<IConfiguration>(configuration);
-
-            var appSettingsSection = configuration.GetSection("AppSettings");
-            services.Configure<AppSettings>(appSettingsSection);
+            #region Doc, test
+            // For test, use DbContext 
+            //services.AddDbContext<KntDbContext>(options =>
+            //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            #endregion 
             
-            var appSettings = appSettingsSection.Get<AppSettings>();
-
-            // TODO: Experimental  .....
-            //   Implementar en el futuro. Si hay distinta a la app para la caché de recursos
-            //   entonces hay que repensar la inserción de recursos dentro de los textos. 
-            //   habría que incluirla / o la url completa. (Estudiar alternativas). 
-            //   Par ahora forzamos que no haya una raíz alternativa (o directorio virtual)
-            //   para la caché de recursos.
-            // KntConst.ContainerResourcesRootPath = appSettings.ContainerResourcesRootPath;
-            // KntConst.ContainerResourcesRootPath = "D:\\Resources\\knt";
-            // KntConst.ContainerResources = appSettings.ContainerResources;
-            // KntConst.ContainerResourcesRootUrl = appSettings.ContainerResourcesRootUrl;
-            //
-            KntConst.ContainerResources = "NotesResources";
-            KntConst.ContainerResourcesCacheRootPath = "";
-            KntConst.ContainerResourcesCacheRootUrl = "";
-            // .......................................
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                  options.TokenValidationParameters = new TokenValidationParameters
@@ -133,18 +128,10 @@ namespace KNote.Server
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
-
             app.UseRouting();
+
             app.UseAuthentication();
-            app.UseAuthorization();
-                        
-            // global cors policy
-            //app.UseCors(x => x
-            //    .AllowAnyOrigin()
-            //    .AllowAnyMethod()
-            //    .AllowAnyHeader()
-            //    .AllowCredentials());
-            
+            app.UseAuthorization();            
             app.UseCors("KntPolicy");
 
             app.UseEndpoints(endpoints =>

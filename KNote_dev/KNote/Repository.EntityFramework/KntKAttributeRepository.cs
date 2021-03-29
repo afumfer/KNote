@@ -12,13 +12,13 @@ namespace KNote.Repository.EntityFramework
 {
     public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeRepository
     {
-        public KntKAttributeRepository(KntDbContext singletonContext, bool throwKntException)
-            : base(singletonContext, throwKntException)
+        public KntKAttributeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef, bool throwKntException)
+            : base(singletonContext, repositoryRef, throwKntException)
         {
         }
 
-        public KntKAttributeRepository(string conn, string provider, bool throwKntException = false)
-            : base(conn, provider, throwKntException)
+        public KntKAttributeRepository(RepositoryRef repositoryRef, bool throwKntException = false)
+            : base(repositoryRef, throwKntException)
         {
         }
 

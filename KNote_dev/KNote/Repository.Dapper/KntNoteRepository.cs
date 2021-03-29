@@ -21,15 +21,15 @@ namespace KNote.Repository.Dapper
     {
         #region Constructor
 
-        public KntNoteRepository(DbConnection singletonConnection, bool throwKntException) : base(singletonConnection, throwKntException)
+        public KntNoteRepository(DbConnection singletonConnection, RepositoryRef repositoryRef, bool throwKntException) 
+            : base(singletonConnection, repositoryRef, throwKntException)
         {
 
         }
 
-        public KntNoteRepository(string conn, string provider, bool throwKntException = false)
-            : base(conn, provider, throwKntException)            
-        {          
-            
+        public KntNoteRepository(RepositoryRef repositoryRef, bool throwKntException = false)
+            : base(repositoryRef, throwKntException)
+        {
         }
 
         #endregion
@@ -39,7 +39,7 @@ namespace KNote.Repository.Dapper
         public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
         {
             using var db = GetOpenConnection();
-            var folders = new KntFolderRepository(db);
+            var folders = new KntFolderRepository(db, _repositoryRef);
            
             var idHomeFolder = (await folders.GetHomeAsync()).Entity?.FolderId;
           
@@ -601,7 +601,7 @@ namespace KNote.Repository.Dapper
                 var db = GetOpenConnection();
                                 
                 if(string.IsNullOrEmpty(entity.Container))
-                    entity.Container = KntConst.ContainerResources + @"\" + DateTime.Now.Year.ToString();
+                    entity.Container = _repositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
 
                 var sql = @"INSERT INTO Resources 
@@ -1504,7 +1504,7 @@ namespace KNote.Repository.Dapper
         private async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(DbConnection conn, List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {
             //var kattributes = new KntKAttributeRepository(ConnectionString, Provider, ThrowKntException);
-            var kattributes = new KntKAttributeRepository(conn);
+            var kattributes = new KntKAttributeRepository(conn, _repositoryRef);
             var attributes = (await kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
             
             if (attributes == null)

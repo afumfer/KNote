@@ -41,33 +41,33 @@ namespace KNote.ClientWin.Core
             }
         }
 
-        private string _cacheResources;
-        public string CacheResources
-        {
-            get { return _cacheResources; }
-            set
-            {
-                if (_cacheResources != value)
-                {
-                    _cacheResources = value;
-                    OnPropertyChanged("CacheResources");
-                }
-            }
-        }
+        //private string _cacheResources;
+        //public string CacheResources
+        //{
+        //    get { return _cacheResources; }
+        //    set
+        //    {
+        //        if (_cacheResources != value)
+        //        {
+        //            _cacheResources = value;
+        //            OnPropertyChanged("CacheResources");
+        //        }
+        //    }
+        //}
 
-        private string _cacheUrlResources;
-        public string CacheUrlResources
-        {
-            get { return _cacheUrlResources; }
-            set
-            {
-                if (_cacheUrlResources != value)
-                {
-                    _cacheUrlResources = value;
-                    OnPropertyChanged("CacheUrlResources");
-                }
-            }
-        }
+        //private string _cacheUrlResources;
+        //public string CacheUrlResources
+        //{
+        //    get { return _cacheUrlResources; }
+        //    set
+        //    {
+        //        if (_cacheUrlResources != value)
+        //        {
+        //            _cacheUrlResources = value;
+        //            OnPropertyChanged("CacheUrlResources");
+        //        }
+        //    }
+        //}
 
         private string _logFile;
         public string LogFile

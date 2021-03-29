@@ -20,34 +20,30 @@ namespace KNote.Repository.Dapper
     {
         #region Private/protected fields
         
-        private bool _throwKntException;
-        
-        private readonly string _strConn;
-        private readonly string _strProvider;
+        private bool _throwKntException;        
         private readonly RepositoryRef _repositoryRef;
-
         private readonly DbConnection _db;
 
         #endregion
 
         #region Constructor
 
-        public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = false)
+        public KntRepository(RepositoryRef repositoryRef, bool throwKntException = false)
         {
             _throwKntException = throwKntException;
-            _strConn = strConn;
-            _strProvider = strProvider;            
+            _repositoryRef = repositoryRef;
         }
 
-        //public KntRepository(DbConnection singletonConnection, bool throwKntException = false)
-        //{
-        //    _throwKntException = throwKntException;
-        //    _db = singletonConnection;
-        //}
+        public KntRepository(DbConnection singletonConnection, RepositoryRef repositoryRef, bool throwKntException = false)
+        {
+            _throwKntException = throwKntException;
+            _db = singletonConnection;
+            _repositoryRef = repositoryRef;
+        }
 
         #endregion
 
-        #region IKntRepository implementation 
+        #region IKntRepository implementation         
 
         private IKntNoteTypeRepository _noteTypes;
         public IKntNoteTypeRepository NoteTypes
@@ -56,9 +52,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_noteTypes == null)
                     if(_db != null)
-                        _noteTypes = new KntNoteTypeRepository(_db, _throwKntException);
+                        _noteTypes = new KntNoteTypeRepository(_db, _repositoryRef, _throwKntException);
                     else
-                        _noteTypes = new KntNoteTypeRepository(_strConn, _strProvider, _throwKntException);
+                        _noteTypes = new KntNoteTypeRepository(_repositoryRef, _throwKntException);
                 return _noteTypes;
             }
         }
@@ -70,9 +66,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_users == null)
                     if (_db != null)
-                        _users = new KntUserRepository(_db, _throwKntException);
+                        _users = new KntUserRepository(_db, _repositoryRef, _throwKntException);
                     else
-                        _users = new KntUserRepository(_strConn, _strProvider, _throwKntException);
+                        _users = new KntUserRepository(_repositoryRef, _throwKntException);
                 return _users;
             }
         }
@@ -84,9 +80,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_systemValues == null)
                     if (_db != null)
-                        _systemValues = new KntSystemValuesRepository(_db, _throwKntException);
+                        _systemValues = new KntSystemValuesRepository(_db, _repositoryRef, _throwKntException);
                     else
-                        _systemValues = new KntSystemValuesRepository(_strConn, _strProvider, _throwKntException);
+                        _systemValues = new KntSystemValuesRepository(_repositoryRef, _throwKntException);
                 return _systemValues;
             }
         }
@@ -98,9 +94,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_folders == null)
                     if (_db != null)
-                        _folders = new KntFolderRepository(_db, _throwKntException);
+                        _folders = new KntFolderRepository(_db, _repositoryRef, _throwKntException);
                     else
-                        _folders = new KntFolderRepository(_strConn, _strProvider, _throwKntException);
+                        _folders = new KntFolderRepository(_repositoryRef, _throwKntException);
                 return _folders;
             }
         }
@@ -112,9 +108,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_kAttributes == null)
                     if (_db != null)
-                        _kAttributes = new KntKAttributeRepository(_db, _throwKntException);
+                        _kAttributes = new KntKAttributeRepository(_db, _repositoryRef, _throwKntException);
                     else
-                        _kAttributes = new KntKAttributeRepository(_strConn, _strProvider, _throwKntException);
+                        _kAttributes = new KntKAttributeRepository(_repositoryRef, _throwKntException);
                 return _kAttributes;
             }
         }
@@ -126,31 +122,36 @@ namespace KNote.Repository.Dapper
             {
                 if (_notes == null)
                     if (_db != null)
-                        _notes = new KntNoteRepository(_db, _throwKntException);
+                        _notes = new KntNoteRepository(_db, _repositoryRef, _throwKntException);
                     else
-                        _notes = new KntNoteRepository(_strConn, _strProvider, _throwKntException);
+                        _notes = new KntNoteRepository(_repositoryRef, _throwKntException);
                 return _notes;
             }
+        }
+
+        public RepositoryRef RespositoryRef
+        {
+            get { return _repositoryRef; }
         }
 
         public async Task<bool> TestDbConnection()
         {
             try
             {                
-                if (_strProvider == "Microsoft.Data.SqlClient")
+                if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
                 {
-                    var db = new SqlConnection(_strConn);
-                    var systemValues = new KntSystemValuesRepository(db, true);
+                    var db = new SqlConnection(_repositoryRef.ConnectionString);
+                    var systemValues = new KntSystemValuesRepository(db, _repositoryRef, true);
                     var testValues = systemValues.GetAllAsync();
                 }                    
-                else if (_strProvider == "Microsoft.Data.Sqlite")
+                else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
                 {
                     SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
                     SqlMapper.AddTypeHandler(new GuidHandler());
                     SqlMapper.AddTypeHandler(new TimeSpanHandler());
-                    var db = new SqliteConnection(_strConn);
+                    var db = new SqliteConnection(_repositoryRef.ConnectionString);
 
-                    var systemValues = new KntSystemValuesRepository(db, true);
+                    var systemValues = new KntSystemValuesRepository(db, _repositoryRef, true);
                     var res = await systemValues.GetAllAsync();
                     if (!res.IsValid)
                         return false;

@@ -12,16 +12,15 @@ namespace KNote.Repository.EntityFramework
 {
     public class KntFolderRepository: KntRepositoryBase, IKntFolderRepository
     {
-        public KntFolderRepository(KntDbContext singletonContext, bool throwKntException)
-            : base (singletonContext, throwKntException)
+        public KntFolderRepository(KntDbContext singletonContext, RepositoryRef repositoryRef, bool throwKntException)
+            : base (singletonContext, repositoryRef, throwKntException)
         {            
         }
 
-        public KntFolderRepository(string conn, string provider, bool throwKntException = false)
-            : base(conn, provider, throwKntException)
+        public KntFolderRepository(RepositoryRef repositoryRef, bool throwKntException = false)
+            : base(repositoryRef, throwKntException)
         {
         }
-
 
         public async Task<Result<List<FolderDto>>> GetAllAsync()
         {

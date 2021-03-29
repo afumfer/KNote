@@ -16,8 +16,6 @@ namespace KNote.Repository.EntityFramework
         #region Protected fields
 
         private bool _throwKntException;
-        private readonly string _strConn;
-        private readonly string _strProvider;
         private readonly RepositoryRef _repositoryRef;
         
         #endregion
@@ -37,18 +35,17 @@ namespace KNote.Repository.EntityFramework
 
         #region Constructors
 
-        public KntRepository(string strConn, string strProvider = "Microsoft.Data.SqlClient", bool throwKntException = false)
+        public KntRepository(RepositoryRef repositoryRef, bool throwKntException = false)
         {
             _throwKntException = throwKntException;
-            _strConn = strConn;
-            _strProvider = strProvider;            
+            _repositoryRef = repositoryRef;           
         }
 
-        //public KntRepository(KntDbContext singletonContext, bool throwKntException = false)
-        //{
-        //    _throwKntException = throwKntException;
-        //    _context = singletonContext;            
-        //}
+        public KntRepository(KntDbContext singletonContext, bool throwKntException = false)
+        {
+            _throwKntException = throwKntException;
+            _context = singletonContext;
+        }
 
         #endregion
 
@@ -61,9 +58,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_noteTypes == null)
                     if(_context != null)
-                        _noteTypes = new KntNoteTypeRepository(Context, _throwKntException);
+                        _noteTypes = new KntNoteTypeRepository(Context, _repositoryRef, _throwKntException);
                     else 
-                        _noteTypes = new KntNoteTypeRepository(_strConn, _strProvider, _throwKntException);
+                        _noteTypes = new KntNoteTypeRepository(_repositoryRef, _throwKntException);
                 return _noteTypes;
                 
             }
@@ -76,9 +73,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_systemValues == null)
                     if (_context != null)
-                        _systemValues = new KntSystemValuesRepository(Context, _throwKntException);
+                        _systemValues = new KntSystemValuesRepository(Context, _repositoryRef, _throwKntException);
                     else
-                        _systemValues = new KntSystemValuesRepository(_strConn, _strProvider, _throwKntException);
+                        _systemValues = new KntSystemValuesRepository(_repositoryRef, _throwKntException);
                 return _systemValues;
             }
         }
@@ -90,9 +87,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_folders == null)
                     if (_context != null)
-                        _folders = new KntFolderRepository(Context, _throwKntException);
+                        _folders = new KntFolderRepository(Context, _repositoryRef, _throwKntException);
                     else
-                        _folders = new KntFolderRepository(_strConn, _strProvider, _throwKntException);
+                        _folders = new KntFolderRepository(_repositoryRef, _throwKntException);
                 return _folders;
             }
         }
@@ -104,9 +101,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_attributes == null)
                     if (_context != null)
-                        _attributes = new KntKAttributeRepository(Context, _throwKntException);
+                        _attributes = new KntKAttributeRepository(Context, _repositoryRef, _throwKntException);
                     else
-                        _attributes = new KntKAttributeRepository(_strConn, _strProvider, _throwKntException);
+                        _attributes = new KntKAttributeRepository(_repositoryRef, _throwKntException);
                 return _attributes;
             }
         }
@@ -118,9 +115,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_notes == null)
                     if (_context != null)
-                        _notes = new KntNoteRepository(Context, _throwKntException);
+                        _notes = new KntNoteRepository(Context, _repositoryRef, _throwKntException);
                     else
-                        _notes = new KntNoteRepository(_strConn, _strProvider, _throwKntException);
+                        _notes = new KntNoteRepository(_repositoryRef, _throwKntException);
                 return _notes;
             }
         }
@@ -132,11 +129,16 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_users == null)
                     if (_context != null)
-                        _users = new KntUserRepository(Context, _throwKntException);
+                        _users = new KntUserRepository(Context, _repositoryRef, _throwKntException);
                     else
-                        _users = new KntUserRepository(_strConn, _strProvider, _throwKntException);
+                        _users = new KntUserRepository(_repositoryRef, _throwKntException);
                 return _users;
             }
+        }
+
+        public RepositoryRef RespositoryRef
+        {
+            get { return _repositoryRef; }
         }
 
         public async Task<bool> TestDbConnection()
@@ -145,15 +147,15 @@ namespace KNote.Repository.EntityFramework
             {
                 var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
 
-                if (_strProvider == "Microsoft.Data.SqlClient")
-                    optionsBuilder.UseSqlServer(_strConn);
-                else if (_strProvider == "Microsoft.Data.Sqlite")
-                    optionsBuilder.UseSqlite(_strConn);
+                if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
+                    optionsBuilder.UseSqlServer(_repositoryRef.ConnectionString);
+                else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
+                    optionsBuilder.UseSqlite(_repositoryRef.ConnectionString);
                 else
                     return false;
 
                 var dbContext = new KntDbContext(optionsBuilder.Options, false);
-                var systemValues = new KntSystemValuesRepository(dbContext, true);
+                var systemValues = new KntSystemValuesRepository(dbContext, _repositoryRef, true);
                 var res = await systemValues.GetAllAsync();
                 if (!res.IsValid)
                     return false;

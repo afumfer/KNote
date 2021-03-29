@@ -16,21 +16,22 @@ namespace KNote.Repository.EntityFramework
 {
     public class KntRepositoryBase : DomainActionBase, IDisposable
     {
-        protected readonly string ConnectionString;
-        protected readonly string Provider;
+        protected internal readonly RepositoryRef _repositoryRef;
+
         protected readonly KntDbContext SingletonConnection;
 
-        public KntRepositoryBase(KntDbContext singletonConnection, bool throwKntException = false)
+        public KntRepositoryBase(KntDbContext singletonConnection, RepositoryRef repositoryRef, bool throwKntException = false)
         {
             SingletonConnection = singletonConnection;
             ThrowKntException = throwKntException;
+            _repositoryRef = repositoryRef;
+            _repositoryRef.ConnectionString = singletonConnection.Database.GetConnectionString();
         }
 
-        public KntRepositoryBase(string connectionString, string provider, bool throwKntException = false)
+        public KntRepositoryBase(RepositoryRef repositoryRef, bool throwKntException = false)
         {
-            ConnectionString = connectionString;
-            Provider = provider;
             ThrowKntException = throwKntException;
+            _repositoryRef = repositoryRef;
         }
 
         public virtual KntDbContext GetOpenConnection()
@@ -40,10 +41,10 @@ namespace KNote.Repository.EntityFramework
 
             var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
 
-            if (Provider == "Microsoft.Data.SqlClient")
-                optionsBuilder.UseSqlServer(ConnectionString);
-            else if (Provider == "Microsoft.Data.Sqlite")
-                optionsBuilder.UseSqlite(ConnectionString);
+            if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
+                optionsBuilder.UseSqlServer(_repositoryRef.ConnectionString);
+            else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
+                optionsBuilder.UseSqlite(_repositoryRef.ConnectionString);
             else
                 throw new Exception("Data provider not suported (KntEx)");
 

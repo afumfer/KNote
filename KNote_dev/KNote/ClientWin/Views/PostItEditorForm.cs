@@ -318,7 +318,9 @@ namespace KNote.ClientWin.Views
             labelStatus.Text = $"({_com.ServiceRef?.Alias} >> [{_com.Model.FolderDto.Name}] )";
             _selectedFolderId = _com.Model.FolderId;
 
-            string desOutput = _com.Model?.Description?.Replace(KntConst.ContainerResources, _com.Store.AppConfig.CacheUrlResources);
+            
+
+            string desOutput = _com.Model?.Description?.Replace(_com.Service.RespositoryRef.ResourcesContainer, _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl);
 
             if (_com.Model?.ContentType == "html")
             {
@@ -335,12 +337,17 @@ namespace KNote.ClientWin.Views
         {
             if (_com.Model?.ContentType == "html")
             {
-                string desOutput = htmlDescription.BodyHtml?.Replace(_com.Store.AppConfig.CacheUrlResources, KntConst.ContainerResources);
+                
+                string desOutput = htmlDescription.BodyHtml?
+                    .Replace(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl, 
+                    _com.Service.RespositoryRef.ResourcesContainer);
                 _com.Model.Description = desOutput;            
             }
             else
             {
-                string desOutput = textDescription.Text?.Replace(_com.Store.AppConfig.CacheUrlResources, KntConst.ContainerResources);
+                string desOutput = textDescription.Text?
+                    .Replace(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl, 
+                    _com.Service.RespositoryRef.ResourcesContainer);
                 _com.Model.Description = desOutput;
             }                                    
             _com.Model.FolderId = _selectedFolderId;

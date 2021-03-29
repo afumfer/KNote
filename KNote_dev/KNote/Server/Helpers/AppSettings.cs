@@ -11,6 +11,7 @@ namespace KNote.Server.Helpers
         public string ApplicationName { get; set; }
         public string Version { get; set; }
         public string ContainerResources { get; set; }
-        public string ContainerResourcesRootPath { get; set; }        
-    }
+        public string ContainerResourcesRootPath { get; set; }
+        public string ContainerResourcesRootUrl { get; set; }
+}
 }
