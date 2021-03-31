@@ -285,6 +285,9 @@ namespace KNote.ClientWin.Core
 
         public string GetOrSaveTmpFile(string rootCacheResource, string container, string fileName, byte[] arrayContent)
         {
+            if (rootCacheResource == null || container == null || fileName == null || arrayContent == null)
+                return null;
+
             string tmpFile;
             try
             {
@@ -292,14 +295,18 @@ namespace KNote.ClientWin.Core
                 var dirPath = Path.Combine(new string[] { rootCacheResource, container });                
                 tmpFile = Path.Combine(dirPath, fileName);
 
+                if (string.IsNullOrEmpty(tmpFile))
+                    return tmpFile;
+
                 if (!Directory.Exists(dirPath))
                     Directory.CreateDirectory(dirPath);
                 if (!File.Exists(tmpFile))
                     File.WriteAllBytes(tmpFile, arrayContent);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                MessageBox.Show(ex.Message);
                 tmpFile = null;
             }    
 

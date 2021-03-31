@@ -103,7 +103,7 @@ namespace KNote.ClientWin
                 store.AppConfig.LastDateTimeStart = DateTime.Now;
                 store.AppConfig.RunCounter = 1;
                 store.AppConfig.LogFile = pathApp + @"\KNoteWinApp.log";
-                store.AppConfig.LogActivated = false;                                
+                store.AppConfig.LogActivated = false;
 
                 #region Examples info for repositories
 
@@ -115,6 +115,9 @@ namespace KNote.ClientWin
                 //    ConnectionString = @"Data Source=D:\DBs\KNote05DB_Sqlite.db",
                 //    Provider = "Microsoft.Data.Sqlite",
                 //    Orm = "EntityFramework"
+                //    ResourcesContainer = "NotesResources",
+                //    ResourcesContainerCacheRootPath = pathResourcesCache,
+                //    ResourcesContainerCacheRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
                 //};
                 //store.AddServiceRef(new ServiceRef(r3));
 
@@ -125,6 +128,9 @@ namespace KNote.ClientWin
                 //    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
                 //    Provider = "Microsoft.Data.SqlClient",
                 //    Orm = "Dapper"  // Dapper / EntityFramework
+                //    ResourcesContainer = "NotesResources",
+                //    ResourcesContainerCacheRootPath = @"D:\Resources\knt";,
+                //    ResourcesContainerCacheRootUrl = @"http://afx.hopto.org/NotesResources"; 
                 //};
                 //store.AddServiceRef(new ServiceRef(r1));
 
@@ -134,17 +140,20 @@ namespace KNote.ClientWin
                 //    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DesaDB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
                 //    Provider = "Microsoft.Data.SqlClient",
                 //    Orm = "EntityFramework"
+                //    ResourcesContainer = "NotesResources",
+                //    ResourcesContainerCacheRootPath = @"D:\Resources\knt";,
+                //    ResourcesContainerCacheRootUrl = @"http://afx.hopto.org/NotesResources"; 
                 //};
                 //store.AddServiceRef(new ServiceRef(r2));
 
-                //"_DefaultORM": "EntityFramework",
-                //"DefaultORM": "Dapper",
+                ////"_DefaultORM": "EntityFramework",
+                ////"DefaultORM": "Dapper",
 
-                //"DefaultProvider": "Microsoft.Data.SqlClient",
-                //"DefaultConnection": "Data Source=.\\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
+                ////"DefaultProvider": "Microsoft.Data.SqlClient",
+                ////"DefaultConnection": "Data Source=.\\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
 
-                //"_DefaultProvider": "Microsoft.Data.Sqlite",
-                //"_DefaultConnection": "Data Source=D:\\DBs\\KNote02DB_Sqlite.db"
+                ////"_DefaultProvider": "Microsoft.Data.Sqlite",
+                ////"_DefaultConnection": "Data Source=D:\\DBs\\KNote02DB_Sqlite.db"
 
                 //store.AppConfig.RespositoryRefs.Add(r1);
                 //store.AppConfig.RespositoryRefs.Add(r2);
@@ -164,12 +173,6 @@ namespace KNote.ClientWin
             store.ComputerName = SystemInformation.ComputerName;
             store.AppConfig.LastDateTimeStart = DateTime.Now;
             store.AppConfig.RunCounter += 1;
-
-            //////
-            // TODO: refactor, move to RepositoryRef
-            //store.AppConfig.CacheResources = @"D:\Resources\knt";
-            //store.AppConfig.CacheUrlResources = @"http://afx.hopto.org/NotesResources"; // @"http://afx.hopto.org/kntres/NotesResources";
-            //////
 
             store.SaveConfig(appFileConfig);
 

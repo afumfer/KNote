@@ -16,9 +16,6 @@ namespace KNote.Model
 
         public static Dictionary<EnumRoles, string> Roles { get; set; }
 
-        //public static string ContainerResources { get; set; } = "NotesResources";
-        //public static string ContainerResourcesCacheRootPath { get; set; }
-
         static KntConst()
         {
             KAttributes = new Dictionary<EnumKAttributeDataType, string>

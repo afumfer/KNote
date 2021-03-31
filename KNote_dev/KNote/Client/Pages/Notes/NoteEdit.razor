@@ -84,14 +84,14 @@ else
     }
 
     private async Task SaveNote()
-    {        
+    {
         var httpResponse = await dataService.Post<NoteDto, Result<NoteDto>>("api/notes", note);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
-        {            
+        {
             note = httpResponse.Response.Entity;
 
             await showMessages.ShowOkMessage("Note successfully updated.");
@@ -125,6 +125,7 @@ else
     {
         await SaveNote();
     }
+
 
     private async Task OnSaveAndNew()
     {

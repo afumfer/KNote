@@ -481,27 +481,7 @@ namespace KNote.ClientWin.Views
                 return;
             }
 
-            InsertLinkSelectedResource(); 
-            
-            //var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
-            //tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            //tmpFile = tmpFile.Replace(KntConst.ContainerResources, _com.Store.Config.CacheUrlResources);
-
-            //if (!buttonViewHtml.Enabled)
-            //{
-            //    string strLink = (_selectedResource.FileType.Contains("image")) ?
-            //        $"<img src='{tmpFile}' alt='{_selectedResource.Description}'/>" :
-            //        $"<a href='{tmpFile}' target='_blank'>{_selectedResource.NameOut}</a>";                
-            //    htmlDescription.SelectedHtml = strLink;
-            //    htmlDescription.Focus();
-            //}
-            //else 
-            //{ 
-            //    string strLink = (_selectedResource.FileType.Contains("image")) ?
-            //        $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
-            //    var selStart = textDescription.SelectionStart;
-            //    textDescription.Text = textDescription.Text.Insert(selStart, strLink);            
-            //}
+            InsertLinkSelectedResource();             
         }
         
         private async void toolDescriptionUploadResource_Click(object sender, EventArgs e)
@@ -599,7 +579,6 @@ namespace KNote.ClientWin.Views
             textTags.Text = _com.Model.Tags;            
             textPriority.Text = _com.Model.Priority.ToString();
                         
-
             string desOutput = _com.Model?.Description?
                 .Replace(_com.Service.RespositoryRef.ResourcesContainer,
                         _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl
@@ -769,8 +748,7 @@ namespace KNote.ClientWin.Views
             _com.Model.FolderDto.Name = textFolder.Text;
             _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
             _com.Model.Tags = textTags.Text;
-           
-            
+                       
             if (_com.Model.ContentType == "html")
             {
                 string desOutput = htmlDescription.BodyHtml?

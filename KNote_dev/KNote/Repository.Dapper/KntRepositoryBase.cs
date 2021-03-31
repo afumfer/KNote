@@ -23,8 +23,7 @@ namespace KNote.Repository.Dapper
         {
             SingletonConnection = singletonConnection;
             ThrowKntException = throwKntException;
-            _repositoryRef = repositoryRef;
-            _repositoryRef.ConnectionString = singletonConnection.ConnectionString;            
+            _repositoryRef = repositoryRef;            
         }
 
         public KntRepositoryBase(RepositoryRef repositoryRef, bool throwKntException = false)
@@ -44,8 +43,7 @@ namespace KNote.Repository.Dapper
             }
             else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
             {
-                // TODO: Estudiar poner esto en otro sitio, una clase estática. 
-                //       SqlMapper es estático.                    
+                // SqlMapper is static, this is a problem (to study in the future ) 
                 SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
                 SqlMapper.AddTypeHandler(new GuidHandler());
                 SqlMapper.AddTypeHandler(new TimeSpanHandler());

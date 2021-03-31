@@ -198,6 +198,7 @@ namespace KNote.Repository.EntityFramework
                     CreationDateTime = DateTime.Now,
                     ModificationDateTime = DateTime.Now,
                     Description = "Version History .... TODO: ..... ",
+                    ContentType = "markdown",
                     FolderId = idFolder2,
                     Priority = 80
                 },
@@ -209,6 +210,7 @@ namespace KNote.Repository.EntityFramework
                     CreationDateTime = DateTime.Now,
                     ModificationDateTime = DateTime.Now,
                     Description = "KaNote documentation .... TODO: ....",
+                    ContentType = "markdown",
                     FolderId = idFolder1,
                     Priority = 90
                 },
@@ -220,10 +222,11 @@ namespace KNote.Repository.EntityFramework
                     CreationDateTime = DateTime.Now,
                     ModificationDateTime = DateTime.Now,
                     Description = "Wellcome to KNote .... TODO: ....",
+                    ContentType = "markdown",
                     FolderId = idFolder1,
                     Priority = 100
                 }
-            );
+            ) ;
         }
     }
 }
