@@ -578,11 +578,23 @@ namespace KNote.ClientWin.Views
             _selectedFolderId = _com.Model.FolderId;                    
             textTags.Text = _com.Model.Tags;            
             textPriority.Text = _com.Model.Priority.ToString();
-                        
+
+            string replaceString = "";
+            if (!string.IsNullOrEmpty(_com.Service?.RespositoryRef?.ResourcesContainerCacheRootUrl))
+                replaceString = _com.Service?.RespositoryRef?.ResourcesContainerCacheRootUrl;
+            else
+            {
+                if (_com.Service?.RespositoryRef?.ResourcesContainerCacheRootPath != null &&  _com.Service?.RespositoryRef?.ResourcesContainer != null)
+                {
+                    replaceString = Path.Combine(_com.Service?.RespositoryRef?.ResourcesContainerCacheRootPath, _com.Service?.RespositoryRef?.ResourcesContainer) ;
+                    replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                }
+            }
+
             string desOutput = _com.Model?.Description?
                 .Replace(_com.Service.RespositoryRef.ResourcesContainer,
-                        _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl
-                        //_com.Store.AppConfig.CacheUrlResources
+                        //_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl
+                        replaceString
                         );
 
             if (_com.Model.HtmlFormat)
@@ -748,11 +760,20 @@ namespace KNote.ClientWin.Views
             _com.Model.FolderDto.Name = textFolder.Text;
             _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
             _com.Model.Tags = textTags.Text;
-                       
+
+            string replaceString = "";
+            if (!string.IsNullOrEmpty(_com.Service?.RespositoryRef?.ResourcesContainerCacheRootUrl))
+                replaceString = _com.Service?.RespositoryRef?.ResourcesContainerCacheRootUrl;
+            else
+            {
+                replaceString = Path.Combine(_com.Service?.RespositoryRef?.ResourcesContainerCacheRootPath, _com.Service?.RespositoryRef?.ResourcesContainer);
+                replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);                
+            }
+
             if (_com.Model.ContentType == "html")
             {
                 string desOutput = htmlDescription.BodyHtml?
-                    .Replace(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl, 
+                    .Replace(replaceString, 
                     _com.Service.RespositoryRef.ResourcesContainer);
                 _com.Model.Description = desOutput;
 
@@ -760,7 +781,7 @@ namespace KNote.ClientWin.Views
             else
             {
                 string desOutput = textDescription.Text?
-                    .Replace(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl, 
+                    .Replace(replaceString, 
                     _com.Service.RespositoryRef.ResourcesContainer);
                 _com.Model.Description = desOutput;
             }
@@ -1054,8 +1075,13 @@ namespace KNote.ClientWin.Views
         private void InsertLinkSelectedResource()
         {
             var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
+
+            if (!string.IsNullOrEmpty(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl))                            
+                tmpFile = tmpFile.Replace(_com.Service.RespositoryRef.ResourcesContainer, _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl);            
+            else            
+                tmpFile = Path.Combine(_com.Service.RespositoryRef.ResourcesContainerCacheRootPath, tmpFile);
+            
             tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            tmpFile = tmpFile.Replace(_com.Service.RespositoryRef.ResourcesContainer, _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl);
 
             if (!buttonViewHtml.Enabled)
             {

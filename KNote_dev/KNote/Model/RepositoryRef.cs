@@ -101,7 +101,7 @@ namespace KNote.Model
         }
 
         private string _resourcesContainerCacheRootUrl;
-        [Required(ErrorMessage = "Resources continer URL is required.")]
+        //[Required(ErrorMessage = "Resources continer URL is required.")]
         public string ResourcesContainerCacheRootUrl
         {
             get { return _resourcesContainerCacheRootUrl; }
@@ -176,9 +176,9 @@ namespace KNote.Model
                new ValidationContext(this, null, null) { MemberName = "ResourcesContainerCacheRootPath" },
                results);
 
-            Validator.TryValidateProperty(this.ResourcesContainerCacheRootUrl,
-               new ValidationContext(this, null, null) { MemberName = "ResourcesContainerCacheRootUrl" },
-               results);
+            //Validator.TryValidateProperty(this.ResourcesContainerCacheRootUrl,
+            //   new ValidationContext(this, null, null) { MemberName = "ResourcesContainerCacheRootUrl" },
+            //   results);
 
             // ---
             // Specific validations
