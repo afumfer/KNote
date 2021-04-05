@@ -173,7 +173,8 @@ namespace KNote.ClientWin.Components
             if (result == DialogResult.Yes || result == DialogResult.Yes)
             {
                 try
-                {                    
+                {
+                    await Store.SaveAndCloseActiveNotes(service.IdServiceRef);
                     Store.RemoveServiceRef(serviceForDelete);
                     Store.SaveConfig();
                     OnDeletedEntity(serviceForDelete.RepositoryRef);

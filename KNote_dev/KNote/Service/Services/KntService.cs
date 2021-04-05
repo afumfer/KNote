@@ -106,7 +106,7 @@ namespace KNote.Service.Services
             }
         }
 
-        public RepositoryRef RespositoryRef
+        public RepositoryRef RepositoryRef
         {
             get { return _repository.RespositoryRef; }
         }

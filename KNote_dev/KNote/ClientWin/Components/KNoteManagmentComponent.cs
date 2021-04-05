@@ -55,7 +55,6 @@ namespace KNote.ClientWin.Components
 
         public EnumSelectMode SelectMode { get; set; } = EnumSelectMode.Folders;
 
-
         public FolderWithServiceRef DefaultFolderWithServiceRef
         {
             get { return Store.DefaultFolderWithServiceRef; }
@@ -617,11 +616,11 @@ namespace KNote.ClientWin.Components
             {
                 View.ShowInfo("There is no repository selected to remove.");
                 return;
-            }
-            var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+            }            
+            var repositoryEditorComponent = new RepositoryEditorComponent(Store);            
             var res = await repositoryEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef);
             if (res)
-            {
+            {                
                 RefreshRepositoryAndFolderTree();
             }
         }

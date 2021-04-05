@@ -19,6 +19,6 @@ namespace KNote.Service
         IKntNoteTypeService NoteTypes { get; }
         Task<bool> TestDbConnection();
         Task<bool> CreateDataBase(string newOwner = null);
-        RepositoryRef RespositoryRef { get; }
+        RepositoryRef RepositoryRef { get; }
     }
 }

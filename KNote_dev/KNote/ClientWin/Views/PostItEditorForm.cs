@@ -316,40 +316,23 @@ namespace KNote.ClientWin.Views
         {
             labelCaption.Text = _com.Model.Topic;            
             labelStatus.Text = $"({_com.ServiceRef?.Alias} >> [{_com.Model.FolderDto.Name}] )";
-            _selectedFolderId = _com.Model.FolderId;
-
-            
-
-            string desOutput = _com.Model?.Description?.Replace(_com.Service.RespositoryRef.ResourcesContainer, _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl);
-
-            if (_com.Model?.ContentType == "html")
-            {
-                htmlDescription.BodyHtml = desOutput;
-            }
+            _selectedFolderId = _com.Model.FolderId;            
+            if (_com.Model?.ContentType == "html")                            
+                htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);            
             else
-            {
-                textDescription.Text = desOutput;
+            {             
+                textDescription.Text = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
                 textDescription.SelectionStart = 0;
             }
         }
 
         private void ControlsToModel()
         {
-            if (_com.Model?.ContentType == "html")
-            {
-                
-                string desOutput = htmlDescription.BodyHtml?
-                    .Replace(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl, 
-                    _com.Service.RespositoryRef.ResourcesContainer);
-                _com.Model.Description = desOutput;            
-            }
+            if (_com.Model.ContentType == "html")
+                _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
             else
-            {
-                string desOutput = textDescription.Text?
-                    .Replace(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl, 
-                    _com.Service.RespositoryRef.ResourcesContainer);
-                _com.Model.Description = desOutput;
-            }                                    
+                _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);
+
             _com.Model.FolderId = _selectedFolderId;
             _com.Model.Topic = labelCaption.Text;
 

@@ -33,10 +33,10 @@
             this.imageListFolders = new System.Windows.Forms.ImageList(this.components);
             this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.panelForm = new System.Windows.Forms.Panel();
+            this.treeViewFolders = new System.Windows.Forms.TreeView();
             this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
-            this.treeViewFolders = new System.Windows.Forms.TreeView();
             this.panelForm.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.SuspendLayout();
@@ -57,13 +57,27 @@
             // 
             // panelForm
             // 
-            this.panelForm.Controls.Add(this.panelBottom);
             this.panelForm.Controls.Add(this.treeViewFolders);
+            this.panelForm.Controls.Add(this.panelBottom);
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(460, 468);
             this.panelForm.TabIndex = 2;
+            // 
+            // treeViewFolders
+            // 
+            this.treeViewFolders.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.treeViewFolders.ContextMenuStrip = this.contextMenu;
+            this.treeViewFolders.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewFolders.ImageIndex = 0;
+            this.treeViewFolders.ImageList = this.imageListFolders;
+            this.treeViewFolders.Location = new System.Drawing.Point(0, 0);
+            this.treeViewFolders.Name = "treeViewFolders";
+            this.treeViewFolders.SelectedImageIndex = 0;
+            this.treeViewFolders.Size = new System.Drawing.Size(460, 424);
+            this.treeViewFolders.TabIndex = 1;
+            this.treeViewFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewFolders_AfterSelect);
             // 
             // panelBottom
             // 
@@ -98,20 +112,6 @@
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
-            // 
-            // treeViewFolders
-            // 
-            this.treeViewFolders.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.treeViewFolders.ContextMenuStrip = this.contextMenu;
-            this.treeViewFolders.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeViewFolders.ImageIndex = 0;
-            this.treeViewFolders.ImageList = this.imageListFolders;
-            this.treeViewFolders.Location = new System.Drawing.Point(0, 0);
-            this.treeViewFolders.Name = "treeViewFolders";
-            this.treeViewFolders.SelectedImageIndex = 0;
-            this.treeViewFolders.Size = new System.Drawing.Size(460, 468);
-            this.treeViewFolders.TabIndex = 1;
-            this.treeViewFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewFolders_AfterSelect);
             // 
             // FoldersSelectorForm
             // 

@@ -454,7 +454,7 @@ namespace KNote.ClientWin.Views
         private void linkViewFile_Click(object sender, EventArgs e)
         {
             var tmpFile = _com.GetOrSaveTmpFile(
-                _com.Service.RespositoryRef.ResourcesContainerCacheRootPath,
+                _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
                 _selectedResource.Container, 
                 _selectedResource.Name, 
                 _selectedResource.ContentArrayBytes);
@@ -579,24 +579,6 @@ namespace KNote.ClientWin.Views
             textTags.Text = _com.Model.Tags;            
             textPriority.Text = _com.Model.Priority.ToString();
 
-            string replaceString = "";
-            if (!string.IsNullOrEmpty(_com.Service?.RespositoryRef?.ResourcesContainerCacheRootUrl))
-                replaceString = _com.Service?.RespositoryRef?.ResourcesContainerCacheRootUrl;
-            else
-            {
-                if (_com.Service?.RespositoryRef?.ResourcesContainerCacheRootPath != null &&  _com.Service?.RespositoryRef?.ResourcesContainer != null)
-                {
-                    replaceString = Path.Combine(_com.Service?.RespositoryRef?.ResourcesContainerCacheRootPath, _com.Service?.RespositoryRef?.ResourcesContainer) ;
-                    replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                }
-            }
-
-            string desOutput = _com.Model?.Description?
-                .Replace(_com.Service.RespositoryRef.ResourcesContainer,
-                        //_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl
-                        replaceString
-                        );
-
             if (_com.Model.HtmlFormat)
             {
                 labelLoadingHtml.Visible = true;
@@ -604,15 +586,14 @@ namespace KNote.ClientWin.Views
                 textDescription.Visible = false;
                 htmlDescription.Visible = true;
                 htmlDescription.BodyHtml = "";
-                htmlDescription.BodyHtml = desOutput; 
-                //                
+                htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
                 htmlDescription.Refresh();
                 labelLoadingHtml.Visible = false;
             }
             else
             {
-                htmlDescription.Visible = false;
-                textDescription.Text = desOutput;
+                htmlDescription.Visible = false;                
+                textDescription.Text = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
                 textDescription.Visible = true;                
             }
 
@@ -635,9 +616,8 @@ namespace KNote.ClientWin.Views
 
             // Script             
             textScriptCode.Text = _com.Model.Script;
-
             
-            // Trace notes
+            // TODO: Trace notes
             //From = new List<TraceNote>(),
             //To = new List<TraceNote>()
 
@@ -761,30 +741,10 @@ namespace KNote.ClientWin.Views
             _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
             _com.Model.Tags = textTags.Text;
 
-            string replaceString = "";
-            if (!string.IsNullOrEmpty(_com.Service?.RespositoryRef?.ResourcesContainerCacheRootUrl))
-                replaceString = _com.Service?.RespositoryRef?.ResourcesContainerCacheRootUrl;
-            else
-            {
-                replaceString = Path.Combine(_com.Service?.RespositoryRef?.ResourcesContainerCacheRootPath, _com.Service?.RespositoryRef?.ResourcesContainer);
-                replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);                
-            }
-
             if (_com.Model.ContentType == "html")
-            {
-                string desOutput = htmlDescription.BodyHtml?
-                    .Replace(replaceString, 
-                    _com.Service.RespositoryRef.ResourcesContainer);
-                _com.Model.Description = desOutput;
-
-            }
+                _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
             else
-            {
-                string desOutput = textDescription.Text?
-                    .Replace(replaceString, 
-                    _com.Service.RespositoryRef.ResourcesContainer);
-                _com.Model.Description = desOutput;
-            }
+                _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);
 
             int p;
             if (int.TryParse(textPriority.Text, out p))
@@ -1076,10 +1036,10 @@ namespace KNote.ClientWin.Views
         {
             var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
 
-            if (!string.IsNullOrEmpty(_com.Service.RespositoryRef.ResourcesContainerCacheRootUrl))                            
-                tmpFile = tmpFile.Replace(_com.Service.RespositoryRef.ResourcesContainer, _com.Service.RespositoryRef.ResourcesContainerCacheRootUrl);            
+            if (!string.IsNullOrEmpty(_com.Service.RepositoryRef.ResourcesContainerCacheRootUrl))                            
+                tmpFile = tmpFile.Replace(_com.Service.RepositoryRef.ResourcesContainer, _com.Service.RepositoryRef.ResourcesContainerCacheRootUrl);            
             else            
-                tmpFile = Path.Combine(_com.Service.RespositoryRef.ResourcesContainerCacheRootPath, tmpFile);
+                tmpFile = Path.Combine(_com.Service.RepositoryRef.ResourcesContainerCacheRootPath, tmpFile);
             
             tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
@@ -1122,7 +1082,6 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
 
         // TODO: 
         //private void toolInsertarImagenClipboard_Click(object sender, EventArgs e)

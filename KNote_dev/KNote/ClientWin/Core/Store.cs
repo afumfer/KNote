@@ -229,11 +229,60 @@ namespace KNote.ClientWin.Core
                             await comNote.SaveModel();
                     }
                 }
-
                 return await Task.FromResult<bool>(true);
             }
             catch (Exception)
             {
+                return await Task.FromResult<bool>(false);
+            }
+        }
+
+        public async Task<bool> SaveAndCloseActiveNotes(Guid serviceId)
+        {
+            var stackPostIts = new Stack<PostItEditorComponent>();
+            var stackNotes = new Stack<NoteEditorComponent>();
+
+            try
+            {
+                foreach (var com in _listComponents)
+                {
+                    if (com is PostItEditorComponent)
+                    {                        
+                        var comNote = (PostItEditorComponent)com;
+                        if (comNote.ServiceRef.IdServiceRef == serviceId)
+                        {
+                            await comNote.SaveModel();                            
+                            stackPostIts.Push(comNote);
+                        }
+                    }
+                    if (com is NoteEditorComponent)
+                    {
+                        var comNote = (NoteEditorComponent)com;
+                        if (comNote.ServiceRef.IdServiceRef == serviceId)
+                        {
+                            if (comNote.EditMode)
+                            {
+                                await comNote.SaveModel();                                
+                                stackNotes.Push(comNote);
+                            }
+                        }                        
+                    }
+                }
+                while(stackPostIts.Count > 0)
+                {
+                    var postIt = stackPostIts.Pop();
+                    postIt.Finalize();
+                }
+                while (stackNotes.Count > 0)
+                {
+                    var note = stackNotes.Pop();
+                    note.Finalize();
+                }
+
+                return await Task.FromResult<bool>(true);
+            }
+            catch (Exception)
+            {                
                 return await Task.FromResult<bool>(false);
             }
         }
@@ -243,7 +292,10 @@ namespace KNote.ClientWin.Core
             foreach (var com in _listComponents)
             {
                 if (com is PostItEditorComponent)
-                    ((PostItEditorComponent)com).HidePostIt();                        
+                {
+
+                    ((PostItEditorComponent)com).HidePostIt();
+                }
             }            
         }
 
