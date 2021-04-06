@@ -491,6 +491,13 @@ namespace KNote.ClientWin.Views
                 InsertLinkSelectedResource();
         }
 
+        private void toolDescriptionUploadResourceFromClipboard_Click(object sender, EventArgs e)
+        {
+            var resource = AddResourceFromClipboard();
+            if (resource != null)
+                InsertLinkSelectedResource();
+        }
+
         #endregion
 
         private async void buttonDeleteType_Click(object sender, EventArgs e)
@@ -1025,11 +1032,26 @@ namespace KNote.ClientWin.Views
             var resource = await _com.NewResource();
             if (resource != null)
             {
-                listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
-                listViewResources.Items[0].Selected = true;
-                _selectedResource = resource;
+                AddItemToListViewResources(resource);
             }
             return resource;
+        }
+
+        private ResourceDto AddResourceFromClipboard()
+        {
+            var resource = _com.NewResourceFromClipboard();
+            if (resource != null)
+            {
+                AddItemToListViewResources(resource);
+            }
+            return resource;
+        }
+
+        private void AddItemToListViewResources(ResourceDto resource)
+        {
+            listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
+            listViewResources.Items[0].Selected = true;
+            _selectedResource = resource;
         }
 
         private void InsertLinkSelectedResource()
@@ -1082,38 +1104,5 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
-        // TODO: 
-        //private void toolInsertarImagenClipboard_Click(object sender, EventArgs e)
-        //{
-        //    Bitmap bm;
-        //    string destino = ObtenerNombreFicheroImagenDestino();
-
-        //    if (string.IsNullOrEmpty(destino))
-        //        return;
-
-        //    destino += ".png";
-
-        //    try
-        //    {
-        //        if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Bitmap))
-        //        {
-        //            bm = (Bitmap)Clipboard.GetDataObject().GetData(DataFormats.Bitmap);
-        //            bm.Save(destino, ImageFormat.Png);
-        //            this.htmlEditor.InsertImage(destino);
-        //        }
-        //        else
-        //            MessageBox.Show("No dispone de imágenes en el Portapapeles para insertar en esta nota.", "ANotas");
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("No se ha podido copiar el fichero seleccionado en el contenedor de imágenes" +
-        //            " de este archivador (" + ex.Message + ")");
-        //    }
-
-        //    this.htmlEditor.Focus();
-        //}
-
     }
 }

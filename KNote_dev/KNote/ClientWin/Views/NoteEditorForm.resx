@@ -60,7 +60,7 @@
   <metadata name="toolBarNoteEditor.Locked" type="System.Boolean, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e">
     <value>True</value>
   </metadata>
-  <assembly alias="System.Drawing.Common" name="System.Drawing.Common, Version=5.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
+  <assembly alias="System.Drawing.Common" name="System.Drawing.Common, Version=5.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
   <data name="buttonSave.Image" type="System.Drawing.Bitmap, System.Drawing.Common" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
@@ -142,10 +142,10 @@
   </data>
   <data name="imageListTabNoteData.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
-        AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj01LjAuMy4w
+        AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj01LjAuNC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAAE
-        EwAAAk1TRnQBSQFMAgEBCwEAAaABBAGgAQQBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
+        EwAAAk1TRnQBSQFMAgEBCwEAAagBBAGoAQQBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
         AwABQAMAATADAAEBAQABCAYAAQwYAAGAAgABgAMAAoABAAGAAwABgAEAAYABAAKAAgADwAEAAcAB3AHA
         AQAB8AHKAaYBAAEzBQABMwEAATMBAAEzAQACMwIAAxYBAAMcAQADIgEAAykBAANVAQADTQEAA0IBAAM5
         AQABgAF8Af8BAAJQAf8BAAGTAQAB1gEAAf8B7AHMAQABxgHWAe8BAAHWAucBAAGQAakBrQIAAf8BMwMA
@@ -257,6 +257,16 @@
         YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAB/SURBVDhPY6AY6Nj46uHCDAz1TFBluIGOXcB/XFjLzn8L
         QUOwaUTGIEOwuQ6GCRpACA9+A8KgGJscGOMzIAwaziA1OA3BZQBcMwyAxNDUgDE2A45qWwfqg6MICkBs
         sBhQDk0t/jCA6sevBpsgDEP1D6AB8CSLTQ6KoXaQCxgYAJfWN9OMvTtPAAAAAElFTkSuQmCC
+</value>
+  </data>
+  <data name="toolDescriptionUploadResourceFromClipboard.Image" type="System.Drawing.Bitmap, System.Drawing.Common" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADTSURBVDhPnZNBDoIwEEV7Ay9g1K0W4sIl0Gri0jhI4qlc
+        ufJ6hngJVjq/gKZAS/EnH8K08/KBqegq1pe5TItko/PU6+S0aFp+2mpaRSp/h7oHkZr2WJBZ/pKKHk7z
+        ugFwErE7XmdxdlY2gO6G6BAgXwAukaLKLPyTYAjALpHC7REANuHZJaTwJ8joyfebxyV7IqCu2b/RBRh6
+        BdSCAezeR0StbWyNibUA60Ox7G7yGWNvASBAkGTMGHvT0AVMFg5EHYmqELdjbwkQJAkxzk7TxhLiAze8
+        A1uoZ0RdAAAAAElFTkSuQmCC
 </value>
   </data>
   <metadata name="buttonFolderSearch.Locked" type="System.Boolean, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e">

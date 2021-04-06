@@ -12,6 +12,9 @@ using KNote.Model.Dto;
 using KNote.Service;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace KNote.ClientWin.Components
 {    
@@ -387,8 +390,45 @@ namespace KNote.ClientWin.Components
                 return resource.Model;
             }
             else                        
+                return null;            
+        }
+
+        public ResourceDto NewResourceFromClipboard()
+        {            
+            try
+            {
+                if (!Clipboard.GetDataObject().GetDataPresent(DataFormats.Bitmap))
+                {
+                    View.ShowInfo("You do not have any images on the Clipboard to insert into this note.", "KaNote");
+                    return null;
+                }
+                var bm = (Bitmap)Clipboard.GetDataObject().GetData(DataFormats.Bitmap);
+                var converter = new ImageConverter();
+                var newResource = new ResourceDto();
+
+                newResource.ResourceId = Guid.NewGuid();
+                newResource.NoteId = Model.NoteId;
+                newResource.Description = "Image inserted from clipboard.";
+                newResource.Order = 0;
+                newResource.Name = "ClipboardImg_" + newResource.ResourceId.ToString() + ".png";            
+                newResource.FileType = Store.ExtensionFileToFileType(".png"); 
+                newResource.Container = Service.RepositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();                                
+                newResource.ContentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));           
+                newResource.ContentBase64 = Convert.ToBase64String(newResource.ContentArrayBytes);
+                                
+                GetOrSaveTmpFile(
+                    Service.RepositoryRef.ResourcesContainerCacheRootPath,
+                    newResource.Container,
+                    newResource.Name,
+                    newResource.ContentArrayBytes);
+
+                Model.Resources.Add(newResource);
+                return newResource;
+            }
+            catch (Exception)
+            {
                 return null;
-            
+            }            
         }
 
         public async Task<ResourceDto> EditResource(Guid resourceId)

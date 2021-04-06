@@ -146,6 +146,7 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
+            this.toolDescriptionUploadResourceFromClipboard = new System.Windows.Forms.ToolStripButton();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
@@ -427,12 +428,13 @@
             this.toolDescriptionHtml,
             this.toolDescriptionMarkdown,
             this.toolDescriptionS3,
-            this.toolDescriptionUploadResource});
+            this.toolDescriptionUploadResource,
+            this.toolDescriptionUploadResourceFromClipboard});
             this.toolDescription.Location = new System.Drawing.Point(0, 0);
             this.toolDescription.Name = "toolDescription";
             this.toolDescription.Size = new System.Drawing.Size(30, 376);
             this.toolDescription.TabIndex = 0;
-            this.toolDescription.Text = "toolStrip1";
+            this.toolDescription.Text = "Tool description editor";
             // 
             // toolDescriptionHtml
             // 
@@ -1413,6 +1415,16 @@
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
             // 
+            // toolDescriptionUploadResourceFromClipboard
+            // 
+            this.toolDescriptionUploadResourceFromClipboard.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolDescriptionUploadResourceFromClipboard.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploadResourceFromClipboard.Image")));
+            this.toolDescriptionUploadResourceFromClipboard.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolDescriptionUploadResourceFromClipboard.Name = "toolDescriptionUploadResourceFromClipboard";
+            this.toolDescriptionUploadResourceFromClipboard.Size = new System.Drawing.Size(27, 20);
+            this.toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
+            this.toolDescriptionUploadResourceFromClipboard.Click += new System.EventHandler(this.toolDescriptionUploadResourceFromClipboard_Click);
+            // 
             // NoteEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1577,5 +1589,6 @@
         private System.Windows.Forms.ToolStripSeparator toolDescriptionS3;
         private System.Windows.Forms.ToolStripButton toolDescriptionUploadResource;
         private System.Windows.Forms.Button buttonDeleteType;
+        private System.Windows.Forms.ToolStripButton toolDescriptionUploadResourceFromClipboard;
     }
 }
