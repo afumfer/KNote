@@ -6,9 +6,7 @@ using System.Text;
 namespace KNote.Model.Dto
 {
     public class NotesFilterDto : NotesSearchDto
-    {        
-        public int TotalPages { get; set; } = 0;
-       
+    {                     
         public Guid? FolderId { get; set; }
         public string Topic { get; set; }
         public Guid? NoteTypeId { get; set; }
@@ -16,6 +14,41 @@ namespace KNote.Model.Dto
         public string Description { get; set; }
 
         public List<AtrFilterDto> AttributesFilter { get; set; } = new List<AtrFilterDto>();
+
+        public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var results = base.Validate(validationContext);
+
+            //var results = new List<ValidationResult>();
+
+            // ---
+            // Capture the validations implemented with attributes.
+            // ---
+
+            //Validator.TryValidateProperty(this.EntityId,
+            //   new ValidationContext(this, null, null) { MemberName = "EntityId" },
+            //   results);
+
+            // TODO: Añadir aquí el resto de validaciones vía atributos ....
+
+            //----
+            // Specific validations
+            //----
+
+            // ---- Ejemplo
+            //if (ModificationDateTime < CreationDateTime)
+            //{
+            //    results.Add(new ValidationResult
+            //     ("KMSG: The modification date cannot be greater than the creation date "
+            //     , new[] { "ModificationDateTime", "CreationDateTime" }));
+            //}
+
+            // ---
+            // Return List<ValidationResult>()
+            // ---           
+
+            return results;
+        }
     }
 
     public class AtrFilterDto : DtoModelBase

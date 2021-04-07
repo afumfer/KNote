@@ -17,15 +17,23 @@ namespace KNote.ClientWin.Views
 {
     public partial class RepositoryEditorForm : Form, IEditorView<RepositoryRef>
     {
+        #region Fields
+
         private readonly RepositoryEditorComponent _com;
         private bool _viewFinalized = false;
         private bool _formIsDisty = false;
+
+        #endregion
+
+        #region Constructor 
 
         public RepositoryEditorForm(RepositoryEditorComponent com)
         {
             InitializeComponent();
             _com = com;
         }
+
+        #endregion 
 
         #region IEditorView implementation 
 
@@ -41,8 +49,7 @@ namespace KNote.ClientWin.Views
 
         public Result<EComponentResult> ShowModalView()
         {
-            var res = _com.DialogResultToComponentResult(this.ShowDialog());
-            return res;
+            return _com.DialogResultToComponentResult(this.ShowDialog());
         }
 
         public void RefreshView()
@@ -174,6 +181,7 @@ namespace KNote.ClientWin.Views
                 }
             }
         }
+
         #endregion 
 
         #region Private methods

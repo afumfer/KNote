@@ -108,5 +108,10 @@ namespace KNote.ClientWin.Core
         {
             return new FiltersSelectorForm(component);
         }
+
+        public IEditorView<AppConfig> View(OptionsEditorComponent component)
+        {
+            return new OptionsEditorForm(component);
+        }
     }
 }

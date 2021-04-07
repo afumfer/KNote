@@ -22,7 +22,7 @@ namespace KNote.Repository.EntityFramework
         {
         }
 
-        public async Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null)
+        public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
         {
             var resService = new Result<List<UserDto>>();
             try

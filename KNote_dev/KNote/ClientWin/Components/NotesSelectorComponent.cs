@@ -125,7 +125,7 @@ namespace KNote.ClientWin.Components
                     // TODO: hack for get all (app win don't have pagination) 
                     //response = await Service.Notes.GetFilter(notesFilter);   //TODO: future                    
                     notesFilter.NumRecords = 99999;
-                    var xx = notesFilter.Pagination.NumRecords;
+                    var xx = notesFilter.PageIdentifier.NumRecords;
                     response = await Service.Notes.GetSearch(notesFilter);
                 }
 

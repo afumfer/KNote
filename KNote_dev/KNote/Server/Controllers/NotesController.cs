@@ -39,7 +39,6 @@ namespace KNote.Server.Controllers
                     return Ok(resApi);
                 else
                     return BadRequest(resApi);
-
             }
             catch (Exception ex)
             {

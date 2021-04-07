@@ -1,19 +1,27 @@
-﻿using System;
+﻿using KNote.Model.Dto;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace KNote.Model.Dto
+namespace KNote.Model
 {
-    public class NotesSearchDto : PaginationBase
+    public abstract class PaginationBase : DtoModelBase
     {
-        public string TextSearch { get; set; }
+        public int Page { get; set; } = 1;
+        public int NumRecords { get; set; } = 25;
+        public int TotalPages { get; set; } = 0;
+
+        public PageIdentifier PageIdentifier
+        {
+            get { return new PageIdentifier { Page = Page, NumRecords = NumRecords }; }
+        }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            var results = base.Validate(validationContext);
-
-            //var results = new List<ValidationResult>();
+            var results = new List<ValidationResult>();
 
             // ---
             // Capture the validations implemented with attributes.
@@ -44,4 +52,11 @@ namespace KNote.Model.Dto
             return results;
         }
     }
+
+    public class PageIdentifier
+    {
+        public int Page { get; set; } = 1;
+        public int NumRecords { get; set; } = 25;
+    }
+
 }

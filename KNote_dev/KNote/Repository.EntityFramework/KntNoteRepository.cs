@@ -141,7 +141,7 @@ namespace KNote.Repository.EntityFramework
                 // Order by and pagination
                 query = query
                     .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
-                    .Pagination(notesFilter.Pagination);
+                    .Pagination(notesFilter.PageIdentifier);
 
                 // Get content
                 resService.Entity = await query
@@ -219,7 +219,7 @@ namespace KNote.Repository.EntityFramework
                 // Order by and pagination
                 query = query
                     .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
-                    .Pagination(notesSearch.Pagination);
+                    .Pagination(notesSearch.PageIdentifier);
 
                 // Get content
                 result.Entity = await query

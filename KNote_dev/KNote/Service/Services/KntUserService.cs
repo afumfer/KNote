@@ -30,7 +30,7 @@ namespace KNote.Service.Services
 
         #region IKntUserService  
 
-        public async Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null)
+        public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
         {
             return await _repository.Users.GetAllAsync(pagination);
         }

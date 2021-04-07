@@ -8,7 +8,7 @@ namespace KNote.Service
 {
     public interface IKntUserService
     {        
-        Task<Result<List<UserDto>>> GetAllAsync(PaginationDto pagination = null);
+        Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null);
         Task<Result<UserDto>> GetAsync(Guid userId);
         Task<Result<UserDto>> GetByUserNameAsync(string userName);
         Task<Result<UserDto>> SaveAsync(UserDto entityInfo);

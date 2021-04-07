@@ -8,7 +8,7 @@ namespace KNote.Model
 {
     public static class QueryableExtensions
     {
-        public static IQueryable<T> Pagination<T>(this IQueryable<T> queryable, PaginationDto pagination)
+        public static IQueryable<T> Pagination<T>(this IQueryable<T> queryable, PageIdentifier pagination)
         {            
             return queryable
                 .Skip((pagination.Page - 1) * pagination.NumRecords)
