@@ -639,7 +639,7 @@ namespace KNote.ClientWin.Components
         {
             if (SelectedServiceRef == null)
             {
-                View.ShowInfo("There is no repository selected to remove.");
+                View.ShowInfo("There is no repository selected to configure.");
                 return;
             }                        
             var repositoryEditorComponent = new RepositoryEditorComponent(Store);
@@ -741,6 +741,22 @@ namespace KNote.ClientWin.Components
             {
                 if (!string.IsNullOrEmpty(note.Script))
                     Store.RunScript(note.Script);
+            }
+        }
+
+        public void Options()
+        {
+            var optionsEditorComponent = new OptionsEditorComponent(Store);
+            
+            optionsEditorComponent.LoadModel(
+                SelectedServiceRef?.Service,
+                Store.AppConfig.GetSimpleDto<AppConfig>(), 
+                true);
+            var res = optionsEditorComponent.RunModal();
+            if (res.Entity == EComponentResult.Executed)
+            {
+                // TODO: refresh context managment
+                
             }
         }
         

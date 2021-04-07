@@ -187,7 +187,9 @@ namespace KNote.ClientWin.Views
             else if (menuSel == menuRemoveTags)
                 _com.RemoveTagsSelectedNotes();            
             else if (menuSel == menuExecuteKntScript)
-                _com.RunScriptSelectedNotes();            
+                _com.RunScriptSelectedNotes();
+            else if (menuSel == menuOptions)
+                _com.Options();
             else if (menuSel == menuFoldersExplorer) {
                 if (tabExplorers.SelectedIndex == 0)
                     return;
@@ -222,17 +224,14 @@ namespace KNote.ClientWin.Views
             menuSel = (ToolStripItem)sender;
 
             if (menuSel == toolEditNote)
-            {
                 _com.EditNote();
-            }
             else if (menuSel == toolNewNote)
-            {
                 _com.AddNote();
-            }
             else if (menuSel == toolDeleteNote)
-            {
                 _com.DeleteNote();
-            }
+            else if (menuSel == toolConfiguration)
+                _com.ManagmentRepository();
+
         }
 
         private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)

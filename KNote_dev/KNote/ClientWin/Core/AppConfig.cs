@@ -125,6 +125,62 @@ namespace KNote.ClientWin.Core
             }
         }
 
+        private int _managmentLocX;
+        public int ManagmentLocX
+        {
+            get { return _managmentLocX; }
+            set
+            {
+                if (_managmentLocX != value)
+                {
+                    _managmentLocX = value;
+                    OnPropertyChanged("ManagmentLocX");
+                }
+            }
+        }
+
+        private int _managmentLocY;
+        public int ManagmentLocY
+        {
+            get { return _managmentLocY; }
+            set
+            {
+                if (_managmentLocY != value)
+                {
+                    _managmentLocY = value;
+                    OnPropertyChanged("ManagmentLocY");
+                }
+            }
+        }
+
+        private int _managmentWidth;
+        public int ManagmentWidth
+        {
+            get { return _managmentWidth; }
+            set
+            {
+                if (_managmentWidth != value)
+                {
+                    _managmentWidth = value;
+                    OnPropertyChanged("ManagmentWidth");
+                }
+            }
+        }
+
+        private int _managmentHeight;
+        public int ManagmentHeight
+        {
+            get { return _managmentHeight; }
+            set
+            {
+                if (_managmentHeight != value)
+                {
+                    _managmentHeight = value;
+                    OnPropertyChanged("ManagmentHeight");
+                }
+            }
+        }
+
         private List<RepositoryRef> _respositoryRef;
         public List<RepositoryRef> RespositoryRefs
         {
@@ -148,7 +204,7 @@ namespace KNote.ClientWin.Core
 
         #region TODO: ... other params
 
-        // KNoteManagmentForm: size, location(in desktop dimension), minimized (?), maximized (?), visible (?), hide note number (?)
+        // KNoteManagmentForm: minimized (?), maximized (?), visible (?), hide note number (?)
 
         // PostIts: always top, style, ....
 
@@ -162,13 +218,12 @@ namespace KNote.ClientWin.Core
 
             // ---
             // Capture the validations implemented with attributes.
-            // TODO: (Esta sección se puede resolver por medio de reflexión).
+            // TODO: apply reflection??
             // ---
 
             //Validator.TryValidateProperty(this.Xxproperty,
             //   new ValidationContext(this, null, null) { MemberName = "Xxproperty" },
             //   results);
-
 
 
             // ---
@@ -183,7 +238,6 @@ namespace KNote.ClientWin.Core
             //}
 
             return results;
-
         }
 
     }

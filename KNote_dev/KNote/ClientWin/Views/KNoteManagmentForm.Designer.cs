@@ -67,6 +67,7 @@
             this.menuView = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFoldersExplorer = new System.Windows.Forms.ToolStripMenuItem();
             this.menuSearchPanel = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuViewS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuHeaderPanelVisible = new System.Windows.Forms.ToolStripMenuItem();
             this.menuMainVisible = new System.Windows.Forms.ToolStripMenuItem();
             this.menuVerticalPanelForNotes = new System.Windows.Forms.ToolStripMenuItem();
@@ -102,7 +103,6 @@
             this.tabSearch = new System.Windows.Forms.TabPage();
             this.imageTabExplorer = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.menuViewS1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuMangment.SuspendLayout();
             this.statusBarManagment.SuspendLayout();
             this.toolBarManagment.SuspendLayout();
@@ -417,6 +417,11 @@
             this.menuSearchPanel.Text = "Search panel";
             this.menuSearchPanel.Click += new System.EventHandler(this.menu_Click);
             // 
+            // menuViewS1
+            // 
+            this.menuViewS1.Name = "menuViewS1";
+            this.menuViewS1.Size = new System.Drawing.Size(263, 6);
+            // 
             // menuHeaderPanelVisible
             // 
             this.menuHeaderPanelVisible.Checked = true;
@@ -630,7 +635,8 @@
             this.toolConfiguration.Name = "toolConfiguration";
             this.toolConfiguration.Size = new System.Drawing.Size(107, 22);
             this.toolConfiguration.Text = "Configuration  ";
-            this.toolConfiguration.ToolTipText = "Repository configurations";
+            this.toolConfiguration.ToolTipText = "Repository configuration";
+            this.toolConfiguration.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
             // panelSupManagment
             // 
@@ -775,11 +781,6 @@
             this.splitContainer2.SplitterDistance = 192;
             this.splitContainer2.SplitterWidth = 7;
             this.splitContainer2.TabIndex = 0;
-            // 
-            // menuViewS1
-            // 
-            this.menuViewS1.Name = "menuViewS1";
-            this.menuViewS1.Size = new System.Drawing.Size(6, 6);
             // 
             // KNoteManagmentForm
             // 

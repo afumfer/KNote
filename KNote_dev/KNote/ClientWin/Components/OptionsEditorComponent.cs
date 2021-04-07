@@ -32,31 +32,50 @@ namespace KNote.ClientWin.Components
             return Store.FactoryViews.View(this);
         }
 
-        public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
+        public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
         {
-            return await Task.FromResult<bool>(true);
+            throw new NotImplementedException();
         }
 
-        public async override Task<bool> NewModel(IKntService service)
+        public override Task<bool> NewModel(IKntService service = null)
         {
-            return await Task.FromResult<bool>(true);
+            throw new NotImplementedException();
         }
 
         public async override Task<bool> SaveModel()
         {
+            View.RefreshModel();
+
+            if (!Model.IsDirty())
+                return await Task.FromResult<bool>(true);
+
+            var msgVal = Model.GetErrorMessage();
+            if (!string.IsNullOrEmpty(msgVal))
+            {
+                View.ShowInfo(msgVal);
+                return await Task.FromResult<bool>(false);
+            }
+
+            Store.AppConfig.AlarmActivated = Model.AlarmActivated;
+            Store.AppConfig.AlarmSeconds = Model.AlarmSeconds;
+            Store.AppConfig.AutoSaveActivated = Model.AutoSaveActivated;
+            Store.AppConfig.AutoSaveSeconds = Model.AutoSaveSeconds;
+            Store.SaveConfig();
+
             return await Task.FromResult<bool>(true);
         }
 
-        public async override Task<bool> DeleteModel(IKntService service, Guid id)
+        public override Task<bool> DeleteModel(IKntService service, Guid id)
         {
-            return await Task.FromResult<bool>(true);
+            throw new NotImplementedException();
         }
 
-        public async override Task<bool> DeleteModel()
+        public override Task<bool> DeleteModel()
         {
-            return await Task.FromResult<bool>(true);
+            throw new NotImplementedException();
         }
 
-        #endregion 
+
+        #endregion
     }
 }
