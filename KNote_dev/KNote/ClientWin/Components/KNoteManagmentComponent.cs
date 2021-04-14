@@ -435,7 +435,8 @@ namespace KNote.ClientWin.Components
 
         public async Task<bool> FinalizeAppForce()
         {
-            var res = await Store.SaveActiveNotes();
+            var res = await Store.SaveActiveNotes();            
+            Store.SaveConfig();                        
             Finalize();
             return res;
         }

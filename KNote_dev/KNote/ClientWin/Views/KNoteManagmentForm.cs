@@ -138,6 +138,28 @@ namespace KNote.ClientWin.Views
 
         #region Form events handlers
 
+        private void KNoteManagmentForm_Load(object sender, EventArgs e)
+        {
+            SetViewPositionAndSize();
+        }
+
+        private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!_viewFinalized)
+            {
+                this.Hide();
+                if (e.CloseReason == CloseReason.WindowsShutDown)
+                {
+                    SaveViewSizeAndPosition();
+                    await _com.FinalizeAppForce();
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
+            }
+        }
+
         private async void menu_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem menuSel;
@@ -213,7 +235,10 @@ namespace KNote.ClientWin.Views
                     splitContainer2.Orientation = Orientation.Horizontal;
                     menuVerticalPanelForNotes.Checked = false; } }            
             else if (menuSel == menuExit)
+            {
+                SaveViewSizeAndPosition();
                 await _com.FinalizeApp();            
+            }
             else
                 MessageBox.Show("In construction ... ");            
         }
@@ -232,22 +257,6 @@ namespace KNote.ClientWin.Views
             else if (menuSel == toolConfiguration)
                 _com.ManagmentRepository();
 
-        }
-
-        private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (!_viewFinalized)
-            {
-                this.Hide();
-                if(e.CloseReason == CloseReason.WindowsShutDown)
-                {                    
-                    await _com.FinalizeAppForce();
-                }
-                else
-                {
-                    e.Cancel = true;
-                }
-            }
         }
 
         private void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
@@ -284,6 +293,32 @@ namespace KNote.ClientWin.Views
             splitContainer2.Panel1.Controls.Add(_com.NotesSelectorComponent.View.PanelView());
             splitContainer2.Panel2.Controls.Add(_com.NoteEditorComponent.View.PanelView());           
         }
+
+        private void SaveViewSizeAndPosition()
+        {
+            _com.Store.AppConfig.ManagmentLocX = Location.X;
+            _com.Store.AppConfig.ManagmentLocY = Location.Y;
+            _com.Store.AppConfig.ManagmentWidth = Width;
+            _com.Store.AppConfig.ManagmentHeight = Height;
+        }
+
+        private void SetViewPositionAndSize()
+        {
+            if (_com.Store.AppConfig.ManagmentLocX > SystemInformation.VirtualScreen.Width - 100)
+                _com.Store.AppConfig.ManagmentLocX = 100;
+            if (_com.Store.AppConfig.ManagmentLocY > SystemInformation.VirtualScreen.Height - 100)
+                _com.Store.AppConfig.ManagmentLocY = 100;
+
+            if (_com.Store.AppConfig.ManagmentLocY > 0)
+                Top = _com.Store.AppConfig.ManagmentLocY;
+            if (_com.Store.AppConfig.ManagmentLocX > 0)
+                Left = _com.Store.AppConfig.ManagmentLocX;
+            if (_com.Store.AppConfig.ManagmentWidth > 0)
+                Width = _com.Store.AppConfig.ManagmentWidth;
+            if (_com.Store.AppConfig.ManagmentHeight > 0)
+                Height = _com.Store.AppConfig.ManagmentHeight;
+        }
+
 
         #endregion
 

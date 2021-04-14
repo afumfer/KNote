@@ -225,17 +225,23 @@ namespace KNote.ClientWin.Core
             //   new ValidationContext(this, null, null) { MemberName = "Xxproperty" },
             //   results);
 
-
             // ---
             // Specific validations
             // ----
 
-            //if (YyProperty != "xxxxxx" )
-            //{
-            //    results.Add(new ValidationResult
-            //     ("KMSG: xxxxxxxx."
-            //     , new[] { "YyProperty" }));
-            //}
+            if (AlarmSeconds < 30 || AlarmSeconds > 300)
+            {
+                results.Add(new ValidationResult
+                 ("KMSG: The alarm seconds must be in a range between 30 and 300."
+                 , new[] { "AlarmSeconds" }));
+            }
+
+            if (AutoSaveSeconds < 60 || AutoSaveSeconds > 600)
+            {
+                results.Add(new ValidationResult
+                 ("KMSG: The auto save seconds must be in a range between 60 and 600."
+                 , new[] { "AlarmSeconds" }));
+            }
 
             return results;
         }

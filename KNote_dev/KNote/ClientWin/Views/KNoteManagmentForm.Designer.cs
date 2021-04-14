@@ -798,6 +798,7 @@
             this.Name = "KNoteManagmentForm";
             this.Text = "KaNote Managment";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KNoteManagmentForm_FormClosing);
+            this.Load += new System.EventHandler(this.KNoteManagmentForm_Load);
             this.menuMangment.ResumeLayout(false);
             this.menuMangment.PerformLayout();
             this.statusBarManagment.ResumeLayout(false);
