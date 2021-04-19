@@ -35,6 +35,14 @@ namespace KNote.ClientWin.Views
         {
             InitializeComponent();
             _com = com;
+
+            // TODO: options for new versión
+            buttonPrint.Visible = false;
+            buttonCheck.Visible = false;
+            toolStripS3.Visible = false;
+            toolStripS4.Visible = false;
+            buttonInsertTemplate.Visible = false;
+            toolStripToolS1.Visible = false;                        
         }
 
         #endregion

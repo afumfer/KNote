@@ -34,19 +34,17 @@
             this.buttonSave = new System.Windows.Forms.ToolStripButton();
             this.buttonDelete = new System.Windows.Forms.ToolStripButton();
             this.buttonUndo = new System.Windows.Forms.ToolStripButton();
-            this.separador1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripS1 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonPostIt = new System.Windows.Forms.ToolStripButton();
-            this.separador2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripS2 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonCheck = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripS3 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonPrint = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripS4 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonTools = new System.Windows.Forms.ToolStripDropDownButton();
             this.buttonInsertTemplate = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripToolS1 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonExecuteKntScript = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.buttonWordWrap = new System.Windows.Forms.ToolStripMenuItem();
             this.imageListTabNoteData = new System.Windows.Forms.ImageList(this.components);
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabNoteData = new System.Windows.Forms.TabControl();
@@ -81,6 +79,7 @@
             this.toolDescriptionMarkdownCode = new System.Windows.Forms.ToolStripMenuItem();
             this.toolDescriptionS3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolDescriptionUploadResource = new System.Windows.Forms.ToolStripButton();
+            this.toolDescriptionUploadResourceFromClipboard = new System.Windows.Forms.ToolStripButton();
             this.labelLoadingHtml = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.buttonEditMarkdown = new System.Windows.Forms.Button();
@@ -135,18 +134,17 @@
             this.listViewTraceNoteTo = new System.Windows.Forms.ListView();
             this.listViewTraceNoteFrom = new System.Windows.Forms.ListView();
             this.textTraceNodeType = new System.Windows.Forms.TextBox();
-            this.button3 = new System.Windows.Forms.Button();
+            this.buttonTraceNodeTypes = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
-            this.button16 = new System.Windows.Forms.Button();
-            this.button17 = new System.Windows.Forms.Button();
-            this.button18 = new System.Windows.Forms.Button();
-            this.button13 = new System.Windows.Forms.Button();
-            this.button14 = new System.Windows.Forms.Button();
-            this.button15 = new System.Windows.Forms.Button();
+            this.buttonTraceToEdit = new System.Windows.Forms.Button();
+            this.buttonTraceToRemove = new System.Windows.Forms.Button();
+            this.buttonTraceToAdd = new System.Windows.Forms.Button();
+            this.buttonTraceFromEdit = new System.Windows.Forms.Button();
+            this.buttonTraceFromRemove = new System.Windows.Forms.Button();
+            this.buttonTraceFromAdd = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
-            this.toolDescriptionUploadResourceFromClipboard = new System.Windows.Forms.ToolStripButton();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
@@ -170,13 +168,13 @@
             this.buttonSave,
             this.buttonDelete,
             this.buttonUndo,
-            this.separador1,
+            this.toolStripS1,
             this.buttonPostIt,
-            this.separador2,
+            this.toolStripS2,
             this.buttonCheck,
-            this.toolStripSeparator1,
+            this.toolStripS3,
             this.buttonPrint,
-            this.toolStripSeparator2,
+            this.toolStripS4,
             this.buttonTools});
             this.toolBarNoteEditor.Location = new System.Drawing.Point(0, 0);
             this.toolBarNoteEditor.Name = "toolBarNoteEditor";
@@ -216,10 +214,10 @@
             this.buttonUndo.ToolTipText = "Undo changes";
             this.buttonUndo.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
-            // separador1
+            // toolStripS1
             // 
-            this.separador1.Name = "separador1";
-            this.separador1.Size = new System.Drawing.Size(6, 25);
+            this.toolStripS1.Name = "toolStripS1";
+            this.toolStripS1.Size = new System.Drawing.Size(6, 25);
             // 
             // buttonPostIt
             // 
@@ -230,10 +228,10 @@
             this.buttonPostIt.Text = "View as Post-It";
             this.buttonPostIt.Click += new System.EventHandler(this.buttonToolBar_Click);
             // 
-            // separador2
+            // toolStripS2
             // 
-            this.separador2.Name = "separador2";
-            this.separador2.Size = new System.Drawing.Size(6, 25);
+            this.toolStripS2.Name = "toolStripS2";
+            this.toolStripS2.Size = new System.Drawing.Size(6, 25);
             // 
             // buttonCheck
             // 
@@ -244,10 +242,10 @@
             this.buttonCheck.Size = new System.Drawing.Size(23, 22);
             this.buttonCheck.Text = "Check";
             // 
-            // toolStripSeparator1
+            // toolStripS3
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.toolStripS3.Name = "toolStripS3";
+            this.toolStripS3.Size = new System.Drawing.Size(6, 25);
             // 
             // buttonPrint
             // 
@@ -258,20 +256,18 @@
             this.buttonPrint.Text = "Print  ";
             this.buttonPrint.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // toolStripSeparator2
+            // toolStripS4
             // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            this.toolStripS4.Name = "toolStripS4";
+            this.toolStripS4.Size = new System.Drawing.Size(6, 25);
             // 
             // buttonTools
             // 
             this.buttonTools.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.buttonTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.buttonInsertTemplate,
-            this.toolStripMenuItem3,
-            this.buttonExecuteKntScript,
-            this.toolStripMenuItem2,
-            this.buttonWordWrap});
+            this.toolStripToolS1,
+            this.buttonExecuteKntScript});
             this.buttonTools.Image = ((System.Drawing.Image)(resources.GetObject("buttonTools.Image")));
             this.buttonTools.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.buttonTools.Name = "buttonTools";
@@ -285,10 +281,10 @@
             this.buttonInsertTemplate.Size = new System.Drawing.Size(217, 22);
             this.buttonInsertTemplate.Text = "Insertar template text ...";
             // 
-            // toolStripMenuItem3
+            // toolStripToolS1
             // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(214, 6);
+            this.toolStripToolS1.Name = "toolStripToolS1";
+            this.toolStripToolS1.Size = new System.Drawing.Size(214, 6);
             // 
             // buttonExecuteKntScript
             // 
@@ -298,19 +294,6 @@
             this.buttonExecuteKntScript.Size = new System.Drawing.Size(217, 22);
             this.buttonExecuteKntScript.Text = "Execute AntScript code";
             this.buttonExecuteKntScript.Click += new System.EventHandler(this.buttonToolBar_Click);
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(214, 6);
-            // 
-            // buttonWordWrap
-            // 
-            this.buttonWordWrap.Checked = true;
-            this.buttonWordWrap.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.buttonWordWrap.Name = "buttonWordWrap";
-            this.buttonWordWrap.Size = new System.Drawing.Size(217, 22);
-            this.buttonWordWrap.Text = "Word wrap";
             // 
             // imageListTabNoteData
             // 
@@ -640,6 +623,16 @@
             this.toolDescriptionUploadResource.Size = new System.Drawing.Size(27, 20);
             this.toolDescriptionUploadResource.Text = "Upload resource";
             this.toolDescriptionUploadResource.Click += new System.EventHandler(this.toolDescriptionUploadResource_Click);
+            // 
+            // toolDescriptionUploadResourceFromClipboard
+            // 
+            this.toolDescriptionUploadResourceFromClipboard.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolDescriptionUploadResourceFromClipboard.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploadResourceFromClipboard.Image")));
+            this.toolDescriptionUploadResourceFromClipboard.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolDescriptionUploadResourceFromClipboard.Name = "toolDescriptionUploadResourceFromClipboard";
+            this.toolDescriptionUploadResourceFromClipboard.Size = new System.Drawing.Size(27, 20);
+            this.toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
+            this.toolDescriptionUploadResourceFromClipboard.Click += new System.EventHandler(this.toolDescriptionUploadResourceFromClipboard_Click);
             // 
             // labelLoadingHtml
             // 
@@ -1239,9 +1232,10 @@
             this.textScriptCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textScriptCode.Multiline = true;
             this.textScriptCode.Name = "textScriptCode";
-            this.textScriptCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textScriptCode.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textScriptCode.Size = new System.Drawing.Size(780, 532);
             this.textScriptCode.TabIndex = 6;
+            this.textScriptCode.WordWrap = false;
             // 
             // label9
             // 
@@ -1258,14 +1252,14 @@
             this.tabTraceNotes.Controls.Add(this.listViewTraceNoteTo);
             this.tabTraceNotes.Controls.Add(this.listViewTraceNoteFrom);
             this.tabTraceNotes.Controls.Add(this.textTraceNodeType);
-            this.tabTraceNotes.Controls.Add(this.button3);
+            this.tabTraceNotes.Controls.Add(this.buttonTraceNodeTypes);
             this.tabTraceNotes.Controls.Add(this.label5);
-            this.tabTraceNotes.Controls.Add(this.button16);
-            this.tabTraceNotes.Controls.Add(this.button17);
-            this.tabTraceNotes.Controls.Add(this.button18);
-            this.tabTraceNotes.Controls.Add(this.button13);
-            this.tabTraceNotes.Controls.Add(this.button14);
-            this.tabTraceNotes.Controls.Add(this.button15);
+            this.tabTraceNotes.Controls.Add(this.buttonTraceToEdit);
+            this.tabTraceNotes.Controls.Add(this.buttonTraceToRemove);
+            this.tabTraceNotes.Controls.Add(this.buttonTraceToAdd);
+            this.tabTraceNotes.Controls.Add(this.buttonTraceFromEdit);
+            this.tabTraceNotes.Controls.Add(this.buttonTraceFromRemove);
+            this.tabTraceNotes.Controls.Add(this.buttonTraceFromAdd);
             this.tabTraceNotes.Controls.Add(this.label13);
             this.tabTraceNotes.Controls.Add(this.label14);
             this.tabTraceNotes.ImageIndex = 2;
@@ -1312,18 +1306,18 @@
             this.textTraceNodeType.Size = new System.Drawing.Size(617, 23);
             this.textTraceNodeType.TabIndex = 41;
             // 
-            // button3
+            // buttonTraceNodeTypes
             // 
-            this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button3.BackColor = System.Drawing.SystemColors.Control;
-            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button3.Location = new System.Drawing.Point(760, 22);
-            this.button3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(24, 23);
-            this.button3.TabIndex = 42;
-            this.button3.Text = "...";
-            this.button3.UseVisualStyleBackColor = false;
+            this.buttonTraceNodeTypes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonTraceNodeTypes.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonTraceNodeTypes.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.buttonTraceNodeTypes.Location = new System.Drawing.Point(760, 22);
+            this.buttonTraceNodeTypes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTraceNodeTypes.Name = "buttonTraceNodeTypes";
+            this.buttonTraceNodeTypes.Size = new System.Drawing.Size(24, 23);
+            this.buttonTraceNodeTypes.TabIndex = 42;
+            this.buttonTraceNodeTypes.Text = "...";
+            this.buttonTraceNodeTypes.UseVisualStyleBackColor = false;
             // 
             // label5
             // 
@@ -1335,65 +1329,65 @@
             this.label5.Text = "Trace node types:";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // button16
+            // buttonTraceToEdit
             // 
-            this.button16.Location = new System.Drawing.Point(566, 60);
-            this.button16.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(27, 23);
-            this.button16.TabIndex = 15;
-            this.button16.Text = "...";
-            this.button16.UseVisualStyleBackColor = true;
+            this.buttonTraceToEdit.Location = new System.Drawing.Point(566, 60);
+            this.buttonTraceToEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTraceToEdit.Name = "buttonTraceToEdit";
+            this.buttonTraceToEdit.Size = new System.Drawing.Size(27, 23);
+            this.buttonTraceToEdit.TabIndex = 15;
+            this.buttonTraceToEdit.Text = "...";
+            this.buttonTraceToEdit.UseVisualStyleBackColor = true;
             // 
-            // button17
+            // buttonTraceToRemove
             // 
-            this.button17.Location = new System.Drawing.Point(534, 60);
-            this.button17.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button17.Name = "button17";
-            this.button17.Size = new System.Drawing.Size(27, 23);
-            this.button17.TabIndex = 14;
-            this.button17.Text = "-";
-            this.button17.UseVisualStyleBackColor = true;
+            this.buttonTraceToRemove.Location = new System.Drawing.Point(531, 60);
+            this.buttonTraceToRemove.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTraceToRemove.Name = "buttonTraceToRemove";
+            this.buttonTraceToRemove.Size = new System.Drawing.Size(27, 23);
+            this.buttonTraceToRemove.TabIndex = 14;
+            this.buttonTraceToRemove.Text = "-";
+            this.buttonTraceToRemove.UseVisualStyleBackColor = true;
             // 
-            // button18
+            // buttonTraceToAdd
             // 
-            this.button18.Location = new System.Drawing.Point(498, 60);
-            this.button18.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button18.Name = "button18";
-            this.button18.Size = new System.Drawing.Size(27, 23);
-            this.button18.TabIndex = 13;
-            this.button18.Text = "+";
-            this.button18.UseVisualStyleBackColor = true;
+            this.buttonTraceToAdd.Location = new System.Drawing.Point(498, 60);
+            this.buttonTraceToAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTraceToAdd.Name = "buttonTraceToAdd";
+            this.buttonTraceToAdd.Size = new System.Drawing.Size(27, 23);
+            this.buttonTraceToAdd.TabIndex = 13;
+            this.buttonTraceToAdd.Text = "+";
+            this.buttonTraceToAdd.UseVisualStyleBackColor = true;
             // 
-            // button13
+            // buttonTraceFromEdit
             // 
-            this.button13.Location = new System.Drawing.Point(196, 60);
-            this.button13.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(27, 23);
-            this.button13.TabIndex = 12;
-            this.button13.Text = "...";
-            this.button13.UseVisualStyleBackColor = true;
+            this.buttonTraceFromEdit.Location = new System.Drawing.Point(196, 60);
+            this.buttonTraceFromEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTraceFromEdit.Name = "buttonTraceFromEdit";
+            this.buttonTraceFromEdit.Size = new System.Drawing.Size(27, 23);
+            this.buttonTraceFromEdit.TabIndex = 12;
+            this.buttonTraceFromEdit.Text = "...";
+            this.buttonTraceFromEdit.UseVisualStyleBackColor = true;
             // 
-            // button14
+            // buttonTraceFromRemove
             // 
-            this.button14.Location = new System.Drawing.Point(162, 60);
-            this.button14.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(27, 23);
-            this.button14.TabIndex = 11;
-            this.button14.Text = "-";
-            this.button14.UseVisualStyleBackColor = true;
+            this.buttonTraceFromRemove.Location = new System.Drawing.Point(162, 60);
+            this.buttonTraceFromRemove.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTraceFromRemove.Name = "buttonTraceFromRemove";
+            this.buttonTraceFromRemove.Size = new System.Drawing.Size(27, 23);
+            this.buttonTraceFromRemove.TabIndex = 11;
+            this.buttonTraceFromRemove.Text = "-";
+            this.buttonTraceFromRemove.UseVisualStyleBackColor = true;
             // 
-            // button15
+            // buttonTraceFromAdd
             // 
-            this.button15.Location = new System.Drawing.Point(128, 60);
-            this.button15.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.button15.Name = "button15";
-            this.button15.Size = new System.Drawing.Size(27, 23);
-            this.button15.TabIndex = 10;
-            this.button15.Text = "+";
-            this.button15.UseVisualStyleBackColor = true;
+            this.buttonTraceFromAdd.Location = new System.Drawing.Point(128, 60);
+            this.buttonTraceFromAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonTraceFromAdd.Name = "buttonTraceFromAdd";
+            this.buttonTraceFromAdd.Size = new System.Drawing.Size(27, 23);
+            this.buttonTraceFromAdd.TabIndex = 10;
+            this.buttonTraceFromAdd.Text = "+";
+            this.buttonTraceFromAdd.UseVisualStyleBackColor = true;
             // 
             // label13
             // 
@@ -1414,16 +1408,6 @@
             this.label14.Size = new System.Drawing.Size(99, 15);
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
-            // 
-            // toolDescriptionUploadResourceFromClipboard
-            // 
-            this.toolDescriptionUploadResourceFromClipboard.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolDescriptionUploadResourceFromClipboard.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploadResourceFromClipboard.Image")));
-            this.toolDescriptionUploadResourceFromClipboard.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDescriptionUploadResourceFromClipboard.Name = "toolDescriptionUploadResourceFromClipboard";
-            this.toolDescriptionUploadResourceFromClipboard.Size = new System.Drawing.Size(27, 20);
-            this.toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
-            this.toolDescriptionUploadResourceFromClipboard.Click += new System.EventHandler(this.toolDescriptionUploadResourceFromClipboard_Click);
             // 
             // NoteEditorForm
             // 
@@ -1477,19 +1461,17 @@
         private System.Windows.Forms.ToolStripButton buttonSave;
         private System.Windows.Forms.ToolStripButton buttonDelete;
         private System.Windows.Forms.ToolStripButton buttonUndo;
-        private System.Windows.Forms.ToolStripSeparator separador1;
+        private System.Windows.Forms.ToolStripSeparator toolStripS1;
         private System.Windows.Forms.ToolStripButton buttonPostIt;
-        private System.Windows.Forms.ToolStripSeparator separador2;
+        private System.Windows.Forms.ToolStripSeparator toolStripS2;
         private System.Windows.Forms.ToolStripButton buttonCheck;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripS3;
         private System.Windows.Forms.ToolStripButton buttonPrint;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator toolStripS4;
         private System.Windows.Forms.ToolStripDropDownButton buttonTools;
         private System.Windows.Forms.ToolStripMenuItem buttonInsertTemplate;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripSeparator toolStripToolS1;
         private System.Windows.Forms.ToolStripMenuItem buttonExecuteKntScript;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem buttonWordWrap;
         private System.Windows.Forms.ImageList imageListTabNoteData;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.TabControl tabNoteData;
@@ -1522,12 +1504,12 @@
         private System.Windows.Forms.Button buttonResourceDelete;
         private System.Windows.Forms.Button buttonResourceAdd;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.Button button16;
-        private System.Windows.Forms.Button button17;
-        private System.Windows.Forms.Button button18;
-        private System.Windows.Forms.Button button13;
-        private System.Windows.Forms.Button button14;
-        private System.Windows.Forms.Button button15;
+        private System.Windows.Forms.Button buttonTraceToEdit;
+        private System.Windows.Forms.Button buttonTraceToRemove;
+        private System.Windows.Forms.Button buttonTraceToAdd;
+        private System.Windows.Forms.Button buttonTraceFromEdit;
+        private System.Windows.Forms.Button buttonTraceFromRemove;
+        private System.Windows.Forms.Button buttonTraceFromAdd;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox textScriptCode;
@@ -1540,7 +1522,7 @@
         private System.Windows.Forms.Button buttonNoteType;
         private System.Windows.Forms.Label label15;
         internal System.Windows.Forms.TextBox textTraceNodeType;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button buttonTraceNodeTypes;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.PictureBox picResource;
         private System.Windows.Forms.TextBox textFolderNumber;
