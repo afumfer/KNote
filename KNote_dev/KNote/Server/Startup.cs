@@ -45,13 +45,16 @@ namespace KNote.Server
             services.Configure<AppSettings>(appSettingsSection);
             var appSettings = appSettingsSection.Get<AppSettings>();
 
-            // TODO: Provisional, hay que pasar esto a RepositoryRef. 
-            //KntConst.ContainerResources = appSettings.ContainerResources;
+            // TODO: Provisional, por ahora estos valores no se usan 
+            //       porque se toman del IIS, pero en versiones futuras
+            //       se deberán definir en appSettings
+            // appSettings.ContainerResourcesRootPath
+            // appSettings.ContainerResourcesRootUrl"
             // .... 
 
             var orm = configuration["ConnectionStrings:DefaultORM"]; ;
             var prov = configuration["ConnectionStrings:DefaultProvider"];
-            var conn = configuration["ConnectionStrings:DefaultConnection"];
+            var conn = configuration["ConnectionStrings:DefaultConnection"];                        
             var repositoryRef = new RepositoryRef
             {
                 Alias = "KaNote",

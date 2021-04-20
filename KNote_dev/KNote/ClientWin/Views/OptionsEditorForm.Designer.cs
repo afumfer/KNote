@@ -33,8 +33,6 @@ namespace KNote.ClientWin.Views
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.panelForm = new System.Windows.Forms.Panel();
-            this.buttonSelectDirectoryResources = new System.Windows.Forms.Button();
-            this.buttonFolderSearch = new System.Windows.Forms.Button();
             this.tabOptions = new System.Windows.Forms.TabControl();
             this.tabGlobalOptions = new System.Windows.Forms.TabPage();
             this.textAutosaveSeconds = new System.Windows.Forms.TextBox();
@@ -43,6 +41,8 @@ namespace KNote.ClientWin.Views
             this.labelAlarmSeconds = new System.Windows.Forms.Label();
             this.checkAutoSaveActivated = new System.Windows.Forms.CheckBox();
             this.checkAlarmActivated = new System.Windows.Forms.CheckBox();
+            this.buttonSelectDirectoryResources = new System.Windows.Forms.Button();
+            this.buttonFolderSearch = new System.Windows.Forms.Button();
             this.panelForm.SuspendLayout();
             this.tabOptions.SuspendLayout();
             this.tabGlobalOptions.SuspendLayout();
@@ -80,29 +80,6 @@ namespace KNote.ClientWin.Views
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(497, 292);
             this.panelForm.TabIndex = 10;
-            // 
-            // buttonSelectDirectoryResources
-            // 
-            this.buttonSelectDirectoryResources.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectDirectoryResources.Location = new System.Drawing.Point(775, 198);
-            this.buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
-            this.buttonSelectDirectoryResources.Size = new System.Drawing.Size(24, 23);
-            this.buttonSelectDirectoryResources.TabIndex = 4;
-            this.buttonSelectDirectoryResources.Text = "...";
-            this.buttonSelectDirectoryResources.UseVisualStyleBackColor = true;
-            // 
-            // buttonFolderSearch
-            // 
-            this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonFolderSearch.Location = new System.Drawing.Point(1077, 199);
-            this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonFolderSearch.Name = "buttonFolderSearch";
-            this.buttonFolderSearch.Size = new System.Drawing.Size(27, 25);
-            this.buttonFolderSearch.TabIndex = 11;
-            this.buttonFolderSearch.Text = "...";
-            this.buttonFolderSearch.UseVisualStyleBackColor = false;
             // 
             // tabOptions
             // 
@@ -181,6 +158,29 @@ namespace KNote.ClientWin.Views
             this.checkAlarmActivated.Text = "Alarm activated";
             this.checkAlarmActivated.UseVisualStyleBackColor = true;
             // 
+            // buttonSelectDirectoryResources
+            // 
+            this.buttonSelectDirectoryResources.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonSelectDirectoryResources.Location = new System.Drawing.Point(775, 198);
+            this.buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
+            this.buttonSelectDirectoryResources.Size = new System.Drawing.Size(24, 23);
+            this.buttonSelectDirectoryResources.TabIndex = 4;
+            this.buttonSelectDirectoryResources.Text = "...";
+            this.buttonSelectDirectoryResources.UseVisualStyleBackColor = true;
+            // 
+            // buttonFolderSearch
+            // 
+            this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.buttonFolderSearch.Location = new System.Drawing.Point(1077, 199);
+            this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonFolderSearch.Name = "buttonFolderSearch";
+            this.buttonFolderSearch.Size = new System.Drawing.Size(27, 25);
+            this.buttonFolderSearch.TabIndex = 11;
+            this.buttonFolderSearch.Text = "...";
+            this.buttonFolderSearch.UseVisualStyleBackColor = false;
+            // 
             // OptionsEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -195,7 +195,7 @@ namespace KNote.ClientWin.Views
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "OptionsEditorForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "KaNote options";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OptionsEditorForm_FormClosing);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OptionsEditorForm_KeyPress);

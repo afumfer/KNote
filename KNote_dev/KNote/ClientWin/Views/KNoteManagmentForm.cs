@@ -298,6 +298,9 @@ namespace KNote.ClientWin.Views
 
         private void SaveViewSizeAndPosition()
         {
+            if (WindowState == FormWindowState.Minimized)
+                return;
+
             _com.Store.AppConfig.ManagmentLocX = Location.X;
             _com.Store.AppConfig.ManagmentLocY = Location.Y;
             _com.Store.AppConfig.ManagmentWidth = Width;

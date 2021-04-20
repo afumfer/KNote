@@ -297,6 +297,7 @@ namespace KNote.ClientWin.Components
         {
             
         }
+
         private void ExtendAddTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
             AddTagsSelectedNotes();
