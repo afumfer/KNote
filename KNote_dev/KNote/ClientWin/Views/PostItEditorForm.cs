@@ -83,7 +83,7 @@ namespace KNote.ClientWin.Views
 
         public void CleanView()
         {
-            // textXxxx = "";
+            
         }
 
         public void OnClosingView()
@@ -107,8 +107,29 @@ namespace KNote.ClientWin.Views
         #region Form events handlers
 
         private void PostItEditorForm_Load(object sender, EventArgs e)
-        {            
+        {
+            InitializeComponentEditor();
             ModelToControlsPostIt(true, _com.ForceAlwaysTop);
+        }
+
+        private void InitializeComponentEditor()
+        {
+            if (_com.Model?.ContentType == "html")
+            {
+                htmlDescription.Location = new System.Drawing.Point(3, 28);
+                htmlDescription.Size = new System.Drawing.Size(472, 292);
+                htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                    | System.Windows.Forms.AnchorStyles.Left)
+                    | System.Windows.Forms.AnchorStyles.Right)));                
+            }
+            else
+            {
+                textDescription.Location = new System.Drawing.Point(3, 28);
+                textDescription.Size = new System.Drawing.Size(472, 292);
+                textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                    | System.Windows.Forms.AnchorStyles.Left)
+                    | System.Windows.Forms.AnchorStyles.Right)));                
+            }
         }
 
         private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -116,15 +137,9 @@ namespace KNote.ClientWin.Views
             if (!_viewFinalized)
             {
                 var savedOk = await SaveModel();
-                if (!savedOk)
-                {
-                    //if (MessageBox.Show("Do yo want exit?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    //    _com.Finalize();
-                    //else
-                    //    e.Cancel = true;
-
+                if (!savedOk)                
                     ShowInfo("The note could not be saved");                    
-                }
+                
                 _com.Finalize();
             }
         }
@@ -343,20 +358,10 @@ namespace KNote.ClientWin.Views
         {
             if (_com.Model?.ContentType == "html")
             {
-                htmlDescription.Location = new System.Drawing.Point(3, 28);
-                htmlDescription.Size = new System.Drawing.Size(472, 292);
-                htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                    | System.Windows.Forms.AnchorStyles.Left)
-                    | System.Windows.Forms.AnchorStyles.Right)));
                 htmlDescription.Visible = true;
             }
             else
             {
-                textDescription.Location = new System.Drawing.Point(3, 28);
-                textDescription.Size = new System.Drawing.Size(472, 292);
-                textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                    | System.Windows.Forms.AnchorStyles.Left)
-                    | System.Windows.Forms.AnchorStyles.Right)));
                 FontStyle style = new FontStyle();
                 if (_com.WindowPostIt.FontBold)
                     style = FontStyle.Bold;

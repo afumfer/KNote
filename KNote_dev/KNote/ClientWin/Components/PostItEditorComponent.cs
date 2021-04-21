@@ -213,8 +213,12 @@ namespace KNote.ClientWin.Components
             return await DeleteModel(Service, Model.NoteId);
         }
 
+        #endregion
+
+        #region Component specific methods
+
         public async Task<bool> SaveFastAlarm(string unitTime, int value)
-        {                                    
+        {
             DateTime? alarmDateTime = null;
 
             switch (unitTime)
@@ -257,10 +261,6 @@ namespace KNote.ClientWin.Components
             return await Task.FromResult<bool>(resSaveMsg.IsValid);
         }
 
-        #endregion 
-
-        #region Component specific methods
-
         public void FinalizeAndExtendEdit()
         {            
             OnExtendedEdit();
@@ -271,6 +271,7 @@ namespace KNote.ClientWin.Components
         {
             var window = new PostItPropertiesComponent(Store);
             window.LoadModel(Service, WindowPostIt, false);
+
             var res = window.RunModal();
             if (res.Entity == EComponentResult.Executed)
                 return window.Model;
