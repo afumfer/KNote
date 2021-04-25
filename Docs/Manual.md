@@ -1,0 +1,3 @@
+# KaNote manual
+
+TODO: ...
