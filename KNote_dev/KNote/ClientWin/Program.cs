@@ -86,12 +86,13 @@ namespace KNote.ClientWin
                     ResourcesContainerCacheRootPath = pathResourcesCache,
                     ResourcesContainerCacheRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
                 };
+
                 var initialServiceRef = new ServiceRef(r0);
                 var resCreateDB = await initialServiceRef.Service.CreateDataBase(SystemInformation.UserName);
 
                 if (resCreateDB)
-                {
-                    store.AddServiceRef(new ServiceRef(r0));
+                {                    
+                    store.AddServiceRef(initialServiceRef);
                     store.AppConfig.RespositoryRefs.Add(r0);
                 }
 
@@ -104,62 +105,6 @@ namespace KNote.ClientWin
                 store.AppConfig.RunCounter = 1;
                 store.AppConfig.LogFile = pathApp + @"\KNoteWinApp.log";
                 store.AppConfig.LogActivated = false;
-
-                #region Examples info for repositories
-
-                // For debug and tests
-
-                //var r3 = new RepositoryRef
-                //{
-                //    Alias = "Tasks db3 (Sqlite)",
-                //    ConnectionString = @"Data Source=D:\DBs\KNote05DB_Sqlite.db",
-                //    Provider = "Microsoft.Data.Sqlite",
-                //    Orm = "EntityFramework"
-                //    ResourcesContainer = "NotesResources",
-                //    ResourcesContainerCacheRootPath = pathResourcesCache,
-                //    ResourcesContainerCacheRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
-                //};
-                //store.AddServiceRef(new ServiceRef(r3));
-
-                //var r1 = new RepositoryRef
-                //{
-                //    Alias = "Test db1 (SQL Server Prod - Dapper)",
-                //    // ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
-                //    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
-                //    Provider = "Microsoft.Data.SqlClient",
-                //    Orm = "Dapper"  // Dapper / EntityFramework
-                //    ResourcesContainer = "NotesResources",
-                //    ResourcesContainerCacheRootPath = @"D:\Resources\knt";,
-                //    ResourcesContainerCacheRootUrl = @"http://afx.hopto.org/NotesResources"; 
-                //};
-                //store.AddServiceRef(new ServiceRef(r1));
-
-                //var r2 = new RepositoryRef
-                //{
-                //    Alias = "Test db2 (SQL Server Desa - Dapper)",
-                //    ConnectionString = @"Data Source=.\sqlexpress;Initial Catalog=KNote05DesaDB;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;",
-                //    Provider = "Microsoft.Data.SqlClient",
-                //    Orm = "EntityFramework"
-                //    ResourcesContainer = "NotesResources",
-                //    ResourcesContainerCacheRootPath = @"D:\Resources\knt";,
-                //    ResourcesContainerCacheRootUrl = @"http://afx.hopto.org/NotesResources"; 
-                //};
-                //store.AddServiceRef(new ServiceRef(r2));
-
-                ////"_DefaultORM": "EntityFramework",
-                ////"DefaultORM": "Dapper",
-
-                ////"DefaultProvider": "Microsoft.Data.SqlClient",
-                ////"DefaultConnection": "Data Source=.\\sqlexpress;Initial Catalog=KNote02DB;User Id=userKNote;Password=SinclairQL1983;Connection Timeout=60;MultipleActiveResultSets=true;",
-
-                ////"_DefaultProvider": "Microsoft.Data.Sqlite",
-                ////"_DefaultConnection": "Data Source=D:\\DBs\\KNote02DB_Sqlite.db"
-
-                //store.AppConfig.RespositoryRefs.Add(r1);
-                //store.AppConfig.RespositoryRefs.Add(r2);
-                //store.AppConfig.RespositoryRefs.Add(r3);
-
-                #endregion
             }
             else
             {

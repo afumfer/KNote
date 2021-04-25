@@ -19,16 +19,14 @@ namespace KNote.Repository.Dapper
         protected internal readonly RepositoryRef _repositoryRef;
         protected readonly DbConnection SingletonConnection;        
 
-        public KntRepositoryBase(DbConnection singletonConnection, RepositoryRef repositoryRef, bool throwKntException = false)
+        public KntRepositoryBase(DbConnection singletonConnection, RepositoryRef repositoryRef)
         {
-            SingletonConnection = singletonConnection;
-            ThrowKntException = throwKntException;
+            SingletonConnection = singletonConnection;            
             _repositoryRef = repositoryRef;            
         }
 
-        public KntRepositoryBase(RepositoryRef repositoryRef, bool throwKntException = false)
-        {
-            ThrowKntException = throwKntException;
+        public KntRepositoryBase(RepositoryRef repositoryRef)
+        {            
             _repositoryRef = repositoryRef;
         }
 

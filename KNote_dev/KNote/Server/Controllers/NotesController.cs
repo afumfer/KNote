@@ -209,7 +209,8 @@ namespace KNote.Server.Controllers
         {
             try
             {
-                var resApi = await _service.Notes.DeleteAsync(id);
+                //var resApi = await _service.Notes.DeleteAsync(id);
+                var resApi = await _service.Notes.DeleteExtendedAsync(id);
                 if (resApi.IsValid)
                     return Ok(resApi);
                 else

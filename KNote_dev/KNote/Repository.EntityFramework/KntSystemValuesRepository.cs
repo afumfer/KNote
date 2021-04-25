@@ -12,13 +12,13 @@ namespace KNote.Repository.EntityFramework
     public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepository
     {        
 
-        public KntSystemValuesRepository(KntDbContext singletonContext, RepositoryRef repositoryRef, bool throwKntException)
-            : base(singletonContext, repositoryRef, throwKntException)
+        public KntSystemValuesRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
+            : base(singletonContext, repositoryRef)
         {
         }
 
-        public KntSystemValuesRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-            : base(repositoryRef, throwKntException)
+        public KntSystemValuesRepository(RepositoryRef repositoryRef)
+            : base(repositoryRef)
         {
         }
 
@@ -28,7 +28,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
                 var resRep = await systemValues.GetAllAsync();
                 resService.Entity = resRep.Entity?.Select(sv => sv.GetSimpleDto<SystemValueDto>()).ToList();
@@ -49,7 +49,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
                 var resRep = await systemValues.GetAsync(sv => sv.Scope == scope && sv.Key == key);
                 resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
@@ -70,7 +70,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
                 var resRep = await systemValues.GetAsync((object)id);
                 resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
@@ -91,7 +91,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
                 var newEntity = new SystemValue();
                 newEntity.SetSimpleDto(entity);
@@ -118,20 +118,10 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
-
-                bool flagThrowKntException = false;
-                if (systemValues.ThrowKntException == true)
-                {
-                    flagThrowKntException = true;
-                    systemValues.ThrowKntException = false;
-                }
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
                 var resGenRepGet = await systemValues.GetAsync(entity.SystemValueId);
                 SystemValue entityForUpdate;
-
-                if (flagThrowKntException == true)
-                    systemValues.ThrowKntException = true;
 
                 if (resGenRepGet.IsValid)
                 {
@@ -164,7 +154,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx, ThrowKntException);
+                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
                 var resGenRep = await systemValues.DeleteAsync(id);
                 if (!resGenRep.IsValid)

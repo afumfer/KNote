@@ -8,17 +8,7 @@ namespace KNote.Model
 {
     public abstract class DomainActionBase
     {
-        private bool _throwKntException = false;
-        public bool ThrowKntException
-        {
-            get { return _throwKntException; }
-            set { _throwKntException = value; }
-        }
-
-        public DomainActionBase(bool throwKntException = false)
-        {
-            _throwKntException = throwKntException;
-        }
+        private bool exceptionHasHappened = false;
 
         protected void AddDBEntityErrorsToErrorsList(KntEntityValidationException ex, List<string> errList)
         {
@@ -29,8 +19,11 @@ namespace KNote.Model
        
         protected void AddExecptionsMessagesToErrorsList(Exception ex, List<string> errList)
         {            
-            Exception tmpEx = ex;
+            Exception tmpEx = ex;            
             string tmpStr = "";
+            
+            exceptionHasHappened = true;
+
             while (tmpEx != null)
             {
                 if (tmpEx.Message != tmpStr)
@@ -39,7 +32,7 @@ namespace KNote.Model
                     tmpStr = tmpEx.Message;
                 }
                 tmpEx = tmpEx.InnerException;
-            }
+            }            
         }
 
         protected void CopyErrorList(List<string> listSource, List<string> listTarget)
@@ -50,17 +43,21 @@ namespace KNote.Model
         
         protected Result<T> ResultDomainAction<T>(Result<T> resultRepositoryAction)
         {
-            if (resultRepositoryAction.IsValid == false)
-                if (_throwKntException == true)
-                    throw new Exception(resultRepositoryAction.Message);
+            if (exceptionHasHappened)
+            {
+                exceptionHasHappened = false;
+                throw new Exception(resultRepositoryAction.Message);
+            }                                                            
             return resultRepositoryAction;
         }
 
         protected Result ResultDomainAction(Result resultRepositoryAction)
         {
-            if (resultRepositoryAction.IsValid == false)
-                if (_throwKntException == true)
-                    throw new Exception(resultRepositoryAction.Message);
+            if (exceptionHasHappened)
+            {
+                exceptionHasHappened = false;
+                throw new Exception(resultRepositoryAction.Message);
+            }
             return resultRepositoryAction;
         }
 
@@ -69,8 +66,8 @@ namespace KNote.Model
             if (string.IsNullOrEmpty(textSearch?.Trim()))
                 return 0;
 
-            var n = 0;
-            string strStartNumber = "";
+            int n = 0;
+            string strStartNumber;
 
             if (textSearch[0] == '#')
             {

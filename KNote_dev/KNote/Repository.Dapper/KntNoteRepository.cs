@@ -21,14 +21,14 @@ namespace KNote.Repository.Dapper
     {
         #region Constructor
 
-        public KntNoteRepository(DbConnection singletonConnection, RepositoryRef repositoryRef, bool throwKntException) 
-            : base(singletonConnection, repositoryRef, throwKntException)
+        public KntNoteRepository(DbConnection singletonConnection, RepositoryRef repositoryRef) 
+            : base(singletonConnection, repositoryRef)
         {
 
         }
 
-        public KntNoteRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-            : base(repositoryRef, throwKntException)
+        public KntNoteRepository(RepositoryRef repositoryRef)
+            : base(repositoryRef)
         {
         }
 
@@ -457,15 +457,15 @@ namespace KNote.Repository.Dapper
                 int rDel = 0;
                 if (entity.NoteTypeId == null)
                 {
-                    sql = @"DELETE [NoteKAttributes] WHERE NoteId = @NoteId AND 
-                                [KAttributeId] NOT IN (SELECT [KAttributeId] FROM [KAttributes] where [NoteTypeId] is null)";
+                    sql = @"DELETE FROM NoteKAttributes WHERE NoteId = @NoteId AND 
+                                KAttributeId NOT IN (SELECT KAttributeId FROM KAttributes WHERE NoteTypeId IS NULL)";
                     rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId, NoteTypeId = entity.NoteTypeId });
 
                 }
                 else
                 {
-                    sql = @"DELETE [NoteKAttributes] WHERE NoteId = @NoteId AND 
-                                [KAttributeId] NOT IN (SELECT [KAttributeId] FROM [KAttributes] where [NoteTypeId] is null or [NoteTypeId] = @NoteTypeId)";
+                    sql = @"DELETE FROM NoteKAttributes WHERE NoteId = @NoteId AND 
+                                KAttributeId NOT IN (SELECT KAttributeId FROM KAttributes WHERE NoteTypeId IS NULL OR NoteTypeId = @NoteTypeId)";
                     rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId,  NoteTypeId = entity.NoteTypeId });
                 }
 

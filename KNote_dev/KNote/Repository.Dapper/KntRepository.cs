@@ -19,8 +19,7 @@ namespace KNote.Repository.Dapper
     public class KntRepository : IKntRepository
     {
         #region Private/protected fields
-        
-        private bool _throwKntException;        
+                
         private readonly RepositoryRef _repositoryRef;
         private readonly DbConnection _db;
 
@@ -28,17 +27,15 @@ namespace KNote.Repository.Dapper
 
         #region Constructor
 
-        public KntRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-        {
-            _throwKntException = throwKntException;
+        public KntRepository(RepositoryRef repositoryRef)
+        {            
             _repositoryRef = repositoryRef;
         }
 
-        public KntRepository(DbConnection singletonConnection, RepositoryRef repositoryRef, bool throwKntException = false)
-        {
-            _throwKntException = throwKntException;
-            _db = singletonConnection;
-            _repositoryRef = repositoryRef;
+        public KntRepository(DbConnection singletonConnection, RepositoryRef repositoryRef)
+            :this(repositoryRef)
+        {            
+            _db = singletonConnection;            
         }
 
         #endregion
@@ -52,9 +49,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_noteTypes == null)
                     if(_db != null)
-                        _noteTypes = new KntNoteTypeRepository(_db, _repositoryRef, _throwKntException);
+                        _noteTypes = new KntNoteTypeRepository(_db, _repositoryRef);
                     else
-                        _noteTypes = new KntNoteTypeRepository(_repositoryRef, _throwKntException);
+                        _noteTypes = new KntNoteTypeRepository(_repositoryRef);
                 return _noteTypes;
             }
         }
@@ -66,9 +63,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_users == null)
                     if (_db != null)
-                        _users = new KntUserRepository(_db, _repositoryRef, _throwKntException);
+                        _users = new KntUserRepository(_db, _repositoryRef);
                     else
-                        _users = new KntUserRepository(_repositoryRef, _throwKntException);
+                        _users = new KntUserRepository(_repositoryRef);
                 return _users;
             }
         }
@@ -80,9 +77,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_systemValues == null)
                     if (_db != null)
-                        _systemValues = new KntSystemValuesRepository(_db, _repositoryRef, _throwKntException);
+                        _systemValues = new KntSystemValuesRepository(_db, _repositoryRef);
                     else
-                        _systemValues = new KntSystemValuesRepository(_repositoryRef, _throwKntException);
+                        _systemValues = new KntSystemValuesRepository(_repositoryRef);
                 return _systemValues;
             }
         }
@@ -94,9 +91,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_folders == null)
                     if (_db != null)
-                        _folders = new KntFolderRepository(_db, _repositoryRef, _throwKntException);
+                        _folders = new KntFolderRepository(_db, _repositoryRef);
                     else
-                        _folders = new KntFolderRepository(_repositoryRef, _throwKntException);
+                        _folders = new KntFolderRepository(_repositoryRef);
                 return _folders;
             }
         }
@@ -108,9 +105,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_kAttributes == null)
                     if (_db != null)
-                        _kAttributes = new KntKAttributeRepository(_db, _repositoryRef, _throwKntException);
+                        _kAttributes = new KntKAttributeRepository(_db, _repositoryRef);
                     else
-                        _kAttributes = new KntKAttributeRepository(_repositoryRef, _throwKntException);
+                        _kAttributes = new KntKAttributeRepository(_repositoryRef);
                 return _kAttributes;
             }
         }
@@ -122,9 +119,9 @@ namespace KNote.Repository.Dapper
             {
                 if (_notes == null)
                     if (_db != null)
-                        _notes = new KntNoteRepository(_db, _repositoryRef, _throwKntException);
+                        _notes = new KntNoteRepository(_db, _repositoryRef);
                     else
-                        _notes = new KntNoteRepository(_repositoryRef, _throwKntException);
+                        _notes = new KntNoteRepository(_repositoryRef);
                 return _notes;
             }
         }
@@ -141,7 +138,7 @@ namespace KNote.Repository.Dapper
                 if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
                 {
                     var db = new SqlConnection(_repositoryRef.ConnectionString);
-                    var systemValues = new KntSystemValuesRepository(db, _repositoryRef, true);
+                    var systemValues = new KntSystemValuesRepository(db, _repositoryRef);
                     var testValues = systemValues.GetAllAsync();
                 }                    
                 else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
@@ -151,7 +148,7 @@ namespace KNote.Repository.Dapper
                     SqlMapper.AddTypeHandler(new TimeSpanHandler());
                     var db = new SqliteConnection(_repositoryRef.ConnectionString);
 
-                    var systemValues = new KntSystemValuesRepository(db, _repositoryRef, true);
+                    var systemValues = new KntSystemValuesRepository(db, _repositoryRef);
                     var res = await systemValues.GetAllAsync();
                     if (!res.IsValid)
                         return false;

@@ -12,13 +12,13 @@ namespace KNote.Repository.EntityFramework
 {
     public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeRepository
     {
-        public KntKAttributeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef, bool throwKntException)
-            : base(singletonContext, repositoryRef, throwKntException)
+        public KntKAttributeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
+            : base(singletonContext, repositoryRef)
         {
         }
 
         public KntKAttributeRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-            : base(repositoryRef, throwKntException)
+            : base(repositoryRef)
         {
         }
 
@@ -28,7 +28,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx, ThrowKntException);
+                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var listAtr = await kattributes.DbSet                    
                     .Include(a => a.NoteType)
@@ -63,7 +63,7 @@ namespace KNote.Repository.EntityFramework
                 // TODO: pendiente de poblar la propiedad NoteTypeDto. Coger implementación de GetAllAsync().
 
                 var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx, ThrowKntException);
+                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var resRep = await kattributes.GetAllAsync(_ => _.NoteTypeId == typeId);
 
@@ -91,7 +91,7 @@ namespace KNote.Repository.EntityFramework
                 // TODO: pendiente de poblar la propiedad NoteTypeDto.  Coger implementación de GetAllAsync().
 
                 var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx, ThrowKntException);
+                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var resRep = await kattributes.GetAllAsync(_ => _.NoteTypeId == null || _.NoteTypeId == typeId);
 
@@ -117,7 +117,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx, ThrowKntException);
+                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var resRep = await kattributes.GetAsync((object)id);
                 if (!resRep.IsValid)
@@ -145,7 +145,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx, ThrowKntException);
+                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var newEntity = new KAttribute();
                 newEntity.SetSimpleDto(entity);
@@ -178,20 +178,10 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx, ThrowKntException);
-
-                bool flagThrowKntException = false;
-                if (kattributes.ThrowKntException == true)
-                {
-                    flagThrowKntException = true;
-                    kattributes.ThrowKntException = false;
-                }
+                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var resGenRepGet = await kattributes.GetAsync(entity.KAttributeId);
                 KAttribute entityForUpdate;
-
-                if (flagThrowKntException == true)
-                    kattributes.ThrowKntException = true;
 
                 if (resGenRepGet.IsValid)
                 {
@@ -232,7 +222,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx, ThrowKntException);
+                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var resGenRep = await kattributes.DeleteAsync(id);
                 if (!resGenRep.IsValid)
@@ -254,9 +244,8 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();                
-                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx, ThrowKntException);
-                //var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx, ThrowKntException);
-
+                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
+                
                 var resRep = await kattributeTabulatedValues.GetAllAsync(tv => tv.KAttributeId == attributeId);
 
                 if (resRep.IsValid)
@@ -281,7 +270,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx, ThrowKntException);
+                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
 
                 var resRep = await kattributeTabulatedValues.GetAsync(tv => tv.KAttributeTabulatedValueId == attributeTabulateValueId);
 
@@ -307,7 +296,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx, ThrowKntException);
+                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
 
                 var resGenRep = await kattributeTabulatedValues.DeleteAsync(id);
                 if (!resGenRep.IsValid)
@@ -334,7 +323,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx, ThrowKntException);
+                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
 
                 if (entity.KAttributeTabulatedValueId == Guid.Empty)
                 {
@@ -350,18 +339,7 @@ namespace KNote.Repository.EntityFramework
                 }
                 else
                 {
-                    bool flagThrowKntException = false;
-
-                    if (kattributeTabulatedValues.ThrowKntException == true)
-                    {
-                        flagThrowKntException = true;
-                        kattributeTabulatedValues.ThrowKntException = false;
-                    }
-
                     var entityForUpdate = kattributeTabulatedValues.Get(entity.KAttributeTabulatedValueId).Entity;
-
-                    if (flagThrowKntException == true)
-                        kattributeTabulatedValues.ThrowKntException = true;
 
                     if (entityForUpdate != null)
                     {

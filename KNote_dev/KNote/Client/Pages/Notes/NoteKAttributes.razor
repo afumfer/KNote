@@ -118,7 +118,7 @@
         var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
         if (httpResponse.Error)
         {
-            // TODO: !!! Pendiente de pensar cómo se muestran los errores
+            // TODO: Pending, thinking about how errors are displayed 
             //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
             return new List<KAttributeTabulatedValueDto>();
         }
@@ -135,7 +135,7 @@
         var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
         if (httpResponse.Error)
         {
-            // TODO: !!! Pendiente de pensar cómo se muestran los errores
+            // TODO: Pending, thinking about how errors are displayed 
             //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
             tagsSel = new List<MultiSelectListDto>();
         }

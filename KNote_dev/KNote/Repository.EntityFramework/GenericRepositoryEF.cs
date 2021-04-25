@@ -27,8 +27,7 @@ namespace KNote.Repository.EntityFramework
 
         #region Constructor
 
-        public GenericRepositoryEF(string strConn, string strProvider = "System.Data.SqlClient", bool throwKntException = false)
-            : base (throwKntException)
+        public GenericRepositoryEF(string strConn, string strProvider = "System.Data.SqlClient")            
         {
             var conn = DbProviderFactories.GetFactory(strProvider).CreateConnection();
             conn.ConnectionString = strConn;            
@@ -36,15 +35,13 @@ namespace KNote.Repository.EntityFramework
             _dbSet = _context.Set<TEntity>();
         }
 
-        public GenericRepositoryEF(DbConnection openConn, bool throwKntException = false)
-            : base(throwKntException)
+        public GenericRepositoryEF(DbConnection openConn)
         {            
             _context = Activator.CreateInstance(typeof(TContext), openConn) as TContext;
             _dbSet = _context.Set<TEntity>();
         }
 
-        public GenericRepositoryEF(TContext context, bool throwKntException = false)
-            : base(throwKntException)
+        public GenericRepositoryEF(TContext context)            
         {
             _context = context;
             _dbSet = _context.Set<TEntity>();

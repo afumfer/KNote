@@ -96,14 +96,12 @@ else
             {
                 var entitySaved = httpResponse.Response.Entity;
 
-                // TODO: !!! hack ... bucar una implementación más eficiente.
+                // TODO: Hack ... bucar una implementación más eficiente.
                 //       Se refrescan valores asignados automáticamente 
                 //       en la capa de negocio.
 
                 foreach (var atrSaved in entitySaved.KAttributesDto)
                 {
-                    //var xx = atrSaved.KAttributeId;
-                    //Console.WriteLine(xx);
                     foreach (var atrEdit in note.KAttributesDto)
                     {
                         if (atrEdit.KAttributeId == atrSaved.KAttributeId)

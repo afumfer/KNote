@@ -14,8 +14,7 @@ namespace KNote.Repository.EntityFramework
     public class KntRepository : IKntRepository
     {
         #region Protected fields
-
-        private bool _throwKntException;
+        
         private readonly RepositoryRef _repositoryRef;
         
         #endregion
@@ -35,15 +34,13 @@ namespace KNote.Repository.EntityFramework
 
         #region Constructors
 
-        public KntRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-        {
-            _throwKntException = throwKntException;
+        public KntRepository(RepositoryRef repositoryRef)
+        {            
             _repositoryRef = repositoryRef;           
         }
 
-        public KntRepository(KntDbContext singletonContext, bool throwKntException = false)
-        {
-            _throwKntException = throwKntException;
+        public KntRepository(KntDbContext singletonContext)
+        {            
             _context = singletonContext;
         }
 
@@ -58,9 +55,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_noteTypes == null)
                     if(_context != null)
-                        _noteTypes = new KntNoteTypeRepository(Context, _repositoryRef, _throwKntException);
+                        _noteTypes = new KntNoteTypeRepository(Context, _repositoryRef);
                     else 
-                        _noteTypes = new KntNoteTypeRepository(_repositoryRef, _throwKntException);
+                        _noteTypes = new KntNoteTypeRepository(_repositoryRef);
                 return _noteTypes;
                 
             }
@@ -73,9 +70,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_systemValues == null)
                     if (_context != null)
-                        _systemValues = new KntSystemValuesRepository(Context, _repositoryRef, _throwKntException);
+                        _systemValues = new KntSystemValuesRepository(Context, _repositoryRef);
                     else
-                        _systemValues = new KntSystemValuesRepository(_repositoryRef, _throwKntException);
+                        _systemValues = new KntSystemValuesRepository(_repositoryRef);
                 return _systemValues;
             }
         }
@@ -87,9 +84,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_folders == null)
                     if (_context != null)
-                        _folders = new KntFolderRepository(Context, _repositoryRef, _throwKntException);
+                        _folders = new KntFolderRepository(Context, _repositoryRef);
                     else
-                        _folders = new KntFolderRepository(_repositoryRef, _throwKntException);
+                        _folders = new KntFolderRepository(_repositoryRef);
                 return _folders;
             }
         }
@@ -101,9 +98,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_attributes == null)
                     if (_context != null)
-                        _attributes = new KntKAttributeRepository(Context, _repositoryRef, _throwKntException);
+                        _attributes = new KntKAttributeRepository(Context, _repositoryRef);
                     else
-                        _attributes = new KntKAttributeRepository(_repositoryRef, _throwKntException);
+                        _attributes = new KntKAttributeRepository(_repositoryRef);
                 return _attributes;
             }
         }
@@ -115,9 +112,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_notes == null)
                     if (_context != null)
-                        _notes = new KntNoteRepository(Context, _repositoryRef, _throwKntException);
+                        _notes = new KntNoteRepository(Context, _repositoryRef);
                     else
-                        _notes = new KntNoteRepository(_repositoryRef, _throwKntException);
+                        _notes = new KntNoteRepository(_repositoryRef);
                 return _notes;
             }
         }
@@ -129,9 +126,9 @@ namespace KNote.Repository.EntityFramework
             {
                 if (_users == null)
                     if (_context != null)
-                        _users = new KntUserRepository(Context, _repositoryRef, _throwKntException);
+                        _users = new KntUserRepository(Context, _repositoryRef);
                     else
-                        _users = new KntUserRepository(_repositoryRef, _throwKntException);
+                        _users = new KntUserRepository(_repositoryRef);
                 return _users;
             }
         }
@@ -155,7 +152,7 @@ namespace KNote.Repository.EntityFramework
                     return false;
 
                 var dbContext = new KntDbContext(optionsBuilder.Options, false);
-                var systemValues = new KntSystemValuesRepository(dbContext, _repositoryRef, true);
+                var systemValues = new KntSystemValuesRepository(dbContext, _repositoryRef);
                 var res = await systemValues.GetAllAsync();
                 if (!res.IsValid)
                     return false;

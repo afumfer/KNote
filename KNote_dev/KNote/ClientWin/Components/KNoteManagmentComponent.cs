@@ -475,8 +475,8 @@ namespace KNote.ClientWin.Components
             noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
             noteEditorComponent.PostItEdit += NoteEditorComponent_PostItEdit;
             var res = await noteEditorComponent.LoadModelById(service, noteId, false);
-            noteEditorComponent.Run();
-            return await Task.FromResult<bool>(res);
+            noteEditorComponent.Run();            
+            return res;
         }
 
         public async void EditNotePostIt()
@@ -504,7 +504,7 @@ namespace KNote.ClientWin.Components
             if(alwaysTop)
                 postItEditorComponent.ForceAlwaysTop = true;
             postItEditorComponent.Run();
-            return await Task.FromResult(res);
+            return res;
         }
 
         public void AddNote()

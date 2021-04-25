@@ -20,17 +20,15 @@ namespace KNote.Repository.EntityFramework
 
         protected readonly KntDbContext SingletonConnection;
 
-        public KntRepositoryBase(KntDbContext singletonConnection, RepositoryRef repositoryRef, bool throwKntException = false)
+        public KntRepositoryBase(KntDbContext singletonConnection, RepositoryRef repositoryRef)            
         {
-            SingletonConnection = singletonConnection;
-            ThrowKntException = throwKntException;
+            SingletonConnection = singletonConnection;            
             _repositoryRef = repositoryRef;
             _repositoryRef.ConnectionString = singletonConnection.Database.GetConnectionString();
         }
 
-        public KntRepositoryBase(RepositoryRef repositoryRef, bool throwKntException = false)
-        {
-            ThrowKntException = throwKntException;
+        public KntRepositoryBase(RepositoryRef repositoryRef)
+        {            
             _repositoryRef = repositoryRef;
         }
 

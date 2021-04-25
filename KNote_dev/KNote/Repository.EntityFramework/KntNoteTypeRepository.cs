@@ -11,13 +11,13 @@ namespace KNote.Repository.EntityFramework
 {
     public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
     {
-        public KntNoteTypeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef, bool throwKntException)
-            : base(singletonContext, repositoryRef, throwKntException)
+        public KntNoteTypeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
+            : base(singletonContext, repositoryRef)
         {
         }
 
-        public KntNoteTypeRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-            : base(repositoryRef, throwKntException)
+        public KntNoteTypeRepository(RepositoryRef repositoryRef)
+            : base(repositoryRef)
         {
         }
 
@@ -27,7 +27,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx);
                 
                 var resGenRep = await noteTypes.GetAllAsync();
                 response.Entity = resGenRep.Entity?
@@ -51,7 +51,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx);
 
                 var resGenRep = await noteTypes.GetAsync((object)id);
 
@@ -73,7 +73,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx);
 
                 var newEntity = new NoteType();
                 newEntity.SetSimpleDto(entity);
@@ -100,20 +100,10 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
-
-                bool flagThrowKntException = false;
-                if (noteTypes.ThrowKntException == true)
-                {
-                    flagThrowKntException = true;
-                    noteTypes.ThrowKntException = false;
-                }
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx);
 
                 var resGenRepGet = await noteTypes.GetAsync(entity.NoteTypeId) ;
                 NoteType entityForUpdate;
-
-                if (flagThrowKntException == true)
-                    noteTypes.ThrowKntException = true;
 
                 if (resGenRepGet.IsValid)
                 {
@@ -146,7 +136,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx, ThrowKntException);
+                var noteTypes = new GenericRepositoryEF<KntDbContext, NoteType>(ctx);
 
                 var resGenRep = await noteTypes.DeleteAsync(id);
                 if (!resGenRep.IsValid)

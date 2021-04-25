@@ -31,17 +31,8 @@ namespace KNote.Repository.Entities
         public EnumNotificationType NotificationType { get; set; }
         
         public EnumAlarmType AlarmType { get; set; }
-        
-        //TODO: deprecated !!!
-        //public bool Disabled { get; set; }
-        
+                
         public string Comment { get; set; }
-
-        //TODO: deprecated !!!
-        //public string Forward { get; set; }
-
-        //TODO: deprecated !!!
-        //public bool? AlarmOk { get; set; }
         
         public bool? AlarmActivated { get; set; }
         

@@ -14,13 +14,13 @@ namespace KNote.Repository.Dapper
 {
     public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeRepository
     {        
-        public KntKAttributeRepository(DbConnection singletonConnection, RepositoryRef repositoryRef, bool throwKntException = false)
-            : base(singletonConnection, repositoryRef, throwKntException)
+        public KntKAttributeRepository(DbConnection singletonConnection, RepositoryRef repositoryRef)
+            : base(singletonConnection, repositoryRef)
         {
         }
 
-        public KntKAttributeRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-            : base(repositoryRef, throwKntException)
+        public KntKAttributeRepository(RepositoryRef repositoryRef)
+            : base(repositoryRef)
         {
         }
 

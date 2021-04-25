@@ -12,13 +12,13 @@ namespace KNote.Repository.EntityFramework
 {
     public class KntFolderRepository: KntRepositoryBase, IKntFolderRepository
     {
-        public KntFolderRepository(KntDbContext singletonContext, RepositoryRef repositoryRef, bool throwKntException)
-            : base (singletonContext, repositoryRef, throwKntException)
+        public KntFolderRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
+            : base (singletonContext, repositoryRef)
         {            
         }
 
-        public KntFolderRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-            : base(repositoryRef, throwKntException)
+        public KntFolderRepository(RepositoryRef repositoryRef)
+            : base(repositoryRef)
         {
         }
 
@@ -28,7 +28,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException) ;
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx) ;
 
                 var resRep = await folders.GetAllAsync();
                 resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
@@ -49,7 +49,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
 
                 var resRep = await folders.GetAsync((object)folderId);
                 // KNote template ... load here aditionals properties for FolderDto
@@ -83,7 +83,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
 
                 var allFolders = await folders.DbSet.ToListAsync();
 
@@ -118,7 +118,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
 
                 var homeFolder = await folders.DbSet
                     .Where(f => f.FolderNumber == 1)
@@ -142,7 +142,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
 
                 var newEntity = new Folder();
                 newEntity.SetSimpleDto(entity);
@@ -172,20 +172,10 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
-
-                bool flagThrowKntException = false;
-                if (folders.ThrowKntException == true)
-                {
-                    flagThrowKntException = true;
-                    folders.ThrowKntException = false;
-                }
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
 
                 var resGenRepGet = await folders.GetAsync(entity.FolderId);
                 Folder entityForUpdate;
-
-                if (flagThrowKntException == true)
-                    folders.ThrowKntException = true;
 
                 if (resGenRepGet.IsValid)
                 {
@@ -219,7 +209,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx, ThrowKntException);
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
 
                 var resGenRep = await folders.DeleteAsync(id);
                 if (!resGenRep.IsValid)

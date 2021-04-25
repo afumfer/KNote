@@ -15,9 +15,7 @@ namespace KNote.Repository.EntityFramework
         where TContext : DbContext, new()
     {
         #region Generics properties
-
-        bool ThrowKntException { get; set; }                
-
+        
         DbSet<TEntity> DbSet { get; }
 
         IQueryable<TEntity> Queryable { get; }
