@@ -158,7 +158,7 @@
             this.menuImportData,
             this.menuExportData});
             this.menuRepositories.Name = "menuRepositories";
-            this.menuRepositories.Size = new System.Drawing.Size(203, 22);
+            this.menuRepositories.Size = new System.Drawing.Size(209, 22);
             this.menuRepositories.Text = "&Repositories";
             // 
             // menuCreateRepository
@@ -229,7 +229,7 @@
             this.menuEditFolder,
             this.menuDeleteFolder});
             this.menuFolders.Name = "menuFolders";
-            this.menuFolders.Size = new System.Drawing.Size(203, 22);
+            this.menuFolders.Size = new System.Drawing.Size(209, 22);
             this.menuFolders.Text = "&Folders";
             // 
             // menuNewFolder
@@ -256,24 +256,24 @@
             // menuFileS1
             // 
             this.menuFileS1.Name = "menuFileS1";
-            this.menuFileS1.Size = new System.Drawing.Size(200, 6);
+            this.menuFileS1.Size = new System.Drawing.Size(206, 6);
             // 
             // menuHide
             // 
             this.menuHide.Name = "menuHide";
-            this.menuHide.Size = new System.Drawing.Size(203, 22);
-            this.menuHide.Text = "&Hide KNote managment";
+            this.menuHide.Size = new System.Drawing.Size(209, 22);
+            this.menuHide.Text = "&Hide KaNote managment";
             this.menuHide.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuFilesS2
             // 
             this.menuFilesS2.Name = "menuFilesS2";
-            this.menuFilesS2.Size = new System.Drawing.Size(200, 6);
+            this.menuFilesS2.Size = new System.Drawing.Size(206, 6);
             // 
             // menuExit
             // 
             this.menuExit.Name = "menuExit";
-            this.menuExit.Size = new System.Drawing.Size(203, 22);
+            this.menuExit.Size = new System.Drawing.Size(209, 22);
             this.menuExit.Text = "&Exit";
             this.menuExit.Click += new System.EventHandler(this.menu_Click);
             // 

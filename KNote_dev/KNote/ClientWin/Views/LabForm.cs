@@ -16,6 +16,7 @@ using KNote.Model.Dto;
 using KntScript;
 using System.Xml.Serialization;
 using KNote.Service;
+using System.Diagnostics;
 
 namespace KNote.ClientWin.Views
 {
@@ -506,6 +507,16 @@ namespace KNote.ClientWin.Views
                 var xx = listVars[0].VarNewValueText;
                 MessageBox.Show(xx);
             }
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/afumfer/kntscript/blob/master/README.md");
+        }
+
+        private void tabAppLab_Click(object sender, EventArgs e)
+        {
 
         }
     }

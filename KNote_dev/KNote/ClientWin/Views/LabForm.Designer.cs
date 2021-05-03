@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LabForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
+            this.button1 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.listMessages = new System.Windows.Forms.ListBox();
@@ -49,7 +50,7 @@
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -70,6 +71,7 @@
             // 
             // tabAppLab
             // 
+            this.tabAppLab.Controls.Add(this.button2);
             this.tabAppLab.Controls.Add(this.button1);
             this.tabAppLab.Controls.Add(this.label2);
             this.tabAppLab.Controls.Add(this.label1);
@@ -83,6 +85,17 @@
             this.tabAppLab.TabIndex = 0;
             this.tabAppLab.Text = "Lab app components";
             this.tabAppLab.UseVisualStyleBackColor = true;
+            this.tabAppLab.Click += new System.EventHandler(this.tabAppLab_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(16, 113);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(295, 25);
+            this.button1.TabIndex = 9;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // label2
             // 
@@ -267,15 +280,15 @@
             this.htmlDescription.Size = new System.Drawing.Size(634, 287);
             this.htmlDescription.TabIndex = 10;
             // 
-            // button1
+            // button2
             // 
-            this.button1.Location = new System.Drawing.Point(16, 113);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(295, 25);
-            this.button1.TabIndex = 9;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button2.Location = new System.Drawing.Point(17, 144);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(294, 25);
+            this.button2.TabIndex = 10;
+            this.button2.Text = "button2";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // LabForm
             // 
@@ -321,5 +334,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button buttonSelectScriptDirectory;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
     }
 }

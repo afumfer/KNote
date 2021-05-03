@@ -51,8 +51,17 @@ namespace KNote.ClientWin.Views
 
         private void KNoteAboutForm_Load(object sender, EventArgs e)
         {
-            var info = "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version. " + Environment.NewLine + Environment.NewLine +
-                       "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. ";
+            var info = @"Permission is hereby granted, free of charge, to any person obtaining a copy of this ";
+            info += "software and associated documentation files (the 'Software'), to deal in the Software without ";
+            info += "restriction, including without limitation the rights to use and copy."; 
+            info += Environment.NewLine + Environment.NewLine;
+            info += "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, ";
+            info += "INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR ";
+            info += "PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE ";
+            info += "FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ";
+            info += "ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."; ;
+
+            labelRepository.Text = @"https://github.com/afumfer/knote";
             labelVersion.Text = "Version: " + Application.ProductVersion.ToString();
             labelInfo.Text = info;
         }
