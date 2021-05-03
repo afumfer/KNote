@@ -171,49 +171,93 @@ namespace KNote.ClientWin.Views
                 // For test ...
                 var labForm = new LabForm(_com.Store);
                 labForm.Show(); }
-            else if (menuSel == menuNewFolder)            
+            else if (menuSel == menuNewFolder)
+            {
                 _com.NewFolder();            
-            else if (menuSel == menuEditFolder)            
+            }            
+            else if (menuSel == menuEditFolder)
+            {
                 _com.EditFolder();            
-            else if (menuSel == menuDeleteFolder)            
+            }
+            else if (menuSel == menuDeleteFolder)
+            {
                 _com.DeleteFolder();           
+            }            
             else if (menuSel == menuRemoveRepositoryLink)
+            {
                 _com.RemoveRepositoryLink();            
-            else if (menuSel == menuAddRepositoryLink)            
+            }
+            else if (menuSel == menuAddRepositoryLink)
+            {
                 _com.AddRepositoryLink();            
+            }
             else if (menuSel == menuCreateRepository)
+            {
                 _com.CreateRepository();            
+            }
             else if (menuSel == menuManagmentRepository)
+            {
                 _com.ManagmentRepository();            
+            }
             else if (menuSel == menuRefreshTreeFolders) {
                 Text = "KaNote Managment";
                 _com.RefreshRepositoryAndFolderTree(); }
             else if (menuSel == menuEditNote)
+            {
                 _com.EditNote();            
+            }
             else if (menuSel == menuEditNoteAsPostIt)
+            {
                 _com.EditNotePostIt();            
+            }
             else if (menuSel == menuNewNote)
+            {
                 _com.AddNote();            
+            }
             else if (menuSel == menuNewNoteAsPostIt)
+            {
                 _com.AddNotePostIt();                        
+            }
             else if (menuSel == menuDeleteNote)
+            {
                 _com.DeleteNote();                            
+            }
             else if (menuSel == menuKntScriptConsole)
+            {
                 _com.ShowKntScriptConsole();            
+            }
             else if (menuSel == menuHide)
+            {
                 _com.HideKNoteManagment();
-            else if (menuSel == menuAbout)            
-                _com.About();            
+            }
+            else if (menuSel == menuAbout)
+            {
+                _com.About();
+            }
+            else if (menuSel == menuHelpDoc)
+            {
+                _com.Help();
+            }
             else if (menuSel == menuMoveSelectedNotes)
+            {
                 _com.MoveSelectedNotes();            
+            }
             else if (menuSel == menuAddTags)
+            {
                 _com.AddTagsSelectedNotes();            
+            }
             else if (menuSel == menuRemoveTags)
-                _com.RemoveTagsSelectedNotes();            
+            {
+                _com.RemoveTagsSelectedNotes();
+            }
             else if (menuSel == menuExecuteKntScript)
+            {
                 _com.RunScriptSelectedNotes();
+            }
             else if (menuSel == menuOptions)
+            {
                 _com.Options();
+            }
             else if (menuSel == menuFoldersExplorer) {
                 if (tabExplorers.SelectedIndex == 0)
                     return;

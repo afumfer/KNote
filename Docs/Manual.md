@@ -6,6 +6,11 @@ KaNote is a minimalist note and task manager. Tasks or notes are stored in datab
 
 Two different database engines are supported, Sqlite for personal tasks and SQL server for corporate use.
 
-KaNote also has two different front-ends, an old-school Windows desktop application and a Web application. 
+KaNote also has two different front-ends, an old-school Windows desktop application (WinForm app) and a Web application (Blazor app). 
+
+TODO: ...
+
+
+## User's Guide 
 
 TODO: ...

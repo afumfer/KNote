@@ -17,6 +17,7 @@ using KntScript;
 using System.Xml.Serialization;
 using KNote.Service;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace KNote.ClientWin.Views
 {
@@ -512,7 +513,33 @@ namespace KNote.ClientWin.Views
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/afumfer/kntscript/blob/master/README.md");
+            string url = @"https://github.com/afumfer/kntscript/blob/master/README.md";
+
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private void tabAppLab_Click(object sender, EventArgs e)

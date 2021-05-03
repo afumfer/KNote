@@ -6,6 +6,11 @@ KaNote es un gestor de notas y tareas minimalista. Las tareas o notas se almacen
 
 Se soportan dos motores diferentes de bases de datos, Sqlite para tareas personales y SQL server para uso corporativo. 
 
-KaNote tiene también dos front-end diferentes, una aplicación windows de escritorio a la vieja escuela y una aplicativo Web.
+KaNote tiene también dos front-end diferentes, una aplicación windows de escritorio a la vieja escuela (WinForm app) y un aplicativo Web (Blazor app).
+
+TODO: ...
+
+
+## Guía de usuario
 
 TODO: ...

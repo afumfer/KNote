@@ -4,7 +4,8 @@ KaNote is a minimalist note and task manager. Tasks or notes are stored in datab
 
 Two different database engines are supported, Sqlite for personal tasks and SQL server for corporate use.
 
-KaNote also has two different front-ends, an old-school Windows desktop application and a Web application. 
+KaNote also has two different front-ends, an old-school Windows desktop application (WinForm app) and a Web application (Blazor app). 
+
 
 ## Compilation and use 
 
@@ -12,11 +13,21 @@ To compile and run KaNote you will need Visual Studio 2019 or higher, then you m
 
 TODO: Creating the database with the desktop application ...
 
-TODO: Creation of the database with the Web application ... 
+TODO: Creating the database with the Web application ... 
 
 
-## Direct use of binaries 
+## Installation and deployment 
+
 
 TODO: ....
 
+
+### Direct use of binaries 
+
+TODO: ....
+
+
+## License
+
+This project is under the MIT License - see the LICENSE.txt file for details 
 
