@@ -29,5 +29,5 @@ TODO: ....
 
 ## License
 
-This project is under the MIT License - see the LICENSE.txt file for details 
+This project is under the MIT License - see the LICENSE.txt file for details.
 
