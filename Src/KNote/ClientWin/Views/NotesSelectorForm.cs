@@ -62,7 +62,7 @@ namespace KNote.ClientWin.Views
                     _sortOrder = getSortOrder(_orderColNumber);
                 }
 
-                RefreshDataGridNotes();
+                RefreshDataGridNotes();                
             }
         }
 
@@ -154,6 +154,7 @@ namespace KNote.ClientWin.Views
 
         private void dataGridNotes_DoubleClick(object sender, EventArgs e)
         {
+            ActiveCurrentRow();
             _com.NotifySelectedEntityDoubleClick();
         }
 

@@ -165,7 +165,7 @@ namespace KNote.ClientWin.Core
         }
 
         public virtual void NotifySelectedEntityDoubleClick()
-        {
+        {            
             OnEntitySelectionDoubleClick(SelectedEntity);
         }
 
