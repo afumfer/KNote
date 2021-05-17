@@ -181,6 +181,34 @@ namespace KNote.ClientWin.Core
             }
         }
 
+        private int _colOrderNotes;
+        public int ColOrderNotes
+        {
+            get { return _colOrderNotes; }
+            set
+            {
+                if (_colOrderNotes != value)
+                {
+                    _colOrderNotes = value;
+                    OnPropertyChanged("ColOrderNotes");
+                }
+            }
+        }
+
+        private bool _ascendigOrderNotes;
+        public bool AscendigOrderNotes
+        {
+            get { return _ascendigOrderNotes; }
+            set
+            {
+                if (_ascendigOrderNotes != value)
+                {
+                    _ascendigOrderNotes = value;
+                    OnPropertyChanged("AscendigOrderNotes");
+                }
+            }
+        }
+
         private List<RepositoryRef> _respositoryRef;
         public List<RepositoryRef> RespositoryRefs
         {

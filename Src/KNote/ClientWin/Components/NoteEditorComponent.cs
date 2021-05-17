@@ -87,7 +87,7 @@ namespace KNote.ClientWin.Components
                 // Evaluate whether to put the following default values in the service layer 
                 // (null values are by default, we need empty strings so that the IsDirty is 
                 //  not altered after leaving the view when there are no modifications).
-                Model.Topic = "";
+                Model.Topic = "New topic ...";                
                 Model.Tags = "";
                 Model.Description = "";
 

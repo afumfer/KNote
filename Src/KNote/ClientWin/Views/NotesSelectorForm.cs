@@ -21,8 +21,20 @@ namespace KNote.ClientWin.Views
         private UInt32 _countRepetition = 0;
         private bool _skipSelectionChanged = false;        
         private BindingSource _source = new BindingSource();
-        private int _orderColNumber = 0;
+        //private int OrderColNumber = 0;
         private SortOrder _sortOrder;
+
+        protected int OrderColNumber
+        {
+            get { return _com.Store.AppConfig.ColOrderNotes; }
+            set { _com.Store.AppConfig.ColOrderNotes = value; }
+        }
+
+        protected bool AscendigOrderNotes
+        {
+            get { return _com.Store.AppConfig.AscendigOrderNotes; }
+            set { _com.Store.AppConfig.AscendigOrderNotes = value; }
+        }
 
         public NotesSelectorForm(NotesSelectorComponent com)
         {
@@ -56,11 +68,12 @@ namespace KNote.ClientWin.Views
             {
                 CoonfigureGridStd();
 
-                if (_orderColNumber == 0)
+                if (OrderColNumber == 0)
                 {
-                    _orderColNumber = 1;
-                    _sortOrder = getSortOrder(_orderColNumber);
-                }
+                    OrderColNumber = 1;
+                    AscendigOrderNotes = true;                    
+                }                
+                _sortOrder = getDefaultSortOrder();
 
                 RefreshDataGridNotes();                
             }
@@ -147,6 +160,12 @@ namespace KNote.ClientWin.Views
 
         #region Form events handlers 
 
+        private void NotesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!_viewFinalized)
+                _com.Finalize();
+        }
+
         private void dataGridNotes_SelectionChanged(object sender, EventArgs e)
         {
             OnSelectedNoteItemChanged();
@@ -170,15 +189,9 @@ namespace KNote.ClientWin.Views
 
         private void dataGridNotes_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            _orderColNumber = e.ColumnIndex;
-            _sortOrder = getSortOrder(_orderColNumber);            
+            OrderColNumber = e.ColumnIndex;
+            _sortOrder = getSortOrder(OrderColNumber);            
             RefreshDataGridNotes();
-        }
-
-        private void NotesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (!_viewFinalized)
-                _com.Finalize();
         }
 
         private void buttonAccept_Click(object sender, EventArgs e)
@@ -202,12 +215,12 @@ namespace KNote.ClientWin.Views
             CoonfigureGridStd();
 
             if (_sortOrder == SortOrder.Descending)
-                _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[_orderColNumber].Name).GetValue(o));
+                _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
             else if (_sortOrder == SortOrder.Ascending)
-                _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[_orderColNumber].Name).GetValue(o));
+                _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
 
             if (dataGridNotes.Columns.Count > 0)
-                dataGridNotes.Columns[_orderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
+                dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
 
             if (_com.ListEntities.Count > 0)            
                 ActiveCurrentRow();
@@ -346,17 +359,33 @@ namespace KNote.ClientWin.Views
             _skipSelectionChanged = false;           
         }
 
+        private SortOrder getDefaultSortOrder()
+        {
+            if (AscendigOrderNotes)
+            {
+                dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = SortOrder.Ascending;                
+                return SortOrder.Ascending;
+            }
+            else
+            {
+                dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = SortOrder.Descending;                
+                return SortOrder.Descending;
+            }
+        }
+
         private SortOrder getSortOrder(int columnIndex)
         {
             if (dataGridNotes.Columns[columnIndex].HeaderCell.SortGlyphDirection == SortOrder.None ||
                 dataGridNotes.Columns[columnIndex].HeaderCell.SortGlyphDirection == SortOrder.Descending)
             {
                 dataGridNotes.Columns[columnIndex].HeaderCell.SortGlyphDirection = SortOrder.Ascending;
+                AscendigOrderNotes = true;
                 return SortOrder.Ascending;
             }
             else
             {
                 dataGridNotes.Columns[columnIndex].HeaderCell.SortGlyphDirection = SortOrder.Descending;
+                AscendigOrderNotes = false;
                 return SortOrder.Descending;
             }
         }
@@ -391,5 +420,6 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
+
     }
 }
