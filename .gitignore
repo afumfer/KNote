@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 /KNote_dev/KNote/Server/wwwroot/NotesResources
 /KNote_dev/KNote/Server/wwwroot/kntres/NotesResources/2021
+/Src/KNote/Server/wwwroot/NotesResources/2021

@@ -64,7 +64,7 @@ namespace KNote.Server.Helpers
         private string GetContainerResourcesPath()
         {            
             // TODO: !!! get from RepositortRef values
-            return env.WebRootPath;
+            return env.WebRootPath;            
         }
     }
 }
