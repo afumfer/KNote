@@ -49,6 +49,8 @@
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabNoteData = new System.Windows.Forms.TabControl();
             this.tabBasicData = new System.Windows.Forms.TabPage();
+            this.textStatus = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.panelDescription = new System.Windows.Forms.Panel();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.textDescription = new System.Windows.Forms.TextBox();
@@ -345,6 +347,8 @@
             // 
             // tabBasicData
             // 
+            this.tabBasicData.Controls.Add(this.textStatus);
+            this.tabBasicData.Controls.Add(this.label8);
             this.tabBasicData.Controls.Add(this.panelDescription);
             this.tabBasicData.Controls.Add(this.labelLoadingHtml);
             this.tabBasicData.Controls.Add(this.label7);
@@ -370,6 +374,28 @@
             this.tabBasicData.TabIndex = 0;
             this.tabBasicData.Text = "Basic data  ";
             this.tabBasicData.UseVisualStyleBackColor = true;
+            // 
+            // textStatus
+            // 
+            this.textStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.textStatus.BackColor = System.Drawing.SystemColors.Control;
+            this.textStatus.Enabled = false;
+            this.textStatus.Location = new System.Drawing.Point(593, 68);
+            this.textStatus.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textStatus.Name = "textStatus";
+            this.textStatus.Size = new System.Drawing.Size(193, 23);
+            this.textStatus.TabIndex = 4;
+            // 
+            // label8
+            // 
+            this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label8.Location = new System.Drawing.Point(544, 68);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(45, 18);
+            this.label8.TabIndex = 56;
+            this.label8.Text = "Status:";
+            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panelDescription
             // 
@@ -650,7 +676,7 @@
             this.label7.Location = new System.Drawing.Point(9, 68);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(103, 18);
+            this.label7.Size = new System.Drawing.Size(64, 18);
             this.label7.TabIndex = 50;
             this.label7.Text = "Priority:";
             this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -683,10 +709,10 @@
             // 
             // textPriority
             // 
-            this.textPriority.Location = new System.Drawing.Point(117, 68);
+            this.textPriority.Location = new System.Drawing.Point(81, 68);
             this.textPriority.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textPriority.Name = "textPriority";
-            this.textPriority.Size = new System.Drawing.Size(121, 23);
+            this.textPriority.Size = new System.Drawing.Size(75, 23);
             this.textPriority.TabIndex = 3;
             // 
             // label6
@@ -702,11 +728,11 @@
             // 
             this.textTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTags.Location = new System.Drawing.Point(313, 68);
+            this.textTags.Location = new System.Drawing.Point(211, 68);
             this.textTags.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textTags.MaxLength = 255;
             this.textTags.Name = "textTags";
-            this.textTags.Size = new System.Drawing.Size(474, 23);
+            this.textTags.Size = new System.Drawing.Size(315, 23);
             this.textTags.TabIndex = 4;
             // 
             // textFolder
@@ -714,22 +740,22 @@
             this.textFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textFolder.Enabled = false;
-            this.textFolder.Location = new System.Drawing.Point(117, 38);
+            this.textFolder.Location = new System.Drawing.Point(81, 38);
             this.textFolder.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textFolder.MaxLength = 255;
             this.textFolder.Name = "textFolder";
-            this.textFolder.Size = new System.Drawing.Size(589, 23);
+            this.textFolder.Size = new System.Drawing.Size(625, 23);
             this.textFolder.TabIndex = 1;
             // 
             // textTopic
             // 
             this.textTopic.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTopic.Location = new System.Drawing.Point(117, 8);
+            this.textTopic.Location = new System.Drawing.Point(81, 8);
             this.textTopic.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textTopic.MaxLength = 255;
             this.textTopic.Name = "textTopic";
-            this.textTopic.Size = new System.Drawing.Size(589, 23);
+            this.textTopic.Size = new System.Drawing.Size(625, 23);
             this.textTopic.TabIndex = 0;
             // 
             // buttonFolderSearch
@@ -748,10 +774,10 @@
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(265, 68);
+            this.label3.Location = new System.Drawing.Point(172, 68);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(41, 18);
+            this.label3.Size = new System.Drawing.Size(35, 18);
             this.label3.TabIndex = 36;
             this.label3.Text = "Tags:";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -761,7 +787,7 @@
             this.label2.Location = new System.Drawing.Point(9, 38);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(103, 18);
+            this.label2.Size = new System.Drawing.Size(64, 18);
             this.label2.TabIndex = 34;
             this.label2.Text = "Folder:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -771,7 +797,7 @@
             this.label1.Location = new System.Drawing.Point(9, 8);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(103, 18);
+            this.label1.Size = new System.Drawing.Size(64, 18);
             this.label1.TabIndex = 33;
             this.label1.Text = "Topic:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1572,5 +1598,7 @@
         private System.Windows.Forms.ToolStripButton toolDescriptionUploadResource;
         private System.Windows.Forms.Button buttonDeleteType;
         private System.Windows.Forms.ToolStripButton toolDescriptionUploadResourceFromClipboard;
+        private System.Windows.Forms.TextBox textStatus;
+        private System.Windows.Forms.Label label8;
     }
 }

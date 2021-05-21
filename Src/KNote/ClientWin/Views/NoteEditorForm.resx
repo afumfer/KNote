@@ -118,6 +118,15 @@
         UQswMAAAvXbaTkvDgigAAAAASUVORK5CYII=
 </value>
   </data>
+  <data name="buttonExecuteKntScript.Image" type="System.Drawing.Bitmap, System.Drawing.Common" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAK9JREFUOE9j
+        0LEL+AnE6UDMzEAOAGr8D8VvgdgViBmhUsQBJANg+CoQa0GlCQM0zch4ExCLQZXhBmiasOEeIOaEKscE
+        aIpx4d9AnALEmAGNpIgYDApoZyBGBDSSJCn4KFQ7WQaUADErVDtJBswGYl6oNgRAU4QNHwBiWahyTICm
+        GBnfA2JjqDLcAE0TCH8G4gAgJi5JI2kE4WIgRgQQMQCqcRYQYwYQMYBsjWDAwAAAWXXOUff6+fAAAAAA
+        SUVORK5CYII=
+</value>
+  </data>
   <data name="buttonTools.Image" type="System.Drawing.Bitmap, System.Drawing.Common" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
@@ -131,21 +140,12 @@
         YAAAOUmYHLqho/kAAAAASUVORK5CYII=
 </value>
   </data>
-  <data name="buttonExecuteKntScript.Image" type="System.Drawing.Bitmap, System.Drawing.Common" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAK9JREFUOE9j
-        0LEL+AnE6UDMzEAOAGr8D8VvgdgViBmhUsQBJANg+CoQa0GlCQM0zch4ExCLQZXhBmiasOEeIOaEKscE
-        aIpx4d9AnALEmAGNpIgYDApoZyBGBDSSJCn4KFQ7WQaUADErVDtJBswGYl6oNgRAU4QNHwBiWahyTICm
-        GBnfA2JjqDLcAE0TCH8G4gAgJi5JI2kE4WIgRgQQMQCqcRYQYwYQMYBsjWDAwAAAWXXOUff6+fAAAAAA
-        SUVORK5CYII=
-</value>
-  </data>
   <data name="imageListTabNoteData.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
-        AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj01LjAuNS4w
+        AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj01LjAuNi4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAAE
-        EwAAAk1TRnQBSQFMAgEBCwEAAcgBBAHIAQQBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
+        EwAAAk1TRnQBSQFMAgEBCwEAAdgBBAHYAQQBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
         AwABQAMAATADAAEBAQABCAYAAQwYAAGAAgABgAMAAoABAAGAAwABgAEAAYABAAKAAgADwAEAAcAB3AHA
         AQAB8AHKAaYBAAEzBQABMwEAATMBAAEzAQACMwIAAxYBAAMcAQADIgEAAykBAANVAQADTQEAA0IBAAM5
         AQABgAF8Af8BAAJQAf8BAAGTAQAB1gEAAf8B7AHMAQABxgHWAe8BAAHWAucBAAGQAakBrQIAAf8BMwMA
@@ -229,18 +229,6 @@
         AsMBgAEfAYABAQL/Cw==
 </value>
   </data>
-  <metadata name="buttonFolderSearch.Locked" type="System.Boolean, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e">
-    <value>True</value>
-  </metadata>
-  <metadata name="listViewResources.Locked" type="System.Boolean, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e">
-    <value>True</value>
-  </metadata>
-  <metadata name="buttonAddAlarm.Locked" type="System.Boolean, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e">
-    <value>True</value>
-  </metadata>
-  <metadata name="textScriptCode.Locked" type="System.Boolean, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e">
-    <value>True</value>
-  </metadata>
   <data name="toolDescriptionHtml.Image" type="System.Drawing.Bitmap, System.Drawing.Common" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
@@ -274,11 +262,11 @@
   <data name="toolDescriptionUploadResourceFromClipboard.Image" type="System.Drawing.Bitmap, System.Drawing.Common" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADUSURBVDhPnZNNDoIwEIV7Ay9g1K38xIVLaKuJOwxFEk/l
-        ypXXM8RLsNJ5BTQFWooveRDamS8PmLK+YnlZhmmZBLJInU7Oq7blp51Um0gUb18PIKFUB73Bi1cg1MNq
-        2td1lITtT9dFzHNhAtRdEy0C5AvAJRJZjY2/EowByBVS2D0BQBGebUIKdwKeP+l+c7gizwQ0a+ZvtAHG
-        XgFr3gDy4CNirWvsjIk1ANtjue4XuYyxNwAQIEgyZYy9bugDZgsHoomU1T7uxt4QIEjiY5ydto3E2Ad0
-        2wLkGFs3EgAAAABJRU5ErkJggg==
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADVSURBVDhPnZNNDoIwEIV7Ay9g1K38xIVLaKuJGxJDkcRT
+        uXLl9QzxEqx0XgFNgZbiSx6EdubLA6asr1helmFaJoEsUqeT86pt+Wkn1SYSxdvXA0go1UFv8OIVCPWw
+        mvZ1HSVh+9N1EfNcmAB110SLAPkCcIlEVmPjrwRjAHKFFHZPAFCEZ5uQwp2A50+63xyuyDMBzZr5G22A
+        sVfAmjeAPPiIWOsaO2NiDcD2WK77RS5j7A0ABAiSTBljrxv6gNnCgWgiZbWPu7E3BAiS+Bhnp20jMfYB
+        R20CvBmb8ugAAAAASUVORK5CYII=
 </value>
   </data>
   <metadata name="buttonFolderSearch.Locked" type="System.Boolean, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e">

@@ -77,6 +77,7 @@ namespace KNote.ClientWin.Views
             textFolder.Text = "";
             textFolderNumber.Text = "";
             textTags.Text = "";
+            textStatus.Text = "";
             textDescription.Text = "";
             htmlDescription.BodyHtml = "";
             textPriority.Text = "";
@@ -591,7 +592,8 @@ namespace KNote.ClientWin.Views
             textFolder.Text = _com.Model.FolderDto?.Name;
             textFolderNumber.Text = "#" + _com.Model.FolderDto.FolderNumber.ToString();
             _selectedFolderId = _com.Model.FolderId;                    
-            textTags.Text = _com.Model.Tags;            
+            textTags.Text = _com.Model.Tags;
+            textStatus.Text = _com.Model.InternalTags;
             textPriority.Text = _com.Model.Priority.ToString();
 
             if (_com.Model.HtmlFormat)
@@ -755,6 +757,7 @@ namespace KNote.ClientWin.Views
             _com.Model.FolderDto.Name = textFolder.Text;
             _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
             _com.Model.Tags = textTags.Text;
+            _com.Model.InternalTags = textStatus.Text;
 
             if (_com.Model.ContentType == "html")
                 _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);

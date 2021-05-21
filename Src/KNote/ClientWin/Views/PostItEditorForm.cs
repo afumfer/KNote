@@ -319,7 +319,7 @@ namespace KNote.ClientWin.Views
             if (folder != null)
             {
                 _selectedFolderId = folder.FolderId;
-                labelStatus.Text = $"[{folder?.Name}]";
+                RefreshStatus();                
             }
         }
 
@@ -329,8 +329,8 @@ namespace KNote.ClientWin.Views
 
         private void ModelToControls()
         {
-            labelCaption.Text = _com.Model.Topic;            
-            labelStatus.Text = $"({_com.ServiceRef?.Alias} >> [{_com.Model.FolderDto.Name}] )";
+            labelCaption.Text = _com.Model.Topic;
+            RefreshStatus();
             _selectedFolderId = _com.Model.FolderId;            
             if (_com.Model?.ContentType == "html")                            
                 htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);            
@@ -435,7 +435,7 @@ namespace KNote.ClientWin.Views
         {
             menuAlwaysFront.Checked = !menuAlwaysFront.Checked;
             this.TopMost = menuAlwaysFront.Checked;
-            // it is necessary set focus or select this form
+            // It is necessary set focus or select this form
             this.textDescription.Focus();
         }
 
@@ -483,14 +483,16 @@ namespace KNote.ClientWin.Views
 
         private void DrawFormBorder()
         {
-            // TODO: 
-            //if ( !ShowBorder )
-            //   return;
-
             Graphics grfx = this.CreateGraphics();
             Pen pn = new Pen(Color.Black);
             grfx.Clear(this.BackColor);
             grfx.DrawRectangle(pn, 0, 0, this.Width - 1, this.Height - 1);
+        }
+
+        private void RefreshStatus()
+        {
+            var status = string.IsNullOrEmpty(_com.Model.InternalTags) ? "" : $" - ({_com.Model.InternalTags})";
+            labelStatus.Text = $"{_com.ServiceRef?.Alias} >> [{_com.Model.FolderDto.Name}] {status}";
         }
        
         #endregion

@@ -271,41 +271,44 @@ namespace KNote.ClientWin.Views
             dataGridNotes.Columns[0].Visible = false;  // NoteId
 
             dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
-            dataGridNotes.Columns[1].Width = 80;
+            dataGridNotes.Columns[1].Width = 70;
             dataGridNotes.Columns[1].HeaderText = "Number";
             dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
             dataGridNotes.Columns[2].DataPropertyName = "Topic";
-            dataGridNotes.Columns[2].Width = 500;  // Topic
+            dataGridNotes.Columns[2].Width = 450;  // Topic
             dataGridNotes.Columns[2].HeaderText = "Topic";
 
             dataGridNotes.Columns[3].DataPropertyName = "Priority";
-            dataGridNotes.Columns[3].Width = 75;  // Priority
+            dataGridNotes.Columns[3].Width = 70;  // Priority
             dataGridNotes.Columns[3].HeaderText = "Priority";
             dataGridNotes.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
             dataGridNotes.Columns[4].DataPropertyName = "Tags";
-            dataGridNotes.Columns[4].Width = 200;  // Tags
+            dataGridNotes.Columns[4].Width = 150;  // Tags
             dataGridNotes.Columns[4].HeaderText = "Tags";
 
-            dataGridNotes.Columns[5].DataPropertyName = "ModificationDateTime";
-            dataGridNotes.Columns[5].Width = 125;  // ModificationDateTime
-            dataGridNotes.Columns[5].HeaderText = "Modification date";
-            dataGridNotes.Columns[5].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dataGridNotes.Columns[5].DataPropertyName = "InternalTags";
+            dataGridNotes.Columns[5].Width = 150;  // InternalTags
+            dataGridNotes.Columns[5].HeaderText = "Status";
 
-            dataGridNotes.Columns[6].DataPropertyName = "CreationDateTime";
-            dataGridNotes.Columns[6].Width = 125;  // CreationDateTime
-            dataGridNotes.Columns[6].HeaderText = "Creation date";
+
+            dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
+            dataGridNotes.Columns[6].Width = 125;  // ModificationDateTime
+            dataGridNotes.Columns[6].HeaderText = "Modification date";
             dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
-            dataGridNotes.Columns[7].Visible = false;  // Description 
-            dataGridNotes.Columns[7].DataPropertyName = "Description";
-            dataGridNotes.Columns[8].Visible = false;  // ContentType
-            dataGridNotes.Columns[8].DataPropertyName = "ContentType";
-            dataGridNotes.Columns[9].Visible = false;  // Script
-            dataGridNotes.Columns[9].DataPropertyName = "Script";
-            dataGridNotes.Columns[10].Visible = false;  // InternalTags
-            dataGridNotes.Columns[10].DataPropertyName = "InternalTags";
+            dataGridNotes.Columns[7].DataPropertyName = "CreationDateTime";
+            dataGridNotes.Columns[7].Width = 125;  // CreationDateTime
+            dataGridNotes.Columns[7].HeaderText = "Creation date";
+            dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+
+            dataGridNotes.Columns[8].Visible = false;  // Description 
+            dataGridNotes.Columns[8].DataPropertyName = "Description";
+            dataGridNotes.Columns[9].Visible = false;  // ContentType
+            dataGridNotes.Columns[9].DataPropertyName = "ContentType";
+            dataGridNotes.Columns[10].Visible = false;  // Script
+            dataGridNotes.Columns[10].DataPropertyName = "Script";
             dataGridNotes.Columns[11].Visible = false;  // FolderId 
             dataGridNotes.Columns[11].DataPropertyName = "FolderId";
             dataGridNotes.Columns[12].Visible = false;  // NoteTypeId

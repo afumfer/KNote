@@ -103,10 +103,57 @@ namespace KNote.Service.Services
             }
         }
 
+        private void UpdateStatus(NoteExtendedDto entity)
+        {
+            string status = "";
+
+            bool allTaskResolved = true;
+            if(entity.Tasks.Count > 0)
+            {
+                foreach (var item in entity.Tasks)
+                {
+                    if (item.Resolved == false)
+                    {
+                        allTaskResolved = false;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                allTaskResolved = false;
+            }
+
+            bool alarmsPending = false;
+            foreach (var item in entity.Messages)
+            {
+                if (item.AlarmActivated == true)
+                {
+                    alarmsPending = true;
+                    break;
+                }
+
+            }
+
+            if (allTaskResolved == true)
+                status = "Resolved";
+
+            if(alarmsPending == true)
+            {
+                if (!string.IsNullOrEmpty(status))
+                    status += "; ";
+                status += "Alarms pending";
+            }
+
+            entity.InternalTags = status;
+        }
+
         public async Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity)
         {            
             var result = new Result<NoteExtendedDto>();
-            
+
+            UpdateStatus(entity);
+
             if (entity.IsDirty())
             {
                 var resNote = await SaveAsync(entity.GetSimpleDto<NoteDto>());

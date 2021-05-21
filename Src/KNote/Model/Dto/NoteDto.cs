@@ -102,21 +102,6 @@ namespace KNote.Model.Dto
             return contentView
                 .Replace(replaceString,
                 repositoryRef.ResourcesContainer);
-
-            //if (ContentType == "html")
-            //{
-            //    string desOutput = contentView?
-            //        .Replace(replaceString,
-            //        repositoryRef.ResourcesContainer);
-            //    return  desOutput;
-            //}
-            //else
-            //{
-            //    string desOutput = contentView?
-            //        .Replace(replaceString,
-            //        repositoryRef.ResourcesContainer);
-            //    return desOutput;
-            //}
         }
 
 

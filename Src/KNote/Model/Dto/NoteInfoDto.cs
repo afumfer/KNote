@@ -84,6 +84,22 @@ namespace KNote.Model.Dto
             }
         }
 
+        private string _internalTags;
+        [MaxLength(256)]
+        public string InternalTags
+        {
+            get { return _internalTags; }
+            set
+            {
+                if (_internalTags != value)
+                {
+                    _internalTags = value;
+                    OnPropertyChanged("InternalTags");
+                }
+            }
+        }
+
+
         private DateTime _modificationDateTime;
         [Required]
         public DateTime ModificationDateTime
@@ -153,21 +169,6 @@ namespace KNote.Model.Dto
                 {
                     _script = value;
                     OnPropertyChanged("Script");
-                }
-            }
-        }
-
-        private string _internalTags;
-        [MaxLength(256)]
-        public string InternalTags
-        {
-            get { return _internalTags; }
-            set
-            {
-                if (_internalTags != value)
-                {
-                    _internalTags = value;
-                    OnPropertyChanged("InternalTags");
                 }
             }
         }
