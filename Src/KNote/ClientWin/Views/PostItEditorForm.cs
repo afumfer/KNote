@@ -463,15 +463,24 @@ namespace KNote.ClientWin.Views
         private async Task<bool> FastAlarmAndHide(string unitTime, int value)
         {
             _com.WindowPostIt.Visible = false;
-            var resSave = await SaveModel();
-                    
+
+            bool resSave = true;
+
+            if (_com.Model.IsNew())
+                resSave = await SaveModel();
+
             if (resSave)
             {
                 var resAlarm = await _com.SaveFastAlarm(unitTime, value);
-                if(resAlarm)
+
+                _com.Model.InternalTags = "(need to be updated)";
+                var resSaveStatus = await SaveModel();
+
+                if (resAlarm && resSaveStatus)
                     _com.Finalize();
                 else
                     MessageBox.Show("The alarm could not be saved.");
+
                 return resAlarm;
             }
             else

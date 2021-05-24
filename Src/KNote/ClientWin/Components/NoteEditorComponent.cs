@@ -139,6 +139,8 @@ namespace KNote.ClientWin.Components
                         OnSavedEntity(response.Entity);
                     else
                         OnAddedEntity(response.Entity);
+
+                    View.RefreshView();
                     
                     // TODO: future version ... notify actions.
                     // NotifyMessage($"Note {Model?.NoteNumber.ToString()} saved");

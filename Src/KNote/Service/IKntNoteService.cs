@@ -17,7 +17,7 @@ namespace KNote.Service
         Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);                        
         Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);
         Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entity = null);
-        Task<Result<NoteDto>> SaveAsync(NoteDto entity);
+        Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true);
         Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity);
         Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
         Task<Result<NoteDto>> DeleteAsync(Guid noteId);

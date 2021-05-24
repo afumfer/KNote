@@ -54,6 +54,8 @@ namespace KNote.Service.Services
             entity.Tasks = (await _repository.Notes.GetNoteTasksAsync(noteId)).Entity;
             entity.Messages = (await _repository.Notes.GetMessagesAsync(noteId)).Entity;
 
+            //entity.InternalTags = GetNoteStatus(entity.Tasks, entity.Messages);
+
             result.Entity = entity;
             return result;
         }
@@ -88,7 +90,7 @@ namespace KNote.Service.Services
             return result;
         }
 
-        public async Task<Result<NoteDto>> SaveAsync(NoteDto entity)
+        public async Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true)
         {
             if (entity.NoteId == Guid.Empty)
             {
@@ -98,65 +100,22 @@ namespace KNote.Service.Services
             }
             else
             {
+                if (updateStatus)
+                    entity.InternalTags = GetNoteStatus((await GetNoteTasksAsync(entity.NoteId)).Entity, (await GetMessagesAsync(entity.NoteId)).Entity);
                 var res =  await _repository.Notes.UpdateAsync(entity);                
                 return res;
             }
         }
-
-        private void UpdateStatus(NoteExtendedDto entity)
-        {
-            string status = "";
-
-            bool allTaskResolved = true;
-            if(entity.Tasks.Count > 0)
-            {
-                foreach (var item in entity.Tasks)
-                {
-                    if (item.Resolved == false)
-                    {
-                        allTaskResolved = false;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                allTaskResolved = false;
-            }
-
-            bool alarmsPending = false;
-            foreach (var item in entity.Messages)
-            {
-                if (item.AlarmActivated == true)
-                {
-                    alarmsPending = true;
-                    break;
-                }
-
-            }
-
-            if (allTaskResolved == true)
-                status = "Resolved";
-
-            if(alarmsPending == true)
-            {
-                if (!string.IsNullOrEmpty(status))
-                    status += "; ";
-                status += "Alarms pending";
-            }
-
-            entity.InternalTags = status;
-        }
-
+        
         public async Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity)
         {            
             var result = new Result<NoteExtendedDto>();
-
-            UpdateStatus(entity);
+            
+            entity.InternalTags = GetNoteStatus(entity.Tasks, entity.Messages);
 
             if (entity.IsDirty())
             {
-                var resNote = await SaveAsync(entity.GetSimpleDto<NoteDto>());
+                var resNote = await SaveAsync(entity.GetSimpleDto<NoteDto>(), false);
                 result.Entity = resNote.Entity.GetSimpleDto<NoteExtendedDto>();
             }
             else
@@ -421,26 +380,31 @@ namespace KNote.Service.Services
 
         public async Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false)
         {
+            Result<KMessageDto> resSavedEntity;
+
             if (entity.KMessageId == Guid.Empty)
             {
-                entity.KMessageId = Guid.NewGuid();
-                return await _repository.Notes.AddMessageAsync(entity);
+                entity.KMessageId = Guid.NewGuid();                
+                resSavedEntity = await _repository.Notes.AddMessageAsync(entity);
             }
             else
             {
                 if (!forceNew)
-                {
-                    return await _repository.Notes.UpdateMessageAsync(entity);
+                {                    
+                    resSavedEntity = await _repository.Notes.UpdateMessageAsync(entity);
                 }
                 else
                 {
                     var checkExist = await GetMessageAsync(entity.KMessageId);
-                    if (checkExist.IsValid)
-                        return await _repository.Notes.UpdateMessageAsync(entity);
-                    else
-                        return await _repository.Notes.AddMessageAsync(entity);
+                    if (checkExist.IsValid)                        
+                        resSavedEntity = await _repository.Notes.UpdateMessageAsync(entity);
+                    else                        
+                        resSavedEntity = await _repository.Notes.AddMessageAsync(entity);
                 }
             }
+
+            resSavedEntity.Entity.UserFullName = entity.UserFullName;
+            return resSavedEntity;
         }
 
         public async Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId)
@@ -528,5 +492,53 @@ namespace KNote.Service.Services
 
         #endregion
 
+        #region Private methods
+
+        private string GetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages)
+        {
+            string status = "";
+
+            bool allTaskResolved = true;
+            if (tasks?.Count > 0)
+            {
+                foreach (var item in tasks)
+                {
+                    if (item.Resolved == false)
+                    {
+                        allTaskResolved = false;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                allTaskResolved = false;
+            }
+
+            bool alarmsPending = false;
+            foreach (var item in messages)
+            {
+                if (item.AlarmActivated == true)
+                {
+                    alarmsPending = true;
+                    break;
+                }
+
+            }
+
+            if (allTaskResolved == true)
+                status = "Resolved";
+
+            if (alarmsPending == true)
+            {
+                if (!string.IsNullOrEmpty(status))
+                    status += "; ";
+                status += "Alarms pending";
+            }
+
+            return status;
+        }
+
+        #endregion 
     }
 }

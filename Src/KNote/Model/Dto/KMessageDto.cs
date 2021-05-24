@@ -95,21 +95,6 @@ namespace KNote.Model.Dto
             }
         }
 
-        ////TODO: deprecated
-        //private bool _disabled;
-        //public bool Disabled
-        //{
-        //    get { return _disabled; }
-        //    set
-        //    {
-        //        if (_disabled != value)
-        //        {
-        //            _disabled = value;
-        //            OnPropertyChanged("Disabled");
-        //        }
-        //    }
-        //}
-
         private string _comment;
         public string Comment
         {
@@ -123,36 +108,6 @@ namespace KNote.Model.Dto
                 }
             }
         }
-
-        ////TODO: deprecated
-        //private string _forward;
-        //public string Forward
-        //{
-        //    get { return _forward; }
-        //    set
-        //    {
-        //        if (_forward != value)
-        //        {
-        //            _forward = value;
-        //            OnPropertyChanged("Forward");
-        //        }
-        //    }
-        //}
-
-        ////TODO: deprecated
-        //private bool? _alarmOk;
-        //public bool? AlarmOk
-        //{
-        //    get { return _alarmOk; }
-        //    set
-        //    {
-        //        if (_alarmOk != value)
-        //        {
-        //            _alarmOk = value;
-        //            OnPropertyChanged("AlarmOk");
-        //        }
-        //    }
-        //}
 
         private bool? _alarmActivated;
         public bool? AlarmActivated

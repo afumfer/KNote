@@ -257,7 +257,7 @@ namespace KNote.ClientWin.Components
             };
 
             var resSaveMsg = await Service.Notes.SaveMessageAsync(alarm, true);
-
+            
             return await Task.FromResult<bool>(resSaveMsg.IsValid);
         }
 
