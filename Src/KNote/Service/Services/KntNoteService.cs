@@ -527,13 +527,13 @@ namespace KNote.Service.Services
             }
 
             if (allTaskResolved == true)
-                status = "Resolved";
+                status = KntConst.Status[EnumStatus.Resolved];
 
             if (alarmsPending == true)
             {
                 if (!string.IsNullOrEmpty(status))
                     status += "; ";
-                status += "Alarms pending";
+                status += KntConst.Status[EnumStatus.AlarmsPending];
             }
 
             return status;

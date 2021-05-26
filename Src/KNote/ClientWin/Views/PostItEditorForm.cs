@@ -136,7 +136,7 @@ namespace KNote.ClientWin.Views
         {
             if (!_viewFinalized)
             {
-                var savedOk = await SaveModel();
+                var savedOk = await _com.SaveModel();
                 if (!savedOk)                
                     ShowInfo("The note could not be saved");                    
                 
@@ -151,15 +151,15 @@ namespace KNote.ClientWin.Views
 
             if (menuSel == menuHide)
             {
-                await SaveAndHide();
+                await _com.SaveAndHide();
             }
             else if (menuSel == menuSaveNow)
             {
-                await SaveModel();
+                await _com.SaveModel();
             }
             else if (menuSel == menuDelete)
             {
-                await DeleteModel();
+                await _com.DeleteAndFinalize();
             }
             else if (menuSel == menuAlwaysFront)
             {
@@ -167,59 +167,63 @@ namespace KNote.ClientWin.Views
             }
             else if (menuSel == menuExtendedEdition)
             {
-                await ExtendedEdit();
+                await _com.ExtendedNoteEdit();
             }
             else if (menuSel == menuPostItProperties)
             {
                 PostItPropertiesEdit();
             }
+            else if (menuSel == menuAddResolvedTask)
+            {
+                await _com.FastTaskAndHide();
+            }
             else if (menuSel == menuFastAlarm10m)
             {
-                await FastAlarmAndHide("m", 10);
+                await _com.FastAlarmAndHide("m", 10);
             }
             else if (menuSel == menuFastAlarm30m)
             {
-                await FastAlarmAndHide("m", 30);
+                await _com.FastAlarmAndHide("m", 30);
             }
             else if (menuSel == menuFastAlarm1h)
             {
-                await FastAlarmAndHide("h", 1);
+                await _com.FastAlarmAndHide("h", 1);
             }
             else if (menuSel == menuFastAlarm2h)
             {
-                await FastAlarmAndHide("h", 2);
+                await _com.FastAlarmAndHide("h", 2);
             }
             else if (menuSel == menuFastAlarm4h)
             {
-                await FastAlarmAndHide("h", 4);
+                await _com.FastAlarmAndHide("h", 4);
             }
             else if (menuSel == menuFastAlarm8h)
             {
-                await FastAlarmAndHide("h", 8);
+                await _com.FastAlarmAndHide("h", 8);
             }
             else if (menuSel == menuFastAlarm10h)
             {
-                await FastAlarmAndHide("h", 10);
+                await _com.FastAlarmAndHide("h", 10);
             }
             else if (menuSel == menuFastAlarm12h)
             {
-                await FastAlarmAndHide("h", 12);
+                await _com.FastAlarmAndHide("h", 12);
             }
             else if (menuSel == menuFastAlarm24h)
             {
-                await FastAlarmAndHide("h", 24);
+                await _com.FastAlarmAndHide("h", 24);
             }
             else if (menuSel == menuFastAlarm1week)
             {
-                await FastAlarmAndHide("week", 1);
+                await _com.FastAlarmAndHide("week", 1);
             }
             else if (menuSel == menuFastAlarm1month)
             {
-                await FastAlarmAndHide("month", 1);
+                await _com.FastAlarmAndHide("month", 1);
             }
             else if (menuSel == menuFastAlarm1year)
             {
-                await FastAlarmAndHide("year", 1);
+                await _com.FastAlarmAndHide("year", 1);
             }
         }
 
@@ -230,19 +234,19 @@ namespace KNote.ClientWin.Views
                 switch (e.KeyCode)
                 {
                     case Keys.S:
-                        await SaveModel();
+                        await _com.SaveModel();
                         break;
                     case Keys.Q:
-                        await SaveAndHide();
+                        await _com.SaveAndHide();
                         break;
                     case Keys.D:
-                        await DeleteModel();
+                        await _com.DeleteAndFinalize();
                         break;
                     case Keys.F:
                         AlwaysFront();
                         break;
                     case Keys.E:
-                        await ExtendedEdit();
+                        await _com.ExtendedNoteEdit();
                         break;
                     case Keys.P:
                         PostItPropertiesEdit();
@@ -310,7 +314,7 @@ namespace KNote.ClientWin.Views
 
         private async void labelCaption_DoubleClick(object sender, EventArgs e)
         {
-            await ExtendedEdit();
+            await _com.ExtendedNoteEdit();
         }
 
         private void labelStatus_DoubleClick(object sender, EventArgs e)
@@ -410,84 +414,25 @@ namespace KNote.ClientWin.Views
             _com.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
         }
 
-        private async Task<bool> SaveModel()
-        {            
-            return await _com.SaveModel();
-        }
-
-        private async Task<bool> SaveAndHide()
-        {
-            _com.WindowPostIt.Visible = false;
-            var res = await SaveModel();
-            _com.Finalize();
-            return res;
-        }
-
-        private async Task<bool> DeleteModel()
-        {
-            var res = await _com.DeleteModel();
-            if (res)
-                _com.Finalize();
-            return res;
-        }
-
-        public void AlwaysFront()
-        {
-            menuAlwaysFront.Checked = !menuAlwaysFront.Checked;
-            this.TopMost = menuAlwaysFront.Checked;
-            // It is necessary set focus or select this form
-            this.textDescription.Focus();
-        }
-
-        private async Task<bool> ExtendedEdit()
-        {
-            _com.WindowPostIt.Visible = false;
-            var res = await SaveModel();
-            _com.FinalizeAndExtendEdit();
-            return res;
-        }
-
         private void PostItPropertiesEdit()
         {
-            var copyTopMost = this.TopMost;
-            this.TopMost = false;
+            var copyTopMost = TopMost;
+            TopMost = false;
             var window = _com.GetWindow();
             if (window != null)
             {
                 _com.WindowPostIt = window;
                 ModelToControlsPostIt(false);
             }
-            this.TopMost = copyTopMost;
+            TopMost = copyTopMost;
         }
 
-        private async Task<bool> FastAlarmAndHide(string unitTime, int value)
+        public void AlwaysFront()
         {
-            _com.WindowPostIt.Visible = false;
-
-            bool resSave = true;
-
-            if (_com.Model.IsNew())
-                resSave = await SaveModel();
-
-            if (resSave)
-            {
-                var resAlarm = await _com.SaveFastAlarm(unitTime, value);
-
-                _com.Model.InternalTags = "(need to be updated)";
-                var resSaveStatus = await SaveModel();
-
-                if (resAlarm && resSaveStatus)
-                    _com.Finalize();
-                else
-                    MessageBox.Show("The alarm could not be saved.");
-
-                return resAlarm;
-            }
-            else
-            {
-                MessageBox.Show("This note could not be saved.");
-                return await Task.FromResult<bool>(false);
-            }
+            menuAlwaysFront.Checked = !menuAlwaysFront.Checked;
+            TopMost = menuAlwaysFront.Checked;
+            // It is necessary set focus or select this form
+            textDescription.Focus();
         }
 
         private void DrawFormBorder()

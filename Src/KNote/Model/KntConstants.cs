@@ -16,6 +16,8 @@ namespace KNote.Model
 
         public static Dictionary<EnumRoles, string> Roles { get; set; }
 
+        public static Dictionary<EnumStatus, string> Status { get; set; }
+
         static KntConst()
         {
             KAttributes = new Dictionary<EnumKAttributeDataType, string>
@@ -36,6 +38,12 @@ namespace KNote.Model
                 { EnumRoles.Staff, "Staff"},
                 { EnumRoles.ProjecManager, "Project manager"},
                 { EnumRoles.Admin, "Admin"}
+            };
+
+            Status = new Dictionary<EnumStatus, string>
+            {
+                { EnumStatus.Resolved, "Resolved"},
+                { EnumStatus.AlarmsPending, "Alarms Pending"}
             };
 
             AlarmType = new Dictionary<EnumAlarmType, string>
@@ -87,6 +95,12 @@ namespace KNote.Model
         Staff,
         ProjecManager,
         Admin
+    }
+
+    public enum EnumStatus
+    {
+        Resolved,
+        AlarmsPending
     }
 
     public enum EnumAlarmType

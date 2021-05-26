@@ -60,6 +60,8 @@ namespace KNote.ClientWin.Views
             this.menuFastAlarm1week = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFastAlarm1month = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFastAlarm1year = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuMoreActions = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuAddResolvedTask = new System.Windows.Forms.ToolStripMenuItem();
             this.panelForm.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picMenu)).BeginInit();
@@ -168,9 +170,10 @@ namespace KNote.ClientWin.Views
             this.menuExtendedEdition,
             this.menuPostItProperties,
             this.menuS2,
-            this.menuAlarmWithin});
+            this.menuAlarmWithin,
+            this.menuMoreActions});
             this.menuPostIt.Name = "menuPostIt";
-            this.menuPostIt.Size = new System.Drawing.Size(216, 170);
+            this.menuPostIt.Size = new System.Drawing.Size(216, 192);
             // 
             // menuHide
             // 
@@ -333,6 +336,21 @@ namespace KNote.ClientWin.Views
             this.menuFastAlarm1year.Text = "1 year";
             this.menuFastAlarm1year.Click += new System.EventHandler(this.postItMenu_Click);
             // 
+            // menuMoreActions
+            // 
+            this.menuMoreActions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuAddResolvedTask});
+            this.menuMoreActions.Name = "menuMoreActions";
+            this.menuMoreActions.Size = new System.Drawing.Size(215, 22);
+            this.menuMoreActions.Text = "More actions";
+            // 
+            // menuAddResolvedTask
+            // 
+            this.menuAddResolvedTask.Name = "menuAddResolvedTask";
+            this.menuAddResolvedTask.Size = new System.Drawing.Size(189, 22);
+            this.menuAddResolvedTask.Text = "Add fast resolved task";
+            this.menuAddResolvedTask.Click += new System.EventHandler(this.postItMenu_Click);
+            // 
             // PostItEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -392,5 +410,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripMenuItem menuFastAlarm1week;
         private System.Windows.Forms.ToolStripMenuItem menuFastAlarm1month;
         private System.Windows.Forms.ToolStripMenuItem menuFastAlarm1year;
+        private System.Windows.Forms.ToolStripMenuItem menuMoreActions;
+        private System.Windows.Forms.ToolStripMenuItem menuAddResolvedTask;
     }
 }

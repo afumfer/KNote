@@ -217,7 +217,61 @@ namespace KNote.ClientWin.Components
 
         #region Component specific methods
 
-        public async Task<bool> SaveFastAlarm(string unitTime, int value)
+        public async Task<bool> SaveAndHide()
+        {
+            WindowPostIt.Visible = false;
+            var res = await SaveModel();
+            Finalize();
+            return res;
+        }
+
+        public async Task<bool> DeleteAndFinalize()
+        {
+            var res = await DeleteModel();
+            if (res)
+                Finalize();
+            return res;
+        }
+
+        public async Task<bool> ExtendedNoteEdit()
+        {
+            WindowPostIt.Visible = false;
+            var res = await SaveModel();
+            FinalizeAndExtendEdit();
+            return res;
+        }
+
+        public async Task<bool> FastAlarmAndHide(string unitTime, int value)
+        {            
+            WindowPostIt.Visible = false;
+
+            bool resSave = true;
+
+            if (Model.IsNew())
+                resSave = await SaveModel();
+
+            if (resSave)
+            {
+                var resAlarm = await SaveFastModelAlarm(unitTime, value);
+
+                Model.InternalTags = "(need to be updated)";
+                var resSaveStatus = await SaveModel();
+
+                if (resAlarm && resSaveStatus)
+                    Finalize();
+                else                    
+                    View.ShowInfo("The alarm could not be saved.");
+
+                return resAlarm;
+            }
+            else
+            {                
+                View.ShowInfo("This note could not be saved.");
+                return await Task.FromResult<bool>(false);
+            }
+        }
+
+        private async Task<bool> SaveFastModelAlarm(string unitTime, int value)
         {
             DateTime? alarmDateTime = null;
 
@@ -255,16 +309,63 @@ namespace KNote.ClientWin.Components
                 AlarmActivated = true
 
             };
-
+            
             var resSaveMsg = await Service.Notes.SaveMessageAsync(alarm, true);
             
             return await Task.FromResult<bool>(resSaveMsg.IsValid);
         }
 
+        public async Task<bool> FastTaskAndHide()
+        {
+            WindowPostIt.Visible = false;
+
+            bool resSave = true;
+
+            if (Model.IsNew())
+                resSave = await SaveModel();
+
+            if (resSave)
+            {
+                var resAlarm = await SaveFastModelTask();
+
+                Model.InternalTags = "(need to be updated)";
+                var resSaveStatus = await SaveModel();
+
+                if (resAlarm && resSaveStatus)
+                    Finalize();
+                else
+                    View.ShowInfo("Task could not be saved.");
+
+                return resAlarm;
+            }
+            else
+            {
+                View.ShowInfo("This note could not be saved.");
+                return await Task.FromResult<bool>(false);
+            }
+        }
+
+        private async Task<bool> SaveFastModelTask()
+        {
+            var task = new NoteTaskDto
+            {
+                NoteId = Model.NoteId,
+                UserId = await GetUserId(),
+                Description = Model.Topic,
+                Tags = "Fast task",
+                Resolved = true,
+                EndDate = DateTime.Now
+            };
+
+            var resSaveTask = await Service.Notes.SaveNoteTaskAsync(task, true);
+
+            return await Task.FromResult<bool>(resSaveTask.IsValid);
+        }
+
         public void FinalizeAndExtendEdit()
         {            
             OnExtendedEdit();
-            Finalize();
+            Finalize();            
         }
 
         public virtual WindowDto GetWindow()
