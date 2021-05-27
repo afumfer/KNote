@@ -324,7 +324,8 @@ namespace KNote.ClientWin.Components
             var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
             taskEditor.Model.UserId = userDto.UserId;
             taskEditor.Model.UserFullName = userDto.FullName;
-            taskEditor.Model.ExpectedStartDate = DateTime.Now;
+            taskEditor.Model.Description = "(Task descripcion ...)";
+            taskEditor.Model.StartDate = DateTime.Now;
             taskEditor.Model.SetIsNew(true);
 
             var res = taskEditor.RunModal();

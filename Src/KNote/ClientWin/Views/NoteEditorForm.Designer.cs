@@ -118,6 +118,10 @@
             this.buttonResourceAdd = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
             this.tabTasks = new System.Windows.Forms.TabPage();
+            this.textTaskTags = new System.Windows.Forms.TextBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.textTaskDescription = new System.Windows.Forms.TextBox();
+            this.label16 = new System.Windows.Forms.Label();
             this.listViewTasks = new System.Windows.Forms.ListView();
             this.buttonTaskEdit = new System.Windows.Forms.Button();
             this.buttonTaskDelete = new System.Windows.Forms.Button();
@@ -1083,6 +1087,10 @@
             // 
             // tabTasks
             // 
+            this.tabTasks.Controls.Add(this.textTaskTags);
+            this.tabTasks.Controls.Add(this.label17);
+            this.tabTasks.Controls.Add(this.textTaskDescription);
+            this.tabTasks.Controls.Add(this.label16);
             this.tabTasks.Controls.Add(this.listViewTasks);
             this.tabTasks.Controls.Add(this.buttonTaskEdit);
             this.tabTasks.Controls.Add(this.buttonTaskDelete);
@@ -1097,6 +1105,44 @@
             this.tabTasks.Text = "Tasks  ";
             this.tabTasks.UseVisualStyleBackColor = true;
             // 
+            // textTaskTags
+            // 
+            this.textTaskTags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.textTaskTags.Location = new System.Drawing.Point(398, 543);
+            this.textTaskTags.Name = "textTaskTags";
+            this.textTaskTags.Size = new System.Drawing.Size(389, 23);
+            this.textTaskTags.TabIndex = 17;
+            // 
+            // label17
+            // 
+            this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(398, 525);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(33, 15);
+            this.label17.TabIndex = 16;
+            this.label17.Text = "Tags:";
+            // 
+            // textTaskDescription
+            // 
+            this.textTaskDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textTaskDescription.Location = new System.Drawing.Point(400, 36);
+            this.textTaskDescription.Multiline = true;
+            this.textTaskDescription.Name = "textTaskDescription";
+            this.textTaskDescription.Size = new System.Drawing.Size(388, 486);
+            this.textTaskDescription.TabIndex = 15;
+            // 
+            // label16
+            // 
+            this.label16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(400, 16);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(94, 15);
+            this.label16.TabIndex = 14;
+            this.label16.Text = "Task description:";
+            // 
             // listViewTasks
             // 
             this.listViewTasks.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -1105,16 +1151,17 @@
             this.listViewTasks.HideSelection = false;
             this.listViewTasks.Location = new System.Drawing.Point(5, 36);
             this.listViewTasks.Name = "listViewTasks";
-            this.listViewTasks.Size = new System.Drawing.Size(782, 530);
+            this.listViewTasks.Size = new System.Drawing.Size(387, 530);
             this.listViewTasks.TabIndex = 13;
             this.listViewTasks.UseCompatibleStateImageBehavior = false;
+            this.listViewTasks.SelectedIndexChanged += new System.EventHandler(this.listViewTasks_SelectedIndexChanged);
             this.listViewTasks.DoubleClick += new System.EventHandler(this.listViewTasks_DoubleClick);
             this.listViewTasks.Resize += new System.EventHandler(this.listView_Resize);
             // 
             // buttonTaskEdit
             // 
             this.buttonTaskEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonTaskEdit.Location = new System.Drawing.Point(760, 10);
+            this.buttonTaskEdit.Location = new System.Drawing.Point(360, 10);
             this.buttonTaskEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonTaskEdit.Name = "buttonTaskEdit";
             this.buttonTaskEdit.Size = new System.Drawing.Size(27, 23);
@@ -1126,7 +1173,7 @@
             // buttonTaskDelete
             // 
             this.buttonTaskDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonTaskDelete.Location = new System.Drawing.Point(725, 10);
+            this.buttonTaskDelete.Location = new System.Drawing.Point(330, 10);
             this.buttonTaskDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonTaskDelete.Name = "buttonTaskDelete";
             this.buttonTaskDelete.Size = new System.Drawing.Size(27, 23);
@@ -1138,7 +1185,7 @@
             // buttonTaskAdd
             // 
             this.buttonTaskAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonTaskAdd.Location = new System.Drawing.Point(690, 10);
+            this.buttonTaskAdd.Location = new System.Drawing.Point(300, 10);
             this.buttonTaskAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonTaskAdd.Name = "buttonTaskAdd";
             this.buttonTaskAdd.Size = new System.Drawing.Size(27, 23);
@@ -1150,7 +1197,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(6, 14);
+            this.label11.Location = new System.Drawing.Point(6, 16);
             this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(37, 15);
@@ -1600,5 +1647,9 @@
         private System.Windows.Forms.ToolStripButton toolDescriptionUploadResourceFromClipboard;
         private System.Windows.Forms.TextBox textStatus;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox textTaskTags;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.TextBox textTaskDescription;
+        private System.Windows.Forms.Label label16;
     }
 }

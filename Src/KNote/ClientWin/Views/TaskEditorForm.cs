@@ -167,6 +167,13 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private void checkResolved_Click(object sender, EventArgs e)
+        {
+            if (checkResolved.Checked == true)
+                if (string.IsNullOrEmpty(textEndDate.Text))
+                    textEndDate.Text = DateTime.Now.ToString();
+        }
+
         #endregion
 
         #region Private methods

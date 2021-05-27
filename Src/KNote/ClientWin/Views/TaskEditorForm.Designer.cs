@@ -66,7 +66,7 @@ namespace KNote.ClientWin.Views
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(525, 425);
+            this.buttonCancel.Location = new System.Drawing.Point(525, 405);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
             this.buttonCancel.TabIndex = 17;
@@ -77,7 +77,7 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(438, 425);
+            this.buttonAccept.Location = new System.Drawing.Point(438, 405);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
             this.buttonAccept.TabIndex = 16;
@@ -119,12 +119,13 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.label1);
             this.panelForm.Location = new System.Drawing.Point(6, 6);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(607, 413);
+            this.panelForm.Size = new System.Drawing.Size(607, 393);
             this.panelForm.TabIndex = 12;
             // 
             // buttonSelDateEnd
             // 
-            this.buttonSelDateEnd.Location = new System.Drawing.Point(575, 123);
+            this.buttonSelDateEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonSelDateEnd.Location = new System.Drawing.Point(348, 354);
             this.buttonSelDateEnd.Name = "buttonSelDateEnd";
             this.buttonSelDateEnd.Size = new System.Drawing.Size(24, 24);
             this.buttonSelDateEnd.TabIndex = 12;
@@ -134,7 +135,8 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelDateStart
             // 
-            this.buttonSelDateStart.Location = new System.Drawing.Point(265, 123);
+            this.buttonSelDateStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonSelDateStart.Location = new System.Drawing.Point(159, 352);
             this.buttonSelDateStart.Name = "buttonSelDateStart";
             this.buttonSelDateStart.Size = new System.Drawing.Size(24, 24);
             this.buttonSelDateStart.TabIndex = 10;
@@ -144,7 +146,8 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelDateExE
             // 
-            this.buttonSelDateExE.Location = new System.Drawing.Point(575, 96);
+            this.buttonSelDateExE.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonSelDateExE.Location = new System.Drawing.Point(573, 309);
             this.buttonSelDateExE.Name = "buttonSelDateExE";
             this.buttonSelDateExE.Size = new System.Drawing.Size(24, 24);
             this.buttonSelDateExE.TabIndex = 8;
@@ -154,7 +157,8 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelDateExS
             // 
-            this.buttonSelDateExS.Location = new System.Drawing.Point(265, 95);
+            this.buttonSelDateExS.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonSelDateExS.Location = new System.Drawing.Point(399, 309);
             this.buttonSelDateExS.Name = "buttonSelDateExS";
             this.buttonSelDateExS.Size = new System.Drawing.Size(24, 24);
             this.buttonSelDateExS.TabIndex = 6;
@@ -167,75 +171,83 @@ namespace KNote.ClientWin.Views
             this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textDescription.Location = new System.Drawing.Point(7, 236);
+            this.textDescription.Location = new System.Drawing.Point(7, 76);
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
-            this.textDescription.Size = new System.Drawing.Size(593, 173);
-            this.textDescription.TabIndex = 16;
+            this.textDescription.Size = new System.Drawing.Size(593, 167);
+            this.textDescription.TabIndex = 0;
             // 
             // textEndDate
             // 
-            this.textEndDate.Location = new System.Drawing.Point(428, 125);
+            this.textEndDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textEndDate.Location = new System.Drawing.Point(200, 354);
             this.textEndDate.Name = "textEndDate";
             this.textEndDate.Size = new System.Drawing.Size(142, 23);
             this.textEndDate.TabIndex = 11;
             // 
             // textStartDate
             // 
-            this.textStartDate.Location = new System.Drawing.Point(117, 125);
+            this.textStartDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textStartDate.Location = new System.Drawing.Point(9, 352);
             this.textStartDate.Name = "textStartDate";
             this.textStartDate.Size = new System.Drawing.Size(144, 23);
             this.textStartDate.TabIndex = 9;
             // 
             // textDificultyLevel
             // 
-            this.textDificultyLevel.Location = new System.Drawing.Point(542, 67);
+            this.textDificultyLevel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textDificultyLevel.Location = new System.Drawing.Point(172, 308);
             this.textDificultyLevel.Name = "textDificultyLevel";
-            this.textDificultyLevel.Size = new System.Drawing.Size(58, 23);
+            this.textDificultyLevel.Size = new System.Drawing.Size(81, 23);
             this.textDificultyLevel.TabIndex = 4;
             // 
             // textSpendTime
             // 
-            this.textSpendTime.Location = new System.Drawing.Point(186, 170);
+            this.textSpendTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textSpendTime.Location = new System.Drawing.Point(489, 357);
             this.textSpendTime.Name = "textSpendTime";
-            this.textSpendTime.Size = new System.Drawing.Size(58, 23);
+            this.textSpendTime.Size = new System.Drawing.Size(67, 23);
             this.textSpendTime.TabIndex = 14;
             // 
             // textExEndDate
             // 
-            this.textExEndDate.Location = new System.Drawing.Point(428, 96);
+            this.textExEndDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textExEndDate.Location = new System.Drawing.Point(438, 309);
             this.textExEndDate.Name = "textExEndDate";
-            this.textExEndDate.Size = new System.Drawing.Size(142, 23);
+            this.textExEndDate.Size = new System.Drawing.Size(129, 23);
             this.textExEndDate.TabIndex = 7;
             // 
             // textEstimatedTime
             // 
-            this.textEstimatedTime.Location = new System.Drawing.Point(339, 67);
+            this.textEstimatedTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textEstimatedTime.Location = new System.Drawing.Point(74, 308);
             this.textEstimatedTime.Name = "textEstimatedTime";
             this.textEstimatedTime.Size = new System.Drawing.Size(92, 23);
             this.textEstimatedTime.TabIndex = 3;
             // 
             // textExStartDate
             // 
-            this.textExStartDate.Location = new System.Drawing.Point(116, 96);
+            this.textExStartDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textExStartDate.Location = new System.Drawing.Point(264, 308);
             this.textExStartDate.Name = "textExStartDate";
-            this.textExStartDate.Size = new System.Drawing.Size(144, 23);
+            this.textExStartDate.Size = new System.Drawing.Size(129, 23);
             this.textExStartDate.TabIndex = 5;
             // 
             // textPriority
             // 
-            this.textPriority.Location = new System.Drawing.Point(117, 67);
+            this.textPriority.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textPriority.Location = new System.Drawing.Point(9, 308);
             this.textPriority.Name = "textPriority";
-            this.textPriority.Size = new System.Drawing.Size(92, 23);
+            this.textPriority.Size = new System.Drawing.Size(59, 23);
             this.textPriority.TabIndex = 2;
             // 
             // textTags
             // 
-            this.textTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTags.Location = new System.Drawing.Point(117, 38);
+            this.textTags.Location = new System.Drawing.Point(7, 264);
             this.textTags.Name = "textTags";
-            this.textTags.Size = new System.Drawing.Size(482, 23);
+            this.textTags.Size = new System.Drawing.Size(590, 23);
             this.textTags.TabIndex = 1;
             // 
             // textUser
@@ -243,15 +255,15 @@ namespace KNote.ClientWin.Views
             this.textUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textUser.Enabled = false;
-            this.textUser.Location = new System.Drawing.Point(117, 9);
+            this.textUser.Location = new System.Drawing.Point(7, 30);
             this.textUser.Name = "textUser";
-            this.textUser.Size = new System.Drawing.Size(482, 23);
+            this.textUser.Size = new System.Drawing.Size(593, 23);
             this.textUser.TabIndex = 0;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(10, 218);
+            this.label11.Location = new System.Drawing.Point(7, 58);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(70, 15);
             this.label11.TabIndex = 11;
@@ -259,8 +271,9 @@ namespace KNote.ClientWin.Views
             // 
             // label10
             // 
+            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(315, 127);
+            this.label10.Location = new System.Drawing.Point(200, 334);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(56, 15);
             this.label10.TabIndex = 10;
@@ -268,8 +281,9 @@ namespace KNote.ClientWin.Views
             // 
             // label9
             // 
+            this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(6, 128);
+            this.label9.Location = new System.Drawing.Point(9, 334);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(60, 15);
             this.label9.TabIndex = 9;
@@ -277,8 +291,9 @@ namespace KNote.ClientWin.Views
             // 
             // label8
             // 
+            this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(315, 99);
+            this.label8.Location = new System.Drawing.Point(438, 291);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(107, 15);
             this.label8.TabIndex = 8;
@@ -286,8 +301,9 @@ namespace KNote.ClientWin.Views
             // 
             // label7
             // 
+            this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(6, 97);
+            this.label7.Location = new System.Drawing.Point(263, 290);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(110, 15);
             this.label7.TabIndex = 7;
@@ -295,8 +311,9 @@ namespace KNote.ClientWin.Views
             // 
             // label6
             // 
+            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(455, 71);
+            this.label6.Location = new System.Drawing.Point(172, 290);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(81, 15);
             this.label6.TabIndex = 6;
@@ -304,18 +321,21 @@ namespace KNote.ClientWin.Views
             // 
             // checkResolved
             // 
+            this.checkResolved.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkResolved.AutoSize = true;
-            this.checkResolved.Location = new System.Drawing.Point(9, 172);
+            this.checkResolved.Location = new System.Drawing.Point(399, 359);
             this.checkResolved.Name = "checkResolved";
             this.checkResolved.Size = new System.Drawing.Size(73, 19);
             this.checkResolved.TabIndex = 13;
-            this.checkResolved.Text = "Resolved";
+            this.checkResolved.Text = "&Resolved";
             this.checkResolved.UseVisualStyleBackColor = true;
+            this.checkResolved.Click += new System.EventHandler(this.checkResolved_Click);
             // 
             // label5
             // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(110, 172);
+            this.label5.Location = new System.Drawing.Point(486, 338);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(70, 15);
             this.label5.TabIndex = 4;
@@ -323,8 +343,9 @@ namespace KNote.ClientWin.Views
             // 
             // label4
             // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(244, 68);
+            this.label4.Location = new System.Drawing.Point(74, 290);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(89, 15);
             this.label4.TabIndex = 3;
@@ -332,8 +353,9 @@ namespace KNote.ClientWin.Views
             // 
             // label3
             // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 68);
+            this.label3.Location = new System.Drawing.Point(9, 290);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(48, 15);
             this.label3.TabIndex = 2;
@@ -341,8 +363,9 @@ namespace KNote.ClientWin.Views
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 38);
+            this.label2.Location = new System.Drawing.Point(7, 246);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(33, 15);
             this.label2.TabIndex = 1;
@@ -361,7 +384,7 @@ namespace KNote.ClientWin.Views
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(618, 466);
+            this.ClientSize = new System.Drawing.Size(618, 446);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);

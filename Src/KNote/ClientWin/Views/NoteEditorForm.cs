@@ -224,7 +224,24 @@ namespace KNote.ClientWin.Views
 
         private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
         {
-            OnSelectedResourceItemChanged();
+            try
+            {
+                if (listViewResources.SelectedItems.Count > 0)
+                {
+                    Cursor = Cursors.WaitCursor;
+                    var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
+                    var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();
+                    UpdatePreviewResource(selRes);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"OnSelectedResourceItemChanged error: {ex.Message}");
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
         }
 
         private void listView_Resize(object sender, EventArgs e)
@@ -627,6 +644,14 @@ namespace KNote.ClientWin.Views
             
             // Tasks
             ModelToControlsTasks();
+            if (_com.Model.Tasks.Count > 0)
+                listViewTasks.Items[0].Selected = true;
+            else
+            {
+                //UpdateTaskDescription(null);
+                textTaskDescription.Text = "";
+                textTaskTags.Text = "";
+            }
 
             // Alarms     
             ModelToControlsAlarms();
@@ -683,22 +708,33 @@ namespace KNote.ClientWin.Views
             }
 
             // Width of -2 indicates auto-size.
-            listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);
 
-            listViewTasks.Columns.Add("Tags", 100, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("Tags", 100, HorizontalAlignment.Left);
 
+            //listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("Resolved", 50, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("Est. time", 50, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
+
+            //listViewTasks.Columns.Add("Ex start", 120, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("Ex end", 120, HorizontalAlignment.Left);
+
+            //listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("End", 120, HorizontalAlignment.Left);
+            //listViewTasks.Columns.Add("Description", -2, HorizontalAlignment.Left);
+
+            listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);            
             listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Resolved", 50, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Resolved", 60, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
+            listViewTasks.Columns.Add("End", 120, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Est. time", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
-
             listViewTasks.Columns.Add("Ex start", 120, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Ex end", 120, HorizontalAlignment.Left);
-
-            listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("End", 120, HorizontalAlignment.Left);
-            listViewTasks.Columns.Add("Description", -2, HorizontalAlignment.Left);
         }
 
         private void ModelToControlsAlarms()
@@ -856,28 +892,6 @@ namespace KNote.ClientWin.Views
             listView.Sorting = SortOrder.None;
         }
        
-        private void OnSelectedResourceItemChanged()
-        {
-            try
-            {
-                if (listViewResources.SelectedItems.Count > 0)
-                {
-                    Cursor = Cursors.WaitCursor;                    
-                    var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
-                    var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();                    
-                    UpdatePreviewResource(selRes);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"OnSelectedResourceItemChanged error: {ex.Message}");
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
-        }
-
         private ListViewItem MessageDtoToListViewItem(KMessageDto message)
         {
             var itemList = new ListViewItem(message.UserFullName);
@@ -893,19 +907,32 @@ namespace KNote.ClientWin.Views
 
         private ListViewItem NoteTaskDtoToListViewItem(NoteTaskDto task)
         {
+            //var itemList = new ListViewItem(task.UserFullName);
+            //itemList.Name = task.NoteTaskId.ToString();                        
+            //itemList.SubItems.Add(task.Tags?.ToString());
+            //itemList.SubItems.Add(task.Priority.ToString());
+            //itemList.SubItems.Add(task.Resolved.ToString());
+            //itemList.SubItems.Add(task.EstimatedTime.ToString());
+            //itemList.SubItems.Add(task.SpentTime.ToString());
+            //itemList.SubItems.Add(task.DifficultyLevel.ToString());
+            //itemList.SubItems.Add(task.ExpectedStartDate.ToString());
+            //itemList.SubItems.Add(task.ExpectedEndDate.ToString());
+            //itemList.SubItems.Add(task.StartDate.ToString());
+            //itemList.SubItems.Add(task.EndDate.ToString());
+            //itemList.SubItems.Add(task.Description.ToString());
+            //return itemList;
+
             var itemList = new ListViewItem(task.UserFullName);
-            itemList.Name = task.NoteTaskId.ToString();                        
-            itemList.SubItems.Add(task.Tags?.ToString());
+            itemList.Name = task.NoteTaskId.ToString();            
             itemList.SubItems.Add(task.Priority.ToString());
             itemList.SubItems.Add(task.Resolved.ToString());
+            itemList.SubItems.Add(task.StartDate.ToString());
+            itemList.SubItems.Add(task.EndDate.ToString());
             itemList.SubItems.Add(task.EstimatedTime.ToString());
             itemList.SubItems.Add(task.SpentTime.ToString());
             itemList.SubItems.Add(task.DifficultyLevel.ToString());
             itemList.SubItems.Add(task.ExpectedStartDate.ToString());
-            itemList.SubItems.Add(task.ExpectedEndDate.ToString());
-            itemList.SubItems.Add(task.StartDate.ToString());
-            itemList.SubItems.Add(task.EndDate.ToString());
-            itemList.SubItems.Add(task.Description.ToString());
+            itemList.SubItems.Add(task.ExpectedEndDate.ToString());            
             return itemList;
         }
 
@@ -989,18 +1016,29 @@ namespace KNote.ClientWin.Views
 
         private void UpdateTask(NoteTaskDto task)
         {
-            var item = listViewTasks.Items[task.NoteTaskId.ToString()];
-            item.SubItems[1].Text = task.Tags;
-            item.SubItems[2].Text = task.Priority.ToString();
-            item.SubItems[3].Text = task.Resolved.ToString();
-            item.SubItems[4].Text = task.EstimatedTime.ToString();
-            item.SubItems[5].Text = task.SpentTime.ToString();
-            item.SubItems[6].Text = task.DifficultyLevel.ToString();
-            item.SubItems[7].Text = task.ExpectedStartDate.ToString();
-            item.SubItems[8].Text = task.ExpectedEndDate.ToString();
-            item.SubItems[9].Text = task.StartDate.ToString();
-            item.SubItems[10].Text = task.EndDate.ToString();
-            item.SubItems[11].Text = task.Description;            
+            //var item = listViewTasks.Items[task.NoteTaskId.ToString()];
+            //item.SubItems[1].Text = task.Tags;
+            //item.SubItems[2].Text = task.Priority.ToString();
+            //item.SubItems[3].Text = task.Resolved.ToString();
+            //item.SubItems[4].Text = task.EstimatedTime.ToString();
+            //item.SubItems[5].Text = task.SpentTime.ToString();
+            //item.SubItems[6].Text = task.DifficultyLevel.ToString();
+            //item.SubItems[7].Text = task.ExpectedStartDate.ToString();
+            //item.SubItems[8].Text = task.ExpectedEndDate.ToString();
+            //item.SubItems[9].Text = task.StartDate.ToString();
+            //item.SubItems[10].Text = task.EndDate.ToString();
+            //item.SubItems[11].Text = task.Description;            
+
+            var item = listViewTasks.Items[task.NoteTaskId.ToString()];            
+            item.SubItems[1].Text = task.Priority.ToString();
+            item.SubItems[2].Text = task.Resolved.ToString();
+            item.SubItems[3].Text = task.StartDate.ToString();
+            item.SubItems[4].Text = task.EndDate.ToString();
+            item.SubItems[5].Text = task.EstimatedTime.ToString();
+            item.SubItems[6].Text = task.SpentTime.ToString();
+            item.SubItems[7].Text = task.DifficultyLevel.ToString();
+            item.SubItems[8].Text = task.ExpectedStartDate.ToString();
+            item.SubItems[9].Text = task.ExpectedEndDate.ToString();            
         }
         
         private async void EditResource()
@@ -1115,5 +1153,23 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
+
+        private void listViewTasks_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (listViewTasks.SelectedItems.Count > 0)
+                {
+                    var idTask = (Guid.Parse(listViewTasks.SelectedItems[0].Name));
+                    var selTask = _com.Model.Tasks.Where(_ => _.NoteTaskId == idTask).FirstOrDefault();                    
+                    textTaskDescription.Text = selTask.Description;
+                    textTaskTags.Text = selTask.Tags;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"OnSelectedTaskItemChanged error: {ex.Message}");
+            }
+        }
     }
 }
