@@ -278,9 +278,7 @@ namespace KNote.ClientWin.Views
             {
                 htmlDescription.HtmlContentsEdit();
                 htmlDescription.Focus();
-            }
-
-            //
+            }            
         }
 
         private void toolDescriptionMarkdown_Click(object sender, EventArgs e)
@@ -355,7 +353,22 @@ namespace KNote.ClientWin.Views
                 ModelToControlsAttributes();
             }
         }
-        
+
+        private async void buttonDeleteType_Click(object sender, EventArgs e)
+        {
+            var changed = await _com.AplyChangeNoteType(null);
+            if (changed)
+            {
+                textNoteType.Text = _com.Model.NoteTypeDto?.Name;
+                ModelToControlsAttributes();
+            }
+        }
+
+        private void buttonAttributeEdit_Click(object sender, EventArgs e)
+        {
+            EditNoteAttribute();
+        }
+
         #region Messages managment
 
         private async void buttonAddAlarm_Click(object sender, EventArgs e)
@@ -398,9 +411,14 @@ namespace KNote.ClientWin.Views
 
         private async void buttonTaskAdd_Click(object sender, EventArgs e)
         {
-            var task = await _com.NewTask();
+            NoteTaskDto task = await _com.NewTask();
             if (task != null)
+            {
                 listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
+                listViewTasks.Items[listViewTasks.Items.Count-1].Selected = true;
+                textTaskDescription.Text = task.Description;
+                textTaskTags.Text = task.Tags;
+            }
         }
 
         private void buttonTaskEdit_Click(object sender, EventArgs e)
@@ -415,11 +433,12 @@ namespace KNote.ClientWin.Views
                 MessageBox.Show("There is no task selected .", "KaNote");
                 return;
             }
-            //var delTsk = GetNoteTaskFromSelectedListView();
-            var delTsk = listViewTasks.SelectedItems[0].Name;
-            var res = await _com.DeleteTask(Guid.Parse(delTsk));
+            string delTsk = listViewTasks.SelectedItems[0].Name;
+            bool res = await _com.DeleteTask(Guid.Parse(delTsk));
             if (res)
             {
+                textTaskDescription.Text = "";
+                textTaskTags.Text = "";
                 listViewTasks.Items[delTsk].Remove();
             }
         }
@@ -436,13 +455,6 @@ namespace KNote.ClientWin.Views
 
         private async void buttonResourceAdd_Click(object sender, EventArgs e)
         {
-            //var resource = await _com.NewResource();
-            //if (resource != null)
-            //{
-            //    listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
-            //    listViewResources.Items[0].Selected = true;
-            //    _selectedResource = resource;
-            //}
             await AddResource();
         }
        
@@ -525,21 +537,6 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
-        private async void buttonDeleteType_Click(object sender, EventArgs e)
-        {
-            var changed = await _com.AplyChangeNoteType(null);
-            if (changed)
-            {
-                textNoteType.Text = _com.Model.NoteTypeDto?.Name;
-                ModelToControlsAttributes();
-            }
-        }
-
-        private void buttonAttributeEdit_Click(object sender, EventArgs e)
-        {
-            EditNoteAttribute();
-        }
 
         #endregion
 
@@ -1016,19 +1013,6 @@ namespace KNote.ClientWin.Views
 
         private void UpdateTask(NoteTaskDto task)
         {
-            //var item = listViewTasks.Items[task.NoteTaskId.ToString()];
-            //item.SubItems[1].Text = task.Tags;
-            //item.SubItems[2].Text = task.Priority.ToString();
-            //item.SubItems[3].Text = task.Resolved.ToString();
-            //item.SubItems[4].Text = task.EstimatedTime.ToString();
-            //item.SubItems[5].Text = task.SpentTime.ToString();
-            //item.SubItems[6].Text = task.DifficultyLevel.ToString();
-            //item.SubItems[7].Text = task.ExpectedStartDate.ToString();
-            //item.SubItems[8].Text = task.ExpectedEndDate.ToString();
-            //item.SubItems[9].Text = task.StartDate.ToString();
-            //item.SubItems[10].Text = task.EndDate.ToString();
-            //item.SubItems[11].Text = task.Description;            
-
             var item = listViewTasks.Items[task.NoteTaskId.ToString()];            
             item.SubItems[1].Text = task.Priority.ToString();
             item.SubItems[2].Text = task.Resolved.ToString();
@@ -1038,7 +1022,10 @@ namespace KNote.ClientWin.Views
             item.SubItems[6].Text = task.SpentTime.ToString();
             item.SubItems[7].Text = task.DifficultyLevel.ToString();
             item.SubItems[8].Text = task.ExpectedStartDate.ToString();
-            item.SubItems[9].Text = task.ExpectedEndDate.ToString();            
+            item.SubItems[9].Text = task.ExpectedEndDate.ToString();
+
+            textTaskDescription.Text = task.Description;
+            textTaskTags.Text = task.Tags;
         }
         
         private async void EditResource()

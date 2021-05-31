@@ -571,6 +571,7 @@ namespace KNote.Repository.EntityFramework
 
                 var listTasks = await noteTasks.DbSet.Where(n => n.NoteId == idNote)
                     .Include(t => t.User)
+                    .OrderBy(t => t.CreationDateTime)
                     .ToListAsync();
                 result.Entity = new List<NoteTaskDto>();
                 foreach (var e in listTasks)
@@ -718,6 +719,7 @@ namespace KNote.Repository.EntityFramework
 
                 var listMessages = await kmessages.DbSet.Where(m => m.NoteId == noteId)
                     .Include(m => m.User)
+                    .OrderBy(m => m.AlarmDateTime)
                     .ToListAsync();
                 result.Entity = new List<KMessageDto>();
                 foreach (var m in listMessages)

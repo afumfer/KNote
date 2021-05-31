@@ -870,6 +870,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listViewAttributes.HideSelection = false;
             this.listViewAttributes.Location = new System.Drawing.Point(10, 79);
+            this.listViewAttributes.MultiSelect = false;
             this.listViewAttributes.Name = "listViewAttributes";
             this.listViewAttributes.Size = new System.Drawing.Size(774, 478);
             this.listViewAttributes.TabIndex = 46;
@@ -1020,6 +1021,7 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.listViewResources.HideSelection = false;
             this.listViewResources.Location = new System.Drawing.Point(5, 36);
+            this.listViewResources.MultiSelect = false;
             this.listViewResources.Name = "listViewResources";
             this.listViewResources.Size = new System.Drawing.Size(381, 529);
             this.listViewResources.TabIndex = 14;
@@ -1150,6 +1152,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listViewTasks.HideSelection = false;
             this.listViewTasks.Location = new System.Drawing.Point(5, 36);
+            this.listViewTasks.MultiSelect = false;
             this.listViewTasks.Name = "listViewTasks";
             this.listViewTasks.Size = new System.Drawing.Size(387, 530);
             this.listViewTasks.TabIndex = 13;
@@ -1362,6 +1365,7 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.listViewTraceNoteFrom.HideSelection = false;
             this.listViewTraceNoteFrom.Location = new System.Drawing.Point(11, 89);
+            this.listViewTraceNoteFrom.MultiSelect = false;
             this.listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
             this.listViewTraceNoteFrom.Size = new System.Drawing.Size(378, 477);
             this.listViewTraceNoteFrom.TabIndex = 43;

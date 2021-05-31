@@ -712,7 +712,6 @@ namespace KNote.Repository.Dapper
                     FROM  NoteTasks LEFT OUTER JOIN
                          Users ON NoteTasks.UserId = Users.UserId
                     WHERE (NoteTasks.NoteId = @idNote)
-
                     ORDER BY [CreationDateTime];";
 
                 var entity = await db.QueryAsync<NoteTaskDto>(sql.ToString(), new { idNote });
@@ -912,7 +911,7 @@ namespace KNote.Repository.Dapper
                     FROM  KMessages INNER JOIN
                          Users ON KMessages.UserId = Users.UserId
                     WHERE (KMessages.NoteId = @noteId)
-                    -- ORDER BY [KMessages.AlarmDateTime];";
+                    ORDER BY KMessages.AlarmDateTime;";
 
                 var entity = await db.QueryAsync<KMessageDto>(sql.ToString(), new { noteId });
                 result.Entity = entity.ToList();
