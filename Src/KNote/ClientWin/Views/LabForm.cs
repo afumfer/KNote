@@ -230,7 +230,7 @@ namespace KNote.ClientWin.Views
                 }
 
                 ANotasExport anotasImport;
-                TextReader reader = new StreamReader(xmlFile);
+                TextReader reader = new StreamReader(xmlFile, Encoding.Unicode);
                 XmlSerializer serializer = new XmlSerializer(typeof(ANotasExport));
                 anotasImport = (ANotasExport)serializer.Deserialize(reader);
                 reader.Close();
@@ -258,10 +258,13 @@ namespace KNote.ClientWin.Views
             string r21 = "&#x";
             string r22 = "$$$";
 
+            int maxFolder = (await service.Folders.GetNextFolderNumber()).Entity;
+            int maxNote = (await service.Folders.GetNextFolderNumber()).Entity; 
 
             var newFolderDto = new FolderDto
             {
-                FolderNumber = carpetaExport.IdCarpeta,
+                //FolderNumber = carpetaExport.IdCarpeta,
+                FolderNumber = maxFolder,
                 Name = carpetaExport.NombreCarpeta,
                 Order = carpetaExport.Orden,
                 OrderNotes = carpetaExport.OrdenNotas,
@@ -284,9 +287,10 @@ namespace KNote.ClientWin.Views
                 }
 
                 var newNote = new NoteExtendedDto
-                {                   
+                {
                     FolderId = folder.FolderId,
-                    NoteNumber = n.IdNota,
+                    //NoteNumber = n.IdNota,
+                    NoteNumber = maxNote++,
                     Description = n.DescripcionNota,
                     Topic = n.Asunto, 
                     CreationDateTime = n.FechaHoraCreacion,

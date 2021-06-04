@@ -224,7 +224,33 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(response);
         }
 
+        public async Task<Result<int>> GetNextFolderNumber()
+        {
+            var result = new Result<int>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
+                result.Entity = GetNextFolderNumber(folders);
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
         #region Private methods
+
+        private int GetNextFolderNumber(GenericRepositoryEF<KntDbContext, Folder> folders)
+        {
+            // Emplear método LastOrDefault() en lugar de FirstOrDafault 
+            var lastFolder = folders
+                .DbSet.OrderByDescending(f => f.FolderNumber).FirstOrDefault();
+
+            return lastFolder != null ? lastFolder.FolderNumber + 1 : 1;
+        }
 
         private void LoadChilds(FolderDto folder, List<FolderDto> allFolders)
         {
@@ -233,15 +259,6 @@ namespace KNote.Repository.EntityFramework
 
             foreach (FolderDto f in folder.ChildFolders)
                 LoadChilds(f, allFolders);
-        }
-
-        private int GetNextFolderNumber(GenericRepositoryEF<KntDbContext, Folder> folders)
-        {            
-            // Emplear método LastOrDefault() en lugar de FirstOrDafault 
-            var lastFolder = folders
-                .DbSet.OrderByDescending(f => f.FolderNumber).FirstOrDefault();
-
-            return lastFolder != null ? lastFolder.FolderNumber + 1 : 1;
         }
 
         #endregion

@@ -250,7 +250,31 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
+        public async Task<Result<int>> GetNextFolderNumber()
+        {
+            var result = new Result<int>();
+            try
+            {
+                var db = GetOpenConnection();
+                result.Entity = GetNextFolderNumber(db);
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
         #region Private methods
+
+        private int GetNextFolderNumber(DbConnection db)
+        {
+            var sql = "SELECT MAX(FolderNumber) FROM Folders";
+            var result = db.ExecuteScalar<int>(sql);
+
+            return result + 1;
+        }
 
         // TODO: Pendiente de refactorizar (este código está repetido en el repositorio EF)
         private void LoadChilds(FolderDto folder, List<FolderDto> allFolders)
@@ -260,14 +284,6 @@ namespace KNote.Repository.Dapper
 
             foreach (FolderDto f in folder.ChildFolders)
                 LoadChilds(f, allFolders);
-        }
-
-        private int GetNextFolderNumber(DbConnection db)
-        {            
-            var sql = "SELECT MAX(FolderNumber) FROM Folders";
-            var result = db.ExecuteScalar<int>(sql);
-
-            return result + 1;
         }
 
         #endregion

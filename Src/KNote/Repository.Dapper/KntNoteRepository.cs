@@ -904,12 +904,12 @@ namespace KNote.Repository.Dapper
                 var db = GetOpenConnection();
 
                 var sql = @"
-                    SELECT                        
+                    SELECT
                         KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
                         KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
                         KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
                     FROM  KMessages INNER JOIN
-                         Users ON KMessages.UserId = Users.UserId
+                        Users ON KMessages.UserId = Users.UserId
                     WHERE (KMessages.NoteId = @noteId)
                     ORDER BY KMessages.AlarmDateTime;";
 
@@ -1354,6 +1354,22 @@ namespace KNote.Repository.Dapper
 
                 result.Entity = true;
 
+                await CloseIsTempConnection(db);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
+        public async Task<Result<int>> GetNextNoteNumber()
+        {
+            var result = new Result<int>();
+            try
+            {
+                var db = GetOpenConnection();
+                result.Entity = GetNextNoteNumber(db);
                 await CloseIsTempConnection(db);
             }
             catch (Exception ex)

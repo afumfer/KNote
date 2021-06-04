@@ -15,5 +15,6 @@ namespace KNote.Repository
         Task<Result<FolderDto>> AddAsync(FolderDto entityInfo);
         Task<Result<FolderDto>> UpdateAsync(FolderDto entityInfo);
         Task<Result> DeleteAsync(Guid id);
+        Task<Result<int>> GetNextFolderNumber();
     }
 }

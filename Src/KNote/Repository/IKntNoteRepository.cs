@@ -42,5 +42,6 @@ namespace KNote.Repository
         Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId, EnumNotificationType? notificationType = null);
         Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId);
         Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag);
+        Task<Result<int>> GetNextNoteNumber();
     }
 }

@@ -1092,6 +1092,23 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result); ;
         }
 
+        public async Task<Result<int>> GetNextNoteNumber()
+        {
+            var result = new Result<int>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+                result.Entity = GetNextNoteNumber(notes);
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
+
 
         #endregion 
 

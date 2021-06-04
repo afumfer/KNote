@@ -490,6 +490,11 @@ namespace KNote.Service.Services
             return await _repository.Notes.PatchChangeTags(noteId,  oldTag, newTag);
         }
 
+        public async Task<Result<int>> GetNextNoteNumber()
+        {
+            return await _repository.Notes.GetNextNoteNumber();
+        }
+
         #endregion
 
         #region Private methods

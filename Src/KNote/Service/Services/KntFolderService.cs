@@ -101,6 +101,11 @@ namespace KNote.Service.Services
             return result;
         }
 
+        public async Task<Result<int>> GetNextFolderNumber()
+        {
+            return await _repository.Folders.GetNextFolderNumber();
+        }
+
         #endregion
 
     }
