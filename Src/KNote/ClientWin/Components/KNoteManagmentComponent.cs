@@ -665,6 +665,7 @@ namespace KNote.ClientWin.Components
             SelectedNoteInfo = null;
             FolderPath = "";
             CountNotes = 0;
+            FoldersSelectorComponent.ServicesRef = null;  // force get repostiroy list form store
             FoldersSelectorComponent.Refresh();
             NoteEditorComponent.CleanView();
             NotesSelectorComponent.CleanView();

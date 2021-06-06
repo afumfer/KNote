@@ -84,8 +84,7 @@
             this.tabAppLab.Size = new System.Drawing.Size(662, 549);
             this.tabAppLab.TabIndex = 0;
             this.tabAppLab.Text = "Lab app components";
-            this.tabAppLab.UseVisualStyleBackColor = true;
-            this.tabAppLab.Click += new System.EventHandler(this.tabAppLab_Click);
+            this.tabAppLab.UseVisualStyleBackColor = true;            
             // 
             // button1
             // 

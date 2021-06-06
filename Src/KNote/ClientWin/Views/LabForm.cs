@@ -258,6 +258,13 @@ namespace KNote.ClientWin.Views
             string r21 = "&#x";
             string r22 = "$$$";
 
+            string r31 = @"D:\Resources\knt\ImgsEditorHtmlPersonalConsejeria";
+            string r32 = @"D:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
+
+            string r41 = @"D:\Resources\knt\ImgsEditorHtmlPersonalConsejeria";
+            string r42 = @"C:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
+
+
             int maxFolder = (await service.Folders.GetNextFolderNumber()).Entity;
             int maxNote = (await service.Folders.GetNextFolderNumber()).Entity; 
 
@@ -281,17 +288,26 @@ namespace KNote.ClientWin.Views
             {
                 if (n.DescripcionNota.Contains(r12))
                 {
-                    // Hack for problems in deserialization                    
+                    // Hack multiples CR LF 
                     n.DescripcionNota = n.DescripcionNota.Replace(r12, r11);
+                    // Hack for problems in deserialization
                     n.DescripcionNota = n.DescripcionNota.Replace(r22, r21);
+                    // Hack inserted resources change
+                    n.DescripcionNota = n.DescripcionNota.Replace(r32, r31);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r42, r41);
                 }
+
+                (string descriptionNew, string scriptCode) = ExtractAnTScriptCode(n.DescripcionNota);
 
                 var newNote = new NoteExtendedDto
                 {
                     FolderId = folder.FolderId,
                     //NoteNumber = n.IdNota,
-                    NoteNumber = maxNote++,
-                    Description = n.DescripcionNota,
+                    NoteNumber = maxNote++,                    
+                    
+                    Description = descriptionNew,
+                    Script = scriptCode,
+
                     Topic = n.Asunto, 
                     CreationDateTime = n.FechaHoraCreacion,
                     ModificationDateTime = n.FechaModificacion,
@@ -360,7 +376,7 @@ namespace KNote.ClientWin.Views
                 if (!string.IsNullOrEmpty(n.NotaEx))
                 {
                     // TODO: Refactor this line
-                    var root = @"C:\ANotas\Docs";
+                    var root = @"D:\ANotas\Docs";
 
                     var fileFullName = $"{root}{n.NotaEx}";
 
@@ -546,10 +562,39 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        private void tabAppLab_Click(object sender, EventArgs e)
-        {
 
+        public (string, string) ExtractAnTScriptCode(string descriptionIn)
+        {
+            int indFrom, indTo, lenCode;
+
+            if (string.IsNullOrEmpty(descriptionIn))
+                return (descriptionIn, null) ;
+
+            indFrom = descriptionIn.IndexOf("[!AnTScript]");
+            indFrom = (indFrom >= 0) ? indFrom + 12 : -1;
+            if (indFrom < 0)
+                return (descriptionIn, null);
+
+            indTo = descriptionIn.IndexOf("[/AnTScript]", indFrom);
+            indTo = (indTo < 0) ? descriptionIn.Length : indTo;
+
+            lenCode = indTo - indFrom;
+
+            if (lenCode <= 0)
+                return (descriptionIn, null);
+            else
+            {
+                string DescriptionOut = "";
+                string ScriptOut = "";
+                ScriptOut = descriptionIn.Substring(indFrom, lenCode);
+
+                DescriptionOut = descriptionIn.Replace("[!AnTScript]" + ScriptOut + "[/AnTScript]", "");
+
+                return (DescriptionOut, ScriptOut);
+            }
+            
         }
+
     }
 
 }
