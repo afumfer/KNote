@@ -111,6 +111,11 @@ namespace KNote.ClientWin.Core
             return _servicesRefs.Where(_ => _.IdServiceRef == id).FirstOrDefault();
         }
 
+        public ServiceRef GetServiceRef(string alias)
+        {
+            return _servicesRefs.Where(_ => _.Alias == alias).FirstOrDefault();
+        }
+
         public ServiceRef GetFirstServiceRef()
         {
             return _servicesRefs.FirstOrDefault();

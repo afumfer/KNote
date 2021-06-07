@@ -918,7 +918,7 @@ namespace KntScript
 
         private void CodeExecutePrintLine(PrintLine printLine)
         {
-            string s = GenExpr(printLine.Expr).ToString();
+            string s = GenExpr(printLine.Expr)?.ToString();
             inOutDevice.Print(s, true);
         }
 

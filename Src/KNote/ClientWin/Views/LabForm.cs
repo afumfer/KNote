@@ -264,6 +264,16 @@ namespace KNote.ClientWin.Views
             string r41 = @"D:\Resources\knt\ImgsEditorHtmlPersonalConsejeria";
             string r42 = @"C:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
 
+            string r51 = @"_KNTERRORTRAP";
+            string r52 = @"_ANTERRORTRAP";
+            string r61 = @"_KNTERRORCODE";
+            string r62 = @"_ANTERRORCODE";
+            string r71 = @"_KNTERRORDESCRIPTION";
+            string r72 = @"_ANTERRORDESCRIPTION";
+            string r81 = "";
+            string r82 = "[!ExecuteAnTScriptBGroundThread]";
+            string r91 = "";
+            string r92 = "_ANTForm.Exit();";
 
             int maxFolder = (await service.Folders.GetNextFolderNumber()).Entity;
             int maxNote = (await service.Folders.GetNextFolderNumber()).Entity; 
@@ -295,6 +305,12 @@ namespace KNote.ClientWin.Views
                     // Hack inserted resources change
                     n.DescripcionNota = n.DescripcionNota.Replace(r32, r31);
                     n.DescripcionNota = n.DescripcionNota.Replace(r42, r41);
+                    // KntScript
+                    n.DescripcionNota = n.DescripcionNota.Replace(r52, r51);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r62, r61);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r72, r71);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r82, r81);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r92, r91);
                 }
 
                 (string descriptionNew, string scriptCode) = ExtractAnTScriptCode(n.DescripcionNota);

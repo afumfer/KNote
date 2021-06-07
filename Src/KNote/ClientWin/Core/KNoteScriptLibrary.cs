@@ -7,11 +7,15 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
+using KNote.Model.Dto;
+using KNote.Service;
 using KntScript;
 
 namespace KNote.ClientWin.Core
@@ -19,6 +23,8 @@ namespace KNote.ClientWin.Core
     public class KNoteScriptLibrary: Library
     {
         private readonly Store _store;
+        
+        private Dictionary<string, string> dictionaryVars;
 
         public KNoteScriptLibrary(Store store) 
         {
@@ -217,7 +223,7 @@ namespace KNote.ClientWin.Core
         public DbConnection GetSQLConnection(string connectionString)
         {
             var db =  new SqlConnection(connectionString);
-            // db.Open();
+            db.Open();
             return db;                        
         }
 
@@ -240,7 +246,7 @@ namespace KNote.ClientWin.Core
             catch (Exception ex)
             {
                 if (showError == true)
-                    MessageBox.Show("Ha ocurrido el siguiente error: " + ex.Message, "ANotas");
+                    MessageBox.Show("The following error has occurred: " + ex.Message, "KaNote");
                 else
                     throw;
             }
@@ -248,16 +254,89 @@ namespace KNote.ClientWin.Core
 
         public void Exec(string fileName, string arguments)
         {
+            string url = fileName;
+
             try
             {
-                Process.Start(fileName, arguments);
+                Process.Start(url, arguments);
             }
-            catch (Exception)
+            catch
             {
-                throw;
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
+         
+        public async Task<bool> LoadVarsFromRepository(string varIdentifier, string repositoryAlias)
+        {
+            ServiceRef serviceRef;
+            if(string.IsNullOrEmpty(repositoryAlias))
+                serviceRef = _store.GetFirstServiceRef();
+            else
+                serviceRef = _store.GetServiceRef(repositoryAlias);
 
+            if (serviceRef == null || varIdentifier == null)
+                throw new Exception("Invalid parameter.");
+
+            NotesSearchDto search = new NotesSearchDto { TextSearch = $"{varIdentifier} " };
+            var note = (await serviceRef.Service.Notes.GetSearch(search)).Entity.FirstOrDefault();
+
+            string content = note?.Description;
+            if (content != null)
+            {
+                //tagVars = note.Description;
+                dictionaryVars = new Dictionary<string, string>();
+                string[] lines = note.Description?.Split(
+                    new[] { "\r\n", "\r", "\n" },
+                    StringSplitOptions.None
+                );
+                foreach(string s in lines)
+                {
+                    var splitVar = s.Split('=');
+                    if (splitVar.Length == 2)
+                    {
+                        splitVar[0] = splitVar[0].Trim();
+                        splitVar[1] = splitVar[1].Trim();
+                        if (dictionaryVars.ContainsKey(splitVar[0]))
+                            dictionaryVars[splitVar[0]] = splitVar[1];
+                        else 
+                            dictionaryVars.Add(splitVar[0], splitVar[1]);
+                    }
+                }
+                return true;
+            }
+            else                            
+                return false;
+        }
+
+        public string GetVar(string idVar)
+        {
+            if (dictionaryVars == null)
+                return null;
+            else
+            {
+                if (dictionaryVars.ContainsKey(idVar))
+                    return dictionaryVars[idVar];
+                else
+                    return null;
+            }
+        }
 
         #endregion 
 
