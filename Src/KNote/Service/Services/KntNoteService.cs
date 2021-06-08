@@ -45,6 +45,11 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetAsync(noteId);
         }
 
+        public async Task<Result<NoteDto>> GetAsync(int noteNumber)
+        {
+            return await _repository.Notes.GetAsync(noteNumber);
+        }
+
         public async Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId)
         {
             var result = new Result<NoteExtendedDto>();            

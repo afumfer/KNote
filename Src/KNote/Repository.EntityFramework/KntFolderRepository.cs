@@ -43,7 +43,48 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
+        //public async Task<Result<FolderDto>> GetAsync(Guid folderId)
+        //{
+        //    var resService = new Result<FolderDto>();
+        //    try
+        //    {
+        //        var ctx = GetOpenConnection();
+        //        var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
+
+        //        var resRep = await folders.GetAsync((object)folderId);
+        //        // KNote template ... load here aditionals properties for FolderDto
+        //        resRep = folders.LoadReference(resRep.Entity, n => n.ParentFolder);
+
+        //        // Map to dto
+        //        resService.Entity = resRep.Entity?.GetSimpleDto<FolderDto>();
+        //        resService.Entity.ParentFolderDto = new FolderDto();
+        //        resService.Entity.ParentFolderDto = resRep.Entity?.ParentFolder?.GetSimpleDto<FolderDto>();
+
+        //        var resultChilds = await GetTreeAsync(folderId);
+        //        resService.Entity.ChildFolders = resultChilds.Entity;
+
+        //        resService.ErrorList = resRep.ErrorList;
+
+        //        await CloseIsTempConnection(ctx);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //    }
+        //    return ResultDomainAction(resService);
+        //}
+
         public async Task<Result<FolderDto>> GetAsync(Guid folderId)
+        {
+            return await GetAsync(folderId, null);
+        }
+
+        public async Task<Result<FolderDto>> GetAsync(int folderNumber)
+        {
+            return await GetAsync(null, folderNumber);
+        }
+
+        public async Task<Result<FolderDto>> GetAsync(Guid? folderId, int? folderNumber)
         {
             var resService = new Result<FolderDto>();
             try
@@ -51,7 +92,12 @@ namespace KNote.Repository.EntityFramework
                 var ctx = GetOpenConnection();
                 var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
 
-                var resRep = await folders.GetAsync((object)folderId);
+                Result<Folder> resRep;
+                if(folderId != null)
+                    resRep = await folders.GetAsync((object)folderId);
+                else 
+                    resRep = await folders.GetAsync(f => f.FolderNumber == folderNumber);
+                
                 // KNote template ... load here aditionals properties for FolderDto
                 resRep = folders.LoadReference(resRep.Entity, n => n.ParentFolder);
 
@@ -60,7 +106,7 @@ namespace KNote.Repository.EntityFramework
                 resService.Entity.ParentFolderDto = new FolderDto();
                 resService.Entity.ParentFolderDto = resRep.Entity?.ParentFolder?.GetSimpleDto<FolderDto>();
 
-                var resultChilds = await GetTreeAsync(folderId);
+                var resultChilds = await GetTreeAsync(resService.Entity.FolderId);
                 resService.Entity.ChildFolders = resultChilds.Entity;
 
                 resService.ErrorList = resRep.ErrorList;

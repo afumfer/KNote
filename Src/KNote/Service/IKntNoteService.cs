@@ -11,6 +11,7 @@ namespace KNote.Service
         Task<Result<List<NoteInfoDto>>> GetAllAsync();
         Task<Result<List<NoteInfoDto>>> HomeNotesAsync();
         Task<Result<NoteDto>> GetAsync(Guid noteId);
+        Task<Result<NoteDto>> GetAsync(int noteNumber);
         Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId);
         Task <Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);
         Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);

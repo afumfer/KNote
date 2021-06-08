@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model.Dto;
+using KNote.Model;
 using KNote.Service;
 using KntScript;
 
@@ -338,9 +339,75 @@ namespace KNote.ClientWin.Core
             }
         }
 
+        public async Task<bool> SaveInfoInRepository(string repositoryAlias, string subjet, string message, int? folderNumber)
+        {
+            ServiceRef serviceRef = GetServiceRef(repositoryAlias);
+
+            NoteDto note = (await serviceRef.Service.Notes.NewAsync()).Entity;
+            note.Topic = subjet;
+            note.Description = message;
+            if (folderNumber == null)
+                note.FolderId = (await serviceRef.Service.Folders.GetHomeAsync()).Entity.FolderId;
+            else
+            {
+                var folder = (await serviceRef.Service.Folders.GetAsync((int)folderNumber)).Entity;
+                if(folder != null)
+                    note.FolderId = folder.FolderId;
+                else
+                    throw new Exception("Invalid parameter.");
+            }
+
+            var res = (await serviceRef.Service.Notes.SaveAsync(note)).IsValid;
+
+            return res;
+        }
+
+        public async Task<bool> SaveInfoInRepository(string repositoryAlias, string subjet, string message)
+        {
+            return await SaveInfoInRepository(repositoryAlias, subjet, message, null);
+        }
+
+        public FolderDto GetFolderByNum(string repositoryAlias, int folderNumber)
+        {
+            ServiceRef serviceRef = GetServiceRef(repositoryAlias);
+
+            Task<Result<FolderDto>> task = serviceRef.Service.Folders.GetAsync(folderNumber);
+            task.Wait();
+
+            Result<FolderDto> result = task.Result;
+
+            return result.Entity;            
+        }
+
+        public NoteDto GetNoteByNum(string repositoryAlias, int noteNumber)
+        {
+            ServiceRef serviceRef = GetServiceRef(repositoryAlias);
+
+            Task<Result<NoteDto>> task = serviceRef.Service.Notes.GetAsync(noteNumber);
+            task.Wait();
+
+            Result<NoteDto> result = task.Result;
+
+            return result.Entity;
+        }
+
         #endregion 
 
         #region Tests and demos
+
+        public Guid TestTaskToSecuential()
+        {
+            ServiceRef serviceRef = GetServiceRef(null);
+
+            Task<Result<FolderDto>> task = serviceRef.Service.Folders.GetHomeAsync();
+            task.Wait();
+
+            Result<FolderDto> result = task.Result;
+
+            var r = result.Entity.FolderId;
+
+            return r;
+        }
 
 
         public float DemoSumNum(float x, float y)
@@ -365,6 +432,23 @@ namespace KNote.ClientWin.Core
 
         #endregion
 
+        #region Private methods
+
+        private ServiceRef GetServiceRef(string repositoryAlias)
+        {
+            ServiceRef serviceRef;
+            if (string.IsNullOrEmpty(repositoryAlias))
+                serviceRef = _store.GetFirstServiceRef();
+            else
+                serviceRef = _store.GetServiceRef(repositoryAlias);
+
+            if (serviceRef == null)
+                throw new Exception("Invalid parameter.");
+
+            return serviceRef;
+        }
+
+        #endregion 
     }
 
 }

@@ -97,30 +97,46 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction<List<FolderDto>>(result);
         }
 
-        public async Task<Result<FolderDto>> GetAsync(Guid id)
-        {            
+        public async Task<Result<FolderDto>> GetAsync(Guid folderId)
+        {
+            return await GetAsync(folderId, null);
+        }
+
+        public async Task<Result<FolderDto>> GetAsync(int folderNumber)
+        {
+            return await GetAsync(null, folderNumber);
+        }
+
+        private async Task<Result<FolderDto>> GetAsync(Guid? folderId, int? folderNumber)
+        {
             var result = new Result<FolderDto>();
             try
             {
                 var db = GetOpenConnection();
 
                 var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
-                sql += "FROM Folders WHERE FolderId = @Id;";
+                if(folderId != null)
+                    sql += "FROM Folders WHERE FolderId = @FolderId;";
+                else
+                    sql += "FROM Folders WHERE FolderNumber = @FolderNumber;";
 
-                var entity = await db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { Id = id });
+                var entity = await db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { FolderId = folderId, FolderNumber = folderNumber });
 
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
                 else
                 {
-                    if(entity.ParentId != null)
+                    if (entity.ParentId != null)
                         entity.ParentFolderDto = await db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { Id = entity.ParentId });
                 }
 
                 result.Entity = entity;
 
-                var resultChilds = await GetTreeAsync(id);
-                result.Entity.ChildFolders = resultChilds.Entity;
+                if (result.IsValid)
+                {
+                    var resultChilds = await GetTreeAsync(result.Entity.FolderId);
+                    result.Entity.ChildFolders = resultChilds.Entity;
+                }
 
                 await CloseIsTempConnection(db);
             }
@@ -130,6 +146,7 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
+
 
         public async Task<Result<FolderDto>> AddAsync(FolderDto entity)
         {

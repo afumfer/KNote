@@ -231,6 +231,16 @@ namespace KNote.Repository.Dapper
         }
 
         public async Task<Result<NoteDto>> GetAsync(Guid noteId)
+        {
+            return await GetAsync(noteId, null);
+        }
+
+        public async Task<Result<NoteDto>> GetAsync(int noteNumber)
+        {
+            return await GetAsync(null, noteNumber);
+        }
+
+        private async Task<Result<NoteDto>> GetAsync(Guid? noteId, int? noteNumber)
         {            
             var result = new Result<NoteDto>();
             try
@@ -251,10 +261,13 @@ namespace KNote.Repository.Dapper
                             
                     FROM  Notes 
                           INNER JOIN  Folders ON Notes.FolderId = Folders.FolderId 
-                          LEFT OUTER JOIN  NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId
+                          LEFT OUTER JOIN  NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId ";
                     
-                    WHERE NoteId = @noteId ;";
-                
+                    if(noteId != null)
+                        sql += "WHERE NoteId = @noteId ;";
+                    else
+                        sql += "WHERE NoteNumber = @noteNumber ;";
+
                 var entity = await db.QueryAsync<NoteDto, FolderDto, NoteTypeDto, NoteDto>(
                     sql.ToString(),
                     (note, folder, noteType) =>
@@ -263,7 +276,7 @@ namespace KNote.Repository.Dapper
                         note.NoteTypeDto = noteType;
                         return note;
                     },
-                    new { noteId }, 
+                    new { noteId, noteNumber }, 
                     splitOn: "FolderId, NoteTypeId"
                     );
 

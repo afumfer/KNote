@@ -233,17 +233,39 @@ namespace KNote.Repository.EntityFramework
 
         public async Task<Result<NoteDto>> GetAsync(Guid noteId)
         {
+            return await GetAsync(noteId, null);
+        }
+
+        public async Task<Result<NoteDto>> GetAsync(int noteNumber)
+        {
+            return await GetAsync(null, noteNumber);
+        }
+
+        private async Task<Result<NoteDto>> GetAsync(Guid? noteId, int? noteNumber)
+        {
             var result = new Result<NoteDto>();
             try
             {
                 var ctx = GetOpenConnection();
                 var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
-                var entity = await notes.DbSet.Where(n => n.NoteId == noteId)
-                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
-                    .Include(n => n.Folder)
-                    .Include(n => n.NoteType)
-                    .SingleOrDefaultAsync();
+                Note entity;
+                if(noteId != null)
+                {
+                    entity = await notes.DbSet.Where(n => n.NoteId == noteId)
+                        .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                        .Include(n => n.Folder)
+                        .Include(n => n.NoteType)
+                        .SingleOrDefaultAsync();
+                }
+                else
+                {
+                    entity = await notes.DbSet.Where(n => n.NoteNumber == noteNumber)
+                        .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                        .Include(n => n.Folder)
+                        .Include(n => n.NoteType)
+                        .SingleOrDefaultAsync();
+                }
 
                 // Map to dto
                 if(entity != null)

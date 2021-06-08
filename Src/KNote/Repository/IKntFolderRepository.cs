@@ -11,6 +11,7 @@ namespace KNote.Repository
         Task<Result<List<FolderDto>>> GetAllAsync();        
         Task<Result<List<FolderDto>>> GetTreeAsync(Guid? parentId = null);
         Task<Result<FolderDto>> GetAsync(Guid folderId);
+        Task<Result<FolderDto>> GetAsync(int folderNumber);
         Task<Result<FolderDto>> GetHomeAsync();        
         Task<Result<FolderDto>> AddAsync(FolderDto entityInfo);
         Task<Result<FolderDto>> UpdateAsync(FolderDto entityInfo);
