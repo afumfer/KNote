@@ -448,7 +448,7 @@ namespace KNote.ClientWin.Views
             var status = string.IsNullOrEmpty(_com.Model.InternalTags) ? "" : $" - ({_com.Model.InternalTags})";
             labelStatus.Text = $"{_com.ServiceRef?.Alias} >> [{_com.Model.FolderDto.Name}] {status}";
         }
-       
-        #endregion
+
+        #endregion 
     }
 }

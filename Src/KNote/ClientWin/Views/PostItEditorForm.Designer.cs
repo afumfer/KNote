@@ -33,11 +33,11 @@ namespace KNote.ClientWin.Views
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             this.panelForm = new System.Windows.Forms.Panel();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
-            this.labelStatus = new System.Windows.Forms.Label();
+            this.labelStatus = new System.Windows.Forms.LabelNoCopy();
             this.picResize = new System.Windows.Forms.PictureBox();
             this.picMenu = new System.Windows.Forms.PictureBox();
             this.textDescription = new System.Windows.Forms.TextBox();
-            this.labelCaption = new System.Windows.Forms.Label();
+            this.labelCaption = new System.Windows.Forms.LabelNoCopy();
             this.menuPostIt = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuHide = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAlwaysFront = new System.Windows.Forms.ToolStripMenuItem();

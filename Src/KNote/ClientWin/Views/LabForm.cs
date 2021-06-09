@@ -200,7 +200,6 @@ namespace KNote.ClientWin.Views
             var serviceRef = _store.ActiveFolderWithServiceRef.ServiceRef;
             var service = serviceRef.Service;
 
-
             Guid? userId = null;
             var userDto = (await service.Users.GetByUserNameAsync(_store.AppUserName)).Entity;
             if (userDto != null)
@@ -258,10 +257,10 @@ namespace KNote.ClientWin.Views
             string r21 = "&#x";
             string r22 = "$$$";
 
-            string r31 = @"D:\Resources\knt\ImgsEditorHtmlPersonalConsejeria";
+            string r31 = @"D:\KaNote\Resources\ImgsEditorHtml";
             string r32 = @"D:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
 
-            string r41 = @"D:\Resources\knt\ImgsEditorHtmlPersonalConsejeria";
+            string r41 = @"D:\KaNote\Resources\ImgsEditorHtml";
             string r42 = @"C:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
 
             string r51 = @"_KNTERRORTRAP";

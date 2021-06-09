@@ -41,14 +41,14 @@
             this.textOut.Location = new System.Drawing.Point(0, 0);
             this.textOut.Multiline = true;
             this.textOut.Name = "textOut";
-            this.textOut.Size = new System.Drawing.Size(481, 358);
+            this.textOut.Size = new System.Drawing.Size(737, 387);
             this.textOut.TabIndex = 0;
             // 
             // InOutDeviceForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(481, 358);
+            this.ClientSize = new System.Drawing.Size(737, 387);
             this.Controls.Add(this.textOut);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "InOutDeviceForm";
