@@ -283,34 +283,35 @@ namespace KNote.ClientWin.Core
             Finalize();
         }
 
-        public string GetOrSaveTmpFile(string rootCacheResource, string container, string fileName, byte[] arrayContent)
+        // TODO: Refactor this method 
+        public (string, string) GetOrSaveTmpFile(string rootCacheResource, string container, string fileName, byte[] arrayContent)
         {
-            if (rootCacheResource == null || container == null || fileName == null || arrayContent == null)
-                return null;
+            if (rootCacheResource == null || container == null || fileName == null || arrayContent == null)                
+                return (null, null);
 
-            string tmpFile;
+            string fullUrl = null;
+            string relativeUrl = null;
             try
             {
-                //var dirPath = Path.Combine(new string[] { Path.GetTempPath(), "KaNote", container });
-                var dirPath = Path.Combine(new string[] { rootCacheResource, container });                
-                tmpFile = Path.Combine(dirPath, fileName);
+                relativeUrl = Path.Combine(container, fileName);
+                string dirPath = Path.Combine(new string[] { rootCacheResource, container });                
+                fullUrl = Path.Combine(dirPath, fileName);
 
-                if (string.IsNullOrEmpty(tmpFile))
-                    return tmpFile;
+                if (string.IsNullOrEmpty(fullUrl))
+                    return (relativeUrl, fullUrl);
 
                 if (!Directory.Exists(dirPath))
                     Directory.CreateDirectory(dirPath);
-                if (!File.Exists(tmpFile))
-                    File.WriteAllBytes(tmpFile, arrayContent);
-
+                if (!File.Exists(fullUrl))
+                    File.WriteAllBytes(fullUrl, arrayContent);
+                                
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
-                tmpFile = null;
-            }    
+                MessageBox.Show(ex.Message);                
+            }
 
-            return tmpFile;
+            return (relativeUrl, fullUrl);
         }
 
         #endregion 

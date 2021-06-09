@@ -20,15 +20,15 @@ namespace KNote.Server.Helpers
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<string> EditFile(string contentBase64, string extension, string container, string pathFile, Guid noteId)
+        public async Task<string> EditFile(string contentBase64, string extension, string container, string pathFile)
         {
-            if (!string.IsNullOrEmpty(pathFile))            
-                await DeleteFile(pathFile, container, noteId);
-            
-            return await SaveFile(contentBase64, extension, container, noteId);
+            if (!string.IsNullOrEmpty(pathFile))
+                await DeleteFile(pathFile, container);
+
+            return await SaveFile(contentBase64, extension, container);
         }
         
-        public Task DeleteFile(string path, string container, Guid noteId)
+        public Task DeleteFile(string path, string container)
         {             
             var filename = Path.GetFileName(path);
             string fileDirectory = Path.Combine(GetContainerResourcesPath(), container, filename);
@@ -38,7 +38,7 @@ namespace KNote.Server.Helpers
             return Task.FromResult(0);
         }
 
-        public async Task<string> SaveFile(string contentBase64, string filename, string container, Guid noteId)
+        public async Task<string> SaveFile(string contentBase64, string filename, string container)
         {                        
             var folder = Path.Combine(GetContainerResourcesPath(), container);
             var content = Convert.FromBase64String(contentBase64);
@@ -55,7 +55,7 @@ namespace KNote.Server.Helpers
             return fullUrl.Replace(@"\", @"/");
         }
 
-        public string GetRelativeUrl(string filename, string container, Guid noteId)
+        public string GetRelativeUrl(string filename, string container)
         {            
             var relativeUrl = Path.Combine(container, filename);
             return relativeUrl.Replace(@"\", @"/");

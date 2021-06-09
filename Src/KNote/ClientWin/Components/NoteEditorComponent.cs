@@ -418,7 +418,8 @@ namespace KNote.ClientWin.Components
                 newResource.Container = Service.RepositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();                                
                 newResource.ContentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));           
                 newResource.ContentBase64 = Convert.ToBase64String(newResource.ContentArrayBytes);
-                                
+
+                (newResource.RelativeUrl,newResource.FullUrl) = 
                 GetOrSaveTmpFile(
                     Service.RepositoryRef.ResourcesContainerCacheRootPath,
                     newResource.Container,

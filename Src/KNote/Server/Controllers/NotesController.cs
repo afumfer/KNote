@@ -234,8 +234,8 @@ namespace KNote.Server.Controllers
                 var resApi = await _service.Notes.SaveResourceAsync(entity);
                 if (resApi.IsValid)
                 {
-                    resApi.Entity.FullUrl = await _fileStore.SaveFile(resApi.Entity.ContentBase64, resApi.Entity.Name, resApi.Entity.Container, resApi.Entity.NoteId);
-                    resApi.Entity.RelativeUrl = _fileStore.GetRelativeUrl(resApi.Entity.Name, resApi.Entity.Container, resApi.Entity.NoteId);
+                    resApi.Entity.FullUrl = await _fileStore.SaveFile(resApi.Entity.ContentBase64, resApi.Entity.Name, resApi.Entity.Container);
+                    resApi.Entity.RelativeUrl = _fileStore.GetRelativeUrl(resApi.Entity.Name, resApi.Entity.Container);
                     return Ok(resApi);                
                 }
                 else
@@ -262,8 +262,8 @@ namespace KNote.Server.Controllers
                     {
                         r.ContentBase64 = Convert.ToBase64String(r.ContentArrayBytes);
                         r.ContentArrayBytes = null;
-                        r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container, id);
-                        r.FullUrl = await _fileStore.SaveFile(r.ContentBase64, r.Name, r.Container, id);
+                        r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container);
+                        r.FullUrl = await _fileStore.SaveFile(r.ContentBase64, r.Name, r.Container);
                     }
                     return Ok(resApi);
                 }
@@ -306,8 +306,8 @@ namespace KNote.Server.Controllers
             try
             {
                 if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
-                {                                                            
-                    resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container, resource.NoteId);
+                {
+                    resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
                 }
                 resApi.Entity = resource;
                 return Ok(resApi);

@@ -190,13 +190,14 @@ namespace KNote.ClientWin.Views
             varContentBase64 = _com.Model.ContentBase64;
             varFileType = _com.Model.FileType;            
             varContainer = _com.Model.Container;
-            varContentArrayBytes = _com.Model.ContentArrayBytes;
-            var tmpFile = _com.GetOrSaveTmpFile(
+            varContentArrayBytes = _com.Model.ContentArrayBytes;            
+            (_com.Model.RelativeUrl, _com.Model.FullUrl) = 
+            _com.GetOrSaveTmpFile(
                 _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
                 _com.Model.Container, 
                 _com.Model.Name, 
                 _com.Model.ContentArrayBytes);
-            ShowPreview(tmpFile, false);
+            ShowPreview(_com.Model.FullUrl, false);
         }
 
         private void ControlsToModel()
@@ -211,6 +212,7 @@ namespace KNote.ClientWin.Views
             _com.Model.Container = varContainer;
             _com.Model.ContentArrayBytes = varContentArrayBytes;
 
+            (_com.Model.RelativeUrl, _com.Model.FullUrl) = 
             _com.GetOrSaveTmpFile(
                 _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
                 _com.Model.Container, 

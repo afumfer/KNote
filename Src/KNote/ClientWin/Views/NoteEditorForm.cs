@@ -81,7 +81,7 @@ namespace KNote.ClientWin.Views
             textDescription.Text = "";
             htmlDescription.BodyHtml = "";
             textPriority.Text = "";
-            textDescriptionResource.Text = "";
+            textDescriptionResource.Text = "";            
             listViewAttributes.Clear();
             listViewResources.Clear();
             listViewTasks.Clear();
@@ -175,7 +175,6 @@ namespace KNote.ClientWin.Views
                 _com.Model.Script = textScriptCode.Text;
                 _com.RunScript();
             }
-
         }
 
         private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -490,17 +489,18 @@ namespace KNote.ClientWin.Views
         }
 
         private void linkViewFile_Click(object sender, EventArgs e)
-        {
-            var tmpFile = _com.GetOrSaveTmpFile(
+        {            
+            (_selectedResource.RelativeUrl, _selectedResource.FullUrl) = 
+            _com.GetOrSaveTmpFile(
                 _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
                 _selectedResource.Container, 
                 _selectedResource.Name, 
-                _selectedResource.ContentArrayBytes);
+                _selectedResource.ContentArrayBytes);            
 
-            if (tmpFile == null)
+            if (_selectedResource.FullUrl == null)
                 return;
 
-            ProcessStartInfo startInfo = new ProcessStartInfo(tmpFile) { UseShellExecute = true };
+            ProcessStartInfo startInfo = new ProcessStartInfo(_selectedResource.FullUrl) { UseShellExecute = true };
             try
             {
                 Process.Start(startInfo);
@@ -684,6 +684,9 @@ namespace KNote.ClientWin.Views
         private void ModelToControlsResources()
         {
             listViewResources.Clear();
+            panelPreview.Visible = true;
+            linkViewFile.Visible = false;
+            picResource.Visible = false;
 
             foreach (var res in _com.Model.Resources)
             {
@@ -778,6 +781,7 @@ namespace KNote.ClientWin.Views
             {
                 picResource.Visible = false;
                 panelPreview.Visible = true;
+                linkViewFile.Visible = true;
             }            
         }
 
