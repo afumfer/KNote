@@ -521,7 +521,24 @@ namespace KNote.ClientWin.Views
 
             InsertLinkSelectedResource();             
         }
-        
+
+        private void buttonSaveResource_Click(object sender, EventArgs e)
+        {            
+            if(_selectedResource == null)
+            {
+                MessageBox.Show("There is no selected resource", "KaNote");
+                return;
+            }
+
+            saveFileDialog.Title = "Save resource file as ...";
+            saveFileDialog.InitialDirectory = Path.GetTempPath();            
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string fileName = saveFileDialog.FileName;
+                File.WriteAllBytes(fileName, _selectedResource.ContentArrayBytes);
+            }
+        }
+
         private async void toolDescriptionUploadResource_Click(object sender, EventArgs e)
         {
             var resource = await AddResource();
@@ -1162,5 +1179,6 @@ namespace KNote.ClientWin.Views
                 MessageBox.Show($"OnSelectedTaskItemChanged error: {ex.Message}");
             }
         }
+
     }
 }

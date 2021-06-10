@@ -151,6 +151,8 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
+            this.buttonSaveResource = new System.Windows.Forms.Button();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
@@ -940,6 +942,7 @@
             // 
             // tabResources
             // 
+            this.tabResources.Controls.Add(this.buttonSaveResource);
             this.tabResources.Controls.Add(this.buttonInsertLink);
             this.tabResources.Controls.Add(this.panelPreview);
             this.tabResources.Controls.Add(this.textDescriptionResource);
@@ -957,6 +960,7 @@
             this.tabResources.Size = new System.Drawing.Size(794, 569);
             this.tabResources.TabIndex = 4;
             this.tabResources.Text = "Resources  ";
+            this.tabResources.ToolTipText = "Save resource file";
             this.tabResources.UseVisualStyleBackColor = true;
             // 
             // buttonInsertLink
@@ -1486,6 +1490,17 @@
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
             // 
+            // buttonSaveResource
+            // 
+            this.buttonSaveResource.Location = new System.Drawing.Point(434, 10);
+            this.buttonSaveResource.Name = "buttonSaveResource";
+            this.buttonSaveResource.Size = new System.Drawing.Size(32, 23);
+            this.buttonSaveResource.TabIndex = 20;
+            this.buttonSaveResource.Text = "S";
+            this.toolTipHelps.SetToolTip(this.buttonSaveResource, "Save resource");
+            this.buttonSaveResource.UseVisualStyleBackColor = true;
+            this.buttonSaveResource.Click += new System.EventHandler(this.buttonSaveResource_Click);
+            // 
             // NoteEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1655,5 +1670,7 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox textTaskDescription;
         private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Button buttonSaveResource;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog;
     }
 }
