@@ -24,7 +24,7 @@ namespace KNote.Model
                 UtilCopyProperties(dest, source);
         }
 
-        static void UtilCopyProperties(object dest, object src)
+        public static void UtilCopyProperties(object dest, object src)
         {
             if ((dest == null) || (src == null) )
                 return;

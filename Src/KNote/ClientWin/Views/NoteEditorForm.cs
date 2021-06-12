@@ -553,6 +553,24 @@ namespace KNote.ClientWin.Views
                 InsertLinkSelectedResource();
         }
 
+        private void listViewTasks_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (listViewTasks.SelectedItems.Count > 0)
+                {
+                    var idTask = (Guid.Parse(listViewTasks.SelectedItems[0].Name));
+                    var selTask = _com.Model.Tasks.Where(_ => _.NoteTaskId == idTask).FirstOrDefault();
+                    textTaskDescription.Text = selTask.Description;
+                    textTaskTags.Text = selTask.Tags;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"OnSelectedTaskItemChanged error: {ex.Message}");
+            }
+        }
+
         #endregion
 
         #endregion
@@ -661,8 +679,7 @@ namespace KNote.ClientWin.Views
             if (_com.Model.Tasks.Count > 0)
                 listViewTasks.Items[0].Selected = true;
             else
-            {
-                //UpdateTaskDescription(null);
+            {                
                 textTaskDescription.Text = "";
                 textTaskTags.Text = "";
             }
@@ -694,7 +711,7 @@ namespace KNote.ClientWin.Views
             }
 
             // Width of -2 indicates auto-size.
-            listViewAttributes.Columns.Add("Name", 400, HorizontalAlignment.Left);
+            listViewAttributes.Columns.Add("Name", 250, HorizontalAlignment.Left);
             listViewAttributes.Columns.Add("Value", -2, HorizontalAlignment.Left);
         }
 
@@ -1161,24 +1178,6 @@ namespace KNote.ClientWin.Views
         }
 
         #endregion
-
-        private void listViewTasks_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                if (listViewTasks.SelectedItems.Count > 0)
-                {
-                    var idTask = (Guid.Parse(listViewTasks.SelectedItems[0].Name));
-                    var selTask = _com.Model.Tasks.Where(_ => _.NoteTaskId == idTask).FirstOrDefault();                    
-                    textTaskDescription.Text = selTask.Description;
-                    textTaskTags.Text = selTask.Tags;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"OnSelectedTaskItemChanged error: {ex.Message}");
-            }
-        }
 
     }
 }

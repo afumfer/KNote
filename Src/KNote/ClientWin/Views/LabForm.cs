@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Linq;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
@@ -234,11 +235,15 @@ namespace KNote.ClientWin.Views
                 anotasImport = (ANotasExport)serializer.Deserialize(reader);
                 reader.Close();
 
-                foreach(var c in anotasImport.Carpetas)
-                {
-                    // listMessages.Items.Add($"Folder: {c.NombreCarpeta}");
-                    await SaveFolderDto(service, userId, c, null);
-                }
+                // Import tags / attributes
+                ImportTags(service, anotasImport.Etiquetas);
+
+                // Import folders and notes
+                //foreach(var c in anotasImport.Carpetas)
+                //{
+                //    // listMessages.Items.Add($"Folder: {c.NombreCarpeta}");
+                //    await SaveFolderDto(service, userId, c, null);
+                //}
             }
             catch (Exception ex)
             {
@@ -249,6 +254,53 @@ namespace KNote.ClientWin.Views
 
         }
 
+        private async void ImportTags(IKntService service, List<EtiquetaExport> etiquetas)
+        {
+            // Padre in ([!EtiquetaRaiz] , UU
+            // Codigo not in ( TB, ND, OP, TR, TU,  . UU . 
+            int orderAtrTab = 0;
+            int orderAtr = 0;
+
+            var filtroEtiquetas = etiquetas
+                .Where(e => (e.CodPadre == "[!EtiquetaRaiz]" || e.CodPadre == "UU") &&
+                (e.CodEtiqueta != "TB" && e.CodEtiqueta != "ND" && e.CodEtiqueta != "OP" && e.CodEtiqueta != "TR" && e.CodEtiqueta != "TU" && e.CodEtiqueta != "UU"))
+                .Select(e => e).OrderBy(e => e.DesEtiqueta).ToList();
+
+            foreach (var e in filtroEtiquetas)
+            {
+                
+                listMessages.Items.Add($"{e.DesEtiqueta} - {e.CodEtiqueta} - {e.CodPadre?.ToString()}");
+                KAttributeDto attributeDto = new KAttributeDto
+                {
+                    Description = $"[{e.CodEtiqueta}] " + e.DesEtiqueta,
+                    Name = e.DesEtiqueta,
+                    KAttributeDataType = EnumKAttributeDataType.TagsValue,
+                    Disabled = false,
+                    Order = orderAtr++,
+                    RequiredValue = false                    
+                };
+
+                var tabulatedValues = etiquetas.Where(ev => ev.CodPadre == e.CodEtiqueta).Select(ev => ev).ToList();
+                List<KAttributeTabulatedValueDto> tabulatedValuesAtr = new List<KAttributeTabulatedValueDto>();
+                orderAtrTab = 0;
+                foreach (var t in tabulatedValues)
+                {
+                    
+                    KAttributeTabulatedValueDto atrValue = new KAttributeTabulatedValueDto
+                    {
+                        Value = t.DesEtiqueta,
+                        Description = $"[{t.CodEtiqueta}] " + t.DesEtiqueta,
+                        Order = orderAtrTab++
+                    };
+                    tabulatedValuesAtr.Add(atrValue);
+                }
+
+                attributeDto.KAttributeValues = tabulatedValuesAtr;
+
+                var res = await service.KAttributes.SaveAsync(attributeDto);
+            }
+        }
+
         private async Task<bool> SaveFolderDto(IKntService service, Guid? userId, CarpetaExport carpetaExport, Guid? parent)
         {
             string r11 = "\r\n";
@@ -257,22 +309,27 @@ namespace KNote.ClientWin.Views
             string r21 = "&#x";
             string r22 = "$$$";
 
-            string r31 = @"D:\KaNote\Resources\ImgsEditorHtml";
-            string r32 = @"D:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
+            #region Import customization 
 
-            string r41 = @"D:\KaNote\Resources\ImgsEditorHtml";
-            string r42 = @"C:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
+            //// afumrer
+            //// .......
+            //string r31 = @"D:\KaNote\Resources\ImgsEditorHtml";
+            //string r32 = @"D:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
+            //string r41 = @"D:\KaNote\Resources\ImgsEditorHtml";
+            //string r42 = @"C:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
+            //string r51 = @"_KNTERRORTRAP";
+            //string r52 = @"_ANTERRORTRAP";
+            //string r61 = @"_KNTERRORCODE";
+            //string r62 = @"_ANTERRORCODE";
+            //string r71 = @"_KNTERRORDESCRIPTION";
+            //string r72 = @"_ANTERRORDESCRIPTION";
+            //string r81 = "";
+            //string r82 = "[!ExecuteAnTScriptBGroundThread]";
+            //string r91 = "";
+            //string r92 = "_ANTForm.Exit();";
 
-            string r51 = @"_KNTERRORTRAP";
-            string r52 = @"_ANTERRORTRAP";
-            string r61 = @"_KNTERRORCODE";
-            string r62 = @"_ANTERRORCODE";
-            string r71 = @"_KNTERRORDESCRIPTION";
-            string r72 = @"_ANTERRORDESCRIPTION";
-            string r81 = "";
-            string r82 = "[!ExecuteAnTScriptBGroundThread]";
-            string r91 = "";
-            string r92 = "_ANTForm.Exit();";
+            #endregion
+
 
             int maxFolder = (await service.Folders.GetNextFolderNumber()).Entity;
             int maxNote = (await service.Folders.GetNextFolderNumber()).Entity; 
@@ -301,16 +358,23 @@ namespace KNote.ClientWin.Views
                     n.DescripcionNota = n.DescripcionNota.Replace(r12, r11);
                     // Hack for problems in deserialization
                     n.DescripcionNota = n.DescripcionNota.Replace(r22, r21);
-                    // Hack inserted resources change
-                    n.DescripcionNota = n.DescripcionNota.Replace(r32, r31);
-                    n.DescripcionNota = n.DescripcionNota.Replace(r42, r41);
-                    // KntScript
-                    n.DescripcionNota = n.DescripcionNota.Replace(r52, r51);
-                    n.DescripcionNota = n.DescripcionNota.Replace(r62, r61);
-                    n.DescripcionNota = n.DescripcionNota.Replace(r72, r71);
-                    n.DescripcionNota = n.DescripcionNota.Replace(r82, r81);
-                    n.DescripcionNota = n.DescripcionNota.Replace(r92, r91);
                 }
+
+                #region Import customization 
+
+                //// afumfer
+                //// .......
+                //// Hack inserted resources change
+                //n.DescripcionNota = n.DescripcionNota.Replace(r32, r31);
+                //n.DescripcionNota = n.DescripcionNota.Replace(r42, r41);
+                //// KntScript
+                //n.DescripcionNota = n.DescripcionNota.Replace(r52, r51);
+                //n.DescripcionNota = n.DescripcionNota.Replace(r62, r61);
+                //n.DescripcionNota = n.DescripcionNota.Replace(r72, r71);
+                //n.DescripcionNota = n.DescripcionNota.Replace(r82, r81);
+                //n.DescripcionNota = n.DescripcionNota.Replace(r92, r91);
+
+                #endregion
 
                 (string descriptionNew, string scriptCode) = ExtractAnTScriptCode(n.DescripcionNota);
 

@@ -1192,6 +1192,7 @@ namespace KNote.Repository.EntityFramework
                 {
                     attributesNotes.Add(new NoteKAttributeDto
                     {
+                        NoteKAttributeId = Guid.NewGuid(),
                         KAttributeId = a.KAttributeId,
                         NoteId = noteId,
                         Value = "",
@@ -1240,10 +1241,13 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
-                var ctx = GetOpenConnection();                
+                var ctx = GetOpenConnection();                  
                 var noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(ctx);
+                
+                var findNoteAttribute = (noteKAttributes.Get(_ => _.NoteKAttributeId == entity.NoteKAttributeId)).Entity;
 
-                if (entity.NoteKAttributeId == Guid.Empty)
+                if(findNoteAttribute == null)
+                //if (entity.NoteKAttributeId == Guid.Empty)
                 {
                     entity.NoteKAttributeId = Guid.NewGuid();
                     var newEntity = new NoteKAttribute();
@@ -1283,9 +1287,10 @@ namespace KNote.Repository.EntityFramework
             {
                 AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
             }
+                        
+            resService.Entity = entity;
+            Model.ModelExtensions.UtilCopyProperties(resService.Entity, resRep.Entity);
 
-            // TODO: Valorar refactorizar los siguiente (este patrón está en varios sitios.
-            resService.Entity = resRep.Entity?.GetSimpleDto<NoteKAttributeDto>();
             resService.ErrorList = resRep.ErrorList;
 
             return ResultDomainAction(resService);

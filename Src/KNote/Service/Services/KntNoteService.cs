@@ -58,9 +58,7 @@ namespace KNote.Service.Services
             entity.Resources = (await _repository.Notes.GetResourcesAsync(noteId)).Entity;
             entity.Tasks = (await _repository.Notes.GetNoteTasksAsync(noteId)).Entity;
             entity.Messages = (await _repository.Notes.GetMessagesAsync(noteId)).Entity;
-
-            //entity.InternalTags = GetNoteStatus(entity.Tasks, entity.Messages);
-
+            
             result.Entity = entity;
             return result;
         }

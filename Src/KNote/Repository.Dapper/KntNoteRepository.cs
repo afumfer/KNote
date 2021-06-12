@@ -388,7 +388,7 @@ namespace KNote.Repository.Dapper
 
                 if (r == 0)
                 {
-                    result.ErrorList.Add("Entity not inserted");
+                    result.ErrorList.Add("Note entity not inserted");
                     return ResultDomainAction(result);
                 }
 
@@ -412,8 +412,7 @@ namespace KNote.Repository.Dapper
 
                     if (rA == 0)
                     {
-                        result.ErrorList.Add("Entity not inserted");
-                        return ResultDomainAction(result);
+                        result.ErrorList.Add("Atribute-value note entity not inserted");                        
                     }
                 }
 
@@ -462,7 +461,7 @@ namespace KNote.Repository.Dapper
 
                 if (r == 0)
                 {
-                    result.ErrorList.Add("Entity not inserted");
+                    result.ErrorList.Add("Note entity not inserted");
                     return ResultDomainAction(result);
                 }
 
@@ -483,9 +482,11 @@ namespace KNote.Repository.Dapper
                 }
 
                 // Add new attributes or update 
+                var sqlFindNoteKAttribute = "SELECT * from NoteKAttributes WHERE NoteKAttributeId = @NoteKAttributeId;";
                 foreach (var atr in entity.KAttributesDto)
-                {
-                    if(atr.NoteKAttributeId == Guid.Empty)
+                {                    
+                    var entityNoteKAttribute = await db.QueryFirstOrDefaultAsync<NoteKAttributeDto>(sqlFindNoteKAttribute.ToString(), new { NoteKAttributeId = atr.NoteKAttributeId });
+                    if (entityNoteKAttribute == null)
                     {
                         atr.NoteKAttributeId = Guid.NewGuid();
                         atr.NoteId = entity.NoteId;
@@ -514,8 +515,7 @@ namespace KNote.Repository.Dapper
 
                     if (rA == 0)
                     {
-                        result.ErrorList.Add("Entity not inserted");
-                        return ResultDomainAction(result);
+                        result.ErrorList.Add("Atribute-value note entity not inserted");                        
                     }
                 }
 
@@ -1547,6 +1547,7 @@ namespace KNote.Repository.Dapper
                 {
                     attributesNotes.Add(new NoteKAttributeDto
                     {
+                        NoteKAttributeId = Guid.NewGuid(),
                         KAttributeId = a.KAttributeId,
                         NoteId = noteId,
                         Value = "",
