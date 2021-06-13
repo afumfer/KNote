@@ -236,7 +236,7 @@ namespace KNote.ClientWin.Views
                 reader.Close();
 
                 // Import tags / attributes
-                ImportTags(service, anotasImport.Etiquetas);
+                //ImportTags(service, anotasImport.Etiquetas);
 
                 // Import folders and notes
                 //foreach(var c in anotasImport.Carpetas)
@@ -244,6 +244,10 @@ namespace KNote.ClientWin.Views
                 //    // listMessages.Items.Add($"Folder: {c.NombreCarpeta}");
                 //    await SaveFolderDto(service, userId, c, null);
                 //}
+
+                // Update attributes
+                var resAtrProc = await UpdateAttributes(service, anotasImport.Etiquetas);
+
             }
             catch (Exception ex)
             {
@@ -253,6 +257,68 @@ namespace KNote.ClientWin.Views
             MessageBox.Show("Process finished ");
 
         }
+
+        private async Task<bool> UpdateAttributes(IKntService service, List<EtiquetaExport> etiquetas)
+        {
+            var allNotes = (await service.Notes.GetAllAsync()).Entity;
+
+            foreach(var n in allNotes)
+            {
+                if (!string.IsNullOrEmpty(n.Tags))
+                {
+                    var tags = ProcessTag(n.Tags);
+                    var note = (await service.Notes.GetAsync(n.NoteId)).Entity;
+                    foreach(var t in tags)
+                    {
+                        foreach(var atr in note.KAttributesDto)
+                        {
+                            if (atr.Description.Contains(t.Key))
+                            {
+
+                                // TODO: hay que quitar el ! inicial
+                                var etiqueta = etiquetas.Find(e => e.CodEtiqueta == t.Value);
+                                if(etiqueta != null)
+                                {
+                                    if (!string.IsNullOrEmpty(atr.Value))
+                                        atr.Value += ", ";
+                                    atr.Value += etiqueta.DesEtiqueta;
+                                }
+                            }
+                        }
+                    }
+                    label1.Text = note.NoteId.ToString();
+                    label2.Text = note.Tags.ToString();
+                    var resSave = await service.Notes.SaveAsync(note);
+                }                
+            }
+
+            return await Task.FromResult<bool>(true);
+        }
+
+        private List<TagKeyValue> ProcessTag(string tags)
+        {
+            List<TagKeyValue> listTags = new List<TagKeyValue>();
+
+            var items = tags.Split(';');
+            foreach (var i in items)
+            {
+                var item = i.Trim();
+                var values = item.Split('=');
+                if (values.Length > 1)
+                {
+                    listTags.Add(new TagKeyValue { Key = values[0], Value = values[1] });
+                }
+            }
+
+            return listTags;
+        }
+
+        private class TagKeyValue
+        {
+            public string Key { get; set; }
+            public string Value { get; set; }
+        }
+
 
         private async void ImportTags(IKntService service, List<EtiquetaExport> etiquetas)
         {
@@ -297,6 +363,23 @@ namespace KNote.ClientWin.Views
 
                 attributeDto.KAttributeValues = tabulatedValuesAtr;
 
+                // Hack import TareasDesarrolloDB
+                if(attributeDto.Name == "Consejería de Educación")
+                {
+                    attributeDto.Name = "00 - Usuarios Consejería de Educación";
+                    attributeDto.Description = $"[{e.CodEtiqueta}] " + attributeDto.Name;
+                    attributeDto.Order = 0;
+                }
+                if (attributeDto.Name == "Empresa de Servicios TIC")
+                {
+                    attributeDto.Name = "00 - Usuarios Empresa de Servicios TIC";
+                    attributeDto.Description = $"[{e.CodEtiqueta}] " + attributeDto.Name;
+                    attributeDto.Order = 0;
+                }
+                if (attributeDto.Name[0] == '!')
+                    attributeDto.Name = attributeDto.Name.Substring(1, attributeDto.Name.Length - 1 );
+
+                // Save Data
                 var res = await service.KAttributes.SaveAsync(attributeDto);
             }
         }
