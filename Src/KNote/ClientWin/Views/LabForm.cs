@@ -235,18 +235,33 @@ namespace KNote.ClientWin.Views
                 anotasImport = (ANotasExport)serializer.Deserialize(reader);
                 reader.Close();
 
+                var etiquetas = anotasImport.Etiquetas
+                    .Select(e =>
+                        {
+                            string desEtiqueta = "";
+                            if (e.DesEtiqueta[0] == '!')
+                                desEtiqueta = e.DesEtiqueta.Substring(1, e.DesEtiqueta.Length - 1);
+                            else
+                                desEtiqueta = e.DesEtiqueta;
+
+                            return new EtiquetaExport{ CodEtiqueta = e.CodEtiqueta, DesEtiqueta = desEtiqueta, CodPadre = e.CodPadre };
+                        }
+                    )
+                    .OrderBy(e => e.DesEtiqueta).ToList();
+
+
                 // Import tags / attributes
-                //ImportTags(service, anotasImport.Etiquetas);
+                await ImportTags(service, etiquetas);
 
                 // Import folders and notes
-                //foreach(var c in anotasImport.Carpetas)
-                //{
-                //    // listMessages.Items.Add($"Folder: {c.NombreCarpeta}");
-                //    await SaveFolderDto(service, userId, c, null);
-                //}
+                foreach (var c in anotasImport.Carpetas)
+                {
+                    // listMessages.Items.Add($"Folder: {c.NombreCarpeta}");
+                    await SaveFolderDto(service, userId, c, null, etiquetas);
+                }
 
                 // Update attributes
-                var resAtrProc = await UpdateAttributes(service, anotasImport.Etiquetas);
+                var resAtrProc = await UpdateAttributes(service, etiquetas);
 
             }
             catch (Exception ex)
@@ -261,9 +276,12 @@ namespace KNote.ClientWin.Views
         private async Task<bool> UpdateAttributes(IKntService service, List<EtiquetaExport> etiquetas)
         {
             var allNotes = (await service.Notes.GetAllAsync()).Entity;
-
+            var i = 0;
+            var nRegs = allNotes.Count;
             foreach(var n in allNotes)
             {
+                i++;
+
                 if (!string.IsNullOrEmpty(n.Tags))
                 {
                     var tags = ProcessTag(n.Tags);
@@ -283,10 +301,12 @@ namespace KNote.ClientWin.Views
                                         atr.Value += ", ";
                                     atr.Value += etiqueta.DesEtiqueta;
                                 }
+                                break;
                             }
                         }
                     }
-                    label1.Text = note.NoteId.ToString();
+
+                    label1.Text = $"{note.NoteId} - {i}/{nRegs}";
                     label2.Text = note.Tags.ToString();
                     var resSave = await service.Notes.SaveAsync(note);
                 }                
@@ -320,10 +340,8 @@ namespace KNote.ClientWin.Views
         }
 
 
-        private async void ImportTags(IKntService service, List<EtiquetaExport> etiquetas)
+        private async Task<bool> ImportTags(IKntService service, List<EtiquetaExport> etiquetas)
         {
-            // Padre in ([!EtiquetaRaiz] , UU
-            // Codigo not in ( TB, ND, OP, TR, TU,  . UU . 
             int orderAtrTab = 0;
             int orderAtr = 0;
 
@@ -338,7 +356,7 @@ namespace KNote.ClientWin.Views
                 listMessages.Items.Add($"{e.DesEtiqueta} - {e.CodEtiqueta} - {e.CodPadre?.ToString()}");
                 KAttributeDto attributeDto = new KAttributeDto
                 {
-                    Description = $"[{e.CodEtiqueta}] " + e.DesEtiqueta,
+                    Description = $"[{e.CodEtiqueta}] - " + e.DesEtiqueta,
                     Name = e.DesEtiqueta,
                     KAttributeDataType = EnumKAttributeDataType.TagsValue,
                     Disabled = false,
@@ -355,7 +373,7 @@ namespace KNote.ClientWin.Views
                     KAttributeTabulatedValueDto atrValue = new KAttributeTabulatedValueDto
                     {
                         Value = t.DesEtiqueta,
-                        Description = $"[{t.CodEtiqueta}] " + t.DesEtiqueta,
+                        Description = $"[{t.CodEtiqueta}] - " + t.DesEtiqueta,
                         Order = orderAtrTab++
                     };
                     tabulatedValuesAtr.Add(atrValue);
@@ -366,25 +384,27 @@ namespace KNote.ClientWin.Views
                 // Hack import TareasDesarrolloDB
                 if(attributeDto.Name == "Consejería de Educación")
                 {
-                    attributeDto.Name = "00 - Usuarios Consejería de Educación";
-                    attributeDto.Description = $"[{e.CodEtiqueta}] " + attributeDto.Name;
+                    attributeDto.Name = "00 - Usuario Consejería de Educación";
+                    attributeDto.Description = $"[{e.CodEtiqueta}] - " + attributeDto.Name;
                     attributeDto.Order = 0;
                 }
                 if (attributeDto.Name == "Empresa de Servicios TIC")
                 {
                     attributeDto.Name = "00 - Usuarios Empresa de Servicios TIC";
-                    attributeDto.Description = $"[{e.CodEtiqueta}] " + attributeDto.Name;
+                    attributeDto.Description = $"[{e.CodEtiqueta}] - " + attributeDto.Name;
                     attributeDto.Order = 0;
                 }
-                if (attributeDto.Name[0] == '!')
-                    attributeDto.Name = attributeDto.Name.Substring(1, attributeDto.Name.Length - 1 );
+                //if (attributeDto.Name[0] == '!')
+                //    attributeDto.Name = attributeDto.Name.Substring(1, attributeDto.Name.Length - 1 );
 
                 // Save Data
-                var res = await service.KAttributes.SaveAsync(attributeDto);
+                var res = await service.KAttributes.SaveAsync(attributeDto);                
             }
+
+            return await Task.FromResult<bool>(true);
         }
 
-        private async Task<bool> SaveFolderDto(IKntService service, Guid? userId, CarpetaExport carpetaExport, Guid? parent)
+        private async Task<bool> SaveFolderDto(IKntService service, Guid? userId, CarpetaExport carpetaExport, Guid? parent, List<EtiquetaExport> etiquetas)
         {
             string r11 = "\r\n";
             string r12 = "\n";
@@ -392,9 +412,11 @@ namespace KNote.ClientWin.Views
             string r21 = "&#x";
             string r22 = "$$$";
 
+            int nErrors = 0;
+
             #region Import customization 
 
-            //// afumrer
+            //// afumfer
             //// .......
             //string r31 = @"D:\KaNote\Resources\ImgsEditorHtml";
             //string r32 = @"D:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
@@ -413,14 +435,13 @@ namespace KNote.ClientWin.Views
 
             #endregion
 
-
-            int maxFolder = (await service.Folders.GetNextFolderNumber()).Entity;
-            int maxNote = (await service.Folders.GetNextFolderNumber()).Entity; 
+            //int maxFolder = (await service.Folders.GetNextFolderNumber()).Entity;
+            //int maxNote = (await service.Folders.GetNextFolderNumber()).Entity; 
 
             var newFolderDto = new FolderDto
             {
-                //FolderNumber = carpetaExport.IdCarpeta,
-                FolderNumber = maxFolder,
+                FolderNumber = carpetaExport.IdCarpeta,
+                //FolderNumber = 0,
                 Name = carpetaExport.NombreCarpeta,
                 Order = carpetaExport.Orden,
                 OrderNotes = carpetaExport.OrdenNotas,
@@ -435,197 +456,236 @@ namespace KNote.ClientWin.Views
 
             foreach(var n in carpetaExport.Notas)
             {
-                if (n.DescripcionNota.Contains(r12))
+                try
                 {
-                    // Hack multiples CR LF 
-                    n.DescripcionNota = n.DescripcionNota.Replace(r12, r11);
-                    // Hack for problems in deserialization
-                    n.DescripcionNota = n.DescripcionNota.Replace(r22, r21);
-                }
-
-                #region Import customization 
-
-                //// afumfer
-                //// .......
-                //// Hack inserted resources change
-                //n.DescripcionNota = n.DescripcionNota.Replace(r32, r31);
-                //n.DescripcionNota = n.DescripcionNota.Replace(r42, r41);
-                //// KntScript
-                //n.DescripcionNota = n.DescripcionNota.Replace(r52, r51);
-                //n.DescripcionNota = n.DescripcionNota.Replace(r62, r61);
-                //n.DescripcionNota = n.DescripcionNota.Replace(r72, r71);
-                //n.DescripcionNota = n.DescripcionNota.Replace(r82, r81);
-                //n.DescripcionNota = n.DescripcionNota.Replace(r92, r91);
-
-                #endregion
-
-                (string descriptionNew, string scriptCode) = ExtractAnTScriptCode(n.DescripcionNota);
-
-                var newNote = new NoteExtendedDto
-                {
-                    FolderId = folder.FolderId,
-                    //NoteNumber = n.IdNota,
-                    NoteNumber = maxNote++,                    
-                    
-                    Description = descriptionNew,
-                    Script = scriptCode,
-
-                    Topic = n.Asunto, 
-                    CreationDateTime = n.FechaHoraCreacion,
-                    ModificationDateTime = n.FechaModificacion,
-                    Tags = n.PalabrasClave,
-                    InternalTags = n.Vinculo,
-                    Priority = n.Prioridad                    
-                };
-              
-
-                // Add alarm
-                if (n.Alarma > new DateTime(1901,1,1) )
-                {
-                    var message = new KMessageDto
+                    if (n.DescripcionNota.Contains(r12))
                     {
-                        NoteId = Guid.Empty,
-                        UserId = userId,
-                        AlarmActivated = n.ActivarAlarma,
-                        ActionType = EnumActionType.UserAlarm,
-                        Comment = "(import ANotas)",
-                        AlarmDateTime = n.Alarma
-                    };
-
-                    // Alarm type
-                    switch (n.TipoAlarma)
-                    {
-                        case 0:  // estandar
-                            message.AlarmType = EnumAlarmType.Standard;    
-                            break;
-                        case 1:  // diaria
-                            message.AlarmType = EnumAlarmType.Daily;
-                            break;
-                        case 2:  // semanal
-                            message.AlarmType = EnumAlarmType.Weekly;
-                            break;
-                        case 3:  // mensual
-                            message.AlarmType = EnumAlarmType.Monthly;
-                            break;
-                        case 4:  // anual
-                            message.AlarmType = EnumAlarmType.Annual;
-                            break;
-                        case 5:  // cada hora
-                            message.AlarmType = EnumAlarmType.InMinutes;
-                            message.AlarmMinutes = 60;
-                            break;
-                        case 6:  // 4 horas
-                            message.AlarmType = EnumAlarmType.InMinutes;
-                            message.AlarmMinutes = 60 * 4;
-                            break;
-                        case 7:  // 8 horas
-                            message.AlarmType = EnumAlarmType.InMinutes;
-                            message.AlarmMinutes = 60 * 8;
-                            break;
-                        case 8:  // 12 diaria
-                            message.AlarmType = EnumAlarmType.InMinutes;
-                            message.AlarmMinutes = 60 * 12;
-                            break;
-                        default:
-                            message.AlarmType = EnumAlarmType.Standard;
-                            break;
+                        // Hack multiples CR LF 
+                        n.DescripcionNota = n.DescripcionNota.Replace(r12, r11);
+                        // Hack for problems in deserialization
+                        n.DescripcionNota = n.DescripcionNota.Replace(r22, r21);
                     }
 
-                    newNote.Messages.Add(message);
-                }
+                    #region Import customization 
 
-                // Add resource                
-                if (!string.IsNullOrEmpty(n.NotaEx))
-                {
-                    // TODO: Refactor this line
-                    var root = @"D:\ANotas\Docs";
+                    //// afumfer
+                    //// .......
+                    //// Hack inserted resources change
+                    //n.DescripcionNota = n.DescripcionNota.Replace(r32, r31);
+                    //n.DescripcionNota = n.DescripcionNota.Replace(r42, r41);
+                    //// KntScript
+                    //n.DescripcionNota = n.DescripcionNota.Replace(r52, r51);
+                    //n.DescripcionNota = n.DescripcionNota.Replace(r62, r61);
+                    //n.DescripcionNota = n.DescripcionNota.Replace(r72, r71);
+                    //n.DescripcionNota = n.DescripcionNota.Replace(r82, r81);
+                    //n.DescripcionNota = n.DescripcionNota.Replace(r92, r91);
 
-                    var fileFullName = $"{root}{n.NotaEx}";
+                    #endregion
 
-                    if (File.Exists(fileFullName))
+                    (string descriptionNew, string scriptCode) = ExtractAnTScriptCode(n.DescripcionNota);
+
+                    DateTime fecMod;
+                    if (n.FechaModificacion > n.FechaHoraCreacion)
+                        fecMod = n.FechaModificacion;
+                    else
+                        fecMod = n.FechaHoraCreacion;
+
+                    var newNote = new NoteExtendedDto
                     {
-                        var fileArrayBytes = File.ReadAllBytes(fileFullName);
-                        var contentBase64 = Convert.ToBase64String(fileArrayBytes);
-                        ResourceDto resource = new ResourceDto
+                        FolderId = folder.FolderId,
+                        NoteNumber = n.IdNota,
+                        //NoteNumber = 0,                    
+
+                        Description = descriptionNew,
+                        Script = scriptCode,
+
+                        Topic = n.Asunto,
+                        CreationDateTime = n.FechaHoraCreacion,
+                        ModificationDateTime = fecMod,
+                        Tags = n.PalabrasClave,
+                        InternalTags = n.Vinculo,
+                        Priority = n.Prioridad
+                    };
+
+                    if (!newNote.Tags.Contains("UC="))
+                    {
+                        if ("afumfer fdomher jurivmar sesther sleoare dgoddelw".Contains(n.Usuario))
+                        {
+                            if (!string.IsNullOrEmpty(newNote.Tags))
+                                newNote.Tags += "; ";
+                            newNote.Tags += "UC=" + n.Usuario;
+                        }
+                    }
+
+                    // Add task
+                    if (n.FechaInicio > new DateTime(1901, 1, 1) ||
+                        n.FechaResolucion > new DateTime(1901, 1, 1) ||
+                        n.FechaPrevistaInicio > new DateTime(1901, 1, 1) ||
+                        n.FechaPrevistaFin > new DateTime(1901, 1, 1) ||
+                        n.Resuelto == true)
+                    {
+                        NoteTaskDto task = new NoteTaskDto
                         {
                             NoteId = Guid.Empty,
-                            ContentInDB = true,
-                            Order = 1,                        
-                            Container = service.RepositoryRef.ResourcesContainer + "\\" + DateTime.Now.Year.ToString(),
-                            Name = $"{Guid.NewGuid()}_{Path.GetFileName(fileFullName)}",
-                            Description = $"(ANotas import {n.NotaEx})",
-                            ContentArrayBytes = fileArrayBytes,
-                            ContentBase64 = contentBase64,
-                            FileType = _store.ExtensionFileToFileType(Path.GetExtension(fileFullName))
+                            UserId = (Guid)userId,
+                            CreationDateTime = n.FechaHoraCreacion,                            
+                            ModificationDateTime = fecMod,
+                            Description = newNote.Topic,
+                            Tags = "(ANotas import)",
+                            Priority = 1,
+                            Resolved = n.Resuelto,
+                            EstimatedTime = n.TiempoEstimado,
+                            SpentTime = n.TiempoInvertido,
+                            DifficultyLevel = n.NivelDificultad,
+                            ExpectedEndDate = n.FechaPrevistaFin,
+                            ExpectedStartDate = n.FechaPrevistaInicio,
+                            EndDate = n.FechaResolucion,
+                            StartDate = n.FechaInicio
                         };
-                        newNote.Resources.Add(resource);
+                        newNote.Tasks.Add(task);
                     }
-                }
 
-                // Add task
-                if (n.FechaInicio > new DateTime(1901, 1, 1) ||
-                    n.FechaResolucion > new DateTime(1901, 1, 1) ||
-                    n.FechaPrevistaInicio > new DateTime(1901, 1, 1) ||
-                    n.FechaPrevistaFin > new DateTime(1901, 1, 1) ||
-                    n.Resuelto == true )
-                {
-                    NoteTaskDto task = new NoteTaskDto
+                    // Add alarm
+                    if (n.Alarma > new DateTime(1901, 1, 1))
                     {
-                        NoteId = Guid.Empty,
-                        UserId = (Guid)userId,
-                        CreationDateTime = n.FechaHoraCreacion,
-                        ModificationDateTime = n.FechaModificacion,
-                        Description = newNote.Topic,
-                        Tags = "(ANotas import)",
-                        Priority = 1,
-                        Resolved = n.Resuelto,
-                        EstimatedTime = n.TiempoEstimado,
-                        SpentTime = n.TiempoInvertido,
-                        DifficultyLevel = n.NivelDificultad,
-                        ExpectedEndDate = n.FechaPrevistaFin,
-                        ExpectedStartDate = n.FechaPrevistaInicio,
-                        EndDate = n.FechaResolucion,
-                        StartDate = n.FechaInicio
-                    };
-                    newNote.Tasks.Add(task);
+                        var message = new KMessageDto
+                        {
+                            NoteId = Guid.Empty,
+                            UserId = userId,
+                            AlarmActivated = n.ActivarAlarma,
+                            ActionType = EnumActionType.UserAlarm,
+                            Comment = "(import ANotas)",
+                            AlarmDateTime = n.Alarma
+                        };
+
+                        // Alarm type
+                        switch (n.TipoAlarma)
+                        {
+                            case 0:  // estandar
+                                message.AlarmType = EnumAlarmType.Standard;
+                                break;
+                            case 1:  // diaria
+                                message.AlarmType = EnumAlarmType.Daily;
+                                break;
+                            case 2:  // semanal
+                                message.AlarmType = EnumAlarmType.Weekly;
+                                break;
+                            case 3:  // mensual
+                                message.AlarmType = EnumAlarmType.Monthly;
+                                break;
+                            case 4:  // anual
+                                message.AlarmType = EnumAlarmType.Annual;
+                                break;
+                            case 5:  // cada hora
+                                message.AlarmType = EnumAlarmType.InMinutes;
+                                message.AlarmMinutes = 60;
+                                break;
+                            case 6:  // 4 horas
+                                message.AlarmType = EnumAlarmType.InMinutes;
+                                message.AlarmMinutes = 60 * 4;
+                                break;
+                            case 7:  // 8 horas
+                                message.AlarmType = EnumAlarmType.InMinutes;
+                                message.AlarmMinutes = 60 * 8;
+                                break;
+                            case 8:  // 12 diaria
+                                message.AlarmType = EnumAlarmType.InMinutes;
+                                message.AlarmMinutes = 60 * 12;
+                                break;
+                            default:
+                                message.AlarmType = EnumAlarmType.Standard;
+                                break;
+                        }
+
+                        newNote.Messages.Add(message);
+                    }
+
+                    // Add resource                
+                    if (!string.IsNullOrEmpty(n.NotaEx))
+                    {
+                        // TODO: Refactor this line
+                        var root = @"D:\ANotas\Docs";
+
+                        var fileFullName = $"{root}{n.NotaEx}";
+
+                        if (File.Exists(fileFullName))
+                        {
+                            var fileArrayBytes = File.ReadAllBytes(fileFullName);
+                            var contentBase64 = Convert.ToBase64String(fileArrayBytes);
+                            ResourceDto resource = new ResourceDto
+                            {
+                                NoteId = Guid.Empty,
+                                ContentInDB = true,
+                                Order = 1,
+                                Container = service.RepositoryRef.ResourcesContainer + "\\" + DateTime.Now.Year.ToString(),
+                                Name = $"{Guid.NewGuid()}_{Path.GetFileName(fileFullName)}",
+                                Description = $"(ANotas import {n.NotaEx})",
+                                ContentArrayBytes = fileArrayBytes,
+                                ContentBase64 = contentBase64,
+                                FileType = _store.ExtensionFileToFileType(Path.GetExtension(fileFullName))
+                            };
+                            newNote.Resources.Add(resource);
+                        }
+                    }
+
+                    // Save note and PostIt
+                    Result<NoteExtendedDto> resNewNote = null;
+                    if (newNote.IsValid())
+                    {
+                        resNewNote = await service.Notes.SaveExtendedAsync(newNote);
+                        label2.Text = $"Added note: {resNewNote.Entity?.Topic} - {resNewNote.Entity?.NoteId.ToString()}";
+
+                        // Add Window
+                        WindowDto windowPostIt = new WindowDto
+                        {
+                            NoteId = resNewNote.Entity.NoteId,
+                            UserId = (Guid)userId,
+                            Visible = false,  //n.Visible,
+                            AlwaysOnTop = n.SiempreArriba,
+                            PosX = n.PosX,
+                            PosY = n.PosY,
+                            Width = n.Ancho,
+                            Height = n.Alto,
+                            FontName = n.FontName,
+                            FontSize = n.FontSize,
+                            FontBold = n.FontBold,
+                            FontItalic = n.FontItalic,
+                            FontUnderline = n.FontUnderline,
+                            FontStrikethru = n.FontStrikethru,
+                            ForeColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor)),
+                            TitleColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ColorBanda)),
+                            TextTitleColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor)),
+                            NoteColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ColorNota)),
+                            TextNoteColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor))
+                        };
+                        var resNewPostIt = await service.Notes.SaveWindowAsync(windowPostIt);
+
+                    }
+                    else
+                    {
+                        label2.Text = $"Added note: ERROR invalid note.";
+                        var msgErr = newNote.GetErrorMessage();
+                        MessageBox.Show($"ERROR invalid note: {msgErr}");
+                    }
+
+                    label2.Refresh();
+
                 }
-                
-                // Save note and PostIt
-                var resNewNote = await service.Notes.SaveExtendedAsync(newNote);
-
-                // Add Window
-                WindowDto windowPostIt = new WindowDto
+                catch (Exception ex)
                 {
-                    NoteId = resNewNote.Entity.NoteId,
-                    UserId = (Guid)userId,
-                    Visible = n.Visible,
-                    AlwaysOnTop = n.SiempreArriba,
-                    PosX = n.PosX,
-                    PosY = n.PosY,
-                    Width = n.Ancho,
-                    Height = n.Alto,
-                    FontName = n.FontName,
-                    FontSize = n.FontSize,
-                    FontBold = n.FontBold,
-                    FontItalic = n.FontItalic,
-                    FontUnderline = n.FontUnderline,
-                    FontStrikethru = n.FontStrikethru,
-                    ForeColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor)),
-                    TitleColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ColorBanda)),
-                    TextTitleColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor)),
-                    NoteColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ColorNota)),
-                    TextNoteColor = ColorTranslator.ToHtml(ColorTranslator.FromOle(n.ForeColor))
-                };
-                var resNewPostIt = await service.Notes.SaveWindowAsync(windowPostIt);
+                    // TODO: hack, hay un registro erróneo en la exportación. 
+                    nErrors++;
+                    if(nErrors > 1)
+                        MessageBox.Show($"Más de error. Error: {ex.Message}");
+                    //throw;
+                }
 
-                label2.Text = $"Added note: {resNewNote.Entity?.Topic} - {resNewPostIt.Entity?.WindowId.ToString()}";
-                label2.Refresh();
             }
 
             // For each folder child all recursively  to this method
             foreach(var c in carpetaExport.CarpetasHijas)
             {
-                await SaveFolderDto(service, userId, c, folder.FolderId);
+                await SaveFolderDto(service, userId, c, folder.FolderId, etiquetas);
             }
 
             return await Task.FromResult<bool>(true);

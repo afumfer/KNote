@@ -8,7 +8,7 @@ namespace KNote.Model
 {
     public abstract class DomainActionBase
     {
-        private bool exceptionHasHappened = false;
+        protected bool ExceptionHasHappened = false;
 
         protected void AddDBEntityErrorsToErrorsList(KntEntityValidationException ex, List<string> errList)
         {
@@ -22,7 +22,7 @@ namespace KNote.Model
             Exception tmpEx = ex;            
             string tmpStr = "";
             
-            exceptionHasHappened = true;
+            ExceptionHasHappened = true;
 
             while (tmpEx != null)
             {
@@ -43,9 +43,9 @@ namespace KNote.Model
         
         protected Result<T> ResultDomainAction<T>(Result<T> resultRepositoryAction)
         {
-            if (exceptionHasHappened)
+            if (ExceptionHasHappened)
             {
-                exceptionHasHappened = false;
+                ExceptionHasHappened = false;
                 throw new Exception(resultRepositoryAction.Message);
             }                                                            
             return resultRepositoryAction;
@@ -53,9 +53,9 @@ namespace KNote.Model
 
         protected Result ResultDomainAction(Result resultRepositoryAction)
         {
-            if (exceptionHasHappened)
+            if (ExceptionHasHappened)
             {
-                exceptionHasHappened = false;
+                ExceptionHasHappened = false;
                 throw new Exception(resultRepositoryAction.Message);
             }
             return resultRepositoryAction;

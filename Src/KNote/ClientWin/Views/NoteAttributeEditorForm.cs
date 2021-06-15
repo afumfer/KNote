@@ -183,6 +183,9 @@ namespace KNote.ClientWin.Views
                 textValue.Size = new Size(478, 23);
             textValue.Text = _com.Model.Value?.ToString();
             textValue.Visible = true;
+            textValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));
         }
 
         private void ModelToControlTextArea()
@@ -192,6 +195,9 @@ namespace KNote.ClientWin.Views
             textValue.Size = new Size(478, 140);
             textValue.Text = _com.Model.Value;
             textValue.Visible = true;
+            textValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));
         }
 
         private void ModelToControlCheck()
@@ -201,6 +207,9 @@ namespace KNote.ClientWin.Views
             checkValue.Checked = bool.Parse(_com.Model.Value);
             checkValue.Text = _com.Model.Name;
             checkValue.Visible = true;
+            checkValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));
         }
 
         private void ModelToControlDateTime()
@@ -223,12 +232,15 @@ namespace KNote.ClientWin.Views
             comboValue.Location = new Point(10, 32);
             comboValue.Size = new Size(478, 23);
             comboValue.Visible = true;
+            comboValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));
         }
 
         private async void ModelToControlListView()
         {
             PersonalizeListView(listViewValue);
-            listViewValue.Columns.Add("Name", 400, HorizontalAlignment.Left);
+            listViewValue.Columns.Add("Name", 450, HorizontalAlignment.Left);
             var res = await _com.Service.KAttributes.GetKAttributeTabulatedValuesAsync(_com.Model.KAttributeId);
             if (res.IsValid)
             {                
@@ -242,11 +254,13 @@ namespace KNote.ClientWin.Views
                     listViewValue.Items.Add(itemList);
                 }
                     
-            }
-            listViewValue.Columns.Add("Name", -2, HorizontalAlignment.Left);
+            }            
             listViewValue.Location = new Point(10, 32);
             listViewValue.Size = new Size(478, 140);
             listViewValue.Visible = true;
+            listViewValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));            
         }
 
         private void PersonalizeListView(ListView listView)

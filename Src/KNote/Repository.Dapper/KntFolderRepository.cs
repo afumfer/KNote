@@ -66,6 +66,7 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
+
         public async Task<Result<List<FolderDto>>> GetTreeAsync(Guid? partenId = null)
         {            
             var result = new Result<List<FolderDto>>();

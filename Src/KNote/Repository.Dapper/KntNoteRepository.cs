@@ -358,7 +358,8 @@ namespace KNote.Repository.Dapper
 
                 entity.CreationDateTime = DateTime.Now;
                 entity.ModificationDateTime = DateTime.Now;
-                entity.NoteNumber = GetNextNoteNumber(db);
+                if(entity.NoteNumber == 0)
+                    entity.NoteNumber = GetNextNoteNumber(db);
 
                 var sql = @"INSERT INTO [Notes] 
                                 (NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime, 
@@ -389,30 +390,34 @@ namespace KNote.Repository.Dapper
                 if (r == 0)
                 {
                     result.ErrorList.Add("Note entity not inserted");
+                    ExceptionHasHappened = true;
                     return ResultDomainAction(result);
                 }
 
                 foreach (var atr in entity.KAttributesDto)
                 {
-                    atr.NoteKAttributeId = Guid.NewGuid();
-                    atr.NoteId = entity.NoteId;
-
-                    sql = @"INSERT INTO [NoteKAttributes] 
-                                (NoteKAttributeId, NoteId, KAttributeId, [Value])
-                          VALUES
-                                ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
-                    var rA = await db.ExecuteAsync(sql.ToString(),
-                        new
-                        {
-                            atr.NoteKAttributeId,
-                            atr.NoteId,
-                            atr.KAttributeId,
-                            atr.Value
-                        });
-
-                    if (rA == 0)
+                    if (!string.IsNullOrEmpty(atr.Value))
                     {
-                        result.ErrorList.Add("Atribute-value note entity not inserted");                        
+                        atr.NoteKAttributeId = Guid.NewGuid();
+                        atr.NoteId = entity.NoteId;
+
+                        sql = @"INSERT INTO [NoteKAttributes] 
+                                    (NoteKAttributeId, NoteId, KAttributeId, [Value])
+                              VALUES
+                                    ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
+                        var rA = await db.ExecuteAsync(sql.ToString(),
+                            new
+                            {
+                                atr.NoteKAttributeId,
+                                atr.NoteId,
+                                atr.KAttributeId,
+                                atr.Value
+                            });
+
+                        if (rA == 0)
+                        {
+                            result.ErrorList.Add("Atribute-value note entity not inserted");                        
+                        }
                     }
                 }
 
@@ -461,7 +466,8 @@ namespace KNote.Repository.Dapper
 
                 if (r == 0)
                 {
-                    result.ErrorList.Add("Note entity not inserted");
+                    result.ErrorList.Add("Note entity not updated.");
+                    ExceptionHasHappened = true;
                     return ResultDomainAction(result);
                 }
 
@@ -488,34 +494,47 @@ namespace KNote.Repository.Dapper
                     var entityNoteKAttribute = await db.QueryFirstOrDefaultAsync<NoteKAttributeDto>(sqlFindNoteKAttribute.ToString(), new { NoteKAttributeId = atr.NoteKAttributeId });
                     if (entityNoteKAttribute == null)
                     {
-                        atr.NoteKAttributeId = Guid.NewGuid();
-                        atr.NoteId = entity.NoteId;
-                        sql = @"INSERT INTO [NoteKAttributes] 
-                                    (NoteKAttributeId, NoteId, KAttributeId, [Value])
-                              VALUES
-                                    ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
+                        if (!string.IsNullOrEmpty(atr.Value))
+                        {
+                            atr.NoteKAttributeId = Guid.NewGuid();
+                            atr.NoteId = entity.NoteId;
+                            sql = @"INSERT INTO [NoteKAttributes] 
+                                        (NoteKAttributeId, NoteId, KAttributeId, [Value])
+                                  VALUES
+                                        ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
+                        }
+                        else
+                            sql = "";
                     }
                     else
                     {
-                        sql = @"UPDATE [NoteKAttributes] SET                                    
+                        if (!string.IsNullOrEmpty(atr.Value))                        
+                            sql = @"UPDATE [NoteKAttributes] SET                                    
                                     NoteId = @NoteId, 
                                     KAttributeId = @KAttributeId, 
                                     [Value] = @Value
-                              WHERE NoteKAttributeId = @NoteKAttributeId";
+                                WHERE NoteKAttributeId = @NoteKAttributeId";
+                        else
+                            sql = @"DELETE [NoteKAttributes] 
+                                WHERE NoteKAttributeId = @NoteKAttributeId";
+
                     }
 
-                    var rA = await db.ExecuteAsync(sql.ToString(),
-                        new
-                        {
-                            atr.NoteKAttributeId,
-                            atr.NoteId,
-                            atr.KAttributeId,
-                            atr.Value
-                        });
-
-                    if (rA == 0)
+                    if (!string.IsNullOrEmpty(sql))
                     {
-                        result.ErrorList.Add("Atribute-value note entity not inserted");                        
+                        var rA = await db.ExecuteAsync(sql.ToString(),
+                            new
+                            {
+                                atr.NoteKAttributeId,
+                                atr.NoteId,
+                                atr.KAttributeId,
+                                atr.Value
+                            });
+
+                        if (rA == 0)
+                        {
+                            result.ErrorList.Add("Atribute-value note entity not saved");                        
+                        }
                     }
                 }
 

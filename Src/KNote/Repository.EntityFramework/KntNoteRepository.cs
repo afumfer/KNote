@@ -339,12 +339,8 @@ namespace KNote.Repository.EntityFramework
                 newEntity.SetSimpleDto(entity);
                 
                 resRep = await notes.AddAsync(newEntity);
-                // TODO: !!! Importante, pendiente de capturar y volcar errores de res en resService
-
-                // Complete Attributes list
-                //result.Entity.KAttributesDto = await CompleteNoteAttributes(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
-
-                // TODO: Limpiar lo siguiente, está sucio ...
+                if (!resRep.IsValid)
+                    ExceptionHasHappened = true;
 
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {
@@ -356,6 +352,7 @@ namespace KNote.Repository.EntityFramework
                 }
 
                 result.Entity = entity;
+                result.ErrorList = resRep.ErrorList;
 
                 await CloseIsTempConnection(ctx);
             }
@@ -363,8 +360,7 @@ namespace KNote.Repository.EntityFramework
             {
                 AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
             }
-
-            result.ErrorList = resRep.ErrorList;
+            
             return ResultDomainAction(result);
         }
 
@@ -1226,7 +1222,8 @@ namespace KNote.Repository.EntityFramework
 
         private void UpdateStandardValuesToNewEntity(GenericRepositoryEF<KntDbContext, Note> notes, NoteDto newEntity)
         {            
-            newEntity.NoteNumber = GetNextNoteNumber(notes);
+            if (newEntity.NoteNumber == 0)
+                newEntity.NoteNumber = GetNextNoteNumber(notes);
             if (newEntity.CreationDateTime == DateTime.MinValue)
                 newEntity.CreationDateTime = DateTime.Now;
 

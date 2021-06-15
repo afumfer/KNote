@@ -881,31 +881,31 @@ namespace KNote.ClientWin.Views
                 t.BackColor = Color.White;
                 return;
             }
-            if (c is Button)
+            else if (c is Button)
             {
                 Button b = (Button)c;
                 b.Visible = false;
                 return;
             }
-            if (c is CheckBox)
+            else if (c is CheckBox)
             {
                 CheckBox cb = (CheckBox)c;
                 cb.Enabled = false;
                 return;
             }
-            if (c is ComboBox)
+            else if (c is ComboBox)
             {
                 ComboBox comB = (ComboBox)c;
                 comB.Enabled = false;
                 return;
             }
-            if (c is ToolStrip)
+            else if (c is ToolStrip)
             {
                 ToolStrip tb = (ToolStrip)c;
                 tb.Visible = false;
                 return;
             }
-            if (c is Panel)
+            else if (c is Panel)
             {
                 Panel tb = (Panel)c;
                 foreach (Control conTmp in tb.Controls)
@@ -942,21 +942,6 @@ namespace KNote.ClientWin.Views
 
         private ListViewItem NoteTaskDtoToListViewItem(NoteTaskDto task)
         {
-            //var itemList = new ListViewItem(task.UserFullName);
-            //itemList.Name = task.NoteTaskId.ToString();                        
-            //itemList.SubItems.Add(task.Tags?.ToString());
-            //itemList.SubItems.Add(task.Priority.ToString());
-            //itemList.SubItems.Add(task.Resolved.ToString());
-            //itemList.SubItems.Add(task.EstimatedTime.ToString());
-            //itemList.SubItems.Add(task.SpentTime.ToString());
-            //itemList.SubItems.Add(task.DifficultyLevel.ToString());
-            //itemList.SubItems.Add(task.ExpectedStartDate.ToString());
-            //itemList.SubItems.Add(task.ExpectedEndDate.ToString());
-            //itemList.SubItems.Add(task.StartDate.ToString());
-            //itemList.SubItems.Add(task.EndDate.ToString());
-            //itemList.SubItems.Add(task.Description.ToString());
-            //return itemList;
-
             var itemList = new ListViewItem(task.UserFullName);
             itemList.Name = task.NoteTaskId.ToString();            
             itemList.SubItems.Add(task.Priority.ToString());
@@ -1174,7 +1159,8 @@ namespace KNote.ClientWin.Views
 
         private void listViewAttributes_DoubleClick(object sender, EventArgs e)
         {
-            EditNoteAttribute();
+            if(_com.EditMode)
+                EditNoteAttribute();
         }
 
         #endregion

@@ -89,7 +89,7 @@ namespace KNote.ClientWin.Views
             this.listViewValue.Size = new System.Drawing.Size(112, 76);
             this.listViewValue.TabIndex = 10;
             this.listViewValue.UseCompatibleStateImageBehavior = false;
-            this.listViewValue.Visible = false;
+            this.listViewValue.Visible = false;            
             // 
             // comboValue
             // 
@@ -134,8 +134,9 @@ namespace KNote.ClientWin.Views
             // 
             // labelDescription
             // 
+            this.labelDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.labelDescription.AutoSize = true;
-            this.labelDescription.Location = new System.Drawing.Point(10, 193);
+            this.labelDescription.Location = new System.Drawing.Point(10, 209);
             this.labelDescription.Name = "labelDescription";
             this.labelDescription.Size = new System.Drawing.Size(67, 15);
             this.labelDescription.TabIndex = 1;
@@ -158,7 +159,6 @@ namespace KNote.ClientWin.Views
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "NoteAttributeEditorForm";
