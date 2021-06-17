@@ -123,10 +123,13 @@ namespace KNote.ClientWin.Views
         {
             var filter = new NotesFilterWithServiceRef();
             filter.ServiceRef = (ServiceRef)comboRepositories.SelectedItem;
-            if(!checkSearchInDescription.Checked)
-                filter.NotesFilter = new NotesFilterDto { TextSearch = textTextSearch.Text };
-            else
-                filter.NotesFilter = new NotesFilterDto { TextSearch = $"*** {textTextSearch.Text}"  };
+
+            //if(!checkSearchInDescription.Checked)
+            //    filter.NotesFilter = new NotesFilterDto { TextSearch = textTextSearch.Text };
+            //else
+            //    filter.NotesFilter = new NotesFilterDto { TextSearch = $"*** {textTextSearch.Text}"  };
+
+            filter.NotesFilter = new NotesFilterDto { TextSearch = textTextSearch.Text, SearchInDescription = checkSearchInDescription.Checked };
 
             _com.SelectedEntity = filter;            
             _com.NotifySelectedEntity();

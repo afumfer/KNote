@@ -205,8 +205,10 @@ namespace KNote.ClientWin.Views
 
         private void treeViewFolders_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if (sender != null)
-                this.Cursor = Cursors.WaitCursor;
+            // TODO: WaitCursor
+            //if (sender != null)
+            //    this.Cursor = Cursors.WaitCursor;
+
             try
             {
                 FolderWithServiceRef v = null;
@@ -227,11 +229,11 @@ namespace KNote.ClientWin.Views
                 // TODO: ... investigar excepciones en este punto
                 throw;
             }
-            finally
-            {
-                if (sender != null)
-                    this.Cursor = Cursors.Default;
-            }
+            //finally
+            //{
+            //    if (sender != null)
+            //        this.Cursor = Cursors.Default;
+            //}
         }
 
         private void buttonAccept_Click(object sender, EventArgs e)

@@ -162,18 +162,14 @@ namespace KNote.Model.Dto
             // Specific validations
             //----
 
-            // ---- Ejemplo
+            // ---- Example 
             //if (ModificationDateTime < CreationDateTime)
             //{
             //    results.Add(new ValidationResult
             //     ("KMSG: The modification date cannot be greater than the creation date "
             //     , new[] { "ModificationDateTime", "CreationDateTime" }));
             //}
-
-            // ---
-            // Return List<ValidationResult>()
-            // ---           
-
+           
             return results;
         }
 

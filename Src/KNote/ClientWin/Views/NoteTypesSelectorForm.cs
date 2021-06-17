@@ -163,7 +163,8 @@ namespace KNote.ClientWin.Views
         }
 
         private void OnSelectedItemChanged()
-        {            
+        {      
+            // TODO: !!! WaitCursor
             try
             {
                 if (_com.ListEntities == null)
@@ -171,7 +172,7 @@ namespace KNote.ClientWin.Views
 
                 if (listViewNoteTypes.SelectedItems.Count > 0)
                 {
-                    this.Cursor = Cursors.WaitCursor;                    
+                    //this.Cursor = Cursors.WaitCursor;                    
                     var selectedItem = Guid.Parse(listViewNoteTypes.SelectedItems[0].Name);
                     _com.SelectedEntity = _com.ListEntities.Where(_ => _.NoteTypeId == selectedItem).SingleOrDefault();
                     _com.NotifySelectedEntity();
@@ -181,10 +182,10 @@ namespace KNote.ClientWin.Views
             {
                 MessageBox.Show($"OnSelectedItemChanged error: {ex.Message}");
             }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+            //finally
+            //{
+            //    this.Cursor = Cursors.Default;
+            //}
         }
 
         private void PersonalizeListView(ListView listView)

@@ -129,7 +129,7 @@ namespace KNote.ClientWin.Views
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "KNoteAboutForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "About KaNote";
             this.Load += new System.EventHandler(this.KNoteAboutForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.iconoANotas)).EndInit();

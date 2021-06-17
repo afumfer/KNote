@@ -230,7 +230,6 @@ namespace KNote.Model.Dto
             // Specific validations
             //----
 
-            // TODO: Revisar Esto
             if (ModificationDateTime < CreationDateTime)
             {
                 results.Add(new ValidationResult
@@ -238,14 +237,8 @@ namespace KNote.Model.Dto
                  , new[] { "ModificationDateTime", "CreationDateTime" }));
             }
 
-            // TODO: Validar NoteNumber
-
-            // TODO: .....
-
-            // ---
-            // Return List<ValidationResult>()
-            // ---           
-
+            // TODO: Validar NoteNumber an more ....
+                   
             return results;
         }
 

@@ -230,6 +230,7 @@ namespace KNote.ClientWin.Views
 
         private void OnSelectedNoteItemChanged()
         {
+            // TODO: WaitCursor
             if (_skipSelectionChanged || _countRepetition > 5)
                 return;
             try
@@ -237,7 +238,7 @@ namespace KNote.ClientWin.Views
                 if (_com.ListEntities == null)
                     return;
                 
-                this.Cursor = Cursors.WaitCursor;
+                //this.Cursor = Cursors.WaitCursor;
                 if (dataGridNotes.SelectedRows.Count > 0)                                    
                     ActiveCurrentRow();
                 
@@ -246,10 +247,10 @@ namespace KNote.ClientWin.Views
             {
                 MessageBox.Show($"OnSelectedNoteItemChanged error: {ex.Message}");
             }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+            //finally
+            //{
+            //    this.Cursor = Cursors.Default;
+            //}
         }
 
         private void ActiveCurrentRow()

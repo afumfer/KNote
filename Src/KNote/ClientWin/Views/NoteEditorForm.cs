@@ -223,11 +223,12 @@ namespace KNote.ClientWin.Views
 
         private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // TODO: WaitCursor
             try
             {
                 if (listViewResources.SelectedItems.Count > 0)
                 {
-                    Cursor = Cursors.WaitCursor;
+                    // Cursor = Cursors.WaitCursor;
                     var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
                     var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();
                     UpdatePreviewResource(selRes);
@@ -237,10 +238,10 @@ namespace KNote.ClientWin.Views
             {
                 MessageBox.Show($"OnSelectedResourceItemChanged error: {ex.Message}");
             }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+            //finally
+            //{
+            //    this.Cursor = Cursors.Default;
+            //}
         }
 
         private void listView_Resize(object sender, EventArgs e)
@@ -632,7 +633,8 @@ namespace KNote.ClientWin.Views
 
         private void ModelToControls()
         {
-            this.Cursor = Cursors.WaitCursor;
+            //TODO: WaitCursor
+            //this.Cursor = Cursors.WaitCursor;
 
             // Basic data            
             this.Text = $"Note editor [{_com.ServiceRef?.Alias}]";
@@ -694,7 +696,7 @@ namespace KNote.ClientWin.Views
             //From = new List<TraceNote>(),
             //To = new List<TraceNote>()
 
-            this.Cursor = Cursors.Default;
+            //this.Cursor = Cursors.Default;
         }
         
         private void ModelToControlsAttributes()

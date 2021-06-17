@@ -110,11 +110,11 @@ namespace KNote.ClientWin.Components
             {
                 // TODO: provisional, hay que buscar una solución más generalista a los estados de espera. 
                 Cursor.Current = Cursors.WaitCursor;
+                
+                Service = service;
+                Folder = null;
 
                 Result<List<NoteInfoDto>> response;
-                Service = service;
-                Folder = null;                                
-                                
                 if (string.IsNullOrEmpty(notesFilter?.TextSearch.Trim()) || service == null || notesFilter == null)
                 {
                     response = new Result<List<NoteInfoDto>>();
@@ -140,9 +140,6 @@ namespace KNote.ClientWin.Components
                         SelectedEntity = ListEntities[0];
                     else
                         SelectedEntity = null;
-
-                    NotifySelectedEntity();
-                    resLoad = await Task.FromResult<bool>(true);
                 }
                 else
                 {

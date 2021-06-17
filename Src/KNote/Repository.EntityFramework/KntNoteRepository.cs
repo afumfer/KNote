@@ -173,10 +173,14 @@ namespace KNote.Repository.EntityFramework
                 else
                 {
                     var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
-                    var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
-                    var flagSearchDescription = listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault();
 
-                    if (flagSearchDescription != "***")
+                    // TODO: refactor this -----------------------------
+                    var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
+                    var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());                    
+                    bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
+                    // --------------------------------------------------
+                    
+                    if (!flagSearchDescription)
                     {
                         foreach (var token in listTokens)
                         {
