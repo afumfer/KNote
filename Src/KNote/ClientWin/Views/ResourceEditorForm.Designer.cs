@@ -49,7 +49,7 @@ namespace KNote.ClientWin.Views
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(539, 469);
+            this.buttonCancel.Location = new System.Drawing.Point(493, 426);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
             this.buttonCancel.TabIndex = 7;
@@ -60,7 +60,7 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(452, 469);
+            this.buttonAccept.Location = new System.Drawing.Point(406, 426);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
             this.buttonAccept.TabIndex = 6;
@@ -84,7 +84,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.htmlPreview);
             this.panelForm.Location = new System.Drawing.Point(1, 3);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(629, 460);
+            this.panelForm.Size = new System.Drawing.Size(583, 417);
             this.panelForm.TabIndex = 5;
             // 
             // textFileName
@@ -94,7 +94,7 @@ namespace KNote.ClientWin.Views
             this.textFileName.Enabled = false;
             this.textFileName.Location = new System.Drawing.Point(78, 14);
             this.textFileName.Name = "textFileName";
-            this.textFileName.Size = new System.Drawing.Size(424, 23);
+            this.textFileName.Size = new System.Drawing.Size(378, 23);
             this.textFileName.TabIndex = 17;
             // 
             // labelPreview
@@ -114,7 +114,7 @@ namespace KNote.ClientWin.Views
             this.textDescription.MaxLength = 3332767;
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
-            this.textDescription.Size = new System.Drawing.Size(261, 329);
+            this.textDescription.Size = new System.Drawing.Size(261, 286);
             this.textDescription.TabIndex = 15;
             // 
             // textOrder
@@ -145,7 +145,7 @@ namespace KNote.ClientWin.Views
             // buttonSelectFile
             // 
             this.buttonSelectFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectFile.Location = new System.Drawing.Point(508, 14);
+            this.buttonSelectFile.Location = new System.Drawing.Point(462, 14);
             this.buttonSelectFile.Name = "buttonSelectFile";
             this.buttonSelectFile.Size = new System.Drawing.Size(111, 25);
             this.buttonSelectFile.TabIndex = 11;
@@ -171,7 +171,7 @@ namespace KNote.ClientWin.Views
             this.htmlPreview.Location = new System.Drawing.Point(288, 68);
             this.htmlPreview.Name = "htmlPreview";
             this.htmlPreview.ReadOnly = true;
-            this.htmlPreview.Size = new System.Drawing.Size(331, 383);
+            this.htmlPreview.Size = new System.Drawing.Size(285, 340);
             this.htmlPreview.TabIndex = 9;
             this.htmlPreview.TabStop = false;
             this.htmlPreview.ToolbarVisible = false;
@@ -184,7 +184,7 @@ namespace KNote.ClientWin.Views
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(632, 510);
+            this.ClientSize = new System.Drawing.Size(586, 467);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);

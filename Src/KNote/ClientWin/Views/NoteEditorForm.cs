@@ -465,21 +465,21 @@ namespace KNote.ClientWin.Views
 
         private async void buttonResourceDelete_Click(object sender, EventArgs e)
         {
-            if (listViewResources.SelectedItems.Count == 0)
+            if (listViewResources.SelectedItems.Count == 0)            
             {
                 MessageBox.Show("There is no task selected .", "KaNote");
                 return;
-            }
-            //var delTsk = GetNoteTaskFromSelectedListView();
-            var delRes = listViewResources.SelectedItems[0].Name;
-            var res = await _com.DeleteResource(Guid.Parse(delRes));
+            }            
+            var delRes = listViewResources.SelectedItems[0].Name;            
+            var res = await _com.DeleteResource(Guid.Parse(delRes));            
             if (res)
             {
-                listViewResources.Items[delRes].Remove();
+                listViewResources.Items[delRes].Remove();      
+                _selectedResource = null;
                 picResource.Image = null;
                 textDescriptionResource.Text = "";
                 if (listViewResources.Items.Count > 0)
-                    listViewResources.Items[0].Selected = true;
+                    listViewResources.Items[0].Selected = true;                
             }
         }
 
@@ -490,25 +490,27 @@ namespace KNote.ClientWin.Views
         }
 
         private void linkViewFile_Click(object sender, EventArgs e)
-        {            
-            (_selectedResource.RelativeUrl, _selectedResource.FullUrl) = 
-            _com.GetOrSaveTmpFile(
-                _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
-                _selectedResource.Container, 
-                _selectedResource.Name, 
-                _selectedResource.ContentArrayBytes);            
+        {
+            UpdateResourceLocation(_selectedResource);
 
             if (_selectedResource.FullUrl == null)
                 return;
 
-            ProcessStartInfo startInfo = new ProcessStartInfo(_selectedResource.FullUrl) { UseShellExecute = true };
-            try
+            if (File.Exists(_selectedResource.FullUrl))
             {
-                Process.Start(startInfo);
+                ProcessStartInfo startInfo = new ProcessStartInfo(_selectedResource.FullUrl) { UseShellExecute = true };
+                try
+                {
+                    Process.Start(startInfo);
+                }
+                catch (Exception ex)
+                {
+                    ShowInfo("The following error has occurred: " + ex.Message);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("The following error has occurred: " + ex.Message, "KaNote");
+                ShowInfo("Resource file not found.");
             }
         }
 
@@ -572,6 +574,12 @@ namespace KNote.ClientWin.Views
             }
         }
 
+        private void listViewAttributes_DoubleClick(object sender, EventArgs e)
+        {
+            if (_com.EditMode)
+                EditNoteAttribute();
+        }
+
         #endregion
 
         #endregion
@@ -603,12 +611,10 @@ namespace KNote.ClientWin.Views
                         BlockControl(conTmp);
                     }
                 }
-
                 htmlDescription.ToolbarVisible = false;
                 htmlDescription.ReadOnly = true;
             }
-
-            // Resource viewer
+            
             picResource.Location = new Point(396, 36);            
             panelPreview.Location = new Point(396, 36);
             if (_com.EditMode)
@@ -621,6 +627,13 @@ namespace KNote.ClientWin.Views
                 picResource.Size = new Size(392, 490);                
                 panelPreview.Size = new Size(392, 490);
             }
+
+            textDescriptionResource.ReadOnly = true;
+            textDescriptionResource.BackColor = Color.White;
+            textTaskDescription.ReadOnly = true;
+            textTaskDescription.BackColor = Color.White;
+            textTaskTags.ReadOnly = true;
+            textTaskTags.BackColor = Color.White;
 
             PersonalizeListView(listViewAttributes);
             PersonalizeListView(listViewResources);
@@ -803,17 +816,24 @@ namespace KNote.ClientWin.Views
                 return;
 
             textDescriptionResource.Text = _selectedResource.Description;
-
-            if (_selectedResource?.ContentArrayBytes == null)            
-                return;
-                                   
+                                                               
             if (_selectedResource.FileType.Contains("image"))
             {            
                 picResource.Visible = true;
                 panelPreview.Visible = false;
-                picResource.Image = Image.FromStream(new MemoryStream(_selectedResource.ContentArrayBytes));                
+                if(_selectedResource.ContentInDB == true)
+                {
+                    if (_selectedResource.ContentArrayBytes != null)
+                        picResource.Image = Image.FromStream(new MemoryStream(_selectedResource.ContentArrayBytes));                
+                }
+                else
+                {
+                    UpdateResourceLocation(_selectedResource);
+                    if (File.Exists(_selectedResource.FullUrl))
+                        picResource.Image = Image.FromFile(_selectedResource.FullUrl);
+                }
             }
-            else // if (_selectedResource.FileType.Contains("pdf"))
+            else
             {
                 picResource.Visible = false;
                 panelPreview.Visible = true;
@@ -1055,12 +1075,14 @@ namespace KNote.ClientWin.Views
         
         private async void EditResource()
         {
-            if (listViewResources.SelectedItems.Count == 0)
+            //if (listViewResources.SelectedItems.Count == 0)
+            if (_selectedResource == null)
             {
                 MessageBox.Show("There is no resource selected.", "KaNote");
                 return;
             }
-            var idResource = Guid.Parse(listViewResources.SelectedItems[0].Name);
+            //var idResource = Guid.Parse(listViewResources.SelectedItems[0].Name);
+            var idResource = _selectedResource.ResourceId;
             var resource = await _com.EditResource(idResource);
             if (resource != null)
             {
@@ -1159,10 +1181,23 @@ namespace KNote.ClientWin.Views
             item.SubItems[1].Text = noteAttribute.Value;
         }
 
-        private void listViewAttributes_DoubleClick(object sender, EventArgs e)
+        private void UpdateResourceLocation(ResourceDto resource)
         {
-            if(_com.EditMode)
-                EditNoteAttribute();
+            if (resource.ContentInDB)
+            {
+                (resource.RelativeUrl, resource.FullUrl) =
+                _com.GetOrSaveTmpFile(
+                    _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
+                    resource.Container,
+                    resource.Name,
+                    resource.ContentArrayBytes);
+            }
+            else
+            {
+                resource.RelativeUrl = Path.Combine(resource.Container, resource.Name);
+                resource.FullUrl = Path.Combine(_com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
+                    resource.RelativeUrl);
+            }
         }
 
         #endregion

@@ -1014,7 +1014,7 @@ namespace KNote.Repository.EntityFramework
                 foreach (var m in resRep.Entity)
                 {
                     ApplyAlarmControl(m);
-                    await UpdateMessageAsync(m.GetSimpleDto<KMessageDto>());
+                    await UpdateMessageAsync(m.GetSimpleDto<KMessageDto>());                    
                 }
 
                 resService.Entity = resRep.Entity?.Select(w => (Guid)w.NoteId).ToList();
