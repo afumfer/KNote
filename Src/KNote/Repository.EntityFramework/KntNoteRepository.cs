@@ -497,10 +497,13 @@ namespace KNote.Repository.EntityFramework
 
                 var newEntity = new Resource();
                 newEntity.SetSimpleDto(entity);
-                // TODO: refactorizar la sigueinte línea (generalizar)
+                // TODO: refactor this line (generalize)
                 if (string.IsNullOrEmpty(entity.Container))
-                    newEntity.Container = _repositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();                
-                newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+                    newEntity.Container = _repositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+                if (!string.IsNullOrEmpty(entity.ContentBase64))
+                    newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+                else
+                    newEntity.ContentArrayBytes = null;
 
                 var resGenRep = await resources.AddAsync(newEntity);
 
@@ -537,7 +540,12 @@ namespace KNote.Repository.EntityFramework
                 {
                     entityForUpdate = resGenRepGet.Entity;
                     entityForUpdate.SetSimpleDto(entity);
-                    entityForUpdate.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+
+                    if (!string.IsNullOrEmpty(entity.ContentBase64))
+                        entityForUpdate.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+                    else
+                        entityForUpdate.ContentArrayBytes = null;
+
                     resGenRep = await resources.UpdateAsync(entityForUpdate);
                 }
                 else

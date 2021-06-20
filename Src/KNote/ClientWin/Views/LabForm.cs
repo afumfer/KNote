@@ -435,9 +435,6 @@ namespace KNote.ClientWin.Views
 
             #endregion
 
-            //int maxFolder = (await service.Folders.GetNextFolderNumber()).Entity;
-            //int maxNote = (await service.Folders.GetNextFolderNumber()).Entity; 
-
             var newFolderDto = new FolderDto
             {
                 FolderNumber = carpetaExport.IdCarpeta,
@@ -603,29 +600,54 @@ namespace KNote.ClientWin.Views
                     // Add resource                
                     if (!string.IsNullOrEmpty(n.NotaEx))
                     {
-                        // TODO: Refactor this line
-                        var root = @"D:\ANotas\Docs";
+                        #region Import resources for ContendInDB = true
 
-                        var fileFullName = $"{root}{n.NotaEx}";
+                        //// TODO: Refactor this line
+                        //var root = @"D:\ANotas\Docs";
 
-                        if (File.Exists(fileFullName))
+                        //var fileFullName = $"{root}{n.NotaEx}";
+
+                        //if (File.Exists(fileFullName))
+                        //{
+                        //    var fileArrayBytes = File.ReadAllBytes(fileFullName);
+                        //    var contentBase64 = Convert.ToBase64String(fileArrayBytes);
+                        //    ResourceDto resource = new ResourceDto
+                        //    {
+                        //        NoteId = Guid.Empty,
+                        //        ContentInDB = true,
+                        //        Order = 1,
+                        //        Container = service.RepositoryRef.ResourcesContainer + "\\" + DateTime.Now.Year.ToString(),
+                        //        Name = $"{Guid.NewGuid()}_{Path.GetFileName(fileFullName)}",
+                        //        Description = $"(ANotas import {n.NotaEx})",
+                        //        ContentArrayBytes = fileArrayBytes,
+                        //        ContentBase64 = contentBase64,
+                        //        FileType = _store.ExtensionFileToFileType(Path.GetExtension(fileFullName))
+                        //    };
+                        //    newNote.Resources.Add(resource);
+                        //}
+
+                        #endregion
+
+                        #region Import resources for ContendInDB = false
+                        
+                        string fileImport = Path.Combine( new[] { service.RepositoryRef.ResourcesContainerCacheRootPath, service.RepositoryRef.ResourcesContainer, n.NotaEx });
+                        
+                        ResourceDto resource = new ResourceDto
                         {
-                            var fileArrayBytes = File.ReadAllBytes(fileFullName);
-                            var contentBase64 = Convert.ToBase64String(fileArrayBytes);
-                            ResourceDto resource = new ResourceDto
-                            {
-                                NoteId = Guid.Empty,
-                                ContentInDB = true,
-                                Order = 1,
-                                Container = service.RepositoryRef.ResourcesContainer + "\\" + DateTime.Now.Year.ToString(),
-                                Name = $"{Guid.NewGuid()}_{Path.GetFileName(fileFullName)}",
-                                Description = $"(ANotas import {n.NotaEx})",
-                                ContentArrayBytes = fileArrayBytes,
-                                ContentBase64 = contentBase64,
-                                FileType = _store.ExtensionFileToFileType(Path.GetExtension(fileFullName))
-                            };
-                            newNote.Resources.Add(resource);
-                        }
+                            NoteId = Guid.Empty,
+                            ContentInDB = false,
+                            Order = 1,
+                            Container = service.RepositoryRef.ResourcesContainer,
+                            Name = n.NotaEx,
+                            Description = $"(ANotas import {n.NotaEx})",
+                            ContentArrayBytes = null,
+                            ContentBase64 = null,
+                            FileType = _store.ExtensionFileToFileType(Path.GetExtension(fileImport))
+                        };
+                        newNote.Resources.Add(resource);
+
+                        #endregion 
+
                     }
 
                     // Save note and PostIt

@@ -140,8 +140,7 @@ namespace KNote.Model.Dto
             }
         }
 
-        private string _contentBase64;
-        [Required(ErrorMessage = KMSG)]
+        private string _contentBase64;        
         public string ContentBase64 {
             get
             {
@@ -195,10 +194,6 @@ namespace KNote.Model.Dto
                new ValidationContext(this, null, null) { MemberName = "Name" },
                results);
 
-            Validator.TryValidateProperty(this.ContentBase64,
-               new ValidationContext(this, null, null) { MemberName = "ContentBase64" },
-               results);
-
             Validator.TryValidateProperty(this.Container,
                new ValidationContext(this, null, null) { MemberName = "Container" },
                results);
@@ -208,17 +203,13 @@ namespace KNote.Model.Dto
             // Specific validations
             //----
 
-            // ---- Ejemplo
-            //if (ModificationDateTime < CreationDateTime)
-            //{
-            //    results.Add(new ValidationResult
-            //     ("KMSG: The modification date cannot be greater than the creation date "
-            //     , new[] { "ModificationDateTime", "CreationDateTime" }));
-            //}
+            if (ContentInDB == true && string.IsNullOrEmpty(ContentBase64))
+            {
+                results.Add(new ValidationResult
+                 ("KMSG: If the content is in the database, you must enter its content in base 64  "
+                 , new[] { "ContentInDB", "ContentBase64" }));
+            }
 
-            // ---
-            // Return List<ValidationResult>()
-            // ---           
 
             return results;
         }

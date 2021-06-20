@@ -43,16 +43,17 @@ namespace KNote.ClientWin.Views
             this.labelFileName = new System.Windows.Forms.Label();
             this.htmlPreview = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.checkContentInDB = new System.Windows.Forms.CheckBox();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(493, 426);
+            this.buttonCancel.Location = new System.Drawing.Point(493, 452);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
-            this.buttonCancel.TabIndex = 7;
+            this.buttonCancel.TabIndex = 8;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -60,10 +61,10 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(406, 426);
+            this.buttonAccept.Location = new System.Drawing.Point(406, 452);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 6;
+            this.buttonAccept.TabIndex = 7;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
@@ -73,6 +74,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.Controls.Add(this.checkContentInDB);
             this.panelForm.Controls.Add(this.textFileName);
             this.panelForm.Controls.Add(this.labelPreview);
             this.panelForm.Controls.Add(this.textDescription);
@@ -84,7 +86,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.htmlPreview);
             this.panelForm.Location = new System.Drawing.Point(1, 3);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(583, 417);
+            this.panelForm.Size = new System.Drawing.Size(583, 443);
             this.panelForm.TabIndex = 5;
             // 
             // textFileName
@@ -95,12 +97,12 @@ namespace KNote.ClientWin.Views
             this.textFileName.Location = new System.Drawing.Point(78, 14);
             this.textFileName.Name = "textFileName";
             this.textFileName.Size = new System.Drawing.Size(378, 23);
-            this.textFileName.TabIndex = 17;
+            this.textFileName.TabIndex = 1;
             // 
             // labelPreview
             // 
             this.labelPreview.AutoSize = true;
-            this.labelPreview.Location = new System.Drawing.Point(288, 50);
+            this.labelPreview.Location = new System.Drawing.Point(288, 78);
             this.labelPreview.Name = "labelPreview";
             this.labelPreview.Size = new System.Drawing.Size(51, 15);
             this.labelPreview.TabIndex = 16;
@@ -110,24 +112,24 @@ namespace KNote.ClientWin.Views
             // 
             this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.textDescription.Location = new System.Drawing.Point(11, 122);
+            this.textDescription.Location = new System.Drawing.Point(11, 156);
             this.textDescription.MaxLength = 3332767;
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
-            this.textDescription.Size = new System.Drawing.Size(261, 286);
-            this.textDescription.TabIndex = 15;
+            this.textDescription.Size = new System.Drawing.Size(261, 278);
+            this.textDescription.TabIndex = 5;
             // 
             // textOrder
             // 
-            this.textOrder.Location = new System.Drawing.Point(11, 68);
+            this.textOrder.Location = new System.Drawing.Point(11, 96);
             this.textOrder.Name = "textOrder";
             this.textOrder.Size = new System.Drawing.Size(85, 23);
-            this.textOrder.TabIndex = 14;
+            this.textOrder.TabIndex = 4;
             // 
             // labelDescription
             // 
             this.labelDescription.AutoSize = true;
-            this.labelDescription.Location = new System.Drawing.Point(11, 104);
+            this.labelDescription.Location = new System.Drawing.Point(11, 138);
             this.labelDescription.Name = "labelDescription";
             this.labelDescription.Size = new System.Drawing.Size(70, 15);
             this.labelDescription.TabIndex = 13;
@@ -136,7 +138,7 @@ namespace KNote.ClientWin.Views
             // labelOrder
             // 
             this.labelOrder.AutoSize = true;
-            this.labelOrder.Location = new System.Drawing.Point(11, 50);
+            this.labelOrder.Location = new System.Drawing.Point(11, 78);
             this.labelOrder.Name = "labelOrder";
             this.labelOrder.Size = new System.Drawing.Size(40, 15);
             this.labelOrder.TabIndex = 12;
@@ -148,7 +150,7 @@ namespace KNote.ClientWin.Views
             this.buttonSelectFile.Location = new System.Drawing.Point(462, 14);
             this.buttonSelectFile.Name = "buttonSelectFile";
             this.buttonSelectFile.Size = new System.Drawing.Size(111, 25);
-            this.buttonSelectFile.TabIndex = 11;
+            this.buttonSelectFile.TabIndex = 2;
             this.buttonSelectFile.Text = "Select file";
             this.buttonSelectFile.UseVisualStyleBackColor = true;
             this.buttonSelectFile.Click += new System.EventHandler(this.buttonSelectFile_Click);
@@ -168,11 +170,11 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.htmlPreview.InnerText = null;
-            this.htmlPreview.Location = new System.Drawing.Point(288, 68);
+            this.htmlPreview.Location = new System.Drawing.Point(288, 96);
             this.htmlPreview.Name = "htmlPreview";
             this.htmlPreview.ReadOnly = true;
-            this.htmlPreview.Size = new System.Drawing.Size(285, 340);
-            this.htmlPreview.TabIndex = 9;
+            this.htmlPreview.Size = new System.Drawing.Size(285, 338);
+            this.htmlPreview.TabIndex = 6;
             this.htmlPreview.TabStop = false;
             this.htmlPreview.ToolbarVisible = false;
             // 
@@ -180,11 +182,23 @@ namespace KNote.ClientWin.Views
             // 
             this.openFileDialog.FileName = "openFileDialog1";
             // 
+            // checkContentInDB
+            // 
+            this.checkContentInDB.AutoSize = true;
+            this.checkContentInDB.Checked = true;
+            this.checkContentInDB.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkContentInDB.Location = new System.Drawing.Point(78, 43);
+            this.checkContentInDB.Name = "checkContentInDB";
+            this.checkContentInDB.Size = new System.Drawing.Size(203, 19);
+            this.checkContentInDB.TabIndex = 3;
+            this.checkContentInDB.Text = "Save content in KaNote Data Base";
+            this.checkContentInDB.UseVisualStyleBackColor = true;
+            // 
             // ResourceEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(586, 467);
+            this.ClientSize = new System.Drawing.Size(586, 493);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);
@@ -218,5 +232,6 @@ namespace KNote.ClientWin.Views
         private Pavonis.Html.Editor.HtmlEditorControl htmlPreview;
         private System.Windows.Forms.TextBox textFileName;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
+        private System.Windows.Forms.CheckBox checkContentInDB;
     }
 }

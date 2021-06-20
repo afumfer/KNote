@@ -181,43 +181,66 @@ namespace KNote.ClientWin.Views
         }
 
         private void ModelToControls()
-        {
-            textDescription.Text = _com.Model.Description;
-            textOrder.Text = _com.Model.Order.ToString();
-                      
+        {                      
             textFileName.Text = _com.Model.NameOut;
             varName = _com.Model.Name;
-            varContentBase64 = _com.Model.ContentBase64;
+            textDescription.Text = _com.Model.Description;
+            textOrder.Text = _com.Model.Order.ToString();
             varFileType = _com.Model.FileType;            
-            varContainer = _com.Model.Container;
-            varContentArrayBytes = _com.Model.ContentArrayBytes;            
-            (_com.Model.RelativeUrl, _com.Model.FullUrl) = 
-            _com.GetOrSaveTmpFile(
-                _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
-                _com.Model.Container, 
-                _com.Model.Name, 
-                _com.Model.ContentArrayBytes);
+            varContainer = _com.Model.Container;            
+            checkContentInDB.Checked = _com.Model.ContentInDB;
+
+            // TODO: Refactor, this logic should be carried over to the component 
+            if (_com.Model.ContentInDB)
+            {
+                (_com.Model.RelativeUrl, _com.Model.FullUrl) = 
+                _com.GetOrSaveTmpFile(
+                    _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
+                    _com.Model.Container, 
+                    _com.Model.Name, 
+                    _com.Model.ContentArrayBytes);
+
+                varContentArrayBytes = _com.Model.ContentArrayBytes;
+                varContentBase64 = _com.Model.ContentBase64;
+            }
+            else
+            {
+                _com.Model.RelativeUrl = Path.Combine(_com.Model.Container, _com.Model.Name);                
+                _com.Model.FullUrl = Path.Combine(_com.Service.RepositoryRef.ResourcesContainerCacheRootPath, _com.Model.RelativeUrl);
+                varContentArrayBytes = File.ReadAllBytes(_com.Model.FullUrl);
+                varContentBase64 = Convert.ToBase64String(varContentArrayBytes);
+            }
+
             ShowPreview(_com.Model.FullUrl, false);
         }
 
         private void ControlsToModel()
         {
+            _com.Model.Name = varName;
             _com.Model.Description = textDescription.Text;
             _com.Model.Order = _com.TextToInt(textOrder.Text);
-            
-            _com.Model.Name = varName;
-            _com.Model.ContentBase64 = varContentBase64;
             _com.Model.FileType = varFileType;
-
             _com.Model.Container = varContainer;
-            _com.Model.ContentArrayBytes = varContentArrayBytes;
+            _com.Model.ContentInDB = checkContentInDB.Checked;
 
-            (_com.Model.RelativeUrl, _com.Model.FullUrl) = 
+            // TODO: Refactor, this logic should be carried over to the component 
+            (_com.Model.RelativeUrl, _com.Model.FullUrl) =
             _com.GetOrSaveTmpFile(
                 _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
-                _com.Model.Container, 
-                _com.Model.Name, 
-                _com.Model.ContentArrayBytes);
+                _com.Model.Container,
+                _com.Model.Name,
+                varContentArrayBytes);
+
+            if (_com.Model.ContentInDB)
+            {
+                _com.Model.ContentBase64 = varContentBase64;                        
+                _com.Model.ContentArrayBytes = varContentArrayBytes;
+            }
+            else
+            {
+                _com.Model.ContentBase64 = null;
+                _com.Model.ContentArrayBytes = null;
+            }
         }
 
         private void ShowPreview(string file, bool includePdf = true)

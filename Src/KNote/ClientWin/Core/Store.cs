@@ -341,6 +341,8 @@ namespace KNote.ClientWin.Core
                 return "image/png";
             else if (extension == ".pdf")
                 return "application/pdf";
+            else if (extension == ".zip")
+                return "application/zip";
             else
                 return "";
         }

@@ -634,7 +634,10 @@ namespace KNote.Repository.Dapper
                                 
                 if(string.IsNullOrEmpty(entity.Container))
                     entity.Container = _repositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
-                entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+                if (!string.IsNullOrEmpty(entity.ContentBase64))
+                    entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+                else
+                    entity.ContentArrayBytes = null;
 
                 var sql = @"INSERT INTO Resources 
                             (ResourceId, [Name], Container, [Description], [Order], 
@@ -667,8 +670,11 @@ namespace KNote.Repository.Dapper
             try
             {
                 var db = GetOpenConnection();
-                
-                entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+
+                if (!string.IsNullOrEmpty(entity.ContentBase64))
+                    entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
+                else
+                    entity.ContentArrayBytes = null;
 
                 var sql = @"UPDATE Resources SET                                                
                             [Name] = @Name, 

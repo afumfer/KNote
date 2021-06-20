@@ -81,7 +81,12 @@ namespace KNote.ClientWin.Views
             textDescription.Text = "";
             htmlDescription.BodyHtml = "";
             textPriority.Text = "";
-            textDescriptionResource.Text = "";            
+            textDescriptionResource.Text = "";
+            picResource.Image = null;
+            picResource.Visible = true;
+            panelPreview.Visible = false;
+            textTaskDescription.Text = "";
+            textTaskTags.Text = "";
             listViewAttributes.Clear();
             listViewResources.Clear();
             listViewTasks.Clear();
