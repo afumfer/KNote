@@ -420,8 +420,10 @@ namespace KNote.ClientWin.Views
             //// .......
             //string r31 = @"D:\KaNote\Resources\ImgsEditorHtml";
             //string r32 = @"D:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
+
             //string r41 = @"D:\KaNote\Resources\ImgsEditorHtml";
             //string r42 = @"C:\Anotas\Docs\__Imgs_!!ANTHtmlEditor!!_";
+
             //string r51 = @"_KNTERRORTRAP";
             //string r52 = @"_ANTERRORTRAP";
             //string r61 = @"_KNTERRORCODE";
@@ -434,6 +436,15 @@ namespace KNote.ClientWin.Views
             //string r92 = "_ANTForm.Exit();";
 
             #endregion
+
+            string r31 = @"KntResCon/";
+            string r32 = @"\\educacion.org\Almacen\Pincel\TareasTM\Doc\";
+
+            string r41 = @"KntResCon/";
+            string r42 = @"\\educacion.org\Almacen\Pincel\tareasTM\Doc\";
+
+            string r51 = @"KntResCon/";
+            string r52 = @"\\Educacion.org\Almacen\Pincel\TareasTM\Doc\";
 
             var newFolderDto = new FolderDto
             {
@@ -468,10 +479,9 @@ namespace KNote.ClientWin.Views
                     //// afumfer
                     //// .......
                     //// Hack inserted resources change
-                    //n.DescripcionNota = n.DescripcionNota.Replace(r32, r31);
-                    //n.DescripcionNota = n.DescripcionNota.Replace(r42, r41);
-                    //// KntScript
-                    //n.DescripcionNota = n.DescripcionNota.Replace(r52, r51);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r32, r31);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r42, r41);
+                    n.DescripcionNota = n.DescripcionNota.Replace(r52, r51);
                     //n.DescripcionNota = n.DescripcionNota.Replace(r62, r61);
                     //n.DescripcionNota = n.DescripcionNota.Replace(r72, r71);
                     //n.DescripcionNota = n.DescripcionNota.Replace(r82, r81);
@@ -629,7 +639,10 @@ namespace KNote.ClientWin.Views
                         #endregion
 
                         #region Import resources for ContendInDB = false
-                        
+
+                        if (n.NotaEx[0] == '\\')
+                            n.NotaEx = n.NotaEx.Substring(1);
+
                         string fileImport = Path.Combine( new[] { service.RepositoryRef.ResourcesContainerCacheRootPath, service.RepositoryRef.ResourcesContainer, n.NotaEx });
                         
                         ResourceDto resource = new ResourceDto

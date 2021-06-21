@@ -534,7 +534,7 @@ namespace KNote.ClientWin.Views
         {            
             if(_selectedResource == null)
             {
-                MessageBox.Show("There is no selected resource", "KaNote");
+                ShowInfo("There is no selected resource.");
                 return;
             }
 
@@ -542,8 +542,18 @@ namespace KNote.ClientWin.Views
             saveFileDialog.InitialDirectory = Path.GetTempPath();            
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string fileName = saveFileDialog.FileName;
-                File.WriteAllBytes(fileName, _selectedResource.ContentArrayBytes);
+                try
+                {
+                    string fileName = saveFileDialog.FileName;
+                    if(_selectedResource.ContentInDB)
+                        File.WriteAllBytes(fileName, _selectedResource.ContentArrayBytes);
+                    else                
+                        File.Copy(_selectedResource.FullUrl, fileName);               
+                }
+                catch (Exception ex)
+                {
+                    ShowInfo($"File could not be saved, the following error has occurred: {ex.Message}.");
+                }
             }
         }
 
@@ -1188,6 +1198,7 @@ namespace KNote.ClientWin.Views
 
         private void UpdateResourceLocation(ResourceDto resource)
         {
+            // TODO: refactor, this logic to store.
             if (resource.ContentInDB)
             {
                 (resource.RelativeUrl, resource.FullUrl) =
