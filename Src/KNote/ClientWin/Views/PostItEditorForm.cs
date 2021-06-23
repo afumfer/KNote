@@ -33,11 +33,15 @@ namespace KNote.ClientWin.Views
 
         #endregion
 
+        #region Constructor
+
         public PostItEditorForm(PostItEditorComponent com)
         {
             InitializeComponent();
             _com = com;
         }
+
+        #endregion 
 
         #region IEditorView interface
 
@@ -319,12 +323,19 @@ namespace KNote.ClientWin.Views
 
         private void labelStatus_DoubleClick(object sender, EventArgs e)
         {
+            var tmpTopMost = TopMost;
+            TopMost = false;
+            Refresh();
+
             var folder = _com.GetFolder();
             if (folder != null)
             {
                 _selectedFolderId = folder.FolderId;
+                _com.Model.FolderDto = folder.GetSimpleDto<FolderDto>();
                 RefreshStatus();                
             }
+
+            TopMost = tmpTopMost;
         }
 
         #endregion

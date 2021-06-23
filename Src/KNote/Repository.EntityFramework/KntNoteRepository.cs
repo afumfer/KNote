@@ -345,7 +345,7 @@ namespace KNote.Repository.EntityFramework
                 resRep = await notes.AddAsync(newEntity);
                 if (!resRep.IsValid)
                     ExceptionHasHappened = true;
-
+                
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {
                     atr.NoteId = entity.NoteId;
@@ -376,7 +376,7 @@ namespace KNote.Repository.EntityFramework
             try
             {
                 var ctx = GetOpenConnection();
-                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);                
 
                 var entityU = await notes.DbSet.Where(n => n.NoteId == entity.NoteId)
                     .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
@@ -403,7 +403,7 @@ namespace KNote.Repository.EntityFramework
                 // TODO: Limiar lo siguiente está sucio ...
 
                 result.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
-                result.Entity.FolderDto = resRep.Entity.Folder.GetSimpleDto<FolderDto>();
+                result.Entity.FolderDto = entity.FolderDto;
 
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {

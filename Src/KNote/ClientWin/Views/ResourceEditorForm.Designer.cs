@@ -33,6 +33,7 @@ namespace KNote.ClientWin.Views
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.panelForm = new System.Windows.Forms.Panel();
+            this.checkContentInDB = new System.Windows.Forms.CheckBox();
             this.textFileName = new System.Windows.Forms.TextBox();
             this.labelPreview = new System.Windows.Forms.Label();
             this.textDescription = new System.Windows.Forms.TextBox();
@@ -43,7 +44,6 @@ namespace KNote.ClientWin.Views
             this.labelFileName = new System.Windows.Forms.Label();
             this.htmlPreview = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.checkContentInDB = new System.Windows.Forms.CheckBox();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -88,6 +88,16 @@ namespace KNote.ClientWin.Views
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(583, 443);
             this.panelForm.TabIndex = 5;
+            // 
+            // checkContentInDB
+            // 
+            this.checkContentInDB.AutoSize = true;
+            this.checkContentInDB.Location = new System.Drawing.Point(78, 43);
+            this.checkContentInDB.Name = "checkContentInDB";
+            this.checkContentInDB.Size = new System.Drawing.Size(203, 19);
+            this.checkContentInDB.TabIndex = 3;
+            this.checkContentInDB.Text = "Save content in KaNote Data Base";
+            this.checkContentInDB.UseVisualStyleBackColor = true;
             // 
             // textFileName
             // 
@@ -181,18 +191,6 @@ namespace KNote.ClientWin.Views
             // openFileDialog
             // 
             this.openFileDialog.FileName = "openFileDialog1";
-            // 
-            // checkContentInDB
-            // 
-            this.checkContentInDB.AutoSize = true;
-            this.checkContentInDB.Checked = true;
-            this.checkContentInDB.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkContentInDB.Location = new System.Drawing.Point(78, 43);
-            this.checkContentInDB.Name = "checkContentInDB";
-            this.checkContentInDB.Size = new System.Drawing.Size(203, 19);
-            this.checkContentInDB.TabIndex = 3;
-            this.checkContentInDB.Text = "Save content in KaNote Data Base";
-            this.checkContentInDB.UseVisualStyleBackColor = true;
             // 
             // ResourceEditorForm
             // 

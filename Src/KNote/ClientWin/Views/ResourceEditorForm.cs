@@ -205,10 +205,13 @@ namespace KNote.ClientWin.Views
             }
             else
             {
-                _com.Model.RelativeUrl = Path.Combine(_com.Model.Container, _com.Model.Name);                
-                _com.Model.FullUrl = Path.Combine(_com.Service.RepositoryRef.ResourcesContainerCacheRootPath, _com.Model.RelativeUrl);
-                varContentArrayBytes = File.ReadAllBytes(_com.Model.FullUrl);
-                varContentBase64 = Convert.ToBase64String(varContentArrayBytes);
+                if(!string.IsNullOrEmpty(_com.Model.Container) && !string.IsNullOrEmpty(_com.Model.Name))
+                {
+                    _com.Model.RelativeUrl = Path.Combine(_com.Model.Container, _com.Model.Name);                
+                    _com.Model.FullUrl = Path.Combine(_com.Service.RepositoryRef.ResourcesContainerCacheRootPath, _com.Model.RelativeUrl);
+                    varContentArrayBytes = File.ReadAllBytes(_com.Model.FullUrl);
+                    varContentBase64 = Convert.ToBase64String(varContentArrayBytes);
+                }
             }
 
             ShowPreview(_com.Model.FullUrl, false);

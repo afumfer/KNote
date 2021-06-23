@@ -382,9 +382,7 @@ namespace KNote.ClientWin.Components
             await resource.NewModel(Service);
             resource.Model.NoteId = Model.NoteId;
             resource.Model.SetIsNew(true);
-
-            var dummy = await Task.FromResult(true);
-
+            
             var res = resource.RunModal();
 
             if (res.Entity == EComponentResult.Executed)
@@ -392,11 +390,16 @@ namespace KNote.ClientWin.Components
                 Model.Resources.Add(resource.Model);
                 return resource.Model;
             }
-            else                        
+            else if (res.Entity == EComponentResult.Error)
+            {
+                View.ShowInfo($"Error: {res.Message}");
+                return null;
+            }
+            else
                 return null;            
         }
 
-        public ResourceDto NewResourceFromClipboard()
+        public ResourceDto NewResourceFromClipboard(bool contentInDB = false)
         {            
             try
             {
@@ -411,26 +414,39 @@ namespace KNote.ClientWin.Components
 
                 newResource.ResourceId = Guid.NewGuid();
                 newResource.NoteId = Model.NoteId;
+                newResource.ContentInDB = contentInDB;
                 newResource.Description = "Image inserted from clipboard.";
                 newResource.Order = 0;
                 newResource.Name = "ClipboardImg_" + newResource.ResourceId.ToString() + ".png";            
                 newResource.FileType = Store.ExtensionFileToFileType(".png"); 
                 newResource.Container = Service.RepositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();                                
-                newResource.ContentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));           
-                newResource.ContentBase64 = Convert.ToBase64String(newResource.ContentArrayBytes);
+                var contentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));           
+                var contentBase64 = Convert.ToBase64String(contentArrayBytes);
 
-                (newResource.RelativeUrl,newResource.FullUrl) = 
+                (newResource.RelativeUrl, newResource.FullUrl) = 
                 GetOrSaveTmpFile(
                     Service.RepositoryRef.ResourcesContainerCacheRootPath,
                     newResource.Container,
                     newResource.Name,
-                    newResource.ContentArrayBytes);
+                    contentArrayBytes);
+
+                if (contentInDB)
+                {
+                    newResource.ContentArrayBytes = contentArrayBytes;
+                    newResource.ContentBase64 = contentBase64;
+                }
+                else
+                {
+                    newResource.ContentArrayBytes = null;
+                    newResource.ContentBase64 = null;
+                }
 
                 Model.Resources.Add(newResource);
                 return newResource;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                View.ShowInfo($"Error: {ex.Message}");
                 return null;
             }            
         }

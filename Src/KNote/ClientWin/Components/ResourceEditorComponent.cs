@@ -35,6 +35,7 @@ namespace KNote.ClientWin.Components
             // TODO: call service for new model
             Model = new ResourceDto();
             Model.ResourceId = Guid.NewGuid();
+            Model.ContentInDB = false;
             return await Task.FromResult<bool>(true);
         }
 
