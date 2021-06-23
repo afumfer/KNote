@@ -44,15 +44,13 @@ namespace KNote.ClientWin.Core
 
         public FolderWithServiceRef _activeFolderWithServiceRef;
         public FolderWithServiceRef ActiveFolderWithServiceRef
-        {
-            set { _activeFolderWithServiceRef = value; }
+        {            
             get { return _activeFolderWithServiceRef; }            
         }
 
         public NotesFilterWithServiceRef _activeFilterWithServiceRef;
         public NotesFilterWithServiceRef ActiveFilterWithServiceRef
-        {
-            set { _activeFilterWithServiceRef = value; }
+        {            
             get { return _activeFilterWithServiceRef; }
         }
 
@@ -79,12 +77,31 @@ namespace KNote.ClientWin.Core
 
         #region Actions    
         
+        public event EventHandler<ComponentEventArgs<FolderWithServiceRef>> ChangedActiveFolderWithServiceRef;
+        public void ChangeActiveFolderWithServiceRef(FolderWithServiceRef activeFolderWithServiceRef)
+        {
+            if(_activeFolderWithServiceRef != activeFolderWithServiceRef)
+            {
+                _activeFolderWithServiceRef = activeFolderWithServiceRef;
+                ChangedActiveFolderWithServiceRef?.Invoke(this, new ComponentEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
+            }
+        }
+
+        public event EventHandler<ComponentEventArgs<NotesFilterWithServiceRef>> ChangedActiveFilterWithServiceRef;
+        public void ChangeActiveFilterWithServiceRef(NotesFilterWithServiceRef activeFilterWithServiceRef)
+        {
+            if (_activeFilterWithServiceRef != activeFilterWithServiceRef)
+            {
+                _activeFilterWithServiceRef = activeFilterWithServiceRef;
+                ChangedActiveFilterWithServiceRef?.Invoke(this, new ComponentEventArgs<NotesFilterWithServiceRef>(activeFilterWithServiceRef));
+            }
+        }
+      
         public event EventHandler<ComponentEventArgs<ServiceRef>> AddedServiceRef;
         public void AddServiceRef(ServiceRef serviceRef)
         {
-            _servicesRefs.Add(serviceRef);            
-            if (AddedServiceRef != null)
-                AddedServiceRef(this, new ComponentEventArgs<ServiceRef>(serviceRef));
+            _servicesRefs.Add(serviceRef);                        
+            AddedServiceRef?.Invoke(this, new ComponentEventArgs<ServiceRef>(serviceRef));
         }
 
         public void AddServiceRefInAppConfig(ServiceRef serviceRef)
@@ -96,9 +113,8 @@ namespace KNote.ClientWin.Core
         public void RemoveServiceRef(ServiceRef serviceRef)
         {            
             _servicesRefs.Remove(serviceRef);
-            AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);
-            if (RemovedServiceRef != null)
-                RemovedServiceRef(this, new ComponentEventArgs<ServiceRef>(serviceRef));
+            AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);            
+            RemovedServiceRef?.Invoke(this, new ComponentEventArgs<ServiceRef>(serviceRef));
         }
 
         public List<ServiceRef> GetAllServiceRef()
@@ -144,15 +160,6 @@ namespace KNote.ClientWin.Core
         internal void OnComponentNotification(ComponentBase component, string message)
         {
             ComponentNotification?.Invoke(component, new ComponentEventArgs<string>(message));
-        }
-
-
-        public event EventHandler<ComponentEventArgs<FolderWithServiceRef>> ActiveFolderChanged;
-        public void UpdateActiveFolder(FolderWithServiceRef activeFolder)
-        {
-            _activeFolderWithServiceRef = activeFolder;
-            if (ActiveFolderChanged != null)
-                ActiveFolderChanged(this, new ComponentEventArgs<FolderWithServiceRef>(activeFolder));
         }
 
         public void SaveConfig(string configFile = null)

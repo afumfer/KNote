@@ -26,13 +26,21 @@ namespace KNote.ClientWin.Components
         public FolderWithServiceRef SelectedFolderWithServiceRef 
         {
             get { return Store.ActiveFolderWithServiceRef; }
-            set { Store.ActiveFolderWithServiceRef = value; } 
+            set 
+            {
+                //Store.ActiveFolderWithServiceRef = value; 
+                Store.ChangeActiveFolderWithServiceRef(value);
+            } 
         }
 
         public NotesFilterWithServiceRef SelectedFilterWithServiceRef
         {
             get { return Store.ActiveFilterWithServiceRef; }
-            set { Store.ActiveFilterWithServiceRef = value; }
+            set 
+            {
+                //Store.ActiveFilterWithServiceRef = value; 
+                Store.ChangeActiveFilterWithServiceRef(value);
+            }
         }
 
         public FolderInfoDto SelectedFolderInfo
@@ -79,10 +87,61 @@ namespace KNote.ClientWin.Components
 
         public KNoteManagmentComponent(Store store) : base(store)
         {
-
+            //Store.ChangedActiveFolderWithServiceRef += RefreshActiveFolderWithServiceRef;
+            //Store.ChangedActiveFilterWithServiceRef += RefreshActiveFilterWithServiceRef;
+            Store.ChangedActiveFolderWithServiceRef += Store_ChangedActiveFolderWithServiceRef;
+            Store.ChangedActiveFilterWithServiceRef += Store_ChangedActiveFilterWithServiceRef;
         }
 
-        #endregion 
+        private void Store_ChangedActiveFolderWithServiceRef(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        {
+            RefreshActiveFolderWithServiceRef(e.Entity);
+        }
+
+        private void Store_ChangedActiveFilterWithServiceRef(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
+        {
+            RefreshActiveFilterWithServiceRef(e.Entity);
+        }
+
+        private async void RefreshActiveFolderWithServiceRef(FolderWithServiceRef folderWithServideRef)
+        {
+            if (folderWithServideRef == null)
+                return;
+
+            SelectMode = EnumSelectMode.Folders;
+
+            NotifyMessage($"Loading notes list for folder {folderWithServideRef.FolderInfo?.FolderNumber}");
+
+            FolderPath = FoldersSelectorComponent.Path;
+
+            _selectedNoteInfo = null;
+            NoteEditorComponent.CleanView();
+            await NotesSelectorComponent.LoadEntities(folderWithServideRef.ServiceRef.Service, folderWithServideRef.FolderInfo);
+            CountNotes = NotesSelectorComponent.ListEntities?.Count;
+
+            View.ShowInfo(null);
+            NotifyMessage($"Loaded notes list for folder {folderWithServideRef.FolderInfo?.FolderNumber}");
+        }
+
+        private async void RefreshActiveFilterWithServiceRef(NotesFilterWithServiceRef notesFilterWithServiceRef)
+        {
+            SelectMode = EnumSelectMode.Filters;
+
+            NotifyMessage($"Loading notes filter: {notesFilterWithServiceRef?.NotesFilter?.TextSearch}");
+            
+            FolderPath = $"Notes filter: {notesFilterWithServiceRef?.NotesFilter?.TextSearch}";
+
+            _selectedNoteInfo = null;
+            NoteEditorComponent.View.CleanView();
+            await NotesSelectorComponent.LoadFilteredEntities(notesFilterWithServiceRef?.ServiceRef?.Service, notesFilterWithServiceRef?.NotesFilter);
+            CountNotes = NotesSelectorComponent.ListEntities?.Count;
+
+            View.ShowInfo(null);
+            NotifyMessage($"Loaded notes filter {notesFilterWithServiceRef?.NotesFilter?.TextSearch}");
+        }
+
+
+        #endregion
 
         #region Views
 
@@ -177,26 +236,9 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        private async void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        private void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
-            if (e.Entity == null)                            
-                return;
-
-            SelectMode = EnumSelectMode.Folders;
-
-            NotifyMessage($"Loading notes list for folder {e.Entity.FolderInfo?.FolderNumber}");
-
             SelectedFolderWithServiceRef = e.Entity;            
-            FolderPath = FoldersSelectorComponent.Path;            
-            
-            _selectedNoteInfo = null;            
-            NoteEditorComponent.CleanView();
-            
-            await NotesSelectorComponent.LoadEntities(e.Entity.ServiceRef.Service, e.Entity.FolderInfo);
-            CountNotes = NotesSelectorComponent.ListEntities?.Count;
-            
-            View.ShowInfo(null);
-            NotifyMessage($"Loaded notes list for folder {e.Entity.FolderInfo?.FolderNumber}");
         }
 
         private void ExtendNewFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
@@ -402,23 +444,9 @@ namespace KNote.ClientWin.Components
             }
         }
 
-        private async void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
+        private void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
         {            
-            SelectMode = EnumSelectMode.Filters;
-
-            NotifyMessage($"Loading notes filter: {e.Entity?.NotesFilter?.TextSearch}");
-
             SelectedFilterWithServiceRef = e.Entity;
-            FolderPath = $"Notes filter: {e.Entity?.NotesFilter?.TextSearch}";
-
-            _selectedNoteInfo = null;
-            NoteEditorComponent.View.CleanView();
-
-            await NotesSelectorComponent.LoadFilteredEntities(e.Entity?.ServiceRef?.Service, e.Entity?.NotesFilter);            
-            CountNotes = NotesSelectorComponent.ListEntities?.Count;
-
-            View.ShowInfo(null);
-            NotifyMessage($"Loaded notes filter {e.Entity?.NotesFilter?.TextSearch}");            
         }
 
         #endregion
@@ -684,13 +712,13 @@ namespace KNote.ClientWin.Components
         }
 
         public void GoActiveFolder()
-        {
-            _folderSelectorComponent_EntitySelection(this, new ComponentEventArgs<FolderWithServiceRef>(SelectedFolderWithServiceRef));
+        {        
+            RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);            
         }
 
         public void GoActiveFilter()
-        {
-            _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
+        {            
+            RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
         }
 
         public void RunScriptSelectedNote()
@@ -882,10 +910,10 @@ namespace KNote.ClientWin.Components
 
         private void ForceRefreshListNotes()
         {
-            if (SelectMode == EnumSelectMode.Folders)
-                _folderSelectorComponent_EntitySelection(this, new ComponentEventArgs<FolderWithServiceRef>(SelectedFolderWithServiceRef));
-            else if (SelectMode == EnumSelectMode.Filters)
-                _filterParamComponent_EntitySelection(this, new ComponentEventArgs<NotesFilterWithServiceRef>(SelectedFilterWithServiceRef));
+            if (SelectMode == EnumSelectMode.Folders)                
+                RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
+            else if (SelectMode == EnumSelectMode.Filters)                
+                RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
         }
 
         private async void ChangeTags(EnumChangeTag action)

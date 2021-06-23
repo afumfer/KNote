@@ -32,8 +32,7 @@ namespace KNote.ClientWin.Components
             try
             {                                                
                 Store.ComponentsStateChanged += Store_ComponentsStateChanged;
-                Store.AddedServiceRef += Store_AddedServiceRef;
-                Store.ActiveFolderChanged += Store_ActiveFolderChanged;
+                Store.AddedServiceRef += Store_AddedServiceRef;                
                 Store.RemovedServiceRef += Store_RemovedServiceRef;
                 Store.ComponentNotification += Store_ComponentNotification;
             }
@@ -55,8 +54,7 @@ namespace KNote.ClientWin.Components
             {
                 result = base.OnFinalized();
                 Store.ComponentsStateChanged -= Store_ComponentsStateChanged;
-                Store.AddedServiceRef -= Store_AddedServiceRef;
-                Store.ActiveFolderChanged -= Store_ActiveFolderChanged;
+                Store.AddedServiceRef -= Store_AddedServiceRef;                
                 Store.RemovedServiceRef -= Store_RemovedServiceRef;                
             }
             catch (Exception ex)
@@ -85,12 +83,6 @@ namespace KNote.ClientWin.Components
         private void Store_RemovedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
         {
             var info = $"{DateTime.Now} - [RemovedServiceRef] - {sender.ToString()} - {e.Entity.Alias.ToString()}";
-            OnShowLog(info);
-        }
-
-        private void Store_ActiveFolderChanged(object sender, ComponentEventArgs<FolderWithServiceRef> e)
-        {
-            var info = $"{DateTime.Now}  - [ActiveFolderChanged] - {sender.ToString()} - {e.Entity.FolderInfo.Name.ToString()}";
             OnShowLog(info);
         }
 
