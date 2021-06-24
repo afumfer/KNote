@@ -82,6 +82,9 @@ namespace KNote.Service.Services
                 result.Entity = resGetEntity.Entity;
 
                 // Check rules
+                if(result.Entity.FolderNumber == 1)
+                    result.AddErrorMessage($"{result.Entity.Name} is the default folder. It cannot be erased.");
+
                 if (resGetEntity.Entity.ChildFolders.Count > 0)                
                     result.AddErrorMessage("This folder has child folders. Delete is not possible.");
                                                         

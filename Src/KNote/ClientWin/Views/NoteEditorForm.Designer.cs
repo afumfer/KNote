@@ -106,6 +106,7 @@
             this.buttonAttributeEdit = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.tabResources = new System.Windows.Forms.TabPage();
+            this.buttonSaveResource = new System.Windows.Forms.Button();
             this.buttonInsertLink = new System.Windows.Forms.Button();
             this.panelPreview = new System.Windows.Forms.Panel();
             this.linkViewFile = new System.Windows.Forms.LinkLabel();
@@ -151,7 +152,6 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
-            this.buttonSaveResource = new System.Windows.Forms.Button();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
@@ -963,6 +963,17 @@
             this.tabResources.ToolTipText = "Save resource file";
             this.tabResources.UseVisualStyleBackColor = true;
             // 
+            // buttonSaveResource
+            // 
+            this.buttonSaveResource.Location = new System.Drawing.Point(434, 10);
+            this.buttonSaveResource.Name = "buttonSaveResource";
+            this.buttonSaveResource.Size = new System.Drawing.Size(32, 23);
+            this.buttonSaveResource.TabIndex = 20;
+            this.buttonSaveResource.Text = "S";
+            this.toolTipHelps.SetToolTip(this.buttonSaveResource, "Save resource");
+            this.buttonSaveResource.UseVisualStyleBackColor = true;
+            this.buttonSaveResource.Click += new System.EventHandler(this.buttonSaveResource_Click);
+            // 
             // buttonInsertLink
             // 
             this.buttonInsertLink.Location = new System.Drawing.Point(396, 10);
@@ -1113,7 +1124,8 @@
             // 
             // textTaskTags
             // 
-            this.textTaskTags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.textTaskTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textTaskTags.Location = new System.Drawing.Point(398, 543);
             this.textTaskTags.Name = "textTaskTags";
             this.textTaskTags.Size = new System.Drawing.Size(389, 23);
@@ -1121,7 +1133,8 @@
             // 
             // label17
             // 
-            this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label17.AutoSize = true;
             this.label17.Location = new System.Drawing.Point(398, 525);
             this.label17.Name = "label17";
@@ -1131,7 +1144,8 @@
             // 
             // textTaskDescription
             // 
-            this.textTaskDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.textTaskDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textTaskDescription.Location = new System.Drawing.Point(400, 36);
             this.textTaskDescription.Multiline = true;
@@ -1141,7 +1155,6 @@
             // 
             // label16
             // 
-            this.label16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label16.AutoSize = true;
             this.label16.Location = new System.Drawing.Point(400, 16);
             this.label16.Name = "label16";
@@ -1151,9 +1164,8 @@
             // 
             // listViewTasks
             // 
-            this.listViewTasks.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listViewTasks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.listViewTasks.HideSelection = false;
             this.listViewTasks.Location = new System.Drawing.Point(5, 36);
             this.listViewTasks.MultiSelect = false;
@@ -1167,7 +1179,6 @@
             // 
             // buttonTaskEdit
             // 
-            this.buttonTaskEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonTaskEdit.Location = new System.Drawing.Point(360, 10);
             this.buttonTaskEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonTaskEdit.Name = "buttonTaskEdit";
@@ -1179,7 +1190,6 @@
             // 
             // buttonTaskDelete
             // 
-            this.buttonTaskDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonTaskDelete.Location = new System.Drawing.Point(330, 10);
             this.buttonTaskDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonTaskDelete.Name = "buttonTaskDelete";
@@ -1191,7 +1201,6 @@
             // 
             // buttonTaskAdd
             // 
-            this.buttonTaskAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonTaskAdd.Location = new System.Drawing.Point(300, 10);
             this.buttonTaskAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonTaskAdd.Name = "buttonTaskAdd";
@@ -1489,17 +1498,6 @@
             this.label14.Size = new System.Drawing.Size(99, 15);
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
-            // 
-            // buttonSaveResource
-            // 
-            this.buttonSaveResource.Location = new System.Drawing.Point(434, 10);
-            this.buttonSaveResource.Name = "buttonSaveResource";
-            this.buttonSaveResource.Size = new System.Drawing.Size(32, 23);
-            this.buttonSaveResource.TabIndex = 20;
-            this.buttonSaveResource.Text = "S";
-            this.toolTipHelps.SetToolTip(this.buttonSaveResource, "Save resource");
-            this.buttonSaveResource.UseVisualStyleBackColor = true;
-            this.buttonSaveResource.Click += new System.EventHandler(this.buttonSaveResource_Click);
             // 
             // NoteEditorForm
             // 

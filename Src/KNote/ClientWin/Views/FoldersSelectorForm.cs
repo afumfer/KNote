@@ -180,7 +180,7 @@ namespace KNote.ClientWin.Views
             else
             {
                 treeNodes = new TreeNode[1];
-                treeNodes[0] = treeViewFolders.TopNode;
+                treeNodes[0] = GetRootRepositoryNode(selectedNode);
             }
 
             if (treeNodes?.Length > 0)
@@ -190,6 +190,19 @@ namespace KNote.ClientWin.Views
                 node.Nodes.Add(selectedNode);
                 treeViewFolders.SelectedNode = selectedNode;
             }            
+        }
+
+        private TreeNode GetRootRepositoryNode(TreeNode node)
+        {
+            if (node == null)
+                return null;
+
+            TreeNode rootRepositoryNode = node.Parent;
+            while(rootRepositoryNode.Parent != null)
+            {
+                rootRepositoryNode = rootRepositoryNode.Parent;
+            }
+            return rootRepositoryNode;
         }
 
         public List<FolderWithServiceRef> GetSelectedListItem()

@@ -116,19 +116,24 @@ namespace KNote.Repository.Dapper
                 var db = GetOpenConnection();
 
                 var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
-                if(folderId != null)
-                    sql += "FROM Folders WHERE FolderId = @FolderId;";
-                else
-                    sql += "FROM Folders WHERE FolderNumber = @FolderNumber;";
+                var sqlEntity = sql;
 
-                var entity = await db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { FolderId = folderId, FolderNumber = folderNumber });
+                if(folderId != null)
+                    sqlEntity += " FROM Folders WHERE FolderId = @FolderId;";
+                else
+                    sqlEntity += "FROM Folders WHERE FolderNumber = @FolderNumber;";
+
+                var entity = await db.QueryFirstOrDefaultAsync<FolderDto>(sqlEntity.ToString(), new { FolderId = folderId, FolderNumber = folderNumber });
 
                 if (entity == null)
                     result.AddErrorMessage("Entity not found.");
                 else
                 {
                     if (entity.ParentId != null)
-                        entity.ParentFolderDto = await db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { Id = entity.ParentId });
+                    {
+                        var sqlParnet = sql + " FROM Folders WHERE FolderId = @FolderId;";
+                        entity.ParentFolderDto = await db.QueryFirstOrDefaultAsync<FolderDto>(sqlParnet.ToString(), new { FolderId = entity.ParentId });
+                    }
                 }
 
                 result.Entity = entity;
