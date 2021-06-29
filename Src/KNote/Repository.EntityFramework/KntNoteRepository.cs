@@ -187,11 +187,11 @@ namespace KNote.Repository.EntityFramework
                             if (!string.IsNullOrEmpty(token))
                             {
                                 if (token[0] != '!')
-                                    query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()));
+                                    query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Tags.ToLower().Contains(token.ToLower()));
                                 else
                                 {
                                     var tokenNot = token.Substring(1, token.Length - 1);
-                                    query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()));
+                                    query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Tags.ToLower().Contains(tokenNot.ToLower()));
                                 }
                             }
                         }
@@ -203,11 +203,11 @@ namespace KNote.Repository.EntityFramework
                             if (!string.IsNullOrEmpty(token))
                             {
                                 if (token[0] != '!')
-                                    query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Description.ToLower().Contains(token.ToLower()));
+                                    query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Tags.ToLower().Contains(token.ToLower()) || n.Description.ToLower().Contains(token.ToLower()));
                                 else
                                 {
                                     var tokenNot = token.Substring(1, token.Length - 1);
-                                    query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Description.ToLower().Contains(tokenNot.ToLower()));
+                                    query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Tags.ToLower().Contains(tokenNot.ToLower()) && !n.Description.ToLower().Contains(tokenNot.ToLower()));
                                 }
                             }
                         }

@@ -171,14 +171,14 @@ namespace KNote.Repository.Dapper
                             {
                                 if (token[0] != '!')
                                 {
-                                    sqlWhere = AddAndToStringSQL(sqlWhere);
-                                    sqlWhere += " (Topic LIKE '%" + token + "%') ";
+                                    sqlWhere = AddAndToStringSQL(sqlWhere);                                    
+                                    sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' ) ";
                                 }
                                 else
                                 {
                                     var tokenNot = token.Substring(1, token.Length - 1);
-                                    sqlWhere = AddAndToStringSQL(sqlWhere);
-                                    sqlWhere += " (Topic NOT LIKE '%" + tokenNot + "%')";
+                                    sqlWhere = AddAndToStringSQL(sqlWhere);                                    
+                                    sqlWhere += $" (Topic NOT LIKE '%{tokenNot}%' AND Tags NOT LIKE '%{tokenNot}%')";
                                 }
                             }
                         }
@@ -191,14 +191,14 @@ namespace KNote.Repository.Dapper
                             {
                                 if (token[0] != '!')
                                 {                                    
-                                    sqlWhere = AddAndToStringSQL(sqlWhere);
-                                    sqlWhere += " (Topic LIKE '%" + token + "%' OR Description LIKE '%" + token + "%') ";
+                                    sqlWhere = AddOrToStringSQL(sqlWhere);                                    
+                                    sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' OR Description LIKE '%{token}%') ";
                                 }
                                 else
                                 {
                                     var tokenNot = token.Substring(1, token.Length - 1);                                 
-                                    sqlWhere = AddAndToStringSQL(sqlWhere);
-                                    sqlWhere += " (Topic NOT LIKE '%" + tokenNot + "%' AND Description NOT LIKE '%" + tokenNot + "%') ";
+                                    sqlWhere = AddAndToStringSQL(sqlWhere);                                    
+                                    sqlWhere += $" (Topic NOT LIKE '%{tokenNot}%' AND Tags NOT LIKE '%{tokenNot}%' AND Description NOT LIKE '%{tokenNot}%') ";
                                 }
                             }
                         }
@@ -1543,10 +1543,18 @@ namespace KNote.Repository.Dapper
 
         private string AddAndToStringSQL (string str)
         {
-            if (str != "")
+            if (!string.IsNullOrEmpty(str))
                 str += " AND ";
             return str;
         }
+
+        private string AddOrToStringSQL(string str)
+        {
+            if (!string.IsNullOrEmpty(str))
+                str += " OR ";
+            return str;
+        }
+
 
         public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {
