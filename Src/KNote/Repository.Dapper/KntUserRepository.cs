@@ -42,7 +42,7 @@ namespace KNote.Repository.Dapper
                     else                        
                         sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                    entity = await db.QueryAsync<UserDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
+                    entity = await db.QueryAsync<UserDto>(sql.ToString(), new { Page = pagination.PageNumber, NumRecords = pagination.PageSize });
                 }
                 else
                 {

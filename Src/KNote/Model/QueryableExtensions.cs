@@ -11,8 +11,8 @@ namespace KNote.Model
         public static IQueryable<T> Pagination<T>(this IQueryable<T> queryable, PageIdentifier pagination)
         {            
             return queryable
-                .Skip((pagination.Page - 1) * pagination.NumRecords)
-                .Take(pagination.NumRecords);
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize);
         }
     }
 }

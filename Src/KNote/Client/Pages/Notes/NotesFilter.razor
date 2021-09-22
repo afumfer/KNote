@@ -73,8 +73,8 @@
     <div class="col-lg-9 pt-2 pb-2 border">
         @if (notes != null && notes.Count > 0)
         {
-            <Pagination CurrentPage="filter.Page" SelectedPage="onSelectedPage"
-                        TotalPages="filter.TotalPages"></Pagination>
+            <Pagination CurrentPage="filter.PaginationContext.CurrentPage" SelectedPage="onSelectedPage"
+                        TotalPages="filter.PaginationContext.TotalPages"></Pagination>
         }
 
         @if (viewMode == 0)
@@ -88,8 +88,8 @@
        
         @if (notes != null && notes.Count > 15)
         {
-            <Pagination CurrentPage="filter.Page" SelectedPage="onSelectedPage"
-                        TotalPages="filter.TotalPages"></Pagination>
+            <Pagination CurrentPage="filter.PaginationContext.CurrentPage" SelectedPage="onSelectedPage"
+                        TotalPages="filter.PaginationContext.TotalPages"></Pagination>
         }
     </div>
 </div>
@@ -128,7 +128,7 @@
 
     private async Task onSelectedPage(int page)
     {
-        filter.Page = page;
+        filter.PaginationContext.CurrentPage = page;
         await LoadNotesWithPagination();
     }
 
@@ -138,7 +138,7 @@
 
         var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter );
 
-        filter.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+        filter.PaginationContext.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
 
         if (httpResponse.Error)
         {

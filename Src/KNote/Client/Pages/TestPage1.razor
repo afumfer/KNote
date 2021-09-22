@@ -4,6 +4,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@inject IWebApiService webApiService
+
 <h3>Test page 1</h3>
 <hr />
 
@@ -35,7 +37,7 @@
     </li>
     <li class="nav-item">
         <a class="nav-link @((selectedPanel == 6) ? "active" : "")" @onclick="@(() => ShowPanel(6))">
-            <span class="oi oi-external-link mr-2"></span>... panel 6
+            <span class="oi oi-external-link mr-2"></span>WebApiService
         </a>
     </li>
     <li class="nav-item">
@@ -167,9 +169,18 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+    <h5 class="mt-4"> Test WebApiService (panel: @selectedPanel)</h5>
 
-    Data for panel @selectedPanel
+    <button class="btn btn-primary" @onclick="TestWebApiService">TestWebApiService</button>
+
+    @if(users != null)
+    {
+        foreach (var user in users)
+        {
+            <p>@user.FullName</p>
+        }
+    }
+
 
 </div>
 
@@ -211,7 +222,7 @@
 
     private FolderDto folderSelected;
     private ResourceDto resourceSelected;
-    
+
     private ResourceDto resource = new ResourceDto();
     private string resourceControl = "0";
 
@@ -319,6 +330,19 @@
         }
 
         resourceControl = "1";
+    }
+
+    #endregion
+
+    #region Test WebApiService
+
+    List<UserDto> users;
+
+    private async Task TestWebApiService()
+    {        
+        var resUser = await webApiService.Users.GetAll();
+
+        users = resUser.Entity.ToList();
     }
 
     #endregion 

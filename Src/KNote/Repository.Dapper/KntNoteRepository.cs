@@ -107,7 +107,7 @@ namespace KNote.Repository.Dapper
 
                 sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
                 
-                var pagination = notesFilter.PageIdentifier;
+                var pagination = notesFilter.PaginationContext.PageIdentifier;
 
                 if (pagination != null)
                 {                    
@@ -117,7 +117,7 @@ namespace KNote.Repository.Dapper
                     else
                         sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                    entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });                    
+                    entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.PageNumber, NumRecords = pagination.PageSize });                    
                 }
                 else
                 {
@@ -209,15 +209,15 @@ namespace KNote.Repository.Dapper
 
                 sql = sql + sqlWhere + sqlOrder;
                                 
-                result.CountColecEntity = GetCountFilter(db, sqlWhere);
+                result.CountColecEntity = GetCountSearch(db, sqlWhere);
 
                 if (db.GetType().Name == "SqliteConnection")
                     sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
                 else
                     sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                var pagination = notesSearch.PageIdentifier;
-                entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.Page, NumRecords = pagination.NumRecords });
+                var pagination = notesSearch.PaginationContext.PageIdentifier;
+                entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.PageNumber, NumRecords = pagination.PageSize });
 
                 result.Entity = entity.ToList();
 
@@ -1463,17 +1463,39 @@ namespace KNote.Repository.Dapper
             return result + 1;
         }
 
-        private long GetCountFilter(DbConnection db, string filter)
+        private long GetCountSearch(DbConnection db, string filter)
         {
             var sql =
                 @"SELECT count(*) 
-                FROM 
-                    Notes LEFT OUTER JOIN
-                    NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId"
+                FROM Notes "
                 + filter;
+
             var result = db.ExecuteScalar(sql);
             
             return (result == null) ? 0 : Convert.ToInt64(result);
+        }
+
+        private long GetCountFilter(DbConnection db, string filter)
+        {
+            // TODO: Fix this !!! 
+
+            var sql =
+                @"SELECT count(*) 
+                FROM 
+                    Notes 
+                    LEFT OUTER JOIN NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId"
+                + filter;
+
+            var result = db.ExecuteScalar(sql);
+
+            return (result == null) ? 0 : Convert.ToInt64(result);
+        }
+
+        private string GetSelectSearch()
+        {
+            return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
+                            [Description], ContentType, Script, InternalTags, Tags, [Priority], FolderId, NoteTypeId
+                    FROM Notes ";
         }
 
         private string GetSelectFilter()
@@ -1486,13 +1508,6 @@ namespace KNote.Repository.Dapper
             FROM 
                 Notes LEFT OUTER JOIN
                 NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId";
-        }
-
-        private string GetSelectSearch()
-        {
-            return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
-                            [Description], ContentType, Script, InternalTags, Tags, [Priority], FolderId, NoteTypeId
-                    FROM Notes ";
         }
 
         private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter)
