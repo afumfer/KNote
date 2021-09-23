@@ -70,12 +70,20 @@ namespace KNote.Server.Controllers
                 return BadRequest(kresApi);
             }
         }
+        
 
         [HttpGet("getsearch")]   // GET api/notes/getfilter
-        public async Task<IActionResult> GetSearch([FromQuery] NotesSearchDto notesSearch)
+        public async Task<IActionResult> GetSearch([FromQuery] NotesSearchParam notesSearchParam)  // NotesSearchDto notesSearch
         {
             try
             {
+                // TODO: tmp,  refactor
+                var notesSearch = new NotesSearchDto();
+                notesSearch.TextSearch = notesSearchParam.TextSearch;
+                if(notesSearchParam.Page > 0)
+                    notesSearch.PaginationContext.CurrentPage = notesSearchParam.Page;
+                // .....
+
                 var kresApi = await _service.Notes.GetSearch(notesSearch);
 
                 HttpContext.InsertPaginationParamInResponse(kresApi.CountColecEntity, notesSearch.PaginationContext.PageSize);
@@ -436,4 +444,5 @@ namespace KNote.Server.Controllers
 
         #endregion
     }
+
 }

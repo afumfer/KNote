@@ -56,7 +56,7 @@ namespace KNote.Repository.Dapper
             {
                 var db = GetOpenConnection();
 
-                var sql = GetSelectFilter();
+                var sql = GetSelectNotes();
                 sql += @" WHERE FolderId = @folderId ORDER BY [Priority], Topic ;";
                 var entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { folderId });
                 result.Entity = entity.ToList();
@@ -76,7 +76,7 @@ namespace KNote.Repository.Dapper
             try
             {
                 var db = GetOpenConnection();
-                var sql = GetSelectFilter();
+                var sql = GetSelectNotes();
                 sql += @" ORDER BY [Priority], Topic ;";
 
                 var entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
@@ -100,10 +100,10 @@ namespace KNote.Repository.Dapper
 
                 IEnumerable<NoteInfoDto> entity;
 
-                var sql = GetSelectFilter();
+                var sql = GetSelectNotes();
                 var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
 
-                result.CountColecEntity = GetCountFilter(db, sqlWhere);
+                result.CountColecEntity = GetCountNotes(db, sqlWhere);
 
                 sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
                 
@@ -145,11 +145,11 @@ namespace KNote.Repository.Dapper
             IEnumerable<NoteInfoDto> entity;
 
             try
-            {
+            {                
                 var db = GetOpenConnection();
 
                 searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
-                sql = GetSelectSearch();
+                sql = GetSelectNotes();
                 sqlWhere = "";                
                 sqlOrder = @" ORDER BY Topic ";
 
@@ -209,7 +209,7 @@ namespace KNote.Repository.Dapper
 
                 sql = sql + sqlWhere + sqlOrder;
                                 
-                result.CountColecEntity = GetCountSearch(db, sqlWhere);
+                result.CountColecEntity = GetCountNotes(db, sqlWhere);
 
                 if (db.GetType().Name == "SqliteConnection")
                     sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
@@ -1463,7 +1463,7 @@ namespace KNote.Repository.Dapper
             return result + 1;
         }
 
-        private long GetCountSearch(DbConnection db, string filter)
+        private long GetCountNotes(DbConnection db, string filter)
         {
             var sql =
                 @"SELECT count(*) 
@@ -1471,43 +1471,15 @@ namespace KNote.Repository.Dapper
                 + filter;
 
             var result = db.ExecuteScalar(sql);
-            
-            return (result == null) ? 0 : Convert.ToInt64(result);
-        }
-
-        private long GetCountFilter(DbConnection db, string filter)
-        {
-            // TODO: Fix this !!! 
-
-            var sql =
-                @"SELECT count(*) 
-                FROM 
-                    Notes 
-                    LEFT OUTER JOIN NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId"
-                + filter;
-
-            var result = db.ExecuteScalar(sql);
 
             return (result == null) ? 0 : Convert.ToInt64(result);
         }
 
-        private string GetSelectSearch()
+        private string GetSelectNotes()
         {
             return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
                             [Description], ContentType, Script, InternalTags, Tags, [Priority], FolderId, NoteTypeId
                     FROM Notes ";
-        }
-
-        private string GetSelectFilter()
-        {
-            return @"SELECT DISTINCT
-                 Notes.NoteId, Notes.NoteNumber, Notes.Topic, Notes.CreationDateTime, 
-                 Notes.ModificationDateTime, Notes.Description, Notes.ContentType, Notes.Script, 
-                 Notes.InternalTags, Notes.Tags, Notes.Priority, Notes.FolderId, 
-                 Notes.NoteTypeId
-            FROM 
-                Notes LEFT OUTER JOIN
-                NoteKAttributes ON Notes.NoteId = NoteKAttributes.NoteId";
         }
 
         private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter)
@@ -1547,7 +1519,10 @@ namespace KNote.Repository.Dapper
             foreach (var f in notesFilter.AttributesFilter)
             {
                 strWhere = AddAndToStringSQL(strWhere);
-                strWhere += " NoteKAttributes.KAttributeId = '" + f.AtrId + "' AND NoteKAttributes.Value LIKE '%" + f.Value + "%'" ;                
+                strWhere += $@" Notes.NoteId in (SELECT [NoteKAttributes].NoteId FROM NoteKAttributes 
+                                    WHERE [NoteKAttributes].NoteId = [Notes].NoteId  
+                                        AND NoteKAttributes.KAttributeId = '{f.AtrId.ToString().ToUpper()}' 
+                                        AND NoteKAttributes.Value like '%{f.Value}%' ) ";
             }
 
             if (!string.IsNullOrEmpty(strWhere))

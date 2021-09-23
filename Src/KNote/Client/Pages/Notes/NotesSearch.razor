@@ -51,7 +51,7 @@
 
 <div class="row">
     <div class="col-9">
-        <Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
+        <Pagination CurrentPage="currentPage" SelectedPage="OnSelectedPage"
                     TotalPages="totalPages"></Pagination>
     </div>
     <div class="col-3">
@@ -157,7 +157,7 @@ else
             textSearch = queryStringsDict["textSearch"];
         }
 
-        if (queryStringsDict.ContainsKey("page"))
+        if (queryStringsDict.ContainsKey("paginationContext.PageIdentifier.PageNumber"))
         {
             int.TryParse(queryStringsDict["page"], out currentPage);
         }
@@ -166,7 +166,7 @@ else
     private string BuildQueryStrings()
     {
         if (queryStringsDict == null) { queryStringsDict = new Dictionary<string, string>(); }
-        queryStringsDict["textSearch"] = textSearch?.ToString();
+        queryStringsDict["textSearch"] = textSearch?.ToString();        
         queryStringsDict["page"] = currentPage.ToString();
 
         var defaultValues = new List<string>() { "false", "", "0" };
@@ -203,7 +203,7 @@ else
         await LoadListNotes();
     }
 
-    private async Task onSelectedPage(int page)
+    private async Task OnSelectedPage(int page)
     {
         currentPage = page;
         await LoadListNotes();

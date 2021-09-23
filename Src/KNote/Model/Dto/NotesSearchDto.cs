@@ -10,12 +10,8 @@ namespace KNote.Model.Dto
         public string TextSearch { get; set; }
 
         public bool SearchInDescription { get; set; }
-
-        //private PaginationContext _paginationContext = new PaginationContext();
-        public PaginationContext PaginationContext
-        {
-            get; // { return _paginationContext; }
-        }
+        
+        public PaginationContext PaginationContext{ get; }
 
         public NotesSearchDto()
         {
@@ -28,5 +24,12 @@ namespace KNote.Model.Dto
 
             return results;
         }
+    }
+
+    // TODO: tmp class, refactor
+    public class NotesSearchParam
+    {
+        public string TextSearch { get; set; }
+        public int Page { get; set; }
     }
 }
