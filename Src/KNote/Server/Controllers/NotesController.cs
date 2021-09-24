@@ -80,8 +80,8 @@ namespace KNote.Server.Controllers
                 var notesSearch = new NotesSearchDto();
                 notesSearch.TextSearch = notesSearchParam.TextSearch;
                 if(notesSearchParam.PageNumber > 0)
-                    notesSearch.PaginationContext.CurrentPage = notesSearchParam.PageNumber;
-                notesSearch.PaginationContext.PageSize = notesSearchParam.PageSize;
+                    notesSearch.PageIdentifier.PageNumber = notesSearchParam.PageNumber;
+                notesSearch.PageIdentifier.PageSize = notesSearchParam.PageSize;
                 // .....
 
                 var kresApi = await _service.Notes.GetSearch(notesSearch);

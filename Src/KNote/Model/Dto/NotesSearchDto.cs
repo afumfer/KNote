@@ -10,13 +10,8 @@ namespace KNote.Model.Dto
         public string TextSearch { get; set; }
 
         public bool SearchInDescription { get; set; }
-        
-        public PaginationContext PaginationContext{ get; }
 
-        public NotesSearchDto()
-        {
-            PaginationContext = new PaginationContext();
-        }
+        public PageIdentifier PageIdentifier { get; set; } = new PageIdentifier();
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

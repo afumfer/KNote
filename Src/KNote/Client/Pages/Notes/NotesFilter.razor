@@ -72,8 +72,8 @@
     <div class="col-lg-9 pt-2 pb-2 border">
         @if (notes != null && notes.Count > 0)
         {
-            <Pagination CurrentPage="filter.PaginationContext.CurrentPage" SelectedPage="OnSelectedPage"
-                        TotalPages="filter.PaginationContext.TotalPages"></Pagination>
+            <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="OnSelectedPage"
+                        TotalPages="paginationContext.TotalPages"></Pagination>
         }
 
         @if (viewMode == 0)
@@ -87,8 +87,8 @@
        
         @if (notes != null && notes.Count > 15)
         {
-            <Pagination CurrentPage="filter.PaginationContext.CurrentPage" SelectedPage="OnSelectedPage"
-                        TotalPages="filter.PaginationContext.TotalPages"></Pagination>
+            <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="OnSelectedPage"
+                        TotalPages="paginationContext.TotalPages"></Pagination>
         }
     </div>
 </div>
@@ -106,6 +106,8 @@
     List<NoteInfoDto> notes = new List<NoteInfoDto>();
 
     private NotesFilterDto filter = new NotesFilterDto();
+
+    PaginationContext paginationContext = new PaginationContext();
 
     protected override async Task OnInitializedAsync()
     {
@@ -126,7 +128,7 @@
 
     private async Task OnSelectedPage(int page)
     {
-        filter.PaginationContext.CurrentPage = page;
+        paginationContext.CurrentPage = page;
         await LoadNotesWithPagination();
     }
 
@@ -134,9 +136,10 @@
     {
         notes = null;
 
+        filter.PageIdentifier = paginationContext.PageIdentifier;
         var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter );
 
-        filter.PaginationContext.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+        //filter.PageIdentifier.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
 
         if (httpResponse.Error)
         {
@@ -144,6 +147,7 @@
         }
         else
         {
+            paginationContext.TotalCount = httpResponse.Response.Count;
             notes = httpResponse.Response.Entity;
         }
     }
@@ -184,12 +188,12 @@
     }
 
     void GoNoteView(NoteInfoDto note)
-    {        
+    {
         navigationManager.NavigateTo($"notes/{note.NoteId}/filter");
     }
 
     void GoNoteEdit(NoteInfoDto note)
-    {        
+    {
         navigationManager.NavigateTo($"notes/edit/{note.NoteId}/filter");
     }
 

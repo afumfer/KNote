@@ -124,7 +124,7 @@ namespace KNote.ClientWin.Components
                 {
                     // TODO: hack for get all (app win don't have pagination) 
                     //response = await Service.Notes.GetFilter(notesFilter);   //TODO: future                    
-                    notesFilter.PaginationContext.PageSize = 99999;                    
+                    notesFilter.PageIdentifier.PageSize = 99999;                    
                     response = await Service.Notes.GetSearch(notesFilter);
                 }
 

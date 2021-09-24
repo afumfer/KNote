@@ -92,8 +92,8 @@
     <div class="col-lg-9 pt-2 pb-2 border">
         @if(notes != null && notes.Count > 0 && viewPagination == 1)
         {
-            <Pagination CurrentPage="filter.PaginationContext.CurrentPage" SelectedPage="onSelectedPage"
-                        TotalPages="filter.PaginationContext.TotalPages"></Pagination>
+            <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="onSelectedPage"
+                        TotalPages="paginationContext.TotalPages"></Pagination>
         }
         @if (viewMode == 0)
         {
@@ -106,8 +106,8 @@
 
         @if (notes != null && notes.Count > 15 && viewPagination == 1)
         {
-            <Pagination CurrentPage="filter.PaginationContext.CurrentPage" SelectedPage="onSelectedPage"
-                        TotalPages="filter.PaginationContext.TotalPages"></Pagination>
+            <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="onSelectedPage"
+                        TotalPages="paginationContext.TotalPages"></Pagination>
         }
     </div>
 </div>
@@ -132,6 +132,8 @@
     private FolderDto folder;
 
     private NotesFilterDto filter = new NotesFilterDto();
+
+    PaginationContext paginationContext = new PaginationContext();
 
     protected override async Task OnInitializedAsync()
     {
@@ -191,7 +193,7 @@
 
     private async Task onSelectedPage(int page)
     {
-        filter.PaginationContext.CurrentPage = page;
+        paginationContext.CurrentPage = page;
         await LoadNotesWithPagination();
     }
 
@@ -213,10 +215,11 @@
     {
         notes = null;
         filter.FolderId = folder.FolderId;
+        filter.PageIdentifier = paginationContext.PageIdentifier;
 
         var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter);
 
-        filter.PaginationContext.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+        //filter.PaginationContext.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
 
         if (httpResponse.Error)
         {
@@ -225,6 +228,7 @@
         else
         {
             notes = httpResponse.Response.Entity;
+            paginationContext.TotalCount = httpResponse.Response.Count;
         }
     }
 

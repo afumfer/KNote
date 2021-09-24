@@ -107,7 +107,7 @@ namespace KNote.Repository.Dapper
 
                 sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
                 
-                var pagination = notesFilter.PaginationContext.PageIdentifier;
+                var pagination = notesFilter.PageIdentifier;
 
                 if (pagination != null)
                 {                    
@@ -216,7 +216,7 @@ namespace KNote.Repository.Dapper
                 else
                     sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                var pagination = notesSearch.PaginationContext.PageIdentifier;
+                var pagination = notesSearch.PageIdentifier;
                 entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.PageNumber, NumRecords = pagination.PageSize });
 
                 result.Entity = entity.ToList();
