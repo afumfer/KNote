@@ -103,7 +103,7 @@ namespace KNote.Repository.Dapper
                 var sql = GetSelectNotes();
                 var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
 
-                result.CountColecEntity = GetCountNotes(db, sqlWhere);
+                result.Count = GetCountNotes(db, sqlWhere);
 
                 sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
                 
@@ -209,7 +209,7 @@ namespace KNote.Repository.Dapper
 
                 sql = sql + sqlWhere + sqlOrder;
                                 
-                result.CountColecEntity = GetCountNotes(db, sqlWhere);
+                result.Count = GetCountNotes(db, sqlWhere);
 
                 if (db.GetType().Name == "SqliteConnection")
                     sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";

@@ -48,7 +48,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpPost("getfilter")]   // PUT api/notes/getfilter
+        [HttpPost("[action]")]   // PUT api/notes/getfilter
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task <IActionResult> GetFilter([FromBody] NotesFilterDto notesFilter )
         {
@@ -56,7 +56,7 @@ namespace KNote.Server.Controllers
             {                
                 var kresApi = await _service.Notes.GetFilter(notesFilter);
 
-                HttpContext.InsertPaginationParamInResponse(kresApi.CountColecEntity, notesFilter.PaginationContext.PageSize);
+                //HttpContext.InsertPaginationParamInResponse(kresApi.Count, notesFilter.PaginationContext.PageSize);
                 
                 if (kresApi.IsValid)
                     return Ok(kresApi);
@@ -70,9 +70,8 @@ namespace KNote.Server.Controllers
                 return BadRequest(kresApi);
             }
         }
-        
-
-        [HttpGet("getsearch")]   // GET api/notes/getfilter
+                
+        [HttpGet("[action]")]   // GET api/notes/getsearch
         public async Task<IActionResult> GetSearch([FromQuery] NotesSearchParam notesSearchParam)  // NotesSearchDto notesSearch
         {
             try
@@ -80,13 +79,14 @@ namespace KNote.Server.Controllers
                 // TODO: tmp,  refactor
                 var notesSearch = new NotesSearchDto();
                 notesSearch.TextSearch = notesSearchParam.TextSearch;
-                if(notesSearchParam.Page > 0)
-                    notesSearch.PaginationContext.CurrentPage = notesSearchParam.Page;
+                if(notesSearchParam.PageNumber > 0)
+                    notesSearch.PaginationContext.CurrentPage = notesSearchParam.PageNumber;
+                notesSearch.PaginationContext.PageSize = notesSearchParam.PageSize;
                 // .....
 
                 var kresApi = await _service.Notes.GetSearch(notesSearch);
 
-                HttpContext.InsertPaginationParamInResponse(kresApi.CountColecEntity, notesSearch.PaginationContext.PageSize);
+                // HttpContext.InsertPaginationParamInResponse(kresApi.Count, notesSearch.PaginationContext.PageSize);
 
                 if (kresApi.IsValid)
                     return Ok(kresApi);
@@ -102,7 +102,7 @@ namespace KNote.Server.Controllers
         }
 
         //[Authorize]
-        [HttpGet("homenotes")]   // GET api/notes/homenotes
+        [HttpGet("[action]")]   // GET api/notes/homenotes
         public async Task<IActionResult> HomeNotes()
         {
             try
@@ -145,7 +145,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("new")]    // GET api/notes/new
+        [HttpGet("[action]")]    // GET api/notes/new
         public async Task<IActionResult> New()
         {
             try
@@ -306,8 +306,8 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpPost("savefile")]    // POST api/notes/savefile
-        [HttpPut("savefile")]    // PUT api/notes/savefile
+        [HttpPost("[action]")]    // POST api/notes/savefile
+        [HttpPut("[action]")]    // PUT api/notes/savefile
         public async Task<IActionResult> SaveFile(ResourceDto resource)
         {
             Result<ResourceDto> resApi = new Result<ResourceDto>();

@@ -51,8 +51,8 @@
 
 <div class="row">
     <div class="col-9">
-        <Pagination CurrentPage="currentPage" SelectedPage="OnSelectedPage"
-                    TotalPages="totalPages"></Pagination>
+        <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="OnSelectedPage"
+                    TotalPages="paginationContext.TotalPages"></Pagination>
     </div>
     <div class="col-3">
         @if (notes != null && notes.Count > 0)
@@ -110,8 +110,11 @@ else
     private string textSearch = "";
 
     private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
-    private int currentPage = 1;
-    private int totalPages;
+
+    //private int currentPage = 1;
+    //private int totalPages;
+
+    PaginationContext paginationContext = new PaginationContext();
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,15 +162,21 @@ else
 
         if (queryStringsDict.ContainsKey("paginationContext.PageIdentifier.PageNumber"))
         {
-            int.TryParse(queryStringsDict["page"], out currentPage);
+            //int.TryParse(queryStringsDict["page"], out currentPage);
+            int currentPage;
+            int.TryParse(queryStringsDict["pageNumber"], out currentPage);
+            paginationContext.CurrentPage = currentPage;
         }
     }
 
     private string BuildQueryStrings()
     {
         if (queryStringsDict == null) { queryStringsDict = new Dictionary<string, string>(); }
-        queryStringsDict["textSearch"] = textSearch?.ToString();        
-        queryStringsDict["page"] = currentPage.ToString();
+        queryStringsDict["textSearch"] = textSearch?.ToString();
+        //queryStringsDict["page"] = currentPage.ToString();
+        queryStringsDict["pageNumber"] = paginationContext.CurrentPage.ToString();
+        queryStringsDict["pageSize"] = paginationContext.PageSize.ToString();
+
 
         var defaultValues = new List<string>() { "false", "", "0" };
 
@@ -184,7 +193,8 @@ else
 
     private async Task OnLoadListNotes()
     {
-        currentPage = 1;
+        //currentPage = 1;
+        paginationContext.CurrentPage = 1;
         await LoadListNotes();
     }
 
@@ -199,13 +209,15 @@ else
     private async Task CleanOnClick()
     {
         textSearch = "";
-        currentPage = 1;
+        //currentPage = 1;
+        paginationContext.CurrentPage = 1;
         await LoadListNotes();
     }
 
     private async Task OnSelectedPage(int page)
     {
-        currentPage = page;
+        //currentPage = page;
+        paginationContext.CurrentPage = page;
         await LoadListNotes();
     }
 
@@ -223,9 +235,13 @@ else
     private async Task GetFilteredNotes(string queryString)
     {
         notes = null;
+
+        if (string.IsNullOrEmpty(queryString))
+            queryString = $"pageNumber={paginationContext.CurrentPage}&pageSize={paginationContext.PageSize}";
+
         var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getsearch?" + queryString);
 
-        totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+        //totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
 
         if (httpResponse.Error)
         {
@@ -234,6 +250,7 @@ else
         else
         {
             notes = httpResponse.Response.Entity;
+            paginationContext.TotalCount = httpResponse.Response.Count;
         }
     }
 

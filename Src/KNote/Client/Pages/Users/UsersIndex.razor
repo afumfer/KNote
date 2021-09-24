@@ -22,8 +22,8 @@
 </div>
 <hr class="mt-0" />
 
-<Pagination CurrentPage="currentPage" SelectedPage="onSelectedPage"
-            TotalPages="totalPages"></Pagination>
+<Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="OnSelectedPage"
+            TotalPages="paginationContext.TotalPages"></Pagination>
 
 <EntityList List="users">
     <ItemsFull>
@@ -74,28 +74,36 @@
     private List<UserDto> users { get; set; }
     private ModalDialog modalDialog;
     private UserDto itemDelete;
-    private int currentPage = 1;
-    private int totalPages;
+
+    //private int currentPage = 1;
+    //private int totalPages;
+
+    PaginationContext paginationContext = new PaginationContext();
 
     protected async override Task OnInitializedAsync()
     {
         await Load();
     }
 
-    private async Task onSelectedPage(int page)
+    private async Task OnSelectedPage(int page)
     {
-        currentPage = page;
+        //currentPage = page;
+
         await Load(page);
     }
 
     private async Task Load(int page = 1)
     {
-        var httpResponse = await dataService.Get<Result<List<UserDto>>>($"api/users?page={page}");
+        paginationContext.CurrentPage = page;
+        var httpResponse = await dataService.Get<Result<List<UserDto>>>($"api/users?pageNumber={paginationContext.CurrentPage}&pageSize={paginationContext.PageSize}");
         if (!httpResponse.Error)
         {
             users = httpResponse.Response.Entity;
-            var count = httpResponse.HttpResponseMessage.Headers.GetValues("count").FirstOrDefault();
-            totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+
+            //var count = httpResponse.HttpResponseMessage.Headers.GetValues("count").FirstOrDefault();
+            //totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
+
+            paginationContext.TotalCount = httpResponse.Response.Count;            
         }
         else
         {

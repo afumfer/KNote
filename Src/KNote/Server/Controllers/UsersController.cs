@@ -59,10 +59,10 @@ namespace KNote.Server.Controllers
             try
             {
                 var count = (await _service.Users.GetCount()).Entity;
-
-                HttpContext.InsertPaginationParamInResponse(count, pagination.PageSize);
+                //HttpContext.InsertPaginationParamInResponse(count, pagination.PageSize);
 
                 var kresApi = await _service.Users.GetAllAsync(pagination);
+                kresApi.Count = count;
 
                 if (kresApi.IsValid)
                     return Ok(kresApi);
@@ -77,7 +77,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("{id}")]    // GET api/kattributes/guidKAttribute
+        [HttpGet("{id}")]    // GET api/users/id
         public async Task<IActionResult> Get(Guid id)
         {
             try
@@ -120,7 +120,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpDelete("{id}")]    // DELETE api/users/guid
+        [HttpDelete("{id}")]    // DELETE api/users/id
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -141,7 +141,7 @@ namespace KNote.Server.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("register")]
+        [HttpPost("[action]")]   
         public async Task<IActionResult> Register([FromBody]UserRegisterDto user)
         {
             try
@@ -159,7 +159,7 @@ namespace KNote.Server.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("login")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody]UserCredentialsDto credentials)
         {            
             try
@@ -221,14 +221,14 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet]
-        [Route("echoping")]
+        [Route("[action]")]
         public IActionResult EchoPing()
         {
             return Ok(true);
         }
 
         [HttpGet]
-        [Route("echouser")]
+        [Route("[action]")]
         public IActionResult EchoUser()
         {
             var identity = Thread.CurrentPrincipal.Identity;
