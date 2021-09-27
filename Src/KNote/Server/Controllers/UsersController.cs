@@ -58,11 +58,7 @@ namespace KNote.Server.Controllers
         {
             try
             {
-                var count = (await _service.Users.GetCount()).Entity;
-                //HttpContext.InsertPaginationParamInResponse(count, pagination.PageSize);
-
                 var kresApi = await _service.Users.GetAllAsync(pagination);
-                kresApi.Count = count;
 
                 if (kresApi.IsValid)
                     return Ok(kresApi);
@@ -100,8 +96,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost]   // POST api/users
         [HttpPut]    // PUT api/users
-        [Authorize(Roles = "Admin")]
-        //public async Task<ActionResult<Result<UserDto>>> Post([FromBody]UserDto userDto)
+        [Authorize(Roles = "Admin")]        
         public async Task<IActionResult> Post([FromBody] UserDto userDto)
         {
             try

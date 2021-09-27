@@ -75,9 +75,6 @@
     private ModalDialog modalDialog;
     private UserDto itemDelete;
 
-    //private int currentPage = 1;
-    //private int totalPages;
-
     PaginationContext paginationContext = new PaginationContext();
 
     protected async override Task OnInitializedAsync()
@@ -86,9 +83,7 @@
     }
 
     private async Task OnSelectedPage(int page)
-    {
-        //currentPage = page;
-
+    {        
         await Load(page);
     }
 
@@ -99,11 +94,7 @@
         if (!httpResponse.Error)
         {
             users = httpResponse.Response.Entity;
-
-            //var count = httpResponse.HttpResponseMessage.Headers.GetValues("count").FirstOrDefault();
-            //totalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
-
-            paginationContext.TotalCount = httpResponse.Response.Count;            
+            paginationContext.TotalCount = httpResponse.Response.TotalCount;
         }
         else
         {

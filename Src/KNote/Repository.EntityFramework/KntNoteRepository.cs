@@ -132,7 +132,7 @@ namespace KNote.Repository.EntityFramework
                     query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
                 }
 
-                resService.Count = await query.CountAsync();
+                resService.TotalCount = await query.CountAsync();
 
                 // Order by and pagination
                 query = query
@@ -214,7 +214,7 @@ namespace KNote.Repository.EntityFramework
                     }
                 }
 
-                result.Count = await query.CountAsync();
+                result.TotalCount = await query.CountAsync();
 
                 // Order by and pagination
                 query = query

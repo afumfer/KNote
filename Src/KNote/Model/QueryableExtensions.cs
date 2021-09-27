@@ -11,7 +11,7 @@ namespace KNote.Model
         public static IQueryable<T> Pagination<T>(this IQueryable<T> queryable, PageIdentifier pagination)
         {            
             return queryable
-                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Skip(pagination.Offset)
                 .Take(pagination.PageSize);
         }
     }

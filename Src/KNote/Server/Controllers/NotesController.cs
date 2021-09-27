@@ -55,9 +55,7 @@ namespace KNote.Server.Controllers
             try
             {                
                 var kresApi = await _service.Notes.GetFilter(notesFilter);
-
-                //HttpContext.InsertPaginationParamInResponse(kresApi.Count, notesFilter.PaginationContext.PageSize);
-                
+                                
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else
@@ -85,9 +83,7 @@ namespace KNote.Server.Controllers
                 // .....
 
                 var kresApi = await _service.Notes.GetSearch(notesSearch);
-
-                // HttpContext.InsertPaginationParamInResponse(kresApi.Count, notesSearch.PaginationContext.PageSize);
-
+                
                 if (kresApi.IsValid)
                     return Ok(kresApi);
                 else

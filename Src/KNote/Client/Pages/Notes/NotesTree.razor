@@ -219,8 +219,6 @@
 
         var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter);
 
-        //filter.PaginationContext.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
-
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -228,7 +226,7 @@
         else
         {
             notes = httpResponse.Response.Entity;
-            paginationContext.TotalCount = httpResponse.Response.Count;
+            paginationContext.TotalCount = httpResponse.Response.TotalCount;
         }
     }
 

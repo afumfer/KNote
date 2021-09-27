@@ -35,7 +35,7 @@ namespace KNote.Service.Services
             return await _repository.Users.GetAllAsync(pagination);
         }
 
-        public async Task<Result<int>> GetCount()
+        public async Task<Result<long>> GetCount()
         {
             return await _repository.Users.GetCount();
         }

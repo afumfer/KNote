@@ -11,7 +11,7 @@ namespace KNote.Model
     public class PaginationContext
     {
         public int CurrentPage { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public int PageSize { get; set; } = 25;
         public long TotalCount { get; set; }
         public int TotalPages 
         {

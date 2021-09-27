@@ -16,7 +16,7 @@ namespace KNote.Repository
         Task<Result<UserDto>> UpdateAsync(UserDto userEntity);
         Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto userEntity);
         Task<Result> DeleteAsync(Guid userId);
-        Task<Result<int>> GetCount();
+        Task<Result<long>> GetCount();
         Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId);
     }
 }

@@ -38,11 +38,11 @@ namespace KNote.Repository.Dapper
                 if (pagination != null)
                 {
                     if (db.GetType().Name == "SqliteConnection")
-                        sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
-                    else                        
-                        sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+                        sql += " LIMIT @NumRecords OFFSET @Offset ;";
+                    else
+                        sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                    entity = await db.QueryAsync<UserDto>(sql.ToString(), new { Page = pagination.PageNumber, NumRecords = pagination.PageSize });
+                    entity = await db.QueryAsync<UserDto>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
                 }
                 else
                 {
@@ -50,6 +50,7 @@ namespace KNote.Repository.Dapper
                 }
                                                                         
                 result.Entity = entity.ToList();
+                result.TotalCount = (await GetCount()).Entity;
 
                 await CloseIsTempConnection(db);
             }
@@ -60,16 +61,16 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<int>> GetCount()
+        public async Task<Result<long>> GetCount()
         {
-            var resService = new Result<int>();
+            var resService = new Result<long>();
 
             try
             {
                 var db = GetOpenConnection();
 
                 var sql = "SELECT COUNT(*) FROM Users";
-                resService.Entity = await db.ExecuteScalarAsync<int>(sql);
+                resService.Entity = await db.ExecuteScalarAsync<long>(sql);
 
                 await CloseIsTempConnection(db);
             }

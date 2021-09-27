@@ -138,16 +138,14 @@
 
         filter.PageIdentifier = paginationContext.PageIdentifier;
         var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter );
-
-        //filter.PageIdentifier.TotalPages = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPages").FirstOrDefault());
-
+        
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
         }
         else
         {
-            paginationContext.TotalCount = httpResponse.Response.Count;
+            paginationContext.TotalCount = httpResponse.Response.TotalCount;
             notes = httpResponse.Response.Entity;
         }
     }

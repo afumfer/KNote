@@ -103,7 +103,7 @@ namespace KNote.Repository.Dapper
                 var sql = GetSelectNotes();
                 var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
 
-                result.Count = GetCountNotes(db, sqlWhere);
+                result.TotalCount = GetCountNotes(db, sqlWhere);
 
                 sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
                 
@@ -113,11 +113,11 @@ namespace KNote.Repository.Dapper
                 {                    
                     // Pagination SqlServer != SQlite
                     if (db.GetType().Name == "SqliteConnection")
-                        sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
+                        sql += " LIMIT @NumRecords OFFSET @Offset ;";
                     else
-                        sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+                        sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                    entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.PageNumber, NumRecords = pagination.PageSize });                    
+                    entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
                 }
                 else
                 {
@@ -209,15 +209,15 @@ namespace KNote.Repository.Dapper
 
                 sql = sql + sqlWhere + sqlOrder;
                                 
-                result.Count = GetCountNotes(db, sqlWhere);
+                result.TotalCount = GetCountNotes(db, sqlWhere);
 
                 if (db.GetType().Name == "SqliteConnection")
-                    sql += " LIMIT @NumRecords OFFSET @NumRecords * (@Page - 1) ;";
+                    sql += " LIMIT @NumRecords OFFSET @Offset ;";
                 else
-                    sql += " OFFSET @NumRecords * (@Page - 1) ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+                    sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
                 var pagination = notesSearch.PageIdentifier;
-                entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Page = pagination.PageNumber, NumRecords = pagination.PageSize });
+                entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
 
                 result.Entity = entity.ToList();
 

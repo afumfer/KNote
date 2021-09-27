@@ -48,6 +48,8 @@ namespace KNote.Repository.EntityFramework
                         .ToListAsync();
                 }
 
+                resService.TotalCount = (await GetCount()).Entity;
+
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
@@ -57,9 +59,9 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(resService);
         }
 
-        public async Task<Result<int>> GetCount()
+        public async Task<Result<long>> GetCount()
         {
-            var resService = new Result<int>();
+            var resService = new Result<long>();
             try
             {
                 var ctx = GetOpenConnection();
