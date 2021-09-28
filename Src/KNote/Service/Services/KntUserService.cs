@@ -35,11 +35,6 @@ namespace KNote.Service.Services
             return await _repository.Users.GetAllAsync(pagination);
         }
 
-        public async Task<Result<long>> GetCount()
-        {
-            return await _repository.Users.GetCount();
-        }
-
         public async Task<Result<UserDto>> GetAsync(Guid userId)
         {
             return await _repository.Users.GetAsync(userId);

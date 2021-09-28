@@ -15,10 +15,7 @@ namespace KNote.Model
         public long TotalCount { get; set; }
         public int TotalPages 
         {
-            get
-            {
-                return (int) (Math.Ceiling((double)TotalCount / PageSize));
-            }
+            get { return (int) (Math.Ceiling((double)TotalCount / PageSize)); }
             set { }
         }
         

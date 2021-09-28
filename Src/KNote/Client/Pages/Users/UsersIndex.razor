@@ -1,6 +1,7 @@
 ﻿@page "/users"
 
-@inject IKntClientDataService  dataService
+@inject IWebApiService webApiService
+
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -83,22 +84,23 @@
     }
 
     private async Task OnSelectedPage(int page)
-    {        
+    {
         await Load(page);
     }
 
     private async Task Load(int page = 1)
     {
         paginationContext.CurrentPage = page;
-        var httpResponse = await dataService.Get<Result<List<UserDto>>>($"api/users?pageNumber={paginationContext.CurrentPage}&pageSize={paginationContext.PageSize}");
-        if (!httpResponse.Error)
+
+        var result = await webApiService.Users.GetAllAsync(paginationContext.PageIdentifier);
+        if (result.IsValid)
         {
-            users = httpResponse.Response.Entity;
-            paginationContext.TotalCount = httpResponse.Response.TotalCount;
+            users = result.Entity;
+            paginationContext.TotalCount = result.TotalCount;
         }
         else
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
     }
 
@@ -133,10 +135,10 @@
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/users/{itemDelete.UserId}");
-        if (httpResponse.Error)
+        var result = await webApiService.Users.DeleteAsync(itemDelete.UserId);
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {

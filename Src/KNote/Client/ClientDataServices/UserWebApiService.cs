@@ -18,11 +18,26 @@ namespace KNote.Client.ClientDataServices
             _httpClient = httpClient;
         }
 
-        public async Task<Result<List<UserDto>>> GetAll()
+        public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
         {
-            //var xx = await _httpClient.GetAsync($"api/users/getall");
+            string urlApi;
+            if (pagination == null)                
+                urlApi = @"api/users";
+            else
+                urlApi = $"api/users?pageNumber={pagination.PageNumber}&pageSize={pagination.PageSize}";
 
-            return await _httpClient.GetFromJsonAsync<Result<List<UserDto>>>($"api/users/getall");            
+            return await _httpClient.GetFromJsonAsync<Result<List<UserDto>>>(urlApi);
         }
+
+        public async Task<Result<UserDto>> DeleteAsync(Guid userId)
+        {                        
+            var httpRes = await _httpClient.DeleteAsync($"api/users/{userId.ToString()}");
+            
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
+
+            return res;
+        }
+
+
     }
 }

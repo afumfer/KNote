@@ -34,30 +34,33 @@ namespace KNote.Server.Controllers
             _appSettings = appSettings.Value;
         }
 
-        [HttpGet("[action]")]    // GET api/users/getall        
-        public async Task<IActionResult> GetAll()
-        {
-            try
-            {
-                var kresApi = await _service.Users.GetAllAsync();
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<List<UserDto>>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //[HttpGet("[action]")]    // GET api/users/getall        
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    try
+        //    {
+        //        var kresApi = await _service.Users.GetAllAsync();
+        //        if (kresApi.IsValid)
+        //            return Ok(kresApi);
+        //        else
+        //            return BadRequest(kresApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var kresApi = new Result<List<UserDto>>();
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
         [HttpGet]    // GET api/users        
         public async Task<IActionResult> Get([FromQuery] PageIdentifier pagination)
         {
             try
             {
+                pagination.PageNumber = (pagination.PageNumber < 1) ? 1 : pagination.PageNumber;
+                pagination.PageSize = (pagination.PageSize < 1) ? 9999 : pagination.PageSize;
+
                 var kresApi = await _service.Users.GetAllAsync(pagination);
 
                 if (kresApi.IsValid)

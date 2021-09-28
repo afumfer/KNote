@@ -340,7 +340,7 @@
 
     private async Task TestWebApiService()
     {        
-        var resUser = await webApiService.Users.GetAll();
+        var resUser = await webApiService.Users.GetAllAsync();
 
         users = resUser.Entity.ToList();
     }
