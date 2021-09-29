@@ -45,16 +45,16 @@ namespace KNote.Service.Services
             return await _repository.Users.GetByUserNameAsync(userName);
         }
 
-        public async Task<Result<UserDto>> SaveAsync(UserDto entity)
+        public async Task<Result<UserDto>> SaveAsync(UserDto user)
         {            
-            if (entity.UserId == Guid.Empty)
+            if (user.UserId == Guid.Empty)
             {
-                entity.UserId = Guid.NewGuid();
-                return await _repository.Users.AddAsync(entity);
+                user.UserId = Guid.NewGuid();
+                return await _repository.Users.AddAsync(user);
             }
             else
             {
-                return await _repository.Users.UpdateAsync(entity);
+                return await _repository.Users.UpdateAsync(user);
             }
         }
 

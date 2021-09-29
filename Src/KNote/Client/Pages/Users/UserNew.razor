@@ -1,27 +1,23 @@
 ﻿@page "/users/new"
 
-@inject IKntClientDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
 @attribute [Authorize(Roles = "Admin")]
 
-<UserForm Title="New User" OnValidSubmit="OnNew" OnExit="OnExit"  User="user"></UserForm>
+<UserForm Title="New User" OnValidSubmit="OnNew" OnExit="OnExit" User="user"></UserForm>
 
 @code {
     private UserDto user = new UserDto();
 
     private async Task OnNew()
     {
-        var httpResponse = await dataService.Post("api/users", user);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            navigationManager.NavigateTo("users");
-        }
+        var result = await webApiService.Users.SaveAsync(user);
+        if (!result.IsValid)        
+            await showMessages.ShowErrorMessage(result.Message);        
+        else        
+            navigationManager.NavigateTo("users");        
     }
 
     private void OnExit()

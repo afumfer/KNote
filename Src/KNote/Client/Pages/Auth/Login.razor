@@ -1,6 +1,6 @@
 ﻿@page "/login"
 
-@inject IKntClientDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 @inject ILoginService loginService
@@ -27,7 +27,7 @@
             <ValidationMessage For="@(() => user.Password)" />
         </div>
     </div>
-    
+
     <!-- Footer -->
     <div class="container-fluid">
         <div class="row">
@@ -48,14 +48,12 @@
 
     private async Task LoginUser()
     {
-        var httpResponse = await dataService.Post<UserCredentialsDto, UserTokenDto>("api/users/login", user);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.Users.LoginAsync(user);
+        if (!result.success)        
+            await showMessages.ShowErrorMessage(result.error);        
         else
-        {            
-            await loginService.Login(httpResponse.Response.token);            
+        {
+            await loginService.Login(result.token);
             navigationManager.NavigateTo("");
         }
     }

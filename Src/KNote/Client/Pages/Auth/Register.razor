@@ -1,6 +1,6 @@
 ﻿@page "/register"
 
-@inject IKntClientDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 @inject ILoginService loginService
@@ -44,7 +44,7 @@
             <ValidationMessage For="@(() => user.Password)" />
         </div>
     </div>
-   
+
     <!-- Footer -->
     <div class="container-fluid">
         <div class="row">
@@ -67,14 +67,12 @@
     {
         user.RoleDefinition = "Public";
 
-        var httpResponse = await dataService.Post<UserRegisterDto, UserTokenDto>("api/users/register", user);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.Users.RegisterAsync(user);
+        if (!result.success)        
+            await showMessages.ShowErrorMessage(result.error);        
         else
-        {            
-            await loginService.Login(httpResponse.Response.token);
+        {
+            await loginService.Login(result.token);
             navigationManager.NavigateTo("");
         }
     }

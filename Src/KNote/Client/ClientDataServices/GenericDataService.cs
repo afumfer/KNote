@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace KNote.Client.ClientDataServices
 {
-    public class KntClientDataService : IKntClientDataService
+    public class GenericDataService : IGenericDataService
     {
         private readonly HttpClient httpClient;
 
-        public KntClientDataService(HttpClient httpClient)
+        public GenericDataService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
         }

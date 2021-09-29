@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace KNote.Client.ClientDataServices
 {
-    public interface IKntClientDataService
+    public interface IGenericDataService
     {
         Task<HttpResponseWrapper<object>> Delete(string url);
         Task<HttpResponseWrapper<T>> Get<T>(string url);        

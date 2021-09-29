@@ -30,7 +30,7 @@ namespace KNote.Client
             
             builder.Services.AddScoped<IShowMessages, ShowMessages>();
             
-            builder.Services.AddScoped<IKntClientDataService, KntClientDataService>();
+            builder.Services.AddScoped<IGenericDataService, GenericDataService>();
 
             //... experimental ...                        
             builder.Services.AddScoped<IWebApiService, WebApiService>();

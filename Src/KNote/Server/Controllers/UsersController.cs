@@ -141,14 +141,19 @@ namespace KNote.Server.Controllers
         [AllowAnonymous]
         [HttpPost("[action]")]   
         public async Task<IActionResult> Register([FromBody]UserRegisterDto user)
-        {
+        {            
             try
             {
-                var kresRep = await _service.Users.Create(user);
-                if (kresRep.IsValid)                    
-                    return Ok(BuildToken(kresRep.Entity));
-                else                    
-                    return BadRequest(new UserTokenDto { success = kresRep.IsValid, token = "", error = kresRep.Message });
+                var kresService = await _service.Users.Create(user);
+
+                if (kresService.IsValid)
+                {
+                    return Ok(BuildToken(kresService.Entity));                    
+                }
+                else
+                {
+                    return BadRequest(new UserTokenDto { success = kresService.IsValid, token = "", error = kresService.Message });
+                }                    
             }
             catch (Exception ex)
             {

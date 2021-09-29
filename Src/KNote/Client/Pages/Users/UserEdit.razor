@@ -1,6 +1,6 @@
 ﻿@page "/users/edit/{UserId}"
 
-@inject IKntClientDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -20,35 +20,28 @@ else
     [Parameter] public string UserId { get; set; }
 
     private UserDto user;
-        
 
     protected async override Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<UserDto>>($"api/users/{UserId}");
-        if (httpResponse.Error)
+        var result = await webApiService.Users.GetAsync(Guid.Parse(UserId));
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
             navigationManager.NavigateTo("/");
         }
-        else
-        {
-            user = httpResponse.Response.Entity;
-        }
-
+        else        
+            user = result.Entity;
+        
         base.OnInitialized();
     }
 
     private async Task OnEdit()
     {
-        var httpResponse = await dataService.Put("api/users", user);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            navigationManager.NavigateTo("users");
-        }
+        var result = await webApiService.Users.SaveAsync(user);
+        if (!result.IsValid)        
+            await showMessages.ShowErrorMessage(result.Message);        
+        else        
+            navigationManager.NavigateTo("users");        
     }
 
     private void OnExit()
