@@ -1,4 +1,5 @@
-﻿@inject IKntClientDataService  dataService
+﻿@inject AppState appState
+@inject IKntClientDataService  dataService
 
 @if (ShowDialog)
 {
@@ -35,8 +36,7 @@
     </div>
 }
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
+@code {    
 
     [Parameter] public string Title { get; set; } = "KaNote folder selector";
     [Parameter] public EventCallback<FolderDto> OnConfirm { get; set; }

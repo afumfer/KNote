@@ -1,5 +1,6 @@
 ﻿@page "/testpage1"
 
+@inject AppState appState
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
@@ -129,7 +130,7 @@
         <p>NoteId: @resourceSelected.NoteId </p>
 
         @if (resourceSelected.FileType == "image/jpeg")
-        {            
+        {
             <hr />
             <div>
                 <div style="margin:10px">
@@ -152,7 +153,7 @@
 
     <InputFileUpload Label="Upload generic file" OnSelectedFile="OnFileSelected" />
 
-    @if(resourceControl == null)
+    @if (resourceControl == null)
     {
         <p>Subiendo fichero .... </p>
     }
@@ -173,7 +174,7 @@
 
     <button class="btn btn-primary" @onclick="TestWebApiService">TestWebApiService</button>
 
-    @if(users != null)
+    @if (users != null)
     {
         foreach (var user in users)
         {
@@ -211,7 +212,7 @@
 <KntResourceSelector @ref="kntResourceSelector" OnCancel="onCancelResource" OnConfirm="onConfirmResource"></KntResourceSelector>
 
 @code {
-    [CascadingParameter] protected AppState appState { get; set; }
+    
     [CascadingParameter] private Task<AuthenticationState> athenticationState { get; set; }
 
     private int selectedPanel = 1;
@@ -240,7 +241,7 @@
             currentCount--;
     }
 
-    #endregion 
+    #endregion
 
     #region  AppState changed subscription
 
@@ -275,7 +276,7 @@
         kntFolderSelector.Hide();
     }
 
-    #endregion 
+    #endregion
 
     #region Test Resource Selector
 
@@ -305,7 +306,7 @@
         selectedPanel = panel;
     }
 
-    #endregion 
+    #endregion
 
     #region Test file upload
 
@@ -339,11 +340,11 @@
     List<UserDto> users;
 
     private async Task TestWebApiService()
-    {        
+    {
         var resUser = await webApiService.Users.GetAllAsync();
 
         users = resUser.Entity.ToList();
     }
 
-    #endregion 
+    #endregion
 }

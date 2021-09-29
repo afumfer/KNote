@@ -1,9 +1,10 @@
-﻿<h5>@appState.SelectedFolder?.Name</h5>
+﻿@inject AppState appState
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
+<h5>@appState.SelectedFolder?.Name</h5>
 
-    #region  AppState changed subscription 
+@code {    
+
+    #region  AppState changed subscription
 
     protected override void OnInitialized()
     {

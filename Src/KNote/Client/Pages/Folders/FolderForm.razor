@@ -1,4 +1,5 @@
-﻿@inject IShowMessages showMessages
+﻿@inject AppState appState
+@inject IShowMessages showMessages
 
 <EditForm Model="Folder" Context="formContext">
 
@@ -69,8 +70,7 @@
 
 </EditForm>
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
+@code {    
 
     [Parameter] public string Title { get; set; } = "---";
     [Parameter] public FolderDto Folder { get; set; }

@@ -1,6 +1,7 @@
 ﻿@page "/notes/tree"
 @page "/tree"
 
+@inject AppState appState
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
@@ -37,7 +38,7 @@
                     <h5><span class="oi oi-folder pr-3"></span>@folder.Name</h5>
                 </div>
                 <div class="col-4">
-                    @if(notes != null && notes.Count > 0)
+                    @if (notes != null && notes.Count > 0)
                     {
                         <span class="float-right">
                             @if (viewPagination == 1)
@@ -81,16 +82,16 @@
                         <span>&nbsp;</span>
                     }
                 </div>
-            </div>                
+            </div>
         }
     </div>
 
     <div class="col-lg-3 pt-2 pb-2 bg-light border">
-        <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" ShowRefreshTree="true" RefreshTreeFolders="OnRefreshTreeFolders"/>
+        <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" ShowRefreshTree="true" RefreshTreeFolders="OnRefreshTreeFolders" />
     </div>
 
     <div class="col-lg-9 pt-2 pb-2 border">
-        @if(notes != null && notes.Count > 0 && viewPagination == 1)
+        @if (notes != null && notes.Count > 0 && viewPagination == 1)
         {
             <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="onSelectedPage"
                         TotalPages="paginationContext.TotalPages"></Pagination>
@@ -117,8 +118,7 @@
     <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
 </ModalDialog>
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
+@code {    
 
     private List<FolderDto> foldersTree;
     private ModalDialog modalDialog;

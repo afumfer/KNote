@@ -1,6 +1,7 @@
 ﻿@page "/notes/search"
 @page "/search"
 
+@inject AppState appState
 @inject IKntClientDataService dataService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
@@ -97,8 +98,7 @@ else
 </ModalDialog>
 
 
-@code {
-    [CascadingParameter] private AppState appState { get; set; }
+@code {    
 
     private List<NoteInfoDto> notes;
 
@@ -158,7 +158,7 @@ else
         }
 
         if (queryStringsDict.ContainsKey("paginationContext.PageIdentifier.PageNumber"))
-        {            
+        {
             int currentPage;
             int.TryParse(queryStringsDict["pageNumber"], out currentPage);
             paginationContext.CurrentPage = currentPage;
@@ -168,7 +168,7 @@ else
     private string BuildQueryStrings()
     {
         if (queryStringsDict == null) { queryStringsDict = new Dictionary<string, string>(); }
-        queryStringsDict["textSearch"] = textSearch?.ToString();        
+        queryStringsDict["textSearch"] = textSearch?.ToString();
         queryStringsDict["pageNumber"] = paginationContext.CurrentPage.ToString();
         queryStringsDict["pageSize"] = paginationContext.PageSize.ToString();
 
@@ -187,7 +187,7 @@ else
     #region Navigation events
 
     private async Task OnLoadListNotes()
-    {        
+    {
         paginationContext.CurrentPage = 1;
         await LoadListNotes();
     }
@@ -202,13 +202,13 @@ else
 
     private async Task CleanOnClick()
     {
-        textSearch = "";        
+        textSearch = "";
         paginationContext.CurrentPage = 1;
         await LoadListNotes();
     }
 
     private async Task OnSelectedPage(int page)
-    {        
+    {
         paginationContext.CurrentPage = page;
         await LoadListNotes();
     }

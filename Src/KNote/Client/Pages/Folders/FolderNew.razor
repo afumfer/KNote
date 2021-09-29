@@ -1,5 +1,6 @@
 ﻿@page "/folders/new"
 
+@inject AppState appState
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
@@ -8,8 +9,7 @@
 
 <FolderForm Title="New folder" OnValidSubmit="OnNew" OnExit="OnExit" Folder="folder" />
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
+@code {    
 
     private FolderDto folder;
 
@@ -18,11 +18,11 @@
         appState.OnChange += StateHasChanged;
 
         folder = new FolderDto();
-        if(appState != null)
+        if (appState != null)
         {
             folder.ParentId = appState.SelectedFolder.FolderId;
             folder.ParentFolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
-        }        
+        }
         base.OnInitialized();
     }
 
@@ -33,7 +33,7 @@
 
     private async Task OnNew()
     {
-        var httpResponse = await dataService.Post<FolderDto,Result<FolderDto>>("api/folders", folder);
+        var httpResponse = await dataService.Post<FolderDto, Result<FolderDto>>("api/folders", folder);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());
@@ -58,7 +58,7 @@
                     {
                         if (toUpdate != null)
                         {
-                            if(toUpdate.Expanded == true)
+                            if (toUpdate.Expanded == true)
                             {
                                 toUpdate.ChildFolders.Add(newFolder);
                                 toUpdate.Selected = false;

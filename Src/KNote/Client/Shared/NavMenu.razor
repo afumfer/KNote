@@ -1,4 +1,6 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
+﻿@inject AppState appState
+
+<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">KaNote</a>
     <button class="navbar-toggler" @onclick="() => ToggleNavMenu(true)">
         <span class="navbar-toggler-icon"></span>
@@ -89,15 +91,14 @@
                 <option value="Task">Task</option>
                 <option value="Blog">Blog</option>
                 <option value="Wiki">Wiki</option>
-            </select>
+            </select>            
         </li>*@
 
     </ul>
 
 </div>
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
+@code {    
 
     private bool collapseNavMenu = true;
     private bool showUserOptions = false;

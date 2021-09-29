@@ -34,6 +34,8 @@ namespace KNote.Client
 
             //... experimental ...                        
             builder.Services.AddScoped<IWebApiService, WebApiService>();
+
+            builder.Services.AddSingleton<AppState>();
             //....................
 
             builder.Services.AddAuthorizationCore();

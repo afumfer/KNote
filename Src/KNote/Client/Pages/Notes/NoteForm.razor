@@ -255,7 +255,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<List<UserDto>>>($"api/users/getall");
+        var httpResponse = await dataService.Get<Result<List<UserDto>>>($"api/users");
         if (!httpResponse.Error)
         {
             users = httpResponse.Response.Entity;

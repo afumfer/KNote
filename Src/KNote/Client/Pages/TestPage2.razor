@@ -1,6 +1,8 @@
 ﻿@page "/testpage2"
 @using KNote.Model
 @inject HttpClient Http
+@inject AppState appState
+
 
 <h1>Test page 2</h1>
 <hr />
@@ -65,6 +67,8 @@
             <p>@s</p>
         }
     }
+
+    <p>@appState.AppDescription</p>
 
 </div>
 
@@ -220,16 +224,22 @@
     {
         forecasts = null;
         forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("api/WeatherForecast");
+
+        appState.AppDescription += "XX ";
     }
 
     private async Task LoadFolders()
     {
         folders = null;
         folders = await Http.GetFromJsonAsync<List<FolderInfoDto>>("api/WeatherForecast/GetFolders");
+
+        appState.AppMode = "Wiki";
     }
 
     private void ShowPanel(int panel)
     {
         selectedPanel = panel;
+
+        appState.AppDescription += panel.ToString();
     }
 }

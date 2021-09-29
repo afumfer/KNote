@@ -1,5 +1,6 @@
 ﻿@page "/folders/edit/{FolderId}"
 
+@inject AppState appState
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
@@ -7,16 +8,15 @@
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
 @if (folder != null)
-{    
-    <FolderForm Title="Folder edit" OnValidSubmit="OnEdit" OnExit="OnExit"  Folder="folder" />
+{
+    <FolderForm Title="Folder edit" OnValidSubmit="OnEdit" OnExit="OnExit" Folder="folder" />
 }
 else
 {
     <text>Loading ... </text>
 }
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
+@code {    
 
     [Parameter] public string FolderId { get; set; }
 
@@ -54,13 +54,13 @@ else
         }
         else
         {
-            if(appState.FoldersTree != null)
+            if (appState.FoldersTree != null)
             {
                 FolderDto toUpdate;
                 appState.FoldersIndex.TryGetValue(folder.FolderId, out toUpdate);
                 if (toUpdate != null)
                 {
-                    if(toUpdate.ParentId == folder.ParentId)
+                    if (toUpdate.ParentId == folder.ParentId)
                         toUpdate.Name = folder.Name;
                     else
                         appState.FoldersTree = null;

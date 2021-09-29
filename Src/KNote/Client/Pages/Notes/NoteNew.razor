@@ -1,5 +1,6 @@
 ﻿@page "/notes/new/{PageReturn}"
 
+@inject AppState appState
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
@@ -8,15 +9,14 @@
 
 @if (showForm)
 {
-    <NoteForm Title=@title Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>    
+    <NoteForm Title=@title Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
 }
 else
 {
     <text>Loading ... </text>
 }
 
-@code {
-    [CascadingParameter] public AppState appState { get; set; }
+@code {    
 
     [Parameter] public string PageReturn { get; set; }
 
@@ -97,7 +97,7 @@ else
                 var entitySaved = httpResponse.Response.Entity;
 
                 // TODO: Hack ... bucar una implementación más eficiente.
-                //       Se refrescan valores asignados automáticamente 
+                //       Se refrescan valores asignados automáticamente
                 //       en la capa de negocio.
 
                 foreach (var atrSaved in entitySaved.KAttributesDto)
@@ -133,7 +133,7 @@ else
         }
     }
 
-    #endregion 
+    #endregion
 
     #region Events managment
 
@@ -153,6 +153,6 @@ else
         navigationManger.NavigateTo(PageReturn);
     }
 
-    #endregion 
+    #endregion
 
 }

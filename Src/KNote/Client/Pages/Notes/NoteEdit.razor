@@ -1,5 +1,6 @@
 ﻿@page "/notes/edit/{NoteId}/{PageReturn}"
 
+@inject AppState appState
 @inject IKntClientDataService  dataService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
@@ -17,12 +18,10 @@ else
 
 @code {
 
-    // TODO: 
-    // Pendiente de refactorizar, el comportamiento de este caso de uso 
-    // se puede generalizar y unificarlo con el caso de uso Nueva Nota. 
-
-    [CascadingParameter] public AppState appState { get; set; }
-
+    // TODO:
+    // Pendiente de refactorizar, el comportamiento de este caso de uso
+    // se puede generalizar y unificarlo con el caso de uso Nueva Nota.
+    
     [Parameter] public string NoteId { get; set; }
     [Parameter] public string PageReturn { get; set; }
 
@@ -138,6 +137,6 @@ else
         navigationManager.NavigateTo(PageReturn);
     }
 
-    #endregion 
+    #endregion
 
 }
