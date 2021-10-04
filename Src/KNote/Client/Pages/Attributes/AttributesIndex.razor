@@ -1,6 +1,7 @@
 ﻿@page "/attributes"
+@*@inject IGenericDataService  dataService*@
 
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -11,7 +12,7 @@
         <div class="col-6">
             <h3>Attributes index</h3>
         </div>
-        <div class="col-6 float-right">            
+        <div class="col-6 float-right">
             <button class="btn btn-sm btn-warning mx-1 float-right"
                     @onclick="GoNewAttribute"
                     data-toggle="tooltip" title="New attribute">
@@ -28,8 +29,8 @@
             <thead>
                 <tr>
                     <th width="60px" class="text-center">Order</th>
-                    <th width="250px">Name</th>
-                    <th>For note type ...</th>
+                    <th>Name</th>
+                    <th width="150px">For note type ...</th>
                     <th width="90px">Required</th>
                     <th width="180px">DataType</th>
                     <th width="100px" class="text-center">(Actions)</th>
@@ -38,35 +39,35 @@
             <tbody>
                 @foreach (var item in attributes)
                 {
-                <tr>
-                    <td class="text-right">@item.Order</td>
-                    <td>@item.Name</td>
-                    <td>
-                        @if (item.NoteTypeDto == null)
-                        {
-                            <span>(All)</span>
-                        }
-                        else
-                        {
-                            <span>@item.NoteTypeDto?.Name</span>
-                        }
-                    </td>
-                    <td>@item.RequiredValue</td>
-                    <td>@KntConst.KAttributes[item.KAttributeDataType]</td>
-                    <td>
-                        <span class="float-right">
-                            <a href="attributes/edit/@item.KAttributeId" class="btn btn-sm btn-warning mx-1"
-                               data-toggle="tooltip" title="Edit user">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                            <button class="btn btn-sm btn-danger mx-1"
-                                    @onclick="@(() => Delete(item))"
-                                    data-toggle="tooltip" title="Delete user">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                        </span>
-                    </td>
-                </tr>
+                    <tr>
+                        <td class="text-right">@item.Order</td>
+                        <td>@item.Name</td>
+                        <td>
+                            @if (item.NoteTypeDto == null)
+                            {
+                                <span>(All)</span>
+                            }
+                            else
+                            {
+                                <span>@item.NoteTypeDto?.Name</span>
+                            }
+                        </td>
+                        <td>@item.RequiredValue</td>
+                        <td>@KntConst.KAttributes[item.KAttributeDataType]</td>
+                        <td>
+                            <span class="float-right">
+                                <a href="attributes/edit/@item.KAttributeId" class="btn btn-sm btn-warning mx-1"
+                                   data-toggle="tooltip" title="Edit user">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => Delete(item))"
+                                        data-toggle="tooltip" title="Delete user">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -78,10 +79,10 @@
 </ModalDialog>
 
 @code {
-    
-    private List<KAttributeDto> attributes { get; set; }
+
+    private List<KAttributeInfoDto> attributes { get; set; }
     private ModalDialog modalDialog;
-    private KAttributeDto itemDelete;
+    private KAttributeInfoDto itemDelete;
 
     protected async override Task OnInitializedAsync()
     {
@@ -89,19 +90,27 @@
     }
 
     private async Task Load()
-    {        
-        var httpResponse = await dataService.Get<Result<List<KAttributeDto>>>("api/kattributes");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+    {
+        //var httpResponse = await dataService.Get<Result<List<KAttributeDto>>>("api/kattributes");
+        //if (httpResponse.Error)
+        //{
+        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        //}
+        //else
+        //{
+        //    attributes = httpResponse.Response.Entity;
+        //}
+
+        //webApiService
+
+        var response = await webApiService.KAttributes.GetAllAsync();
+        if (!response.IsValid)
+            await showMessages.ShowErrorMessage(response.Message);
         else
-        {
-            attributes = httpResponse.Response.Entity;
-        }
+            attributes = response.Entity;
     }
-    
-    private void Delete(KAttributeDto item)
+
+    private void Delete(KAttributeInfoDto item)
     {
         modalDialog.Show();
         itemDelete = item;
@@ -111,16 +120,23 @@
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/kattributes/{itemDelete.KAttributeId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            await Load();
-        }
+        //var httpResponse = await dataService.Delete($"api/kattributes/{itemDelete.KAttributeId}");
+        //if (httpResponse.Error)
+        //{
+        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        //}
+        //else
+        //{
+        //    await Load();
+        //}
 
+        var response = await webApiService.KAttributes.DeleteAsync(itemDelete.KAttributeId);
+        if (!response.IsValid)        
+            await showMessages.ShowErrorMessage(response.Message);        
+        else
+        
+            await Load();
+        
         itemDelete = null;
     }
 
