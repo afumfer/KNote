@@ -8,7 +8,7 @@
 
 @if (user != null)
 {
-    <UserForm Title="User Edit" OnValidSubmit="OnEdit" OnExit="OnExit" User="user"></UserForm>
+    <UserForm Title="User Edit" OnValidSubmit="OnSave" OnExit="OnExit" User="user"></UserForm>
 }
 else
 {
@@ -35,7 +35,7 @@ else
         base.OnInitialized();
     }
 
-    private async Task OnEdit()
+    private async Task OnSave()
     {
         var result = await webApiService.Users.SaveAsync(user);
         if (!result.IsValid)        

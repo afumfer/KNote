@@ -26,5 +26,52 @@ namespace KNote.Client.ClientDataServices
             }
         }
 
+        private INoteTypeWebApiService _noteTypes;
+        public INoteTypeWebApiService NoteTypes
+        {
+            get
+            {
+                if (_noteTypes == null)
+                    _noteTypes = new NoteTypeWebApiService(_httpClient);
+                return _noteTypes;
+            }
+        }
+
+        private IKAttributeWebApiService _kAttributes;
+        public IKAttributeWebApiService KAttributes
+        {
+            get
+            {
+                if (_kAttributes == null)
+                    _kAttributes = new KAttributeWebApiService(_httpClient);
+                return _kAttributes;
+            }
+        }
+
+
+        private IFolderWebApiService _folders;
+        public IFolderWebApiService Folders
+        {
+            get
+            {
+                if (_folders == null)
+                    _folders = new FolderWebApiService(_httpClient);
+                return _folders;
+            }
+        }
+
+
+        private INoteWebApiService _notes;
+        public INoteWebApiService Notes
+        {
+            get
+            {
+                if (_notes == null)
+                    _notes = new NoteWebApiService(_httpClient);
+                return _notes;
+            }
+        }
+
+
     }
 }

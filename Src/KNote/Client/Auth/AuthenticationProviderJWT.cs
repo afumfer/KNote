@@ -34,7 +34,6 @@ namespace KNote.Client.Auth
             if (string.IsNullOrEmpty(token))            
                 return Anonymous;
             
-
             return BuildAuthenticationState(token);
         }
 

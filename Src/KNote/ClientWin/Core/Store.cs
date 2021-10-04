@@ -33,6 +33,8 @@ namespace KNote.ClientWin.Core
 
         public string ComputerName { get; set; }
 
+        public Version AppVersion { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
+
         public readonly IFactoryViews FactoryViews;
 
         public FolderWithServiceRef _dafaultFolderWithServiceRef;

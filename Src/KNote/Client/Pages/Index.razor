@@ -11,7 +11,7 @@
 
 <div>
     <h3>@appState.AppName home page</h3>
-    <p><i>(@appState.AppDescription)</i></p>
+    <p><i>@appInfo</i></p>
     <hr />
     <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
 </div>
@@ -27,8 +27,11 @@
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
 
+    private string appInfo;
+
     protected override async Task OnInitializedAsync()
     {
+        appInfo = $"{appState.AppDescription} ({appState.AppVersion})";
         await LoadNotes();
     }
 

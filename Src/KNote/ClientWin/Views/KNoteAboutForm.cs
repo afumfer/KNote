@@ -62,7 +62,7 @@ namespace KNote.ClientWin.Views
             info += "ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."; ;
 
             labelRepository.Text = @"https://github.com/afumfer/knote";
-            labelVersion.Text = "Version: " + Application.ProductVersion.ToString();
+            labelVersion.Text = $"Version: {_com.Store.AppVersion}";
             labelInfo.Text = info;
         }
 

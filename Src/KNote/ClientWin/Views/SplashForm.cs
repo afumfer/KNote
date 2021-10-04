@@ -15,12 +15,14 @@ namespace KNote.ClientWin.Views
 {
     public partial class SplashForm : Form
     {
+        Store _appContext;
 
         public SplashForm(Store appContext)
         {
             InitializeComponent();
 
-            appContext.AddedServiceRef += AppContext_AddedServiceRef; 
+            appContext.AddedServiceRef += AppContext_AddedServiceRef;
+            _appContext = appContext;
         }
 
         private void AppContext_AddedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
@@ -32,7 +34,7 @@ namespace KNote.ClientWin.Views
 
         private void SplashForm_Load(object sender, EventArgs e)
         {
-            labelVersion.Text = "Version: " + Application.ProductVersion.ToString();
+            labelVersion.Text = $"Version: {_appContext.AppVersion}";
         }
     }
 }

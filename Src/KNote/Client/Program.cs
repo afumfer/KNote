@@ -29,10 +29,13 @@ namespace KNote.Client
             builder.Services.AddOptions();
             
             builder.Services.AddScoped<IShowMessages, ShowMessages>();
+
+            //... experimental ... !!!                       
             
+            // old
             builder.Services.AddScoped<IGenericDataService, GenericDataService>();
 
-            //... experimental ...                        
+            // new
             builder.Services.AddScoped<IWebApiService, WebApiService>();
 
             builder.Services.AddSingleton<AppState>();

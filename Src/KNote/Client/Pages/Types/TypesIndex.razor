@@ -1,6 +1,6 @@
 ﻿@page "/types"
 
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -35,23 +35,23 @@
             <tbody>
                 @foreach (var item in noteTypes)
                 {
-                <tr>
-                    <td>@item.Name</td>
-                    <td>@item.Description</td>
-                    <td>
-                        <span class="float-right">
-                            <a href="types/edit/@item.NoteTypeId" class="btn btn-sm btn-warning mx-1"
-                               data-toggle="tooltip" title="Edit type">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                            <button class="btn btn-sm btn-danger mx-1"
-                                    @onclick="@(() => Delete(item))"
-                                    data-toggle="tooltip" title="Delete type">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                        </span>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Description</td>
+                        <td>
+                            <span class="float-right">
+                                <a href="types/edit/@item.NoteTypeId" class="btn btn-sm btn-warning mx-1"
+                                   data-toggle="tooltip" title="Edit type">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => Delete(item))"
+                                        data-toggle="tooltip" title="Delete type">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -75,8 +75,11 @@
 
     private async Task Load()
     {
-        var res = await dataService.Get<Result<List<NoteTypeDto>>>("api/notetypes");
-        noteTypes = res.Response.Entity;
+        var result = await webApiService.NoteTypes.GetAllAsync();
+        if (result.IsValid)
+            noteTypes = result.Entity;
+        else
+            await showMessages.ShowErrorMessage(result.Message);
     }
 
     private void Delete(NoteTypeDto item)
@@ -89,15 +92,11 @@
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/notetypes/{itemDelete.NoteTypeId}");        
-        if (httpResponse.Error)
-        {            
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.NoteTypes.DeleteAsync(itemDelete.NoteTypeId);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-        {
             await Load();
-        }
 
         itemDelete = null;
     }

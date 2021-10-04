@@ -37,7 +37,7 @@ namespace KNote.Client.ClientDataServices
 
         public async Task<Result<UserDto>> DeleteAsync(Guid userId)
         {                        
-            var httpRes = await _httpClient.DeleteAsync($"api/users/{userId.ToString()}");
+            var httpRes = await _httpClient.DeleteAsync($"api/users/{userId}");
             
             var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
 

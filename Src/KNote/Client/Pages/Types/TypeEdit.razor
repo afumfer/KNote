@@ -1,6 +1,6 @@
 ﻿@page "/types/edit/{TypeId}"
 
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -9,7 +9,7 @@
 
 @if (noteType != null)
 {
-    <TypeForm Title="Note type edit"  OnValidSubmit="OnSave" OnExit="OnExit"  NoteType="noteType" />
+    <TypeForm Title="Note type edit" OnValidSubmit="OnSave" OnExit="OnExit" NoteType="noteType" />
 }
 else
 {
@@ -24,15 +24,15 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<NoteTypeDto>>($"api/notetypes/{TypeId}");
-        if (httpResponse.Error)
+        var result = await webApiService.NoteTypes.GetAsync(Guid.Parse(TypeId));
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
             navigationManager.NavigateTo("/");
         }
         else
         {
-            noteType = httpResponse.Response.Entity;
+            noteType = result.Entity;
         }
 
         base.OnInitialized();
@@ -40,15 +40,12 @@ else
 
     private async Task OnSave()
     {
-        var httpResponse = await dataService.Put("api/NoteTypes", noteType);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.NoteTypes.SaveAsync(noteType);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-        {
             navigationManager.NavigateTo("types");
-        }
+
     }
 
     private void OnExit()

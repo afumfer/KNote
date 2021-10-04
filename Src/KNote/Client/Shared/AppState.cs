@@ -23,11 +23,16 @@ namespace KNote.Client.Shared
             set { _appName = value; NotifyStateChanged(); }
         }
 
-        private string _appDescription = "Another keynotes managment (ver 0.0.5.21)";
+        private string _appDescription = $"Another keynotes managment.";
         public string AppDescription
         {
             get { return _appDescription; }
             set { _appDescription = value; NotifyStateChanged(); }
+        }
+                
+        public Version AppVersion
+        {
+            get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; }
         }
 
         private FolderDto _selectedFolder;
@@ -46,9 +51,6 @@ namespace KNote.Client.Shared
             }
         }
 
-        // Only used in KntFoldersTreeView  (hack)
-        public FolderDto folderOldSelected { get; set; }
-
         private List<FolderDto> _foldersTree;
         public List<FolderDto> FoldersTree 
         { 
@@ -61,6 +63,7 @@ namespace KNote.Client.Shared
                 _foldersTree = value;
                 if(_foldersIndex != null)
                     _foldersIndex = null;
+                NotifyStateChanged();
             } 
         }
 
@@ -73,8 +76,11 @@ namespace KNote.Client.Shared
                     _foldersIndex = new Dictionary<Guid, FolderDto>();
                 return _foldersIndex;
             }
-        } 
-        
+        }
+
+        // Only used in KntFoldersTreeView  (hack)
+        public FolderDto folderOldSelected { get; set; }
+
         public event Action OnChange;
         private void NotifyStateChanged() => OnChange?.Invoke();
 
