@@ -1,7 +1,7 @@
-﻿@inject IShowMessages showMessages
-@inject IGenericDataService  dataService
+﻿@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
+@inject IShowMessages showMessages
 @inject NavigationManager navigationManager
-
 <!-- -->
 
 <EditForm Model="Note" Context="formContext">
@@ -46,31 +46,31 @@
             </a>
         </li>
         @*
-        //TODO: pending implementation
-        <li class="nav-item">
-            <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
-                <span class="oi oi-envelope-open mr-2"></span>Messages
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @((selectedPanel == 6) ? "active" : "")" @onclick="@(() => ShowPanel(6))">
-                <span class="oi oi-external-link mr-2"></span>TraceNotes
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @((selectedPanel == 7) ? "active" : "")" @onclick="@(() => ShowPanel(7))">
-                <span class="oi oi-flag mr-2"></span>KEvents
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @((selectedPanel == 8) ? "active" : "")" @onclick="@(() => ShowPanel(8))">
-                <span class="oi oi-terminal mr-2" aria-hidden="true"></span>Script
-            </a>
-        </li>*@
+            //TODO: pending implementation
+            <li class="nav-item">
+                <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
+                    <span class="oi oi-envelope-open mr-2"></span>Messages
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @((selectedPanel == 6) ? "active" : "")" @onclick="@(() => ShowPanel(6))">
+                    <span class="oi oi-external-link mr-2"></span>TraceNotes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @((selectedPanel == 7) ? "active" : "")" @onclick="@(() => ShowPanel(7))">
+                    <span class="oi oi-flag mr-2"></span>KEvents
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @((selectedPanel == 8) ? "active" : "")" @onclick="@(() => ShowPanel(8))">
+                    <span class="oi oi-terminal mr-2" aria-hidden="true"></span>Script
+                </a>
+            </li>*@
 
         @*<li class="nav-item">
-                <a class="nav-link disabled" href="#">Script</a>
-        </li>*@
+                    <a class="nav-link disabled" href="#">Script</a>
+            </li>*@
     </ul>
 
     <!-- Panels -->
@@ -121,7 +121,7 @@
             </div>
 
             <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
-            <div class="input-group col-sm-5" id="atrNoteType">                                
+            <div class="input-group col-sm-5" id="atrNoteType">
                 <select class="form-control col-sm-11" @bind="@NoteTypeControl">
                     <option></option>
                     @if (NoteTypes != null)
@@ -174,7 +174,7 @@
         else
         {
             <NoteKTasks Tasks="tasks"
-                        OnDelete="OnDeleteTask"                        
+                        OnDelete="OnDeleteTask"
                         OnNew="OnNewTask"
                         OnEdit="OnEditTask">
             </NoteKTasks>
@@ -229,16 +229,16 @@
 
 </EditForm>
 
-@code {    
-    [Parameter] public string Title { get; set; } = "---";
-    [Parameter] public NoteDto Note { get; set; }
-    [Parameter] public EventCallback OnValidSubmit { get; set; }
-    [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
-    [Parameter] public EventCallback OnExit { get; set; }
-    [Parameter] public List<NoteTypeDto> NoteTypes { get; set; }  //  = new List<NoteTypeDto>();
+@code {
+        [Parameter] public string Title { get; set; } = "---";
+        [Parameter] public NoteDto Note { get; set; }
+        [Parameter] public EventCallback OnValidSubmit { get; set; }
+        [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
+        [Parameter] public EventCallback OnExit { get; set; }
+        [Parameter] public List<NoteTypeDto> NoteTypes { get; set; }  //  = new List<NoteTypeDto>();
 
     private List<ResourceDto> resources; // { get; set; }
-    private List<NoteTaskDto> tasks  { get; set; }
+    private List<NoteTaskDto> tasks { get; set; }
     private NoteTaskDto taskEdit; // { get; set; }
     private List<UserDto> users;
 
@@ -318,7 +318,7 @@
                 addMessage += $" {KAttribute.Name} is required.";
             }
         }
-        
+
         if (formIsValid == false)
         {
             await showMessages.ShowErrorMessage("Incorrect data, check the required attributes. " + addMessage);
@@ -366,7 +366,7 @@
         }
     }
 
-    #endregion 
+    #endregion
 
     #region Managment FolderSelector
 
@@ -520,7 +520,8 @@
 
     public Guid? NoteTypeControl
     {
-        get {
+        get
+        {
             return Note.NoteTypeId;
         }
         set
@@ -547,14 +548,25 @@
         if (Note.NoteTypeId == oldNoteType)
             return;
 
-        var httpResponse = await dataService.Get<Result<List<KAttributeDto>>>($"api/kattributes/getfornotetype/{Note.NoteTypeId}");
-        if (httpResponse.Error)
+
+        //var httpResponse = await dataService.Get<Result<List<KAttributeDto>>>($"api/kattributes/getfornotetype/{Note.NoteTypeId}");
+        //if (httpResponse.Error)
+        //{
+        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        //}
+        //else
+        //{
+        //    var listA = httpResponse.Response.Entity;
+        //    ....
+
+        var result = await  webApiService.KAttributes.GetAllAsync(Note.NoteTypeId);
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
-            var listA = httpResponse.Response.Entity;
+            var listA = result.Entity;
 
             //if (oldNoteType != null)
             //    Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
@@ -569,7 +581,7 @@
                 Note.KAttributesDto.Add(newA);
             }
 
-            foreach(var a in Note.KAttributesDto)
+            foreach (var a in Note.KAttributesDto)
             {
                 if (a.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
                     a.TabulatedValues = await noteKAttributes.GetTabulatedValues(a.KAttributeId);

@@ -23,19 +23,28 @@ namespace KNote.Client.ClientDataServices
             return await _httpClient.GetFromJsonAsync<Result<List<KAttributeInfoDto>>>("api/kattributes");
         }
 
-        public Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
+        public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
         {
-            throw new NotImplementedException();
+            return await _httpClient.GetFromJsonAsync<Result<List<KAttributeInfoDto>>>($"api/kattributes/getfornotetype/{typeId}");
         }
 
-        public Task<Result<KAttributeDto>> GetAsync(Guid id)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<KAttributeDto>> GetAsync(Guid id)
+        {            
+            return await _httpClient.GetFromJsonAsync<Result<KAttributeDto>>($"api/kattributes/{id}");
         }
 
-        public Task<Result<KAttributeDto>> SaveAsync(KAttributeDto kattribute)
+        public async Task<Result<KAttributeDto>> SaveAsync(KAttributeDto kattribute)
         {
-            throw new NotImplementedException();
+            HttpResponseMessage httpRes;
+
+            if (kattribute.KAttributeId == Guid.Empty)
+                httpRes = await _httpClient.PostAsJsonAsync<KAttributeDto>("api/kattributes", kattribute);
+            else
+                httpRes = await _httpClient.PutAsJsonAsync<KAttributeDto>("api/kattributes", kattribute);
+
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<KAttributeDto>>();
+
+            return res;
         }
 
         public async Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id)
@@ -47,14 +56,18 @@ namespace KNote.Client.ClientDataServices
             return res;
         }
 
-        public Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id)
+        {            
+            return await _httpClient.GetFromJsonAsync<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{id}");
         }
 
-        public Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
+        public async Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var httpRes = await _httpClient.DeleteAsync($"api/kattributes/deletetabulatedvalue/{id}");
+
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<KAttributeTabulatedValueDto>>();
+
+            return res;
         }
     }
 }

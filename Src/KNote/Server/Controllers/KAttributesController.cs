@@ -66,7 +66,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("{id}")]    // GET api/kattributes/guidKAttribute
+        [HttpGet("{id}")]    // GET api/kattributes/id
         public async Task<IActionResult> Get(Guid id)
         {
             try

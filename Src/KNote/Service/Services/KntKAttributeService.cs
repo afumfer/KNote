@@ -53,10 +53,9 @@ namespace KNote.Service.Services
                 return await _repository.KAttributes.AddAsync(entity);
             }
             else
-            {
+            {                
                 return await _repository.KAttributes.UpdateAsync(entity);
             }
-
         }
 
         public async Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id)

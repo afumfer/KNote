@@ -91,7 +91,8 @@ namespace KNote.Repository.Dapper
                             atrDictionary.Add(kAttribute.KAttributeId, attributeEntry);
                         }
 
-                        attributeEntry.KAttributeValues.Add(kAttributeTabulatedValueDto);
+                        if(kAttributeTabulatedValueDto != null)
+                            attributeEntry.KAttributeValues.Add(kAttributeTabulatedValueDto);
                         return attributeEntry;
                     },
                     new { Id = id }
@@ -99,7 +100,7 @@ namespace KNote.Repository.Dapper
                     );
 
                 result.Entity = entity.ToList().FirstOrDefault<KAttributeDto>();
-
+                
                 await CloseIsTempConnection(db);
             }
             catch (Exception ex)

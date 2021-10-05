@@ -1,5 +1,6 @@
-﻿@inject IShowMessages showMessages
-@inject IGenericDataService  dataService
+﻿
+@inject IWebApiService webApiService
+@inject IShowMessages showMessages
 @inject NavigationManager navigationManager
 
 <EditForm Model="KAttribute" Context="formContext">
@@ -15,7 +16,7 @@
             <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
         </Buttons>
     </ToolingHeader>
-    
+
     <div class="form-group row">
         <label for="atrName" class="col-sm-2 col-form-label">Name:</label>
         <div class="input-group col-sm-10" id="atrName">
@@ -36,7 +37,7 @@
         <label for="atrRequired" class="col-sm-2 col-form-label">Required Value::</label>
         <div class="input-group col-sm-10" id="atrRequired">
             <InputCheckbox class="form-control" @bind-Value="@KAttribute.RequiredValue" />
-            
+
         </div>
         <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
     </div>
@@ -101,8 +102,8 @@
                         }
                     </tbody>
                 </table>
-            </div>            
-        </div>        
+            </div>
+        </div>
     }
 
     <div class="form-group row">
@@ -166,16 +167,11 @@
             return;
         }
 
-
-        var httpResponse = await dataService.Delete($"api/kattributes/deletetabulatedvalue/{atrValue.KAttributeTabulatedValueId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.KAttributes.DeleteKAttributeTabulatedValueAsync(atrValue.KAttributeTabulatedValueId);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-        {            
             KAttribute.KAttributeValues.Remove(atrValue);
-        }
     }
 
     private void OnAtrValueEdit(KAttributeTabulatedValueDto atrEdit)
@@ -189,8 +185,9 @@
     }
 
     private void OnConfirmAtrValueEditor(KAttributeTabulatedValueDto atrValue)
-    {        
-        var atrOld = KAttribute.KAttributeValues.Where(v => v.Value == atrValue.Value).SingleOrDefault();
+    {
+        //var atrOld = KAttribute.KAttributeValues.Where(v => v.Value == atrValue.Value).SingleOrDefault();
+        var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
 
         if (atrOld == null)
         {

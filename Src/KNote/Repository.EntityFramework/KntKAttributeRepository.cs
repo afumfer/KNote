@@ -312,7 +312,6 @@ namespace KNote.Repository.EntityFramework
 
         }
 
-
         #region Private methods
 
         private async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entity)

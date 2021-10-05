@@ -1,16 +1,17 @@
-﻿@inject IShowMessages showMessages
+﻿
 @inject IGenericDataService  dataService
+@inject IWebApiService webApiService
+@inject IShowMessages showMessages
 @inject NavigationManager navigationManager
-
 
 @foreach (var KAttribute in Attributes)
 {
     <div class="form-group row">
         <label for="atrTags" class="col-sm-4 col-form-label">
-            @KAttribute.Name 
+            @KAttribute.Name
             @if (KAttribute.RequiredValue)
             {
-               <span>(*)</span>
+                <span>(*)</span>
             }
             :
         </label>
@@ -22,7 +23,7 @@
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TextArea)
             {
-                <InputTextArea class="form-control p-2" @bind-Value="@KAttribute.ValueString" />                                
+                <InputTextArea class="form-control p-2" @bind-Value="@KAttribute.ValueString" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.DateTime)
             {
@@ -115,16 +116,28 @@
 
     public async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(Guid idAttribute)
     {
-        var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
-        if (httpResponse.Error)
+        //var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
+        //if (httpResponse.Error)
+        //{
+        //    // TODO: Pending, thinking about how errors are displayed
+        //    //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        //    return new List<KAttributeTabulatedValueDto>();
+        //}
+        //else
+        //{
+        //    return httpResponse.Response.Entity.ToList();
+        //}
+
+        var result = await webApiService.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
+        if (!result.IsValid)
         {
-            // TODO: Pending, thinking about how errors are displayed 
-            //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            // TODO: Pending, thinking about how errors are displayed
+            //await showMessages.ShowErrorMessage(result.Message);
             return new List<KAttributeTabulatedValueDto>();
         }
         else
         {
-            return httpResponse.Response.Entity.ToList();
+            return result.Entity.ToList();
         }
     }
 
@@ -132,16 +145,36 @@
     {
         List<MultiSelectListDto> tagsSel;
 
-        var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
-        if (httpResponse.Error)
+        //var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
+        //if (httpResponse.Error)
+        //{
+        //    // TODO: Pending, thinking about how errors are displayed
+        //    //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+        //    tagsSel = new List<MultiSelectListDto>();
+        //}
+        //else
+        //{
+        //    var tagsList = httpResponse.Response.Entity.ToList();
+        //    tagsSel = new List<MultiSelectListDto>();
+        //    foreach (var t in tagsList)
+        //    {
+        //        var selected = false;
+        //        if (tags?.IndexOf(t.Value.ToString()) >= 0)
+        //            selected = true;
+        //        tagsSel.Add(new MultiSelectListDto(selected, t.Value.ToString(), t.Value.ToString()));
+        //    }
+        //}
+
+        var result = await webApiService.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
+        if (!result.IsValid)
         {
-            // TODO: Pending, thinking about how errors are displayed 
-            //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            // TODO: Pending, thinking about how errors are displayed
+            //await showMessages.ShowErrorMessage(result.Message);
             tagsSel = new List<MultiSelectListDto>();
         }
         else
         {
-            var tagsList = httpResponse.Response.Entity.ToList();
+            var tagsList = result.Entity.ToList();
             tagsSel = new List<MultiSelectListDto>();
 
             foreach (var t in tagsList)

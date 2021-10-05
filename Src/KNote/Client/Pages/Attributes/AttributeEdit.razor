@@ -1,6 +1,6 @@
 ﻿@page "/attributes/edit/{AttributeId}"
 
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -8,7 +8,7 @@
 
 @if (kattribute != null && showForm)
 {
-    <AttributeForm Title="Attribute Edit" OnValidSubmit="OnEdit" OnExit="OnExit"  KAttribute="kattribute" NoteTypes="noteTypes" />
+    <AttributeForm Title="Attribute Edit" OnValidSubmit="OnEdit" OnExit="OnExit" KAttribute="kattribute" NoteTypes="noteTypes" />
 }
 else
 {
@@ -24,26 +24,25 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<KAttributeDto>>($"api/kattributes/{AttributeId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-            navigationManager.NavigateTo("/");
-        }
-        else
-        {
-            kattribute = httpResponse.Response.Entity;
-        }
 
-        var httpResponse2 = await dataService.Get<Result<List<NoteTypeDto>>>("api/notetypes");
-        if (httpResponse2.Error)
+        var result = await webApiService.KAttributes.GetAsync(Guid.Parse(AttributeId));
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
+            navigationManager.NavigateTo("/");
+        }
+        else
+            kattribute = result.Entity;
+
+        var result2 = await webApiService.NoteTypes.GetAllAsync();
+        if (!result2.IsValid)
+        {
+            await showMessages.ShowErrorMessage(result2.Message);
             navigationManager.NavigateTo("/");
         }
         else
         {
-            noteTypes = httpResponse2.Response.Entity;
+            noteTypes = result2.Entity;
             showForm = true;
         }
 
@@ -52,15 +51,11 @@ else
 
     private async Task OnEdit()
     {
-        var httpResponse = await dataService.Put("api/kattributes", kattribute);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.KAttributes.SaveAsync(kattribute);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-        {
             navigationManager.NavigateTo("attributes");
-        }
     }
 
     private void OnExit()

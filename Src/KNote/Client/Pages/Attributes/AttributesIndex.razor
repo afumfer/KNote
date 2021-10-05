@@ -1,5 +1,4 @@
 ﻿@page "/attributes"
-@*@inject IGenericDataService  dataService*@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
@@ -91,18 +90,6 @@
 
     private async Task Load()
     {
-        //var httpResponse = await dataService.Get<Result<List<KAttributeDto>>>("api/kattributes");
-        //if (httpResponse.Error)
-        //{
-        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        //}
-        //else
-        //{
-        //    attributes = httpResponse.Response.Entity;
-        //}
-
-        //webApiService
-
         var response = await webApiService.KAttributes.GetAllAsync();
         if (!response.IsValid)
             await showMessages.ShowErrorMessage(response.Message);
@@ -120,21 +107,10 @@
     {
         modalDialog.Hide();
 
-        //var httpResponse = await dataService.Delete($"api/kattributes/{itemDelete.KAttributeId}");
-        //if (httpResponse.Error)
-        //{
-        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        //}
-        //else
-        //{
-        //    await Load();
-        //}
-
         var response = await webApiService.KAttributes.DeleteAsync(itemDelete.KAttributeId);
         if (!response.IsValid)        
             await showMessages.ShowErrorMessage(response.Message);        
-        else
-        
+        else        
             await Load();
         
         itemDelete = null;

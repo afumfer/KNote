@@ -1,6 +1,6 @@
 ﻿@page "/attributes/new"
 
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -22,30 +22,25 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<List<NoteTypeDto>>>("api/notetypes");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.NoteTypes.GetAllAsync();
+        if(!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
         {
-            noteTypes = httpResponse.Response.Entity;
+            noteTypes = result.Entity;
             showForm = true;
         }
+
         base.OnInitialized();
     }
 
     private async Task OnNew()
     {
-        var httpResponse = await dataService.Post("api/kattributes", kattribute);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            navigationManager.NavigateTo("attributes");
-        }
+        var response = await webApiService.KAttributes.SaveAsync(kattribute);
+        if (!response.IsValid)        
+            await showMessages.ShowErrorMessage(response.Message);        
+        else        
+            navigationManager.NavigateTo("attributes");       
     }
 
     private void OnExit()

@@ -1,5 +1,4 @@
-﻿@inject IGenericDataService  dataService
-@inject IShowMessages showMessages
+﻿@inject IShowMessages showMessages
 
 @if (ShowDialog)
 {
@@ -64,9 +63,12 @@
     {
         if (valueEdit != null)
             atrValue = valueEdit.GetSimpleDto<KAttributeTabulatedValueDto>();
-        else        
-            atrValue = new KAttributeTabulatedValueDto();            
-        
+        else
+        {
+            atrValue = new KAttributeTabulatedValueDto();
+            atrValue.KAttributeTabulatedValueId = Guid.NewGuid();
+        }
+
         ShowDialog = true;
     }
 
