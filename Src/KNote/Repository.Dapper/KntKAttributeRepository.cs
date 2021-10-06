@@ -125,7 +125,7 @@ namespace KNote.Repository.Dapper
                 if (r == 0)
                     result.ErrorList.Add("Entity not inserted");
                 
-                var resTabValues = await SaveTabulateValueAsync(entity.KAttributeId, entity.KAttributeValues);
+                var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
                 if (!resTabValues.IsValid)
                     CopyErrorList(resTabValues.ErrorList, result.ErrorList);
                 
@@ -157,12 +157,13 @@ namespace KNote.Repository.Dapper
                         Disabled = @Disabled, 
                         NoteTypeId = @NoteTypeId
                     WHERE KAttributeId = @KAttributeId";
+
                 var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
                 if (r == 0)
                     result.ErrorList.Add("Entity not updated");
 
-                var resTabValues = await SaveTabulateValueAsync(entity.KAttributeId, entity.KAttributeValues);
+                var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
                 if (!resTabValues.IsValid)
                     CopyErrorList(resTabValues.ErrorList, result.ErrorList);
 
@@ -325,15 +326,21 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        private async Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(Guid kattributeId, List<KAttributeTabulatedValueDto> tabulatedValues)
+        private async Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(DbConnection db, Guid kattributeId, List<KAttributeTabulatedValueDto> tabulatedValues)
         {            
             var result = new Result<List<KAttributeTabulatedValueDto>>();
-            string sql = "";
+            string sql;
+            string sqlInsert = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
+                                    VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
+            string sqlUpdate = @"UPDATE [KAttributeTabulatedValues] SET                                     
+                                        KAttributeId = @KAttributeId, 
+                                        [Value] = @Value, 
+                                        [Description] = @Description, 
+                                        [Order] = @Order  
+                                    WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
             int r = 0;
             try
-            {
-                var db = GetOpenConnection();
-
+            {                
                 foreach (var tv in tabulatedValues)
                 {
                     if (tv != null)
@@ -342,18 +349,14 @@ namespace KNote.Repository.Dapper
 
                         if (tv.KAttributeTabulatedValueId == Guid.Empty)
                         {
-                            tv.KAttributeTabulatedValueId = Guid.NewGuid();    
-                            sql = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
-                                    VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
+                            tv.KAttributeTabulatedValueId = Guid.NewGuid();
+                            sql = sqlInsert;
                         }
                         else
                         {
-                            sql = @"UPDATE [KAttributeTabulatedValues] SET                                     
-                                        KAttributeId = @KAttributeId, 
-                                        [Value] = @Value, 
-                                        [Description] = @Description, 
-                                        [Order] = @Order  
-                                    WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
+                            var sqlCount = "SELECT COUNT(*) FROM KAttributeTabulatedValues WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId";
+                            var countTabValue = await db.ExecuteScalarAsync<long>(sqlCount, new { KAttributeTabulatedValueId = tv.KAttributeTabulatedValueId });
+                            sql = (countTabValue > 0) ? sqlUpdate : sqlInsert;
                         }
 
                         r = await db.ExecuteAsync(sql.ToString(),
@@ -364,9 +367,7 @@ namespace KNote.Repository.Dapper
                     }
                 }
                               
-                result.Entity = tabulatedValues;
-
-                await CloseIsTempConnection(db);
+                result.Entity = tabulatedValues;                
             }
             catch (Exception ex)
             {

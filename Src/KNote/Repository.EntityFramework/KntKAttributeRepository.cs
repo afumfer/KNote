@@ -157,7 +157,7 @@ namespace KNote.Repository.EntityFramework
 
                 foreach (var value in entity.KAttributeValues)
                 {
-                    var res = await SaveTabulateValueAsync(response.Entity.KAttributeId, value);
+                    var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
                     response.Entity.KAttributeValues.Add(res.Entity);
                 }
 
@@ -199,7 +199,7 @@ namespace KNote.Repository.EntityFramework
 
                 foreach (var value in entity.KAttributeValues)
                 {
-                    var res = await SaveTabulateValueAsync(response.Entity.KAttributeId, value);
+                    var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
                     response.Entity.KAttributeValues.Add(res.Entity);
                 }
 
@@ -314,14 +314,13 @@ namespace KNote.Repository.EntityFramework
 
         #region Private methods
 
-        private async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(Guid attributeId, KAttributeTabulatedValueDto entity)
+        private async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(KntDbContext ctx, Guid attributeId, KAttributeTabulatedValueDto entity) 
         {
             Result<KAttributeTabulatedValue> resRep = null;
             var resService = new Result<KAttributeTabulatedValueDto>();
 
             try
-            {
-                var ctx = GetOpenConnection();
+            {                
                 var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
 
                 if (entity.KAttributeTabulatedValueId == Guid.Empty)
@@ -357,9 +356,7 @@ namespace KNote.Repository.EntityFramework
                         // ...
                         resRep = await kattributeTabulatedValues.AddAsync(newEntity);
                     }
-                }
-
-                await CloseIsTempConnection(ctx);
+                }             
             }
             catch (Exception ex)
             {
