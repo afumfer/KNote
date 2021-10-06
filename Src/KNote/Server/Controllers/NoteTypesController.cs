@@ -10,8 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace KNote.Server.Controllers
 {
     //[Authorize]
@@ -47,7 +45,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("{id}")]    // GET api/notetypes/guidnotetype
+        [HttpGet("{id}")]    // GET api/notetypes/id
         public async Task<IActionResult> Get(Guid id)
         {
             try
@@ -90,7 +88,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpDelete("{id}")]    // DELETE api/notetypes/guid       
+        [HttpDelete("{id}")]    // DELETE api/notetypes/id       
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {

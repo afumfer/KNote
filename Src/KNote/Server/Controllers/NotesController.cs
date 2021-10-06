@@ -162,7 +162,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/xxxxxxxxxx        
+        [HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/folderId        
         public async Task<IActionResult> GetByFolder(Guid folderId)
         {
 

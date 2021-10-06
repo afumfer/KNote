@@ -129,6 +129,7 @@ namespace KNote.Server.Controllers
             }
         }
 
+        // TODO: !!! Pending refactoring, this method will disappear 
         [HttpDelete("[action]/{id}")]    // DELETE api/kattributes/deleterabulatedvalue/guid        
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTabulatedValue(Guid id)
@@ -148,9 +149,9 @@ namespace KNote.Server.Controllers
                 return BadRequest(resApi);
             }
         }
-
-        [HttpGet("[action]/{idAttribute}")]    // GET api/kattributes/getattributetabulatedvalues/guid 
-        public async Task<IActionResult> GetAttributeTabulatedValues(Guid idAttribute)
+        
+        [HttpGet("{idAttribute}/[action]")]    // GET api/kattributes/guid/getattributetabulatedvalues
+        public async Task<IActionResult> GetTabulatedValues(Guid idAttribute)
         {
             try
             {

@@ -116,18 +116,6 @@
 
     public async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(Guid idAttribute)
     {
-        //var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
-        //if (httpResponse.Error)
-        //{
-        //    // TODO: Pending, thinking about how errors are displayed
-        //    //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        //    return new List<KAttributeTabulatedValueDto>();
-        //}
-        //else
-        //{
-        //    return httpResponse.Response.Entity.ToList();
-        //}
-
         var result = await webApiService.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
         {
@@ -144,26 +132,6 @@
     public async Task<List<MultiSelectListDto>> GetTagsValues(Guid idAttribute, string tags)
     {
         List<MultiSelectListDto> tagsSel;
-
-        //var httpResponse = await dataService.Get<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{idAttribute}");
-        //if (httpResponse.Error)
-        //{
-        //    // TODO: Pending, thinking about how errors are displayed
-        //    //await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        //    tagsSel = new List<MultiSelectListDto>();
-        //}
-        //else
-        //{
-        //    var tagsList = httpResponse.Response.Entity.ToList();
-        //    tagsSel = new List<MultiSelectListDto>();
-        //    foreach (var t in tagsList)
-        //    {
-        //        var selected = false;
-        //        if (tags?.IndexOf(t.Value.ToString()) >= 0)
-        //            selected = true;
-        //        tagsSel.Add(new MultiSelectListDto(selected, t.Value.ToString(), t.Value.ToString()));
-        //    }
-        //}
 
         var result = await webApiService.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)

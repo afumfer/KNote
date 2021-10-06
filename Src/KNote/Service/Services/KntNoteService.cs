@@ -490,7 +490,7 @@ namespace KNote.Service.Services
 
         public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
         {                        
-            return await _repository.Notes.PatchChangeTags(noteId,  oldTag, newTag);
+            return await _repository.Notes.PatchChangeTags(noteId, oldTag, newTag);
         }
 
         public async Task<Result<int>> GetNextNoteNumber()

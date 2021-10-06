@@ -86,24 +86,24 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{folderId}")]    // GET api/folders/GetNotes/xxxxxxxxxx        
-        public async Task<IActionResult> GetNotes(Guid folderId)
-        {
-            try
-            {
-                var resApi = await _service.Notes.GetByFolderAsync(folderId);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<List<FolderInfoDto>>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //[HttpGet("[action]/{folderId}")]    // GET api/folders/getnotes/folderId        
+        //public async Task<IActionResult> GetNotes(Guid folderId)
+        //{
+        //    try
+        //    {
+        //        var resApi = await _service.Notes.GetByFolderAsync(folderId);
+        //        if (resApi.IsValid)
+        //            return Ok(resApi);
+        //        else
+        //            return BadRequest(resApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var kresApi = new Result<List<FolderInfoDto>>();
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
         [HttpPost]   // POST api/folders
         [HttpPut]    // PUT api/folders

@@ -1,9 +1,10 @@
 ﻿@page "/folders"
 
-@inject AppState appState
-@inject IGenericDataService  dataService
+@*@inject IGenericDataService  dataService*@
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
+@inject AppState appState
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -43,7 +44,7 @@ else
     <div><p>Are you sure you want to delete folder "@itemDelete.Name" ?</p></div>
 </ModalDialog>
 
-@code {    
+@code {
 
     private List<FolderDto> foldersTree;
     private FolderDto folder;
@@ -68,8 +69,15 @@ else
 
         if (appState.FoldersTree == null)
         {
-            var res = await dataService.Get<Result<List<FolderDto>>>("api/folders/gettree");
-            foldersTree = res.Response.Entity;
+            //var res = await dataService.Get<Result<List<FolderDto>>>("api/folders/gettree");
+            //foldersTree = res.Response.Entity;
+
+            var result = await webApiService.Folders.GetTreeAsync();
+            if (!result.IsValid)
+                foldersTree = new List<FolderDto>();
+            else
+                foldersTree = result.Entity;
+
             appState.FoldersTree = foldersTree;
 
             if (foldersTree?.Count > 0)
@@ -102,10 +110,14 @@ else
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/folders/{itemDelete.FolderId}");
-        if (httpResponse.Error)
+        //var httpResponse = await dataService.Delete($"api/folders/{itemDelete.FolderId}");
+        //if (httpResponse.Error) 
+        // 
+
+        var result = await webApiService.Folders.DeleteAsync(itemDelete.FolderId);
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {

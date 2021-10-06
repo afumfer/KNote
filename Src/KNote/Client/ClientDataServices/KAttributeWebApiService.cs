@@ -50,15 +50,15 @@ namespace KNote.Client.ClientDataServices
         public async Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id)
         {
             var httpRes = await _httpClient.DeleteAsync($"api/kattributes/{id}");
-
+            
             var res = await httpRes.Content.ReadFromJsonAsync<Result<KAttributeInfoDto>>();
 
             return res;
         }
 
         public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id)
-        {            
-            return await _httpClient.GetFromJsonAsync<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/getattributetabulatedvalues/{id}");
+        {                        
+            return await _httpClient.GetFromJsonAsync<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/{id}/gettabulatedvalues");
         }
 
         public async Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
