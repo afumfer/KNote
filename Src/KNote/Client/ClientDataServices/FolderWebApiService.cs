@@ -28,15 +28,24 @@ namespace KNote.Client.ClientDataServices
             return await _httpClient.GetFromJsonAsync<Result<List<FolderDto>>>("api/folders/gettree");            
         }
 
-        public Task<Result<FolderDto>> GetAsync(Guid folderId)
-        {
-            throw new NotImplementedException();
+        public async Task<Result<FolderDto>> GetAsync(Guid folderId)
+        {                        
+            return await _httpClient.GetFromJsonAsync<Result<FolderDto>>($"api/folders/{folderId}");
         }
 
 
-        public Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo)
+        public async Task<Result<FolderDto>> SaveAsync(FolderDto folder)
         {
-            throw new NotImplementedException();
+            HttpResponseMessage httpRes;
+
+            if (folder.FolderId == Guid.Empty)
+                httpRes = await _httpClient.PostAsJsonAsync<FolderDto>($"api/folders", folder);
+            else
+                httpRes = await _httpClient.PutAsJsonAsync<FolderDto>($"api/folders", folder);
+
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<FolderDto>>();
+
+            return res;
         }
 
         public async Task<Result<FolderDto>> DeleteAsync(Guid id)

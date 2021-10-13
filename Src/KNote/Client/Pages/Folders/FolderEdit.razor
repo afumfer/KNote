@@ -1,7 +1,8 @@
 ﻿@page "/folders/edit/{FolderId}"
 
 @inject AppState appState
-@inject IGenericDataService  dataService
+@*@inject IGenericDataService  dataService*@
+@inject IWebApiService webApiService 
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -26,15 +27,15 @@ else
     {
         appState.OnChange += StateHasChanged;
 
-        var httpResponse = await dataService.Get<Result<FolderDto>>($"api/folders/{FolderId}");
-        if (httpResponse.Error)
+        var result = await webApiService.Folders.GetAsync(Guid.Parse(FolderId));
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
             navigationManager.NavigateTo("folders");
         }
         else
         {
-            folder = httpResponse.Response.Entity;
+            folder = result.Entity;
         }
 
         base.OnInitialized();
@@ -47,10 +48,10 @@ else
 
     private async Task OnEdit()
     {
-        var httpResponse = await dataService.Put<FolderDto>("api/folders", folder);
-        if (httpResponse.Error)
+        var result = await webApiService.Folders.SaveAsync(folder);
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {

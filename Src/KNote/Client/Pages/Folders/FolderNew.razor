@@ -1,7 +1,7 @@
 ﻿@page "/folders/new"
 
 @inject AppState appState
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService 
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -33,17 +33,17 @@
 
     private async Task OnNew()
     {
-        var httpResponse = await dataService.Post<FolderDto, Result<FolderDto>>("api/folders", folder);
-        if (httpResponse.Error)
+        var result = await webApiService.Folders.SaveAsync(folder);
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
             if (appState.FoldersTree != null)
             {
                 FolderDto toUpdate;
-                var newFolder = httpResponse.Response.Entity.GetSimpleDto<FolderDto>();
+                var newFolder = result.Entity.GetSimpleDto<FolderDto>();
                 newFolder.Selected = true;
                 appState.folderOldSelected.Selected = false;
 
@@ -79,6 +79,7 @@
 
             navigationManager.NavigateTo("folders");
         }
+
     }
 
     private void OnExit()
