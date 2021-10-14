@@ -4,9 +4,10 @@
 @using KNote.Client.Pages.Notes
 
 @inject AppState appState
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
+
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
 <div>
@@ -38,13 +39,11 @@
     private async Task LoadNotes()
     {
         notes = null;
-        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/homenotes");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.Notes.GetHomeNotesAsync();
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-            notes = httpResponse.Response.Entity;
+            notes = result.Entity;
     }
 
     private void GoNoteView(NoteInfoDto note)
@@ -67,15 +66,11 @@
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/notes/{itemDelete.NoteId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.Notes.DeleteAsync(itemDelete.NoteId);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-        {
             await LoadNotes();
-        }
 
         itemDelete = null;
     }

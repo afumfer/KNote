@@ -72,6 +72,5 @@ namespace KNote.Client.ClientDataServices
             }
         }
 
-
     }
 }

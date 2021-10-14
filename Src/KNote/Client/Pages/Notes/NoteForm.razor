@@ -1,4 +1,4 @@
-﻿@inject IGenericDataService  dataService
+﻿@inject IWebApiService webApiService
 @inject IWebApiService webApiService
 @inject IShowMessages showMessages
 @inject NavigationManager navigationManager
@@ -68,7 +68,7 @@
                 </a>
             </li>*@
 
-        @*<li class="nav-item">
+            @*<li class="nav-item">
                     <a class="nav-link disabled" href="#">Script</a>
             </li>*@
     </ul>
@@ -230,12 +230,12 @@
 </EditForm>
 
 @code {
-        [Parameter] public string Title { get; set; } = "---";
-        [Parameter] public NoteDto Note { get; set; }
-        [Parameter] public EventCallback OnValidSubmit { get; set; }
-        [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
-        [Parameter] public EventCallback OnExit { get; set; }
-        [Parameter] public List<NoteTypeDto> NoteTypes { get; set; }  //  = new List<NoteTypeDto>();
+    [Parameter] public string Title { get; set; } = "---";
+    [Parameter] public NoteDto Note { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
+    [Parameter] public EventCallback OnExit { get; set; }
+    [Parameter] public List<NoteTypeDto> NoteTypes { get; set; }  //  = new List<NoteTypeDto>();
 
     private List<ResourceDto> resources; // { get; set; }
     private List<NoteTaskDto> tasks { get; set; }
@@ -255,14 +255,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<List<UserDto>>>($"api/users");
-        if (!httpResponse.Error)
+        var result = await webApiService.Users.GetAllAsync();
+        if (result.IsValid)
         {
-            users = httpResponse.Response.Entity;
+            users = result.Entity;
         }
         else
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
 
         oldNoteType = Note.NoteTypeId;
@@ -341,28 +341,20 @@
 
         if (panel == 3 && resources == null)
         {
-            var httpResponse = await dataService.Get<Result<List<ResourceDto>>>($"api/notes/getresources/{Note.NoteId}");
-            if (httpResponse.Error)
-            {
-                await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-            }
+            var result = await webApiService.Notes.GetResourcesAsync(Note.NoteId);
+            if (!result.IsValid)
+                await showMessages.ShowErrorMessage(result.Message);
             else
-            {
-                resources = httpResponse.Response.Entity;
-            }
+                resources = result.Entity;
         }
 
         if (panel == 4 && tasks == null)
         {
-            var httpResponse = await dataService.Get<Result<List<NoteTaskDto>>>($"api/notes/GetNoteTasks/{Note.NoteId}");
-            if (httpResponse.Error)
-            {
-                await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-            }
+            var result = await webApiService.Notes.GetNoteTasksAsync(Note.NoteId);
+            if (!result.IsValid)
+                await showMessages.ShowErrorMessage(result.Message);
             else
-            {
-                tasks = httpResponse.Response.Entity;
-            }
+                tasks = result.Entity;
         }
     }
 
@@ -406,15 +398,11 @@
         resource.NoteId = Note.NoteId;
         resource.Name = Note.NoteId.ToString() + "_" + resource.Name;
 
-        var httpResponse = await dataService.Post<ResourceDto, Result<ResourceDto>>($"api/notes/saveresource", resource);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.Notes.SaveResourceAsync(resource);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-        {
-            resources.Add(httpResponse.Response.Entity);
-        }
+            resources.Add(result.Entity);
 
         kntResourceSelector.Hide();
     }
@@ -426,15 +414,11 @@
 
     private async Task OnDeleteResource(ResourceDto resource)
     {
-        var httpResponse = await dataService.Delete($"api/notes/deleteresource/{resource.ResourceId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.Notes.DeleteResourceAsync(resource.ResourceId);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-        {
             resources.Remove(resource);
-        }
     }
 
     private void InsertInDescription(ResourceDto resource)
@@ -467,14 +451,12 @@
     {
         task.NoteId = Note.NoteId;
 
-        var httpResponse = await dataService.Post<NoteTaskDto, Result<NoteTaskDto>>($"api/notes/savenotetask", task);
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.Notes.SaveNoteTaskAsync(task);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
         {
-            var taskUpdated = httpResponse.Response.Entity;
+            var taskUpdated = result.Entity;
 
             var taskOld = tasks.Where(t => t.NoteTaskId == taskUpdated.NoteTaskId).SingleOrDefault();
 
@@ -497,15 +479,11 @@
 
     private async Task OnDeleteTask(NoteTaskDto task)
     {
-        var httpResponse = await dataService.Delete($"api/notes/deletenotetask/{task.NoteTaskId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            tasks.Remove(task);
-        }
+        var result = await webApiService.Notes.DeleteNoteTaskAsync(task.NoteTaskId);
+        if (!result.IsValid)        
+            await showMessages.ShowErrorMessage(result.Message);
+        else        
+            tasks.Remove(task);        
     }
 
     private void OnEditTask(NoteTaskDto task)
@@ -559,7 +537,7 @@
         //    var listA = httpResponse.Response.Entity;
         //    ....
 
-        var result = await  webApiService.KAttributes.GetAllAsync(Note.NoteTypeId);
+        var result = await webApiService.KAttributes.GetAllAsync(Note.NoteTypeId);
         if (!result.IsValid)
         {
             await showMessages.ShowErrorMessage(result.Message);

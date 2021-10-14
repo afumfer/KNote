@@ -1,7 +1,7 @@
 ﻿@page "/notes/edit/{NoteId}/{PageReturn}"
 
 @inject AppState appState
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -21,7 +21,7 @@ else
     // TODO:
     // Pendiente de refactorizar, el comportamiento de este caso de uso
     // se puede generalizar y unificarlo con el caso de uso Nueva Nota.
-    
+
     [Parameter] public string NoteId { get; set; }
     [Parameter] public string PageReturn { get; set; }
 
@@ -35,15 +35,15 @@ else
     {
         appState.OnChange += StateHasChanged;
 
-        var httpResponse2 = await dataService.Get<Result<List<NoteTypeDto>>>("api/notetypes");
-        if (httpResponse2.Error)
+        var result = await webApiService.NoteTypes.GetAllAsync();
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse2.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
             navigationManager.NavigateTo("/");
         }
         else
         {
-            noteTypes = httpResponse2.Response.Entity;
+            noteTypes = result.Entity;
 
             await GetNote();
 
@@ -69,44 +69,43 @@ else
 
     private async Task GetNote()
     {
-        var httpResponse = await dataService.Get<Result<NoteDto>>($"api/notes/{NoteId}");
-        if (httpResponse.Error)
+        var result = await webApiService.Notes.GetAsync(Guid.Parse(NoteId));
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
             navigationManager.NavigateTo("/");
         }
         else
         {
-            note = httpResponse.Response.Entity;
+            note = result.Entity;
             showForm = true;
         }
     }
 
     private async Task SaveNote()
     {
-        var httpResponse = await dataService.Post<NoteDto, Result<NoteDto>>("api/notes", note);
-        if (httpResponse.Error)
+        var result = await webApiService.Notes.SaveAsync(note);
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
-            note = httpResponse.Response.Entity;
-
+            note = result.Entity;
             await showMessages.ShowOkMessage("Note successfully updated.");
         }
     }
 
     private async Task GetNewNote()
     {
-        var httpResponseNote = await dataService.Get<Result<NoteDto>>("api/notes/new");
-        if (httpResponseNote.Error)
+        var result = await webApiService.Notes.NewAsync();
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponseNote.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
-            note = httpResponseNote.Response.Entity;
+            note = result.Entity;
             if (appState.SelectedFolder != null)
             {
                 note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
@@ -124,7 +123,6 @@ else
     {
         await SaveNote();
     }
-
 
     private async Task OnSaveAndNew()
     {

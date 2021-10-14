@@ -253,7 +253,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{id}")]    // GET api/notes/getresources
+        [HttpGet("{id}/[action]")]    // GET api/notes/getresources
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> GetResources(Guid id)
         {
@@ -346,7 +346,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{id}")]    // GET api/notes/getnotetasks
+        [HttpGet("{id}/[action]")]    // GET api/notes/getnotetasks
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> GetNoteTasks(Guid id)
         {
