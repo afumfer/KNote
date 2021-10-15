@@ -1,8 +1,7 @@
 ﻿@page "/notes/search"
 @page "/search"
 
-@inject AppState appState
-@inject IGenericDataService dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 @inject HttpClient Http
@@ -24,8 +23,8 @@
         </div>
     </div>
 </div>
-<hr class="mt-0" />
 
+<hr class="mt-0" />
 
 <div class="form-group row">
     <div class="input-group col-sm-11 mb-2" id="atrText">
@@ -115,8 +114,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //appState.OnChange += AppStateHasChanged;
-
         var url = navigationManager.Uri;
         var queries = navigationManager.GetQueryStrings(url);
 
@@ -132,16 +129,6 @@ else
             await GetFilteredNotes(queryStrings);
         }
     }
-
-    //public void Dispose()
-    //{
-    //    appState.OnChange -= AppStateHasChanged;
-    //}
-
-    //private void AppStateHasChanged()
-    //{
-    //    Console.WriteLine("AppStateHasChanged");
-    //}
 
     #region Utils
 
@@ -231,16 +218,16 @@ else
         if (string.IsNullOrEmpty(queryString))
             queryString = $"pageNumber={paginationContext.CurrentPage}&pageSize={paginationContext.PageSize}";
 
-        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/getsearch?" + queryString);
+        var result = await webApiService.Notes.GetSearch(queryString);
 
-        if (httpResponse.Error)
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
-            notes = httpResponse.Response.Entity;
-            paginationContext.TotalCount = httpResponse.Response.TotalCount;
+            notes = result.Entity;
+            paginationContext.TotalCount = result.TotalCount;
         }
     }
 
@@ -279,15 +266,11 @@ else
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/notes/{itemDelete.NoteId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
+        var result = await webApiService.Notes.DeleteAsync(itemDelete.NoteId);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
         else
-        {
             await LoadListNotes();
-        }
 
         itemDelete = null;
     }

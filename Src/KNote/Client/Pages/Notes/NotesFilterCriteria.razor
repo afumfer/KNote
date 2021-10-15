@@ -1,5 +1,5 @@
-﻿@inject IShowMessages showMessages
-@inject IGenericDataService  dataService
+﻿@inject IWebApiService webApiService
+@inject IShowMessages showMessages
 @inject NavigationManager navigationManger
 
 
@@ -11,8 +11,8 @@
     <div class="container-fluid">
         <div class="row">
             @*<div class="col-6">
-                /// TODO: selector criteria saved
-            </div>*@
+                    /// TODO: selector criteria saved
+                </div>*@
             <div class="col-12 mb-2">
                 <button class="btn btn-success float-right mx-1 mt-1" @onclick="(() => ApplyFilter(formContext))">Apply</button>
                 <button class="btn btn-info float-right mx-1 mt-1" @onclick="(() => ClearFilter(formContext))">Clear</button>
@@ -113,15 +113,15 @@
 
     protected async override Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<List<NoteTypeDto>>>("api/notetypes");
-        if (httpResponse.Error)
+        var result = await webApiService.NoteTypes.GetAllAsync();
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
             navigationManger.NavigateTo("/");
         }
         else
         {
-            noteTypes = httpResponse.Response.Entity;
+            noteTypes = result.Entity;
         }
 
         await base.OnInitializedAsync();
@@ -178,7 +178,7 @@
 
     #endregion
 
-    #region Attribute filter selector 
+    #region Attribute filter selector
 
     private void OnAtrDelete(AtrFilterDto atr)
     {

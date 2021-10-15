@@ -1,6 +1,6 @@
 ﻿@page "/notes/{NoteId}/{PageReturn}"
 
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
@@ -45,22 +45,22 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var httpResponse = await dataService.Get<Result<NoteDto>>($"api/notes/{NoteId}");
-        if (httpResponse.Error)
+        var result = await webApiService.Notes.GetAsync(Guid.Parse(NoteId));
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
             navigationManger.NavigateTo("/");
         }
         else
         {
-            note = httpResponse.Response.Entity;
+            note = result.Entity;
         }
 
         base.OnInitialized();
     }
 
     private void OnExit()
-    {        
+    {
         navigationManger.NavigateTo(PageReturn);
     }
 

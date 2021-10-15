@@ -1,8 +1,6 @@
-﻿
-@inject IGenericDataService  dataService
-@inject IWebApiService webApiService
-@inject IShowMessages showMessages
-@inject NavigationManager navigationManager
+﻿@inject IWebApiService webApiService
+@*@inject IShowMessages showMessages
+@inject NavigationManager navigationManager*@
 
 @foreach (var KAttribute in Attributes)
 {
@@ -64,7 +62,6 @@
 
 @code {
     [Parameter] public List<NoteKAttributeDto> Attributes { get; set; }
-
 
     protected override async Task OnInitializedAsync()
     {

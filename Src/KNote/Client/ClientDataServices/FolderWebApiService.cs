@@ -33,7 +33,6 @@ namespace KNote.Client.ClientDataServices
             return await _httpClient.GetFromJsonAsync<Result<FolderDto>>($"api/folders/{folderId}");
         }
 
-
         public async Task<Result<FolderDto>> SaveAsync(FolderDto folder)
         {
             HttpResponseMessage httpRes;
@@ -55,6 +54,11 @@ namespace KNote.Client.ClientDataServices
             var res = await httpRes.Content.ReadFromJsonAsync<Result<FolderDto>>();
 
             return res;
+        }
+
+        public async Task<Result<List<NoteInfoDto>>> GetNotes(Guid folderId)
+        {
+            return await _httpClient.GetFromJsonAsync<Result<List<NoteInfoDto>>>($"api/folders/{folderId}/getnotes");
         }
     }
 }

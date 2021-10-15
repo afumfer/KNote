@@ -61,11 +61,6 @@ namespace KNote.Client.ClientDataServices
             return await _httpClient.GetFromJsonAsync<Result<List<ResourceDto>>>($"api/notes/{noteId}/getresources");
         }
 
-        public Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto resource)
         {                        
             HttpResponseMessage httpRes;
@@ -92,11 +87,6 @@ namespace KNote.Client.ClientDataServices
             return await _httpClient.GetFromJsonAsync<Result<List<NoteTaskDto>>>($"api/notes/{noteId}/GetNoteTasks");
         }
 
-        public Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto noteTask)
         {            
             HttpResponseMessage httpRes;
@@ -117,6 +107,20 @@ namespace KNote.Client.ClientDataServices
             var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTaskDto>>();
             return res;
         }
+
+        public async Task<Result<List<NoteInfoDto>>> GetSearch(string queryString)
+        {                        
+            return await _httpClient.GetFromJsonAsync<Result<List<NoteInfoDto>>>($"api/notes/getsearch?{queryString}");
+        }
+
+        public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
+        {                        
+            HttpResponseMessage httpRes;         
+            httpRes = await _httpClient.PostAsJsonAsync<NotesFilterDto>($"api/notes/getfilter", notesFilter);
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<List<NoteInfoDto>>>();
+            return res;
+        }
+
 
     }
 }

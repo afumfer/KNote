@@ -1,7 +1,7 @@
 ﻿@page "/notes/filter"
 @page "/filter"
 
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -137,16 +137,16 @@
         notes = null;
 
         filter.PageIdentifier = paginationContext.PageIdentifier;
-        var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter );
-        
-        if (httpResponse.Error)
+        var result = await webApiService.Notes.GetFilter(filter);
+
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
-            paginationContext.TotalCount = httpResponse.Response.TotalCount;
-            notes = httpResponse.Response.Entity;
+            paginationContext.TotalCount = result.TotalCount;
+            notes = result.Entity;
         }
     }
 
@@ -155,16 +155,12 @@
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/notes/{itemDelete.NoteId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
+        var result = await webApiService.Notes.DeleteAsync(itemDelete.NoteId);
+        if (!result.IsValid)        
+            await showMessages.ShowErrorMessage(result.Message);        
+        else        
             await LoadNotesWithPagination();
-        }
-
+        
         itemDelete = null;
     }
 

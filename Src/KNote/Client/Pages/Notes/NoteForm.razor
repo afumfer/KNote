@@ -526,17 +526,6 @@
         if (Note.NoteTypeId == oldNoteType)
             return;
 
-
-        //var httpResponse = await dataService.Get<Result<List<KAttributeDto>>>($"api/kattributes/getfornotetype/{Note.NoteTypeId}");
-        //if (httpResponse.Error)
-        //{
-        //    await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        //}
-        //else
-        //{
-        //    var listA = httpResponse.Response.Entity;
-        //    ....
-
         var result = await webApiService.KAttributes.GetAllAsync(Note.NoteTypeId);
         if (!result.IsValid)
         {

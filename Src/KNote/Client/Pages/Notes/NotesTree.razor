@@ -2,7 +2,7 @@
 @page "/tree"
 
 @inject AppState appState
-@inject IGenericDataService  dataService
+@inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
@@ -146,8 +146,8 @@
     {
         if (appState.FoldersTree == null)
         {
-            var res = await dataService.Get<Result<List<FolderDto>>>("api/folders/gettree");
-            foldersTree = res.Response.Entity;
+            var result = await webApiService.Folders.GetTreeAsync();
+            foldersTree = result.Entity;
             appState.FoldersTree = foldersTree;
 
             if (foldersTree?.Count > 0)
@@ -200,14 +200,14 @@
     private async Task LoadNotes()
     {
         notes = null;
-        var httpResponse = await dataService.Get<Result<List<NoteInfoDto>>>("api/notes/GetByFolder/" + folder.FolderId.ToString());
-        if (httpResponse.Error)
+        var result = await webApiService.Folders.GetNotes(folder.FolderId);
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
-            notes = httpResponse.Response.Entity;
+            notes = result.Entity;
         }
     }
 
@@ -217,16 +217,16 @@
         filter.FolderId = folder.FolderId;
         filter.PageIdentifier = paginationContext.PageIdentifier;
 
-        var httpResponse = await dataService.Post<NotesFilterDto, Result<List<NoteInfoDto>>>("api/notes/getfilter", filter);
+        var result = await webApiService.Notes.GetFilter(filter);
 
-        if (httpResponse.Error)
+        if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
-            notes = httpResponse.Response.Entity;
-            paginationContext.TotalCount = httpResponse.Response.TotalCount;
+            notes = result.Entity;
+            paginationContext.TotalCount = result.TotalCount;
         }
     }
 
@@ -234,15 +234,11 @@
     {
         modalDialog.Hide();
 
-        var httpResponse = await dataService.Delete($"api/notes/{itemDelete.NoteId}");
-        if (httpResponse.Error)
-        {
-            await showMessages.ShowErrorMessage(await httpResponse.GetBody());
-        }
-        else
-        {
-            await LoadNotes();
-        }
+        var result = await webApiService.Notes.DeleteAsync(itemDelete.NoteId);
+        if (!result.IsValid)        
+            await showMessages.ShowErrorMessage(result.Message);
+        else        
+            await LoadNotes();        
 
         itemDelete = null;
     }
