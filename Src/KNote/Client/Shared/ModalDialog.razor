@@ -9,20 +9,40 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">@Title</h5>
-                    <button @onclick="onCancel" type="button" class="close" data-dismiss="modal"
-                            aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    @if (Mode == 0)
+                    {
+                        <button @onclick="onCancel" type="button" class="close" data-dismiss="modal"
+                                aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    }
+                    @if (Mode == 1)
+                    {
+                        <button @onclick="onClose" type="button" class="close" data-dismiss="modal"
+                                aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    }
                 </div>
                 <div class="modal-body">
                     @ChildContent
                 </div>
                 <div class="modal-footer">
-                    <button @onclick="onCancel" type="button" class="btn btn-secondary"
-                            data-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button @onclick="onConfirm" type="button" class="btn btn-primary">Ok</button>
+                    @if (Mode == 0)
+                    {
+                        <button @onclick="onCancel" type="button" class="btn btn-secondary"
+                                data-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button @onclick="onConfirm" type="button" class="btn btn-primary">Ok</button>
+                    }
+                    @if (Mode == 1)
+                    {
+                        <button @onclick="onClose" type="button" class="btn btn-secondary"
+                                data-dismiss="modal">
+                            Close
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -37,6 +57,8 @@
     [Parameter] public RenderFragment ChildContent { get; set; }
     [Parameter] public EventCallback onConfirm { get; set; }
     [Parameter] public EventCallback onCancel { get; set; }
+    [Parameter] public EventCallback onClose { get; set; }
+    [Parameter] public int Mode { get; set; } = 0;
 
     public void Show() => ShowDialog = true;
     public void Hide() => ShowDialog = false;

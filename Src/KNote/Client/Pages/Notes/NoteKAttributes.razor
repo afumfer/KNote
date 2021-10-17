@@ -5,7 +5,7 @@
 @foreach (var KAttribute in Attributes)
 {
     <div class="form-group row">
-        <label for="atrTags" class="col-sm-4 col-form-label">
+        <label for="atrTags" class="col-sm-3 col-form-label border-top">
             @KAttribute.Name
             @if (KAttribute.RequiredValue)
             {
@@ -14,7 +14,7 @@
             :
         </label>
 
-        <div class="input-group col-sm-8" id="atrTags">
+        <div class="input-group col-sm-9 bg-light border pt-2 pb-2" id="atrTags">
             @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.String)
             {
                 <InputText class="form-control" @bind-Value="@KAttribute.ValueString" />
@@ -42,6 +42,7 @@
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
             {
+                @*@KAttribute.ValueTags*@
                 <MultiSelectList Items="KAttribute.TagsValues" OnItemChange="(() => onItemChange(KAttribute))" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
