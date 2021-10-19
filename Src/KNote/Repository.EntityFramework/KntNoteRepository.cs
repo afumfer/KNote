@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Repository.Entities;
+using System.Transactions;
 
 namespace KNote.Repository.EntityFramework
 {
@@ -245,59 +246,6 @@ namespace KNote.Repository.EntityFramework
             return await GetAsync(null, noteNumber);
         }
 
-        private async Task<Result<NoteDto>> GetAsync(Guid? noteId, int? noteNumber)
-        {
-            var result = new Result<NoteDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
-
-                Note entity;
-                if(noteId != null)
-                {
-                    entity = await notes.DbSet.Where(n => n.NoteId == noteId)
-                        .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
-                        .Include(n => n.Folder)
-                        .Include(n => n.NoteType)
-                        .SingleOrDefaultAsync();
-                }
-                else
-                {
-                    entity = await notes.DbSet.Where(n => n.NoteNumber == noteNumber)
-                        .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
-                        .Include(n => n.Folder)
-                        .Include(n => n.NoteType)
-                        .SingleOrDefaultAsync();
-                }
-
-                // Map to dto
-                if(entity != null)
-                {
-                    result.Entity = entity?.GetSimpleDto<NoteDto>();
-                    result.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
-                    result.Entity.NoteTypeDto = entity?.NoteType?.GetSimpleDto<NoteTypeDto>();
-                    result.Entity.KAttributesDto = entity?.KAttributes
-                        .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
-                        .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == result.Entity.NoteTypeId)
-                        .ToList();
-
-                    // Complete Attributes list
-                    result.Entity.KAttributesDto = await CompleteNoteAttributes(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
-                }
-                else
-                {
-                    result.AddErrorMessage("Entity not found.");
-                }
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
 
         public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
         {
@@ -335,30 +283,35 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
-                var ctx = GetOpenConnection();
-                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
-
-                var newEntity = new Note();
-                UpdateStandardValuesToNewEntity(notes, entity);
-                newEntity.SetSimpleDto(entity);
-                
-                resRep = await notes.AddAsync(newEntity);
-                if (!resRep.IsValid)
-                    ExceptionHasHappened = true;
-                
-                foreach (NoteKAttributeDto atr in entity.KAttributesDto)
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    atr.NoteId = entity.NoteId;
-                    var res = (await SaveAttrtibuteAsync(atr)).Entity;
-                    // TODO: !!! Importante, pendiente de capturar y volcar errores de res en resService
-                    atr.KAttributeId = res.KAttributeId;
-                    atr.NoteKAttributeId = res.NoteKAttributeId;
+                    var ctx = GetOpenConnection();
+                    var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+
+                    var newEntity = new Note();
+                    UpdateStandardValuesToNewEntity(notes, entity);
+                    newEntity.SetSimpleDto(entity);
+                
+                    resRep = await notes.AddAsync(newEntity);
+                    if (!resRep.IsValid)
+                        ExceptionHasHappened = true;
+                
+                    foreach (NoteKAttributeDto atr in entity.KAttributesDto)
+                    {
+                        atr.NoteId = entity.NoteId;
+                        var res = (await SaveAttrtibuteAsync(ctx, atr)).Entity;
+                        // TODO: !!! Importante, pendiente de capturar y volcar errores de res en resService
+                        atr.KAttributeId = res.KAttributeId;
+                        atr.NoteKAttributeId = res.NoteKAttributeId;
+                    }
+
+                    result.Entity = entity;
+                    result.ErrorList = resRep.ErrorList;
+
+                    scope.Complete();
+
+                    await CloseIsTempConnection(ctx);
                 }
-
-                result.Entity = entity;
-                result.ErrorList = resRep.ErrorList;
-
-                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -375,44 +328,49 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
-                var ctx = GetOpenConnection();
-                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);                
-
-                var entityU = await notes.DbSet.Where(n => n.NoteId == entity.NoteId)
-                    .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
-                    .Include(n => n.Folder)
-                    .Include(n => n.NoteType)
-                    .SingleOrDefaultAsync();
-                var entityForUpdate = entityU;
-
-                if (entityForUpdate != null)
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    entity.ModificationDateTime = DateTime.Now;
-                    entityForUpdate.SetSimpleDto(entity);                    
-                    // Delete deprecated atttibutes
-                    entityForUpdate.KAttributes.RemoveAll(_ => _.KAttribute.NoteTypeId != entityForUpdate.NoteTypeId && _.KAttribute.NoteTypeId != null);
+                    var ctx = GetOpenConnection();
+                    var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);                
 
-                    resRep = await notes.UpdateAsync(entityForUpdate);
-                }
-                else
-                {
-                    resRep.Entity = null;
-                    resRep.AddErrorMessage("Can't find entity for update.");
-                }
+                    var entityU = await notes.DbSet.Where(n => n.NoteId == entity.NoteId)
+                        .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                        .Include(n => n.Folder)
+                        .Include(n => n.NoteType)
+                        .SingleOrDefaultAsync();
+                    var entityForUpdate = entityU;
+
+                    if (entityForUpdate != null)
+                    {
+                        entity.ModificationDateTime = DateTime.Now;
+                        entityForUpdate.SetSimpleDto(entity);                    
+                        // Delete deprecated atttibutes
+                        entityForUpdate.KAttributes.RemoveAll(_ => _.KAttribute.NoteTypeId != entityForUpdate.NoteTypeId && _.KAttribute.NoteTypeId != null);
+
+                        resRep = await notes.UpdateAsync(entityForUpdate);
+                    }
+                    else
+                    {
+                        resRep.Entity = null;
+                        resRep.AddErrorMessage("Can't find entity for update.");
+                    }
                                 
-                // TODO: Limiar lo siguiente está sucio ...
+                    // TODO: Limiar lo siguiente está sucio ...
 
-                result.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
-                result.Entity.FolderDto = entity.FolderDto;
+                    result.Entity = resRep.Entity?.GetSimpleDto<NoteDto>();
+                    result.Entity.FolderDto = entity.FolderDto;
 
-                foreach (NoteKAttributeDto atr in entity.KAttributesDto)
-                {
-                    var res = await SaveAttrtibuteAsync(atr);
-                    // TODO: !!! Importante !!! pendiente de capturar y volcar errores de res en resService
-                    result.Entity.KAttributesDto.Add(res.Entity);
+                    foreach (NoteKAttributeDto atr in entity.KAttributesDto)
+                    {
+                        var res = await SaveAttrtibuteAsync(ctx, atr);
+                        // TODO: !!! Importante !!! pendiente de capturar y volcar errores de res en resService
+                        result.Entity.KAttributesDto.Add(res.Entity);
+                    }
+
+                    scope.Complete();
+
+                    await CloseIsTempConnection(ctx);
                 }
-
-                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
@@ -442,7 +400,6 @@ namespace KNote.Repository.EntityFramework
                 AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
             }
             return ResultDomainAction(response);
-
         }
 
         public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
@@ -1139,10 +1096,110 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
+        public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+        {
+            var ctx = GetOpenConnection();
+            var kattributes = new KntKAttributeRepository(ctx, _repositoryRef);
+
+            var attributes = (await kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
+            foreach (KAttributeInfoDto a in attributes)
+            {
+                var atrTmp = attributesNotes
+                    .Where(na => na.KAttributeId == a.KAttributeId)
+                    .Select(at => at).SingleOrDefault();
+                if (atrTmp == null)
+                {
+                    attributesNotes.Add(new NoteKAttributeDto
+                    {
+                        NoteKAttributeId = Guid.NewGuid(),
+                        KAttributeId = a.KAttributeId,
+                        NoteId = noteId,
+                        Value = "",
+                        Name = a.Name,
+                        Description = a.Description,
+                        KAttributeDataType = a.KAttributeDataType,
+                        KAttributeNoteTypeId = a.NoteTypeId,
+                        RequiredValue = a.RequiredValue,
+                        Order = a.Order,
+                        Script = a.Script,
+                        Disabled = a.Disabled
+                    });
+                }
+                else
+                {
+                    atrTmp.Name = a.Name;
+                    atrTmp.Description = a.Description;
+                    atrTmp.KAttributeDataType = a.KAttributeDataType;
+                    atrTmp.KAttributeNoteTypeId = a.NoteTypeId;
+                    atrTmp.RequiredValue = a.RequiredValue;
+                    atrTmp.Order = a.Order;
+                    atrTmp.Script = a.Script;
+                    atrTmp.Disabled = a.Disabled;
+                }
+            }
+
+            await CloseIsTempConnection(ctx);
+
+            return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
+        }
 
         #endregion 
 
         #region Utils methods 
+
+        private async Task<Result<NoteDto>> GetAsync(Guid? noteId, int? noteNumber)
+        {
+            var result = new Result<NoteDto>();
+            try
+            {
+                var ctx = GetOpenConnection();
+                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+
+                Note entity;
+                if (noteId != null)
+                {
+                    entity = await notes.DbSet.Where(n => n.NoteId == noteId)
+                        .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                        .Include(n => n.Folder)
+                        .Include(n => n.NoteType)
+                        .SingleOrDefaultAsync();
+                }
+                else
+                {
+                    entity = await notes.DbSet.Where(n => n.NoteNumber == noteNumber)
+                        .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
+                        .Include(n => n.Folder)
+                        .Include(n => n.NoteType)
+                        .SingleOrDefaultAsync();
+                }
+
+                // Map to dto
+                if (entity != null)
+                {
+                    result.Entity = entity?.GetSimpleDto<NoteDto>();
+                    result.Entity.FolderDto = entity?.Folder.GetSimpleDto<FolderDto>();
+                    result.Entity.NoteTypeDto = entity?.NoteType?.GetSimpleDto<NoteTypeDto>();
+                    result.Entity.KAttributesDto = entity?.KAttributes
+                        .Select(_ => _.GetSimpleDto<NoteKAttributeDto>())
+                        .Where(_ => _.KAttributeNoteTypeId == null || _.KAttributeNoteTypeId == result.Entity.NoteTypeId)
+                        .ToList();
+
+                    // Complete Attributes list
+                    result.Entity.KAttributesDto = await CompleteNoteAttributes(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
+                }
+                else
+                {
+                    result.AddErrorMessage("Entity not found.");
+                }
+
+                await CloseIsTempConnection(ctx);
+            }
+            catch (Exception ex)
+            {
+                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            }
+            return ResultDomainAction(result);
+        }
 
         // TODO refactor (duplicated code in dapper repository )
         private void ApplyAlarmControl(KMessage message)
@@ -1185,52 +1242,6 @@ namespace KNote.Repository.EntityFramework
             return lastNote != null ? lastNote.NoteNumber + 1 : 1;
         }
 
-        public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
-        {            
-            var ctx = GetOpenConnection();            
-            var kattributes = new KntKAttributeRepository(ctx, _repositoryRef);
-
-            var attributes = (await kattributes.GetAllIncludeNullTypeAsync(noteTypeId)).Entity;
-            foreach (KAttributeInfoDto a in attributes)
-            {
-                var atrTmp = attributesNotes
-                    .Where(na => na.KAttributeId == a.KAttributeId)
-                    .Select(at => at).SingleOrDefault();
-                if (atrTmp == null)
-                {
-                    attributesNotes.Add(new NoteKAttributeDto
-                    {
-                        NoteKAttributeId = Guid.NewGuid(),
-                        KAttributeId = a.KAttributeId,
-                        NoteId = noteId,
-                        Value = "",
-                        Name = a.Name,
-                        Description = a.Description,
-                        KAttributeDataType = a.KAttributeDataType,
-                        KAttributeNoteTypeId = a.NoteTypeId,
-                        RequiredValue = a.RequiredValue,
-                        Order = a.Order,
-                        Script = a.Script,
-                        Disabled = a.Disabled
-                    });
-                }
-                else
-                {
-                    atrTmp.Name = a.Name;
-                    atrTmp.Description = a.Description;
-                    atrTmp.KAttributeDataType = a.KAttributeDataType;
-                    atrTmp.KAttributeNoteTypeId = a.NoteTypeId;
-                    atrTmp.RequiredValue = a.RequiredValue;
-                    atrTmp.Order = a.Order;
-                    atrTmp.Script = a.Script;
-                    atrTmp.Disabled = a.Disabled;
-                }
-            }
-
-            await CloseIsTempConnection(ctx);
-
-            return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();            
-        }
 
         private void UpdateStandardValuesToNewEntity(GenericRepositoryEF<KntDbContext, Note> notes, NoteDto newEntity)
         {            
@@ -1243,28 +1254,22 @@ namespace KNote.Repository.EntityFramework
                 newEntity.ModificationDateTime = DateTime.Now;
         }
 
-        private async Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(NoteKAttributeDto entity)
+        private async Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(KntDbContext ctx, NoteKAttributeDto entity)
         {
             Result<NoteKAttribute> resRep = null;
             var resService = new Result<NoteKAttributeDto>();
 
             try
-            {
-                var ctx = GetOpenConnection();                  
+            {                
                 var noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(ctx);
                 
                 var findNoteAttribute = (noteKAttributes.Get(_ => _.NoteKAttributeId == entity.NoteKAttributeId)).Entity;
 
-                if(findNoteAttribute == null)
-                //if (entity.NoteKAttributeId == Guid.Empty)
+                if(findNoteAttribute == null)                
                 {
                     entity.NoteKAttributeId = Guid.NewGuid();
                     var newEntity = new NoteKAttribute();
                     newEntity.SetSimpleDto(entity);
-
-                    // TODO: update standard control values to newEntity
-                    // ...
-
                     resRep = await noteKAttributes.AddAsync(newEntity);
                 }
                 else
@@ -1273,8 +1278,6 @@ namespace KNote.Repository.EntityFramework
 
                     if (entityForUpdate != null)
                     {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
                         entityForUpdate.SetSimpleDto(entity);
                         resRep = await noteKAttributes.UpdateAsync(entityForUpdate);
                     }
@@ -1282,15 +1285,9 @@ namespace KNote.Repository.EntityFramework
                     {
                         var newEntity = new NoteKAttribute();
                         newEntity.SetSimpleDto(entity);
-
-                        // TODO: update standard control values to newEntity
-                        // ...
-
                         resRep = await noteKAttributes.AddAsync(newEntity);
                     }
-                }
-
-                await CloseIsTempConnection(ctx);
+                }                
             }
             catch (Exception ex)
             {

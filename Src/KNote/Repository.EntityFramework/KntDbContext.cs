@@ -39,9 +39,9 @@ namespace KNote.Repository.EntityFramework
            : base(options)
         {            
             if(ensureCreated)
-                Database.EnsureCreated();
+                Database.EnsureCreated();            
         }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.KNoteDbConfigure();

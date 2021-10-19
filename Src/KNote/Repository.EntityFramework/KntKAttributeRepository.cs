@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace KNote.Repository.EntityFramework
 {
@@ -144,24 +145,29 @@ namespace KNote.Repository.EntityFramework
             var response = new Result<KAttributeDto>();
             try
             {
-                var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
-
-                var newEntity = new KAttribute();
-                newEntity.SetSimpleDto(entity);
-
-                var resGenRep = await kattributes.AddAsync(newEntity);
-
-                response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
-                response.ErrorList = resGenRep.ErrorList;
-
-                foreach (var value in entity.KAttributeValues)
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
-                    response.Entity.KAttributeValues.Add(res.Entity);
-                }
+                    var ctx = GetOpenConnection();
+                    var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
-                await CloseIsTempConnection(ctx);
+                    var newEntity = new KAttribute();
+                    newEntity.SetSimpleDto(entity);
+
+                    var resGenRep = await kattributes.AddAsync(newEntity);
+
+                    response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
+                    response.ErrorList = resGenRep.ErrorList;
+
+                    foreach (var value in entity.KAttributeValues)
+                    {
+                        var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
+                        response.Entity.KAttributeValues.Add(res.Entity);
+                    }
+
+                    scope.Complete();
+
+                    await CloseIsTempConnection(ctx);
+                }
             }
             catch (Exception ex)
             {
@@ -177,36 +183,41 @@ namespace KNote.Repository.EntityFramework
 
             try
             {
-                var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
-
-                var resGenRepGet = await kattributes.GetAsync(entity.KAttributeId);
-                KAttribute entityForUpdate;
-
-                if (resGenRepGet.IsValid)
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    entityForUpdate = resGenRepGet.Entity;
-                    entityForUpdate.SetSimpleDto(entity);
-                    resGenRep = await kattributes.UpdateAsync(entityForUpdate);
+                    var ctx = GetOpenConnection();
+                    var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
+
+                    var resGenRepGet = await kattributes.GetAsync(entity.KAttributeId);
+                    KAttribute entityForUpdate;
+
+                    if (resGenRepGet.IsValid)
+                    {
+                        entityForUpdate = resGenRepGet.Entity;
+                        entityForUpdate.SetSimpleDto(entity);
+                        resGenRep = await kattributes.UpdateAsync(entityForUpdate);
+                    }
+                    else
+                    {
+                        resGenRep.Entity = null;
+                        resGenRep.AddErrorMessage("Can't find entity for update.");
+                    }
+
+                    response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
+
+                    foreach (var value in entity.KAttributeValues)
+                    {
+                        var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
+                        response.Entity.KAttributeValues.Add(res.Entity);
+                    }
+
+                    // TODO: hay que acumular los posibles errores del guardado de los hijos ??
+                    response.ErrorList = resGenRep.ErrorList;
+
+                    scope.Complete();
+
+                    await CloseIsTempConnection(ctx);
                 }
-                else
-                {
-                    resGenRep.Entity = null;
-                    resGenRep.AddErrorMessage("Can't find entity for update.");
-                }
-
-                response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
-
-                foreach (var value in entity.KAttributeValues)
-                {
-                    var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
-                    response.Entity.KAttributeValues.Add(res.Entity);
-                }
-
-                // TODO: hay que acumular los posibles errores del guardado de los hijos ??
-                response.ErrorList = resGenRep.ErrorList;
-
-                await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {

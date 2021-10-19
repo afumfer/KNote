@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 using KNote.Model;
 using KNote.Repository.Entities;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace KNote.Repository.EntityFramework
 {
@@ -42,7 +43,11 @@ namespace KNote.Repository.EntityFramework
             if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
                 optionsBuilder.UseSqlServer(_repositoryRef.ConnectionString);
             else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
+            {
                 optionsBuilder.UseSqlite(_repositoryRef.ConnectionString);
+                // Entity framework core for Sqlite no support AmbientTransaction
+                optionsBuilder.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+            }
             else
                 throw new Exception("Data provider not suported (KntEx)");
 

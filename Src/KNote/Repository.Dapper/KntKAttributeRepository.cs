@@ -9,6 +9,7 @@ using Dapper;
 
 using KNote.Model;
 using KNote.Model.Dto;
+using System.Transactions;
 
 namespace KNote.Repository.Dapper
 {
@@ -115,23 +116,28 @@ namespace KNote.Repository.Dapper
             var result = new Result<KAttributeDto>();
             try
             {
-                var db = GetOpenConnection();
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var db = GetOpenConnection();
 
-                var sql = @"INSERT INTO KAttributes  (KAttributeId, [Name], Description, KAttributeDataType, RequiredValue, [Order], Script, Disabled, NoteTypeId)
-                            VALUES (@KAttributeId, @Name, @Description, @KAttributeDataType, @RequiredValue, @Order, @Script, @Disabled, @NoteTypeId)";
+                    var sql = @"INSERT INTO KAttributes  (KAttributeId, [Name], Description, KAttributeDataType, RequiredValue, [Order], Script, Disabled, NoteTypeId)
+                                VALUES (@KAttributeId, @Name, @Description, @KAttributeDataType, @RequiredValue, @Order, @Script, @Disabled, @NoteTypeId)";
 
-                var r = await db.ExecuteAsync(sql.ToString(),
-                    new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
-                if (r == 0)
-                    result.ErrorList.Add("Entity not inserted");
+                    var r = await db.ExecuteAsync(sql.ToString(),
+                        new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
+                    if (r == 0)
+                        result.ErrorList.Add("Entity not inserted");
                 
-                var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
-                if (!resTabValues.IsValid)
-                    CopyErrorList(resTabValues.ErrorList, result.ErrorList);
+                    var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
+                    if (!resTabValues.IsValid)
+                        CopyErrorList(resTabValues.ErrorList, result.ErrorList);
                 
-                result.Entity = entity;
+                    result.Entity = entity;
 
-                await CloseIsTempConnection(db);
+                    scope.Complete();
+
+                    await CloseIsTempConnection(db);
+                }
             }
             catch (Exception ex)
             {
@@ -145,31 +151,36 @@ namespace KNote.Repository.Dapper
             var result = new Result<KAttributeDto>();
             try
             {
-                var db = GetOpenConnection();
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var db = GetOpenConnection();
 
-                var sql = @"UPDATE KAttributes SET                     
-                        [Name] = @Name, 
-                        Description = @Description, 
-                        KAttributeDataType = @KAttributeDataType, 
-                        RequiredValue = @RequiredValue, 
-                        [Order] = @Order, 
-                        Script = @Script, 
-                        Disabled = @Disabled, 
-                        NoteTypeId = @NoteTypeId
-                    WHERE KAttributeId = @KAttributeId";
+                    var sql = @"UPDATE KAttributes SET                     
+                            [Name] = @Name, 
+                            Description = @Description, 
+                            KAttributeDataType = @KAttributeDataType, 
+                            RequiredValue = @RequiredValue, 
+                            [Order] = @Order, 
+                            Script = @Script, 
+                            Disabled = @Disabled, 
+                            NoteTypeId = @NoteTypeId
+                        WHERE KAttributeId = @KAttributeId";
 
-                var r = await db.ExecuteAsync(sql.ToString(),
-                    new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
-                if (r == 0)
-                    result.ErrorList.Add("Entity not updated");
+                    var r = await db.ExecuteAsync(sql.ToString(),
+                        new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
+                    if (r == 0)
+                        result.ErrorList.Add("Entity not updated");
 
-                var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
-                if (!resTabValues.IsValid)
-                    CopyErrorList(resTabValues.ErrorList, result.ErrorList);
+                    var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
+                    if (!resTabValues.IsValid)
+                        CopyErrorList(resTabValues.ErrorList, result.ErrorList);
 
-                result.Entity = entity;
+                    result.Entity = entity;
 
-                await CloseIsTempConnection(db);
+                    scope.Complete();
+
+                    await CloseIsTempConnection(db);
+                }
             }
             catch (Exception ex)
             {

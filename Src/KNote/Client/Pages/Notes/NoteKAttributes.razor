@@ -1,6 +1,5 @@
 ﻿@inject IWebApiService webApiService
-@*@inject IShowMessages showMessages
-@inject NavigationManager navigationManager*@
+
 
 @foreach (var KAttribute in Attributes)
 {
@@ -41,8 +40,7 @@
                 <InputCheckbox class="form-control" @bind-Value="@KAttribute.ValueBool" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-            {
-                @*@KAttribute.ValueTags*@
+            {                
                 <MultiSelectList Items="KAttribute.TagsValues" OnItemChange="(() => onItemChange(KAttribute))" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
@@ -56,8 +54,6 @@
                 </select>
             }
         </div>
-
-
     </div>
 }
 

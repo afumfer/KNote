@@ -104,7 +104,6 @@ namespace KNote.Model.Dto
                 repositoryRef.ResourcesContainer);
         }
 
-
         // TODO: Eliminar la siguiente propiedad, se deberá implementar en ContentType
         public bool HtmlFormat
         {

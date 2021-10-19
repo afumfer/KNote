@@ -8,6 +8,7 @@ using System.Data.Common;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using KNote.Model;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace KNote.Repository.EntityFramework
 {
@@ -147,7 +148,10 @@ namespace KNote.Repository.EntityFramework
                 if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
                     optionsBuilder.UseSqlServer(_repositoryRef.ConnectionString);
                 else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
+                {
                     optionsBuilder.UseSqlite(_repositoryRef.ConnectionString);
+                    optionsBuilder.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+                }
                 else
                     return false;
 

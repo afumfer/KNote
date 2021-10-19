@@ -162,32 +162,31 @@ namespace KNote.Server.Controllers
             }
         }
 
-        //[HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/folderId        
-        //public async Task<IActionResult> GetByFolder(Guid folderId)
-        //{
+        [HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/folderId        
+        public async Task<IActionResult> GetByFolder(Guid folderId)
+        {
+            try
+            {                
+                var resApi = await _service.Notes.GetByFolderAsync(folderId);
+                if (resApi.IsValid)
+                    return Ok(resApi);
+                else
+                    return BadRequest(resApi);
 
-        //    try
-        //    {
-        //        var resApi = await _service.Notes.GetByFolderAsync(folderId);
-        //        if (resApi.IsValid)
-        //            return Ok(resApi);
-        //        else
-        //            return BadRequest(resApi);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var kresApi = new Result<List<NoteInfoDto>>();
-        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
-        //        return BadRequest(kresApi);
-        //    }
-        //}
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<List<NoteInfoDto>>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
 
         [HttpPost]   // POST api/notes
         [HttpPut]    // PUT api/notes
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> Post([FromBody]NoteDto note)
-        {
+        {            
             try
             {
                 var resApi = await _service.Notes.SaveAsync(note);

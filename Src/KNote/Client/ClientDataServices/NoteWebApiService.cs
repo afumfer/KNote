@@ -24,7 +24,7 @@ namespace KNote.Client.ClientDataServices
         }
 
         public async Task<Result<NoteDto>> GetAsync(Guid noteId)
-        {                        
+        {
             return await _httpClient.GetFromJsonAsync<Result<NoteDto>>($"api/notes/{noteId}");
         }
 

@@ -290,13 +290,13 @@
                 case EnumKAttributeDataType.TextArea:
                     KAttribute.Value = KAttribute.ValueString;
                     break;
-                case EnumKAttributeDataType.Int:
+                case EnumKAttributeDataType.Int:                    
                     KAttribute.Value = KAttribute.ValueInt.ToString();
                     break;
-                case EnumKAttributeDataType.Double:
+                case EnumKAttributeDataType.Double:                    
                     KAttribute.Value = KAttribute.ValueDouble.ToString();
                     break;
-                case EnumKAttributeDataType.DateTime:
+                case EnumKAttributeDataType.DateTime:                    
                     KAttribute.Value = KAttribute.ValueDateTime.ToString();
                     break;
                 case EnumKAttributeDataType.Bool:
@@ -480,10 +480,10 @@
     private async Task OnDeleteTask(NoteTaskDto task)
     {
         var result = await webApiService.Notes.DeleteNoteTaskAsync(task.NoteTaskId);
-        if (!result.IsValid)        
+        if (!result.IsValid)
             await showMessages.ShowErrorMessage(result.Message);
-        else        
-            tasks.Remove(task);        
+        else
+            tasks.Remove(task);
     }
 
     private void OnEditTask(NoteTaskDto task)
