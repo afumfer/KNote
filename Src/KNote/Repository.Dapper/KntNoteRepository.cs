@@ -1412,22 +1412,6 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<int>> GetNextNoteNumber()
-        {
-            var result = new Result<int>();
-            try
-            {
-                var db = GetOpenConnection();
-                result.Entity = GetNextNoteNumber(db);
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
         #endregion
 
         #region Private methods
