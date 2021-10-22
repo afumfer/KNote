@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 namespace KNote.Model.Dto
 {
     public class KAttributeDto : KAttributeInfoDto
-    {
-        
+    {        
         public List<KAttributeTabulatedValueDto> KAttributeValues { get; set; } = new List<KAttributeTabulatedValueDto>();        
     }
 }

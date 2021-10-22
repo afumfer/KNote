@@ -102,7 +102,7 @@ namespace KNote.Model.Dto
             // Specific validations
             //----
 
-            // ---- Ejemplo
+            // ---- Example
             //if (ModificationDateTime < CreationDateTime)
             //{
             //    results.Add(new ValidationResult
@@ -110,9 +110,6 @@ namespace KNote.Model.Dto
             //     , new[] { "ModificationDateTime", "CreationDateTime" }));
             //}
 
-            // ---
-            // Return List<ValidationResult>()
-            // ---
             return results;
         }
 

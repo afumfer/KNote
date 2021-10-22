@@ -161,6 +161,8 @@ namespace KNote.Repository.EntityFramework
                     foreach (var value in entity.KAttributeValues)
                     {
                         var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
+                        if (!res.IsValid)
+                            response.ErrorList.Add(res.Message);
                         response.Entity.KAttributeValues.Add(res.Entity);
                     }
 
@@ -205,13 +207,18 @@ namespace KNote.Repository.EntityFramework
 
                     response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
 
+                    var guidsUpdated = new List<Guid>();
                     foreach (var value in entity.KAttributeValues)
                     {
                         var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
+                        if (!res.IsValid)
+                            response.ErrorList.Add(res.Message);
                         response.Entity.KAttributeValues.Add(res.Entity);
+                        guidsUpdated.Add(value.KAttributeTabulatedValueId);
                     }
 
-                    // TODO: hay que acumular los posibles errores del guardado de los hijos ??
+                    await DeleteNoContainsTabulateValueAsync(ctx, response.Entity.KAttributeId, guidsUpdated);
+                    
                     response.ErrorList = resGenRep.ErrorList;
 
                     scope.Complete();
@@ -275,55 +282,14 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<KAttributeTabulatedValueDto>> GetKAttributeTabulatedValueAsync(Guid attributeTabulateValueId)
-        {
-            var result = new Result<KAttributeTabulatedValueDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
-
-                var resRep = await kattributeTabulatedValues.GetAsync(tv => tv.KAttributeTabulatedValueId == attributeTabulateValueId);
-
-                if (resRep.IsValid)
-                {
-                    result.Entity = resRep.Entity.GetSimpleDto<KAttributeTabulatedValueDto>();
-                }
-                else
-                    result.ErrorList = resRep.ErrorList;
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
-        public async Task<Result> DeleteKAttributeTabulatedValueAsync(Guid id)
-        {
-            var response = new Result();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
-
-                var resGenRep = await kattributeTabulatedValues.DeleteAsync(id);
-                if (!resGenRep.IsValid)
-                    response.ErrorList = resGenRep.ErrorList;
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
-            }
-            return ResultDomainAction(response);
-
-        }
-
         #region Private methods
+
+        private async Task DeleteNoContainsTabulateValueAsync(KntDbContext ctx, Guid attributeId, List<Guid> guids)
+        {
+            var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
+            var tabValuesForDelete = (await kattributeTabulatedValues.GetAllAsync(v => (v.KAttributeId == attributeId && !guids.Contains(v.KAttributeTabulatedValueId)))).Entity;            
+            var res = kattributeTabulatedValues.DeleteRange(tabValuesForDelete);
+        }
 
         private async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(KntDbContext ctx, Guid attributeId, KAttributeTabulatedValueDto entity) 
         {
@@ -333,38 +299,28 @@ namespace KNote.Repository.EntityFramework
             try
             {                
                 var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
-
+                             
                 if (entity.KAttributeTabulatedValueId == Guid.Empty)
                 {
                     entity.KAttributeTabulatedValueId = Guid.NewGuid();
                     var newEntity = new KAttributeTabulatedValue();
-
                     newEntity.SetSimpleDto(entity);
                     newEntity.KAttributeId = attributeId;
-                    // TODO: update standard control values to newEntity
-                    // ...
-
                     resRep = await kattributeTabulatedValues.AddAsync(newEntity);
                 }
                 else
                 {
                     var entityForUpdate = kattributeTabulatedValues.Get(entity.KAttributeTabulatedValueId).Entity;
-
                     if (entityForUpdate != null)
                     {
-                        // TODO: update standard control values to entityForUpdate
-                        // ...
                         entityForUpdate.SetSimpleDto(entity);
                         resRep = await kattributeTabulatedValues.UpdateAsync(entityForUpdate);
                     }
                     else
                     {
                         var newEntity = new KAttributeTabulatedValue();
-
                         newEntity.SetSimpleDto(entity);
                         newEntity.KAttributeId = attributeId;
-                        // TODO: update standard control values to newEntity
-                        // ...
                         resRep = await kattributeTabulatedValues.AddAsync(newEntity);
                     }
                 }             

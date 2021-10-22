@@ -232,53 +232,6 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-        public async Task<Result<KAttributeTabulatedValueDto>> GetKAttributeTabulatedValueAsync(Guid attributeTabulateValueId)
-        {            
-            var result = new Result<KAttributeTabulatedValueDto>();
-            try
-            {
-                var db = GetOpenConnection();
-
-                var sql = @"SELECT KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order] FROM [KAttributeTabulatedValues] 
-                        WHERE KAttributeTabulatedValueId = @Id";
-
-                var entity = await db.QueryFirstOrDefaultAsync<KAttributeTabulatedValueDto>(sql.ToString(), new { Id = attributeTabulateValueId });
-
-                if (entity == null)
-                    result.AddErrorMessage("Entity not found.");
-
-                result.Entity = entity;
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
-        public async Task<Result>DeleteKAttributeTabulatedValueAsync(Guid id)
-        {            
-            var result = new Result();
-            try
-            {
-                var db = GetOpenConnection();
-
-                var sql = @"DELETE FROM [KAttributeTabulatedValues] WHERE KAttributeTabulatedValueId = @Id";
-                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
-                if (r == 0)
-                    result.AddErrorMessage("Entity not deleted");
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
         #region Private methods
 
         private async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(bool applyFilter, Guid? typeId, bool includeNullType)
@@ -340,6 +293,7 @@ namespace KNote.Repository.Dapper
         private async Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(DbConnection db, Guid kattributeId, List<KAttributeTabulatedValueDto> tabulatedValues)
         {            
             var result = new Result<List<KAttributeTabulatedValueDto>>();
+            var idsTabValues = "";
             string sql;
             string sqlInsert = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
                                     VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
@@ -374,10 +328,18 @@ namespace KNote.Repository.Dapper
                             new { tv.KAttributeTabulatedValueId, tv.KAttributeId, tv.Value, tv.Description, tv.Order });
 
                         if (r == 0)
-                            result.ErrorList.Add("Entity tabulated value not updated.");
+                            result.ErrorList.Add($"Entity tabulated value - {tv.KAttributeTabulatedValueId} - not updated.");
+
+                        if (!string.IsNullOrEmpty(idsTabValues))
+                            idsTabValues += ", ";
+                        idsTabValues += "'" + tv.KAttributeTabulatedValueId + "'";
                     }
                 }
-                              
+
+                sql = $"DELETE FROM [KAttributeTabulatedValues]  WHERE KAttributeId = '{kattributeId.ToString().ToUpper()}' AND KAttributeTabulatedValueId NOT IN ( {idsTabValues.ToString().ToUpper()} )";
+                r = await db.ExecuteAsync(sql.ToString(),
+                            new { });
+
                 result.Entity = tabulatedValues;                
             }
             catch (Exception ex)

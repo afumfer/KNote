@@ -85,28 +85,6 @@ namespace KNote.Service.Services
             return await _repository.KAttributes.GetKAttributeTabulatedValuesAsync(attributeId);
         }
 
-        public async Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
-        {
-            var result = new Result<KAttributeTabulatedValueDto>();
-
-            var resGetEntity = await _repository.KAttributes.GetKAttributeTabulatedValueAsync(id);
-
-            if (resGetEntity.IsValid)
-            {
-                var resDelEntity = await _repository.KAttributes.DeleteKAttributeTabulatedValueAsync(id);
-                if (resDelEntity.IsValid)
-                    result.Entity = resGetEntity.Entity;
-                else
-                    result.ErrorList = resDelEntity.ErrorList;
-            }
-            else
-            {
-                result.ErrorList = resGetEntity.ErrorList;
-            }
-
-            return result;
-        }
-
         #endregion 
     }
 }

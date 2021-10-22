@@ -62,13 +62,18 @@
     public void Show(KAttributeTabulatedValueDto valueEdit)
     {
         if (valueEdit != null)
+        {
             atrValue = valueEdit.GetSimpleDto<KAttributeTabulatedValueDto>();
+            atrValue.SetIsNew(false);
+        }
         else
         {
             atrValue = new KAttributeTabulatedValueDto();
             atrValue.KAttributeTabulatedValueId = Guid.NewGuid();
+            atrValue.SetIsNew(true);
         }
 
+        atrValue.SetIsDirty(false);
         ShowDialog = true;
     }
 

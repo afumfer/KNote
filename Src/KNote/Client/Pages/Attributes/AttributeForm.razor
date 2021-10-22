@@ -79,26 +79,29 @@
                     <tbody>
                         @foreach (var value in KAttribute.KAttributeValues)
                         {
-                            <tr>
-                                <td>@value.Value</td>
-                                <td width="100px">@value.Order</td>
-                                <td width="100px">
-                                    <span class="float-right">
-                                        <button class="btn btn-sm btn-light mx-1"
-                                                @onclick="@(() => OnAtrValueDelete(value))"
-                                                data-toggle="tooltip" title="Delete value">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </span>
-                                    <span class="float-right">
-                                        <button class="btn btn-sm btn-light mx-1"
-                                                @onclick="@(() => OnAtrValueEdit(value))"
-                                                data-toggle="tooltip" title="Edit value">
-                                            <i class="fa fa-pencil"></i>
-                                        </button>
-                                    </span>
-                                </td>
-                            </tr>
+                            if (!value.IsDeleted())
+                            {
+                                <tr>
+                                    <td>@value.Value</td>
+                                    <td width="100px">@value.Order</td>
+                                    <td width="100px">
+                                        <span class="float-right">
+                                            <button class="btn btn-sm btn-light mx-1"
+                                                    @onclick="@(() => OnAtrValueDelete(value))"
+                                                    data-toggle="tooltip" title="Delete value">
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                        </span>
+                                        <span class="float-right">
+                                            <button class="btn btn-sm btn-light mx-1"
+                                                    @onclick="@(() => OnAtrValueEdit(value))"
+                                                    data-toggle="tooltip" title="Edit value">
+                                                <i class="fa fa-pencil"></i>
+                                            </button>
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
@@ -159,19 +162,14 @@
         attributeValueEditor.Show(null);
     }
 
-    private async Task OnAtrValueDelete(KAttributeTabulatedValueDto atrValue)
+    private void OnAtrValueDelete(KAttributeTabulatedValueDto atrValue)
     {
         if (atrValue.KAttributeTabulatedValueId == Guid.Empty)
         {
             KAttribute.KAttributeValues.Remove(atrValue);
             return;
         }
-
-        var result = await webApiService.KAttributes.DeleteKAttributeTabulatedValueAsync(atrValue.KAttributeTabulatedValueId);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
-        else
-            KAttribute.KAttributeValues.Remove(atrValue);
+        atrValue.SetIsDeleted(true);
     }
 
     private void OnAtrValueEdit(KAttributeTabulatedValueDto atrEdit)
@@ -185,12 +183,18 @@
     }
 
     private void OnConfirmAtrValueEditor(KAttributeTabulatedValueDto atrValue)
-    {        
+    {
+        attributeValueEditor.Hide();
+
+        if (!atrValue.IsDirty())
+            return;
+
         var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
 
         if (atrOld == null)
         {
             atrValue.KAttributeId = KAttribute.KAttributeId;
+            atrValue.SetIsNew(true);
             KAttribute.KAttributeValues.Add(atrValue);
         }
         else
@@ -199,7 +203,5 @@
             KAttribute.KAttributeValues.RemoveAt(i);
             KAttribute.KAttributeValues.Insert(i, atrValue);
         }
-
-        attributeValueEditor.Hide();
     }
 }

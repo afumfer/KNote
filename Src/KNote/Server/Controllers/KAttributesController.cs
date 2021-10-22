@@ -128,27 +128,6 @@ namespace KNote.Server.Controllers
                 return BadRequest(resApi);
             }
         }
-
-        // TODO: !!! Pending refactoring, this method will disappear 
-        [HttpDelete("[action]/{id}")]    // DELETE api/kattributes/deleterabulatedvalue/guid        
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteTabulatedValue(Guid id)
-        {
-            try
-            {
-                var resApi = await _service.KAttributes.DeleteKAttributeTabulatedValueAsync(id);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-            }
-            catch (Exception ex)
-            {
-                var resApi = new Result<NoteTypeDto>();
-                resApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(resApi);
-            }
-        }
         
         [HttpGet("{idAttribute}/[action]")]    // GET api/kattributes/guid/getattributetabulatedvalues
         public async Task<IActionResult> GetTabulatedValues(Guid idAttribute)

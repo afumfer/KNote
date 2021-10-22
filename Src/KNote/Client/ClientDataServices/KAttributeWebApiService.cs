@@ -35,7 +35,9 @@ namespace KNote.Client.ClientDataServices
 
         public async Task<Result<KAttributeDto>> SaveAsync(KAttributeDto kattribute)
         {
-            HttpResponseMessage httpRes;
+            HttpResponseMessage httpRes;                        
+            
+            kattribute.KAttributeValues.RemoveAll(av => av.IsDeleted() == true);
 
             if (kattribute.KAttributeId == Guid.Empty)
                 httpRes = await _httpClient.PostAsJsonAsync<KAttributeDto>("api/kattributes", kattribute);
@@ -59,15 +61,6 @@ namespace KNote.Client.ClientDataServices
         public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id)
         {                        
             return await _httpClient.GetFromJsonAsync<Result<List<KAttributeTabulatedValueDto>>>($"api/kattributes/{id}/gettabulatedvalues");
-        }
-
-        public async Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id)
-        {
-            var httpRes = await _httpClient.DeleteAsync($"api/kattributes/deletetabulatedvalue/{id}");
-
-            var res = await httpRes.Content.ReadFromJsonAsync<Result<KAttributeTabulatedValueDto>>();
-
-            return res;
         }
     }
 }

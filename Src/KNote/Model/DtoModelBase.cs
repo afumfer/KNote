@@ -10,9 +10,9 @@ namespace KNote.Model
 {
     public abstract class DtoModelBase : ModelBase, INotifyPropertyChanged
     {
-        protected bool _isDirty = false;
-        
         protected const string KMSG = "Attribute {0} is required. ";
+        
+        protected bool _isDirty = false;
 
         public virtual bool IsDirty()
         {
@@ -36,6 +36,19 @@ namespace KNote.Model
             _isNew = isNew;
         }
 
+        // TODO: !!! IsDeleted implementation ....
+        protected bool _isDeleted = false;
+
+        public virtual bool IsDeleted()
+        {
+            return _isDeleted;
+        }
+
+        public virtual void SetIsDeleted(bool isDeleted)
+        {
+            _isDeleted = isDeleted;
+        }
+        // ....
 
         #region INotifyPropertyChanged members
 
