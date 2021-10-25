@@ -17,7 +17,7 @@ namespace KNote.ClientWin.Components
 {
     public abstract class ComponentEditor<TView, TEntity> : ComponentEditorBase<TView, TEntity>
         where TView : IViewConfigurable
-        where TEntity : DtoModelBase, new()
+        where TEntity : SmartModelDtoBase, new()
     {
         public ComponentEditor(Store store) : base(store)
         {

@@ -852,6 +852,32 @@ namespace KNote.ClientWin.Views
             
         }
 
+        private void button3_Click(object sender, EventArgs e)
+        {
+            var attribute = new KAttributeDto();
+
+            attribute.NoteTypeDto = new NoteTypeDto { Description = "aaa", Name = "", NoteTypeId = Guid.NewGuid(), ParenNoteTypeId = null };
+
+            attribute.KAttributeValues.Add(new KAttributeTabulatedValueDto
+            {
+                Description = "bbb",
+                KAttributeId = Guid.NewGuid()
+                ,
+                KAttributeTabulatedValueId = Guid.NewGuid(),
+                Order = 1,
+                Value = "111"
+            });
+
+            //var fieldsAtr = attribute.GetAllClassFields();
+
+            //foreach (var f in fieldsAtr)
+            //    listMessages.Items.Add(f.Name);
+
+            var xx = attribute.GetDtoChilds();
+            foreach(var v in xx)
+                listMessages.Items.Add(v.IsValid());
+
+        }
     }
 
 }

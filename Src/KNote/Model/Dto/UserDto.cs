@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KNote.Model.Dto
 {
-    public class UserDto : DtoModelBase
+    public class UserDto : SmartModelDtoBase
     {        
         #region Property definitions
 

@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LabForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
+            this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -50,7 +51,7 @@
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -71,6 +72,7 @@
             // 
             // tabAppLab
             // 
+            this.tabAppLab.Controls.Add(this.button3);
             this.tabAppLab.Controls.Add(this.button2);
             this.tabAppLab.Controls.Add(this.button1);
             this.tabAppLab.Controls.Add(this.label2);
@@ -84,7 +86,17 @@
             this.tabAppLab.Size = new System.Drawing.Size(662, 549);
             this.tabAppLab.TabIndex = 0;
             this.tabAppLab.Text = "Lab app components";
-            this.tabAppLab.UseVisualStyleBackColor = true;            
+            this.tabAppLab.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(17, 144);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(294, 25);
+            this.button2.TabIndex = 10;
+            this.button2.Text = "button2";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button1
             // 
@@ -279,15 +291,15 @@
             this.htmlDescription.Size = new System.Drawing.Size(634, 287);
             this.htmlDescription.TabIndex = 10;
             // 
-            // button2
+            // button3
             // 
-            this.button2.Location = new System.Drawing.Point(17, 144);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(294, 25);
-            this.button2.TabIndex = 10;
-            this.button2.Text = "button2";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button3.Location = new System.Drawing.Point(326, 114);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(135, 24);
+            this.button3.TabIndex = 11;
+            this.button3.Text = "Test Reflection";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // LabForm
             // 
@@ -334,5 +346,6 @@
         private System.Windows.Forms.Button buttonSelectScriptDirectory;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
     }
 }

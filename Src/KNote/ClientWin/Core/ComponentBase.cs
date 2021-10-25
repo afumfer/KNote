@@ -36,7 +36,7 @@ namespace KNote.ClientWin.Core
             get
             {
                 if (_fields == null)
-                    _fields = GetAllTheClassField();
+                    _fields = GetAllClassFields();
                 return _fields;
             }
         }
@@ -205,7 +205,7 @@ namespace KNote.ClientWin.Core
             }            
         }
 
-        protected List<FieldInfo> GetAllTheClassField()
+        protected List<FieldInfo> GetAllClassFields()
         {
             return ReflectionExtensions.GetAllFields(this.GetType(), BindingFlags.Public | BindingFlags.NonPublic
                 | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);

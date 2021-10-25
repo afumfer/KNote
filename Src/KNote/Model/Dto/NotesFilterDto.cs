@@ -22,7 +22,7 @@ namespace KNote.Model.Dto
         }
     }
 
-    public class AtrFilterDto : DtoModelBase
+    public class AtrFilterDto : SmartModelDtoBase
     {
         #region Properties 
 

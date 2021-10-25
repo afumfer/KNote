@@ -5,7 +5,7 @@ using System.Text;
 
 namespace KNote.Model.Dto
 {
-    public class NoteTypeDto : DtoModelBase
+    public class NoteTypeDto : SmartModelDtoBase
     {
         #region Property definitions
 

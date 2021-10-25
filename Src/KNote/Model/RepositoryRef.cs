@@ -8,7 +8,7 @@ using System.IO;
 
 namespace KNote.Model
 {
-    public class RepositoryRef : DtoModelBase
+    public class RepositoryRef : SmartModelDtoBase
     {
         private string _alias;
         [Required(ErrorMessage = KMSG)]

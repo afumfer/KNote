@@ -204,7 +204,7 @@ namespace KNote.ClientWin.Core
 
     abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TView>
         where TView : IViewConfigurable
-        where TEntity : DtoModelBase, new()        
+        where TEntity : SmartModelDtoBase, new()        
     {
         #region Prperties
 

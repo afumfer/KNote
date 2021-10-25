@@ -9,7 +9,7 @@ using KNote.Model;
 namespace KNote.ClientWin.Core
 {
     [Serializable]
-    public class AppConfig : DtoModelBase
+    public class AppConfig : SmartModelDtoBase
 	{
         #region Properties 
 

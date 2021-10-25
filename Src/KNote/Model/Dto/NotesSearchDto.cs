@@ -5,7 +5,7 @@ using System.Text;
 
 namespace KNote.Model.Dto
 {
-    public class NotesSearchDto : DtoModelBase // PaginationBase
+    public class NotesSearchDto : SmartModelDtoBase // PaginationBase
     {
         public string TextSearch { get; set; }
 

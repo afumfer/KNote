@@ -14,7 +14,6 @@ namespace KNote.Client.ClientDataServices
         Task<Result<KAttributeDto>> GetAsync(Guid id);
         Task<Result<KAttributeDto>> SaveAsync(KAttributeDto kattribute);
         Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id);        
-        Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id);
-        //Task<Result<KAttributeTabulatedValueDto>> DeleteKAttributeTabulatedValueAsync(Guid id);
+        Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id);        
     }
 }

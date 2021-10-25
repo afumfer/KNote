@@ -12,6 +12,5 @@ namespace KNote.Client.ClientDataServices
         IKAttributeWebApiService KAttributes { get; }
         IFolderWebApiService Folders { get; }
         INoteWebApiService Notes { get; }
-
     }
 }
