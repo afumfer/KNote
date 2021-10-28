@@ -29,19 +29,31 @@ else
             await showMessages.ShowErrorMessage(result.Message);
             navigationManager.NavigateTo("/");
         }
-        else        
+        else
             user = result.Entity;
-        
+
         base.OnInitialized();
     }
 
     private async Task OnSave()
     {
-        var result = await webApiService.Users.SaveAsync(user);
-        if (!result.IsValid)        
-            await showMessages.ShowErrorMessage(result.Message);        
-        else        
-            navigationManager.NavigateTo("users");        
+        if (!user.IsDirty())
+        {
+            navigationManager.NavigateTo("users");
+        }
+        else
+        {
+            if (!user.IsValid())
+                await showMessages.ShowErrorMessage(user.GetErrorMessage());
+            else
+            {
+                var result = await webApiService.Users.SaveAsync(user);
+                if (!result.IsValid)
+                    await showMessages.ShowErrorMessage(result.Message);
+                else
+                    navigationManager.NavigateTo("users");                
+            }
+        }
     }
 
     private void OnExit()

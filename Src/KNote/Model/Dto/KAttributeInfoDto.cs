@@ -163,13 +163,13 @@ namespace KNote.Model.Dto
             //----
 
             // ---- Example 
-            //if (ModificationDateTime < CreationDateTime)
+            //if (string.IsNullOrEmpty(Description))
             //{
             //    results.Add(new ValidationResult
-            //     ("KMSG: The modification date cannot be greater than the creation date "
-            //     , new[] { "ModificationDateTime", "CreationDateTime" }));
+            //     ("KMSG: Attribute description is required. "
+            //     , new[] { "Description" }));
             //}
-           
+
             return results;
         }
 

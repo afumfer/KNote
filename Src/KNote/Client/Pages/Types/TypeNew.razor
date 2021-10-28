@@ -13,11 +13,16 @@
 
     private async Task OnNew()
     {
-        var result = await webApiService.NoteTypes.SaveAsync(noteType);
-        if(!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
+        if (!noteType.IsValid())
+            await showMessages.ShowErrorMessage(noteType.GetErrorMessage());
         else
-            navigationManager.NavigateTo("types");
+        {
+            var result = await webApiService.NoteTypes.SaveAsync(noteType);
+            if(!result.IsValid)
+                await showMessages.ShowErrorMessage(result.Message);
+            else
+                navigationManager.NavigateTo("types");            
+        }
     }
 
     private void OnExit()

@@ -854,9 +854,9 @@ namespace KNote.ClientWin.Views
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var attribute = new KAttributeDto();
+            var attribute = new KAttributeDto();           
 
-            attribute.NoteTypeDto = new NoteTypeDto { Description = "aaa", Name = "", NoteTypeId = Guid.NewGuid(), ParenNoteTypeId = null };
+            attribute.NoteTypeDto = new NoteTypeDto { Description = "aaa", Name = "bbbbb", NoteTypeId = Guid.NewGuid(), ParenNoteTypeId = null };
 
             attribute.KAttributeValues.Add(new KAttributeTabulatedValueDto
             {
@@ -868,15 +868,60 @@ namespace KNote.ClientWin.Views
                 Value = "111"
             });
 
-            //var fieldsAtr = attribute.GetAllClassFields();
+            listMessages.Items.Add("TEST IsDirty: ");
+            listMessages.Items.Add("----------------");
+            listMessages.Items.Add("Original value IsDirty: " + attribute.IsDirty());
+            listMessages.Items.Add("Original value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
+            foreach(var a in attribute.KAttributeValues)
+                listMessages.Items.Add("Original value KAttributeValue IsDirty: " + a.IsDirty());
+            
+            attribute.SetIsDirty(false);
+            listMessages.Items.Add("==== changed IsDirty attribute to false with SetIsDirty()");
 
-            //foreach (var f in fieldsAtr)
-            //    listMessages.Items.Add(f.Name);
+            listMessages.Items.Add("Changed value IsDirty: " + attribute.IsDirty());
+            listMessages.Items.Add("Changed value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
+            foreach (var a in attribute.KAttributeValues)
+                listMessages.Items.Add("Changed value KAttributeValue IsDirty: " + a.IsDirty());
 
-            var xx = attribute.GetDtoChilds();
-            foreach(var v in xx)
-                listMessages.Items.Add(v.IsValid());
+            attribute.KAttributeValues[0].Value = "222";
+            listMessages.Items.Add("==== changed value to child object");
 
+            listMessages.Items.Add("Changed value IsDirty: " + attribute.IsDirty());
+            listMessages.Items.Add("Changed value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
+            foreach (var a in attribute.KAttributeValues)
+                listMessages.Items.Add("Changed value KAttributeValue IsDirty: " + a.IsDirty());
+
+            listMessages.Items.Add("");
+            listMessages.Items.Add("TEST IsValid: ");
+            listMessages.Items.Add("----------------");
+            listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
+            listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
+            foreach (var a in attribute.KAttributeValues)
+                listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
+
+            attribute.Name = "ZZZZZZZZZZ";
+
+            listMessages.Items.Add("--OK --------------");
+            listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
+            listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
+            foreach (var a in attribute.KAttributeValues)
+                listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
+
+            attribute.KAttributeValues[0].Value = "";
+
+            listMessages.Items.Add("--Error --------------");
+            listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
+            listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
+            foreach (var a in attribute.KAttributeValues)
+                listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
+
+            attribute.NoteTypeDto.Name = "";
+            attribute.Name = "";
+            listMessages.Items.Add("--GetErrorMessage --------------");
+            var errMsg = attribute.GetErrorMessage(false);
+            listMessages.Items.Add(errMsg);
+            errMsg = attribute.GetErrorMessage();
+            listMessages.Items.Add(errMsg);
         }
     }
 

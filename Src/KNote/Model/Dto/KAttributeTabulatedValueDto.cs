@@ -40,7 +40,7 @@ namespace KNote.Model.Dto
         }
 
         private string _value;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = "Attribute {0} is required. ")]
         public string Value
         {
             get { return _value; }
@@ -103,11 +103,11 @@ namespace KNote.Model.Dto
             //----
 
             // ---- Example
-            //if (ModificationDateTime < CreationDateTime)
+            //if (MyProperty == "bad value")
             //{
             //    results.Add(new ValidationResult
-            //     ("KMSG: The modification date cannot be greater than the creation date "
-            //     , new[] { "ModificationDateTime", "CreationDateTime" }));
+            //     ("KMSG: Value can't be 'bad value' "
+            //     , new[] { "MyProperty" }));
             //}
 
             return results;

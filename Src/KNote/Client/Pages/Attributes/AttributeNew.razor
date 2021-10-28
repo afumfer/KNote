@@ -31,16 +31,23 @@ else
             showForm = true;
         }
 
+        kattribute.SetIsNew(true);
+
         base.OnInitialized();
     }
 
     private async Task OnNew()
     {
-        var response = await webApiService.KAttributes.SaveAsync(kattribute);
-        if (!response.IsValid)        
-            await showMessages.ShowErrorMessage(response.Message);        
-        else        
-            navigationManager.NavigateTo("attributes");       
+        if (!kattribute.IsValid())
+            await showMessages.ShowErrorMessage(kattribute.GetErrorMessage());
+        else
+        {
+            var response = await webApiService.KAttributes.SaveAsync(kattribute);
+            if (!response.IsValid)
+                await showMessages.ShowErrorMessage(response.Message);
+            else
+                navigationManager.NavigateTo("attributes");            
+        }
     }
 
     private void OnExit()

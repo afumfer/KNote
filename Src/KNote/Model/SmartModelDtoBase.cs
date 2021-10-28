@@ -15,19 +15,42 @@ namespace KNote.Model
         protected const string KMSG = "Attribute {0} is required. ";
         
         protected bool _isDirty = false;
+        protected bool _isNew = false;
+        protected bool _isDeleted = false;        
 
         public virtual bool IsDirty()
         {
-            return _isDirty;
+            bool _isChilsDirty = false;
+            
+            var childs = GetChilds<SmartModelDtoBase>();
+
+            foreach (var child in childs)
+            {
+                if (child.IsDirty())
+                {
+                    _isChilsDirty = true;
+                    break;
+                }
+            }
+
+            if (_isDirty || _isChilsDirty)
+                return true;
+            else
+                return false;
         }
 
         public virtual void SetIsDirty(bool isDirty)
         {
             _isDirty = isDirty;
+            
+            var childs = GetChilds<SmartModelDtoBase>();
+
+            foreach (var child in childs)
+            {
+                child.SetIsDirty(isDirty);                
+            }
         }
-
-        protected bool _isNew = false;
-
+        
         public virtual bool IsNew()
         {
             return _isNew;
@@ -38,9 +61,6 @@ namespace KNote.Model
             _isNew = isNew;
         }
 
-        // TODO: !!! IsDeleted implementation ....
-        protected bool _isDeleted = false;
-
         public virtual bool IsDeleted()
         {
             return _isDeleted;
@@ -50,8 +70,7 @@ namespace KNote.Model
         {
             _isDeleted = isDeleted;
         }
-        // ....
-
+        
         #region INotifyPropertyChanged members
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -65,83 +84,12 @@ namespace KNote.Model
 
         #endregion
 
-        public List<FieldInfo> GetAllClassFields()
-        {
-            return ReflectionExtensions.GetAllFields(this.GetType(), BindingFlags.Public | BindingFlags.NonPublic
-                | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-        }
-
-        public List<SmartModelDtoBase> GetDtoChilds()
-        {
-            List<SmartModelDtoBase>
-                dtoChilds = new List<SmartModelDtoBase>();
-
-            foreach (FieldInfo field in GetAllClassFields())
-            {
-                
-                object v = field.GetValue(this);
-                if ((v != null && v is SmartModelDtoBase))
-                {
-                    dtoChilds.Add((SmartModelDtoBase)v);
-                }
-
-                if (v != null && ReflectionExtensions.IsEnumerableDto(v))
-                {                    
-                    foreach(var e in (IEnumerable<SmartModelDtoBase>)v)
-                    {
-                        dtoChilds.Add(e);
-                    }
-                }
-            }
-
-            // || (v != null && v is List<KAttributeTabulatedValueDto> ...)
-
-            return dtoChilds;
-        }
-
-
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = true)]
-    public class ChildDtoIgnoreAttribute : Attribute
+    public class ChildModelDtoIgnoreAttribute : Attribute
     {
 
     }
 
-    public static class ReflectionExtensions
-    {
-        public static List<FieldInfo> GetAllFields(Type type, BindingFlags flags)
-        {
-            if (type == typeof(object))
-                return new List<FieldInfo>();
-
-            // Get all fields recursively           
-            List<FieldInfo> myList = GetAllFields(type.BaseType, flags);
-            myList.AddRange(type.GetFields(flags));
-            return myList;
-        }
-
-        public  static Type GetElementTypeOfDtoEnumerable(object o)
-        {
-            var enumerable = o as IEnumerable<SmartModelDtoBase>;            
-            if (enumerable == null)
-                return null;
-
-            Type[] interfaces = enumerable.GetType().GetInterfaces();
-
-            return (from i in interfaces
-                    where i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-                    select i.GetGenericArguments()[0]).FirstOrDefault();
-        }
-
-        public static bool IsEnumerableDto(object o)
-        {
-            var enumerable = o as IEnumerable<SmartModelDtoBase>;            
-            if (enumerable == null)
-                return false;
-            else 
-                return true;
-        }
-    }
 }

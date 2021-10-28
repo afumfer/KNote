@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LabForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
+            this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
@@ -51,7 +52,6 @@
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.button3 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -88,30 +88,40 @@
             this.tabAppLab.Text = "Lab app components";
             this.tabAppLab.UseVisualStyleBackColor = true;
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(316, 102);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(296, 26);
+            this.button3.TabIndex = 11;
+            this.button3.Text = "Test Reflection Model Objects";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(17, 144);
+            this.button2.Location = new System.Drawing.Point(14, 133);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(294, 25);
             this.button2.TabIndex = 10;
-            this.button2.Text = "button2";
+            this.button2.Text = "Test ProcessStart";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(16, 113);
+            this.button1.Location = new System.Drawing.Point(14, 101);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(295, 25);
+            this.button1.Size = new System.Drawing.Size(296, 26);
             this.button1.TabIndex = 9;
-            this.button1.Text = "button1";
+            this.button1.Text = "Test ReadVarItem";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(13, 209);
+            this.label2.Location = new System.Drawing.Point(13, 233);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(38, 15);
             this.label2.TabIndex = 8;
@@ -120,7 +130,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 194);
+            this.label1.Location = new System.Drawing.Point(13, 218);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(38, 15);
             this.label1.TabIndex = 7;
@@ -133,7 +143,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listMessages.FormattingEnabled = true;
             this.listMessages.ItemHeight = 15;
-            this.listMessages.Location = new System.Drawing.Point(13, 255);
+            this.listMessages.Location = new System.Drawing.Point(13, 254);
             this.listMessages.Name = "listMessages";
             this.listMessages.Size = new System.Drawing.Size(636, 274);
             this.listMessages.TabIndex = 6;
@@ -150,9 +160,9 @@
             // 
             // buttonTest1
             // 
-            this.buttonTest1.Location = new System.Drawing.Point(12, 16);
+            this.buttonTest1.Location = new System.Drawing.Point(13, 16);
             this.buttonTest1.Name = "buttonTest1";
-            this.buttonTest1.Size = new System.Drawing.Size(301, 29);
+            this.buttonTest1.Size = new System.Drawing.Size(300, 28);
             this.buttonTest1.TabIndex = 2;
             this.buttonTest1.Text = "Run monitor";
             this.buttonTest1.UseVisualStyleBackColor = true;
@@ -290,16 +300,6 @@
             this.htmlDescription.Name = "htmlDescription";
             this.htmlDescription.Size = new System.Drawing.Size(634, 287);
             this.htmlDescription.TabIndex = 10;
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(326, 114);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(135, 24);
-            this.button3.TabIndex = 11;
-            this.button3.Text = "Test Reflection";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // LabForm
             // 

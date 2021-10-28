@@ -13,11 +13,16 @@
 
     private async Task OnNew()
     {
-        var result = await webApiService.Users.SaveAsync(user);
-        if (!result.IsValid)        
-            await showMessages.ShowErrorMessage(result.Message);        
-        else        
-            navigationManager.NavigateTo("users");        
+        if (!user.IsValid())
+            await showMessages.ShowErrorMessage(user.GetErrorMessage());
+        else
+        {
+            var result = await webApiService.Users.SaveAsync(user);
+            if (!result.IsValid)
+                await showMessages.ShowErrorMessage(result.Message);
+            else
+                navigationManager.NavigateTo("users");
+        }
     }
 
     private void OnExit()

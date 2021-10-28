@@ -8,7 +8,7 @@
 
 @if (kattribute != null && showForm)
 {
-    <AttributeForm Title="Attribute Edit" OnValidSubmit="OnEdit" OnExit="OnExit" KAttribute="kattribute" NoteTypes="noteTypes" />
+    <AttributeForm Title="Attribute Edit" OnValidSubmit="OnSave" OnExit="OnExit" KAttribute="kattribute" NoteTypes="noteTypes" />
 }
 else
 {
@@ -32,7 +32,10 @@ else
             navigationManager.NavigateTo("/");
         }
         else
+        {
             kattribute = result.Entity;
+            kattribute.SetIsDirty(false);
+        }
 
         var result2 = await webApiService.NoteTypes.GetAllAsync();
         if (!result2.IsValid)
@@ -49,13 +52,25 @@ else
         await base.OnInitializedAsync();
     }
 
-    private async Task OnEdit()
+    private async Task OnSave()
     {
-        var result = await webApiService.KAttributes.SaveAsync(kattribute);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
-        else
+        if (!kattribute.IsDirty())
+        {
             navigationManager.NavigateTo("attributes");
+        }
+        else
+        {
+            if (!kattribute.IsValid())
+                await showMessages.ShowErrorMessage(kattribute.GetErrorMessage());
+            else
+            {
+                var result = await webApiService.KAttributes.SaveAsync(kattribute);
+                if (!result.IsValid)
+                    await showMessages.ShowErrorMessage(result.Message);
+                else
+                    navigationManager.NavigateTo("attributes");
+            }
+        }
     }
 
     private void OnExit()

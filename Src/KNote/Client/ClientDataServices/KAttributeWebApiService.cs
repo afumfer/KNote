@@ -29,16 +29,14 @@ namespace KNote.Client.ClientDataServices
         }
 
         public async Task<Result<KAttributeDto>> GetAsync(Guid id)
-        {            
-            return await _httpClient.GetFromJsonAsync<Result<KAttributeDto>>($"api/kattributes/{id}");
+        {
+            return await _httpClient.GetFromJsonAsync<Result<KAttributeDto>>($"api/kattributes/{id}");            
         }
 
         public async Task<Result<KAttributeDto>> SaveAsync(KAttributeDto kattribute)
         {
             HttpResponseMessage httpRes;                        
-            
-            kattribute.KAttributeValues.RemoveAll(av => av.IsDeleted() == true);
-
+                        
             if (kattribute.KAttributeId == Guid.Empty)
                 httpRes = await _httpClient.PostAsJsonAsync<KAttributeDto>("api/kattributes", kattribute);
             else

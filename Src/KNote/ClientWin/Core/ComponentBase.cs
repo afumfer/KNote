@@ -80,8 +80,6 @@ namespace KNote.ClientWin.Core
 
         protected virtual Result<EComponentResult> CheckPreconditions()
         {
-
-
             // TODO: En el futuro se implementarán reglas genéricas
             //       para todas las controladoras.
             //       Estas reglas se podrán sobreescibir o complementar en mis  
@@ -327,20 +325,6 @@ namespace KNote.ClientWin.Core
     }
 
     public delegate void ExtensionsEventHandler<T>(object sender, ComponentEventArgs<T> e);
-
-    public static class ReflectionExtensions
-    {
-        public static List<FieldInfo> GetAllFields(Type type, BindingFlags flags)
-        {
-            if (type == typeof(object))
-                return new List<FieldInfo>();
-
-            // Get all fields recursively           
-            List<FieldInfo> myList = GetAllFields(type.BaseType, flags);
-            myList.AddRange(type.GetFields(flags));
-            return myList;
-        }
-    }
 
     /// <summary>
     /// Attribute to identify the variables of the controller that you want to reset

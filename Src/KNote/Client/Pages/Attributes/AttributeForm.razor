@@ -79,29 +79,26 @@
                     <tbody>
                         @foreach (var value in KAttribute.KAttributeValues)
                         {
-                            if (!value.IsDeleted())
-                            {
-                                <tr>
-                                    <td>@value.Value</td>
-                                    <td width="100px">@value.Order</td>
-                                    <td width="100px">
-                                        <span class="float-right">
-                                            <button class="btn btn-sm btn-light mx-1"
-                                                    @onclick="@(() => OnAtrValueDelete(value))"
-                                                    data-toggle="tooltip" title="Delete value">
-                                                <i class="fa fa-minus"></i>
-                                            </button>
-                                        </span>
-                                        <span class="float-right">
-                                            <button class="btn btn-sm btn-light mx-1"
-                                                    @onclick="@(() => OnAtrValueEdit(value))"
-                                                    data-toggle="tooltip" title="Edit value">
-                                                <i class="fa fa-pencil"></i>
-                                            </button>
-                                        </span>
-                                    </td>
-                                </tr>
-                            }
+                            <tr>
+                                <td>@value.Value</td>
+                                <td width="100px">@value.Order</td>
+                                <td width="100px">
+                                    <span class="float-right">
+                                        <button class="btn btn-sm btn-light mx-1"
+                                                @onclick="@(() => OnAtrValueDelete(value))"
+                                                data-toggle="tooltip" title="Delete value">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </span>
+                                    <span class="float-right">
+                                        <button class="btn btn-sm btn-light mx-1"
+                                                @onclick="@(() => OnAtrValueEdit(value))"
+                                                data-toggle="tooltip" title="Edit value">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                    </span>
+                                </td>
+                            </tr>
                         }
                     </tbody>
                 </table>
@@ -164,12 +161,7 @@
 
     private void OnAtrValueDelete(KAttributeTabulatedValueDto atrValue)
     {
-        if (atrValue.KAttributeTabulatedValueId == Guid.Empty)
-        {
-            KAttribute.KAttributeValues.Remove(atrValue);
-            return;
-        }
-        atrValue.SetIsDeleted(true);
+        KAttribute.KAttributeValues.Remove(atrValue);
     }
 
     private void OnAtrValueEdit(KAttributeTabulatedValueDto atrEdit)

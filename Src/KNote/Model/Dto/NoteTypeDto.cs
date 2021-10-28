@@ -24,7 +24,7 @@ namespace KNote.Model.Dto
         }
 
         private string _name;
-        [Required(ErrorMessage = "* Attribute {0} is required ")]
+        [Required(ErrorMessage = "Note type {0} is required. ")]
         [MaxLength(256)]
         public string Name
         {

@@ -40,11 +40,23 @@ else
 
     private async Task OnSave()
     {
-        var result = await webApiService.NoteTypes.SaveAsync(noteType);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
+        if (!noteType.IsDirty())
+        {
+            navigationManager.NavigateTo("attributes");
+        }
         else
-            navigationManager.NavigateTo("types");
+        {
+            if (!noteType.IsValid())
+                await showMessages.ShowErrorMessage(noteType.GetErrorMessage());
+            else
+            {
+                var result = await webApiService.NoteTypes.SaveAsync(noteType);
+                if (!result.IsValid)
+                    await showMessages.ShowErrorMessage(result.Message);
+                else
+                    navigationManager.NavigateTo("types");
+            }
+        }
 
     }
 
