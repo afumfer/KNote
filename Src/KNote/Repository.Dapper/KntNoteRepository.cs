@@ -439,7 +439,7 @@ namespace KNote.Repository.Dapper
         }
 
         public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity)
-        {            
+        {
             var result = new Result<NoteDto>();
             try
             {
@@ -448,7 +448,7 @@ namespace KNote.Repository.Dapper
                     var db = GetOpenConnection();
 
                     entity.ModificationDateTime = DateTime.Now;
-                
+
                     var sql = @"UPDATE [Notes] SET 
                                     NoteId = @NoteId, 
                                     NoteNumber = @NoteNumber, 
@@ -467,9 +467,19 @@ namespace KNote.Repository.Dapper
                     var r = await db.ExecuteAsync(sql.ToString(),
                         new
                         {
-                            entity.NoteId, entity.NoteNumber, entity.Topic, entity.CreationDateTime, entity.ModificationDateTime,
-                            entity.Description, entity.ContentType, entity.Script, entity.InternalTags, entity.Tags,
-                            entity.Priority, entity.FolderId, entity.NoteTypeId
+                            entity.NoteId,
+                            entity.NoteNumber,
+                            entity.Topic,
+                            entity.CreationDateTime,
+                            entity.ModificationDateTime,
+                            entity.Description,
+                            entity.ContentType,
+                            entity.Script,
+                            entity.InternalTags,
+                            entity.Tags,
+                            entity.Priority,
+                            entity.FolderId,
+                            entity.NoteTypeId
                         });
 
                     if (r == 0)
@@ -479,26 +489,25 @@ namespace KNote.Repository.Dapper
                         return ResultDomainAction(result);
                     }
 
-                    // Delete old attributes
+                    // Delete old attributes when note NoteType has changed
                     int rDel = 0;
                     if (entity.NoteTypeId == null)
                     {
                         sql = @"DELETE FROM NoteKAttributes WHERE NoteId = @NoteId AND 
                                     KAttributeId NOT IN (SELECT KAttributeId FROM KAttributes WHERE NoteTypeId IS NULL)";
                         rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId, NoteTypeId = entity.NoteTypeId });
-
                     }
                     else
                     {
                         sql = @"DELETE FROM NoteKAttributes WHERE NoteId = @NoteId AND 
                                     KAttributeId NOT IN (SELECT KAttributeId FROM KAttributes WHERE NoteTypeId IS NULL OR NoteTypeId = @NoteTypeId)";
-                        rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId,  NoteTypeId = entity.NoteTypeId });
+                        rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId, NoteTypeId = entity.NoteTypeId });
                     }
 
                     // Add new attributes or update 
-                    var sqlFindNoteKAttribute = "SELECT * from NoteKAttributes WHERE NoteKAttributeId = @NoteKAttributeId;";
+                    var sqlFindNoteKAttribute = "SELECT * FROM NoteKAttributes WHERE NoteKAttributeId = @NoteKAttributeId;";
                     foreach (var atr in entity.KAttributesDto)
-                    {                    
+                    {
                         var entityNoteKAttribute = await db.QueryFirstOrDefaultAsync<NoteKAttributeDto>(sqlFindNoteKAttribute.ToString(), new { NoteKAttributeId = atr.NoteKAttributeId });
                         if (entityNoteKAttribute == null)
                         {
@@ -516,7 +525,7 @@ namespace KNote.Repository.Dapper
                         }
                         else
                         {
-                            if (!string.IsNullOrEmpty(atr.Value))                        
+                            if (!string.IsNullOrEmpty(atr.Value))
                                 sql = @"UPDATE [NoteKAttributes] SET                                    
                                         NoteId = @NoteId, 
                                         KAttributeId = @KAttributeId, 
@@ -525,7 +534,6 @@ namespace KNote.Repository.Dapper
                             else
                                 sql = @"DELETE FROM [NoteKAttributes] 
                                     WHERE NoteKAttributeId = @NoteKAttributeId";
-
                         }
 
                         if (!string.IsNullOrEmpty(sql))
@@ -541,10 +549,12 @@ namespace KNote.Repository.Dapper
 
                             if (rA == 0)
                             {
-                                result.ErrorList.Add("Atribute-value note entity not saved");                        
+                                result.ErrorList.Add("Atribute-value note entity not saved");
                             }
                         }
                     }
+
+                    // TODO: Delete old attributes
 
                     result.Entity = entity;
 
@@ -559,6 +569,7 @@ namespace KNote.Repository.Dapper
             }
             return ResultDomainAction(result);
         }
+
 
         public async Task<Result> DeleteAsync(Guid id)
         {
