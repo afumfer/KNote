@@ -16,38 +16,45 @@ namespace KNote.Model
         
         protected bool _isDirty = false;
         protected bool _isNew = false;
-        protected bool _isDeleted = false;        
-
-        public virtual bool IsDirty()
+        protected bool _isDeleted = false;
+        
+        public virtual bool IsDirty(bool incluideChildsChek = true)
         {
             bool _isChilsDirty = false;
-            
-            var childs = GetChilds<SmartModelDtoBase>();
 
-            foreach (var child in childs)
+            if (incluideChildsChek)
             {
-                if (child.IsDirty())
+                var childs = GetChilds<SmartModelDtoBase>();
+                foreach (var child in childs)
                 {
-                    _isChilsDirty = true;
-                    break;
+                    if (child.IsDirty() || child.IsNew() || child.IsDeleted())
+                    {
+                        _isChilsDirty = true;
+                        break;
+                    }
                 }
+                if (_isDirty || _isChilsDirty)
+                    return true;
+                else
+                    return false;
             }
-
-            if (_isDirty || _isChilsDirty)
-                return true;
             else
-                return false;
-        }
+                return _isDirty;
 
-        public virtual void SetIsDirty(bool isDirty)
+        }
+        
+        public virtual void SetIsDirty(bool isDirty, bool forceChildsSet = true)
         {
             _isDirty = isDirty;
-            
-            var childs = GetChilds<SmartModelDtoBase>();
 
-            foreach (var child in childs)
+            if (forceChildsSet)
             {
-                child.SetIsDirty(isDirty);                
+                var childs = GetChilds<SmartModelDtoBase>();
+
+                foreach (var child in childs)
+                {
+                    child.SetIsDirty(isDirty);                
+                }
             }
         }
         

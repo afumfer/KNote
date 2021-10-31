@@ -128,14 +128,21 @@ namespace KNote.ClientWin.Components
                         response = await service.Notes.DeleteNoteTaskAsync(id);
                     else
                     {
-                        // Force valid result
-                        response = new Result<NoteTaskDto>();
+                        var resGet = await service.Notes.GetNoteTaskAsync(id);
+                        if (!resGet.IsValid)
+                        {
+                            response = new Result<NoteTaskDto>();
+                            response.Entity = new NoteTaskDto();
+                        }
+                        else
+                            response = resGet;
                     }
-
+                        
                     if (response.IsValid)
                     {
+                        response.Entity.SetIsDeleted(true);
                         Model = response.Entity;
-                        OnDeletedEntity(response.Entity);
+                        OnDeletedEntity(Model);
                         return true;
                     }
                     else

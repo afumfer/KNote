@@ -126,12 +126,22 @@ namespace KNote.ClientWin.Components
                     if (AutoDBSave)
                         response = await service.Notes.DeleteResourceAsync(id);
                     else
-                        response = new Result<ResourceDto>();
+                    {                        
+                        var resGet = await service.Notes.GetResourceAsync(id);
+                        if (!resGet.IsValid)
+                        {
+                            response = new Result<ResourceDto>();
+                            response.Entity = new ResourceDto();
+                        }
+                        else
+                            response = resGet;
+                    }
 
                     if (response.IsValid)
                     {
+                        response.Entity.SetIsDeleted(true);
                         Model = response.Entity;
-                        OnDeletedEntity(response.Entity);
+                        OnDeletedEntity(Model);
                         return true;
                     }
                     else

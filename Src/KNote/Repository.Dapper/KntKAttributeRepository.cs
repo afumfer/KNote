@@ -165,8 +165,6 @@ namespace KNote.Repository.Dapper
                         {
                             var sqlType2 = "SELECT count(*) FROM NoteKAttributes WHERE KAttributeId = @KAttributeId";
                             var n = await db.ExecuteScalarAsync<long>(sqlType2, new { KAttributeId = entity.KAttributeId });
-                            //var sqlType2 = $"SELECT count(*) FROM NoteKAttributes WHERE NoteKAttributeId = '{entity.KAttributeId.ToString().ToUpper()}'";
-                            //var n = await db.ExecuteScalarAsync<long>(sqlType2, new { });
                             if (n > 0)
                             {
                                 result.AddErrorMessage("You cannot change the note type for this attribute. This attribute is already being used by several notes. ");

@@ -754,7 +754,8 @@ namespace KNote.ClientWin.Views
 
             foreach (var res in _com.Model.Resources)
             {
-                listViewResources.Items.Add(ResourceDtoToListViewItem(res));
+                if(!res.IsDeleted())
+                    listViewResources.Items.Add(ResourceDtoToListViewItem(res));
             }
 
             listViewResources.Columns.Add("Name", 200, HorizontalAlignment.Left);
@@ -768,27 +769,11 @@ namespace KNote.ClientWin.Views
 
             foreach (var task in _com.Model.Tasks)
             {
-                listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
+                if(!task.IsDeleted())
+                    listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
             }
 
             // Width of -2 indicates auto-size.
-            //listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);
-
-            //listViewTasks.Columns.Add("Tags", 100, HorizontalAlignment.Left);
-
-            //listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
-            //listViewTasks.Columns.Add("Resolved", 50, HorizontalAlignment.Left);
-            //listViewTasks.Columns.Add("Est. time", 50, HorizontalAlignment.Left);
-            //listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
-            //listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
-
-            //listViewTasks.Columns.Add("Ex start", 120, HorizontalAlignment.Left);
-            //listViewTasks.Columns.Add("Ex end", 120, HorizontalAlignment.Left);
-
-            //listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
-            //listViewTasks.Columns.Add("End", 120, HorizontalAlignment.Left);
-            //listViewTasks.Columns.Add("Description", -2, HorizontalAlignment.Left);
-
             listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);            
             listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
             listViewTasks.Columns.Add("Resolved", 60, HorizontalAlignment.Left);
@@ -807,7 +792,8 @@ namespace KNote.ClientWin.Views
 
             foreach (var msg in _com.Model.Messages)
             {
-                listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
+                if(!msg.IsDeleted())
+                    listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
             }
 
             // Width of -2 indicates auto-size.            

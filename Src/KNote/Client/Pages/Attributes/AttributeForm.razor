@@ -162,6 +162,7 @@
     private void OnAtrValueDelete(KAttributeTabulatedValueDto atrValue)
     {
         KAttribute.KAttributeValues.Remove(atrValue);
+        KAttribute.SetIsDirty(true, false);
     }
 
     private void OnAtrValueEdit(KAttributeTabulatedValueDto atrEdit)

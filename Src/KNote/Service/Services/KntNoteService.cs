@@ -128,7 +128,13 @@ namespace KNote.Service.Services
 
             foreach (var item in entity.Messages)
             {
-                if (item.IsDirty())
+                if (item.IsDeleted())
+                {
+                    var res = await DeleteMessageAsync(item.KMessageId);
+                    if (!res.IsValid)
+                        CopyErrorList(res.ErrorList, result.ErrorList);
+                }
+                else if (item.IsDirty())
                 {
                     if (item.NoteId == Guid.Empty)
                         item.NoteId = noteEdited.NoteId;
@@ -141,61 +147,54 @@ namespace KNote.Service.Services
                 else
                     result.Entity.Messages.Add(item);
             }
-            foreach (var item in entity.MessagesDeleted)
-            {
-                var res = await DeleteMessageAsync(item);
-                if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
-            }
-            entity.MessagesDeleted.Clear();
+            entity.Messages.RemoveAll( m => m.IsDeleted());
 
             foreach (var item in entity.Resources)
             {
-                if (item.IsDirty())
+                if (item.IsDeleted())
+                {
+                    var res = await DeleteResourceAsync(item.ResourceId);
+                    if (!res.IsValid)
+                        CopyErrorList(res.ErrorList, result.ErrorList);
+                }
+                else if (item.IsDirty())
                 {
                     if (item.NoteId == Guid.Empty)
                         item.NoteId = noteEdited.NoteId;
                     var res = await SaveResourceAsync(item, true);
                     if (!res.IsValid)
                         CopyErrorList(res.ErrorList, result.ErrorList);
-                    else 
+                    else
                         result.Entity.Resources.Add(res.Entity);
                 }
                 else
-                
-                    result.Entity.Resources.Add(item);                
+                    result.Entity.Resources.Add(item);
             }
-            foreach (var item in entity.ResourcesDeleted)
-            {
-                var res = await DeleteResourceAsync(item);
-                if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
-            }
-            entity.Resources.Clear();
+            entity.Resources.RemoveAll(r => r.IsDeleted());
 
             foreach (var item in entity.Tasks)
             {
-                if (item.IsDirty())
+                if (item.IsDeleted())
+                {
+                    var res = await DeleteNoteTaskAsync(item.NoteTaskId);
+                    if (!res.IsValid)
+                        CopyErrorList(res.ErrorList, result.ErrorList);
+                }
+                else if (item.IsDirty())
                 {
                     if (item.NoteId == Guid.Empty)
                         item.NoteId = noteEdited.NoteId;
                     var res = await SaveNoteTaskAsync(item, true);
                     if (!res.IsValid)
                         CopyErrorList(res.ErrorList, result.ErrorList);
-                    else 
+                    else
                         result.Entity.Tasks.Add(res.Entity);
                 }
                 else
                     result.Entity.Tasks.Add(item);
 
             }
-            foreach (var item in entity.TasksDeleted)
-            {
-                var res = await DeleteNoteTaskAsync(item);
-                if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
-            }
-            entity.TasksDeleted.Clear();
+            entity.Tasks.RemoveAll(t => t.IsDeleted());
 
             return result;
         }

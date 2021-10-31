@@ -125,13 +125,23 @@ namespace KNote.ClientWin.Components
                     Result<KMessageDto> response;
                     if (AutoDBSave)
                         response = await service.Notes.DeleteMessageAsync(id);
-                    else                    
-                        response = new Result<KMessageDto>();
+                    else
+                    {
+                        var resGet = await service.Notes.GetMessageAsync(id);
+                        if (!resGet.IsValid)
+                        {
+                            response = new Result<KMessageDto>();
+                            response.Entity = new KMessageDto();
+                        }
+                        else
+                            response = resGet;
+                    }                  
                     
                     if (response.IsValid)
                     {
+                        response.Entity.SetIsDeleted(true);
                         Model = response.Entity;
-                        OnDeletedEntity(response.Entity);
+                        OnDeletedEntity(Model);
                         return true;
                     }
                     else
@@ -149,7 +159,6 @@ namespace KNote.ClientWin.Components
         {
             return await DeleteModel(Service, Model.KMessageId);
         }
-
 
         #endregion 
     }

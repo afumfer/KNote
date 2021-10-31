@@ -195,32 +195,48 @@ namespace KNote.Repository.EntityFramework
 
                     if (resGenRepGet.IsValid)
                     {
-                        entityForUpdate = resGenRepGet.Entity;
-                        entityForUpdate.SetSimpleDto(entity);
-                        resGenRep = await kattributes.UpdateAsync(entityForUpdate);
+                        // Check notetype in notes.
+                        if (entity.NoteTypeId != null && resGenRepGet.Entity.NoteTypeId != entity.NoteTypeId)
+                        {
+                            var noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(ctx);
+                            var nAttributes = (await noteKAttributes.GetAllAsync(n => n.KAttributeId == entity.KAttributeId)).Entity;
+                            if (nAttributes.Count > 0)
+                            {
+                                response.AddErrorMessage("You cannot change the note type for this attribute. This attribute is already being used by several notes. ");
+                                response.Entity = entity;                                
+                            }
+                        }
+
+                        if (response.IsValid)
+                        {                            
+                            entityForUpdate = resGenRepGet.Entity;
+                            entityForUpdate.SetSimpleDto(entity);
+
+                            resGenRep = await kattributes.UpdateAsync(entityForUpdate);
+
+                            response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
+                            
+                            var guidsUpdated = new List<Guid>();
+                            foreach (var value in entity.KAttributeValues)
+                            {
+                                var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
+                                if (!res.IsValid)
+                                    response.ErrorList.Add(res.Message);
+                                response.Entity.KAttributeValues.Add(res.Entity);
+                                guidsUpdated.Add(value.KAttributeTabulatedValueId);
+                            }
+
+                            await DeleteNoContainsTabulateValueAsync(ctx, response.Entity.KAttributeId, guidsUpdated);
+
+                            response.ErrorList = resGenRep.ErrorList;
+                        }                      
                     }
                     else
                     {
-                        resGenRep.Entity = null;
-                        resGenRep.AddErrorMessage("Can't find entity for update.");
+                        response.Entity = entity;
+                        response.AddErrorMessage("Can't find entity for update.");
                     }
-
-                    response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
-
-                    var guidsUpdated = new List<Guid>();
-                    foreach (var value in entity.KAttributeValues)
-                    {
-                        var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
-                        if (!res.IsValid)
-                            response.ErrorList.Add(res.Message);
-                        response.Entity.KAttributeValues.Add(res.Entity);
-                        guidsUpdated.Add(value.KAttributeTabulatedValueId);
-                    }
-
-                    await DeleteNoContainsTabulateValueAsync(ctx, response.Entity.KAttributeId, guidsUpdated);
-                    
-                    response.ErrorList = resGenRep.ErrorList;
-
+                                                           
                     scope.Complete();
 
                     await CloseIsTempConnection(ctx);

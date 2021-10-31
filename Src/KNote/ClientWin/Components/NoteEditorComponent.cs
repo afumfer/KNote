@@ -298,16 +298,28 @@ namespace KNote.ClientWin.Components
         public async Task<bool> DeleteMessage(Guid messageId)
         {
             var messageEditor = new MessageEditorComponent(Store);
-
             messageEditor.AutoDBSave = false;  // don't save automatically
 
             var res = await messageEditor.DeleteModel(Service, messageId);
             if (res)
             {
-                var msgDel = Model.Messages.SingleOrDefault(t => t.KMessageId == messageId);
-                if (!msgDel.IsNew())
-                    Model.MessagesDeleted.Add(messageId);
-                Model.Messages.Remove(msgDel);
+                KMessageDto msgDel = null;
+                foreach (var item in Model.Messages)
+                {
+                    if (item.KMessageId == messageId)
+                    {
+                        msgDel = item;
+                        break;
+                    }
+                }
+
+                if (msgDel != null)
+                {
+                    if (msgDel.IsNew())
+                        Model.Messages.Remove(msgDel);
+                    else
+                        msgDel.SetIsDeleted(true);
+                }
             }
 
             return res;
@@ -365,14 +377,28 @@ namespace KNote.ClientWin.Components
             var res = await taskEditor.DeleteModel(Service, taskId);
             if (res)
             {
-                var tskDel = Model.Tasks.SingleOrDefault(t => t.NoteTaskId == taskId);
-                if (!tskDel.IsNew())
-                    Model.TasksDeleted.Add(taskId);
-                Model.Tasks.Remove(tskDel);
+                NoteTaskDto tskDel = null;
+                foreach(var item in Model.Tasks)
+                {
+                    if(item.NoteTaskId == taskId)
+                    {
+                        tskDel = item;
+                        break;
+                    }
+                }
+
+                if(tskDel != null)
+                {
+                    if (tskDel.IsNew())
+                        Model.Tasks.Remove(tskDel);
+                    else
+                        tskDel.SetIsDeleted(true);
+                }
             }
 
             return res;
         }
+
 
         public async Task<ResourceDto> NewResource()
         {
@@ -472,17 +498,29 @@ namespace KNote.ClientWin.Components
 
         public async Task<bool> DeleteResource(Guid resourceId)
         {
-            var resource = new ResourceEditorComponent(Store);            
+            var resource = new ResourceEditorComponent(Store);
             resource.AutoDBSave = false;  // don't save automatically
 
             var res = await resource.DeleteModel(Service, resourceId);
             if (res)
             {
-                var resDel = Model.Resources.SingleOrDefault(t => t.ResourceId == resourceId);
-                if (!resDel.IsNew())
-                    if(!resource.AutoDBSave)
-                        Model.ResourcesDeleted.Add(resourceId);
-                Model.Resources.Remove(resDel);
+                ResourceDto resDel = null;
+                foreach(var item in Model.Resources)
+                {
+                    if(item.ResourceId == resourceId)
+                    {
+                        resDel = item;
+                        break;
+                    }
+                }
+
+                if(resDel != null)
+                {
+                    if (resDel.IsNew())
+                        Model.Resources.Remove(resDel);
+                    else
+                        resDel.SetIsDeleted(true);
+                }
             }
 
             return res;
