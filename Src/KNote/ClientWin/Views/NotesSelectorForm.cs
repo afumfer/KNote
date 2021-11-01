@@ -272,7 +272,7 @@ namespace KNote.ClientWin.Views
             dataGridNotes.Columns[0].Visible = false;  // NoteId
 
             dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
-            dataGridNotes.Columns[1].Width = 70;
+            dataGridNotes.Columns[1].Width = 80;
             dataGridNotes.Columns[1].HeaderText = "Number";
             dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
@@ -286,7 +286,7 @@ namespace KNote.ClientWin.Views
             dataGridNotes.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
             dataGridNotes.Columns[4].DataPropertyName = "Tags";
-            dataGridNotes.Columns[4].Width = 150;  // Tags
+            dataGridNotes.Columns[4].Width = 160;  // Tags
             dataGridNotes.Columns[4].HeaderText = "Tags";
 
             dataGridNotes.Columns[5].DataPropertyName = "InternalTags";
@@ -295,12 +295,12 @@ namespace KNote.ClientWin.Views
 
 
             dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
-            dataGridNotes.Columns[6].Width = 125;  // ModificationDateTime
+            dataGridNotes.Columns[6].Width = 130;  // ModificationDateTime
             dataGridNotes.Columns[6].HeaderText = "Modification date";
             dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
             dataGridNotes.Columns[7].DataPropertyName = "CreationDateTime";
-            dataGridNotes.Columns[7].Width = 125;  // CreationDateTime
+            dataGridNotes.Columns[7].Width = 130;  // CreationDateTime
             dataGridNotes.Columns[7].HeaderText = "Creation date";
             dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 

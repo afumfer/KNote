@@ -8,6 +8,7 @@ using KNote.Model.Dto;
 using System.Linq.Expressions;
 using KNote.Service;
 using KNote.Repository;
+using System.IO;
 
 namespace KNote.Service.Services
 {
@@ -303,7 +304,21 @@ namespace KNote.Service.Services
             {
                 var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
                 if (resDelEntity.IsValid)
+                {
                     result.Entity = resGetEntity.Entity;
+                    try
+                    {
+                        var repRef = _repository.RespositoryRef;
+                        var fullPathRec  = Path.Combine(repRef.ResourcesContainerCacheRootPath, result.Entity.Container, result.Entity.Name);
+                        if(File.Exists(fullPathRec))
+                            File.Delete(fullPathRec);
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: anotate this meesage in log
+                        var errMsg = ex.ToString();
+                    }
+                }
                 else
                     result.ErrorList = resDelEntity.ErrorList;
             }

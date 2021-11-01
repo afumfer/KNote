@@ -411,7 +411,7 @@ namespace KNote.Repository.EntityFramework
                 var resources = new GenericRepositoryEF<KntDbContext, Resource>(ctx);
 
                 var resRep = await resources.GetAllAsync(r => r.NoteId == idNote);
-                result.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<ResourceDto>()).ToList();
+                result.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<ResourceDto>()).OrderBy( r => r.Order).ThenBy( r => r.Name).ToList();
                 result.ErrorList = resRep.ErrorList;
 
                 await CloseIsTempConnection(ctx);
@@ -558,7 +558,8 @@ namespace KNote.Repository.EntityFramework
 
                 var listTasks = await noteTasks.DbSet.Where(n => n.NoteId == idNote)
                     .Include(t => t.User)
-                    .OrderBy(t => t.CreationDateTime)
+                    .OrderBy( t => t.Priority)
+                    .ThenBy(t => t.CreationDateTime)
                     .ToListAsync();
                 result.Entity = new List<NoteTaskDto>();
                 foreach (var e in listTasks)

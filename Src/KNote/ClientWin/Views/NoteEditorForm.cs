@@ -481,6 +481,7 @@ namespace KNote.ClientWin.Views
             {
                 listViewResources.Items[delRes].Remove();      
                 _selectedResource = null;
+                picResource.Image.Dispose();
                 picResource.Image = null;
                 textDescriptionResource.Text = "";
                 if (listViewResources.Items.Count > 0)
@@ -531,15 +532,18 @@ namespace KNote.ClientWin.Views
         }
 
         private void buttonSaveResource_Click(object sender, EventArgs e)
-        {            
-            if(_selectedResource == null)
+        {           
+            if (_selectedResource == null)
             {
                 ShowInfo("There is no selected resource.");
                 return;
             }
 
+            UpdateResourceLocation(_selectedResource);
+
             saveFileDialog.Title = "Save resource file as ...";
-            saveFileDialog.InitialDirectory = Path.GetTempPath();            
+            saveFileDialog.InitialDirectory = Path.GetTempPath();
+            saveFileDialog.FileName = _selectedResource.NameOut;
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -831,7 +835,10 @@ namespace KNote.ClientWin.Views
                 {
                     UpdateResourceLocation(_selectedResource);
                     if (File.Exists(_selectedResource.FullUrl))
-                        picResource.Image = Image.FromFile(_selectedResource.FullUrl);
+                    {
+                        picResource.Image = Image.FromFile(_selectedResource.FullUrl);                        
+                        //picResource.Image.Dispose();
+                    }
                 }
             }
             else

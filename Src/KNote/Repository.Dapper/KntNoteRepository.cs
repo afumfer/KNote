@@ -605,7 +605,7 @@ namespace KNote.Repository.Dapper
                         ResourceId, [Name], Container, [Description], [Order], FileType, ContentInDB, ContentArrayBytes, NoteId 
                     FROM Resources
                     WHERE NoteId = @idNote 
-                    ORDER BY [Order];";
+                    ORDER BY [Order], [Name];";
 
                 var entity = await db.QueryAsync<ResourceDto>(sql.ToString(), new { idNote });
                 result.Entity = entity.ToList();
@@ -772,7 +772,7 @@ namespace KNote.Repository.Dapper
                     FROM  NoteTasks LEFT OUTER JOIN
                          Users ON NoteTasks.UserId = Users.UserId
                     WHERE (NoteTasks.NoteId = @idNote)
-                    ORDER BY [CreationDateTime];";
+                    ORDER BY [Priority], [CreationDateTime];";
 
                 var entity = await db.QueryAsync<NoteTaskDto>(sql.ToString(), new { idNote });
                 result.Entity = entity.ToList();
