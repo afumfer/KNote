@@ -19,14 +19,6 @@ namespace KNote.Server.Helpers
             this.env = env;
             this.httpContextAccessor = httpContextAccessor;
         }
-
-        public async Task<string> EditFile(string contentBase64, string extension, string container, string pathFile)
-        {
-            if (!string.IsNullOrEmpty(pathFile))
-                await DeleteFile(pathFile, container);
-
-            return await SaveFile(contentBase64, extension, container);
-        }
         
         public Task DeleteFile(string path, string container)
         {             
@@ -39,17 +31,22 @@ namespace KNote.Server.Helpers
         }
 
         public async Task<string> SaveFile(string contentBase64, string filename, string container)
-        {                        
-            var folder = Path.Combine(GetContainerResourcesPath(), container);
+        {                                    
             var content = Convert.FromBase64String(contentBase64);
-                                    
-            if (!Directory.Exists(folder))            
+            return await SaveFile(content, filename, container);
+        }
+
+        public async Task<string> SaveFile(byte[] content, string filename, string container)
+        {
+            var folder = Path.Combine(GetContainerResourcesPath(), container);            
+
+            if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
-                        
+
             string pathSaved = Path.Combine(folder, filename);
             if (!File.Exists(pathSaved))
                 await File.WriteAllBytesAsync(pathSaved, content);
-           
+
             var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}{httpContextAccessor.HttpContext.Request.PathBase}";
             var fullUrl = Path.Combine(actualUrl, container, filename);
             return fullUrl.Replace(@"\", @"/");
@@ -66,5 +63,6 @@ namespace KNote.Server.Helpers
             // TODO: !!! get from RepositortRef values
             return env.WebRootPath;            
         }
+
     }
 }

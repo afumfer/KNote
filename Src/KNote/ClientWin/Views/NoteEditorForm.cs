@@ -834,11 +834,9 @@ namespace KNote.ClientWin.Views
                 else
                 {
                     UpdateResourceLocation(_selectedResource);
-                    if (File.Exists(_selectedResource.FullUrl))
-                    {
-                        picResource.Image = Image.FromFile(_selectedResource.FullUrl);                        
-                        //picResource.Image.Dispose();
-                    }
+                    if (File.Exists(_selectedResource.FullUrl))                    
+                        picResource.Image = Image.FromFile(_selectedResource.FullUrl);                                                
+                    
                 }
             }
             else

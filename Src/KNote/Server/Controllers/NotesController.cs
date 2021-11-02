@@ -262,14 +262,11 @@ namespace KNote.Server.Controllers
                 if (resApi.IsValid)
                 {
                     foreach (var r in resApi.Entity)
-                    {
-                        r.ContentArrayBytes = null;
+                    {                        
                         r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container);
-                        if (r.ContentArrayBytes != null)
-                        {
-                            r.ContentBase64 = Convert.ToBase64String(r.ContentArrayBytes);
-                            r.FullUrl = await _fileStore.SaveFile(r.ContentBase64, r.Name, r.Container);
-                        }
+                        if (r.ContentArrayBytes != null)                                                    
+                            r.FullUrl = await _fileStore.SaveFile(r.ContentArrayBytes, r.Name, r.Container);
+                        
                     }
                     return Ok(resApi);
                 }

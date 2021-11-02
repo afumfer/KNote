@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 namespace KNote.Server.Helpers
 {
     public interface IFileStore
-    {
-        Task<string> EditFile(string contentBase64, string extension, string container, string path);
+    {        
         Task DeleteFile(string path, string container);
-        Task<string> SaveFile(string contentBase64, string extension, string container);
+        Task<string> SaveFile(string contentBase64, string filename, string container);
+        Task<string> SaveFile(byte[] contentArrayBytes, string filename, string container);
         string GetRelativeUrl(string filename, string container);
     }
 }
