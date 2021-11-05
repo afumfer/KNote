@@ -22,14 +22,11 @@ namespace KNote.ClientWin.Views
         private readonly ResourceEditorComponent _com;
         private bool _viewFinalized = false;
         private bool _formIsDisty = false;
-
-        private string varContentBase64;
-        private string varFileType;
-        private string varContainer;
+        
+        private string varFileType;        
         private byte[] varContentArrayBytes;
         private string varName;
-        //private string varRelativeUrl;
-        //private string varFullUrl;
+        private string varContainer;
 
         #endregion
 
@@ -38,9 +35,7 @@ namespace KNote.ClientWin.Views
         public ResourceEditorForm(ResourceEditorComponent com)
         {
             InitializeComponent();
-            _com = com;
-
-            var n = new ResourceDto();            
+            _com = com;            
         }
 
         #endregion
@@ -150,20 +145,16 @@ namespace KNote.ClientWin.Views
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 var fileTmp = openFileDialog.FileName;
-                varContentArrayBytes = File.ReadAllBytes(fileTmp);
-                varContentBase64 = Convert.ToBase64String(varContentArrayBytes);
+                varContentArrayBytes = File.ReadAllBytes(fileTmp);                
                 textFileName.Text = Path.GetFileName(fileTmp);
                 textDescription.Text = textFileName.Text;
-                varName = _com.Model.ResourceId.ToString() + "_" + textFileName.Text;
-                varContainer = _com.Service.RepositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+                varName = _com.Model.ResourceId.ToString() + "_" + textFileName.Text;                
                 varFileType = _com.ExtensionFileToFileType(Path.GetExtension(fileTmp));
                 ShowPreview(fileTmp);
             }
-
         }
 
         #endregion
-
 
         #region Private methods
 
@@ -181,70 +172,52 @@ namespace KNote.ClientWin.Views
         }
 
         private void ModelToControls()
-        {                      
+        {            
             textFileName.Text = _com.Model.NameOut;
             varName = _com.Model.Name;
             textDescription.Text = _com.Model.Description;
             textOrder.Text = _com.Model.Order.ToString();
             varFileType = _com.Model.FileType;            
-            varContainer = _com.Model.Container;            
-            checkContentInDB.Checked = _com.Model.ContentInDB;
+            varContainer = _com.Model.Container;
+            checkContentInDB.Checked = _com.Model.ContentInDB;            
 
-            // TODO: Refactor, this logic should be carried over to the component 
-            if (_com.Model.ContentInDB)
-            {
-                (_com.Model.RelativeUrl, _com.Model.FullUrl) = 
-                _com.GetOrSaveTmpFile(
-                    _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
-                    _com.Model.Container, 
-                    _com.Model.Name, 
-                    _com.Model.ContentArrayBytes);
-
-                varContentArrayBytes = _com.Model.ContentArrayBytes;
-                varContentBase64 = _com.Model.ContentBase64;
-            }
+            if (_com.Model.ContentInDB)             
+                varContentArrayBytes = _com.Model.ContentArrayBytes;            
             else
             {
-                if(!string.IsNullOrEmpty(_com.Model.Container) && !string.IsNullOrEmpty(_com.Model.Name))
-                {
-                    _com.Model.RelativeUrl = Path.Combine(_com.Model.Container, _com.Model.Name);                
-                    _com.Model.FullUrl = Path.Combine(_com.Service.RepositoryRef.ResourcesContainerCacheRootPath, _com.Model.RelativeUrl);
-                    varContentArrayBytes = File.ReadAllBytes(_com.Model.FullUrl);
-                    varContentBase64 = Convert.ToBase64String(varContentArrayBytes);
-                }
-            }
-
+                var file = _com.Service.Notes.GetResourcePath(_com.Model);
+                if(!string.IsNullOrEmpty(file))
+                    varContentArrayBytes = File.ReadAllBytes(file);
+            } 
+            
             ShowPreview(_com.Model.FullUrl, false);
         }
 
         private void ControlsToModel()
         {
+            // Delte old file
+            if (_com.Model.Name != null && _com.Model.Name != varName && _com.Model.ContentInDB == false)
+            {                
+                var oldFile = _com.Service.Notes.GetResourcePath(_com.Model);
+                try
+                {
+                    if(File.Exists(oldFile))
+                        File.Delete(oldFile);
+                }
+                catch {}
+            }
+
+
             _com.Model.Name = varName;
             _com.Model.Description = textDescription.Text;
             _com.Model.Order = _com.TextToInt(textOrder.Text);
             _com.Model.FileType = varFileType;
             _com.Model.Container = varContainer;
             _com.Model.ContentInDB = checkContentInDB.Checked;
-
-            // TODO: Refactor, this logic should be carried over to the component 
-            (_com.Model.RelativeUrl, _com.Model.FullUrl) =
-            _com.GetOrSaveTmpFile(
-                _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
-                _com.Model.Container,
-                _com.Model.Name,
-                varContentArrayBytes);
-
-            if (_com.Model.ContentInDB)
-            {
-                _com.Model.ContentBase64 = varContentBase64;                        
-                _com.Model.ContentArrayBytes = varContentArrayBytes;
-            }
-            else
-            {
-                _com.Model.ContentBase64 = null;
-                _com.Model.ContentArrayBytes = null;
-            }
+            
+            _com.SaveResourceFileAndRefreshDto(varContentArrayBytes);
         }
+
 
         private void ShowPreview(string file, bool includePdf = true)
         {

@@ -165,6 +165,15 @@ namespace KNote.ClientWin.Components
             return Store.ExtensionFileToFileType(extension);
         }
 
+        #endregion
+
+        #region Utils
+
+        public void SaveResourceFileAndRefreshDto(byte[] varContentArrayBytes)
+        {
+            Service.Notes.SaveResourceFileAndRefreshDto(Model, varContentArrayBytes);
+        }
+
         #endregion 
     }
 }

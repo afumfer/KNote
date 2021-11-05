@@ -283,37 +283,6 @@ namespace KNote.ClientWin.Core
             Finalize();
         }
 
-        // TODO: Refactor this method 
-        public (string, string) GetOrSaveTmpFile(string rootCacheResource, string container, string fileName, byte[] arrayContent)
-        {
-            if (rootCacheResource == null || container == null || fileName == null || arrayContent == null)                
-                return (null, null);
-
-            string fullUrl = null;
-            string relativeUrl = null;
-            try
-            {
-                relativeUrl = Path.Combine(container, fileName);
-                string dirPath = Path.Combine(new string[] { rootCacheResource, container });                
-                fullUrl = Path.Combine(dirPath, fileName);
-
-                if (string.IsNullOrEmpty(fullUrl))
-                    return (relativeUrl, fullUrl);
-
-                if (!Directory.Exists(dirPath))
-                    Directory.CreateDirectory(dirPath);
-                if (!File.Exists(fullUrl))
-                    File.WriteAllBytes(fullUrl, arrayContent);
-                                
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);                
-            }
-
-            return (relativeUrl, fullUrl);
-        }
-
         #endregion 
 
         #region Component events

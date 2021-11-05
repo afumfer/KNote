@@ -68,10 +68,13 @@ namespace KNote.Model.Dto
         {
             if (repositoryRef == null)
                 return Description;
-
+            
             string replaceString = "";
             if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
-                replaceString = repositoryRef?.ResourcesContainerCacheRootUrl;
+            {
+                replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+                replaceString = replaceString.Replace(@"\", @"/");
+            }
             else
             {
                 if (repositoryRef.ResourcesContainerCacheRootPath != null && repositoryRef?.ResourcesContainer != null)
@@ -92,7 +95,10 @@ namespace KNote.Model.Dto
 
             string replaceString;
             if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
-                replaceString = repositoryRef?.ResourcesContainerCacheRootUrl;
+            {
+                replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+                replaceString = replaceString.Replace(@"\", @"/");
+            }
             else
             {
                 replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootPath, repositoryRef?.ResourcesContainer);

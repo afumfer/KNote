@@ -121,6 +121,7 @@ namespace KNote.Model.Dto
                 if (_contentArrayBytes != value)
                 {
                     _contentArrayBytes = value;
+                    _contentBase64 = null;
                     OnPropertyChanged("ContentArrayBytes");
                 }
             }
@@ -141,12 +142,16 @@ namespace KNote.Model.Dto
         }
 
         private string _contentBase64;        
-        public string ContentBase64 {
+        public string ContentBase64 {            
             get
             {
                 if (_contentBase64 == null)
-                    if(_contentArrayBytes != null)
-                    _contentBase64 = Convert.ToBase64String(_contentArrayBytes);
+                {
+                    if (_contentArrayBytes != null)
+                        _contentBase64 = Convert.ToBase64String(_contentArrayBytes);
+                    else
+                        _contentBase64 = null;
+                }
                 return _contentBase64;
             }
             set
@@ -203,13 +208,12 @@ namespace KNote.Model.Dto
             // Specific validations
             //----
 
-            if (ContentInDB == true && string.IsNullOrEmpty(ContentBase64))
+            if (ContentInDB == true && ContentArrayBytes == null)
             {
                 results.Add(new ValidationResult
                  ("KMSG: If the content is in the database, you must enter its content in base 64  "
                  , new[] { "ContentInDB", "ContentBase64" }));
             }
-
 
             return results;
         }

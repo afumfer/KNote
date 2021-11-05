@@ -198,8 +198,7 @@ namespace KNote.ClientWin.Views
                 case EnumRepositoryEditorMode.Create:
                     Text = "Create new repository";
                     break;
-                case EnumRepositoryEditorMode.Managment:
-                    //Text = "Managment repository";
+                case EnumRepositoryEditorMode.Managment:                    
                     Text = "Edit repository properties";
                     groupRepositoryType.Enabled = false;
                     panelSqLite.Enabled = false;
@@ -213,19 +212,16 @@ namespace KNote.ClientWin.Views
             textResourcesContainerUrl.Text = _com.Model.ResourcesContainerCacheRootUrl;
 
             if (!string.IsNullOrEmpty(_com.Model.ConnectionString))
-            {
-                //var connecionValues = GetConnectionProperties(_com.Model.ConnectionString);
+            {                
                 var connecionValues = _com.Model.GetConnectionProperties();
                 if (_com.Model.Provider == "Microsoft.Data.Sqlite")
-                {
-                    // example connection "Data Source=D:\xx\MySqliteDataBase.db"              
+                {                    
                     textSqLiteDirectory.Text = Path.GetDirectoryName(connecionValues["Data Source"]) ;
                     textSqLiteDataBase.Text = Path.GetFileName(connecionValues["Data Source"]);
                     radioSqLite.Checked = true;
                 }
                 else
-                {
-                    // example "Data Source=.\sqlexpress;Initial Catalog=MyDataBase;Trusted_Connection=True;Connection Timeout=60;MultipleActiveResultSets=true;
+                {                    
                     textSQLServer.Text = connecionValues["Data Source"];
                     textSQLDataBase.Text = connecionValues["Initial Catalog"];
                     radioMSSqlServer.Checked = true;                
@@ -253,7 +249,7 @@ namespace KNote.ClientWin.Views
                 _com.Model.ConnectionString = $"Data Source={textSQLServer.Text}; Initial Catalog={textSQLDataBase.Text}; Trusted_Connection=True; Connection Timeout=60; MultipleActiveResultSets=true;";
             }
 
-            // TODO: hack, EntityFramework is default orm when repository is created. (Daper no suport create repository). 
+            // TODO: hack, EntityFramework is default orm when repository is created. (Dapper version no suport create repository). 
             if (_com.EditorMode == EnumRepositoryEditorMode.AddLink || _com.EditorMode == EnumRepositoryEditorMode.Create)
                 _com.Model.Orm = "EntityFramework";
         }

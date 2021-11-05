@@ -480,8 +480,8 @@ namespace KNote.ClientWin.Views
             if (res)
             {
                 listViewResources.Items[delRes].Remove();      
-                _selectedResource = null;
-                picResource.Image.Dispose();
+                _selectedResource = null;                
+                picResource.Image?.Dispose();
                 picResource.Image = null;
                 textDescriptionResource.Text = "";
                 if (listViewResources.Items.Count > 0)
@@ -496,27 +496,19 @@ namespace KNote.ClientWin.Views
         }
 
         private void linkViewFile_Click(object sender, EventArgs e)
-        {
-            UpdateResourceLocation(_selectedResource);
+        {            
 
             if (_selectedResource.FullUrl == null)
                 return;
 
-            if (File.Exists(_selectedResource.FullUrl))
-            {
+            try
+            {                
                 ProcessStartInfo startInfo = new ProcessStartInfo(_selectedResource.FullUrl) { UseShellExecute = true };
-                try
-                {
-                    Process.Start(startInfo);
-                }
-                catch (Exception ex)
-                {
-                    ShowInfo("The following error has occurred: " + ex.Message);
-                }
+                Process.Start(startInfo);
             }
-            else
+            catch (Exception ex)
             {
-                ShowInfo("Resource file not found.");
+                ShowInfo("The following error has occurred: " + ex.Message);
             }
         }
 
@@ -538,9 +530,7 @@ namespace KNote.ClientWin.Views
                 ShowInfo("There is no selected resource.");
                 return;
             }
-
-            UpdateResourceLocation(_selectedResource);
-
+           
             saveFileDialog.Title = "Save resource file as ...";
             saveFileDialog.InitialDirectory = Path.GetTempPath();
             saveFileDialog.FileName = _selectedResource.NameOut;
@@ -551,8 +541,11 @@ namespace KNote.ClientWin.Views
                     string fileName = saveFileDialog.FileName;
                     if(_selectedResource.ContentInDB)
                         File.WriteAllBytes(fileName, _selectedResource.ContentArrayBytes);
-                    else                
-                        File.Copy(_selectedResource.FullUrl, fileName);               
+                    else
+                    {
+                        string fullPath = _com.Service.Notes.GetResourcePath(_selectedResource);
+                        File.Copy(fullPath, fileName);
+                    }                
                 }
                 catch (Exception ex)
                 {
@@ -833,10 +826,9 @@ namespace KNote.ClientWin.Views
                 }
                 else
                 {
-                    UpdateResourceLocation(_selectedResource);
-                    if (File.Exists(_selectedResource.FullUrl))                    
-                        picResource.Image = Image.FromFile(_selectedResource.FullUrl);                                                
-                    
+                    string fullPath = _com.Service.Notes.GetResourcePath(resource);
+                    if (File.Exists(fullPath))
+                        picResource.Image = Image.FromFile(fullPath);
                 }
             }
             else
@@ -1080,14 +1072,12 @@ namespace KNote.ClientWin.Views
         }
         
         private async void EditResource()
-        {
-            //if (listViewResources.SelectedItems.Count == 0)
+        {            
             if (_selectedResource == null)
             {
                 MessageBox.Show("There is no resource selected.", "KaNote");
                 return;
-            }
-            //var idResource = Guid.Parse(listViewResources.SelectedItems[0].Name);
+            }            
             var idResource = _selectedResource.ResourceId;
             var resource = await _com.EditResource(idResource);
             if (resource != null)
@@ -1145,13 +1135,15 @@ namespace KNote.ClientWin.Views
 
         private void InsertLinkSelectedResource()
         {
+            var repRef = _com.Service.RepositoryRef;
             var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
 
-            if (!string.IsNullOrEmpty(_com.Service.RepositoryRef.ResourcesContainerCacheRootUrl))                            
-                tmpFile = tmpFile.Replace(_com.Service.RepositoryRef.ResourcesContainer, _com.Service.RepositoryRef.ResourcesContainerCacheRootUrl);            
-            else            
-                tmpFile = Path.Combine(_com.Service.RepositoryRef.ResourcesContainerCacheRootPath, tmpFile);
-            
+            var containerWithRootUrl = Path.Combine(repRef.ResourcesContainerCacheRootUrl, repRef.ResourcesContainer);
+            if (!string.IsNullOrEmpty(repRef.ResourcesContainerCacheRootUrl))
+                tmpFile = tmpFile.Replace(repRef.ResourcesContainer, containerWithRootUrl);
+            else
+                tmpFile = Path.Combine(repRef.ResourcesContainerCacheRootPath, tmpFile);
+
             tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
             if (!buttonViewHtml.Enabled)
@@ -1185,26 +1177,6 @@ namespace KNote.ClientWin.Views
             var item = listViewAttributes.Items[noteAttribute.NoteKAttributeId.ToString()];
             item.Text = noteAttribute.Name;
             item.SubItems[1].Text = noteAttribute.Value;
-        }
-
-        private void UpdateResourceLocation(ResourceDto resource)
-        {
-            // TODO: refactor, this logic to store.
-            if (resource.ContentInDB)
-            {
-                (resource.RelativeUrl, resource.FullUrl) =
-                _com.GetOrSaveTmpFile(
-                    _com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
-                    resource.Container,
-                    resource.Name,
-                    resource.ContentArrayBytes);
-            }
-            else
-            {
-                resource.RelativeUrl = Path.Combine(resource.Container, resource.Name);
-                resource.FullUrl = Path.Combine(_com.Service.RepositoryRef.ResourcesContainerCacheRootPath,
-                    resource.RelativeUrl);
-            }
         }
 
         #endregion

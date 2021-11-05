@@ -426,7 +426,7 @@ namespace KNote.ClientWin.Components
         }
 
         public ResourceDto NewResourceFromClipboard(bool contentInDB = false)
-        {            
+        {
             try
             {
                 if (!Clipboard.GetDataObject().GetDataPresent(DataFormats.Bitmap))
@@ -436,36 +436,20 @@ namespace KNote.ClientWin.Components
                 }
                 var bm = (Bitmap)Clipboard.GetDataObject().GetData(DataFormats.Bitmap);
                 var converter = new ImageConverter();
-                var newResource = new ResourceDto();
 
+                var newResource = new ResourceDto();
                 newResource.ResourceId = Guid.NewGuid();
                 newResource.NoteId = Model.NoteId;
                 newResource.ContentInDB = contentInDB;
                 newResource.Description = "Image inserted from clipboard.";
                 newResource.Order = 0;
-                newResource.Name = "ClipboardImg_" + newResource.ResourceId.ToString() + ".png";            
-                newResource.FileType = Store.ExtensionFileToFileType(".png"); 
-                newResource.Container = Service.RepositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();                                
-                var contentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));           
-                var contentBase64 = Convert.ToBase64String(contentArrayBytes);
+                newResource.Name = "ClipboardImg_" + newResource.ResourceId.ToString() + ".png";
+                newResource.FileType = Store.ExtensionFileToFileType(".png");
+                newResource.Container = Service.RepositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
 
-                (newResource.RelativeUrl, newResource.FullUrl) = 
-                GetOrSaveTmpFile(
-                    Service.RepositoryRef.ResourcesContainerCacheRootPath,
-                    newResource.Container,
-                    newResource.Name,
-                    contentArrayBytes);
+                var contentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));
 
-                if (contentInDB)
-                {
-                    newResource.ContentArrayBytes = contentArrayBytes;
-                    newResource.ContentBase64 = contentBase64;
-                }
-                else
-                {
-                    newResource.ContentArrayBytes = null;
-                    newResource.ContentBase64 = null;
-                }
+                Service.Notes.SaveResourceFileAndRefreshDto(newResource, contentArrayBytes);
 
                 Model.Resources.Add(newResource);
                 return newResource;
@@ -474,15 +458,17 @@ namespace KNote.ClientWin.Components
             {
                 View.ShowInfo($"Error: {ex.Message}");
                 return null;
-            }            
+            }
         }
+
 
         public async Task<ResourceDto> EditResource(Guid resourceId)
         {
             var resourceEditor = new ResourceEditorComponent(Store);
             resourceEditor.AutoDBSave = false;  // don't save automatically
-            
-            var resource = Model.Resources.Where(_ => _.ResourceId == resourceId).SingleOrDefault();            
+
+            var resource = Model.Resources.Where(_ => _.ResourceId == resourceId).SingleOrDefault();                     
+
             resourceEditor.LoadModel(Service, resource, false);
 
             var dummy = await Task.FromResult(true);

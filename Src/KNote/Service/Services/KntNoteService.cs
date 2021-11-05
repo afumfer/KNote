@@ -55,11 +55,11 @@ namespace KNote.Service.Services
         {
             var result = new Result<NoteExtendedDto>();            
 
-            var entity = (await _repository.Notes.GetAsync(noteId)).Entity.GetSimpleDto<NoteExtendedDto>();
-            entity.Resources = (await _repository.Notes.GetResourcesAsync(noteId)).Entity;
-            entity.Tasks = (await _repository.Notes.GetNoteTasksAsync(noteId)).Entity;
-            entity.Messages = (await _repository.Notes.GetMessagesAsync(noteId)).Entity;
-            
+            var entity = (await GetAsync(noteId)).Entity.GetSimpleDto<NoteExtendedDto>();
+            entity.Resources = (await GetResourcesAsync(noteId)).Entity;
+            entity.Tasks = (await GetNoteTasksAsync(noteId)).Entity;
+            entity.Messages = (await GetMessagesAsync(noteId)).Entity;
+
             result.Entity = entity;
             return result;
         }
@@ -263,12 +263,47 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
         {
-            return await _repository.Notes.GetResourcesAsync(idNote);
+            var res = await _repository.Notes.GetResourcesAsync(idNote);
+            foreach(var r in res.Entity)
+                (r.RelativeUrl, r.FullUrl) = GetResourceUrls(r);
+            return res;
         }
 
         public async Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId)
         {
-            return await _repository.Notes.GetResourceAsync(resourceId);
+            var res = await _repository.Notes.GetResourceAsync(resourceId);
+            (res.Entity.RelativeUrl, res.Entity.FullUrl) = GetResourceUrls(res.Entity);
+            return res;
+        }
+
+        public (string, string) GetResourceUrls(ResourceDto resource)
+        {
+            string rootUrl = _repository.RespositoryRef.ResourcesContainerCacheRootUrl;
+            string relativeUrl;
+            string fullUrl;
+
+            if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name) )
+                return (null, null);
+                        
+            relativeUrl = (Path.Combine(resource.Container, resource.Name)).Replace(@"\", @"/");            
+            fullUrl = (Path.Combine(rootUrl, relativeUrl)).Replace(@"\", @"/");
+
+            return (relativeUrl, fullUrl);
+        }
+
+        public string GetResourcePath(ResourceDto resource)
+        {
+            string rootPath = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
+            string relativePath;
+            string fullPath;
+
+            if (string.IsNullOrEmpty(rootPath) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
+                return null;
+
+            relativePath = Path.Combine(resource.Container, resource.Name);
+            fullPath = Path.Combine(rootPath, relativePath);
+
+            return fullPath;
         }
 
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity, bool forceNew = false)
@@ -293,6 +328,43 @@ namespace KNote.Service.Services
                         return await _repository.Notes.AddResourceAsync(entity);
                 }
             }
+        }
+        
+        public bool SaveResourceFileAndRefreshDto(ResourceDto resource, byte[] arrayContent)
+        {
+            string rootCacheResource = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
+            if(string.IsNullOrEmpty(resource.Container))
+                resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString(); ;
+                        
+            if (rootCacheResource == null || resource.Container == null || resource.Name == null || arrayContent == null)
+                return false;
+
+            try
+            {                
+                string dirPath = Path.Combine(new string[] { rootCacheResource, resource.Container });                
+                string file = GetResourcePath(resource);
+
+                if (!Directory.Exists(dirPath))
+                    Directory.CreateDirectory(dirPath);
+                if (!File.Exists(file))
+                    File.WriteAllBytes(file, arrayContent);
+
+            }
+            catch (Exception ex)
+            {
+                // TODO: anotate this meesage in log
+                var errMsg = ex.ToString();
+                return false;
+            }
+
+            if (resource.ContentInDB)           
+                resource.ContentArrayBytes = arrayContent;                            
+            else            
+                resource.ContentArrayBytes = null;                
+                        
+            (resource.RelativeUrl, resource.FullUrl) = GetResourceUrls(resource);
+
+            return true;
         }
 
         public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
