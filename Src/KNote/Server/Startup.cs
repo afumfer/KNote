@@ -17,13 +17,15 @@ using KNote.Repository;
 using KNote.Model;
 using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
+using Microsoft.AspNetCore.Http;
 
 namespace KNote.Server
 {
     public class Startup
     {
-
         private readonly IConfiguration configuration;
+        private readonly IWebHostEnvironment env;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
         public Startup(IConfiguration configuration)
         {
@@ -44,13 +46,6 @@ namespace KNote.Server
             var appSettingsSection = configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
             var appSettings = appSettingsSection.Get<AppSettings>();
-
-            // TODO: Provisional, por ahora estos valores no se usan 
-            //       porque se toman del IIS, pero en versiones futuras
-            //       se deberán definir en appSettings
-            // appSettings.ContainerResourcesRootPath
-            // appSettings.ContainerResourcesRootUrl"
-            // .... 
 
             var orm = configuration["ConnectionStrings:DefaultORM"]; ;
             var prov = configuration["ConnectionStrings:DefaultProvider"];
@@ -110,7 +105,7 @@ namespace KNote.Server
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env) // 
         {
             //app.UseResponseCompression();
 
@@ -144,5 +139,6 @@ namespace KNote.Server
                 endpoints.MapFallbackToFile("index.html");
             });
         }
+
     }
 }

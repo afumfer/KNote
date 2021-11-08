@@ -265,71 +265,46 @@ namespace KNote.Service.Services
         {
             var res = await _repository.Notes.GetResourcesAsync(idNote);
             foreach(var r in res.Entity)
-                (r.RelativeUrl, r.FullUrl) = GetResourceUrls(r);
+                //(r.RelativeUrl, r.FullUrl) = GetResourceUrls(r);
+                SaveResourceFileAndRefreshDto(r, r.ContentArrayBytes);
             return res;
         }
 
         public async Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId)
         {
             var res = await _repository.Notes.GetResourceAsync(resourceId);
-            (res.Entity.RelativeUrl, res.Entity.FullUrl) = GetResourceUrls(res.Entity);
+            //(res.Entity.RelativeUrl, res.Entity.FullUrl) = GetResourceUrls(res.Entity);
+            SaveResourceFileAndRefreshDto(res.Entity, res.Entity.ContentArrayBytes);
             return res;
         }
 
-        public (string, string) GetResourceUrls(ResourceDto resource)
+        public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto resource, bool forceNew = false)
         {
-            string rootUrl = _repository.RespositoryRef.ResourcesContainerCacheRootUrl;
-            string relativeUrl;
-            string fullUrl;
+            SaveResourceFileAndRefreshDto(resource, resource.ContentArrayBytes);
 
-            if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name) )
-                return (null, null);
-                        
-            relativeUrl = (Path.Combine(resource.Container, resource.Name)).Replace(@"\", @"/");            
-            fullUrl = (Path.Combine(rootUrl, relativeUrl)).Replace(@"\", @"/");
-
-            return (relativeUrl, fullUrl);
-        }
-
-        public string GetResourcePath(ResourceDto resource)
-        {
-            string rootPath = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
-            string relativePath;
-            string fullPath;
-
-            if (string.IsNullOrEmpty(rootPath) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
-                return null;
-
-            relativePath = Path.Combine(resource.Container, resource.Name);
-            fullPath = Path.Combine(rootPath, relativePath);
-
-            return fullPath;
-        }
-
-        public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity, bool forceNew = false)
-        {            
-            if (entity.ResourceId == Guid.Empty)
+            if (resource.ResourceId == Guid.Empty)
             {
-                entity.ResourceId = Guid.NewGuid();
-                return await _repository.Notes.AddResourceAsync(entity);
+                resource.ResourceId = Guid.NewGuid();
+                return await _repository.Notes.AddResourceAsync(resource);
             }
             else
             {
                 if (!forceNew)
                 {
-                    return await _repository.Notes.UpdateResourceAsync(entity);
+                    return await _repository.Notes.UpdateResourceAsync(resource);
                 }
                 else
                 {
-                    var checkExist = await GetResourceAsync(entity.ResourceId);
+                    var checkExist = await GetResourceAsync(resource.ResourceId);
                     if(checkExist.IsValid)
-                        return await _repository.Notes.UpdateResourceAsync(entity);
+                        return await _repository.Notes.UpdateResourceAsync(resource);
                     else
-                        return await _repository.Notes.AddResourceAsync(entity);
+                        return await _repository.Notes.AddResourceAsync(resource);
                 }
-            }
+            }            
         }
         
+        // TODO: !!!! refactor this method. This methos must be private
         public bool SaveResourceFileAndRefreshDto(ResourceDto resource, byte[] arrayContent)
         {
             string rootCacheResource = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
@@ -348,7 +323,6 @@ namespace KNote.Service.Services
                     Directory.CreateDirectory(dirPath);
                 if (!File.Exists(file))
                     File.WriteAllBytes(file, arrayContent);
-
             }
             catch (Exception ex)
             {
@@ -357,15 +331,33 @@ namespace KNote.Service.Services
                 return false;
             }
 
+            // TODO: !!!! review this lines
             if (resource.ContentInDB)           
                 resource.ContentArrayBytes = arrayContent;                            
             else            
                 resource.ContentArrayBytes = null;                
+            // .....
                         
             (resource.RelativeUrl, resource.FullUrl) = GetResourceUrls(resource);
 
             return true;
         }
+
+        public string GetResourcePath(ResourceDto resource)
+        {
+            string rootPath = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
+            string relativePath;
+            string fullPath;
+
+            if (string.IsNullOrEmpty(rootPath) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
+                return null;
+
+            relativePath = Path.Combine(resource.Container, resource.Name);
+            fullPath = Path.Combine(rootPath, relativePath);
+
+            return fullPath;
+        }
+
 
         public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
         {            
@@ -626,6 +618,21 @@ namespace KNote.Service.Services
             }
 
             return status;
+        }
+
+        private (string, string) GetResourceUrls(ResourceDto resource)
+        {
+            string rootUrl = _repository.RespositoryRef.ResourcesContainerCacheRootUrl;
+            string relativeUrl;
+            string fullUrl;
+
+            if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
+                return (null, null);
+
+            relativeUrl = (Path.Combine(resource.Container, resource.Name)).Replace(@"\", @"/");
+            fullUrl = (Path.Combine(rootUrl, relativeUrl)).Replace(@"\", @"/");
+
+            return (relativeUrl, fullUrl);
         }
 
         #endregion 

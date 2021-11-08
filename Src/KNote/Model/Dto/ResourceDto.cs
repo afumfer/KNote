@@ -112,21 +112,6 @@ namespace KNote.Model.Dto
             }
         }
 
-        private byte[] _contentArrayBytes;
-        public byte[] ContentArrayBytes
-        {
-            get { return _contentArrayBytes; }
-            set
-            {
-                if (_contentArrayBytes != value)
-                {
-                    _contentArrayBytes = value;
-                    _contentBase64 = null;
-                    OnPropertyChanged("ContentArrayBytes");
-                }
-            }
-        }
-
         private Guid _noteId;
         public Guid NoteId
         {
@@ -137,6 +122,31 @@ namespace KNote.Model.Dto
                 {
                     _noteId = value;
                     OnPropertyChanged("NoteId");
+                }
+            }
+        }
+
+        private byte[] _contentArrayBytes;
+        public byte[] ContentArrayBytes
+        {
+            get 
+            {
+                if(_contentArrayBytes == null)
+                {
+                    if (_contentBase64 != null)
+                        _contentArrayBytes = Convert.FromBase64String(_contentBase64); 
+                    else
+                        _contentArrayBytes = null;
+                }
+                return _contentArrayBytes; 
+            }
+            set
+            {
+                if (_contentArrayBytes != value)
+                {
+                    _contentArrayBytes = value;
+                    _contentBase64 = null;
+                    OnPropertyChanged("ContentArrayBytes");
                 }
             }
         }
@@ -156,7 +166,12 @@ namespace KNote.Model.Dto
             }
             set
             {
-                _contentBase64 = value;
+                if(_contentBase64 != value)
+                {
+                    _contentBase64 = value;
+                    _contentArrayBytes = null;
+                    OnPropertyChanged("ContentBase64");
+                }
             } 
         }
 

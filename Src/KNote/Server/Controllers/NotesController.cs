@@ -27,6 +27,11 @@ namespace KNote.Server.Controllers
             _service = service;
             _appSettings = appSettings.Value;
             _fileStore = fileStore;
+
+            if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerCacheRootPath))
+                _service.RepositoryRef.ResourcesContainerCacheRootPath = _fileStore.GetContainerResourcesRootPath();
+            if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerCacheRootUrl))
+                _service.RepositoryRef.ResourcesContainerCacheRootUrl = _fileStore.GetContainerResourcesRootUrl();
         }
 
         [HttpGet]   // GET api/notes
@@ -237,8 +242,8 @@ namespace KNote.Server.Controllers
                 var resApi = await _service.Notes.SaveResourceAsync(entity);
                 if (resApi.IsValid)
                 {
-                    resApi.Entity.FullUrl = await _fileStore.SaveFile(resApi.Entity.ContentBase64, resApi.Entity.Name, resApi.Entity.Container);
-                    resApi.Entity.RelativeUrl = _fileStore.GetRelativeUrl(resApi.Entity.Name, resApi.Entity.Container);
+                    //resApi.Entity.FullUrl = await _fileStore.SaveFile(resApi.Entity.ContentBase64, resApi.Entity.Name, resApi.Entity.Container);
+                    //resApi.Entity.RelativeUrl = _fileStore.GetRelativeUrl(resApi.Entity.Name, resApi.Entity.Container);
                     return Ok(resApi);                
                 }
                 else
@@ -263,9 +268,9 @@ namespace KNote.Server.Controllers
                 {
                     foreach (var r in resApi.Entity)
                     {                        
-                        r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container);
-                        if (r.ContentArrayBytes != null)                                                    
-                            r.FullUrl = await _fileStore.SaveFile(r.ContentArrayBytes, r.Name, r.Container);
+                        //r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container);
+                        //if (r.ContentArrayBytes != null)                                                    
+                        //    r.FullUrl = await _fileStore.SaveFile(r.ContentArrayBytes, r.Name, r.Container);
                         
                     }
                     return Ok(resApi);

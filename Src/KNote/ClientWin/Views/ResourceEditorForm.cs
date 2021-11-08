@@ -35,7 +35,7 @@ namespace KNote.ClientWin.Views
         public ResourceEditorForm(ResourceEditorComponent com)
         {
             InitializeComponent();
-            _com = com;            
+            _com = com;
         }
 
         #endregion
@@ -195,7 +195,7 @@ namespace KNote.ClientWin.Views
 
         private void ControlsToModel()
         {
-            // Delte old file
+            // TODO: !!!! Delete old file, this is provisional here
             if (_com.Model.Name != null && _com.Model.Name != varName && _com.Model.ContentInDB == false)
             {                
                 var oldFile = _com.Service.Notes.GetResourcePath(_com.Model);
@@ -207,7 +207,6 @@ namespace KNote.ClientWin.Views
                 catch {}
             }
 
-
             _com.Model.Name = varName;
             _com.Model.Description = textDescription.Text;
             _com.Model.Order = _com.TextToInt(textOrder.Text);
@@ -217,7 +216,6 @@ namespace KNote.ClientWin.Views
             
             _com.SaveResourceFileAndRefreshDto(varContentArrayBytes);
         }
-
 
         private void ShowPreview(string file, bool includePdf = true)
         {
