@@ -26,8 +26,8 @@ namespace KNote.Service
         Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);
         Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId); 
         Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity, bool forceNew = false);
-        bool SaveResourceFileAndRefreshDto(ResourceDto resource, byte[] arrayContent);        
-        string GetResourcePath(ResourceDto resource);
+        bool ManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);        
+        string GetResourcePath(ResourceDto resource);        
         Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId);
         Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
         Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId);
@@ -43,5 +43,6 @@ namespace KNote.Service
         Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null);
         Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId);
         Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag);
+        
     }
 }

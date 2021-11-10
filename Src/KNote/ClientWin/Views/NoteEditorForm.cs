@@ -819,24 +819,18 @@ namespace KNote.ClientWin.Views
             {            
                 picResource.Visible = true;
                 panelPreview.Visible = false;
-                if(_selectedResource.ContentInDB == true)
-                {
-                    if (_selectedResource.ContentArrayBytes != null)
-                        picResource.Image = Image.FromStream(new MemoryStream(_selectedResource.ContentArrayBytes));                
-                }
-                else
-                {
-                    string fullPath = _com.Service.Notes.GetResourcePath(resource);
-                    if (File.Exists(fullPath))
-                        picResource.Image = Image.FromFile(fullPath);
-                }
+
+                if (_selectedResource.ContentArrayBytes != null)
+                    picResource.Image = Image.FromStream(new MemoryStream(_selectedResource.ContentArrayBytes));
             }
             else
             {
+                _com.Service.Notes.ManageResourceContent(_selectedResource, false);
+
                 picResource.Visible = false;
                 panelPreview.Visible = true;
                 linkViewFile.Visible = true;
-            }            
+            }
         }
 
         private void ControlsToModel()

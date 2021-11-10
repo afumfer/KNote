@@ -183,7 +183,7 @@ namespace KNote.Model.Dto
                     return Name;
                 else
                 {
-                    // Ehurística para descartar el prefijo (guid) del nombre del fichero
+                    // Drop the guid prefix from filename 
                     var i = Name.IndexOf("_") + 1;
                     if (i == 37)
                         return Name.Substring(i, Name.Length - i);

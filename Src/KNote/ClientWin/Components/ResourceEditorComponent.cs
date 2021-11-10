@@ -169,9 +169,9 @@ namespace KNote.ClientWin.Components
 
         #region Utils
 
-        public void SaveResourceFileAndRefreshDto(byte[] varContentArrayBytes)
+        public void SaveResourceFileAndRefreshDto()
         {
-            Service.Notes.SaveResourceFileAndRefreshDto(Model, varContentArrayBytes);
+            Service.Notes.ManageResourceContent(Model);
         }
 
         #endregion 

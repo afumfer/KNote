@@ -213,8 +213,10 @@ namespace KNote.ClientWin.Views
             _com.Model.FileType = varFileType;
             _com.Model.Container = varContainer;
             _com.Model.ContentInDB = checkContentInDB.Checked;
+            _com.Model.ContentArrayBytes = varContentArrayBytes;
+
+            _com.SaveResourceFileAndRefreshDto();
             
-            _com.SaveResourceFileAndRefreshDto(varContentArrayBytes);
         }
 
         private void ShowPreview(string file, bool includePdf = true)

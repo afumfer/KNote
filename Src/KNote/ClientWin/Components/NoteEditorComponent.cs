@@ -447,9 +447,9 @@ namespace KNote.ClientWin.Components
                 newResource.FileType = Store.ExtensionFileToFileType(".png");
                 newResource.Container = Service.RepositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
 
-                var contentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));
+                newResource.ContentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));
 
-                Service.Notes.SaveResourceFileAndRefreshDto(newResource, contentArrayBytes);
+                Service.Notes.ManageResourceContent(newResource);
 
                 Model.Resources.Add(newResource);
                 return newResource;

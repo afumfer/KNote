@@ -263,55 +263,72 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
         {
-            var res = await _repository.Notes.GetResourcesAsync(idNote);
-            foreach(var r in res.Entity)
-                //(r.RelativeUrl, r.FullUrl) = GetResourceUrls(r);
-                SaveResourceFileAndRefreshDto(r, r.ContentArrayBytes);
+            var res = await _repository.Notes.GetResourcesAsync(idNote);         
+            if(res.IsValid)
+                foreach(var r in res.Entity)                    
+                    ManageResourceContent(r);
             return res;
         }
 
         public async Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId)
-        {
+        {            
             var res = await _repository.Notes.GetResourceAsync(resourceId);
-            //(res.Entity.RelativeUrl, res.Entity.FullUrl) = GetResourceUrls(res.Entity);
-            SaveResourceFileAndRefreshDto(res.Entity, res.Entity.ContentArrayBytes);
+            if(res.IsValid)
+                ManageResourceContent(res.Entity);
             return res;
         }
 
         public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto resource, bool forceNew = false)
         {
-            SaveResourceFileAndRefreshDto(resource, resource.ContentArrayBytes);
+            Result<ResourceDto> result;
 
+            ManageResourceContent(resource);
+
+            var tmpContent = resource.ContentArrayBytes;
+
+            if (!resource.ContentInDB)                            
+                resource.ContentArrayBytes = null;
+                                   
             if (resource.ResourceId == Guid.Empty)
             {
                 resource.ResourceId = Guid.NewGuid();
-                return await _repository.Notes.AddResourceAsync(resource);
+                result = await _repository.Notes.AddResourceAsync(resource);
             }
             else
             {
                 if (!forceNew)
                 {
-                    return await _repository.Notes.UpdateResourceAsync(resource);
+                    result = await _repository.Notes.UpdateResourceAsync(resource);
                 }
                 else
                 {
                     var checkExist = await GetResourceAsync(resource.ResourceId);
                     if(checkExist.IsValid)
-                        return await _repository.Notes.UpdateResourceAsync(resource);
+                        result = await _repository.Notes.UpdateResourceAsync(resource);
                     else
-                        return await _repository.Notes.AddResourceAsync(resource);
+                        result = await _repository.Notes.AddResourceAsync(resource);
                 }
-            }            
+            }
+
+            if (!resource.ContentInDB)            
+                resource.ContentArrayBytes = tmpContent;
+                       
+            return result;
         }
         
-        // TODO: !!!! refactor this method. This methos must be private
-        public bool SaveResourceFileAndRefreshDto(ResourceDto resource, byte[] arrayContent)
+        public bool ManageResourceContent(ResourceDto resource, bool forceUpdateDto = true)
         {
+            if (resource == null)
+                return false;
+
             string rootCacheResource = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
-            if(string.IsNullOrEmpty(resource.Container))
-                resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString(); ;
+            if (string.IsNullOrEmpty(resource.Container))
+            {
+                if(forceUpdateDto)
+                    resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString(); ;
+            }
                         
-            if (rootCacheResource == null || resource.Container == null || resource.Name == null || arrayContent == null)
+            if (rootCacheResource == null || resource.Container == null || resource.Name == null)
                 return false;
 
             try
@@ -319,10 +336,21 @@ namespace KNote.Service.Services
                 string dirPath = Path.Combine(new string[] { rootCacheResource, resource.Container });                
                 string file = GetResourcePath(resource);
 
-                if (!Directory.Exists(dirPath))
-                    Directory.CreateDirectory(dirPath);
-                if (!File.Exists(file))
-                    File.WriteAllBytes(file, arrayContent);
+                if(resource.ContentArrayBytes != null)
+                {
+                    if (!Directory.Exists(dirPath))
+                        Directory.CreateDirectory(dirPath);
+                    if (!File.Exists(file))
+                        File.WriteAllBytes(file, resource.ContentArrayBytes);
+                }
+
+                if (forceUpdateDto)
+                {
+                    if (!resource.ContentInDB)
+                        resource.ContentArrayBytes = File.ReadAllBytes(file);
+
+                    (resource.RelativeUrl, resource.FullUrl) = GetResourceUrls(resource);
+                }
             }
             catch (Exception ex)
             {
@@ -330,16 +358,7 @@ namespace KNote.Service.Services
                 var errMsg = ex.ToString();
                 return false;
             }
-
-            // TODO: !!!! review this lines
-            if (resource.ContentInDB)           
-                resource.ContentArrayBytes = arrayContent;                            
-            else            
-                resource.ContentArrayBytes = null;                
-            // .....
-                        
-            (resource.RelativeUrl, resource.FullUrl) = GetResourceUrls(resource);
-
+                                               
             return true;
         }
 
@@ -357,7 +376,6 @@ namespace KNote.Service.Services
 
             return fullPath;
         }
-
 
         public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
         {            
@@ -625,6 +643,9 @@ namespace KNote.Service.Services
             string rootUrl = _repository.RespositoryRef.ResourcesContainerCacheRootUrl;
             string relativeUrl;
             string fullUrl;
+
+            if (string.IsNullOrEmpty(resource.Container))
+                resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString(); ;
 
             if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
                 return (null, null);

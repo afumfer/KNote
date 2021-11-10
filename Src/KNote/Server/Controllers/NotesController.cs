@@ -240,12 +240,8 @@ namespace KNote.Server.Controllers
             try
             {
                 var resApi = await _service.Notes.SaveResourceAsync(entity);
-                if (resApi.IsValid)
-                {
-                    //resApi.Entity.FullUrl = await _fileStore.SaveFile(resApi.Entity.ContentBase64, resApi.Entity.Name, resApi.Entity.Container);
-                    //resApi.Entity.RelativeUrl = _fileStore.GetRelativeUrl(resApi.Entity.Name, resApi.Entity.Container);
-                    return Ok(resApi);                
-                }
+                if (resApi.IsValid)                
+                    return Ok(resApi);                                
                 else
                     return BadRequest(resApi);
             }
@@ -264,17 +260,8 @@ namespace KNote.Server.Controllers
             try
             {
                 var resApi = await _service.Notes.GetResourcesAsync(id);
-                if (resApi.IsValid)
-                {
-                    foreach (var r in resApi.Entity)
-                    {                        
-                        //r.RelativeUrl = _fileStore.GetRelativeUrl(r.Name, r.Container);
-                        //if (r.ContentArrayBytes != null)                                                    
-                        //    r.FullUrl = await _fileStore.SaveFile(r.ContentArrayBytes, r.Name, r.Container);
-                        
-                    }
-                    return Ok(resApi);
-                }
+                if (resApi.IsValid)                
+                    return Ok(resApi);                
                 else
                     return BadRequest(resApi);
             }
@@ -393,56 +380,5 @@ namespace KNote.Server.Controllers
                 return BadRequest(kresApi);
             }
         }
-
-
-        #region Código candidato a eliminar
-
-        #region GetByNumber
-        //[HttpGet("[action]/{noteNumber}")]    // GET api/notes/GetByNumber/xx        
-        //public IActionResult GetByNumber(int noteNumber)
-        //{
-        //    try
-        //    {
-        //        var resApi = _service.Notes.Get(noteNumber);
-        //        if (resApi.IsValid)
-        //            return Ok(resApi);
-        //        else
-        //        {
-        //            return BadRequest(resApi);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var kresApi = new Result<NoteInfoDto>();
-        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
-        //        return BadRequest(kresApi);
-        //    }
-        //}
-        #endregion
-
-        #region GetFilter (old)
-        //[HttpGet("getfilter")]   // GET api/notes/getfilter
-        //public IActionResult GetFilter(int _page, int _limit, Guid folderId, string q)
-        //{
-        //    try
-        //    {
-        //        var resApi = _service.Notes.GetFilter(_page, _limit, folderId, q);
-        //        if (resApi.IsValid)
-        //            return Ok(resApi);
-        //        else
-        //            return BadRequest(resApi);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var resApi = new Result<List<NoteInfoDto>>();
-        //        resApi.AddErrorMessage("Generic error: " + ex.Message);
-        //        return BadRequest(resApi);
-        //    }
-        //}
-        #endregion 
-
-        #endregion
     }
-
 }
