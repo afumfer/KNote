@@ -296,13 +296,36 @@ namespace KNote.Service.Services
             }
             else
             {
+                var checkExist = await GetResourceAsync(resource.ResourceId);
+
+                // Delete old resource file
+                if (checkExist.IsValid)
+                {
+                    var oldResource = checkExist.Entity;
+
+                    if (oldResource.Name != resource.Name && oldResource.ContentInDB == false)
+                    {
+                        var oldFile = GetResourcePath(oldResource);
+                        try
+                        {
+                            if (File.Exists(oldFile))
+                                File.Delete(oldFile);
+                        }
+                        catch (Exception ex)
+                        {
+                            // TODO: anotate this meesage in log
+                            var errMsg = ex.ToString();
+                        }
+                    }
+                }
+
                 if (!forceNew)
                 {
                     result = await _repository.Notes.UpdateResourceAsync(resource);
                 }
                 else
                 {
-                    var checkExist = await GetResourceAsync(resource.ResourceId);
+                    
                     if(checkExist.IsValid)
                         result = await _repository.Notes.UpdateResourceAsync(resource);
                     else
@@ -310,9 +333,11 @@ namespace KNote.Service.Services
                 }
             }
 
-            if (!resource.ContentInDB)            
-                resource.ContentArrayBytes = tmpContent;
-                       
+            if (!result.Entity.ContentInDB)
+                result.Entity.ContentArrayBytes = tmpContent;
+
+            (result.Entity.RelativeUrl, result.Entity.FullUrl) = GetResourceUrls(result.Entity);
+
             return result;
         }
         

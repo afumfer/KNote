@@ -195,18 +195,6 @@ namespace KNote.ClientWin.Views
 
         private void ControlsToModel()
         {
-            // TODO: !!!! Delete old file, this is provisional here
-            if (_com.Model.Name != null && _com.Model.Name != varName && _com.Model.ContentInDB == false)
-            {                
-                var oldFile = _com.Service.Notes.GetResourcePath(_com.Model);
-                try
-                {
-                    if(File.Exists(oldFile))
-                        File.Delete(oldFile);
-                }
-                catch {}
-            }
-
             _com.Model.Name = varName;
             _com.Model.Description = textDescription.Text;
             _com.Model.Order = _com.TextToInt(textOrder.Text);
@@ -215,8 +203,7 @@ namespace KNote.ClientWin.Views
             _com.Model.ContentInDB = checkContentInDB.Checked;
             _com.Model.ContentArrayBytes = varContentArrayBytes;
 
-            _com.SaveResourceFileAndRefreshDto();
-            
+            _com.SaveResourceFileAndRefreshDto();            
         }
 
         private void ShowPreview(string file, bool includePdf = true)
