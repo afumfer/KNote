@@ -235,13 +235,13 @@ namespace KNote.Server.Controllers
         [HttpPost("[action]")]
         [HttpPut("[action]")]
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> SaveResource([FromBody]ResourceDto entity)
+        public async Task<IActionResult> SaveResource([FromBody]ResourceInfoDto entity)
         {
             try
-            {
+            {                             
                 var resApi = await _service.Notes.SaveResourceAsync(entity);
-                if (resApi.IsValid)                
-                    return Ok(resApi);                                
+                if (resApi.IsValid)                                    
+                    return Ok(resApi);                                                              
                 else
                     return BadRequest(resApi);
             }
@@ -259,9 +259,9 @@ namespace KNote.Server.Controllers
         {
             try
             {
-                var resApi = await _service.Notes.GetResourcesAsync(id);
+                var resApi = await _service.Notes.GetResourcesInfoAsync(id);
                 if (resApi.IsValid)                
-                    return Ok(resApi);                
+                    return Ok(resApi);                               
                 else
                     return BadRequest(resApi);
             }
@@ -279,9 +279,9 @@ namespace KNote.Server.Controllers
         {
             try
             {
-                var resApi = await _service.Notes.DeleteResourceAsync(id);
-                if (resApi.IsValid)
-                    return Ok(resApi);
+                var resApi = await _service.Notes.DeleteResourceInfoAsync(id);
+                if (resApi.IsValid)                
+                    return Ok(resApi);                
                 else
                     return BadRequest(resApi);
             }

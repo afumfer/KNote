@@ -237,7 +237,7 @@
     [Parameter] public EventCallback OnExit { get; set; }
     [Parameter] public List<NoteTypeDto> NoteTypes { get; set; }  //  = new List<NoteTypeDto>();
 
-    private List<ResourceDto> resources; // { get; set; }
+    private List<ResourceInfoDto> resources; // { get; set; } 
     private List<NoteTaskDto> tasks { get; set; }
     private NoteTaskDto taskEdit; // { get; set; }
     private List<UserDto> users;
@@ -393,7 +393,7 @@
             kntResourceSelector.Show();
     }
 
-    private async Task OnConfirmResourceSelector(ResourceDto resource)
+    private async Task OnConfirmResourceSelector(ResourceInfoDto resource)
     {
         resource.NoteId = Note.NoteId;
         resource.Name = Note.NoteId.ToString() + "_" + resource.Name;
@@ -412,7 +412,7 @@
         kntResourceSelector.Hide();
     }
 
-    private async Task OnDeleteResource(ResourceDto resource)
+    private async Task OnDeleteResource(ResourceInfoDto resource)
     {
         var result = await webApiService.Notes.DeleteResourceAsync(resource.ResourceId);
         if (!result.IsValid)
@@ -421,7 +421,7 @@
             resources.Remove(resource);
     }
 
-    private void InsertInDescription(ResourceDto resource)
+    private void InsertInDescription(ResourceInfoDto resource)
     {
         if (resource.FileType == "image/jpeg")
             Note.Description += "\n\n![alt text](" + resource?.RelativeUrl + " '" + resource?.Description + "' )";

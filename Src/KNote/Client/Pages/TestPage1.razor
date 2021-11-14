@@ -222,9 +222,9 @@
     private KntResourceSelector kntResourceSelector;
 
     private FolderDto folderSelected;
-    private ResourceDto resourceSelected;
+    private ResourceInfoDto resourceSelected;
 
-    private ResourceDto resource = new ResourceDto();
+    private ResourceInfoDto resource = new ResourceInfoDto();
     private string resourceControl = "0";
 
     #region Test incremente count
@@ -285,7 +285,7 @@
         kntResourceSelector.Show();
     }
 
-    private async Task onConfirmResource(ResourceDto r)
+    private async Task onConfirmResource(ResourceInfoDto r)
     {
         resourceSelected = r;
         kntResourceSelector.Hide();
@@ -319,7 +319,7 @@
         resource.FileType = file.Type;
         resource.Description = file.Type + " - " + file.LastModifiedDate.ToString() + " - " + file.Size.ToString();
 
-        var httpResponse = await dataService.Post<ResourceDto, Result<ResourceDto>>("api/notes/savefile", resource);
+        var httpResponse = await dataService.Post<ResourceInfoDto, Result<ResourceInfoDto>>("api/notes/savefile", resource);
         if (httpResponse.Error)
         {
             await showMessages.ShowErrorMessage(await httpResponse.GetBody());

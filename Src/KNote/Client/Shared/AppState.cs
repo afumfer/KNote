@@ -9,6 +9,8 @@ namespace KNote.Client.Shared
 {
     public class AppState
     {
+        #region Generic configuration properties
+
         private string _appMode = "Task";
         public string AppMode
         {
@@ -34,6 +36,17 @@ namespace KNote.Client.Shared
         {
             get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; }
         }
+
+        private bool _defaultContentResourcesInDB = false;
+        public bool DefaultContentResourcesInDB
+        {
+            get { return _defaultContentResourcesInDB; }
+            set { _defaultContentResourcesInDB = value; NotifyStateChanged(); }
+        }
+
+        #endregion
+
+        #region AppSatate properties
 
         private FolderDto _selectedFolder;
         public FolderDto SelectedFolder
@@ -78,12 +91,22 @@ namespace KNote.Client.Shared
             }
         }
 
-        // Only used in KntFoldersTreeView  (hack)
-        public FolderDto folderOldSelected { get; set; }
+        #endregion 
+
+        #region App event
 
         public event Action OnChange;
         private void NotifyStateChanged() => OnChange?.Invoke();
 
+        #endregion
+
+        #region Utils
+
+        // Only used in KntFoldersTreeView  (hack)
+        public FolderDto folderOldSelected { get; set; }
+
+
+        #endregion 
 
     }
 }

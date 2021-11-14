@@ -15,9 +15,9 @@ namespace KNote.Client.ClientDataServices
         Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true);
         Task<Result<NoteDto>> DeleteAsync(Guid noteId);
 
-        Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);        
-        Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity);
-        Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId);
+        Task<Result<List<ResourceInfoDto>>> GetResourcesAsync(Guid noteId);        
+        Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto entity);
+        Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId);
         Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);        
         Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo);
         Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId);

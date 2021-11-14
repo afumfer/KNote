@@ -84,18 +84,15 @@ namespace KNote.Service.Services
         {
             var resService = new Result<UserDto>();
 
-            // check if username and pwd is not null
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 resService.AddErrorMessage("User not authenticated");
                 resService.Entity = null;
                 return resService;
             }
-
-            //var resRep = _repository.Users.Get(u => u.UserName == username);
+            
             var resRep = await _repository.Users.GetInternalAsync(username);
 
-            // check if username exists
             if (!resRep.IsValid)
             {
                 resService.AddErrorMessage("User not authenticated");
@@ -103,15 +100,13 @@ namespace KNote.Service.Services
                 return resService;
             }
 
-            // check if password is correct
             if (!VerifyPasswordHash(password, resRep.Entity.PasswordHash, resRep.Entity.PasswordSalt))
             {
                 resService.AddErrorMessage("User not authenticated");
                 resService.Entity = null;
                 return resService;
             }
-
-            // authentication successful
+            
             resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
             return resService;
         }

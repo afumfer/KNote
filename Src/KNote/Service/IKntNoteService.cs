@@ -24,11 +24,14 @@ namespace KNote.Service
         Task<Result<NoteDto>> DeleteAsync(Guid noteId);
         Task<Result<NoteExtendedDto>> DeleteExtendedAsync(Guid noteId);
         Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);
+        Task<Result<List<ResourceInfoDto>>> GetResourcesInfoAsync(Guid noteId);
         Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId); 
         Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity, bool forceNew = false);
+        Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resourceInfo, bool forceNew = false);
         bool ManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);        
         string GetResourcePath(ResourceDto resource);        
         Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId);
+        Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id);
         Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
         Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId);
         Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo, bool forceNew = false);       

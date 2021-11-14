@@ -153,7 +153,6 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-
         public async Task<Result<FolderDto>> AddAsync(FolderDto entity)
         {
             var result = new Result<FolderDto>();

@@ -1,6 +1,6 @@
 ﻿@inject IGenericDataService  dataService
 @inject IShowMessages showMessages
-
+@inject AppState appState
 
 @if (ShowDialog)
 {
@@ -57,16 +57,16 @@
 
 @code {
     [Parameter] public string Title { get; set; } = "KaNote resource selector";
-    [Parameter] public EventCallback<ResourceDto> OnConfirm { get; set; }
+    [Parameter] public EventCallback<ResourceInfoDto> OnConfirm { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 
     private bool ShowDialog = false;
-    private ResourceDto resource;
+    private ResourceInfoDto resource;
     private string resourceFlowControl = "0";
 
     public void Show()
     {
-        resource = new ResourceDto();
+        resource = new ResourceInfoDto();
 
         ShowDialog = true;
     }
@@ -81,6 +81,7 @@
         resource.Name = file.Name;
         resource.Description = file.Name;
         resource.FileType = file.Type;
+        resource.ContentInDB = appState.DefaultContentResourcesInDB;
 
         resourceFlowControl = "1";
     }

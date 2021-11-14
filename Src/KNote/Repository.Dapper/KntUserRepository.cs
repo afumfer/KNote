@@ -134,7 +134,6 @@ namespace KNote.Repository.Dapper
             return ResultDomainAction(result);
         }
 
-
         public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
         {            
             var result = new Result<UserInternalDto>();

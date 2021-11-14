@@ -261,12 +261,26 @@ namespace KNote.Service.Services
             return await _repository.Notes.CompleteNoteAttributes(attributesNotes, noteId, noteTypeId);
         }
 
-        public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
+        public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId)
         {
-            var res = await _repository.Notes.GetResourcesAsync(idNote);         
+            var res = await _repository.Notes.GetResourcesAsync(noteId);         
             if(res.IsValid)
                 foreach(var r in res.Entity)                    
                     ManageResourceContent(r);
+            return res;
+        }
+
+        public async Task<Result<List<ResourceInfoDto>>> GetResourcesInfoAsync(Guid noteId)
+        {
+            var res = new Result<List<ResourceInfoDto>>();
+
+            var resGetResources = await GetResourcesAsync(noteId);
+            
+            res.ErrorList = resGetResources.ErrorList;
+            res.Entity = new List<ResourceInfoDto>();
+            foreach (var r in resGetResources.Entity)
+                res.Entity.Add(r.GetSimpleDto<ResourceInfoDto>());
+
             return res;
         }
 
@@ -340,7 +354,24 @@ namespace KNote.Service.Services
 
             return result;
         }
-        
+
+        public async Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resourceInfo, bool forceNew = false)
+        {
+            if (resourceInfo == null)
+                throw new ArgumentException("Resource can't be null");
+
+            var res = new Result<ResourceInfoDto>();
+
+            var resource = resourceInfo.GetSimpleDto<ResourceDto>();
+
+            var resSaveResource = await SaveResourceAsync(resource, forceNew);
+
+            res.ErrorList = resSaveResource.ErrorList;
+            res.Entity = resSaveResource.Entity.GetSimpleDto<ResourceInfoDto>();
+
+            return res;
+        }
+
         public bool ManageResourceContent(ResourceDto resource, bool forceUpdateDto = true)
         {
             if (resource == null)
@@ -435,6 +466,16 @@ namespace KNote.Service.Services
             }
 
             return result;
+        }
+
+        public async Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id)
+        {
+            var res = new Result<ResourceInfoDto>();
+
+            var resDelete = await DeleteResourceAsync(id);
+            res.ErrorList = resDelete.ErrorList;
+            res.Entity = resDelete.Entity.GetSimpleDto<ResourceInfoDto>();
+            return res;
         }
 
         public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
@@ -681,6 +722,6 @@ namespace KNote.Service.Services
             return (relativeUrl, fullUrl);
         }
 
-        #endregion 
+        #endregion
     }
 }

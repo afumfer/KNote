@@ -66,12 +66,12 @@
 </EntityList>
 
 @code {
-    [Parameter] public List<ResourceDto> Resources { get; set; }
-    [Parameter] public EventCallback<ResourceDto> OnDelete { get; set; }
-    [Parameter] public EventCallback<ResourceDto> OnInsertInDesription { get; set; }
+    [Parameter] public List<ResourceInfoDto> Resources { get; set; }
+    [Parameter] public EventCallback<ResourceInfoDto> OnDelete { get; set; }
+    [Parameter] public EventCallback<ResourceInfoDto> OnInsertInDesription { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
 
-    private string ImgPreview(ResourceDto resource)
+    private string ImgPreview(ResourceInfoDto resource)
     {
         var imgSrc = "";
         if (resource.FileType == "image/jpeg")
@@ -84,7 +84,7 @@
         return imgSrc;
     }
 
-    private int ImgWidth(ResourceDto resource)
+    private int ImgWidth(ResourceInfoDto resource)
     {
         var imgW = 50;
         if (resource.FileType == "image/jpeg")

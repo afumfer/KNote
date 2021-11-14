@@ -56,29 +56,29 @@ namespace KNote.Client.ClientDataServices
             return res;
         }
 
-        public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId)
+        public async Task<Result<List<ResourceInfoDto>>> GetResourcesAsync(Guid noteId)
         {
-            return await _httpClient.GetFromJsonAsync<Result<List<ResourceDto>>>($"api/notes/{noteId}/getresources");
+            return await _httpClient.GetFromJsonAsync<Result<List<ResourceInfoDto>>>($"api/notes/{noteId}/getresources");
         }
 
-        public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto resource)
+        public async Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resource)
         {                        
             HttpResponseMessage httpRes;
 
             if (resource.ResourceId == Guid.Empty)
-                httpRes = await _httpClient.PostAsJsonAsync<ResourceDto>($"api/notes/saveresource", resource);
+                httpRes = await _httpClient.PostAsJsonAsync<ResourceInfoDto>($"api/notes/saveresource", resource);
             else
-                httpRes = await _httpClient.PutAsJsonAsync<ResourceDto>($"api/notes/saveresource", resource);
+                httpRes = await _httpClient.PutAsJsonAsync<ResourceInfoDto>($"api/notes/saveresource", resource);
 
-            var res = await httpRes.Content.ReadFromJsonAsync<Result<ResourceDto>>();
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<ResourceInfoDto>>();
 
             return res;
         }
 
-        public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId)
+        public async Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId)
         {                        
             var httpRes = await _httpClient.DeleteAsync($"api/notes/deleteresource/{resourceId}");
-            var res = await httpRes.Content.ReadFromJsonAsync<Result<ResourceDto>>();
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<ResourceInfoDto>>();
             return res;
         }
 
