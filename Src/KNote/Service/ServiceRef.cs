@@ -62,21 +62,6 @@ namespace KNote.Service
             }
         }
 
-        public string ContainerResources
-        {
-            get { return RepositoryRef?.ResourcesContainer; }
-        }
-
-        public string ContainerResourcesCacheRootPath
-        {
-            get { return RepositoryRef?.ResourcesContainerCacheRootPath; }
-        }
-
-        public string ContainerResourcesCacheRootUrl
-        {
-            get { return RepositoryRef?.ResourcesContainerCacheRootUrl; }
-        }
-
         #endregion
 
         #region Constructor

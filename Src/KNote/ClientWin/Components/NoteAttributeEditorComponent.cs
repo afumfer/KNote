@@ -46,7 +46,7 @@ namespace KNote.ClientWin.Components
             View.RefreshModel();
 
             if (!Model.IsDirty())
-                return await Task.FromResult<bool>(true); ;
+                return await Task.FromResult<bool>(true);
 
             var isNew = (Model.NoteKAttributeId == Guid.Empty);
 
@@ -54,7 +54,7 @@ namespace KNote.ClientWin.Components
             if (!string.IsNullOrEmpty(msgVal))
             {
                 View.ShowInfo(msgVal);
-                return await Task.FromResult<bool>(false); ;
+                return await Task.FromResult<bool>(false);
             }
 
             try

@@ -29,9 +29,9 @@ namespace KNote.Server.Controllers
             _fileStore = fileStore;
 
             if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerCacheRootPath))
-                _service.RepositoryRef.ResourcesContainerCacheRootPath = _fileStore.GetContainerResourcesRootPath();
+                _service.RepositoryRef.ResourcesContainerCacheRootPath = _fileStore.GetResourcesContainerRootPath();
             if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerCacheRootUrl))
-                _service.RepositoryRef.ResourcesContainerCacheRootUrl = _fileStore.GetContainerResourcesRootUrl();
+                _service.RepositoryRef.ResourcesContainerCacheRootUrl = _fileStore.GetResourcesContainerRootUrl();
         }
 
         [HttpGet]   // GET api/notes

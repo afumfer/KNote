@@ -96,20 +96,6 @@ namespace KNote.Model.Dto
             }
         }
 
-        private bool _contentInDB;
-        public bool ContentInDB
-        {
-            get { return _contentInDB; }
-            set
-            {
-                if (_contentInDB != value)
-                {
-                    _contentInDB = value;
-                    OnPropertyChanged("ContentInDB");
-                }
-            }
-        }
-
         private Guid _noteId;
         public Guid NoteId
         {

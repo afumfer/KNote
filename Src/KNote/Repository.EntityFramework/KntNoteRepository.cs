@@ -91,7 +91,7 @@ namespace KNote.Repository.EntityFramework
 
                 var resRep = await notes.GetAllAsync(n => n.FolderId == folderId);
                 resService.Entity = resRep.Entity?.Select(n => n.GetSimpleDto<NoteInfoDto>()).ToList();
-                resService.ErrorList = resRep.ErrorList; ;
+                resService.ErrorList = resRep.ErrorList;
 
                 await CloseIsTempConnection(ctx);
             }
@@ -1027,7 +1027,7 @@ namespace KNote.Repository.EntityFramework
             }
 
             result.ErrorList = resRep.ErrorList;
-            return ResultDomainAction(result); ;
+            return ResultDomainAction(result);
         }
 
         public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
@@ -1077,7 +1077,7 @@ namespace KNote.Repository.EntityFramework
             }
 
             result.ErrorList = resRep.ErrorList;
-            return ResultDomainAction(result); ;
+            return ResultDomainAction(result);
         }
 
         public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)

@@ -380,8 +380,11 @@ namespace KNote.Service.Services
             string rootCacheResource = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
             if (string.IsNullOrEmpty(resource.Container))
             {
-                if(forceUpdateDto)
-                    resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString(); ;
+                if (forceUpdateDto)
+                {
+                    resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+                    resource.ContentInDB = _repository.RespositoryRef.ResourceContentInDB;
+                }
             }
                         
             if (rootCacheResource == null || resource.Container == null || resource.Name == null)
@@ -711,7 +714,10 @@ namespace KNote.Service.Services
             string fullUrl;
 
             if (string.IsNullOrEmpty(resource.Container))
-                resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString(); ;
+            {
+                resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+                resource.ContentInDB = _repository.RespositoryRef.ResourceContentInDB;
+            }
 
             if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
                 return (null, null);

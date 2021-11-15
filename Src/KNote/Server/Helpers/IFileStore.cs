@@ -11,7 +11,7 @@ namespace KNote.Server.Helpers
         Task<string> SaveFile(string contentBase64, string filename, string container);
         Task<string> SaveFile(byte[] contentArrayBytes, string filename, string container);
         string GetRelativeUrl(string filename, string container);
-        string GetContainerResourcesRootUrl();
-        string GetContainerResourcesRootPath();
+        string GetResourcesContainerRootUrl();
+        string GetResourcesContainerRootPath();
     }
 }

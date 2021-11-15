@@ -10,8 +10,10 @@ namespace KNote.Server.Helpers
         public string Secret { get; set; }
         public string ApplicationName { get; set; }
         public string Version { get; set; }
-        public string ContainerResources { get; set; }
-        public string ContainerResourcesRootPath { get; set; }
-        public string ContainerResourcesRootUrl { get; set; }
-}
+        public string ResourcesContainer { get; set; }
+        public string ResourcesContainerRootPath { get; set; }
+        public string ResourcesContainerRootUrl { get; set; }
+        public bool ResourcesContentInDB { get; set; }
+
+    }
 }

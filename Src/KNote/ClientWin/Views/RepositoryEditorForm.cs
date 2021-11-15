@@ -208,6 +208,7 @@ namespace KNote.ClientWin.Views
 
             textAliasName.Text = _com.Model.Alias;
             textResourcesContainer.Text = _com.Model.ResourcesContainer;
+            checkResourceContentInDB.Checked = _com.Model.ResourceContentInDB;
             textResourcesContainerRoot.Text = _com.Model.ResourcesContainerCacheRootPath;
             textResourcesContainerUrl.Text = _com.Model.ResourcesContainerCacheRootUrl;
 
@@ -236,6 +237,7 @@ namespace KNote.ClientWin.Views
         {
             _com.Model.Alias = textAliasName.Text;
             _com.Model.ResourcesContainer = textResourcesContainer.Text;
+            _com.Model.ResourceContentInDB = checkResourceContentInDB.Checked;
             _com.Model.ResourcesContainerCacheRootPath = textResourcesContainerRoot.Text;
             _com.Model.ResourcesContainerCacheRootUrl = textResourcesContainerUrl.Text;
             if (radioSqLite.Checked)

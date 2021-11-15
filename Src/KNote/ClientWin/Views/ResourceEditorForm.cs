@@ -178,8 +178,7 @@ namespace KNote.ClientWin.Views
             textDescription.Text = _com.Model.Description;
             textOrder.Text = _com.Model.Order.ToString();
             varFileType = _com.Model.FileType;            
-            varContainer = _com.Model.Container;
-            checkContentInDB.Checked = _com.Model.ContentInDB;            
+            varContainer = _com.Model.Container;                  
 
             if (_com.Model.ContentInDB)             
                 varContentArrayBytes = _com.Model.ContentArrayBytes;            
@@ -199,8 +198,7 @@ namespace KNote.ClientWin.Views
             _com.Model.Description = textDescription.Text;
             _com.Model.Order = _com.TextToInt(textOrder.Text);
             _com.Model.FileType = varFileType;
-            _com.Model.Container = varContainer;
-            _com.Model.ContentInDB = checkContentInDB.Checked;
+            _com.Model.Container = varContainer;            
             _com.Model.ContentArrayBytes = varContentArrayBytes;
 
             _com.SaveResourceFileAndRefreshDto();            

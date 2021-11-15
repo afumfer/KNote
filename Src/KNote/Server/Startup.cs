@@ -24,8 +24,6 @@ namespace KNote.Server
     public class Startup
     {
         private readonly IConfiguration configuration;
-        private readonly IWebHostEnvironment env;
-        private readonly IHttpContextAccessor httpContextAccessor;
 
         public Startup(IConfiguration configuration)
         {
@@ -47,18 +45,20 @@ namespace KNote.Server
             services.Configure<AppSettings>(appSettingsSection);
             var appSettings = appSettingsSection.Get<AppSettings>();
 
-            var orm = configuration["ConnectionStrings:DefaultORM"]; ;
+            var orm = configuration["ConnectionStrings:DefaultORM"];
             var prov = configuration["ConnectionStrings:DefaultProvider"];
-            var conn = configuration["ConnectionStrings:DefaultConnection"];                        
+            var conn = configuration["ConnectionStrings:DefaultConnection"];  
+            
             var repositoryRef = new RepositoryRef
             {
                 Alias = "KaNote",
                 ConnectionString = conn,
                 Provider = prov,
                 Orm = orm,
-                ResourcesContainer = appSettings.ContainerResources,
-                ResourcesContainerCacheRootPath = appSettings.ContainerResourcesRootPath,
-                ResourcesContainerCacheRootUrl = appSettings.ContainerResourcesRootUrl
+                ResourceContentInDB = appSettings.ResourcesContentInDB,
+                ResourcesContainer = appSettings.ResourcesContainer,
+                ResourcesContainerCacheRootPath = appSettings.ResourcesContainerRootPath,
+                ResourcesContainerCacheRootUrl = appSettings.ResourcesContainerRootUrl
             };
 
             if(orm == "Dapper")                

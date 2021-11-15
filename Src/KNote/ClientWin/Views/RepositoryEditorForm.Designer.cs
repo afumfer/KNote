@@ -58,6 +58,7 @@ namespace KNote.ClientWin.Views
             this.buttonFolderSearch = new System.Windows.Forms.Button();
             this.labelAlias = new System.Windows.Forms.Label();
             this.textAliasName = new System.Windows.Forms.TextBox();
+            this.checkResourceContentInDB = new System.Windows.Forms.CheckBox();
             this.panelForm.SuspendLayout();
             this.panelMSSqlServer.SuspendLayout();
             this.panelSqLite.SuspendLayout();
@@ -67,10 +68,10 @@ namespace KNote.ClientWin.Views
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(444, 578);
+            this.buttonCancel.Location = new System.Drawing.Point(563, 563);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(64, 29);
-            this.buttonCancel.TabIndex = 9;
+            this.buttonCancel.TabIndex = 15;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -78,16 +79,17 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(374, 578);
+            this.buttonAccept.Location = new System.Drawing.Point(493, 563);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(64, 29);
-            this.buttonAccept.TabIndex = 8;
+            this.buttonAccept.TabIndex = 14;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
             // 
             // panelForm
             // 
+            this.panelForm.Controls.Add(this.checkResourceContentInDB);
             this.panelForm.Controls.Add(this.buttonSelectDirectoryResources);
             this.panelForm.Controls.Add(this.textResourcesContainer);
             this.panelForm.Controls.Add(this.textResourcesContainerUrl);
@@ -104,16 +106,16 @@ namespace KNote.ClientWin.Views
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(520, 567);
+            this.panelForm.Size = new System.Drawing.Size(639, 567);
             this.panelForm.TabIndex = 3;
             // 
             // buttonSelectDirectoryResources
             // 
             this.buttonSelectDirectoryResources.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectDirectoryResources.Location = new System.Drawing.Point(478, 198);
+            this.buttonSelectDirectoryResources.Location = new System.Drawing.Point(597, 198);
             this.buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
             this.buttonSelectDirectoryResources.Size = new System.Drawing.Size(24, 23);
-            this.buttonSelectDirectoryResources.TabIndex = 4;
+            this.buttonSelectDirectoryResources.TabIndex = 6;
             this.buttonSelectDirectoryResources.Text = "...";
             this.buttonSelectDirectoryResources.UseVisualStyleBackColor = true;
             this.buttonSelectDirectoryResources.Click += new System.EventHandler(this.buttonSelectDirectoryResources_Click);
@@ -124,7 +126,7 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textResourcesContainer.Location = new System.Drawing.Point(10, 148);
             this.textResourcesContainer.Name = "textResourcesContainer";
-            this.textResourcesContainer.Size = new System.Drawing.Size(494, 23);
+            this.textResourcesContainer.Size = new System.Drawing.Size(277, 23);
             this.textResourcesContainer.TabIndex = 3;
             // 
             // textResourcesContainerUrl
@@ -133,8 +135,8 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textResourcesContainerUrl.Location = new System.Drawing.Point(8, 248);
             this.textResourcesContainerUrl.Name = "textResourcesContainerUrl";
-            this.textResourcesContainerUrl.Size = new System.Drawing.Size(494, 23);
-            this.textResourcesContainerUrl.TabIndex = 5;
+            this.textResourcesContainerUrl.Size = new System.Drawing.Size(613, 23);
+            this.textResourcesContainerUrl.TabIndex = 7;
             // 
             // textResourcesContainerRoot
             // 
@@ -142,8 +144,8 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textResourcesContainerRoot.Location = new System.Drawing.Point(8, 198);
             this.textResourcesContainerRoot.Name = "textResourcesContainerRoot";
-            this.textResourcesContainerRoot.Size = new System.Drawing.Size(464, 23);
-            this.textResourcesContainerRoot.TabIndex = 4;
+            this.textResourcesContainerRoot.Size = new System.Drawing.Size(583, 23);
+            this.textResourcesContainerRoot.TabIndex = 5;
             // 
             // labelContainerUrl
             // 
@@ -183,7 +185,7 @@ namespace KNote.ClientWin.Views
             this.panelMSSqlServer.Controls.Add(this.label5);
             this.panelMSSqlServer.Location = new System.Drawing.Point(6, 404);
             this.panelMSSqlServer.Name = "panelMSSqlServer";
-            this.panelMSSqlServer.Size = new System.Drawing.Size(505, 117);
+            this.panelMSSqlServer.Size = new System.Drawing.Size(624, 117);
             this.panelMSSqlServer.TabIndex = 14;
             // 
             // textSQLDataBase
@@ -192,8 +194,8 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textSQLDataBase.Location = new System.Drawing.Point(1, 83);
             this.textSQLDataBase.Name = "textSQLDataBase";
-            this.textSQLDataBase.Size = new System.Drawing.Size(494, 23);
-            this.textSQLDataBase.TabIndex = 11;
+            this.textSQLDataBase.Size = new System.Drawing.Size(613, 23);
+            this.textSQLDataBase.TabIndex = 13;
             // 
             // label1
             // 
@@ -210,8 +212,8 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textSQLServer.Location = new System.Drawing.Point(1, 28);
             this.textSQLServer.Name = "textSQLServer";
-            this.textSQLServer.Size = new System.Drawing.Size(494, 23);
-            this.textSQLServer.TabIndex = 10;
+            this.textSQLServer.Size = new System.Drawing.Size(613, 23);
+            this.textSQLServer.TabIndex = 12;
             // 
             // label5
             // 
@@ -233,18 +235,18 @@ namespace KNote.ClientWin.Views
             this.panelSqLite.Controls.Add(this.labelSqLiteDataBase);
             this.panelSqLite.Controls.Add(this.textSqLiteDirectory);
             this.panelSqLite.Controls.Add(this.labelDirectory);
-            this.panelSqLite.Location = new System.Drawing.Point(6, 272);
+            this.panelSqLite.Location = new System.Drawing.Point(6, 277);
             this.panelSqLite.Name = "panelSqLite";
-            this.panelSqLite.Size = new System.Drawing.Size(505, 121);
+            this.panelSqLite.Size = new System.Drawing.Size(624, 121);
             this.panelSqLite.TabIndex = 13;
             // 
             // buttonSelectFile
             // 
             this.buttonSelectFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectFile.Location = new System.Drawing.Point(471, 82);
+            this.buttonSelectFile.Location = new System.Drawing.Point(590, 82);
             this.buttonSelectFile.Name = "buttonSelectFile";
             this.buttonSelectFile.Size = new System.Drawing.Size(24, 23);
-            this.buttonSelectFile.TabIndex = 9;
+            this.buttonSelectFile.TabIndex = 11;
             this.buttonSelectFile.Text = "...";
             this.buttonSelectFile.UseVisualStyleBackColor = true;
             this.buttonSelectFile.Visible = false;
@@ -253,10 +255,10 @@ namespace KNote.ClientWin.Views
             // buttonSelectDirectory
             // 
             this.buttonSelectDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectDirectory.Location = new System.Drawing.Point(471, 28);
+            this.buttonSelectDirectory.Location = new System.Drawing.Point(590, 28);
             this.buttonSelectDirectory.Name = "buttonSelectDirectory";
             this.buttonSelectDirectory.Size = new System.Drawing.Size(24, 23);
-            this.buttonSelectDirectory.TabIndex = 7;
+            this.buttonSelectDirectory.TabIndex = 9;
             this.buttonSelectDirectory.Text = "...";
             this.buttonSelectDirectory.UseVisualStyleBackColor = true;
             this.buttonSelectDirectory.Click += new System.EventHandler(this.buttonSelectDirectory_Click);
@@ -267,8 +269,8 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textSqLiteDataBase.Location = new System.Drawing.Point(1, 83);
             this.textSqLiteDataBase.Name = "textSqLiteDataBase";
-            this.textSqLiteDataBase.Size = new System.Drawing.Size(494, 23);
-            this.textSqLiteDataBase.TabIndex = 8;
+            this.textSqLiteDataBase.Size = new System.Drawing.Size(613, 23);
+            this.textSqLiteDataBase.TabIndex = 10;
             // 
             // labelSqLiteDataBase
             // 
@@ -285,8 +287,8 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textSqLiteDirectory.Location = new System.Drawing.Point(1, 28);
             this.textSqLiteDirectory.Name = "textSqLiteDirectory";
-            this.textSqLiteDirectory.Size = new System.Drawing.Size(464, 23);
-            this.textSqLiteDirectory.TabIndex = 6;
+            this.textSqLiteDirectory.Size = new System.Drawing.Size(583, 23);
+            this.textSqLiteDirectory.TabIndex = 8;
             // 
             // labelDirectory
             // 
@@ -305,7 +307,7 @@ namespace KNote.ClientWin.Views
             this.groupRepositoryType.Controls.Add(this.radioSqLite);
             this.groupRepositoryType.Location = new System.Drawing.Point(8, 7);
             this.groupRepositoryType.Name = "groupRepositoryType";
-            this.groupRepositoryType.Size = new System.Drawing.Size(496, 61);
+            this.groupRepositoryType.Size = new System.Drawing.Size(615, 61);
             this.groupRepositoryType.TabIndex = 12;
             this.groupRepositoryType.TabStop = false;
             this.groupRepositoryType.Text = "Reposoty database type";
@@ -339,7 +341,7 @@ namespace KNote.ClientWin.Views
             this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
             this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonFolderSearch.Location = new System.Drawing.Point(780, 199);
+            this.buttonFolderSearch.Location = new System.Drawing.Point(899, 199);
             this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonFolderSearch.Name = "buttonFolderSearch";
             this.buttonFolderSearch.Size = new System.Drawing.Size(27, 25);
@@ -362,14 +364,24 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textAliasName.Location = new System.Drawing.Point(10, 98);
             this.textAliasName.Name = "textAliasName";
-            this.textAliasName.Size = new System.Drawing.Size(494, 23);
+            this.textAliasName.Size = new System.Drawing.Size(613, 23);
             this.textAliasName.TabIndex = 2;
+            // 
+            // checkResourceContentInDB
+            // 
+            this.checkResourceContentInDB.AutoSize = true;
+            this.checkResourceContentInDB.Location = new System.Drawing.Point(314, 150);
+            this.checkResourceContentInDB.Name = "checkResourceContentInDB";
+            this.checkResourceContentInDB.Size = new System.Drawing.Size(277, 19);
+            this.checkResourceContentInDB.TabIndex = 4;
+            this.checkResourceContentInDB.Text = "Save a copy of the resource content in database";
+            this.checkResourceContentInDB.UseVisualStyleBackColor = true;
             // 
             // RepositoryEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(520, 619);
+            this.ClientSize = new System.Drawing.Size(639, 604);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);
@@ -426,5 +438,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelContainerRoot;
         private System.Windows.Forms.Label labelContainer;
         private System.Windows.Forms.Button buttonSelectDirectoryResources;
+        private System.Windows.Forms.CheckBox checkResourceContentInDB;
     }
 }

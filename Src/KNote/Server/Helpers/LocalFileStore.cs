@@ -23,7 +23,7 @@ namespace KNote.Server.Helpers
         public Task DeleteFile(string path, string container)
         {             
             var filename = Path.GetFileName(path);
-            string fileDirectory = Path.Combine(GetContainerResourcesRootPath(), container, filename);
+            string fileDirectory = Path.Combine(GetResourcesContainerRootPath(), container, filename);
             if (File.Exists(fileDirectory))            
                 File.Delete(fileDirectory);            
 
@@ -38,7 +38,7 @@ namespace KNote.Server.Helpers
 
         public async Task<string> SaveFile(byte[] content, string filename, string container)
         {
-            var folder = Path.Combine(GetContainerResourcesRootPath(), container);            
+            var folder = Path.Combine(GetResourcesContainerRootPath(), container);            
 
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
@@ -58,15 +58,14 @@ namespace KNote.Server.Helpers
             return relativeUrl.Replace(@"\", @"/");
         }
 
-        public string GetContainerResourcesRootUrl()
+        public string GetResourcesContainerRootUrl()
         {
             return $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}{httpContextAccessor.HttpContext.Request.PathBase}";
         }
 
-        public string GetContainerResourcesRootPath()
+        public string GetResourcesContainerRootPath()
         {                       
             return env.WebRootPath;            
         }
-
     }
 }

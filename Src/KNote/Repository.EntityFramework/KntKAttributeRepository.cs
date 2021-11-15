@@ -41,7 +41,7 @@ namespace KNote.Repository.EntityFramework
                 foreach (var a in listAtr)
                 {
                     var dto = a.GetSimpleDto<KAttributeInfoDto>();
-                    dto.NoteTypeDto = a.NoteType?.GetSimpleDto<NoteTypeDto>(); ;
+                    dto.NoteTypeDto = a.NoteType?.GetSimpleDto<NoteTypeDto>();
                     listDto.Add(dto);
                 }
 

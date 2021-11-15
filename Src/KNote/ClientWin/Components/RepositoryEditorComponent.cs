@@ -55,6 +55,7 @@ namespace KNote.ClientWin.Components
                 Model.Provider = repositoryForEdit.Provider;
                 Model.Orm = repositoryForEdit.Orm;
                 Model.ResourcesContainer = repositoryForEdit.ResourcesContainer;
+                Model.ResourceContentInDB = repositoryForEdit.ResourceContentInDB;
                 Model.ResourcesContainerCacheRootPath = repositoryForEdit.ResourcesContainerCacheRootPath;
                 Model.ResourcesContainerCacheRootUrl = repositoryForEdit.ResourcesContainerCacheRootUrl;
                 Model.SetIsDirty(false);
@@ -103,6 +104,7 @@ namespace KNote.ClientWin.Components
                     repositoryForEdit.Provider = Model.Provider ;
                     repositoryForEdit.Orm = Model.Orm;
                     repositoryForEdit.ResourcesContainer = Model.ResourcesContainer;
+                    repositoryForEdit.ResourceContentInDB = Model.ResourceContentInDB;
                     repositoryForEdit.ResourcesContainerCacheRootPath = Model.ResourcesContainerCacheRootPath;
                     repositoryForEdit.ResourcesContainerCacheRootUrl = Model.ResourcesContainerCacheRootUrl;
                     Model.SetIsDirty(false);

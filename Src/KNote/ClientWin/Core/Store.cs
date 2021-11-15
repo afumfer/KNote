@@ -167,7 +167,7 @@ namespace KNote.ClientWin.Core
         public void SaveConfig(string configFile = null)
         {
             if(string.IsNullOrEmpty(configFile))
-                configFile = Path.Combine(Application.StartupPath, "KNoteData.config"); ;
+                configFile = Path.Combine(Application.StartupPath, "KNoteData.config");
             try
             {
                 TextWriter w = new StreamWriter(configFile);
