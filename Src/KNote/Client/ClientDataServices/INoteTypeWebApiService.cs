@@ -1,17 +1,13 @@
 ﻿using KNote.Model;
 using KNote.Model.Dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace KNote.Client.ClientDataServices
+namespace KNote.Client.ClientDataServices;
+
+public interface INoteTypeWebApiService
 {
-    public interface INoteTypeWebApiService
-    {
-        Task<Result<List<NoteTypeDto>>> GetAllAsync();
-        Task<Result<NoteTypeDto>> GetAsync(Guid id);
-        Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto noteType);
-        Task<Result<NoteTypeDto>> DeleteAsync(Guid id);
-    }
+    Task<Result<List<NoteTypeDto>>> GetAllAsync();
+    Task<Result<NoteTypeDto>> GetAsync(Guid id);
+    Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto noteType);
+    Task<Result<NoteTypeDto>> DeleteAsync(Guid id);
 }
+

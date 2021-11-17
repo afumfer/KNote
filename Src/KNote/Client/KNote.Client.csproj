@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RazorLangVersion>3.0</RazorLangVersion>
+	<ImplicitUsings>enable</ImplicitUsings>
     <Version>0.0.5</Version>
     <AssemblyVersion>0.0.5.23</AssemblyVersion>
     <FileVersion>0.0.5.23</FileVersion>
@@ -10,13 +10,10 @@
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.26.0" />
-
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />   
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.0" PrivateAssets="all" />
-    <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
-    
+    <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />    
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.0" />
-    <PackageReference Include="Tewr.Blazor.FileReader" Version="3.2.0.21211" />
   </ItemGroup>
 
   <ItemGroup>

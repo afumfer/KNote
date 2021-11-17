@@ -17,8 +17,8 @@ namespace KNote.ClientWin.Components
 {
     public class MessagesManagmentComponent : ComponentBase
     {
-        static Timer kntTimerAlarms;
-        static Timer kntTimerAutoSave;        
+        static System.Windows.Forms.Timer kntTimerAlarms;
+        static System.Windows.Forms.Timer kntTimerAutoSave;        
         
         public MessagesManagmentComponent(Store store): base(store)
         {
@@ -37,12 +37,12 @@ namespace KNote.ClientWin.Components
             {
                 VisibleWindows();
 
-                kntTimerAlarms = new Timer();
+                kntTimerAlarms = new System.Windows.Forms.Timer();
                 kntTimerAlarms.Tick += kntTimerAlarms_Tick;
                 kntTimerAlarms.Interval = Store.AppConfig.AlarmSeconds * 1000;
                 kntTimerAlarms.Start();
 
-                kntTimerAutoSave = new Timer();
+                kntTimerAutoSave = new System.Windows.Forms.Timer();
                 kntTimerAutoSave.Tick += KntTimerAutoSave_Tick;
                 kntTimerAutoSave.Interval = Store.AppConfig.AutoSaveSeconds * 1000; 
                 kntTimerAutoSave.Start();

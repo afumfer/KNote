@@ -12,7 +12,6 @@ else
     @((MarkupString)HtmlContent)
 }
 
-
 @code {
     [Parameter] public string MarkdownContent { get; set; }
     [Parameter] public RenderFragment TemplateContent { get; set; }
@@ -30,5 +29,4 @@ else
             //HtmlContent = Markdown.ToHtml(MarkdownContent);
         }
     }
-
 }

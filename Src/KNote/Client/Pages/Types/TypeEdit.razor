@@ -6,7 +6,6 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-
 @if (noteType != null)
 {
     <TypeForm Title="Note type edit" OnValidSubmit="OnSave" OnExit="OnExit" NoteType="noteType" />
@@ -15,7 +14,6 @@ else
 {
     <text>Loading ... </text>
 }
-
 
 @code {
     [Parameter] public string TypeId { get; set; }
