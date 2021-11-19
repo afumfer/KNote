@@ -5,30 +5,44 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using KNote.Model;
 
-namespace KNote.Repository.Entities
+namespace KNote.Repository.EntityFramework.Entities
 {
-    public class SystemValue : EntityModelBase
+    public class TraceNote : EntityModelBase
     {
-        #region Constructor
+        #region Constructor 
 
-        public SystemValue() : base() { }
+        public TraceNote() : base() { }
         
         #endregion
 
         #region Property definitions
         
         [Key]
-        public Guid SystemValueId { get; set; }
+        public Guid TraceNoteId { get; set; }
 
-        [Required(ErrorMessage = "KMSG: La clave es requerida")]
-        [MaxLength(256)]
-        public string Scope { get; set; }
+        public Guid FromId { get; set; }
         
-        [Required(ErrorMessage = "KMSG: La clave es requerida")]
-        [MaxLength(256)]        
-        public string Key { get; set; }
+        public Guid ToId { get; set; }
+                
+        public int Order { get; set; }
         
-        public string Value { get; set; }
+        public double Weight { get; set; }
+        
+        public Guid? TraceNoteTypeId { get; set; }
+
+        #region Virtual - navigation properties
+        
+        [InverseProperty("From")]
+        [ForeignKey("FromId")]
+        public virtual Note From { get; set; }
+        
+        [InverseProperty("To")]
+        [ForeignKey("ToId")]
+        public virtual Note To { get; set; }
+        
+        public virtual TraceNoteType TraceNoteType { get; set; }
+
+        #endregion
 
         #endregion
 
@@ -42,9 +56,9 @@ namespace KNote.Repository.Entities
             // Capturar las validaciones implementadas vía atributos.
             // ---
 
-            Validator.TryValidateProperty(this.Key,
-               new ValidationContext(this, null, null) { MemberName = "Key" },
-               results);
+            //Validator.TryValidateProperty(this.Key,
+            //   new ValidationContext(this, null, null) { MemberName = "Key" },
+            //   results);
 
             //----
             // Validaciones específicas

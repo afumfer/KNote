@@ -1,39 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 using KNote.Model;
 
-namespace KNote.Repository.Entities
+namespace KNote.Repository.EntityFramework.Entities
 {
-    public class KAttributeTabulatedValue : EntityModelBase
+    public class Resource : EntityModelBase
     {
         #region Constructor
 
-        public KAttributeTabulatedValue() : base () { }
+        public Resource() : base() { }
         
         #endregion
 
         #region Property definitions
         
         [Key]
-        public Guid KAttributeTabulatedValueId { get; set; }
+        public Guid ResourceId { get; set; }
 
-        public Guid KAttributeId { get; set; }
+        [Required(ErrorMessage = "KMSG: El nombre del recurso es requerido")]
+        [MaxLength(1024)]        
+        public string Name { get; set; }
         
-        [Required(ErrorMessage = "KMSG: El valor para el atributo es requerido")]
-        [MaxLength(256)]
-        public string Value { get; set; }
+        public string Container { get; set; }
         
         public string Description { get; set; }
         
         public int Order { get; set; }
+        
+        [MaxLength(64)]
+        public string FileType { get; set; }
+        
+        public bool ContentInDB { get; set; }
+        
+        public byte[] ContentArrayBytes { get; set; }
+        
+        public Guid NoteId { get; set; }
 
         #region Virtual - navigation properties
         
-        public virtual KAttribute KAttribute { get; set; }
+        public virtual Note Note { get; set; }
 
         #endregion 
 
@@ -49,8 +57,8 @@ namespace KNote.Repository.Entities
             // Capturar las validaciones implementadas vía atributos.
             // ---
 
-            Validator.TryValidateProperty(this.Value,
-               new ValidationContext(this, null, null) { MemberName = "Value" },
+            Validator.TryValidateProperty(this.Name,
+               new ValidationContext(this, null, null) { MemberName = "Name" },
                results);
 
             //----
@@ -67,10 +75,12 @@ namespace KNote.Repository.Entities
 
             // ---
             // Retornar List<ValidationResult>()
-            // ---
+            // ---           
+
             return results;
         }
 
         #endregion
     }
 }
+

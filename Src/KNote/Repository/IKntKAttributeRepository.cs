@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using KNote.Model.Dto;
+﻿using KNote.Model.Dto;
 using KNote.Model;
 
+namespace KNote.Repository;
 
-namespace KNote.Repository
+public interface IKntKAttributeRepository : IDisposable
 {
-    public interface IKntKAttributeRepository : IDisposable
-    {
-        Task<Result<List<KAttributeInfoDto>>> GetAllAsync();
-        Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId);        
-        Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId);
-        Task<Result<KAttributeDto>> GetAsync(Guid id);        
-        Task<Result<KAttributeDto>> AddAsync(KAttributeDto entityInfo);
-        Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entityInfo);        
-        Task<Result> DeleteAsync(Guid id);
-        Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId);
-    }
+    Task<Result<List<KAttributeInfoDto>>> GetAllAsync();
+    Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId);        
+    Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId);
+    Task<Result<KAttributeDto>> GetAsync(Guid id);        
+    Task<Result<KAttributeDto>> AddAsync(KAttributeDto entityInfo);
+    Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entityInfo);        
+    Task<Result> DeleteAsync(Guid id);
+    Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId);
 }
+

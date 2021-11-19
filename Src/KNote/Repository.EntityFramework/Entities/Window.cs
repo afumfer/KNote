@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using KNote.Model;
 
 
-namespace KNote.Repository.Entities
+namespace KNote.Repository.EntityFramework.Entities
 {
     public class Window : EntityModelBase
     {

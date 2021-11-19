@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 using KNote.Model;
-using KNote.Repository.Entities;
+using KNote.Repository.EntityFramework.Entities;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace KNote.Repository.EntityFramework

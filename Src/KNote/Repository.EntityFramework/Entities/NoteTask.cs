@@ -6,7 +6,7 @@ using System.ComponentModel;
 using KNote.Model;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace KNote.Repository.Entities
+namespace KNote.Repository.EntityFramework.Entities
 {
     public class NoteTask : EntityModelBase
     {

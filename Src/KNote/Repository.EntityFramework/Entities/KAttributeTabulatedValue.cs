@@ -1,36 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 using KNote.Model;
 
-namespace KNote.Repository.Entities
+namespace KNote.Repository.EntityFramework.Entities
 {
-    public class KLog : EntityModelBase
+    public class KAttributeTabulatedValue : EntityModelBase
     {
         #region Constructor
 
-        public KLog() : base() { }
+        public KAttributeTabulatedValue() : base () { }
         
         #endregion
 
         #region Property definitions
         
         [Key]
-        public Guid KLogId { get; set; }
+        public Guid KAttributeTabulatedValueId { get; set; }
 
-        [Required(ErrorMessage = "KMSG: El Id de la entidad es requerido")]        
-        public Guid EntityId { get; set; }
+        public Guid KAttributeId { get; set; }
         
-        [Required(ErrorMessage = "KMSG: El nombre de la entidad es requerido")]
-        [MaxLength(64)]        
-        public string EntityName { get; set; }
+        [Required(ErrorMessage = "KMSG: El valor para el atributo es requerido")]
+        [MaxLength(256)]
+        public string Value { get; set; }
         
-        [Required(ErrorMessage = "KMSG: La gecha del registro es requerida")]
-        public DateTime RegistryDateTime { get; set; }
+        public string Description { get; set; }
         
-        [Required(ErrorMessage = "KMSG: El mensaje de registro es requerido")]
-        public string RegistryMessage { get; set; }
+        public int Order { get; set; }
+
+        #region Virtual - navigation properties
+        
+        public virtual KAttribute KAttribute { get; set; }
+
+        #endregion 
 
         #endregion
 
@@ -44,11 +49,9 @@ namespace KNote.Repository.Entities
             // Capturar las validaciones implementadas vía atributos.
             // ---
 
-            Validator.TryValidateProperty(this.EntityId,
-               new ValidationContext(this, null, null) { MemberName = "EntityId" },
+            Validator.TryValidateProperty(this.Value,
+               new ValidationContext(this, null, null) { MemberName = "Value" },
                results);
-
-            // TODO: Añadir aquí el resto de validaciones vía atributos ....
 
             //----
             // Validaciones específicas
@@ -64,8 +67,7 @@ namespace KNote.Repository.Entities
 
             // ---
             // Retornar List<ValidationResult>()
-            // ---           
-
+            // ---
             return results;
         }
 

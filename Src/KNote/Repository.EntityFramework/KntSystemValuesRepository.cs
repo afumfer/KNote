@@ -1,6 +1,6 @@
 ﻿using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Repository.Entities;
+using KNote.Repository.EntityFramework.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

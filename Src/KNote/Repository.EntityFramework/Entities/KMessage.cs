@@ -7,39 +7,44 @@ using System.ComponentModel.DataAnnotations;
 using KNote.Model;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace KNote.Repository.Entities
+namespace KNote.Repository.EntityFramework.Entities
 {
-    public class KEvent : EntityModelBase
+    public class KMessage: EntityModelBase
     {
         #region Constructor
 
-        public KEvent() : base() { }
+        public KMessage() : base() { }
         
         #endregion
 
         #region Property definitions
-
+        
         [Key]
-        public Guid KEventId { get; set; }
+        public Guid KMessageId { get; set; }
+
+        public Guid? UserId { get; set; }
+
+        public Guid? NoteId { get; set; }
         
-        public Guid? NoteScriptId { get; set; }
+        public EnumActionType ActionType { get; set; }
         
-        public Guid? EntityId { get; set; }
+        public EnumNotificationType NotificationType { get; set; }
         
-        [MaxLength(64)]        
-        public string EntityName { get; set; }
+        public EnumAlarmType AlarmType { get; set; }
+                
+        public string Comment { get; set; }
         
-        [MaxLength(64)]
-        public string PropertyName { get; set; }
+        public bool? AlarmActivated { get; set; }
         
-        public string PropertyValue { get; set; }
+        public DateTime? AlarmDateTime { get; set; }
         
-        public EnumEventType EventType { get; set; }
-        
+        public int? AlarmMinutes { get; set; }
+
         #region Virtual - navigation properties
+       
+        public virtual User User { get; set; }
         
-        [ForeignKey("NoteScriptId")]
-        public virtual Note NoteScript { get; set; }
+        public virtual Note Note { get; set; }
 
         #endregion 
 
@@ -55,18 +60,14 @@ namespace KNote.Repository.Entities
             // Capturar las validaciones implementadas vía atributos.
             // ---            
 
-            Validator.TryValidateProperty(this.EntityName,
-               new ValidationContext(this, null, null) { MemberName = "EntityName" },
-               results);
-
-            Validator.TryValidateProperty(this.PropertyName,
-               new ValidationContext(this, null, null) { MemberName = "PropertyName" },
+            Validator.TryValidateProperty(this.Comment,
+               new ValidationContext(this, null, null) { MemberName = "Comment" },
                results);
 
             //----
             // Validaciones específicas
             //----
-
+            
             //if (ModificationDateTime < CreationDateTime)
             //{
             //    results.Add(new ValidationResult
@@ -82,19 +83,5 @@ namespace KNote.Repository.Entities
         }
 
         #endregion
-    }
-
-    public enum EnumEventType
-    {        
-        OnCreateActionDefault,
-        OnSaveActionDefault,
-        OnDeleteActionDefault,
-        OnPropertyGetValueActionDefault,
-        OnPropertyChangeActionDefault,
-        OnCreateScriptExec,
-        OnSaveScriptExec,
-        OnDeleteScriptExec,
-        OnPropertyGetValueScriptExec,
-        OnPropertyChangeScriptExec
     }
 }

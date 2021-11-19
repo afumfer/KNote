@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Repository.Entities;
+using KNote.Repository.EntityFramework.Entities;
 using System.Transactions;
 
 namespace KNote.Repository.EntityFramework

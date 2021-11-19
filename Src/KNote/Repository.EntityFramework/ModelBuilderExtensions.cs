@@ -1,4 +1,4 @@
-﻿using KNote.Repository.Entities;
+﻿using KNote.Repository.EntityFramework.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

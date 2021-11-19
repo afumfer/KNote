@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
-using KNote.Repository.Entities;
 
 namespace KNote.Service
 {

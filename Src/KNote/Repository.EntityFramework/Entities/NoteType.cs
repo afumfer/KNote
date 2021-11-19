@@ -5,28 +5,37 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using KNote.Model;
 
-namespace KNote.Repository.Entities
+namespace KNote.Repository.EntityFramework.Entities
 {
-    public class TraceNoteType : EntityModelBase
+    public class NoteType : EntityModelBase
     {
         #region Constructor
 
-        public TraceNoteType() : base() { }        
-
+        public NoteType() : base() { }
+        
         #endregion
 
         #region Property definitions
         
         [Key]
-        public Guid TraceNoteTypeId { get; set; }
+        public Guid NoteTypeId { get; set; }
 
         [Required(ErrorMessage = "KMSG: El nombre del tipo es requerido")]
-        [MaxLength(256)]
+        [MaxLength(256)]        
         public string Name { get; set; }
         
         public string Description { get; set; }
+        
+        public Guid? ParenNoteTypeId { get; set; }
 
         #endregion
+
+        #region Virtual - navigation properties
+        
+        [ForeignKey("ParenNoteTypeId")]   
+        public virtual NoteType ParenNoteType { get; set; }
+
+        #endregion 
 
         #region Validations
 

@@ -1,41 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using KNote.Model;
 using System.ComponentModel.DataAnnotations.Schema;
 
-using KNote.Model;
-
-namespace KNote.Repository.Entities
+namespace KNote.Repository.EntityFramework.Entities
 {
-    public class NoteType : EntityModelBase
+    public class NoteKAttribute : EntityModelBase
     {
         #region Constructor
 
-        public NoteType() : base() { }
+        public NoteKAttribute() : base() { }
         
         #endregion
 
         #region Property definitions
-        
+                
         [Key]
-        public Guid NoteTypeId { get; set; }
+        public Guid NoteKAttributeId { get; set; }
 
-        [Required(ErrorMessage = "KMSG: El nombre del tipo es requerido")]
-        [MaxLength(256)]        
-        public string Name { get; set; }
+        public Guid NoteId { get; set; }
         
-        public string Description { get; set; }
+        public Guid KAttributeId { get; set; }
         
-        public Guid? ParenNoteTypeId { get; set; }
-
-        #endregion
+        public string Value { get; set; }
 
         #region Virtual - navigation properties
+
+        public virtual Note Note { get; set; }
         
-        [ForeignKey("ParenNoteTypeId")]   
-        public virtual NoteType ParenNoteType { get; set; }
+        public virtual KAttribute KAttribute { get; set; }
 
         #endregion 
+
+        #endregion
 
         #region Validations
 
@@ -45,17 +43,16 @@ namespace KNote.Repository.Entities
 
             // ---
             // Capturar las validaciones implementadas vía atributos.
-            // ---
+            // ---            
 
-            Validator.TryValidateProperty(this.Name,
-               new ValidationContext(this, null, null) { MemberName = "Name" },
-               results);
+            //Validator.TryValidateProperty(this.Name,
+            //   new ValidationContext(this, null, null) { MemberName = "Name" },
+            //   results);
 
             //----
             // Validaciones específicas
             //----
-
-            // ---- Ejemplo
+            
             //if (ModificationDateTime < CreationDateTime)
             //{
             //    results.Add(new ValidationResult
@@ -70,7 +67,7 @@ namespace KNote.Repository.Entities
             return results;
         }
 
+
         #endregion
     }
 }
-
