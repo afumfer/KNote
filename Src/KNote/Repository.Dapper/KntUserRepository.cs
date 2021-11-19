@@ -1,301 +1,294 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using System.Linq;
-
-using System.Data.Common;
+﻿using System.Data.Common;
 using Dapper;
-
 using KNote.Model;
 using KNote.Model.Dto;
 
-namespace KNote.Repository.Dapper
-{
-    public class KntUserRepository : KntRepositoryBase, IKntUserRepository
-    {        
-        public KntUserRepository(DbConnection singletonConnection, RepositoryRef repositoryRef) 
-            : base(singletonConnection, repositoryRef)
-        {
-        }
+namespace KNote.Repository.Dapper;
 
-        public KntUserRepository(RepositoryRef repositoryRef)
-            : base(repositoryRef)
-        {
-        }
+public class KntUserRepository : KntRepositoryBase, IKntUserRepository
+{        
+    public KntUserRepository(DbConnection singletonConnection, RepositoryRef repositoryRef) 
+        : base(singletonConnection, repositoryRef)
+    {
+    }
 
-        public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
+    public KntUserRepository(RepositoryRef repositoryRef)
+        : base(repositoryRef)
+    {
+    }
+
+    public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
+    {
+        var result = new Result<List<UserDto>>();
+        try
         {
-            var result = new Result<List<UserDto>>();
-            try
+            var db = GetOpenConnection();
+
+            IEnumerable<UserDto> entity;
+
+            var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users] ORDER BY UserName ";
+
+            if (pagination != null)
             {
-                var db = GetOpenConnection();
-
-                IEnumerable<UserDto> entity;
-
-                var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users] ORDER BY UserName ";
-
-                if (pagination != null)
-                {
-                    if (db.GetType().Name == "SqliteConnection")
-                        sql += " LIMIT @NumRecords OFFSET @Offset ;";
-                    else
-                        sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
-
-                    entity = await db.QueryAsync<UserDto>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
-                }
+                if (db.GetType().Name == "SqliteConnection")
+                    sql += " LIMIT @NumRecords OFFSET @Offset ;";
                 else
-                {
-                    entity = await db.QueryAsync<UserDto>(sql.ToString(), new { });
-                }
+                    sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+
+                entity = await db.QueryAsync<UserDto>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
+            }
+            else
+            {
+                entity = await db.QueryAsync<UserDto>(sql.ToString(), new { });
+            }
                                                                         
-                result.Entity = entity.ToList();
-                result.TotalCount = (await GetCount()).Entity;
+            result.Entity = entity.ToList();
+            result.TotalCount = (await GetCount()).Entity;
 
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
+            await CloseIsTempConnection(db);
         }
-
-        public async Task<Result<long>> GetCount()
+        catch (Exception ex)
         {
-            var resService = new Result<long>();
-
-            try
-            {
-                var db = GetOpenConnection();
-
-                var sql = "SELECT COUNT(*) FROM Users";
-                resService.Entity = await db.ExecuteScalarAsync<long>(sql);
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
-            }
-
-            return ResultDomainAction(resService);
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
         }
+        return ResultDomainAction(result);
+    }
 
-        public async Task<Result<UserDto>> GetAsync(Guid id)
-        {            
-            var result = new Result<UserDto>();
-            try
-            {
-                var db = GetOpenConnection();
+    public async Task<Result<long>> GetCount()
+    {
+        var resService = new Result<long>();
 
-                var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]  
-                        WHERE UserId = @Id";
-
-                var entity = await db.QueryFirstOrDefaultAsync<UserDto>(sql.ToString(), new { Id = id });
-
-                if (entity == null)
-                    result.AddErrorMessage("Entity not found.");
-
-                result.Entity = entity;
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
-        public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
+        try
         {
-            var result = new Result<UserDto>();
-            try
-            {
-                var db = GetOpenConnection();
+            var db = GetOpenConnection();
 
-                var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]  
-                        WHERE UserName = @userName";
+            var sql = "SELECT COUNT(*) FROM Users";
+            resService.Entity = await db.ExecuteScalarAsync<long>(sql);
 
-                var entity = await db.QueryFirstOrDefaultAsync<UserDto>(sql.ToString(), new { userName });
-
-                if (entity == null)
-                    result.AddErrorMessage("Entity not found.");
-
-                result.Entity = entity;
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
+            await CloseIsTempConnection(db);
         }
-
-        public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
-        {            
-            var result = new Result<UserInternalDto>();
-            try
-            {
-                var db = GetOpenConnection();
-
-                var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled], [PasswordHash], [PasswordSalt] FROM [Users]  
-                        WHERE UserName = @UserName";
-
-                var entity = await db.QueryFirstOrDefaultAsync<UserInternalDto>(sql.ToString(), new { UserName = userName });
-
-                if (entity == null)
-                    result.AddErrorMessage("Entity not found.");
-
-                result.Entity = entity;
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
-        }
-
-        public async Task<Result<UserDto>> AddAsync(UserDto entity)
+        catch (Exception ex)
         {
-            var result = new Result<UserDto>();
-            try
-            {
-                var db = GetOpenConnection();
-
-                var sql = @"INSERT INTO Users (UserId, UserName, EMail, FullName, RoleDefinition, Disabled )
-                            VALUES (@UserId, @UserName, @EMail, @FullName, @RoleDefinition, @Disabled)";
-
-                var r = await db.ExecuteAsync(sql.ToString(),
-                    new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled });
-
-                if (r == 0)
-                    result.ErrorList.Add("Entity not inserted");
-
-                result.Entity = entity;
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
+            AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
         }
 
-        public async Task<Result<UserDto>> UpdateAsync(UserDto entity)
+        return ResultDomainAction(resService);
+    }
+
+    public async Task<Result<UserDto>> GetAsync(Guid id)
+    {            
+        var result = new Result<UserDto>();
+        try
         {
-            var result = new Result<UserDto>();
-            try
-            {
-                var db = GetOpenConnection();
+            var db = GetOpenConnection();
 
-                var sql = @"UPDATE Users SET 
-                        UserName = @UserName, 
-                        EMail = @EMail, 
-                        FullName = @FullName, 
-                        RoleDefinition = @RoleDefinition, 
-                        Disabled = @Disabled
-                    WHERE UserId = @UserId";
+            var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]  
+                    WHERE UserId = @Id";
 
-                var r = await db.ExecuteAsync(sql.ToString(),
-                    new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled });
+            var entity = await db.QueryFirstOrDefaultAsync<UserDto>(sql.ToString(), new { Id = id });
 
-                if (r == 0)
-                    result.ErrorList.Add("Entity not updated");
+            if (entity == null)
+                result.AddErrorMessage("Entity not found.");
 
-                result.Entity = entity;
+            result.Entity = entity;
 
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
+            await CloseIsTempConnection(db);
         }
-
-        public async Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto entity)
+        catch (Exception ex)
         {
-            var result = new Result<UserInternalDto>();
-            try
-            {
-                var db = GetOpenConnection();
-
-                var sql = @"INSERT INTO Users (UserId, UserName, EMail, FullName, RoleDefinition, Disabled, PasswordHash, PasswordSalt )
-                            VALUES (@UserId, @UserName, @EMail, @FullName, @RoleDefinition, @Disabled, @PasswordHash, @PasswordSalt)";
-
-                var r = await db.ExecuteAsync(sql.ToString(),
-                    new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled, entity.PasswordHash, entity.PasswordSalt });
-
-                if (r == 0)
-                    result.ErrorList.Add("Entity not inserted");
-
-                result.Entity = entity;
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
         }
+        return ResultDomainAction(result);
+    }
 
-        public async Task<Result> DeleteAsync(Guid id)
+    public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
+    {
+        var result = new Result<UserDto>();
+        try
         {
-            var result = new Result();
-            try
-            {
-                var db = GetOpenConnection();
+            var db = GetOpenConnection();
 
-                var sql = @"DELETE FROM Users WHERE UserId = @Id";
+            var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]  
+                    WHERE UserName = @userName";
 
-                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
+            var entity = await db.QueryFirstOrDefaultAsync<UserDto>(sql.ToString(), new { userName });
 
-                if (r == 0)
-                    result.AddErrorMessage("Entity not deleted");
+            if (entity == null)
+                result.AddErrorMessage("Entity not found.");
 
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
+            result.Entity = entity;
+
+            await CloseIsTempConnection(db);
         }
-
-        public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
+        catch (Exception ex)
         {
-            var result = new Result<List<KMessageDto>>();
-            try
-            {
-                var db = GetOpenConnection();
-
-                var sql = @"
-                    SELECT                        
-                        KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
-                        KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
-                        KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
-                    FROM  KMessages INNER JOIN
-                         Users ON KMessages.UserId = Users.UserId
-                    WHERE (KMessages.UserId = @userId)
-                    -- ORDER BY [KMessages.AlarmDateTime];";
-
-                var entity = await db.QueryAsync<KMessageDto>(sql.ToString(), new { userId });
-                result.Entity = entity.ToList();
-
-                await CloseIsTempConnection(db);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
-            }
-            return ResultDomainAction(result);
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
         }
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
+    {            
+        var result = new Result<UserInternalDto>();
+        try
+        {
+            var db = GetOpenConnection();
+
+            var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled], [PasswordHash], [PasswordSalt] FROM [Users]  
+                    WHERE UserName = @UserName";
+
+            var entity = await db.QueryFirstOrDefaultAsync<UserInternalDto>(sql.ToString(), new { UserName = userName });
+
+            if (entity == null)
+                result.AddErrorMessage("Entity not found.");
+
+            result.Entity = entity;
+
+            await CloseIsTempConnection(db);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+        }
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserDto>> AddAsync(UserDto entity)
+    {
+        var result = new Result<UserDto>();
+        try
+        {
+            var db = GetOpenConnection();
+
+            var sql = @"INSERT INTO Users (UserId, UserName, EMail, FullName, RoleDefinition, Disabled )
+                        VALUES (@UserId, @UserName, @EMail, @FullName, @RoleDefinition, @Disabled)";
+
+            var r = await db.ExecuteAsync(sql.ToString(),
+                new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled });
+
+            if (r == 0)
+                result.ErrorList.Add("Entity not inserted");
+
+            result.Entity = entity;
+
+            await CloseIsTempConnection(db);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+        }
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserDto>> UpdateAsync(UserDto entity)
+    {
+        var result = new Result<UserDto>();
+        try
+        {
+            var db = GetOpenConnection();
+
+            var sql = @"UPDATE Users SET 
+                    UserName = @UserName, 
+                    EMail = @EMail, 
+                    FullName = @FullName, 
+                    RoleDefinition = @RoleDefinition, 
+                    Disabled = @Disabled
+                WHERE UserId = @UserId";
+
+            var r = await db.ExecuteAsync(sql.ToString(),
+                new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled });
+
+            if (r == 0)
+                result.ErrorList.Add("Entity not updated");
+
+            result.Entity = entity;
+
+            await CloseIsTempConnection(db);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+        }
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto entity)
+    {
+        var result = new Result<UserInternalDto>();
+        try
+        {
+            var db = GetOpenConnection();
+
+            var sql = @"INSERT INTO Users (UserId, UserName, EMail, FullName, RoleDefinition, Disabled, PasswordHash, PasswordSalt )
+                        VALUES (@UserId, @UserName, @EMail, @FullName, @RoleDefinition, @Disabled, @PasswordHash, @PasswordSalt)";
+
+            var r = await db.ExecuteAsync(sql.ToString(),
+                new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled, entity.PasswordHash, entity.PasswordSalt });
+
+            if (r == 0)
+                result.ErrorList.Add("Entity not inserted");
+
+            result.Entity = entity;
+
+            await CloseIsTempConnection(db);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+        }
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result> DeleteAsync(Guid id)
+    {
+        var result = new Result();
+        try
+        {
+            var db = GetOpenConnection();
+
+            var sql = @"DELETE FROM Users WHERE UserId = @Id";
+
+            var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
+
+            if (r == 0)
+                result.AddErrorMessage("Entity not deleted");
+
+            await CloseIsTempConnection(db);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+        }
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
+    {
+        var result = new Result<List<KMessageDto>>();
+        try
+        {
+            var db = GetOpenConnection();
+
+            var sql = @"
+                SELECT                        
+                    KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
+                    KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
+                    KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
+                FROM  KMessages INNER JOIN
+                        Users ON KMessages.UserId = Users.UserId
+                WHERE (KMessages.UserId = @userId)
+                -- ORDER BY [KMessages.AlarmDateTime];";
+
+            var entity = await db.QueryAsync<KMessageDto>(sql.ToString(), new { userId });
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+        }
+        return ResultDomainAction(result);
     }
 }
+

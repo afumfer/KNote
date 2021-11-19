@@ -59,7 +59,7 @@ namespace KNote.ClientWin.Views
             this.buttonCancel.Location = new System.Drawing.Point(501, 249);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
-            this.buttonCancel.TabIndex = 10;
+            this.buttonCancel.TabIndex = 8;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -70,7 +70,7 @@ namespace KNote.ClientWin.Views
             this.buttonAccept.Location = new System.Drawing.Point(418, 249);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 9;
+            this.buttonAccept.TabIndex = 7;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
@@ -103,7 +103,7 @@ namespace KNote.ClientWin.Views
             this.buttonCaptionTextColor.Location = new System.Drawing.Point(399, 69);
             this.buttonCaptionTextColor.Name = "buttonCaptionTextColor";
             this.buttonCaptionTextColor.Size = new System.Drawing.Size(171, 26);
-            this.buttonCaptionTextColor.TabIndex = 11;
+            this.buttonCaptionTextColor.TabIndex = 4;
             this.buttonCaptionTextColor.Text = "Change caption text color ...";
             this.buttonCaptionTextColor.UseVisualStyleBackColor = true;
             this.buttonCaptionTextColor.Click += new System.EventHandler(this.buttonStyle_Click);
@@ -113,7 +113,7 @@ namespace KNote.ClientWin.Views
             this.buttonNoteFont.Location = new System.Drawing.Point(399, 180);
             this.buttonNoteFont.Name = "buttonNoteFont";
             this.buttonNoteFont.Size = new System.Drawing.Size(171, 26);
-            this.buttonNoteFont.TabIndex = 10;
+            this.buttonNoteFont.TabIndex = 6;
             this.buttonNoteFont.Text = "Change note font ...";
             this.buttonNoteFont.UseVisualStyleBackColor = true;
             this.buttonNoteFont.Click += new System.EventHandler(this.buttonStyle_Click);
@@ -123,7 +123,7 @@ namespace KNote.ClientWin.Views
             this.buttonNoteColor.Location = new System.Drawing.Point(399, 148);
             this.buttonNoteColor.Name = "buttonNoteColor";
             this.buttonNoteColor.Size = new System.Drawing.Size(171, 26);
-            this.buttonNoteColor.TabIndex = 9;
+            this.buttonNoteColor.TabIndex = 5;
             this.buttonNoteColor.Text = "Change note color ...";
             this.buttonNoteColor.UseVisualStyleBackColor = true;
             this.buttonNoteColor.Click += new System.EventHandler(this.buttonStyle_Click);
@@ -133,8 +133,8 @@ namespace KNote.ClientWin.Views
             this.buttonBlue.Location = new System.Drawing.Point(9, 100);
             this.buttonBlue.Name = "buttonBlue";
             this.buttonBlue.Size = new System.Drawing.Size(139, 26);
-            this.buttonBlue.TabIndex = 8;
-            this.buttonBlue.Text = "Blue";
+            this.buttonBlue.TabIndex = 2;
+            this.buttonBlue.Text = "Blue style ";
             this.buttonBlue.UseVisualStyleBackColor = true;
             this.buttonBlue.Click += new System.EventHandler(this.buttonStyle_Click);
             // 
@@ -143,8 +143,8 @@ namespace KNote.ClientWin.Views
             this.buttonGray.Location = new System.Drawing.Point(9, 68);
             this.buttonGray.Name = "buttonGray";
             this.buttonGray.Size = new System.Drawing.Size(139, 26);
-            this.buttonGray.TabIndex = 7;
-            this.buttonGray.Text = "Gray";
+            this.buttonGray.TabIndex = 1;
+            this.buttonGray.Text = "Dark style ";
             this.buttonGray.UseVisualStyleBackColor = true;
             this.buttonGray.Click += new System.EventHandler(this.buttonStyle_Click);
             // 
@@ -200,8 +200,8 @@ namespace KNote.ClientWin.Views
             this.buttonYellow.Location = new System.Drawing.Point(9, 36);
             this.buttonYellow.Name = "buttonYellow";
             this.buttonYellow.Size = new System.Drawing.Size(139, 26);
-            this.buttonYellow.TabIndex = 1;
-            this.buttonYellow.Text = "Yellow";
+            this.buttonYellow.TabIndex = 0;
+            this.buttonYellow.Text = "Yellow style ";
             this.buttonYellow.UseVisualStyleBackColor = true;
             this.buttonYellow.Click += new System.EventHandler(this.buttonStyle_Click);
             // 

@@ -122,7 +122,10 @@
 
             <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
             <div class="input-group col-sm-5" id="atrNoteType">
-                <select class="form-control col-sm-11" @bind="@NoteTypeControl">
+                <InputSelect class="form-control col-sm11"
+                                Value="@Note.NoteTypeId"
+                                ValueChanged="@((Guid? noteTypeId) => OnChangeNoteTypeActions(noteTypeId))"
+                                ValueExpression="@(() => Note.NoteTypeId)">
                     <option></option>
                     @if (NoteTypes != null)
                     {
@@ -131,7 +134,7 @@
                             <option value=@ntype.NoteTypeId>@ntype.Name</option>
                         }
                     }
-                </select>
+                </InputSelect>                
                 <ValidationMessage For="@(() => Note.NoteTypeId)" />
             </div>
         </div>
@@ -496,26 +499,12 @@
 
     #region NoteType change control
 
-    public Guid? NoteTypeControl
+    private async void OnChangeNoteTypeActions(Guid? noteType)
     {
-        get
-        {
-            return Note.NoteTypeId;
-        }
-        set
-        {
-            Note.NoteTypeId = value;
-            OnChangeNoteTypeActions();
-        }
-    }
+        Note.NoteTypeId = noteType;
 
-    private async void OnChangeNoteTypeActions()
-    {
         if (Note.NoteTypeId == null)
         {
-            //if (oldNoteType != null)
-            //Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
-
             Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
 
             oldNoteType = null;
@@ -534,9 +523,6 @@
         else
         {
             var listA = result.Entity;
-
-            //if (oldNoteType != null)
-            //    Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId == oldNoteType);
 
             Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
 
