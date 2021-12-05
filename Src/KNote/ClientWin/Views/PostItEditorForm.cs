@@ -116,7 +116,7 @@ namespace KNote.ClientWin.Views
             ModelToControlsPostIt(true, _com.ForceAlwaysTop);
         }
 
-        private void InitializeComponentEditor()
+        private async void InitializeComponentEditor()
         {
             if (_com.Model?.ContentType == "html")
             {
@@ -125,6 +125,23 @@ namespace KNote.ClientWin.Views
                 htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                     | System.Windows.Forms.AnchorStyles.Left)
                     | System.Windows.Forms.AnchorStyles.Right)));                
+            }
+            else if (_com.Model?.ContentType == "navigation")
+            {
+                webView2.Location = new System.Drawing.Point(3, 28);
+                webView2.Size = new System.Drawing.Size(472, 292);
+                webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                    | System.Windows.Forms.AnchorStyles.Left)
+                    | System.Windows.Forms.AnchorStyles.Right)));
+
+                webView2.NavigationStarting += WebView2_NavigationStarting; ;
+
+                await webView2.EnsureCoreWebView2Async(null);
+
+                if ((webView2 == null) || (webView2.CoreWebView2 == null))
+                {
+                    MessageBox.Show("WebView2 not ready");
+                }
             }
             else
             {
@@ -338,17 +355,30 @@ namespace KNote.ClientWin.Views
             TopMost = tmpTopMost;
         }
 
+        private void WebView2_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
+        {
+            
+        }
+
         #endregion
 
         #region private Methods
 
-        private void ModelToControls()
+        private async void ModelToControls()
         {
             labelCaption.Text = _com.Model.Topic;
             RefreshStatus();
             _selectedFolderId = _com.Model.FolderId;            
-            if (_com.Model?.ContentType == "html")                            
-                htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);            
+            if (_com.Model?.ContentType == "html")
+                htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
+            else if (_com.Model?.ContentType == "navigation")
+            {                
+                if ((webView2 == null) || (webView2.CoreWebView2 == null))                
+                    await webView2.EnsureCoreWebView2Async(null);                
+                if (!string.IsNullOrEmpty(_com.Model.Description))
+                    webView2.CoreWebView2.Navigate(_com.Model.Description);
+                textDescription.Text = _com.Model.Description;
+            }
             else
             {             
                 textDescription.Text = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
@@ -360,6 +390,8 @@ namespace KNote.ClientWin.Views
         {
             if (_com.Model.ContentType == "html")
                 _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
+            else if (_com.Model.ContentType == "navigation")
+                _com.Model.Description = textDescription.Text;
             else
                 _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);
 
@@ -374,6 +406,10 @@ namespace KNote.ClientWin.Views
             if (_com.Model?.ContentType == "html")
             {
                 htmlDescription.Visible = true;
+            }
+            if (_com.Model?.ContentType == "navigation")
+            {
+                webView2.Visible = true;
             }
             else
             {
