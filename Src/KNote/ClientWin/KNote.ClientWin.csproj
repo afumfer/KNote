@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.26.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="6.0.101-preview.10.2068" />
     <PackageReference Include="ReverseMarkdown" Version="3.20.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.IO.Ports" Version="6.0.0" />

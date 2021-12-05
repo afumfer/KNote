@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LabForm));
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabControlLab = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -51,24 +51,38 @@
             this.buttonRunScript = new System.Windows.Forms.Button();
             this.tabRichEditor = new System.Windows.Forms.TabPage();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
+            this.tabWebView2 = new System.Windows.Forms.TabPage();
+            this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            this.btnGoBack = new System.Windows.Forms.Button();
+            this.btnNavigate = new System.Windows.Forms.Button();
+            this.textStatusWebView2 = new System.Windows.Forms.TextBox();
+            this.textUrlWebView2 = new System.Windows.Forms.TextBox();
+            this.tabBlazorWebView = new System.Windows.Forms.TabPage();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.tabControl1.SuspendLayout();
+            this.tabControlLab.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
             this.groupSamples.SuspendLayout();
             this.tabRichEditor.SuspendLayout();
+            this.tabWebView2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
             this.SuspendLayout();
             // 
-            // tabControl1
+            // tabControlLab
             // 
-            this.tabControl1.Controls.Add(this.tabAppLab);
-            this.tabControl1.Controls.Add(this.tabKntScriptLab);
-            this.tabControl1.Controls.Add(this.tabRichEditor);
-            this.tabControl1.Location = new System.Drawing.Point(12, 12);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(670, 577);
-            this.tabControl1.TabIndex = 4;
+            this.tabControlLab.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControlLab.Controls.Add(this.tabAppLab);
+            this.tabControlLab.Controls.Add(this.tabKntScriptLab);
+            this.tabControlLab.Controls.Add(this.tabRichEditor);
+            this.tabControlLab.Controls.Add(this.tabWebView2);
+            this.tabControlLab.Controls.Add(this.tabBlazorWebView);
+            this.tabControlLab.Location = new System.Drawing.Point(12, 12);
+            this.tabControlLab.Name = "tabControlLab";
+            this.tabControlLab.SelectedIndex = 0;
+            this.tabControlLab.Size = new System.Drawing.Size(670, 577);
+            this.tabControlLab.TabIndex = 4;
             // 
             // tabAppLab
             // 
@@ -298,33 +312,111 @@
             this.htmlDescription.InnerText = null;
             this.htmlDescription.Location = new System.Drawing.Point(14, 15);
             this.htmlDescription.Name = "htmlDescription";
-            this.htmlDescription.Size = new System.Drawing.Size(634, 287);
+            this.htmlDescription.Size = new System.Drawing.Size(634, 520);
             this.htmlDescription.TabIndex = 10;
+            // 
+            // tabWebView2
+            // 
+            this.tabWebView2.Controls.Add(this.webView2);
+            this.tabWebView2.Controls.Add(this.btnGoBack);
+            this.tabWebView2.Controls.Add(this.btnNavigate);
+            this.tabWebView2.Controls.Add(this.textStatusWebView2);
+            this.tabWebView2.Controls.Add(this.textUrlWebView2);
+            this.tabWebView2.Location = new System.Drawing.Point(4, 24);
+            this.tabWebView2.Name = "tabWebView2";
+            this.tabWebView2.Size = new System.Drawing.Size(662, 549);
+            this.tabWebView2.TabIndex = 3;
+            this.tabWebView2.Text = "WebView2";
+            this.tabWebView2.UseVisualStyleBackColor = true;
+            // 
+            // webView2
+            // 
+            this.webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.webView2.CreationProperties = null;
+            this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
+            this.webView2.Location = new System.Drawing.Point(3, 32);
+            this.webView2.Name = "webView2";
+            this.webView2.Size = new System.Drawing.Size(656, 485);
+            this.webView2.TabIndex = 4;
+            this.webView2.ZoomFactor = 1D;
+            // 
+            // btnGoBack
+            // 
+            this.btnGoBack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnGoBack.Location = new System.Drawing.Point(585, 3);
+            this.btnGoBack.Name = "btnGoBack";
+            this.btnGoBack.Size = new System.Drawing.Size(74, 23);
+            this.btnGoBack.TabIndex = 3;
+            this.btnGoBack.Text = "Go back";
+            this.btnGoBack.UseVisualStyleBackColor = true;
+            this.btnGoBack.Click += new System.EventHandler(this.btnGoBack_Click);
+            // 
+            // btnNavigate
+            // 
+            this.btnNavigate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnNavigate.Location = new System.Drawing.Point(505, 3);
+            this.btnNavigate.Name = "btnNavigate";
+            this.btnNavigate.Size = new System.Drawing.Size(74, 23);
+            this.btnNavigate.TabIndex = 2;
+            this.btnNavigate.Text = "Navigate";
+            this.btnNavigate.UseVisualStyleBackColor = true;
+            this.btnNavigate.Click += new System.EventHandler(this.btnNavigate_Click);
+            // 
+            // textStatusWebView2
+            // 
+            this.textStatusWebView2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textStatusWebView2.Location = new System.Drawing.Point(3, 523);
+            this.textStatusWebView2.Name = "textStatusWebView2";
+            this.textStatusWebView2.Size = new System.Drawing.Size(656, 23);
+            this.textStatusWebView2.TabIndex = 1;
+            // 
+            // textUrlWebView2
+            // 
+            this.textUrlWebView2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textUrlWebView2.Location = new System.Drawing.Point(3, 3);
+            this.textUrlWebView2.Name = "textUrlWebView2";
+            this.textUrlWebView2.Size = new System.Drawing.Size(496, 23);
+            this.textUrlWebView2.TabIndex = 0;
+            this.textUrlWebView2.Text = "https://www.gobiernodecanarias.org/educacion/9/pekweb/ekade";
+            // 
+            // tabBlazorWebView
+            // 
+            this.tabBlazorWebView.Location = new System.Drawing.Point(4, 24);
+            this.tabBlazorWebView.Name = "tabBlazorWebView";
+            this.tabBlazorWebView.Size = new System.Drawing.Size(662, 549);
+            this.tabBlazorWebView.TabIndex = 4;
+            this.tabBlazorWebView.Text = "Blazor WebView";
+            this.tabBlazorWebView.UseVisualStyleBackColor = true;
             // 
             // LabForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(689, 601);
-            this.Controls.Add(this.tabControl1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.ClientSize = new System.Drawing.Size(690, 595);
+            this.Controls.Add(this.tabControlLab);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
             this.Name = "LabForm";
             this.Text = "KntScript AppHost demo";
             this.Load += new System.EventHandler(this.DemoForm_Load);
-            this.tabControl1.ResumeLayout(false);
+            this.tabControlLab.ResumeLayout(false);
             this.tabAppLab.ResumeLayout(false);
             this.tabAppLab.PerformLayout();
             this.tabKntScriptLab.ResumeLayout(false);
             this.groupSamples.ResumeLayout(false);
             this.tabRichEditor.ResumeLayout(false);
+            this.tabWebView2.ResumeLayout(false);
+            this.tabWebView2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl tabControlLab;
         private System.Windows.Forms.TabPage tabAppLab;
         private System.Windows.Forms.TabPage tabKntScriptLab;
         private System.Windows.Forms.Button buttonRunBackground;
@@ -347,5 +439,12 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
+        private TabPage tabWebView2;
+        private TabPage tabBlazorWebView;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
+        private Button btnGoBack;
+        private Button btnNavigate;
+        private TextBox textStatusWebView2;
+        private TextBox textUrlWebView2;
     }
 }

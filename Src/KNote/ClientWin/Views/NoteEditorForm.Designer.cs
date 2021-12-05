@@ -49,9 +49,11 @@
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabNoteData = new System.Windows.Forms.TabControl();
             this.tabBasicData = new System.Windows.Forms.TabPage();
+            this.buttonNavigate = new System.Windows.Forms.Button();
             this.textStatus = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.panelDescription = new System.Windows.Forms.Panel();
+            this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.textDescription = new System.Windows.Forms.TextBox();
             this.toolDescription = new System.Windows.Forms.ToolStrip();
@@ -158,6 +160,7 @@
             this.tabNoteData.SuspendLayout();
             this.tabBasicData.SuspendLayout();
             this.panelDescription.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
             this.toolDescription.SuspendLayout();
             this.tabAttributes.SuspendLayout();
             this.tabResources.SuspendLayout();
@@ -353,6 +356,7 @@
             // 
             // tabBasicData
             // 
+            this.tabBasicData.Controls.Add(this.buttonNavigate);
             this.tabBasicData.Controls.Add(this.textStatus);
             this.tabBasicData.Controls.Add(this.label8);
             this.tabBasicData.Controls.Add(this.panelDescription);
@@ -381,6 +385,18 @@
             this.tabBasicData.Text = "Basic data  ";
             this.tabBasicData.UseVisualStyleBackColor = true;
             // 
+            // buttonNavigate
+            // 
+            this.buttonNavigate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonNavigate.Location = new System.Drawing.Point(706, 105);
+            this.buttonNavigate.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.buttonNavigate.Name = "buttonNavigate";
+            this.buttonNavigate.Size = new System.Drawing.Size(80, 24);
+            this.buttonNavigate.TabIndex = 57;
+            this.buttonNavigate.Text = "Navigate";
+            this.buttonNavigate.UseVisualStyleBackColor = true;
+            this.buttonNavigate.Click += new System.EventHandler(this.buttonNavigate_Click);
+            // 
             // textStatus
             // 
             this.textStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -408,20 +424,32 @@
             this.panelDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelDescription.Controls.Add(this.webView2);
             this.panelDescription.Controls.Add(this.htmlDescription);
             this.panelDescription.Controls.Add(this.textDescription);
             this.panelDescription.Controls.Add(this.toolDescription);
             this.panelDescription.Location = new System.Drawing.Point(14, 142);
             this.panelDescription.Name = "panelDescription";
-            this.panelDescription.Size = new System.Drawing.Size(621, 376);
+            this.panelDescription.Size = new System.Drawing.Size(538, 339);
             this.panelDescription.TabIndex = 55;
+            // 
+            // webView2
+            // 
+            this.webView2.CreationProperties = null;
+            this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
+            this.webView2.Location = new System.Drawing.Point(40, 221);
+            this.webView2.Name = "webView2";
+            this.webView2.Size = new System.Drawing.Size(277, 77);
+            this.webView2.TabIndex = 9;
+            this.webView2.Visible = false;
+            this.webView2.ZoomFactor = 1D;
             // 
             // htmlDescription
             // 
             this.htmlDescription.InnerText = null;
             this.htmlDescription.Location = new System.Drawing.Point(40, 116);
             this.htmlDescription.Name = "htmlDescription";
-            this.htmlDescription.Size = new System.Drawing.Size(277, 125);
+            this.htmlDescription.Size = new System.Drawing.Size(277, 88);
             this.htmlDescription.TabIndex = 8;
             // 
             // textDescription
@@ -447,7 +475,7 @@
             this.toolDescriptionUploadResourceFromClipboard});
             this.toolDescription.Location = new System.Drawing.Point(0, 0);
             this.toolDescription.Name = "toolDescription";
-            this.toolDescription.Size = new System.Drawing.Size(30, 376);
+            this.toolDescription.Size = new System.Drawing.Size(30, 339);
             this.toolDescription.TabIndex = 0;
             this.toolDescription.Text = "Tool description editor";
             // 
@@ -692,7 +720,7 @@
             this.buttonEditMarkdown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonEditMarkdown.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.buttonEditMarkdown.ImageList = this.imageListTabNoteData;
-            this.buttonEditMarkdown.Location = new System.Drawing.Point(658, 105);
+            this.buttonEditMarkdown.Location = new System.Drawing.Point(542, 105);
             this.buttonEditMarkdown.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonEditMarkdown.Name = "buttonEditMarkdown";
             this.buttonEditMarkdown.Size = new System.Drawing.Size(79, 24);
@@ -704,12 +732,12 @@
             // buttonViewHtml
             // 
             this.buttonViewHtml.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonViewHtml.Location = new System.Drawing.Point(740, 105);
+            this.buttonViewHtml.Location = new System.Drawing.Point(624, 105);
             this.buttonViewHtml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonViewHtml.Name = "buttonViewHtml";
-            this.buttonViewHtml.Size = new System.Drawing.Size(46, 24);
+            this.buttonViewHtml.Size = new System.Drawing.Size(80, 24);
             this.buttonViewHtml.TabIndex = 6;
-            this.buttonViewHtml.Text = "Html";
+            this.buttonViewHtml.Text = "Html editor";
             this.buttonViewHtml.UseVisualStyleBackColor = true;
             this.buttonViewHtml.Click += new System.EventHandler(this.buttonViewHtml_Click);
             // 
@@ -728,7 +756,7 @@
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(103, 18);
             this.label6.TabIndex = 44;
-            this.label6.Text = "Description:";
+            this.label6.Text = "Content:";
             // 
             // textTags
             // 
@@ -870,7 +898,6 @@
             this.listViewAttributes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewAttributes.HideSelection = false;
             this.listViewAttributes.Location = new System.Drawing.Point(10, 79);
             this.listViewAttributes.MultiSelect = false;
             this.listViewAttributes.Name = "listViewAttributes";
@@ -1034,7 +1061,6 @@
             // 
             this.listViewResources.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.listViewResources.HideSelection = false;
             this.listViewResources.Location = new System.Drawing.Point(5, 36);
             this.listViewResources.MultiSelect = false;
             this.listViewResources.Name = "listViewResources";
@@ -1166,7 +1192,6 @@
             // 
             this.listViewTasks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.listViewTasks.HideSelection = false;
             this.listViewTasks.Location = new System.Drawing.Point(5, 36);
             this.listViewTasks.MultiSelect = false;
             this.listViewTasks.Name = "listViewTasks";
@@ -1242,7 +1267,6 @@
             this.listViewAlarms.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewAlarms.HideSelection = false;
             this.listViewAlarms.Location = new System.Drawing.Point(6, 34);
             this.listViewAlarms.MultiSelect = false;
             this.listViewAlarms.Name = "listViewAlarms";
@@ -1365,7 +1389,6 @@
             this.listViewTraceNoteTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewTraceNoteTo.HideSelection = false;
             this.listViewTraceNoteTo.Location = new System.Drawing.Point(395, 89);
             this.listViewTraceNoteTo.Name = "listViewTraceNoteTo";
             this.listViewTraceNoteTo.Size = new System.Drawing.Size(393, 477);
@@ -1376,7 +1399,6 @@
             // 
             this.listViewTraceNoteFrom.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.listViewTraceNoteFrom.HideSelection = false;
             this.listViewTraceNoteFrom.Location = new System.Drawing.Point(11, 89);
             this.listViewTraceNoteFrom.MultiSelect = false;
             this.listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
@@ -1523,6 +1545,7 @@
             this.tabBasicData.PerformLayout();
             this.panelDescription.ResumeLayout(false);
             this.panelDescription.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
             this.toolDescription.ResumeLayout(false);
             this.toolDescription.PerformLayout();
             this.tabAttributes.ResumeLayout(false);
@@ -1670,5 +1693,7 @@
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Button buttonSaveResource;
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
+        private Button buttonNavigate;
     }
 }
