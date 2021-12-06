@@ -35,6 +35,7 @@ namespace KNote.ClientWin.Views
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabOptions = new System.Windows.Forms.TabControl();
             this.tabGlobalOptions = new System.Windows.Forms.TabPage();
+            this.checkCompactViewNotesList = new System.Windows.Forms.CheckBox();
             this.textAutosaveSeconds = new System.Windows.Forms.TextBox();
             this.textAlarmSeconds = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -43,6 +44,7 @@ namespace KNote.ClientWin.Views
             this.checkAlarmActivated = new System.Windows.Forms.CheckBox();
             this.buttonSelectDirectoryResources = new System.Windows.Forms.Button();
             this.buttonFolderSearch = new System.Windows.Forms.Button();
+            this.labelInfo = new System.Windows.Forms.Label();
             this.panelForm.SuspendLayout();
             this.tabOptions.SuspendLayout();
             this.tabGlobalOptions.SuspendLayout();
@@ -92,6 +94,8 @@ namespace KNote.ClientWin.Views
             // 
             // tabGlobalOptions
             // 
+            this.tabGlobalOptions.Controls.Add(this.labelInfo);
+            this.tabGlobalOptions.Controls.Add(this.checkCompactViewNotesList);
             this.tabGlobalOptions.Controls.Add(this.textAutosaveSeconds);
             this.tabGlobalOptions.Controls.Add(this.textAlarmSeconds);
             this.tabGlobalOptions.Controls.Add(this.label2);
@@ -106,42 +110,54 @@ namespace KNote.ClientWin.Views
             this.tabGlobalOptions.Text = "Global options";
             this.tabGlobalOptions.UseVisualStyleBackColor = true;
             // 
+            // checkCompactViewNotesList
+            // 
+            this.checkCompactViewNotesList.AutoSize = true;
+            this.checkCompactViewNotesList.Location = new System.Drawing.Point(13, 88);
+            this.checkCompactViewNotesList.Name = "checkCompactViewNotesList";
+            this.checkCompactViewNotesList.Size = new System.Drawing.Size(181, 19);
+            this.checkCompactViewNotesList.TabIndex = 24;
+            this.checkCompactViewNotesList.Text = "Compact view in notes list (*)";
+            this.checkCompactViewNotesList.UseVisualStyleBackColor = true;
+            // 
             // textAutosaveSeconds
             // 
-            this.textAutosaveSeconds.Location = new System.Drawing.Point(169, 103);
+            this.textAutosaveSeconds.Location = new System.Drawing.Point(309, 47);
             this.textAutosaveSeconds.Name = "textAutosaveSeconds";
-            this.textAutosaveSeconds.Size = new System.Drawing.Size(101, 23);
+            this.textAutosaveSeconds.Size = new System.Drawing.Size(58, 23);
             this.textAutosaveSeconds.TabIndex = 23;
             // 
             // textAlarmSeconds
             // 
-            this.textAlarmSeconds.Location = new System.Drawing.Point(169, 35);
+            this.textAlarmSeconds.Location = new System.Drawing.Point(309, 12);
             this.textAlarmSeconds.Name = "textAlarmSeconds";
-            this.textAlarmSeconds.Size = new System.Drawing.Size(101, 23);
+            this.textAlarmSeconds.Size = new System.Drawing.Size(58, 23);
             this.textAlarmSeconds.TabIndex = 22;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(55, 106);
+            this.label2.Location = new System.Drawing.Point(198, 51);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(105, 15);
             this.label2.TabIndex = 21;
             this.label2.Text = "Autosave seconds:";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labelAlarmSeconds
             // 
             this.labelAlarmSeconds.AutoSize = true;
-            this.labelAlarmSeconds.Location = new System.Drawing.Point(55, 38);
+            this.labelAlarmSeconds.Location = new System.Drawing.Point(198, 16);
             this.labelAlarmSeconds.Name = "labelAlarmSeconds";
             this.labelAlarmSeconds.Size = new System.Drawing.Size(88, 15);
             this.labelAlarmSeconds.TabIndex = 20;
             this.labelAlarmSeconds.Text = "Alarm seconds:";
+            this.labelAlarmSeconds.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // checkAutoSaveActivated
             // 
             this.checkAutoSaveActivated.AutoSize = true;
-            this.checkAutoSaveActivated.Location = new System.Drawing.Point(13, 84);
+            this.checkAutoSaveActivated.Location = new System.Drawing.Point(13, 51);
             this.checkAutoSaveActivated.Name = "checkAutoSaveActivated";
             this.checkAutoSaveActivated.Size = new System.Drawing.Size(158, 19);
             this.checkAutoSaveActivated.TabIndex = 19;
@@ -180,6 +196,15 @@ namespace KNote.ClientWin.Views
             this.buttonFolderSearch.TabIndex = 11;
             this.buttonFolderSearch.Text = "...";
             this.buttonFolderSearch.UseVisualStyleBackColor = false;
+            // 
+            // labelInfo
+            // 
+            this.labelInfo.AutoSize = true;
+            this.labelInfo.Location = new System.Drawing.Point(6, 224);
+            this.labelInfo.Name = "labelInfo";
+            this.labelInfo.Size = new System.Drawing.Size(181, 15);
+            this.labelInfo.TabIndex = 25;
+            this.labelInfo.Text = "(*) Application restart is required ";
             // 
             // OptionsEditorForm
             // 
@@ -223,5 +248,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelAlarmSeconds;
         private System.Windows.Forms.CheckBox checkAutoSaveActivated;
         private System.Windows.Forms.CheckBox checkAlarmActivated;
+        private CheckBox checkCompactViewNotesList;
+        private Label labelInfo;
     }
 }

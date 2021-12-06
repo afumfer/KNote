@@ -258,28 +258,43 @@ namespace KNote.ClientWin.Views
             {
                 _com.Options();
             }
-            else if (menuSel == menuFoldersExplorer) {
+            else if (menuSel == menuFoldersExplorer) 
+            {
                 if (tabExplorers.SelectedIndex == 0)
                     return;
-                SelectTab(0); }
-            else if (menuSel == menuSearchPanel) {
+                SelectTab(0); 
+            }
+            else if (menuSel == menuSearchPanel) 
+            {
                 if (tabExplorers.SelectedIndex == 1)
                     return;
-                SelectTab(1); }            
-            else if (menuSel == menuHeaderPanelVisible) {
+                SelectTab(1); 
+            }
+            else if (menuSel == menuHeaderPanelVisible) 
+            {
                 if(!panelSupManagment.Visible)
                     Text = "KaNote Managment";
-                panelSupManagment.Visible = !panelSupManagment.Visible; }
-            else if (menuSel == menuMainVisible) {
+                panelSupManagment.Visible = !panelSupManagment.Visible; 
+            }
+            else if (menuSel == menuMainVisible) 
+            {
                 menuMangment.Visible = !menuMangment.Visible;
-                menuMainVisible.Checked = !menuMainVisible.Checked; }
-            else if (menuSel == menuVerticalPanelForNotes) {
+                menuMainVisible.Checked = !menuMainVisible.Checked; 
+            }
+            else if (menuSel == menuToolbarVisible)
+            {                
+                menuToolbarVisible.Checked = !menuToolbarVisible.Checked;
+                toolBarManagment.Visible = menuToolbarVisible.Checked;
+            }
+            else if (menuSel == menuVerticalPanelForNotes) 
+            {
                 if(splitContainer2.Orientation == Orientation.Horizontal) {
                     splitContainer2.Orientation = Orientation.Vertical;
                     menuVerticalPanelForNotes.Checked = true; }
                 else {
                     splitContainer2.Orientation = Orientation.Horizontal;
-                    menuVerticalPanelForNotes.Checked = false; } }            
+                    menuVerticalPanelForNotes.Checked = false; } 
+            }            
             else if (menuSel == menuExit)
             {
                 SaveViewSizeAndPosition();

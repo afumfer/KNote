@@ -103,6 +103,7 @@
             this.tabSearch = new System.Windows.Forms.TabPage();
             this.imageTabExplorer = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.menuToolbarVisible = new System.Windows.Forms.ToolStripMenuItem();
             this.menuMangment.SuspendLayout();
             this.statusBarManagment.SuspendLayout();
             this.toolBarManagment.SuspendLayout();
@@ -392,9 +393,10 @@
             this.menuFoldersExplorer,
             this.menuSearchPanel,
             this.menuViewS1,
+            this.menuVerticalPanelForNotes,
             this.menuHeaderPanelVisible,
-            this.menuMainVisible,
-            this.menuVerticalPanelForNotes});
+            this.menuToolbarVisible,
+            this.menuMainVisible});
             this.menuView.Name = "menuView";
             this.menuView.Size = new System.Drawing.Size(44, 20);
             this.menuView.Text = "&View";
@@ -405,7 +407,7 @@
             this.menuFoldersExplorer.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuFoldersExplorer.Name = "menuFoldersExplorer";
             this.menuFoldersExplorer.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.menuFoldersExplorer.Size = new System.Drawing.Size(266, 22);
+            this.menuFoldersExplorer.Size = new System.Drawing.Size(301, 22);
             this.menuFoldersExplorer.Text = "&Folders explorer";
             this.menuFoldersExplorer.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -413,14 +415,14 @@
             // 
             this.menuSearchPanel.Name = "menuSearchPanel";
             this.menuSearchPanel.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.menuSearchPanel.Size = new System.Drawing.Size(266, 22);
+            this.menuSearchPanel.Size = new System.Drawing.Size(301, 22);
             this.menuSearchPanel.Text = "Search panel";
             this.menuSearchPanel.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuViewS1
             // 
             this.menuViewS1.Name = "menuViewS1";
-            this.menuViewS1.Size = new System.Drawing.Size(263, 6);
+            this.menuViewS1.Size = new System.Drawing.Size(298, 6);
             // 
             // menuHeaderPanelVisible
             // 
@@ -428,7 +430,8 @@
             this.menuHeaderPanelVisible.CheckOnClick = true;
             this.menuHeaderPanelVisible.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuHeaderPanelVisible.Name = "menuHeaderPanelVisible";
-            this.menuHeaderPanelVisible.Size = new System.Drawing.Size(266, 22);
+            this.menuHeaderPanelVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F10)));
+            this.menuHeaderPanelVisible.Size = new System.Drawing.Size(301, 22);
             this.menuHeaderPanelVisible.Text = "Show header panel";
             this.menuHeaderPanelVisible.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -439,14 +442,15 @@
             this.menuMainVisible.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuMainVisible.Name = "menuMainVisible";
             this.menuMainVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F12)));
-            this.menuMainVisible.Size = new System.Drawing.Size(266, 22);
-            this.menuMainVisible.Text = "Main menu visible";
+            this.menuMainVisible.Size = new System.Drawing.Size(301, 22);
+            this.menuMainVisible.Text = "Show main menu";
             this.menuMainVisible.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuVerticalPanelForNotes
             // 
             this.menuVerticalPanelForNotes.Name = "menuVerticalPanelForNotes";
-            this.menuVerticalPanelForNotes.Size = new System.Drawing.Size(266, 22);
+            this.menuVerticalPanelForNotes.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F9)));
+            this.menuVerticalPanelForNotes.Size = new System.Drawing.Size(301, 22);
             this.menuVerticalPanelForNotes.Text = "Vertical panel for list notes";
             this.menuVerticalPanelForNotes.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -782,6 +786,16 @@
             this.splitContainer2.SplitterWidth = 7;
             this.splitContainer2.TabIndex = 0;
             // 
+            // menuToolbarVisible
+            // 
+            this.menuToolbarVisible.Checked = true;
+            this.menuToolbarVisible.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.menuToolbarVisible.Name = "menuToolbarVisible";
+            this.menuToolbarVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F11)));
+            this.menuToolbarVisible.Size = new System.Drawing.Size(301, 22);
+            this.menuToolbarVisible.Text = "Show toolbar";
+            this.menuToolbarVisible.Click += new System.EventHandler(this.menu_Click);
+            // 
             // KNoteManagmentForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -894,5 +908,6 @@
         private System.Windows.Forms.ToolStripMenuItem menuMainVisible;
         private System.Windows.Forms.ToolStripMenuItem menuVerticalPanelForNotes;
         private System.Windows.Forms.ToolStripSeparator menuViewS1;
+        private ToolStripMenuItem menuToolbarVisible;
     }
 }
