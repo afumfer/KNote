@@ -428,9 +428,9 @@
             this.panelDescription.Controls.Add(this.htmlDescription);
             this.panelDescription.Controls.Add(this.textDescription);
             this.panelDescription.Controls.Add(this.toolDescription);
-            this.panelDescription.Location = new System.Drawing.Point(14, 142);
+            this.panelDescription.Location = new System.Drawing.Point(4, 132);
             this.panelDescription.Name = "panelDescription";
-            this.panelDescription.Size = new System.Drawing.Size(538, 339);
+            this.panelDescription.Size = new System.Drawing.Size(782, 434);
             this.panelDescription.TabIndex = 55;
             // 
             // webView2
@@ -475,7 +475,7 @@
             this.toolDescriptionUploadResourceFromClipboard});
             this.toolDescription.Location = new System.Drawing.Point(0, 0);
             this.toolDescription.Name = "toolDescription";
-            this.toolDescription.Size = new System.Drawing.Size(30, 339);
+            this.toolDescription.Size = new System.Drawing.Size(30, 434);
             this.toolDescription.TabIndex = 0;
             this.toolDescription.Text = "Tool description editor";
             // 
@@ -698,7 +698,7 @@
             // 
             this.labelLoadingHtml.AutoSize = true;
             this.labelLoadingHtml.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelLoadingHtml.Location = new System.Drawing.Point(101, 108);
+            this.labelLoadingHtml.Location = new System.Drawing.Point(136, 112);
             this.labelLoadingHtml.Name = "labelLoadingHtml";
             this.labelLoadingHtml.Size = new System.Drawing.Size(138, 15);
             this.labelLoadingHtml.TabIndex = 54;
@@ -751,7 +751,7 @@
             // 
             // label6
             // 
-            this.label6.Location = new System.Drawing.Point(9, 108);
+            this.label6.Location = new System.Drawing.Point(9, 112);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(103, 18);

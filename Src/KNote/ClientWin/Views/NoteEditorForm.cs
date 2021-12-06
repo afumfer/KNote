@@ -239,10 +239,17 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
     private void buttonNavigate_Click(object sender, EventArgs e)
     {
         // TODO: Validate url 
-        webView2.CoreWebView2.Navigate(textDescription.Text);
-        _com.Model.ContentType = "navigation";
+        try
+        {
+            webView2.CoreWebView2.Navigate(textDescription.Text);
+            _com.Model.ContentType = "navigation";
 
-        EnableWebView2View();
+            EnableWebView2View();
+        }
+        catch (Exception)
+        {
+            ShowInfo("You cannot navigate to the indicated address.");
+        }
     }
 
     private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
@@ -618,15 +625,17 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
     #region Private methods
 
     private void PersonalizeControls()
-    {
-        panelDescription.Location = new Point(6, 130);
-
+    {        
+        // old version .net
         // This is necessary, I cannot find an explanation for
         // this differentiated treatment when establishing the size.
-        if (_com.EditMode)
-            panelDescription.Size = new Size(780, 432);
-        else            
-            panelDescription.Size = new Size(686, 192);   
+        //if (_com.EditMode)
+        //    panelDescription.Size = new Size(780, 432);
+        //else
+        //    //panelDescription.Size = new Size(686, 192);   
+        //    panelDescription.Size = new Size(780, 432);
+        //panelDescription.Location = new Point(6, 130);
+        // -----------------------------------------------------
 
         textDescription.Dock = DockStyle.Fill;
         htmlDescription.Dock = DockStyle.Fill;
@@ -697,7 +706,6 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         textStatus.Text = _com.Model.InternalTags;
         textPriority.Text = _com.Model.Priority.ToString();
 
-        //if (_com.Model.HtmlFormat)
         if (_com.Model.ContentType == "html")
             {
             labelLoadingHtml.Visible = true;
@@ -713,16 +721,23 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         else if (_com.Model.ContentType == "navigation")
         {
             // TODO: !!! WebView2 refactor.            
-            textDescription.Visible = false;
-            htmlDescription.Visible = false;                               
-            if ((webView2 == null) || (webView2.CoreWebView2 == null))
+            try
             {
-                await webView2.EnsureCoreWebView2Async(null);
+                if ((webView2 == null) || (webView2.CoreWebView2 == null))            
+                    await webView2.EnsureCoreWebView2Async(null);            
+            
+                if (!string.IsNullOrEmpty(_com.Model.Description))
+                    webView2.CoreWebView2.Navigate(_com.Model.Description);
+
+                textDescription.Visible = false;
+                htmlDescription.Visible = false;
+                webView2.Visible = true;
+                textDescription.Text = _com.Model.Description;
             }
-            webView2.Visible = true;
-            if (!string.IsNullOrEmpty(_com.Model.Description))
-                webView2.CoreWebView2.Navigate(_com.Model.Description);
-            textDescription.Text = _com.Model.Description;
+            catch (Exception)
+            {
+                ShowInfo("You cannot navigate to the indicated address.");                
+            }
         }
         else
         {
@@ -888,8 +903,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
         if (_com.Model.ContentType == "html")
             _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
-        // TODO: !!! Refactor navigation mode ...
-        if (_com.Model.ContentType == "navigation")
+        else if (_com.Model.ContentType == "navigation")        
             _com.Model.Description = textDescription.Text;
         else
             _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);

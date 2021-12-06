@@ -37,8 +37,8 @@ namespace KNote.ClientWin.Views
             this.buttonCaptionTextColor = new System.Windows.Forms.Button();
             this.buttonNoteFont = new System.Windows.Forms.Button();
             this.buttonNoteColor = new System.Windows.Forms.Button();
-            this.buttonBlue = new System.Windows.Forms.Button();
-            this.buttonGray = new System.Windows.Forms.Button();
+            this.buttonLightGray = new System.Windows.Forms.Button();
+            this.buttonDark = new System.Windows.Forms.Button();
             this.labelText = new System.Windows.Forms.Label();
             this.labelNote = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -80,12 +80,13 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.BackColor = System.Drawing.SystemColors.Window;
             this.panelForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelForm.Controls.Add(this.buttonCaptionTextColor);
             this.panelForm.Controls.Add(this.buttonNoteFont);
             this.panelForm.Controls.Add(this.buttonNoteColor);
-            this.panelForm.Controls.Add(this.buttonBlue);
-            this.panelForm.Controls.Add(this.buttonGray);
+            this.panelForm.Controls.Add(this.buttonLightGray);
+            this.panelForm.Controls.Add(this.buttonDark);
             this.panelForm.Controls.Add(this.labelText);
             this.panelForm.Controls.Add(this.labelNote);
             this.panelForm.Controls.Add(this.label2);
@@ -128,25 +129,25 @@ namespace KNote.ClientWin.Views
             this.buttonNoteColor.UseVisualStyleBackColor = true;
             this.buttonNoteColor.Click += new System.EventHandler(this.buttonStyle_Click);
             // 
-            // buttonBlue
+            // buttonLightGray
             // 
-            this.buttonBlue.Location = new System.Drawing.Point(9, 100);
-            this.buttonBlue.Name = "buttonBlue";
-            this.buttonBlue.Size = new System.Drawing.Size(139, 26);
-            this.buttonBlue.TabIndex = 2;
-            this.buttonBlue.Text = "Blue style ";
-            this.buttonBlue.UseVisualStyleBackColor = true;
-            this.buttonBlue.Click += new System.EventHandler(this.buttonStyle_Click);
+            this.buttonLightGray.Location = new System.Drawing.Point(9, 100);
+            this.buttonLightGray.Name = "buttonLightGray";
+            this.buttonLightGray.Size = new System.Drawing.Size(139, 26);
+            this.buttonLightGray.TabIndex = 2;
+            this.buttonLightGray.Text = "Light gray style";
+            this.buttonLightGray.UseVisualStyleBackColor = true;
+            this.buttonLightGray.Click += new System.EventHandler(this.buttonStyle_Click);
             // 
-            // buttonGray
+            // buttonDark
             // 
-            this.buttonGray.Location = new System.Drawing.Point(9, 68);
-            this.buttonGray.Name = "buttonGray";
-            this.buttonGray.Size = new System.Drawing.Size(139, 26);
-            this.buttonGray.TabIndex = 1;
-            this.buttonGray.Text = "Dark style ";
-            this.buttonGray.UseVisualStyleBackColor = true;
-            this.buttonGray.Click += new System.EventHandler(this.buttonStyle_Click);
+            this.buttonDark.Location = new System.Drawing.Point(9, 68);
+            this.buttonDark.Name = "buttonDark";
+            this.buttonDark.Size = new System.Drawing.Size(139, 26);
+            this.buttonDark.TabIndex = 1;
+            this.buttonDark.Text = "Dark style ";
+            this.buttonDark.UseVisualStyleBackColor = true;
+            this.buttonDark.Click += new System.EventHandler(this.buttonStyle_Click);
             // 
             // labelText
             // 
@@ -248,8 +249,8 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button buttonNoteFont;
         private System.Windows.Forms.Button buttonNoteColor;
-        private System.Windows.Forms.Button buttonBlue;
-        private System.Windows.Forms.Button buttonGray;
+        private System.Windows.Forms.Button buttonLightGray;
+        private System.Windows.Forms.Button buttonDark;
         private System.Windows.Forms.Label labelText;
         private System.Windows.Forms.Label labelNote;
         private System.Windows.Forms.Label label2;

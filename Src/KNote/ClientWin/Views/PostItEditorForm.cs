@@ -360,12 +360,19 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
         if (_com.Model?.ContentType == "html")
             htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
         else if (_com.Model?.ContentType == "navigation")
-        {                
-            if ((webView2 == null) || (webView2.CoreWebView2 == null))                
-                await webView2.EnsureCoreWebView2Async(null);                
-            if (!string.IsNullOrEmpty(_com.Model.Description))
-                webView2.CoreWebView2.Navigate(_com.Model.Description);
-            textDescription.Text = _com.Model.Description;
+        {
+            try
+            {
+                if ((webView2 == null) || (webView2.CoreWebView2 == null))                
+                    await webView2.EnsureCoreWebView2Async(null);                
+                if (!string.IsNullOrEmpty(_com.Model.Description))
+                    webView2.CoreWebView2.Navigate(_com.Model.Description);
+                textDescription.Text = _com.Model.Description;
+            }
+            catch (Exception)
+            {
+                ShowInfo("You cannot navigate to the indicated address.");
+            }
         }
         else
         {             
