@@ -626,17 +626,6 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
     private void PersonalizeControls()
     {        
-        // old version .net
-        // This is necessary, I cannot find an explanation for
-        // this differentiated treatment when establishing the size.
-        //if (_com.EditMode)
-        //    panelDescription.Size = new Size(780, 432);
-        //else
-        //    //panelDescription.Size = new Size(686, 192);   
-        //    panelDescription.Size = new Size(780, 432);
-        //panelDescription.Location = new Point(6, 130);
-        // -----------------------------------------------------
-
         textDescription.Dock = DockStyle.Fill;
         htmlDescription.Dock = DockStyle.Fill;
         webView2.Dock = DockStyle.Fill;
@@ -660,7 +649,9 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
             htmlDescription.ToolbarVisible = false;
             htmlDescription.ReadOnly = true;
         }
-            
+
+        panelDescription.Visible = true;
+
         picResource.Location = new Point(396, 36);            
         panelPreview.Location = new Point(396, 36);
         if (_com.EditMode)
@@ -687,7 +678,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         PersonalizeListView(listViewAlarms);
 
         // TODO: remove in this version
-        tabNoteData.TabPages.Remove(tabTraceNotes);
+        tabNoteData.TabPages.Remove(tabTraceNotes);        
     }
 
     private async void ModelToControls()
@@ -696,7 +687,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         //this.Cursor = Cursors.WaitCursor;
 
         // Basic data            
-        this.Text = $"Note editor [{_com.ServiceRef?.Alias}]";
+        Text = $"Note editor [{_com.ServiceRef?.Alias}]";
         textTopic.Text = _com.Model.Topic;                
         textNoteNumber.Text = "#" + _com.Model.NoteNumber.ToString();
         textFolder.Text = _com.Model.FolderDto?.Name;

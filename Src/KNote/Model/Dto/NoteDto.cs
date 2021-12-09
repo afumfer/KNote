@@ -1,137 +1,108 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace KNote.Model.Dto
+namespace KNote.Model.Dto;
+
+public class NoteDto : NoteInfoDto
 {
-    public class NoteDto : NoteInfoDto
+    private FolderDto _folderDto;
+    public FolderDto FolderDto 
     {
-        private FolderDto _folderDto;
-        public FolderDto FolderDto 
+        get {
+            if (_folderDto == null)
+                _folderDto = new FolderDto();
+            return _folderDto; 
+        }
+        set
         {
-            get {
-                if (_folderDto == null)
-                    _folderDto = new FolderDto();
-                return _folderDto; 
-            }
-            set
+            if (_folderDto != value)
             {
-                if (_folderDto != value)
-                {
-                    _folderDto = value;
-                    OnPropertyChanged("FolderDto");
-                }
+                _folderDto = value;
+                OnPropertyChanged("FolderDto");
             }
         }
+    }
 
-        private NoteTypeDto _noteTypeDto;
-        public NoteTypeDto NoteTypeDto
+    private NoteTypeDto _noteTypeDto;
+    public NoteTypeDto NoteTypeDto
+    {
+        get
         {
-            get
+            if (_noteTypeDto == null)
+                _noteTypeDto = new NoteTypeDto();
+            return _noteTypeDto;
+        }
+        set
+        {
+            if (_noteTypeDto != value)
             {
-                if (_noteTypeDto == null)
-                    _noteTypeDto = new NoteTypeDto();
-                return _noteTypeDto;
-            }
-            set
+                _noteTypeDto = value;
+                OnPropertyChanged("NoteTypeDto");}
+        }
+    }
+
+    private List<NoteKAttributeDto> _kAttributesDto;
+    public List<NoteKAttributeDto> KAttributesDto
+    {
+        get {
+            if (_kAttributesDto == null)
+                _kAttributesDto = new List<NoteKAttributeDto>();
+            return _kAttributesDto; 
+        }
+        set
+        {
+            if (_kAttributesDto != value)
             {
-                if (_noteTypeDto != value)
-                {
-                    _noteTypeDto = value;
-                    OnPropertyChanged("NoteTypeDto");}
+                _kAttributesDto = value;
+                OnPropertyChanged("KAttributesDto");
             }
         }
-
-        private List<NoteKAttributeDto> _kAttributesDto;
-        public List<NoteKAttributeDto> KAttributesDto
-        {
-            get {
-                if (_kAttributesDto == null)
-                    _kAttributesDto = new List<NoteKAttributeDto>();
-                return _kAttributesDto; 
-            }
-            set
-            {
-                if (_kAttributesDto != value)
-                {
-                    _kAttributesDto = value;
-                    OnPropertyChanged("KAttributesDto");
-                }
-            }
-        } 
+    } 
         
-        public string ModelToViewDescription(RepositoryRef repositoryRef)
-        {
-            if (repositoryRef == null)
-                return Description;
+    public string ModelToViewDescription(RepositoryRef repositoryRef)
+    {
+        if (repositoryRef == null)
+            return Description;
             
-            string replaceString = "";
-            if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
-            {
-                replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
-                replaceString = replaceString.Replace(@"\", @"/");
-            }
-            else
-            {
-                if (repositoryRef.ResourcesContainerCacheRootPath != null && repositoryRef?.ResourcesContainer != null)
-                {
-                    replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootPath, repositoryRef?.ResourcesContainer);
-                    replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                }
-            }
-
-            return Description?
-                .Replace(repositoryRef.ResourcesContainer, replaceString);
-        }
-
-        public string ViewToModelDescription(RepositoryRef repositoryRef, string contentView)
+        string replaceString = "";
+        if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
         {
-            if (repositoryRef == null || string.IsNullOrEmpty(contentView))
-                return contentView;
-
-            string replaceString;
-            if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
-            {
-                replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
-                replaceString = replaceString.Replace(@"\", @"/");
-            }
-            else
+            replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+            replaceString = replaceString.Replace(@"\", @"/");
+        }
+        else
+        {
+            if (repositoryRef.ResourcesContainerCacheRootPath != null && repositoryRef?.ResourcesContainer != null)
             {
                 replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootPath, repositoryRef?.ResourcesContainer);
                 replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             }
-
-            return contentView
-                .Replace(replaceString,
-                repositoryRef.ResourcesContainer);
         }
 
-        // TODO: Eliminar la siguiente propiedad, se deberá implementar en ContentType
-        public bool HtmlFormat
+        return Description?
+            .Replace(repositoryRef.ResourcesContainer, replaceString);
+    }
+
+    public string ViewToModelDescription(RepositoryRef repositoryRef, string contentView)
+    {
+        if (repositoryRef == null || string.IsNullOrEmpty(contentView))
+            return contentView;
+
+        string replaceString;
+        if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
         {
-            get
-            {
-                if (Description == null || Description.Length < 5)
-                    return false;
-                
-                if (ContentType == "html")
-                    return true;
-
-                var tmp = Description.Substring(0, 5);
-                if (tmp == "<BODY")
-                {
-                    ContentType = "html";
-                    return true;
-                }
-                else
-                    return false;
-            }
-
-            set { }
+            replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+            replaceString = replaceString.Replace(@"\", @"/");
         }
+        else
+        {
+            replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootPath, repositoryRef?.ResourcesContainer);
+            replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
+
+        return contentView
+            .Replace(replaceString,
+            repositoryRef.ResourcesContainer);
     }
 }
+

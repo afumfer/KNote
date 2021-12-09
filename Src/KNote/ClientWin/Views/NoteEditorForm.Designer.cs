@@ -432,6 +432,7 @@
             this.panelDescription.Name = "panelDescription";
             this.panelDescription.Size = new System.Drawing.Size(782, 434);
             this.panelDescription.TabIndex = 55;
+            this.panelDescription.Visible = false;
             // 
             // webView2
             // 
