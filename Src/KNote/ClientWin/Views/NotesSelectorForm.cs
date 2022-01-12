@@ -360,9 +360,8 @@ public partial class NotesSelectorForm : Form, ISelectorView<NoteInfoDto>
     private void GridSelectFirstElement(bool skipSelectionChanged = true)
     {
         _skipSelectionChanged = skipSelectionChanged;
-        dataGridNotes.ClearSelection();            
-        dataGridNotes.CurrentCell = dataGridNotes.Rows[0].Cells[1];            
-        dataGridNotes.Rows[0].Selected = true;            
+        dataGridNotes.ClearSelection();         
+        dataGridNotes.Rows[0].Selected = true;
         _skipSelectionChanged = false;           
     }
 
