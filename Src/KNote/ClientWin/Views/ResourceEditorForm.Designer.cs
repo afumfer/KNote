@@ -33,6 +33,7 @@ namespace KNote.ClientWin.Views
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.panelForm = new System.Windows.Forms.Panel();
+            this.htmlPreview = new KntWebView.KWebView();
             this.textFileName = new System.Windows.Forms.TextBox();
             this.labelPreview = new System.Windows.Forms.Label();
             this.textDescription = new System.Windows.Forms.TextBox();
@@ -41,7 +42,6 @@ namespace KNote.ClientWin.Views
             this.labelOrder = new System.Windows.Forms.Label();
             this.buttonSelectFile = new System.Windows.Forms.Button();
             this.labelFileName = new System.Windows.Forms.Label();
-            this.htmlPreview = new Pavonis.Html.Editor.HtmlEditorControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
@@ -73,6 +73,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.Controls.Add(this.htmlPreview);
             this.panelForm.Controls.Add(this.textFileName);
             this.panelForm.Controls.Add(this.labelPreview);
             this.panelForm.Controls.Add(this.textDescription);
@@ -81,11 +82,26 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.labelOrder);
             this.panelForm.Controls.Add(this.buttonSelectFile);
             this.panelForm.Controls.Add(this.labelFileName);
-            this.panelForm.Controls.Add(this.htmlPreview);
             this.panelForm.Location = new System.Drawing.Point(1, 3);
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(583, 443);
             this.panelForm.TabIndex = 5;
+            // 
+            // htmlPreview
+            // 
+            this.htmlPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.htmlPreview.EnableUrlBox = true;
+            this.htmlPreview.ForceHttps = false;
+            this.htmlPreview.IsInitialized = false;
+            this.htmlPreview.Location = new System.Drawing.Point(288, 73);
+            this.htmlPreview.Name = "htmlPreview";
+            this.htmlPreview.ShowNavigationTools = false;
+            this.htmlPreview.ShowStatusInfo = false;
+            this.htmlPreview.Size = new System.Drawing.Size(285, 361);
+            this.htmlPreview.TabIndex = 17;
+            this.htmlPreview.TextUrl = "";
             // 
             // textFileName
             // 
@@ -164,20 +180,6 @@ namespace KNote.ClientWin.Views
             this.labelFileName.TabIndex = 10;
             this.labelFileName.Text = "File name:";
             // 
-            // htmlPreview
-            // 
-            this.htmlPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.htmlPreview.InnerText = null;
-            this.htmlPreview.Location = new System.Drawing.Point(288, 73);
-            this.htmlPreview.Name = "htmlPreview";
-            this.htmlPreview.ReadOnly = true;
-            this.htmlPreview.Size = new System.Drawing.Size(285, 361);
-            this.htmlPreview.TabIndex = 3;
-            this.htmlPreview.TabStop = false;
-            this.htmlPreview.ToolbarVisible = false;
-            // 
             // openFileDialog
             // 
             this.openFileDialog.FileName = "openFileDialog1";
@@ -217,8 +219,8 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelOrder;
         private System.Windows.Forms.Button buttonSelectFile;
         private System.Windows.Forms.Label labelFileName;
-        private Pavonis.Html.Editor.HtmlEditorControl htmlPreview;
         private System.Windows.Forms.TextBox textFileName;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
+        private KntWebView.KWebView htmlPreview;
     }
 }

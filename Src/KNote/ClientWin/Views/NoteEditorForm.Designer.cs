@@ -53,7 +53,6 @@
             this.textStatus = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.panelDescription = new System.Windows.Forms.Panel();
-            this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.textDescription = new System.Windows.Forms.TextBox();
             this.toolDescription = new System.Windows.Forms.ToolStrip();
@@ -155,12 +154,12 @@
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.webView2 = new KntWebView.KWebView();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
             this.tabBasicData.SuspendLayout();
             this.panelDescription.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
             this.toolDescription.SuspendLayout();
             this.tabAttributes.SuspendLayout();
             this.tabResources.SuspendLayout();
@@ -434,21 +433,10 @@
             this.panelDescription.TabIndex = 55;
             this.panelDescription.Visible = false;
             // 
-            // webView2
-            // 
-            this.webView2.CreationProperties = null;
-            this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Location = new System.Drawing.Point(40, 221);
-            this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(277, 77);
-            this.webView2.TabIndex = 9;
-            this.webView2.Visible = false;
-            this.webView2.ZoomFactor = 1D;
-            // 
             // htmlDescription
             // 
             this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(40, 116);
+            this.htmlDescription.Location = new System.Drawing.Point(324, 14);
             this.htmlDescription.Name = "htmlDescription";
             this.htmlDescription.Size = new System.Drawing.Size(277, 88);
             this.htmlDescription.TabIndex = 8;
@@ -462,7 +450,7 @@
             this.textDescription.Multiline = true;
             this.textDescription.Name = "textDescription";
             this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textDescription.Size = new System.Drawing.Size(277, 78);
+            this.textDescription.Size = new System.Drawing.Size(277, 88);
             this.textDescription.TabIndex = 7;
             // 
             // toolDescription
@@ -1522,6 +1510,19 @@
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
             // 
+            // webView2
+            // 
+            this.webView2.ForceHttps = false;
+            this.webView2.IsInitialized = false;
+            this.webView2.Location = new System.Drawing.Point(40, 127);
+            this.webView2.Name = "webView2";
+            this.webView2.ShowNavigationTools = true;
+            this.webView2.ShowStatusInfo = true;
+            this.webView2.Size = new System.Drawing.Size(277, 166);
+            this.webView2.TabIndex = 11;
+            this.webView2.TextUrl = "";
+            this.webView2.Visible = false;
+            // 
             // NoteEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1546,7 +1547,6 @@
             this.tabBasicData.PerformLayout();
             this.panelDescription.ResumeLayout(false);
             this.panelDescription.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
             this.toolDescription.ResumeLayout(false);
             this.toolDescription.PerformLayout();
             this.tabAttributes.ResumeLayout(false);
@@ -1694,7 +1694,7 @@
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Button buttonSaveResource;
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
-        private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
         private Button buttonNavigate;
+        private KntWebView.KWebView webView2;
     }
 }

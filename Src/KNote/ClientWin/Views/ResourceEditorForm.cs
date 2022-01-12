@@ -63,9 +63,9 @@ namespace KNote.ClientWin.Views
             return MessageBox.Show(info, caption, buttons, icon);
         }
 
-        public void RefreshView()
+        public async void RefreshView()
         {
-            ModelToControls();
+            await ModelToControls();
         }
 
         public void RefreshModel()
@@ -73,11 +73,11 @@ namespace KNote.ClientWin.Views
             ControlsToModel();
         }
 
-        public void CleanView()
+        public async void CleanView()
         {
             textDescription.Text = "";
-            textOrder.Text = "";
-            htmlPreview.BodyHtml = "";
+            textOrder.Text = "";            
+            await htmlPreview.NavigateToString(" ");
             textFileName.Text = "";
         }
 
@@ -126,8 +126,8 @@ namespace KNote.ClientWin.Views
         {            
             var res = await _com.SaveModel();
             if (res)
-            {
-                htmlPreview.BodyHtml = "";
+            {                
+                await htmlPreview.NavigateToString(" ");
                 htmlPreview.Refresh();
                 _formIsDisty = false;
                 this.DialogResult = DialogResult.OK;
@@ -139,7 +139,7 @@ namespace KNote.ClientWin.Views
             OnCandelEdition();
         }
 
-        private void buttonSelectFile_Click(object sender, EventArgs e)
+        private async void buttonSelectFile_Click(object sender, EventArgs e)
         {
             openFileDialog.Title = "Select file for KeyNote resource";
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -150,7 +150,7 @@ namespace KNote.ClientWin.Views
                 textDescription.Text = textFileName.Text;
                 varName = _com.Model.ResourceId.ToString() + "_" + textFileName.Text;                
                 varFileType = _com.ExtensionFileToFileType(Path.GetExtension(fileTmp));
-                ShowPreview(fileTmp);
+                await ShowPreview(fileTmp);
             }
         }
 
@@ -171,7 +171,7 @@ namespace KNote.ClientWin.Views
             return true;
         }
 
-        private void ModelToControls()
+        private async Task ModelToControls()
         {            
             textFileName.Text = _com.Model.NameOut;
             varName = _com.Model.Name;
@@ -189,7 +189,7 @@ namespace KNote.ClientWin.Views
                     varContentArrayBytes = File.ReadAllBytes(file);
             } 
             
-            ShowPreview(_com.Model.FullUrl, false);
+            await ShowPreview(_com.Model.FullUrl, false);
         }
 
         private void ControlsToModel()
@@ -204,23 +204,26 @@ namespace KNote.ClientWin.Views
             _com.SaveResourceFileAndRefreshDto();            
         }
 
-        private void ShowPreview(string file, bool includePdf = true)
+        private async Task ShowPreview(string file, bool includePdf = true)  // !!!
         {
             if (file == null)
-            {
-                htmlPreview.BodyHtml = "";
+            {                
+                await htmlPreview.NavigateToString(" ");
                 return;
             }
                             
             var ext = Path.GetExtension(file);          
+            // TODO: revisar esto, el siguiente hack estaba implementado para 
+            //       sortear un problema con la versión anterior de htmlEditor
+            //       Con el componente WebView2 esto no debería pasar. 
             // Hack, ... pdf not work in htmlEditor when edit ... :-( ...
             var fileTypes = (includePdf) ? ".jpg.jpeg.png.pdf" : ".jpg.jpeg.png";
             if (fileTypes.IndexOf(ext) >= 0)
             {
                 try
-                {                    
-                    htmlPreview.BodyHtml = "";
-                    htmlPreview.NavigateToUrl(file);
+                {
+                    await htmlPreview.NavigateToString(" ");
+                    await htmlPreview.Navigate(file);
                 }
                 catch (Exception ex)
                 {
@@ -228,7 +231,7 @@ namespace KNote.ClientWin.Views
                 }
             }
             else
-                htmlPreview.BodyHtml = "";
+                await htmlPreview.NavigateToString(" ");
         }
 
         #endregion

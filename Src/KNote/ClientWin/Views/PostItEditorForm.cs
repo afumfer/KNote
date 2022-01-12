@@ -104,7 +104,7 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
         ModelToControlsPostIt(true, _com.ForceAlwaysTop);
     }
 
-    private async void InitializeComponentEditor()
+    private void InitializeComponentEditor()
     {
         if (_com.Model?.ContentType == "html")
         {
@@ -121,15 +121,6 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
             webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                 | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right)));
-
-            webView2.NavigationStarting += WebView2_NavigationStarting; ;
-
-            await webView2.EnsureCoreWebView2Async(null);
-
-            if ((webView2 == null) || (webView2.CoreWebView2 == null))
-            {
-                MessageBox.Show("WebView2 not ready");
-            }
         }
         else
         {
@@ -361,18 +352,11 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
             htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
         else if (_com.Model?.ContentType == "navigation")
         {
-            try
-            {
-                if ((webView2 == null) || (webView2.CoreWebView2 == null))                
-                    await webView2.EnsureCoreWebView2Async(null);                
-                if (!string.IsNullOrEmpty(_com.Model.Description))
-                    webView2.CoreWebView2.Navigate(_com.Model.Description);
-                textDescription.Text = _com.Model.Description;
-            }
-            catch (Exception)
-            {
-                ShowInfo("You cannot navigate to the indicated address.");
-            }
+            webView2.TextUrl = _com.Model.Description;            
+            if (!string.IsNullOrEmpty(_com.Model.Description))            
+                await webView2.Navigate();
+            else
+                await webView2.NavigateToString(" ");
         }
         else
         {             
@@ -385,8 +369,8 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
     {
         if (_com.Model.ContentType == "html")
             _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
-        else if (_com.Model.ContentType == "navigation")
-            _com.Model.Description = textDescription.Text;
+        else if (_com.Model.ContentType == "navigation")            
+            _com.Model.Description = webView2.TextUrl;
         else
             _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);
 

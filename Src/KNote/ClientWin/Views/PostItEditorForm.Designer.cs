@@ -32,6 +32,7 @@ namespace KNote.ClientWin.Views
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             this.panelForm = new System.Windows.Forms.Panel();
+            this.webView2 = new KntWebView.KWebView();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.labelStatus = new System.Windows.Forms.LabelNoCopy();
             this.picResize = new System.Windows.Forms.PictureBox();
@@ -62,12 +63,10 @@ namespace KNote.ClientWin.Views
             this.menuFastAlarm1year = new System.Windows.Forms.ToolStripMenuItem();
             this.menuMoreActions = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAddResolvedTask = new System.Windows.Forms.ToolStripMenuItem();
-            this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.panelForm.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picMenu)).BeginInit();
             this.menuPostIt.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
             this.SuspendLayout();
             // 
             // panelForm
@@ -87,12 +86,24 @@ namespace KNote.ClientWin.Views
             this.panelForm.Size = new System.Drawing.Size(479, 340);
             this.panelForm.TabIndex = 3;
             // 
+            // webView2
+            // 
+            this.webView2.ForceHttps = false;
+            this.webView2.Location = new System.Drawing.Point(14, 170);
+            this.webView2.Name = "webView2";
+            this.webView2.ShowNavigationTools = true;
+            this.webView2.ShowStatusInfo = true;
+            this.webView2.Size = new System.Drawing.Size(215, 110);
+            this.webView2.TabIndex = 10;
+            this.webView2.TextUrl = "";
+            this.webView2.Visible = false;
+            // 
             // htmlDescription
             // 
             this.htmlDescription.InnerText = null;
             this.htmlDescription.Location = new System.Drawing.Point(14, 108);
             this.htmlDescription.Name = "htmlDescription";
-            this.htmlDescription.Size = new System.Drawing.Size(215, 95);
+            this.htmlDescription.Size = new System.Drawing.Size(215, 56);
             this.htmlDescription.TabIndex = 9;
             this.htmlDescription.ToolbarVisible = false;
             this.htmlDescription.Visible = false;
@@ -354,17 +365,6 @@ namespace KNote.ClientWin.Views
             this.menuAddResolvedTask.Text = "Add fast resolved task";
             this.menuAddResolvedTask.Click += new System.EventHandler(this.postItMenu_Click);
             // 
-            // webView2
-            // 
-            this.webView2.CreationProperties = null;
-            this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Location = new System.Drawing.Point(14, 209);
-            this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(215, 82);
-            this.webView2.TabIndex = 10;
-            this.webView2.Visible = false;
-            this.webView2.ZoomFactor = 1D;
-            // 
             // PostItEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -390,7 +390,6 @@ namespace KNote.ClientWin.Views
             ((System.ComponentModel.ISupportInitialize)(this.picResize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picMenu)).EndInit();
             this.menuPostIt.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -425,8 +424,8 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripMenuItem menuFastAlarm1year;
         private System.Windows.Forms.ToolStripMenuItem menuMoreActions;
         private System.Windows.Forms.ToolStripMenuItem menuAddResolvedTask;
-        private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
         private LabelNoCopy labelStatus;
         private LabelNoCopy labelCaption;
+        private KntWebView.KWebView webView2;
     }
 }

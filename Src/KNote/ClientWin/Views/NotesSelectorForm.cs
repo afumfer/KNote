@@ -86,7 +86,7 @@ public partial class NotesSelectorForm : Form, ISelectorView<NoteInfoDto>
         panelBottom.Visible = false;
         panelDataGridNotes.Dock = DockStyle.Fill;
         dataGridNotes.BorderStyle = BorderStyle.None;
-        dataGridNotes.Dock = DockStyle.Fill;
+        dataGridNotes.Dock = DockStyle.Fill;        
     }
 
     public void ConfigureWindowMode()

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29613.14
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.Server", "Server\KNote.Server.csproj", "{1AB0E85F-E172-4491-87BF-9EACAA8F1804}"
 EndProject
@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KntWebView", "KntWebView\KntWebView.csproj", "{DFD92433-B13E-4966-B74C-5C70E6C608D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,6 +70,10 @@ Global
 		{4FB8FB01-9B7D-4984-B16C-6542D0597879}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FB8FB01-9B7D-4984-B16C-6542D0597879}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FB8FB01-9B7D-4984-B16C-6542D0597879}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFD92433-B13E-4966-B74C-5C70E6C608D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFD92433-B13E-4966-B74C-5C70E6C608D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFD92433-B13E-4966-B74C-5C70E6C608D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFD92433-B13E-4966-B74C-5C70E6C608D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

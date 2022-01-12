@@ -105,7 +105,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         TopLevel = false;
         Dock = DockStyle.Fill;
         FormBorderStyle = FormBorderStyle.None;
-        toolBarNoteEditor.Visible = false;
+        toolBarNoteEditor.Visible = false;        
         _com.EditMode = false;
     }
 
@@ -123,17 +123,8 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
     #region Form events handlers
 
-    private async void NoteEditorForm_Load(object sender, EventArgs e)
+    private void NoteEditorForm_Load(object sender, EventArgs e)
     {
-        webView2.NavigationStarting += WebView2_NavigationStarting;
-
-        await webView2.EnsureCoreWebView2Async(null);
-
-        if ((webView2 == null) || (webView2.CoreWebView2 == null))
-        {
-            MessageBox.Show("WebView2 not ready");
-        }
-
         PersonalizeControls();
     }
 
@@ -214,10 +205,10 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
             string result = converter.Convert(html);
             textDescription.Text = result;
         }
-        // TODO: !!! WebView2.
-        //else if (webView2.Visible)
-        //{
-        //}
+        else if (webView2.Visible)
+        {
+            textDescription.Text = webView2.TextUrl;
+        }
 
         _com.Model.ContentType = "markdown";
 
@@ -236,25 +227,17 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         EnableHtmlView();
     }
 
-    private void buttonNavigate_Click(object sender, EventArgs e)
+    private async void buttonNavigate_Click(object sender, EventArgs e)
     {
-        // TODO: Validate url 
-        try
-        {
-            webView2.CoreWebView2.Navigate(textDescription.Text);
-            _com.Model.ContentType = "navigation";
+        webView2.TextUrl = textDescription.Text;
+        await webView2.Navigate();
+        _com.Model.ContentType = "navigation";
 
-            EnableWebView2View();
-        }
-        catch (Exception)
-        {
-            ShowInfo("You cannot navigate to the indicated address.");
-        }
+        EnableWebView2View();
     }
 
     private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
     {
-        // TODO: WaitCursor
         try
         {
             if (listViewResources.SelectedItems.Count > 0)
@@ -269,10 +252,6 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         {
             MessageBox.Show($"OnSelectedResourceItemChanged error: {ex.Message}");
         }
-        //finally
-        //{
-        //    this.Cursor = Cursors.Default;
-        //}
     }
 
     private void listView_Resize(object sender, EventArgs e)
@@ -648,6 +627,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
             }
             htmlDescription.ToolbarVisible = false;
             htmlDescription.ReadOnly = true;
+            webView2.EnableUrlBox = false;
         }
 
         panelDescription.Visible = true;
@@ -698,7 +678,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         textPriority.Text = _com.Model.Priority.ToString();
 
         if (_com.Model.ContentType == "html")
-            {
+        {
             labelLoadingHtml.Visible = true;
             labelLoadingHtml.Refresh();
             textDescription.Visible = false;
@@ -711,23 +691,13 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         }
         else if (_com.Model.ContentType == "navigation")
         {
-            // TODO: !!! WebView2 refactor.            
-            try
+            textDescription.Visible = false;
+            htmlDescription.Visible = false;
+            webView2.Visible = true;            
+            webView2.TextUrl = _com.Model.Description;            
+            if (!string.IsNullOrEmpty(_com.Model.Description))
             {
-                if ((webView2 == null) || (webView2.CoreWebView2 == null))            
-                    await webView2.EnsureCoreWebView2Async(null);            
-            
-                if (!string.IsNullOrEmpty(_com.Model.Description))
-                    webView2.CoreWebView2.Navigate(_com.Model.Description);
-
-                textDescription.Visible = false;
-                htmlDescription.Visible = false;
-                webView2.Visible = true;
-                textDescription.Text = _com.Model.Description;
-            }
-            catch (Exception)
-            {
-                ShowInfo("You cannot navigate to the indicated address.");                
+                await webView2.Navigate();
             }
         }
         else
@@ -894,8 +864,8 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
         if (_com.Model.ContentType == "html")
             _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
-        else if (_com.Model.ContentType == "navigation")        
-            _com.Model.Description = textDescription.Text;
+        else if (_com.Model.ContentType == "navigation")
+            _com.Model.Description = webView2.TextUrl;
         else
             _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);
 
