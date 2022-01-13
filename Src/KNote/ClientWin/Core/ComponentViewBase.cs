@@ -290,7 +290,7 @@ namespace KNote.ClientWin.Core
         public event EventHandler<ComponentEventArgs<TEntity>> SavedEntity;
         protected virtual void OnSavedEntity(TEntity entity)
         {
-            SavedEntity?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+            SavedEntity?.Invoke(this, new ComponentEventArgs<TEntity>(entity));            
         }
 
         public event EventHandler<ComponentEventArgs<TEntity>> AddedEntity;

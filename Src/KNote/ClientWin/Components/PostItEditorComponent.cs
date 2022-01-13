@@ -24,7 +24,7 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
 
     #endregion 
 
-    #region Componet specific events 
+    #region Component specific events 
 
     public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> ExtendedEdit;
     protected virtual void OnExtendedEdit()

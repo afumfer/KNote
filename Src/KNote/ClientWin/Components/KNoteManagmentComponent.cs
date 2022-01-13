@@ -27,8 +27,7 @@ namespace KNote.ClientWin.Components
         {
             get { return Store.ActiveFolderWithServiceRef; }
             set 
-            {
-                //Store.ActiveFolderWithServiceRef = value; 
+            {                
                 Store.ChangeActiveFolderWithServiceRef(value);
             } 
         }
@@ -37,8 +36,7 @@ namespace KNote.ClientWin.Components
         {
             get { return Store.ActiveFilterWithServiceRef; }
             set 
-            {
-                //Store.ActiveFilterWithServiceRef = value; 
+            {                
                 Store.ChangeActiveFilterWithServiceRef(value);
             }
         }
@@ -87,10 +85,18 @@ namespace KNote.ClientWin.Components
 
         public KNoteManagmentComponent(Store store) : base(store)
         {
-            //Store.ChangedActiveFolderWithServiceRef += RefreshActiveFolderWithServiceRef;
-            //Store.ChangedActiveFilterWithServiceRef += RefreshActiveFilterWithServiceRef;
             Store.ChangedActiveFolderWithServiceRef += Store_ChangedActiveFolderWithServiceRef;
             Store.ChangedActiveFilterWithServiceRef += Store_ChangedActiveFilterWithServiceRef;
+
+            Store.AddedPostIt += PostItEditorComponent_AddedEntity;
+            Store.SavedPostIt += PostItEditorComponent_SavedEntity;
+            Store.DeletedPostIt += PostItEditorComponent_SavedEntity;
+            Store.ExtendedEditPostIt += PostItEditorComponent_ExtendedEdit;
+
+            Store.AddedNote += NoteEditorComponent_AddedEntity;
+            Store.SavedNote += NoteEditorComponent_SavedEntity;
+            Store.DeletedNote += NoteEditorComponent_DeletedEntity;
+            Store.EditedPostItNote += NoteEditorComponent_PostItEdit;
         }
 
         private void Store_ChangedActiveFolderWithServiceRef(object sender, ComponentEventArgs<FolderWithServiceRef> e)
@@ -501,9 +507,10 @@ namespace KNote.ClientWin.Components
         public async Task<bool> EditNote(IKntService service, Guid noteId)
         {
             var noteEditorComponent = new NoteEditorComponent(Store);
-            noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
-            noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            noteEditorComponent.PostItEdit += NoteEditorComponent_PostItEdit;
+            // TODO !!! delete this code
+            //noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
+            //noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
+            //noteEditorComponent.PostItEdit += NoteEditorComponent_PostItEdit;
             var res = await noteEditorComponent.LoadModelById(service, noteId, false);
             noteEditorComponent.Run();            
             return res;
@@ -523,13 +530,14 @@ namespace KNote.ClientWin.Components
             }
             await EditNotePostIt(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
         }
-
+        
         public async Task<bool> EditNotePostIt(IKntService service, Guid noteId, bool alwaysTop = false)
         {            
             var postItEditorComponent = new PostItEditorComponent(Store);
-            postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
-            postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
-            postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
+            // TODO !!! delete this code
+            //postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
+            //postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
+            //postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
             var res = await postItEditorComponent.LoadModelById(service, noteId, false);
             if(alwaysTop)
                 postItEditorComponent.ForceAlwaysTop = true;
@@ -547,13 +555,14 @@ namespace KNote.ClientWin.Components
             AddNote(SelectedServiceRef.Service);
         }
 
-        private async void AddNote(IKntService service)
+        public async void AddNote(IKntService service)
         {
             var noteEditorComponent = new NoteEditorComponent(Store);
             noteEditorComponent.AddedEntity += NoteEditorComponent_AddedEntity;
-            noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
-            noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            noteEditorComponent.PostItEdit += NoteEditorComponent_PostItEdit;
+            // TODO !!! delete this code
+            //noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
+            //noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
+            //noteEditorComponent.PostItEdit += NoteEditorComponent_PostItEdit;
             await noteEditorComponent.NewModel(service);
             noteEditorComponent.Run();
         }
@@ -878,8 +887,8 @@ namespace KNote.ClientWin.Components
 
         private async void OnNoteEditorSaved(NoteInfoDto noteInfo)
         {
-            if (NoteEditorComponent.Model.NoteId == noteInfo.NoteId)            
-                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);            
+            if (NoteEditorComponent.Model.NoteId == noteInfo.NoteId)
+                await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);
             NotesSelectorComponent.RefreshItem(noteInfo);
         }
 
@@ -978,14 +987,15 @@ namespace KNote.ClientWin.Components
                 RefreshRepositoryAndFolderTree();
             }
         }
-
+        
         private async void AddNotePostIt(FolderWithServiceRef folderWithServiceRef)
         {
             var postItEditorComponent = new PostItEditorComponent(Store);
-            postItEditorComponent.AddedEntity += PostItEditorComponent_AddedEntity;
-            postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
-            postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
-            postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
+            // TODO !!! delete this code
+            //postItEditorComponent.AddedEntity += PostItEditorComponent_AddedEntity;
+            //postItEditorComponent.SavedEntity += PostItEditorComponent_SavedEntity;
+            //postItEditorComponent.DeletedEntity += PostItEditorComponent_DeletedEntity;
+            //postItEditorComponent.ExtendedEdit += PostItEditorComponent_ExtendedEdit;
             postItEditorComponent.FolderWithServiceRef = folderWithServiceRef;
             await postItEditorComponent.NewModel(folderWithServiceRef.ServiceRef.Service);
             postItEditorComponent.Run();
