@@ -558,8 +558,8 @@ namespace KNote.ClientWin.Components
         public async void AddNote(IKntService service)
         {
             var noteEditorComponent = new NoteEditorComponent(Store);
-            noteEditorComponent.AddedEntity += NoteEditorComponent_AddedEntity;
             // TODO !!! delete this code
+            //noteEditorComponent.AddedEntity += NoteEditorComponent_AddedEntity;            
             //noteEditorComponent.SavedEntity += NoteEditorComponent_SavedEntity;
             //noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
             //noteEditorComponent.PostItEdit += NoteEditorComponent_PostItEdit;
