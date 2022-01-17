@@ -381,6 +381,15 @@ namespace KNote.ClientWin.Core
                 return "";
         }
 
+        public async Task<Guid?> GetUserId(IKntService service)
+        {
+            var userDto = (await service.Users.GetByUserNameAsync(this.AppUserName)).Entity;
+            if (userDto != null)
+                return userDto.UserId;
+            else 
+                return null;
+        }
+
         #endregion
 
         #region Helper event handlers 

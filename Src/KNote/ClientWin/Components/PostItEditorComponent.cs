@@ -56,7 +56,7 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
 
             FolderWithServiceRef = new FolderWithServiceRef { ServiceRef = Store.GetServiceRef(service.IdServiceRef), FolderInfo = Model?.FolderDto };
 
-            var resGetWindow = await Service.Notes.GetWindowAsync(Model.NoteId, await GetUserId());
+            var resGetWindow = await Service.Notes.GetWindowAsync(Model.NoteId, await PostItGetUserId());
             if (resGetWindow.IsValid)
                 WindowPostIt = resGetWindow.Entity;
             else
@@ -290,7 +290,7 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
         var alarm = new KMessageDto
         {
             NoteId = Model.NoteId,
-            UserId = await GetUserId(),
+            UserId = await PostItGetUserId(),
             ActionType = EnumActionType.NoteAlarm,
             NotificationType = EnumNotificationType.PostIt,
             AlarmType = EnumAlarmType.Standard,
@@ -341,7 +341,7 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
         var task = new NoteTaskDto
         {
             NoteId = Model.NoteId,
-            UserId = await GetUserId(),
+            UserId = await PostItGetUserId(),
             Description = Model.Topic,
             Tags = "Fast task",
             Resolved = true,
@@ -393,7 +393,7 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
         // TODO: get default values from Store.AppConfig ...
         return new WindowDto {
             NoteId = Model.NoteId,
-            UserId = await GetUserId(),
+            UserId = await PostItGetUserId(),
             PosX = random.Next(50, 150),
             PosY = random.Next(50, 150),
             Visible = true,                
@@ -414,15 +414,22 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
         };
     }
 
-    private async Task<Guid> GetUserId()
+    private async Task<Guid> PostItGetUserId()
     {
         if (_userId != Guid.Empty)
             return _userId;
-         
-        var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
-        if(userDto != null)
-            _userId = userDto.UserId;
-        return _userId;
+
+        var userId = await Store.GetUserId(Service);
+        if (userId != null)
+            return (Guid)userId;
+        else
+            return _userId;
+
+        // TODO: !!! Eliminar esto
+        //var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
+        //if(userDto != null)
+        //    _userId = userDto.UserId;
+        //return _userId;
     }
 
 }

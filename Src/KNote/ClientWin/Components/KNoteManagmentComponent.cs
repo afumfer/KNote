@@ -146,7 +146,6 @@ namespace KNote.ClientWin.Components
             NotifyMessage($"Loaded notes filter {notesFilterWithServiceRef?.NotesFilter?.TextSearch}");
         }
 
-
         #endregion
 
         #region Views
@@ -283,7 +282,9 @@ namespace KNote.ClientWin.Components
                     _notesSelectorComponent.Extensions.Add("Edit note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNote));
                     _notesSelectorComponent.Extensions.Add("Edit note as PostIt ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNoteAsPostIt));
                     _notesSelectorComponent.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendDeleteNote));
-                    _notesSelectorComponent.Extensions.Add("--", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
+                    _notesSelectorComponent.Extensions.Add("--0", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
+                    _notesSelectorComponent.Extensions.Add("Add fast resolved task", new ExtensionsEventHandler<NoteInfoDto>(AddFastResolvedTask));
+                    _notesSelectorComponent.Extensions.Add("--1", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
                     _notesSelectorComponent.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendMoveSelectedNotes));
                     _notesSelectorComponent.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddTagSelectedNotes));
                     _notesSelectorComponent.Extensions.Add("Remove tag from selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendRemoveTagSelectedNotes));
@@ -328,6 +329,11 @@ namespace KNote.ClientWin.Components
             EditNote();
         }
 
+        private void AddFastResolvedTask(object sender, ComponentEventArgs<NoteInfoDto> e)
+        {
+            AddFastResolvedTask();
+        }
+       
         private void ExtendEditNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
         {
             EditNotePostIt();
@@ -502,6 +508,46 @@ namespace KNote.ClientWin.Components
             }
 
             await EditNote(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
+        }
+
+        public async void AddFastResolvedTask()
+        {
+            if (SelectedNoteInfo == null)
+            {
+                View.ShowInfo("There is no note selected to edit.");
+                return;
+            }
+            if (await Store.CheckNoteIsActive(SelectedNoteInfo.NoteId) || await Store.CheckPostItIsActive(SelectedNoteInfo.NoteId))
+            {
+                View.ShowInfo("This note is already active. Add task with editor form.");
+                return;
+            }
+            
+            var userId = await Store.GetUserId(SelectedServiceRef.Service);
+            if(userId == null)
+            {
+                View.ShowInfo("There is no recognized user to create a quick task.");
+                return;
+            }
+
+            var service = SelectedServiceRef.Service;
+
+            var task = new NoteTaskDto
+            {
+                NoteId = SelectedNoteInfo.NoteId,
+                UserId = (Guid)userId,
+                Description = SelectedNoteInfo.Topic,
+                Tags = "Fast task",
+                Resolved = true,
+                EndDate = DateTime.Now
+            };
+
+            var resNoteForSaveTask = (await service.Notes.GetExtendedAsync(SelectedNoteInfo.NoteId)).Entity;
+            resNoteForSaveTask.Tasks.Add(task);
+
+            var res = (await service.Notes.SaveExtendedAsync(resNoteForSaveTask)).Entity;
+            
+            OnNoteEditorSaved(res.GetSimpleDto<NoteInfoDto>());            
         }
 
         public async Task<bool> EditNote(IKntService service, Guid noteId)
@@ -994,7 +1040,6 @@ namespace KNote.ClientWin.Components
         }
 
         #endregion 
-
     }
 
     #region Public enums 
@@ -1006,4 +1051,5 @@ namespace KNote.ClientWin.Components
     }
 
     #endregion 
+
 }

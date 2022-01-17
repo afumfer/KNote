@@ -88,8 +88,10 @@ namespace KNote.ClientWin.Views
             // 
             // webView2
             // 
+            this.webView2.EnableUrlBox = true;
             this.webView2.ForceHttps = false;
-            this.webView2.Location = new System.Drawing.Point(14, 170);
+            this.webView2.IsInitialized = false;
+            this.webView2.Location = new System.Drawing.Point(244, 91);
             this.webView2.Name = "webView2";
             this.webView2.ShowNavigationTools = true;
             this.webView2.ShowStatusInfo = true;
@@ -101,7 +103,7 @@ namespace KNote.ClientWin.Views
             // htmlDescription
             // 
             this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(14, 108);
+            this.htmlDescription.Location = new System.Drawing.Point(238, 29);
             this.htmlDescription.Name = "htmlDescription";
             this.htmlDescription.Size = new System.Drawing.Size(215, 56);
             this.htmlDescription.TabIndex = 9;
@@ -187,7 +189,7 @@ namespace KNote.ClientWin.Views
             this.menuAlarmWithin,
             this.menuMoreActions});
             this.menuPostIt.Name = "menuPostIt";
-            this.menuPostIt.Size = new System.Drawing.Size(216, 192);
+            this.menuPostIt.Size = new System.Drawing.Size(216, 214);
             // 
             // menuHide
             // 

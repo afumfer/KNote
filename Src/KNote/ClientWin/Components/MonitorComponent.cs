@@ -44,8 +44,6 @@ namespace KNote.ClientWin.Components
             return result;
         }
 
-
-
         protected override Result<EComponentResult> OnFinalized()
         {
             Result<EComponentResult> result;

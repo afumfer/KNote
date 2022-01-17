@@ -388,6 +388,8 @@ namespace KNote.ClientWin.Views
 
     }
 
+    #region Utils
+
     public class WaitCursor : IDisposable
     {
         public WaitCursor()
@@ -400,5 +402,7 @@ namespace KNote.ClientWin.Views
             Cursor.Current = Cursors.Default;            
         }
     }
+
+    #endregion
 
 }
