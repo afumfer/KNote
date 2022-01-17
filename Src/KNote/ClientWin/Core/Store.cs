@@ -140,13 +140,12 @@ namespace KNote.ClientWin.Core
             return _servicesRefs.FirstOrDefault();
         }
 
+        public event EventHandler<ComponentEventArgs<ComponentBase>> AddedComponent;
         public event EventHandler<ComponentEventArgs<EComponentState>> ComponentsStateChanged;
         public void AddComponent(ComponentBase component)
         {
-            _listComponents.Add(component);
             component.StateComponentChanged += Components_StateCtrlChanged;
-
-            // TODO: Refactor managment events for PostIts and NoteEditor 
+            
             if (component is PostItEditorComponent)
             {
                 ((PostItEditorComponent)component).AddedEntity += Store_AddedPostIt;
@@ -154,72 +153,23 @@ namespace KNote.ClientWin.Core
                 ((PostItEditorComponent)component).DeletedEntity += Store_DeletedPostIt;
                 ((PostItEditorComponent)component).ExtendedEdit += Store_ExtendedEditPostIt;
             }
-            if (component is NoteEditorComponent)
+            else if (component is NoteEditorComponent)
             {
                 ((NoteEditorComponent)component).AddedEntity += Store_AddedNote;
                 ((NoteEditorComponent)component).SavedEntity += Store_SavedNote;
                 ((NoteEditorComponent)component).DeletedEntity += Store_DeletedNote;
                 ((NoteEditorComponent)component).PostItEdit += Store_EditedPostItNote;
             }
-        }
 
-        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> EditedPostItNote;
-        private void Store_EditedPostItNote(object sender, ComponentEventArgs<ServiceWithNoteId> e)
-        {
-            EditedPostItNote?.Invoke(sender, e);
-        }
-
-        public event EventHandler<ComponentEventArgs<NoteExtendedDto>> DeletedNote;
-        private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
-        {
-            DeletedNote?.Invoke(sender, e);
-        }
-
-        public event EventHandler<ComponentEventArgs<NoteExtendedDto>> SavedNote;
-        private void Store_SavedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
-        {
-            SavedNote?.Invoke(sender, e);
-        }
-
-        public event EventHandler<ComponentEventArgs<NoteExtendedDto>> AddedNote;
-        private void Store_AddedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
-        {
-            AddedNote?.Invoke(sender, e);
-        }
-
-        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> ExtendedEditPostIt;
-        private void Store_ExtendedEditPostIt(object sender, ComponentEventArgs<ServiceWithNoteId> e)
-        {
-            ExtendedEditPostIt?.Invoke(sender, e);
-        }
-
-        public event EventHandler<ComponentEventArgs<NoteDto>> DeletedPostIt;
-        private void Store_DeletedPostIt(object sender, ComponentEventArgs<NoteDto> e)
-        {
-            DeletedPostIt?.Invoke(sender, e);
-        }
-
-        public event EventHandler<ComponentEventArgs<NoteDto>> SavedPostIt;
-        private void Store_SavedPostIt(object sender, ComponentEventArgs<NoteDto> e)
-        {
-            SavedPostIt?.Invoke(sender, e);
-        }
-       
-        public event EventHandler<ComponentEventArgs<NoteDto>> AddedPostIt;
-        private void Store_AddedPostIt(object sender, ComponentEventArgs<NoteDto> e)
-        {
-            AddedPostIt?.Invoke(sender, e); 
-        }
-
-        private void Components_StateCtrlChanged(object sender, ComponentEventArgs<EComponentState> e)
-        {
-            ComponentsStateChanged?.Invoke(sender, e);
+            _listComponents.Add(component);
+            AddedComponent?.Invoke(this, new ComponentEventArgs<ComponentBase>(component));
         }
 
         public event EventHandler<ComponentEventArgs<ComponentBase>> RemovedComponent;
         public void RemoveComponent(ComponentBase component)
         {
             component.StateComponentChanged -= Components_StateCtrlChanged;
+
             if (component is PostItEditorComponent)
             {
                 ((PostItEditorComponent)component).AddedEntity -= Store_AddedPostIt;
@@ -227,21 +177,16 @@ namespace KNote.ClientWin.Core
                 ((PostItEditorComponent)component).DeletedEntity -= Store_DeletedPostIt;
                 ((PostItEditorComponent)component).ExtendedEdit -= Store_ExtendedEditPostIt;
             }
-            if (component is NoteEditorComponent)
+            else if (component is NoteEditorComponent)
             {
                 ((NoteEditorComponent)component).AddedEntity += Store_AddedNote;
                 ((NoteEditorComponent)component).SavedEntity += Store_SavedNote;
                 ((NoteEditorComponent)component).DeletedEntity += Store_DeletedNote;
                 ((NoteEditorComponent)component).PostItEdit += Store_EditedPostItNote;
             }
+
             _listComponents.Remove(component);
             RemovedComponent?.Invoke(this, new ComponentEventArgs<ComponentBase>(component));
-        }
-
-        public event EventHandler<ComponentEventArgs<string>> ComponentNotification;
-        internal void OnComponentNotification(ComponentBase component, string message)
-        {
-            ComponentNotification?.Invoke(component, new ComponentEventArgs<string>(message));
         }
 
         public void SaveConfig(string configFile = null)
@@ -438,13 +383,68 @@ namespace KNote.ClientWin.Core
 
         #endregion
 
-        // !!!
-        //public event EventHandler<ComponentEventArgs<NoteDto>> SavedNoteDto;
-        //public virtual void NotifySavedNoteDto<T>(object component, T entity)
-        //{
-        //    SavedNoteDto?.Invoke(this, new ComponentEventArgs<NoteDto>((NoteDto)entity));
-        //}
+        #region Helper event handlers 
 
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> EditedPostItNote;
+        private void Store_EditedPostItNote(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        {
+            EditedPostItNote?.Invoke(sender, e);
+        }
+
+        public event EventHandler<ComponentEventArgs<NoteExtendedDto>> DeletedNote;
+        private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+        {
+            DeletedNote?.Invoke(sender, e);
+        }
+
+        public event EventHandler<ComponentEventArgs<NoteExtendedDto>> SavedNote;
+        private void Store_SavedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+        {
+            SavedNote?.Invoke(sender, e);
+        }
+
+        public event EventHandler<ComponentEventArgs<NoteExtendedDto>> AddedNote;
+        private void Store_AddedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+        {
+            AddedNote?.Invoke(sender, e);
+        }
+
+        public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> ExtendedEditPostIt;
+        private void Store_ExtendedEditPostIt(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        {
+            ExtendedEditPostIt?.Invoke(sender, e);
+        }
+
+        public event EventHandler<ComponentEventArgs<NoteDto>> DeletedPostIt;
+        private void Store_DeletedPostIt(object sender, ComponentEventArgs<NoteDto> e)
+        {
+            DeletedPostIt?.Invoke(sender, e);
+        }
+
+        public event EventHandler<ComponentEventArgs<NoteDto>> SavedPostIt;
+        private void Store_SavedPostIt(object sender, ComponentEventArgs<NoteDto> e)
+        {
+            SavedPostIt?.Invoke(sender, e);
+        }
+
+        public event EventHandler<ComponentEventArgs<NoteDto>> AddedPostIt;
+        private void Store_AddedPostIt(object sender, ComponentEventArgs<NoteDto> e)
+        {
+            AddedPostIt?.Invoke(sender, e);
+        }
+
+        private void Components_StateCtrlChanged(object sender, ComponentEventArgs<EComponentState> e)
+        {
+            ComponentsStateChanged?.Invoke(sender, e);
+        }
+
+        public event EventHandler<ComponentEventArgs<string>> ComponentNotification;
+        internal void OnComponentNotification(ComponentBase component, string message)
+        {
+            ComponentNotification?.Invoke(component, new ComponentEventArgs<string>(message));
+        }
+
+        #endregion
 
     }
 

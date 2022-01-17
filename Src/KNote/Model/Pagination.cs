@@ -31,8 +31,8 @@ namespace KNote.Model
 
     public class PageIdentifier
     {
-        public int PageNumber { get; set; } 
-        public int PageSize { get; set; } 
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 99999;
         public int Offset => (PageNumber - 1) * PageSize;
     }
 }
