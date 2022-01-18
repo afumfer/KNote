@@ -666,8 +666,11 @@ namespace KNote.Service.Services
         {
             string status = "";
 
+            var tasksValid = tasks.Where(t => t.IsDeleted() == false).Select(t => t).ToList();
+            var messagesValid = messages.Where(m => m.IsDeleted() == false).Select(m => m).ToList();
+
             bool allTaskResolved = true;
-            if (tasks?.Count > 0)
+            if (tasksValid?.Count > 0)
             {
                 foreach (var item in tasks)
                 {
@@ -684,7 +687,7 @@ namespace KNote.Service.Services
             }
 
             bool alarmsPending = false;
-            foreach (var item in messages)
+            foreach (var item in messagesValid)
             {
                 if (item.AlarmActivated == true)
                 {
