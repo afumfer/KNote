@@ -213,11 +213,11 @@ namespace KNote.ClientWin.Views
             }
                             
             var ext = Path.GetExtension(file);          
-            // TODO: revisar esto, el siguiente hack estaba implementado para 
+            // TODO: !!! revisar esto, el siguiente hack estaba implementado para 
             //       sortear un problema con la versión anterior de htmlEditor
             //       Con el componente WebView2 esto no debería pasar. 
             // Hack, ... pdf not work in htmlEditor when edit ... :-( ...
-            var fileTypes = (includePdf) ? ".jpg.jpeg.png.pdf" : ".jpg.jpeg.png";
+            var fileTypes = (includePdf) ? ".jpg.jpeg.png.pdf.mp4.txt.text.htm.html" : ".jpg.jpeg.png.pdf.mp4.txt.text.htm.html";
             if (fileTypes.IndexOf(ext) >= 0)
             {
                 try

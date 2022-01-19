@@ -53,6 +53,7 @@
             this.textStatus = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.panelDescription = new System.Windows.Forms.Panel();
+            this.webView2 = new KntWebView.KWebView();
             this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
             this.textDescription = new System.Windows.Forms.TextBox();
             this.toolDescription = new System.Windows.Forms.ToolStrip();
@@ -107,6 +108,7 @@
             this.buttonAttributeEdit = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.tabResources = new System.Windows.Forms.TabPage();
+            this.webViewResource = new KntWebView.KWebView();
             this.buttonSaveResource = new System.Windows.Forms.Button();
             this.buttonInsertLink = new System.Windows.Forms.Button();
             this.panelPreview = new System.Windows.Forms.Panel();
@@ -114,7 +116,6 @@
             this.textDescriptionResource = new System.Windows.Forms.TextBox();
             this.labelPreview = new System.Windows.Forms.Label();
             this.listViewResources = new System.Windows.Forms.ListView();
-            this.picResource = new System.Windows.Forms.PictureBox();
             this.buttonResourceEdit = new System.Windows.Forms.Button();
             this.buttonResourceDelete = new System.Windows.Forms.Button();
             this.buttonResourceAdd = new System.Windows.Forms.Button();
@@ -154,7 +155,6 @@
             this.label14 = new System.Windows.Forms.Label();
             this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.webView2 = new KntWebView.KWebView();
             this.toolBarNoteEditor.SuspendLayout();
             this.panelForm.SuspendLayout();
             this.tabNoteData.SuspendLayout();
@@ -164,7 +164,6 @@
             this.tabAttributes.SuspendLayout();
             this.tabResources.SuspendLayout();
             this.panelPreview.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picResource)).BeginInit();
             this.tabTasks.SuspendLayout();
             this.tabAlarms.SuspendLayout();
             this.tabCode.SuspendLayout();
@@ -432,6 +431,20 @@
             this.panelDescription.Size = new System.Drawing.Size(782, 434);
             this.panelDescription.TabIndex = 55;
             this.panelDescription.Visible = false;
+            // 
+            // webView2
+            // 
+            this.webView2.EnableUrlBox = true;
+            this.webView2.ForceHttps = false;
+            this.webView2.IsInitialized = false;
+            this.webView2.Location = new System.Drawing.Point(40, 127);
+            this.webView2.Name = "webView2";
+            this.webView2.ShowNavigationTools = false;
+            this.webView2.ShowStatusInfo = false;
+            this.webView2.Size = new System.Drawing.Size(277, 166);
+            this.webView2.TabIndex = 11;
+            this.webView2.TextUrl = "";
+            this.webView2.Visible = false;
             // 
             // htmlDescription
             // 
@@ -958,13 +971,13 @@
             // 
             // tabResources
             // 
+            this.tabResources.Controls.Add(this.webViewResource);
             this.tabResources.Controls.Add(this.buttonSaveResource);
             this.tabResources.Controls.Add(this.buttonInsertLink);
             this.tabResources.Controls.Add(this.panelPreview);
             this.tabResources.Controls.Add(this.textDescriptionResource);
             this.tabResources.Controls.Add(this.labelPreview);
             this.tabResources.Controls.Add(this.listViewResources);
-            this.tabResources.Controls.Add(this.picResource);
             this.tabResources.Controls.Add(this.buttonResourceEdit);
             this.tabResources.Controls.Add(this.buttonResourceDelete);
             this.tabResources.Controls.Add(this.buttonResourceAdd);
@@ -978,6 +991,23 @@
             this.tabResources.Text = "Resources  ";
             this.tabResources.ToolTipText = "Save resource file";
             this.tabResources.UseVisualStyleBackColor = true;
+            // 
+            // webViewResource
+            // 
+            this.webViewResource.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.webViewResource.EnableUrlBox = true;
+            this.webViewResource.ForceHttps = false;
+            this.webViewResource.IsInitialized = false;
+            this.webViewResource.Location = new System.Drawing.Point(392, 39);
+            this.webViewResource.Name = "webViewResource";
+            this.webViewResource.ShowNavigationTools = false;
+            this.webViewResource.ShowStatusInfo = false;
+            this.webViewResource.Size = new System.Drawing.Size(392, 157);
+            this.webViewResource.TabIndex = 21;
+            this.webViewResource.TextUrl = "";
+            this.webViewResource.Visible = false;
             // 
             // buttonSaveResource
             // 
@@ -1058,20 +1088,6 @@
             this.listViewResources.UseCompatibleStateImageBehavior = false;
             this.listViewResources.SelectedIndexChanged += new System.EventHandler(this.listViewResources_SelectedIndexChanged);
             this.listViewResources.DoubleClick += new System.EventHandler(this.listViewResources_DoubleClick);
-            // 
-            // picResource
-            // 
-            this.picResource.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.picResource.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("picResource.BackgroundImage")));
-            this.picResource.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picResource.Location = new System.Drawing.Point(396, 36);
-            this.picResource.Name = "picResource";
-            this.picResource.Size = new System.Drawing.Size(392, 160);
-            this.picResource.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picResource.TabIndex = 13;
-            this.picResource.TabStop = false;
             // 
             // buttonResourceEdit
             // 
@@ -1510,19 +1526,6 @@
             this.label14.TabIndex = 4;
             this.label14.Text = "Trace node from :";
             // 
-            // webView2
-            // 
-            this.webView2.ForceHttps = false;
-            this.webView2.IsInitialized = false;
-            this.webView2.Location = new System.Drawing.Point(40, 127);
-            this.webView2.Name = "webView2";
-            this.webView2.ShowNavigationTools = true;
-            this.webView2.ShowStatusInfo = true;
-            this.webView2.Size = new System.Drawing.Size(277, 166);
-            this.webView2.TabIndex = 11;
-            this.webView2.TextUrl = "";
-            this.webView2.Visible = false;
-            // 
             // NoteEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1555,7 +1558,6 @@
             this.tabResources.PerformLayout();
             this.panelPreview.ResumeLayout(false);
             this.panelPreview.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picResource)).EndInit();
             this.tabTasks.ResumeLayout(false);
             this.tabTasks.PerformLayout();
             this.tabAlarms.ResumeLayout(false);
@@ -1638,7 +1640,6 @@
         internal System.Windows.Forms.TextBox textTraceNodeType;
         private System.Windows.Forms.Button buttonTraceNodeTypes;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.PictureBox picResource;
         private System.Windows.Forms.TextBox textFolderNumber;
         private System.Windows.Forms.TextBox textNoteNumber;
         private System.Windows.Forms.ListView listViewAttributes;
@@ -1696,5 +1697,6 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private Button buttonNavigate;
         private KntWebView.KWebView webView2;
+        private KntWebView.KWebView webViewResource;
     }
 }

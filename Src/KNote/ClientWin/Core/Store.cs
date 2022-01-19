@@ -366,7 +366,7 @@ namespace KNote.ClientWin.Core
 
         public string ExtensionFileToFileType(string extension)
         {
-            // TODO: study this method ...
+            // TODO: !!! study this method ...
             if (extension == ".jpg")
                 return @"image/jpeg";
             if (extension == ".jpeg")
@@ -377,8 +377,23 @@ namespace KNote.ClientWin.Core
                 return "application/pdf";
             else if (extension == ".zip")
                 return "application/zip";
+            else if (extension == ".mp4")
+                return "video/mp4";
+            else if (extension == ".mp3")
+                return "audio/mp3";
+            else if (extension == ".txt")
+                return "text/plain";
+            else if (extension == ".text")
+                return "text/plain";
+            else if (extension == ".htm")
+                return "text/plain";
+            else if (extension == ".html")
+                return "text/plain";
             else
                 return "";
+
+
+            // text/plain
         }
 
         public async Task<Guid?> GetUserId(IKntService service)

@@ -60,7 +60,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         return MessageBox.Show(info, caption, buttons, icon);
     }
 
-    public void CleanView()
+    public async void CleanView()
     {
         // Basic data
         textTopic.Text = "";
@@ -71,10 +71,14 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         textStatus.Text = "";
         textDescription.Text = "";
         htmlDescription.BodyHtml = "";
+        await webView2.NavigateToString(" ");
         textPriority.Text = "";
         textDescriptionResource.Text = "";
-        picResource.Image = null;
-        picResource.Visible = true;
+        // !!!
+        //picResource.Image = null;
+        //picResource.Visible = true;
+        await webViewResource.NavigateToString(" ");
+        webViewResource.Visible = true;
         panelPreview.Visible = false;
         textTaskDescription.Text = "";
         textTaskTags.Text = "";
@@ -485,9 +489,13 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         if (res)
         {
             listViewResources.Items[delRes].Remove();      
-            _selectedResource = null;                
-            picResource.Image?.Dispose();
-            picResource.Image = null;
+            _selectedResource = null;
+            // !!!
+            //picResource.Image?.Dispose();
+            //picResource.Image = null;
+            await webViewResource.NavigateToString(" ");
+            webViewResource.Visible = false;
+            panelPreview.Visible = true;
             textDescriptionResource.Text = "";
             if (listViewResources.Items.Count > 0)
                 listViewResources.Items[0].Selected = true;                
@@ -632,16 +640,20 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
         panelDescription.Visible = true;
 
-        picResource.Location = new Point(396, 36);            
+        // !!!
+        //picResource.Location = new Point(396, 36);
+        webViewResource.Location = new Point(396, 36);
         panelPreview.Location = new Point(396, 36);
         if (_com.EditMode)
         {
-            picResource.Size = new Size(392, 464);                
+            //picResource.Size = new Size(392, 464);
+            webViewResource.Size = new Size(392, 464);
             panelPreview.Size = new Size(392, 464);
         }
         else
         {
-            picResource.Size = new Size(392, 490);                
+            //picResource.Size = new Size(392, 490);
+            webViewResource.Size = new Size(392, 490);
             panelPreview.Size = new Size(392, 490);
         }
 
@@ -765,7 +777,9 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         listViewResources.Clear();
         panelPreview.Visible = true;
         linkViewFile.Visible = false;
-        picResource.Visible = false;
+        // !!!
+        //picResource.Visible = false;
+        webViewResource.Visible = false;
 
         foreach (var res in _com.Model.Resources)
         {
@@ -821,11 +835,13 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);            
     }
 
-    private void UpdatePreviewResource(ResourceDto resource)
+    private async void UpdatePreviewResource(ResourceDto resource)
     {
         _selectedResource = resource;
 
-        picResource.Image = null;
+        // !!!
+        //picResource.Image = null;
+        await webViewResource.NavigateToString(" ");
         textDescriptionResource.Text = "";
 
         if (_selectedResource == null)
@@ -833,19 +849,27 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
         textDescriptionResource.Text = _selectedResource.Description;
                                                                
-        if (_selectedResource.FileType.Contains("image"))
-        {            
-            picResource.Visible = true;
+        if (_selectedResource.FileType.Contains("image")
+            || _selectedResource.FileType.Contains("pdf") 
+            || _selectedResource.FileType.Contains("mp4")
+            || _selectedResource.FileType.Contains("text")
+            )
+        {
+            //picResource.Visible = true;
+            webViewResource.Visible = true;
             panelPreview.Visible = false;
 
-            if (_selectedResource.ContentArrayBytes != null)
-                picResource.Image = Image.FromStream(new MemoryStream(_selectedResource.ContentArrayBytes));
+            //if (_selectedResource.ContentArrayBytes != null)
+            //    picResource.Image = Image.FromStream(new MemoryStream(_selectedResource.ContentArrayBytes));
+
+            await webViewResource.Navigate(_selectedResource.FullUrl);
         }
         else
         {
             _com.Service.Notes.ManageResourceContent(_selectedResource, false);
 
-            picResource.Visible = false;
+            //picResource.Visible = false;
+            webViewResource.Visible = false;
             panelPreview.Visible = true;
             linkViewFile.Visible = true;
         }
