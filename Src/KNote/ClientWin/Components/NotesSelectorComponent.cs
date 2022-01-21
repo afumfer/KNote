@@ -163,40 +163,43 @@ namespace KNote.ClientWin.Components
         }
 
         public override void RefreshItem(NoteInfoDto note)
-        {            
+        {
             var updateNote = ListEntities?.FirstOrDefault(_ => _.NoteId == note.NoteId);
-            if (updateNote == null)
-                return;
 
             if (Folder == null)
-            {
-                updateNote.SetSimpleDto(note);
-                View.RefreshItem(updateNote);
-                return;
+            {                
+                if (updateNote != null)
+                {
+                    updateNote.SetSimpleDto(note);
+                    View.RefreshItem(updateNote);
+                }
             }
-
-            if (Folder.FolderId == note.FolderId)
-            {
-                updateNote.SetSimpleDto(note);
-                View.RefreshItem(updateNote);
-            }           
             else
             {
-                ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
-                View.DeleteItem(note);                
+                if (Folder.FolderId == note.FolderId)
+                {
+                    if (updateNote != null)
+                    {
+                        updateNote.SetSimpleDto(note);
+                        View.RefreshItem(updateNote);
+                    }
+                    else
+                    {
+                        ListEntities.Add(note);
+                        View.AddItem(note);
+                    }
+                }
+                else
+                {
+                    ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
+                    View.DeleteItem(note);
+                }
             }
         }
 
         public override void AddItem(NoteInfoDto note)
         {
-            if (Folder == null)
-                return;
-
-            if (Folder.FolderId == note?.FolderId)
-            {                
-                ListEntities.Add(note);
-                View.AddItem(note);             
-            }
+            RefreshItem(note);
         }
 
         public override void DeleteItem(NoteInfoDto note)

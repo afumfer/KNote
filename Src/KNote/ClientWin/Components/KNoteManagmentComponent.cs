@@ -922,7 +922,14 @@ namespace KNote.ClientWin.Components
         {
             if (NoteEditorComponent.Model.NoteId == noteInfo.NoteId)
                 await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);
+
             NotesSelectorComponent.RefreshItem(noteInfo);
+
+            if (NotesSelectorComponent.ListEntities?.Count == 0)
+            {
+                NoteEditorComponent.View.CleanView();
+                _selectedNoteInfo = null;
+            }                            
         }
 
         private void PostItEditorComponent_DeletedEntity(object sender, ComponentEventArgs<NoteDto> e)
