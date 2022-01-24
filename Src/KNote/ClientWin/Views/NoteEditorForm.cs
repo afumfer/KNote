@@ -74,9 +74,6 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         await webView2.NavigateToString(" ");
         textPriority.Text = "";
         textDescriptionResource.Text = "";
-        // !!!
-        //picResource.Image = null;
-        //picResource.Visible = true;
         await webViewResource.NavigateToString(" ");
         webViewResource.Visible = true;
         panelPreview.Visible = false;
@@ -490,9 +487,6 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         {
             listViewResources.Items[delRes].Remove();      
             _selectedResource = null;
-            // !!!
-            //picResource.Image?.Dispose();
-            //picResource.Image = null;
             await webViewResource.NavigateToString(" ");
             webViewResource.Visible = false;
             panelPreview.Visible = true;
@@ -839,8 +833,6 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
     {
         _selectedResource = resource;
 
-        // !!!
-        //picResource.Image = null;
         await webViewResource.NavigateToString(" ");
         textDescriptionResource.Text = "";
 
@@ -849,26 +841,15 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
         textDescriptionResource.Text = _selectedResource.Description;
                                                                
-        if (_selectedResource.FileType.Contains("image")
-            || _selectedResource.FileType.Contains("pdf") 
-            || _selectedResource.FileType.Contains("mp4")
-            || _selectedResource.FileType.Contains("text")
-            )
+        if (_com.Store.IsSupportedFileTypeForPreview(_selectedResource.FileType))
         {
-            //picResource.Visible = true;
             webViewResource.Visible = true;
             panelPreview.Visible = false;
-
-            //if (_selectedResource.ContentArrayBytes != null)
-            //    picResource.Image = Image.FromStream(new MemoryStream(_selectedResource.ContentArrayBytes));
-
             await webViewResource.Navigate(_selectedResource.FullUrl);
         }
         else
         {
             _com.Service.Notes.ManageResourceContent(_selectedResource, false);
-
-            //picResource.Visible = false;
             webViewResource.Visible = false;
             panelPreview.Visible = true;
             linkViewFile.Visible = true;

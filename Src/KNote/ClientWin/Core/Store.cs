@@ -18,6 +18,12 @@ namespace KNote.ClientWin.Core
 {
     public class Store
     {
+        #region Constants
+
+        const string SUPORTED_MIME_TYPES = @"image/jpeg;image/png;application/pdf;application/zip;video/mp4;audio/mp3;text/plain";
+
+        #endregion
+
         #region Private fields
 
         private readonly List<ServiceRef> _servicesRefs;
@@ -366,10 +372,10 @@ namespace KNote.ClientWin.Core
 
         public string ExtensionFileToFileType(string extension)
         {
-            // TODO: !!! study this method ...
+            // TODO: Refactor this method
             if (extension == ".jpg")
                 return @"image/jpeg";
-            if (extension == ".jpeg")
+            else if (extension == ".jpeg")
                 return @"image/jpeg";
             else if (extension == ".png")
                 return "image/png";
@@ -390,10 +396,16 @@ namespace KNote.ClientWin.Core
             else if (extension == ".html")
                 return "text/plain";
             else
-                return "";
+                return "";            
+        }
+        
+        public bool IsSupportedFileTypeForPreview(string fileType)
+        {
+            // TODO: Refactor this method
+            if (string.IsNullOrEmpty(fileType))
+                return false;
 
-
-            // text/plain
+            return SUPORTED_MIME_TYPES.Contains(fileType);            
         }
 
         public async Task<Guid?> GetUserId(IKntService service)

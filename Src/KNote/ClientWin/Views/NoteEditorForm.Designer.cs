@@ -438,9 +438,9 @@
             this.webView2.ForceHttps = false;
             this.webView2.IsInitialized = false;
             this.webView2.Location = new System.Drawing.Point(40, 127);
-            this.webView2.Name = "webView2";
-            this.webView2.ShowNavigationTools = false;
-            this.webView2.ShowStatusInfo = false;
+            this.webView2.Name = "webView2";            
+            this.webView2.ShowNavigationTools = true;
+            this.webView2.ShowStatusInfo = true;
             this.webView2.Size = new System.Drawing.Size(277, 166);
             this.webView2.TabIndex = 11;
             this.webView2.TextUrl = "";
@@ -1001,7 +1001,7 @@
             this.webViewResource.ForceHttps = false;
             this.webViewResource.IsInitialized = false;
             this.webViewResource.Location = new System.Drawing.Point(392, 39);
-            this.webViewResource.Name = "webViewResource";
+            this.webViewResource.Name = "webViewResource";            
             this.webViewResource.ShowNavigationTools = false;
             this.webViewResource.ShowStatusInfo = false;
             this.webViewResource.Size = new System.Drawing.Size(392, 157);

@@ -92,11 +92,12 @@ namespace KNote.ClientWin.Views
             this.htmlPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.htmlPreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.htmlPreview.EnableUrlBox = true;
             this.htmlPreview.ForceHttps = false;
             this.htmlPreview.IsInitialized = false;
             this.htmlPreview.Location = new System.Drawing.Point(288, 73);
-            this.htmlPreview.Name = "htmlPreview";
+            this.htmlPreview.Name = "htmlPreview";            
             this.htmlPreview.ShowNavigationTools = false;
             this.htmlPreview.ShowStatusInfo = false;
             this.htmlPreview.Size = new System.Drawing.Size(285, 361);
