@@ -71,10 +71,12 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         textStatus.Text = "";
         textDescription.Text = "";
         htmlDescription.BodyHtml = "";
-        await webView2.NavigateToString(" ");
+        if (webView2.Visible)
+            await webView2.NavigateToString(" ");
         textPriority.Text = "";
         textDescriptionResource.Text = "";
-        await webViewResource.NavigateToString(" ");
+        if (webViewResource.Visible)
+            await webViewResource.NavigateToString(" ");
         webViewResource.Visible = true;
         panelPreview.Visible = false;
         textTaskDescription.Text = "";
@@ -140,13 +142,18 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         {
             var savedOk = await SaveModel();
             if (!savedOk)
+            {
                 if (MessageBox.Show("Do yo want exit?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
                     _com.Finalize();
+                    return;
+                }
                 else
                 {
                     e.Cancel = true;
                     return;
                 }
+            }
             _com.Finalize();
         }
     }
@@ -833,7 +840,8 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
     {
         _selectedResource = resource;
 
-        await webViewResource.NavigateToString(" ");
+        if(webViewResource.Visible)
+            await webViewResource.NavigateToString(" ");
         textDescriptionResource.Text = "";
 
         if (_selectedResource == null)

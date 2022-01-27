@@ -69,7 +69,7 @@ namespace KNote.ClientWin.Views
         {
             if (FlagClose)
             {
-                MessageBox.Show("You cannot close this window until script execution is finished.", "KntScript");
+                MessageBox.Show("You can not close this window until script execution is finished.", "KntScript");
                 e.Cancel = true;
             }
         }

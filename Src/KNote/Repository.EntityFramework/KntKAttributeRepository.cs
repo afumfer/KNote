@@ -202,7 +202,7 @@ namespace KNote.Repository.EntityFramework
                             var nAttributes = (await noteKAttributes.GetAllAsync(n => n.KAttributeId == entity.KAttributeId)).Entity;
                             if (nAttributes.Count > 0)
                             {
-                                response.AddErrorMessage("You cannot change the note type for this attribute. This attribute is already being used by several notes. ");
+                                response.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
                                 response.Entity = entity;                                
                             }
                         }

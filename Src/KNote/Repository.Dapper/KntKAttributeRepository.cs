@@ -160,7 +160,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                         var n = await db.ExecuteScalarAsync<long>(sqlType2, new { KAttributeId = entity.KAttributeId });
                         if (n > 0)
                         {
-                            result.AddErrorMessage("You cannot change the note type for this attribute. This attribute is already being used by several notes. ");
+                            result.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
                             result.Entity = entity;
                             return result;
                         }
