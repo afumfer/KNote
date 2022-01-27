@@ -172,7 +172,8 @@ namespace KntWebView
                 if (!_isInitialized)
                     await InitializeAsync();
 
-                webView2.NavigateToString(contentString);
+                if (webView2.CoreWebView2 != null)  // This patch is required when using sql server repositories
+                    webView2.NavigateToString(contentString);
             }
             catch (Exception ex)
             {
