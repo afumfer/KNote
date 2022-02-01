@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
+
 using KNote.Client.ClientDataServices;
 using KNote.Client.Helpers;
 using KNote.Client.Auth;
 using KNote.Client.Shared;
 
+using Radzen;
+
 namespace KNote.Client;
-    
+
 public class Program
 {
     public static async Task Main(string[] args)
@@ -42,6 +45,12 @@ public class Program
         builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(
             provider => provider.GetRequiredService<AuthenticationProviderJWT>()
         );
+
+
+        builder.Services.AddScoped<DialogService>();
+        builder.Services.AddScoped<NotificationService>();
+        builder.Services.AddScoped<TooltipService>();
+        builder.Services.AddScoped<ContextMenuService>();
 
         // TODO: deprecated
         //builder.Services.AddFileReaderService(options => options.InitializeOnFirstCall = true);
