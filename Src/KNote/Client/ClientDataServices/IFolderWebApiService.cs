@@ -5,7 +5,7 @@ namespace KNote.Client.ClientDataServices;
 
 public interface IFolderWebApiService
 {
-    Task<Result<List<FolderDto>>> GetAllAsync();
+    Task<Result<List<FolderInfoDto>>> GetAllAsync();
     Task<Result<List<FolderDto>>> GetTreeAsync();        
     Task<Result<FolderDto>> GetAsync(Guid folderId);        
     Task<Result<FolderDto>> SaveAsync(FolderDto folder);

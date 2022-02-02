@@ -5,7 +5,7 @@ namespace KNote.Repository;
 
 public interface IKntFolderRepository : IDisposable
 {        
-    Task<Result<List<FolderDto>>> GetAllAsync();        
+    Task<Result<List<FolderInfoDto>>> GetAllAsync();        
     Task<Result<List<FolderDto>>> GetTreeAsync(Guid? parentId = null);
     Task<Result<FolderDto>> GetAsync(Guid folderId);
     Task<Result<FolderDto>> GetAsync(int folderNumber);

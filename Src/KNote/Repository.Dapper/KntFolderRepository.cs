@@ -17,9 +17,9 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
     {
     }
 
-    public async Task<Result<List<FolderDto>>> GetAllAsync()
+    public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
     {            
-        var result = new Result<List<FolderDto>>();
+        var result = new Result<List<FolderInfoDto>>();
         try
         {
             var db = GetOpenConnection();
@@ -27,7 +27,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
             var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
             sql += "FROM Folders ORDER BY [Order];";
 
-            var entity = await db.QueryAsync<FolderDto>(sql.ToString(), new { });
+            var entity = await db.QueryAsync<FolderInfoDto>(sql.ToString(), new { });
             result.Entity = entity.ToList();
 
             await CloseIsTempConnection(db);
@@ -70,7 +70,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         {
             var allFoldersInfo = (await GetAllAsync()).Entity;
 
-            treeFolders = allFoldersInfo.Where(fi => fi.ParentId == partenId)
+            treeFolders = allFoldersInfo.Where(fi => fi.ParentId == partenId).Select( f => f.GetSimpleDto<FolderDto>())
                 .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
 
             foreach (FolderDto f in treeFolders)
@@ -292,9 +292,9 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
     }
 
     // TODO: Pendiente de refactorizar (este código está repetido en el repositorio EF)
-    private void LoadChilds(FolderDto folder, List<FolderDto> allFolders)
+    private void LoadChilds(FolderDto folder, List<FolderInfoDto> allFolders)
     {
-        folder.ChildFolders = allFolders.Where(fi => fi.ParentId == folder.FolderId)
+        folder.ChildFolders = allFolders.Where(fi => fi.ParentId == folder.FolderId).Select(f => f.GetSimpleDto<FolderDto>())
             .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
 
         foreach (FolderDto f in folder.ChildFolders)

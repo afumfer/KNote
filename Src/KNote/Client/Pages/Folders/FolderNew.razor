@@ -5,6 +5,8 @@
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
+@implements IDisposable
+
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
 <FolderForm Title="New folder" OnValidSubmit="OnNew" OnExit="OnExit" Folder="folder" />

@@ -29,7 +29,7 @@ else
         if (!result.IsValid)
         {
             await showMessages.ShowErrorMessage(result.Message);
-            navigationManager.NavigateTo("/");
+            navigationManager.NavigateTo("index");
         }
         else
         {
@@ -41,7 +41,7 @@ else
         if (!result2.IsValid)
         {
             await showMessages.ShowErrorMessage(result2.Message);
-            navigationManager.NavigateTo("/");
+            navigationManager.NavigateTo("index");
         }
         else
         {

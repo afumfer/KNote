@@ -22,16 +22,16 @@ namespace KNote.Repository.EntityFramework
         {
         }
 
-        public async Task<Result<List<FolderDto>>> GetAllAsync()
+        public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
         {
-            var resService = new Result<List<FolderDto>>();
+            var resService = new Result<List<FolderInfoDto>>();
             try
             {
                 var ctx = GetOpenConnection();
                 var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx) ;
 
                 var resRep = await folders.GetAllAsync();
-                resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
+                resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderInfoDto>()).ToList();
                 resService.ErrorList = resRep.ErrorList;
 
                 await CloseIsTempConnection(ctx);

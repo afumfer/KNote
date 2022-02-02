@@ -1,9 +1,15 @@
-﻿@page "/testpage2"
+﻿@using System.IO
+
+@page "/testpage2"
 
 @using KNote.Model
 
 @inject HttpClient Http
 @inject AppState appState
+@inject NavigationManager navigationManger
+@*@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment*@
+
+@implements IDisposable
 
 <h1>Test page 2</h1>
 <hr />
@@ -26,17 +32,17 @@
     </li>
     <li class="nav-item">
         <a class="nav-link @((selectedPanel == 4) ? "active" : "")" @onclick="@(() => ShowPanel(4))">
-            <span class="oi oi-terminal mr-2"></span>... panel 4
+            <span class="oi oi-terminal mr-2"></span>Radzen controls
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
-            <span class="oi oi-terminal mr-2"></span> ... panel 5
+            <span class="oi oi-terminal mr-2"></span> Radzen TreeView inline
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link @((selectedPanel == 6) ? "active" : "")" @onclick="@(() => ShowPanel(6))">
-            <span class="oi oi-terminal mr-2"></span>... panel 6
+            <span class="oi oi-terminal mr-2"></span> Radzen TreeView (folders)
         </a>
     </li>
     <li class="nav-item">
@@ -158,9 +164,12 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+    <h4 class="mt-2"> Test Radzen Controls</h4>
 
-    Data for panel @selectedPanel
+    Panel @selectedPanel  
+    <hr />
+    
+    <RadzenButton Click="@RadzenButtonClicked" Text="Test go home"></RadzenButton>
 
 </div>
 
@@ -168,9 +177,49 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+    <h4 class="mt-2">Radzen tree inline</h4>  
 
-    Data for panel @selectedPanel
+    <hr />
+
+    <RadzenCard Class="my-5 mx-auto" style="max-width: 400px;">
+        <h4>Inline definition</h4>
+        <RadzenTree Expand=@OnExpand Change=@OnChange Style="width: 100%; height: 300px">
+            <RadzenTreeItem Text="BMW">
+                <ChildContent>
+                    <RadzenTreeItem Text="M3" />
+                    <RadzenTreeItem Text="M5" />
+                </ChildContent>
+                <Template>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg" style="width: 20px; margin-right: 8px;" />
+                    <b>@context.Text</b>
+                </Template>
+            </RadzenTreeItem>
+            <RadzenTreeItem Text="Audi">
+                <ChildContent>
+                    <RadzenTreeItem Text="RS4" />
+                    <RadzenTreeItem Text="RS6" />
+                </ChildContent>
+                <Template>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/92/Audi-Logo_2016.svg" style="width: 20px; margin-right: 8px;" />
+                    <b>@context.Text</b>
+                </Template>
+            </RadzenTreeItem>
+            <RadzenTreeItem Text="Mercedes">
+                <Template>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg" style="width: 20px; margin-right: 8px;" />
+                    <b>@context.Text</b>
+                </Template>
+                <ChildContent>
+                    <RadzenTreeItem Text="C63 AMG" />
+                    <RadzenTreeItem Text="S63 AMG" />
+                </ChildContent>
+            </RadzenTreeItem>
+        </RadzenTree>
+    </RadzenCard>
+
+    <hr />
+
+    <p>@message</p>
 
 </div>
 
@@ -178,9 +227,28 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+    <h4 class="mt-2"> Radzen TreeView (folders)</h4>
 
-    Data for panel @selectedPanel
+    <button class="btn btn-primary" @onclick="LoadFolders">Load folders</button>
+    <hr />
+    <p>@message</p>    
+
+@*    <RadzenCard Class="my-5 mx-auto">
+        <RadzenTree Data=@entries2 Expand=@LoadFoldersTree Style="width: 100%; height: 100%" @bind-Value=@selectedNode Change=@OnChange >
+            <RadzenTreeLevel Text=@GetTextForNode2  />
+        </RadzenTree>
+    </RadzenCard>*@
+
+    <RadzenTree Data=@foldersFull Style="height: 300px" Change=@OnChange>
+        <RadzenTreeLevel TextProperty="Name" ChildrenProperty="ChildFolders"  Expanded=@ShouldExpand HasChildren=@(f => (f as FolderDto).ChildFolders.Any()) />
+    </RadzenTree>
+
+
+@*    <RadzenCard Class="my-5 mx-auto" style="max-width: 400px;">
+        <RadzenTree Data=@entries Expand=@LoadFiles Style="width: 100%; height: 100%" @bind-Value=@selectedNode Change=@OnChange>
+            <RadzenTreeLevel Text=@GetTextForNode Template=@FileOrFolderTemplate  />
+        </RadzenTree>
+    </RadzenCard>*@
 
 </div>
 
@@ -211,14 +279,38 @@
 @code {
     private WeatherForecast[] forecasts;
     private List<FolderInfoDto> folders = new List<FolderInfoDto>();
+    private List<FolderDto> foldersFull = new List<FolderDto>();
     private string[] settings;
-
-
     private int selectedPanel = 1;
+    private string message = "";
+
+
+    IEnumerable<FolderInfoDto> entries2 = new List<FolderInfoDto>();
+
+    object selectedNode = null;    
+    IEnumerable<string> entries;
 
     protected override async Task OnInitializedAsync()
     {
+        appState.OnChange += StateHasChanged;
+
         settings = await Http.GetFromJsonAsync<string[]>("api/WeatherForecast/GetAppSettings");
+
+        entries = Directory.GetDirectories(@"/")
+                           .Where(entry =>
+                           {
+                               var name = Path.GetFileName(entry);
+
+                               return !name.StartsWith("$") && !name.StartsWith("System");
+                           });
+
+        selectedNode = entries.First();
+
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
     }
 
     private async Task LoadWeatherForecast()
@@ -232,7 +324,10 @@
     private async Task LoadFolders()
     {
         folders = null;
+        foldersFull = await Http.GetFromJsonAsync<List<FolderDto>>("api/WeatherForecast/GetFoldersFull");
         folders = await Http.GetFromJsonAsync<List<FolderInfoDto>>("api/WeatherForecast/GetFolders");
+
+        entries2 = folders.Where(f => f.ParentId == null).Select(f => f).ToList();
 
         appState.AppMode = "Wiki";
     }
@@ -243,4 +338,78 @@
 
         appState.AppDescription += panel.ToString();
     }
+
+    void RadzenButtonClicked()
+    {
+        navigationManger.NavigateTo("index");
+    }
+
+
+    void OnChange(TreeEventArgs args)
+    {
+        var f = args.Value as FolderDto;
+
+        message = $"Change Item Text: {args.Text} - {f.FolderId} - {f.Name}";
+    }
+
+    void OnExpand(TreeExpandEventArgs args)
+    {
+        if (args.Value is string text)
+        {
+            message = $"Expand Text: {text}";
+        }
+    }
+
+    string GetTextForNode2(object data)
+    {
+        return ((FolderInfoDto)data).Name;
+    }
+
+    void LoadFoldersTree(TreeExpandEventArgs args)
+    {
+        var folder = args.Value as FolderInfoDto;
+
+        args.Children.Data = folders.Where(f => f.ParentId == folder.FolderId).Select(f => f).ToList();
+        args.Children.Text = GetTextForNode2;
+                
+        args.Children.HasChildren = (fo) => folders.Where(f => f.ParentId == ((FolderInfoDto)fo).FolderId).Count() > 0;
+
+        //args.Children.Template = FileOrFolderTemplate;
+    }
+
+
+
+    void LoadFiles(TreeExpandEventArgs args)
+    {
+        var directory = args.Value as string;
+
+        args.Children.Data = Directory.EnumerateFileSystemEntries(directory);
+        args.Children.Text = GetTextForNode;
+        args.Children.HasChildren = (path) => Directory.Exists((string)path);
+        args.Children.Template = FileOrFolderTemplate;
+    }
+
+    string GetTextForNode(object data)
+    {
+        return Path.GetFileName((string)data);
+    }
+
+    RenderFragment<RadzenTreeItem> FileOrFolderTemplate = (context) => builder =>
+    {
+        string path = context.Value as string;
+        bool isDirectory = Directory.Exists(path);
+
+        builder.OpenComponent<RadzenIcon>(0);
+        builder.AddAttribute(1, nameof(RadzenIcon.Icon), isDirectory ? "folder" : "insert_drive_file");
+        builder.CloseComponent();        
+        builder.AddContent(3, context.Text);
+    };
+
+    bool ShouldExpand(object data)
+    {
+        var folder = data as FolderDto;
+
+        return folder.Name == "Home";
+    }
+
 }

@@ -6,6 +6,8 @@
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
+@implements IDisposable
+
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
 <div class="container-fluid">
@@ -86,8 +88,11 @@
         }
     </div>
 
-    <div class="col-lg-3 pt-2 pb-2 bg-light border">
-        <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" ShowRefreshTree="true" RefreshTreeFolders="OnRefreshTreeFolders" />
+    @*bg-light*@
+
+    <div class="col-lg-3 pt-2 pb-2  border">
+        @*<KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" ShowRefreshTree="true" RefreshTreeFolders="OnRefreshTreeFolders" />*@
+        <KntFoldersTreeViewRZ FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" ShowRefreshTree="true" RefreshTreeFolders="OnRefreshTreeFolders" />
     </div>
 
     <div class="col-lg-9 pt-2 pb-2 border">
@@ -118,9 +123,9 @@
     <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
 </ModalDialog>
 
-@code {    
+@code {
 
-    private List<FolderDto> foldersTree;
+    private List<FolderDto> foldersTree;    
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
 
@@ -139,7 +144,7 @@
     {
         appState.OnChange += StateHasChanged;
 
-        await Load();
+        await Load();        
     }
 
     private async Task Load()
@@ -277,4 +282,5 @@
         appState.FoldersTree = null;
         await Load();
     }
+
 }

@@ -49,10 +49,17 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("GetFolders")]
-        public async Task<IEnumerable<FolderDto>> GetFolders()
+        public async Task<IEnumerable<FolderInfoDto>> GetFolders()
         {            
             return (await service.Folders.GetAllAsync()).Entity;
         }
+
+        [HttpGet("GetFoldersFull")]
+        public async Task<IEnumerable<FolderInfoDto>> GetFoldersFull()
+        {
+            return (await service.Folders.GetTreeAsync()).Entity;
+        }
+
 
         [HttpGet("GetAppSettings")]
         public IEnumerable<string> GetAppSettings()

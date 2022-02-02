@@ -1,5 +1,7 @@
 ﻿@inject AppState appState
 
+@implements IDisposable
+
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">KaNote</a>
     <button class="navbar-toggler" @onclick="() => ToggleNavMenu(true)">

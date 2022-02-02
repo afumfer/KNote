@@ -8,7 +8,7 @@ namespace KNote.Service
 {
     public interface IKntFolderService
     {        
-        Task<Result<List<FolderDto>>> GetAllAsync();        
+        Task<Result<List<FolderInfoDto>>> GetAllAsync();        
         Task<Result<List<FolderDto>>> GetTreeAsync();
         Task<Result<FolderDto>> GetHomeAsync();
         Task<Result<FolderDto>> GetAsync(Guid folderId);

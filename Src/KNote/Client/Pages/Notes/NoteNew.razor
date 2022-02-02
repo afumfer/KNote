@@ -5,6 +5,8 @@
 @inject NavigationManager navigationManger
 @inject IShowMessages showMessages
 
+@implements IDisposable
+
 @attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
 
 @if (showForm)

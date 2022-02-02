@@ -8,6 +8,8 @@
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 
+@implements IDisposable
+
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
 <div>
@@ -32,8 +34,15 @@
 
     protected override async Task OnInitializedAsync()
     {
+        appState.OnChange += StateHasChanged;
+
         appInfo = $"{appState.AppDescription} ({appState.AppVersion})";
         await LoadNotes();
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
     }
 
     private async Task LoadNotes()

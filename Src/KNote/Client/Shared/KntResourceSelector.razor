@@ -1,6 +1,8 @@
 ﻿@inject IGenericDataService  dataService
 @inject IShowMessages showMessages
-@inject AppState appState
+
+@*@inject AppState appState
+@implements IDisposable*@
 
 @if (ShowDialog)
 {

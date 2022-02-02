@@ -13,9 +13,9 @@ public class FolderWebApiService : IFolderWebApiService
         _httpClient = httpClient;
     }
         
-    public async Task<Result<List<FolderDto>>> GetAllAsync()
+    public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
     {
-        return await _httpClient.GetFromJsonAsync<Result<List<FolderDto>>>("api/folders");
+        return await _httpClient.GetFromJsonAsync<Result<List<FolderInfoDto>>>("api/folders");
     }
 
     public async Task<Result<List<FolderDto>>> GetTreeAsync()

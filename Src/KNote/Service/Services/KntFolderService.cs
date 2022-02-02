@@ -30,7 +30,7 @@ namespace KNote.Service.Services
 
         #region IKntFolderService
 
-        public async Task<Result<List<FolderDto>>> GetAllAsync()
+        public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
         {
             return await _repository.Folders.GetAllAsync();
         }
