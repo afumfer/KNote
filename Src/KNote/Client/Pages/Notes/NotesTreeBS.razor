@@ -1,0 +1,285 @@
+﻿@page "/notes/treeBS"
+@page "/treeBS"
+
+@inject AppState appState
+@inject IWebApiService webApiService
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
+
+@implements IDisposable
+
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <h3>Notes tree</h3>
+        </div>
+        <div class="col-6 float-right">
+            <button class="btn btn-sm btn-warning mx-1 float-right"
+                    @onclick="GoNoteNew"
+                    data-toggle="tooltip" title="New note">
+                <i class="oi oi-document"></i> New note
+            </button>
+        </div>
+    </div>
+</div>
+<hr class="mt-0" />
+
+<div class="row">
+
+    <div class="col-lg-12 pt-2 bg-light border">
+        @if (folder == null)
+        {
+            <h5>( ... no folder selected ...)</h5>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-8">
+                    <h5><span class="oi oi-folder pr-3"></span>@folder.Name</h5>
+                </div>
+                <div class="col-4">
+                    @if (notes != null && notes.Count > 0)
+                    {
+                        <span class="float-right">
+                            @if (viewPagination == 1)
+                            {
+                                <button class="btn btn-sm btn-dark mx-1"
+                                        @onclick="TogglePagination"
+                                        data-toggle="tooltip" title="Disable paging">
+                                    <i class="fa fa-list"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-dark mx-1"
+                                        @onclick="TogglePagination"
+                                        data-toggle="tooltip" title="Activate paging">
+                                    <i class="fa fa-list-ol"></i>
+                                </button>
+                            }
+
+
+                            @if (viewMode == 0)
+                            {
+                                <button class="btn btn-sm btn-dark mx-1"
+                                        @onclick="ToggleView"
+                                        data-toggle="tooltip" title="Item mode view">
+                                    <i class="fa fa-file-text-o"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-dark mx-1"
+                                        @onclick="ToggleView"
+                                        data-toggle="tooltip" title="Table mode view">
+                                    <i class="fa fa-table"></i>
+                                </button>
+                            }
+                        </span>
+                    }
+                    else
+                    {
+                        <span>&nbsp;</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>    
+
+    <div class="col-lg-3 pt-2 pb-2 bg-light border">        
+        <KntFoldersTreeViewBS FoldersInfo="foldersTree" FolderSelected="OnFolderSelected" ShowRefreshTree="true" RefreshTreeFolders="OnRefreshTreeFolders" />
+    </div>
+
+    <div class="col-lg-9 pt-2 pb-2 border">
+        @if (notes != null && notes.Count > 0 && viewPagination == 1)
+        {
+            <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="onSelectedPage"
+                        TotalPages="paginationContext.TotalPages"></Pagination>
+        }
+        @if (viewMode == 0)
+        {
+            <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView"></NotesIndex>
+        }
+        else
+        {
+            <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+        }
+
+        @if (notes != null && notes.Count > 15 && viewPagination == 1)
+        {
+            <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="onSelectedPage"
+                        TotalPages="paginationContext.TotalPages"></Pagination>
+        }
+    </div>
+
+
+</div>
+
+
+<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
+</ModalDialog>
+
+@code {
+
+    private List<FolderDto> foldersTree;    
+    private ModalDialog modalDialog;
+    private NoteInfoDto itemDelete;
+
+    private int viewMode = 0;
+    private int viewPagination = 1;
+
+    private List<NoteInfoDto> notes;
+
+    private FolderDto folder;
+
+    private NotesFilterDto filter = new NotesFilterDto();
+
+    PaginationContext paginationContext = new PaginationContext();
+
+    protected override async Task OnInitializedAsync()
+    {
+        appState.OnChange += StateHasChanged;
+
+        await Load();        
+    }
+
+    private async Task Load()
+    {
+        if (appState.FoldersTree == null)
+        {
+            var result = await webApiService.Folders.GetTreeAsync();
+            foldersTree = result.Entity;
+            appState.FoldersTree = foldersTree;
+
+            if (foldersTree?.Count > 0)
+            {
+                var f = foldersTree.Select(x => x).FirstOrDefault();
+                f.Selected = true;
+                await OnFolderSelected(f);
+            }
+        }
+        else
+        {
+            foldersTree = appState.FoldersTree;
+            await OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
+        }
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    private async Task OnFolderSelected(FolderDto f)
+    {
+        folder = f;
+        appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
+
+        if (viewPagination == 0)
+            await LoadNotes();
+        else
+            await onSelectedPage(1);
+    }
+
+    private void ToggleView()
+    {
+        viewMode = (viewMode == 0) ? 1 : 0;
+    }
+
+    private async Task TogglePagination()
+    {
+        viewPagination = (viewPagination == 0) ? 1 : 0;
+        await OnFolderSelected(folder);
+    }
+
+    private async Task onSelectedPage(int page)
+    {
+        paginationContext.CurrentPage = page;
+        await LoadNotesWithPagination();
+    }
+
+    private async Task LoadNotes()
+    {
+        notes = null;
+        var result = await webApiService.Folders.GetNotes(folder.FolderId);
+        if (!result.IsValid)
+        {
+            await showMessages.ShowErrorMessage(result.Message);
+        }
+        else
+        {
+            notes = result.Entity;
+        }
+    }
+
+    private async Task LoadNotesWithPagination()
+    {
+        notes = null;
+        filter.FolderId = folder.FolderId;
+        filter.PageIdentifier = paginationContext.PageIdentifier;
+
+        var result = await webApiService.Notes.GetFilter(filter);
+
+        if (!result.IsValid)
+        {
+            await showMessages.ShowErrorMessage(result.Message);
+        }
+        else
+        {
+            notes = result.Entity;
+            paginationContext.TotalCount = result.TotalCount;
+        }
+    }
+
+    private async Task OnConfirmDelete()
+    {
+        modalDialog.Hide();
+
+        var result = await webApiService.Notes.DeleteAsync(itemDelete.NoteId);
+        if (!result.IsValid)        
+            await showMessages.ShowErrorMessage(result.Message);
+        else        
+            await LoadNotes();        
+
+        itemDelete = null;
+    }
+
+    private void OnCancelDelete()
+    {
+        modalDialog.Hide();
+        itemDelete = null;
+    }
+
+    private void GoNoteDelete(NoteInfoDto item)
+    {
+        modalDialog.Show();
+        itemDelete = item;
+    }
+
+    void GoNoteNew()
+    {
+        navigationManager.NavigateTo($"notes/new/tree");
+    }
+
+    void GoNoteView(NoteInfoDto note)
+    {
+        navigationManager.NavigateTo($"notes/{note.NoteId}/tree");
+    }
+
+    void GoNoteEdit(NoteInfoDto note)
+    {
+        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/tree");
+    }
+
+    private async Task OnRefreshTreeFolders()
+    {
+        foldersTree = null;
+        notes = null;
+        appState.FoldersTree = null;
+        await Load();
+    }
+
+}

@@ -10,7 +10,7 @@
                 <h5>Folders catalog</h5>
             </div>
             <div class="col-2 float-right">
-                <button class="btn btn-sm btn-success mb-0 float-right"
+                <button class="btn btn-sm btn-success float-right"
                         @onclick="OnRefreshTreeFolders"
                         data-toggle="tooltip" title="Refresh tree folders">
                     <i class="fa fa-refresh"></i>
@@ -21,15 +21,23 @@
     <hr class="mt-1" />
 }
 
-<KntFoldersTreeNode FoldersInfo="@FoldersInfo"
-                    FolderSelected="OnFolderSelected"
-                    EditMode="EditMode"
-                    FolderDelete="OnFolderDelete"
-                    FolderEdit="OnFolderEdit">
-</KntFoldersTreeNode>
+@*Expanded=@ShouldExpand *@
 
-@code {    
+<RadzenTree Data=@FoldersInfo  Change=@OnChange>
+    <RadzenTreeLevel 
+        TextProperty="Name" 
+        ChildrenProperty="ChildFolders"     
+        Expanded=@ShouldExpanded 
+        Selected=@ShouldSelected
+        HasChildren=@(f => (f as FolderDto).ChildFolders.Any()) >
+            <Template>       
+                <RadzenIcon Icon="folder" Style="color: lightgray"/> @context.Text
+           </Template>
+    </RadzenTreeLevel>            
+</RadzenTree>
 
+
+@code {
     [Parameter] public List<FolderDto> FoldersInfo { get; set; }
     [Parameter] public EventCallback<FolderDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderDto> FolderDelete { get; set; }
@@ -69,5 +77,40 @@
     {
         await RefreshTreeFolders.InvokeAsync(null);
     }
+
+    bool ShouldSelected(object data)
+    {
+        if(string.IsNullOrEmpty(appState.SelectedFolder.Name))
+            return false; 
+        
+        var folder = data as FolderDto;
+        return folder.Name == appState.SelectedFolder.Name;              
+    }
+
+    bool ShouldExpanded(object data)
+    {
+        if(appState.SelectedFolder == null)
+            return false; 
+
+        if(appState.SelectedFolder.ParentId == null)
+            return false; 
+        
+        var folder = data as FolderDto;
+        return folder.FolderId == appState.SelectedFolder.ParentId;              
+    }
+
+    async void OnChange(TreeEventArgs args)
+    {
+        var folder = args.Value as FolderDto;
+        await FolderSelected.InvokeAsync(folder);        
+    }
+
+    RenderFragment<RadzenTreeItem> NodeFolderTemplate = (context) => builder =>
+        {
+            builder.OpenComponent<RadzenIcon>(0);
+            builder.AddAttribute(1, "folder");
+            builder.CloseComponent();        
+            builder.AddContent(1, context.Text);
+        };
 
 }

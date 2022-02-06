@@ -21,29 +21,14 @@
     <hr class="mt-1" />
 }
 
-@*<KntFoldersTreeNode FoldersInfo="@FoldersInfo"
+<KntFoldersTreeNode FoldersInfo="@FoldersInfo"
                     FolderSelected="OnFolderSelected"
                     EditMode="EditMode"
                     FolderDelete="OnFolderDelete"
                     FolderEdit="OnFolderEdit">
-</KntFoldersTreeNode>*@
+</KntFoldersTreeNode>
 
-@*Style="height: 300px"*@
-
-<RadzenTree Data=@FoldersInfo  Change=@OnChange>
-    <RadzenTreeLevel 
-        TextProperty="Name" 
-        ChildrenProperty="ChildFolders"  
-        Expanded=@ShouldExpand 
-        HasChildren=@(f => (f as FolderDto).ChildFolders.Any()) >
-            <Template>       
-                <RadzenIcon Icon="folder" Style="color: lightgray"/> @context.Text
-           </Template>
-    </RadzenTreeLevel>            
-</RadzenTree>
-
-
-@code {
+@code {    
 
     [Parameter] public List<FolderDto> FoldersInfo { get; set; }
     [Parameter] public EventCallback<FolderDto> FolderSelected { get; set; }
@@ -84,26 +69,5 @@
     {
         await RefreshTreeFolders.InvokeAsync(null);
     }
-
-    bool ShouldExpand(object data)
-    {
-        // TODO: !!! expandir la carpeta por defecto. 
-        var folder = data as FolderDto;
-        return folder.Name == "Tareas Resueltas";
-    }
-
-    async void OnChange(TreeEventArgs args)
-    {
-        var folder = args.Value as FolderDto;
-        await FolderSelected.InvokeAsync(folder);        
-    }
-
-    RenderFragment<RadzenTreeItem> NodeFolderTemplate = (context) => builder =>
-        {
-            builder.OpenComponent<RadzenIcon>(0);
-            builder.AddAttribute(1, "folder");
-            builder.CloseComponent();        
-            builder.AddContent(1, context.Text);
-        };
 
 }

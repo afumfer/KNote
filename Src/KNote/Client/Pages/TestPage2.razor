@@ -47,7 +47,7 @@
     </li>
     <li class="nav-item">
         <a class="nav-link @((selectedPanel == 7) ? "active" : "")" @onclick="@(() => ShowPanel(7))">
-            <span class="oi oi-terminal mr-2"></span>... panel 7
+            <span class="oi oi-terminal mr-2"></span>Splitter
         </a>
     </li>
     <li class="nav-item">
@@ -177,45 +177,11 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2">Radzen tree inline</h4>  
+    <h4 class="mt-2">Radzen </h4>  
 
     <hr />
 
-    <RadzenCard Class="my-5 mx-auto" style="max-width: 400px;">
-        <h4>Inline definition</h4>
-        <RadzenTree Expand=@OnExpand Change=@OnChange Style="width: 100%; height: 300px">
-            <RadzenTreeItem Text="BMW">
-                <ChildContent>
-                    <RadzenTreeItem Text="M3" />
-                    <RadzenTreeItem Text="M5" />
-                </ChildContent>
-                <Template>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg" style="width: 20px; margin-right: 8px;" />
-                    <b>@context.Text</b>
-                </Template>
-            </RadzenTreeItem>
-            <RadzenTreeItem Text="Audi">
-                <ChildContent>
-                    <RadzenTreeItem Text="RS4" />
-                    <RadzenTreeItem Text="RS6" />
-                </ChildContent>
-                <Template>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/92/Audi-Logo_2016.svg" style="width: 20px; margin-right: 8px;" />
-                    <b>@context.Text</b>
-                </Template>
-            </RadzenTreeItem>
-            <RadzenTreeItem Text="Mercedes">
-                <Template>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg" style="width: 20px; margin-right: 8px;" />
-                    <b>@context.Text</b>
-                </Template>
-                <ChildContent>
-                    <RadzenTreeItem Text="C63 AMG" />
-                    <RadzenTreeItem Text="S63 AMG" />
-                </ChildContent>
-            </RadzenTreeItem>
-        </RadzenTree>
-    </RadzenCard>
+        <RadzenPager Count="100" PageSize="10" PageNumbersCount="5" PageChanged=@(args => Console.WriteLine($"Skip: {args.Skip}, Top: {args.Top}")) />
 
     <hr />
 
@@ -233,22 +199,9 @@
     <hr />
     <p>@message</p>    
 
-@*    <RadzenCard Class="my-5 mx-auto">
-        <RadzenTree Data=@entries2 Expand=@LoadFoldersTree Style="width: 100%; height: 100%" @bind-Value=@selectedNode Change=@OnChange >
-            <RadzenTreeLevel Text=@GetTextForNode2  />
-        </RadzenTree>
-    </RadzenCard>*@
-
     <RadzenTree Data=@foldersFull Style="height: 300px" Change=@OnChange>
         <RadzenTreeLevel TextProperty="Name" ChildrenProperty="ChildFolders"  Expanded=@ShouldExpand HasChildren=@(f => (f as FolderDto).ChildFolders.Any()) />
     </RadzenTree>
-
-
-@*    <RadzenCard Class="my-5 mx-auto" style="max-width: 400px;">
-        <RadzenTree Data=@entries Expand=@LoadFiles Style="width: 100%; height: 100%" @bind-Value=@selectedNode Change=@OnChange>
-            <RadzenTreeLevel Text=@GetTextForNode Template=@FileOrFolderTemplate  />
-        </RadzenTree>
-    </RadzenCard>*@
 
 </div>
 
@@ -256,9 +209,19 @@
 
     <div class="mt-4"></div>
 
-    <h4 class="mt-2"> ... panel x (panel: @selectedPanel)</h4>
+    <h4 class="mt-2">Splitter</h4>
 
-    Data for panel @selectedPanel
+    <RadzenSplitter>
+        <RadzenSplitterPane Size="20%" Min="30px" Max="40%">
+            Pane A1
+            <div style="font-size: 10px;">
+                50% Min 30px Max 70%
+            </div>
+        </RadzenSplitterPane>
+        <RadzenSplitterPane>
+            Pane A2
+        </RadzenSplitterPane>
+    </RadzenSplitter>
 
 </div>
 
