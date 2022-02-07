@@ -1,60 +1,31 @@
 ﻿@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
 <EntityList List="Notes">
-    <ItemsFull>
-        <table class="table table-sm table-bordered table-striped">
-            <!--   <table class="table pt-4">  -->
-            <thead>
-                <tr>
-                    <th width="80px" class="text-right">#</th>
-                    <th>Topic</th>
-                    @*<th width="140px">Tags</th>*@
-                    <th width="60px" class="text-right">Priority</th>
-                    <th width="80px" class="text-right">Date</th>
-                    <th width="100px" class="text-center">(Actions)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var note in Notes)
-                {
-                    <tr>
-                        <td class="text-right">@note.NoteNumber</td>
-                        <td>@note.Topic</td>
-                        @*<td>@note.Tags</td>*@
-                        <td class="text-right">@note.Priority</td>
-                        <td class="text-right">  @note.CreationDateTime.ToShortDateString()</td>
-                        <td>
-                            <!-- Estudiar la autorización, provoca retardo en el evento keypress de la página de búsqueda -->
-                            @*<AuthorizeView Roles="Admin, ProjecManager, Staff">
-                                <Authorized>*@
-                                    <span class="float-right">
-                                        <button class="btn btn-sm btn-warning mx-1"
-                                                @onclick="@(() => OnNoteEdit.InvokeAsync(note))" 
-                                                data-toggle="tooltip" title="Edit note">
-                                            <i class="fa fa-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger mx-1"
-                                                @onclick="@(() => OnNoteDelete.InvokeAsync(note))"
-                                                data-toggle="tooltip" title="Delete note">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </span>
-                                @*</Authorized>
-                                <NotAuthorized>
-                                    <span class="float-right">
-                                        <button class="badge badge-pill badge-primary"
-                                                @onclick="@(() => OnNoteView.InvokeAsync(note))"
-                                                data-toggle="tooltip" title="View note">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </span>
-                                </NotAuthorized>
-                            </AuthorizeView>*@
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <ItemsFull>        
+        <RadzenDataGrid Data="@Notes" TItem="NoteInfoDto" AllowColumnResize="true" >
+            <Columns>
+                <RadzenDataGridColumn TItem="NoteInfoDto" Property="NoteNumber" Title="Note #" Width="80px" TextAlign="TextAlign.Center" />
+                <RadzenDataGridColumn TItem="NoteInfoDto" Property="Topic" Title="Topic" />
+                <RadzenDataGridColumn TItem="NoteInfoDto" Property="Priority" Title="Priority " Width="60px"  TextAlign="TextAlign.Right" />
+                <RadzenDataGridColumn TItem="NoteInfoDto" Property="CreationDateTime" Title="Date " FormatString="{0:d}" Width="80px"  TextAlign="TextAlign.Right" />                
+                <RadzenDataGridColumn TItem="NoteInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
+                    <Template Context="data">                        
+                        @*<span class="float-right">*@
+                            <button class="btn btn-sm btn-warning mx-1"
+                                    @onclick="@(() => OnNoteEdit.InvokeAsync(data))" 
+                                    data-toggle="tooltip" title="Edit note">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger mx-1"
+                                    @onclick="@(() => OnNoteDelete.InvokeAsync(data))"
+                                    data-toggle="tooltip" title="Delete note">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        @*</span>*@
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns> 
+        </RadzenDataGrid>
     </ItemsFull>
 </EntityList>
 

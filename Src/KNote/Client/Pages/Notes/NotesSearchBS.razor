@@ -1,5 +1,5 @@
-﻿@page "/notes/search"
-@page "/search"
+﻿@page "/notes/searchBS"
+@page "/searchBS"
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
@@ -11,29 +11,14 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-6">
-            <h3 class="pt-3">Notes search</h3>
+            <h3>Notes search</h3>
         </div>
-        <div class="col-6">
-@*            <button class="btn btn-sm btn-warning float-right"
+        <div class="col-6 float-right">
+            <button class="btn btn-sm btn-warning float-right"
                     @onclick="GoNoteNew"
                     data-toggle="tooltip" title="New note">
                 <i class="oi oi-document"></i> New note
-            </button>*@
-            <span class="float-right">
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="GoNoteNew"></RadzenMenuItem>
-                    <RadzenMenuItem Text="Display options" Icon="tune">
-                        @if (viewMode == 0)
-                        {                                 
-                            <RadzenMenuItem Text="Item view" Click="ToggleView"></RadzenMenuItem>                                        
-                        }
-                        else
-                        {                                    
-                            <RadzenMenuItem Text="Table view" Click="ToggleView"></RadzenMenuItem>                        
-                        }            
-                    </RadzenMenuItem>
-                </RadzenMenu>
-            </span>
+            </button>
         </div>
     </div>
 </div>
@@ -64,45 +49,67 @@
 <hr />
 
 <div class="row">
-    <div class="col-12 pt-2">
-        <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
-                        HorizontalAlign="HorizontalAlign.Right" 
-                        Count="@((int)paginationContext.TotalCount)" 
-                        PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
-                        PageChanged=@PageChanged />
+    <div class="col-9">
+        <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="OnSelectedPage"
+                    TotalPages="paginationContext.TotalPages"></Pagination>
     </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        @if (viewMode == 0)
+    <div class="col-3">
+        @if (notes != null && notes.Count > 0)
         {
-            <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView"></NotesIndex>
+            <span class="float-right mt-1">
+                @if (viewMode == 0)
+                {
+                    <button class="btn btn-sm btn-dark mx-1"
+                            @onclick="ToggleView"
+                            data-toggle="tooltip" title="Item mode view">
+                        <i class="fa fa-file-text-o"></i>
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-sm btn-dark mx-1"
+                            @onclick="ToggleView"
+                            data-toggle="tooltip" title="Table mode view">
+                        <i class="fa fa-table"></i>
+                    </button>
+                }
+            </span>
         }
         else
         {
-            <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+            <span>&nbsp;</span>
         }
     </div>
 </div>
+
+@if (viewMode == 0)
+{
+    <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView"></NotesIndex>
+}
+else
+{
+    <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+}
 
 <ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
     <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
 </ModalDialog>
 
 
-@code {
+@code {    
 
     private List<NoteInfoDto> notes;
+
     private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
+
     private int viewMode = 0;
+
     private string textSearch = "";
+
     private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
 
     PaginationContext paginationContext = new PaginationContext();
-    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
-    private RadzenPager pager;
-    private bool componentInitialized = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,7 +127,6 @@
             var queryStrings = url.Split(new string[] { "?" }, StringSplitOptions.None)[1];
             await GetFilteredNotes(queryStrings);
         }
-        componentInitialized = true;
     }
 
     #region Utils
@@ -169,8 +175,6 @@
     private async Task OnLoadListNotes()
     {
         paginationContext.CurrentPage = 1;
-        if(componentInitialized)
-            await pager.GoToPage(0);        
         await LoadListNotes();
     }
 
@@ -187,11 +191,6 @@
         textSearch = "";
         paginationContext.CurrentPage = 1;
         await LoadListNotes();
-    }
-
-    private async Task PageChanged(PagerEventArgs args)
-    {
-        await OnSelectedPage(args.PageIndex + 1);                
     }
 
     private async Task OnSelectedPage(int page)
