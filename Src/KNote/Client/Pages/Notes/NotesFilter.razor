@@ -10,109 +10,74 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-6">
-            <h3>Notes filter</h3>
+            <h3 class="pt-3">Notes filter</h3>
         </div>
         <div class="col-6 float-right">
-            <button class="btn btn-sm btn-warning mx-1 float-right"
-                    @onclick="GoNoteNew"
-                    data-toggle="tooltip" title="New note">
-                <i class="oi oi-document"></i> New note                
-            </button>
+            <span class="float-right">
+                <RadzenMenu>
+                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="GoNoteNew"></RadzenMenuItem>
+                    <RadzenMenuItem Text="Display options" Icon="tune">
+                        @if (viewMode == 0)
+                        {                                 
+                            <RadzenMenuItem Text="Item view" Click="ToggleView"></RadzenMenuItem>                                        
+                        }
+                        else
+                        {                                    
+                            <RadzenMenuItem Text="Table view" Click="ToggleView"></RadzenMenuItem>                        
+                        }            
+                    </RadzenMenuItem>
+                </RadzenMenu>
+            </span>
         </div>
     </div>
 </div>
 <hr class="mt-0" />
 
 <div class="row">
-
-    <div class="col-lg-12 pt-2 bg-light border">
-
-        <div class="row">
-            <div class="col-8">
-                <h5>
-                    <span class="oi oi-pin pr-3"></span>
-                    @*New notes filter*@
-                </h5>
+    <RadzenSplitter> 
+         <RadzenSplitterPane Size="30%" Min="200px" Max="50%">   
+             <div class="p-2 bg-light border">
+                <NotesFilterCriteria FilterSelected="FilterSelected" />
             </div>
-            <div class="col-4">
-                @if (notes != null && notes.Count > 0)
-                {
-                    <span class="float-right">
-                        @if (viewMode == 0)
-                        {
-                            <button class="btn btn-sm btn-dark mx-1 mb-2"
-                                    @onclick="ToggleView"
-                                    data-toggle="tooltip" title="Item mode view">
-                                <i class="fa fa-file-text-o"></i>
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="btn btn-sm btn-dark mx-1 mb-2"
-                                    @onclick="ToggleView"
-                                    data-toggle="tooltip" title="Table mode view">
-                                <i class="fa fa-table"></i>
-                            </button>
-                        }
-                    </span>
-                }
-                else
-                {
-                    <span>&nbsp;</span>
-                }
-            </div>
-        </div>
-        
-    </div>
-
-    <div class="col-lg-3 pt-2 pb-2 bg-light border">        
-        <NotesFilterCriteria FilterSelected="OnFilterSelected" />
-    </div>
-
-    <div class="col-lg-9 pt-2 pb-2 border">
-        @if (notes != null && notes.Count > 0)
-        {
-            <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="OnSelectedPage"
-                        TotalPages="paginationContext.TotalPages"></Pagination>
-        }
-
-        @if (viewMode == 0)
-        {
-            <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit"  OnNoteView="GoNoteView"></NotesIndex>
-        }
-        else
-        {
-            <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
-        }
-       
-        @if (notes != null && notes.Count > 15)
-        {
-            <Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="OnSelectedPage"
-                        TotalPages="paginationContext.TotalPages"></Pagination>
-        }
-    </div>
+         </RadzenSplitterPane>
+         <RadzenSplitterPane> 
+            <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
+                    HorizontalAlign="HorizontalAlign.Right" 
+                    Count="@((int)paginationContext.TotalCount)" 
+                    PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
+                    PageChanged=@PageChanged/>
+            @if (viewMode == 0)
+            {
+                <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit"  OnNoteView="GoNoteView"></NotesIndex>
+            }
+            else
+            {
+                <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+            } 
+         </RadzenSplitterPane>
+    </RadzenSplitter>
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="ConfirmDelete" onCancel="CancelDelete">
     <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
 </ModalDialog>
 
-@code {    
+@code {
     private ModalDialog modalDialog;
-    private NoteInfoDto itemDelete;
-
-    private int viewMode = 0;
-
-    List<NoteInfoDto> notes = new List<NoteInfoDto>();
-
+    private NoteInfoDto itemDelete;    
+    private List<NoteInfoDto> notes = new List<NoteInfoDto>();
     private NotesFilterDto filter = new NotesFilterDto();
-
-    PaginationContext paginationContext = new PaginationContext();
+    private PaginationContext paginationContext = new PaginationContext();
+    private RadzenPager pager;
+    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";    
+    private int viewMode = 0;
+    private bool componentInitialized = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await OnSelectedPage(1);
+        await SelectedPage(1);
         await base.OnInitializedAsync();
+        componentInitialized = true;
     }
 
     private void ToggleView()
@@ -120,13 +85,20 @@
         viewMode = (viewMode == 0) ? 1 : 0;
     }
 
-    private async Task OnFilterSelected(NotesFilterDto f)
+    private async Task FilterSelected(NotesFilterDto f)
     {
         filter = f;
-        await OnSelectedPage(1);
+        await SelectedPage(1);
+        if(componentInitialized)
+            await pager.GoToPage(0);
     }
 
-    private async Task OnSelectedPage(int page)
+    private async Task PageChanged(PagerEventArgs args)
+    {
+        await SelectedPage(args.PageIndex + 1);                
+    }
+
+    private async Task SelectedPage(int page)
     {
         paginationContext.CurrentPage = page;
         await LoadNotesWithPagination();
@@ -150,8 +122,7 @@
         }
     }
 
-
-    private async Task OnConfirmDelete()
+    private async Task ConfirmDelete()
     {
         modalDialog.Hide();
 
@@ -164,7 +135,7 @@
         itemDelete = null;
     }
 
-    private void OnCancelDelete()
+    private void CancelDelete()
     {
         modalDialog.Hide();
         itemDelete = null;

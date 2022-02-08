@@ -186,7 +186,8 @@ namespace KNote.ClientWin.Views
             {
                 var file = _com.Service.Notes.GetResourcePath(_com.Model);
                 if(!string.IsNullOrEmpty(file))
-                    varContentArrayBytes = File.ReadAllBytes(file);
+                    if(File.Exists(file))
+                        varContentArrayBytes = File.ReadAllBytes(file);
             } 
             
             await ShowPreview(_com.Model.FullUrl, false);

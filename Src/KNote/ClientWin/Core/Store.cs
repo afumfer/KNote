@@ -20,7 +20,7 @@ namespace KNote.ClientWin.Core
     {
         #region Constants
 
-        const string SUPORTED_MIME_TYPES = @"image/jpeg;image/png;application/pdf;application/zip;video/mp4;audio/mp3;text/plain";
+        const string SUPORTED_MIME_TYPES = @"image/jpeg;image/png;application/pdf;video/mp4;audio/mp3;text/plain";
 
         #endregion
 
@@ -381,8 +381,6 @@ namespace KNote.ClientWin.Core
                 return "image/png";
             else if (extension == ".pdf")
                 return "application/pdf";
-            else if (extension == ".zip")
-                return "application/zip";
             else if (extension == ".mp4")
                 return "video/mp4";
             else if (extension == ".mp3")

@@ -14,11 +14,6 @@
             <h3 class="pt-3">Notes search</h3>
         </div>
         <div class="col-6">
-@*            <button class="btn btn-sm btn-warning float-right"
-                    @onclick="GoNoteNew"
-                    data-toggle="tooltip" title="New note">
-                <i class="oi oi-document"></i> New note
-            </button>*@
             <span class="float-right">
                 <RadzenMenu>
                     <RadzenMenuItem Text="New note" Icon="post_add"  Click="GoNoteNew"></RadzenMenuItem>
@@ -38,8 +33,8 @@
     </div>
 </div>
 
+<!--- Move this to new component -->
 <hr class="mt-0" />
-
 <div class="form-group row">
     <div class="input-group col-sm-11 mb-2" id="atrText">
         <input type="text" class="form-control" @bind-value="textSearch" @bind-value:event="oninput"
@@ -60,8 +55,8 @@
         </button>
     </div>
 </div>
-
 <hr />
+<!---->
 
 <div class="row">
     <div class="col-12 pt-2">
@@ -85,7 +80,7 @@
     </div>
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="ConfirmDelete" onCancel="CancelDelete">
     <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
 </ModalDialog>
 
@@ -256,13 +251,13 @@
         itemDelete = item;
     }
 
-    private void OnCancelDelete()
+    private void CancelDelete()
     {
         modalDialog.Hide();
         itemDelete = null;
     }
 
-    private async Task OnConfirmDelete()
+    private async Task ConfirmDelete()
     {
         modalDialog.Hide();
 
