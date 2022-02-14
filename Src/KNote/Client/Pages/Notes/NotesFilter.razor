@@ -7,7 +7,7 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="container-fluid">
+<div class="container-fluid bg-light border">
     <div class="row">
         <div class="col-6">
             <h3 class="pt-3">Notes filter</h3>
@@ -31,31 +31,33 @@
         </div>
     </div>
 </div>
-<hr class="mt-0" />
+@*<hr class="mt-0" />*@
 
 <div class="row">
-    <RadzenSplitter> 
-         <RadzenSplitterPane Size="30%" Min="200px" Max="50%">   
-             <div class="p-2 bg-light border">
-                <NotesFilterCriteria FilterSelected="FilterSelected" />
-            </div>
-         </RadzenSplitterPane>
-         <RadzenSplitterPane> 
-            <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
-                    HorizontalAlign="HorizontalAlign.Right" 
-                    Count="@((int)paginationContext.TotalCount)" 
-                    PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
-                    PageChanged=@PageChanged/>
-            @if (viewMode == 0)
-            {
-                <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit"  OnNoteView="GoNoteView"></NotesIndex>
-            }
-            else
-            {
-                <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
-            } 
-         </RadzenSplitterPane>
-    </RadzenSplitter>
+    <div class="col-12 pt-2">
+        <RadzenSplitter> 
+             <RadzenSplitterPane Size="30%" Min="200px" Max="50%">   
+                 <div class="p-2 bg-light border">
+                    <NotesFilterCriteria FilterSelected="FilterSelected" />
+                </div>
+             </RadzenSplitterPane>
+             <RadzenSplitterPane> 
+                <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
+                        HorizontalAlign="HorizontalAlign.Right" 
+                        Count="@((int)paginationContext.TotalCount)" 
+                        PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
+                        PageChanged=@PageChanged/>
+                @if (viewMode == 0)
+                {
+                    <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit"  OnNoteView="GoNoteView"></NotesIndex>
+                }
+                else
+                {
+                    <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+                } 
+             </RadzenSplitterPane>
+        </RadzenSplitter>
+    </div>
 </div>
 
 <ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="ConfirmDelete" onCancel="CancelDelete">

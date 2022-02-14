@@ -8,7 +8,7 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="container-fluid">
+<div class="container-fluid bg-light border">
     <div class="row">
         <div class="col-6">
             <h3 class="pt-3">Notes search</h3>
@@ -32,10 +32,10 @@
         </div>
     </div>
 </div>
+@*<hr class="mt-0" />*@
 
 <!--- Move this to new component -->
-<hr class="mt-0" />
-<div class="form-group row">
+<div class="form-group row pt-3">
     <div class="input-group col-sm-11 mb-2" id="atrText">
         <input type="text" class="form-control" @bind-value="textSearch" @bind-value:event="oninput"
                @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))"
@@ -55,11 +55,11 @@
         </button>
     </div>
 </div>
-<hr />
+@*<hr />*@
 <!---->
 
 <div class="row">
-    <div class="col-12 pt-2">
+    <div class="col-12">
         <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
                         HorizontalAlign="HorizontalAlign.Right" 
                         Count="@((int)paginationContext.TotalCount)" 

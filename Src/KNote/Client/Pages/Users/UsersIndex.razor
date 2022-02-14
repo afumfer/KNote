@@ -6,64 +6,61 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<div class="container-fluid">
+<div class="container-fluid bg-light border">
     <div class="row">
         <div class="col-6">
-            <h3>Users index</h3>
+            <h3 class="pt-3">Users admin</h3>
         </div>
-        <div class="col-6 float-right">
-            <button class="btn btn-sm btn-warning mx-1 float-right"
-                    @onclick="GoNewUser"
-                    data-toggle="tooltip" title="New user">
-                <i class="oi oi-person"></i> New user
-            </button>
+        <div class="col-6">
+            <span class="float-right">
+                <RadzenMenu>
+                    <RadzenMenuItem Text="New user ..." Icon="post_add"  Click="OnUserNew"></RadzenMenuItem>
+                </RadzenMenu>
+            </span>
         </div>
     </div>
 </div>
-<hr class="mt-0" />
 
-<Pagination CurrentPage="paginationContext.CurrentPage" SelectedPage="OnSelectedPage"
-            TotalPages="paginationContext.TotalPages"></Pagination>
+<div class="row">
+    <div class="col-12 pt-2">
+    <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
+                            HorizontalAlign="HorizontalAlign.Right" 
+                            Count="@((int)paginationContext.TotalCount)" 
+                            PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
+                            PageChanged=@PageChanged />
+    </div>
+</div>
 
-<EntityList List="users">
-    <ItemsFull>
-        <table class="table table-sm table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th width="140px">User Name</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Roles</th>
-                    <th width="100px" class="text-center">(Actions)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in users)
-                {
-                    <tr>
-                        <td>@item.UserName</td>
-                        <td>@item.FullName</td>
-                        <td>@item.EMail</td>
-                        <td>@(RolesDescriptions(item.RoleDefinition))</td>
-                        <td>
-                            <span class="float-right">
-                                <a href="users/edit/@item.UserId" class="btn btn-sm btn-warning mx-1"
-                                   data-toggle="tooltip" title="Edit user">
+<div class="row">
+    <div class="col-12">
+        <EntityList List="users">
+            <ItemsFull>
+                <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" >
+                    <Columns>
+                        <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="User name" />
+                        <RadzenDataGridColumn TItem="UserDto" Property="FullName" Title="Full name" />
+                        <RadzenDataGridColumn TItem="UserDto" Property="EMail" Title="Email"  />
+                        <RadzenDataGridColumn TItem="UserDto" Property="RoleDefinition" Title="Roles" />                
+                        <RadzenDataGridColumn TItem="UserDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
+                            <Template Context="data">                                                        
+                                <button class="btn btn-sm btn-warning mx-1"
+                                        @onclick="@(() => OnUserEdit(data))" 
+                                        data-toggle="tooltip" title="Edit note">
                                     <i class="fa fa-pencil"></i>
-                                </a>
+                                </button>
                                 <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => Delete(item))"
-                                        data-toggle="tooltip" title="Delete user">
+                                        @onclick="@(() => OnUserDelete(data))"
+                                        data-toggle="tooltip" title="Delete note">
                                     <i class="fa fa-minus"></i>
                                 </button>
-                            </span>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </ItemsFull>
-</EntityList>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns> 
+                </RadzenDataGrid>
+            </ItemsFull>
+        </EntityList>
+    </div>
+</div>
 
 <ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
     <div><p>Are you sure you want to delete user "@itemDelete.UserName (@itemDelete.FullName)" ?</p></div>
@@ -76,10 +73,17 @@
     private UserDto itemDelete;
 
     PaginationContext paginationContext = new PaginationContext();
+    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
+    private RadzenPager pager;
 
     protected async override Task OnInitializedAsync()
     {
         await Load();
+    }
+    
+    private async Task PageChanged(PagerEventArgs args)
+    {
+        await OnSelectedPage(args.PageIndex + 1);                
     }
 
     private async Task OnSelectedPage(int page)
@@ -124,7 +128,7 @@
         return rolesDes;
     }
 
-    private void Delete(UserDto item)
+    private void OnUserDelete(UserDto item)
     {
         modalDialog.Show();
         itemDelete = item;
@@ -154,9 +158,13 @@
         itemDelete = null;
     }
 
-    void GoNewUser()
+    void OnUserNew()
     {
         navigationManager.NavigateTo($"users/new");
     }
 
+    void OnUserEdit(UserDto user)
+    {
+        navigationManager.NavigateTo($"users/edit/{user.UserId}");
+    }
 }

@@ -1,0 +1,115 @@
+﻿@page "/typesBS"
+
+@inject IWebApiService webApiService
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
+
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <h3>Types index</h3>
+        </div>
+        <div class="col-6 float-right">
+            <button class="btn btn-sm btn-warning mx-1 float-right"
+                    @onclick="GoNewType"
+                    data-toggle="tooltip" title="New type">
+                <i class="oi oi-tablet"></i> New type
+            </button>
+        </div>
+    </div>
+</div>
+<hr class="mt-0" />
+
+<EntityList List="noteTypes">
+    <ItemsFull>
+        <table class="table table-sm table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th width="300px">Name</th>
+                    <th>Description</th>
+                    <th width="100px" class="text-center">(Actions)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in noteTypes)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Description</td>
+                        <td>
+                            <span class="float-right">
+                                <a href="types/edit/@item.NoteTypeId" class="btn btn-sm btn-warning mx-1"
+                                   data-toggle="tooltip" title="Edit type">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger mx-1"
+                                        @onclick="@(() => Delete(item))"
+                                        data-toggle="tooltip" title="Delete type">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </ItemsFull>
+</EntityList>
+
+<ModalDialog @ref="modalDialog" Title="Delete type" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+    <div><p>Are you sure you want to delete type "@itemDelete.Name" ?</p></div>
+</ModalDialog>
+
+@code {
+
+    private List<NoteTypeDto> noteTypes { get; set; }
+    private ModalDialog modalDialog;
+    private NoteTypeDto itemDelete;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var result = await webApiService.NoteTypes.GetAllAsync();
+        if (result.IsValid)
+            noteTypes = result.Entity;
+        else
+            await showMessages.ShowErrorMessage(result.Message);
+    }
+
+    private void Delete(NoteTypeDto item)
+    {
+        modalDialog.Show();
+        itemDelete = item;
+    }
+
+    private async Task OnConfirmDelete()
+    {
+        modalDialog.Hide();
+
+        var result = await webApiService.NoteTypes.DeleteAsync(itemDelete.NoteTypeId);
+        if (!result.IsValid)
+            await showMessages.ShowErrorMessage(result.Message);
+        else
+            await Load();
+
+        itemDelete = null;
+    }
+
+    private void OnCancelDelete()
+    {
+        modalDialog.Hide();
+        itemDelete = null;
+    }
+
+    void GoNewType()
+    {
+        navigationManager.NavigateTo($"types/new");
+    }
+
+}

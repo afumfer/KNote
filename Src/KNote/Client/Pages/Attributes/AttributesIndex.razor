@@ -6,72 +6,51 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<div class="container-fluid">
+<div class="container-fluid bg-light border">
     <div class="row">
         <div class="col-6">
-            <h3>Attributes index</h3>
+            <h3 class="pt-3">Attributes admin</h3>
         </div>
-        <div class="col-6 float-right">
-            <button class="btn btn-sm btn-warning mx-1 float-right"
-                    @onclick="GoNewAttribute"
-                    data-toggle="tooltip" title="New attribute">
-                <i class="oi oi-bookmark"></i> New attribute
-            </button>
+        <div class="col-6">
+            <span class="float-right">
+                <RadzenMenu>
+                    <RadzenMenuItem Text="New attribute ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+                </RadzenMenu>
+            </span>
         </div>
     </div>
 </div>
-<hr class="mt-0" />
 
-<EntityList List="attributes">
-    <ItemsFull>
-        <table class="table table-sm table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th width="60px" class="text-center">Order</th>
-                    <th>Name</th>
-                    <th width="150px">For note type ...</th>
-                    <th width="90px">Required</th>
-                    <th width="180px">DataType</th>
-                    <th width="100px" class="text-center">(Actions)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in attributes)
-                {
-                    <tr>
-                        <td class="text-right">@item.Order</td>
-                        <td>@item.Name</td>
-                        <td>
-                            @if (item.NoteTypeDto == null)
-                            {
-                                <span>(All)</span>
-                            }
-                            else
-                            {
-                                <span>@item.NoteTypeDto?.Name</span>
-                            }
-                        </td>
-                        <td>@item.RequiredValue</td>
-                        <td>@KntConst.KAttributes[item.KAttributeDataType]</td>
-                        <td>
-                            <span class="float-right">
-                                <a href="attributes/edit/@item.KAttributeId" class="btn btn-sm btn-warning mx-1"
-                                   data-toggle="tooltip" title="Edit user">
+<div class="container-fluid pt-2">
+    <div class="row">
+        <EntityList List="attributes">
+            <ItemsFull>
+                <RadzenDataGrid Data="@attributes" TItem="KAttributeInfoDto" AllowColumnResize="true" >
+                    <Columns>
+                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Order" Title="Order" Width="60px"/>
+                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Name" Title="Name" />
+                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="NoteTypeDto" Title="Note type" Width="150px" />
+                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="RequiredValue" Title="Requiered" Width="90px"/>                
+                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
+                            <Template Context="data">                                                        
+                                <button class="btn btn-sm btn-warning mx-1"
+                                        @onclick="@(() => OnEdit(data))" 
+                                        data-toggle="tooltip" title="Edit note">
                                     <i class="fa fa-pencil"></i>
-                                </a>
+                                </button>
                                 <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => Delete(item))"
-                                        data-toggle="tooltip" title="Delete user">
+                                        @onclick="@(() => OnDelete(data))"
+                                        data-toggle="tooltip" title="Delete note">
                                     <i class="fa fa-minus"></i>
                                 </button>
-                            </span>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </ItemsFull>
-</EntityList>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns> 
+                </RadzenDataGrid>
+            </ItemsFull>
+        </EntityList>
+    </div>
+</div>
 
 <ModalDialog @ref="modalDialog" Title="Delete attribute" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
     <div><p>Are you sure you want to delete attribute "@itemDelete.Name" ?</p></div>
@@ -97,7 +76,7 @@
             attributes = response.Entity;
     }
 
-    private void Delete(KAttributeInfoDto item)
+    private void OnDelete(KAttributeInfoDto item)
     {
         modalDialog.Show();
         itemDelete = item;
@@ -122,9 +101,14 @@
         itemDelete = null;
     }
 
-    void GoNewAttribute()
+    void OnNew()
     {
         navigationManager.NavigateTo($"attributes/new");
+    }
+
+    void OnEdit(KAttributeInfoDto attribute)
+    {
+        navigationManager.NavigateTo($"attributes/edit/{attribute.KAttributeId}");
     }
 
 }

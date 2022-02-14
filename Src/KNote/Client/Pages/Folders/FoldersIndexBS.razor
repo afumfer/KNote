@@ -1,4 +1,4 @@
-﻿@page "/folders"
+﻿@page "/foldersBS"
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
@@ -9,41 +9,37 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="container-fluid bg-light border">
+<div class="container-fluid">
     <div class="row">
         <div class="col-6">
-            <h3 class="pt-3">Folders admin</h3>
+            <h3>Folders index</h3>
         </div>
-        <div class="col-6">
-            <span class="float-right">
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="GoNewFolder"></RadzenMenuItem>
-                    <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTreeFolders" ></RadzenMenuItem>
-                </RadzenMenu>
-            </span>
+        <div class="col-6 float-right">
+            <button class="btn btn-sm btn-warning mx-1 float-right"
+                    @onclick="GoNewFolder"
+                    data-toggle="tooltip" title="New folder">
+                <i class="oi oi-folder"></i> New folder
+            </button>
         </div>
     </div>
 </div>
+<hr class="mt-0" />
 
-<div class="container-fluid border pt-2">
-    <div class="row">
-        @if (foldersTree == null)
-        {
-            <p><em>Loading tree folders ...</em></p>
-        }
-        else
-        {
-            <KntFoldersTreeView FoldersInfo="foldersTree"
-                                EditMode="true"
-                                FolderSelected="OnFolderSelected"
-                                FolderEdit="OnFolderEdit"
-                                FolderDelete="OnFolderDelete"
-                                ShowRefreshTree="false"
-                                />
-                                @*RefreshTreeFolders="OnRefreshTreeFolders" *@
-        }
-    </div>
-</div>
+
+@if (foldersTree == null)
+{
+    <p><em>Loading tree folders ...</em></p>
+}
+else
+{
+    <KntFoldersTreeView FoldersInfo="foldersTree"
+                        EditMode="true"
+                        FolderSelected="OnFolderSelected"
+                        FolderEdit="OnFolderEdit"
+                        FolderDelete="OnFolderDelete"
+                        ShowRefreshTree="false"
+                        RefreshTreeFolders="OnRefreshTreeFolders" />                        
+}
 
 <ModalDialog @ref="modalDialog" Title="Delete folder" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
     <div><p>Are you sure you want to delete folder "@itemDelete.Name" ?</p></div>
