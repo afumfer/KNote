@@ -3,6 +3,7 @@
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
+@inject TooltipService tooltipService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -33,16 +34,12 @@
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="RequiredValue" Title="Requiered" Width="90px"/>                
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                             <Template Context="data">                                                        
-                                <button class="btn btn-sm btn-warning mx-1"
-                                        @onclick="@(() => OnEdit(data))" 
-                                        data-toggle="tooltip" title="Edit note">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => OnDelete(data))"
-                                        data-toggle="tooltip" title="Delete note">
-                                    <i class="fa fa-minus"></i>
-                                </button>
+                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" 
+                                    ButtonStyle="ButtonStyle.Primary" 
+                                    MouseEnter="@(args => tooltipService.Open(args, "Edit attribute ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete"
+                                    ButtonStyle="ButtonStyle.Danger" 
+                                    MouseEnter="@(args => tooltipService.Open(args, "Delete attribute ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />                           
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns> 
@@ -76,6 +73,16 @@
             attributes = response.Entity;
     }
 
+    void OnNew()
+    {
+        navigationManager.NavigateTo($"attributes/new");
+    }
+
+    void OnEdit(KAttributeInfoDto attribute)
+    {
+        navigationManager.NavigateTo($"attributes/edit/{attribute.KAttributeId}");
+    }
+
     private void OnDelete(KAttributeInfoDto item)
     {
         modalDialog.Show();
@@ -99,16 +106,6 @@
     {
         modalDialog.Hide();
         itemDelete = null;
-    }
-
-    void OnNew()
-    {
-        navigationManager.NavigateTo($"attributes/new");
-    }
-
-    void OnEdit(KAttributeInfoDto attribute)
-    {
-        navigationManager.NavigateTo($"attributes/edit/{attribute.KAttributeId}");
     }
 
 }

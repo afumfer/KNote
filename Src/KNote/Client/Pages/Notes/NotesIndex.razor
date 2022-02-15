@@ -1,4 +1,6 @@
-﻿@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+﻿@inject TooltipService tooltipService
+
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
 <EntityList List="Notes">
     <ItemsFull>        
@@ -9,19 +11,23 @@
                 <RadzenDataGridColumn TItem="NoteInfoDto" Property="Priority" Title="Priority " Width="60px"  TextAlign="TextAlign.Right" />
                 <RadzenDataGridColumn TItem="NoteInfoDto" Property="CreationDateTime" Title="Date " FormatString="{0:d}" Width="80px"  TextAlign="TextAlign.Right" />                
                 <RadzenDataGridColumn TItem="NoteInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                    <Template Context="data">                        
-                        @*<span class="float-right">*@
-                            <button class="btn btn-sm btn-warning mx-1"
-                                    @onclick="@(() => OnNoteEdit.InvokeAsync(data))" 
-                                    data-toggle="tooltip" title="Edit note">
-                                <i class="fa fa-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger mx-1"
-                                    @onclick="@(() => OnNoteDelete.InvokeAsync(data))"
-                                    data-toggle="tooltip" title="Delete note">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                        @*</span>*@
+                    <Template Context="data">                                                
+@*                        <button class="btn btn-sm btn-warning mx-1"
+                                @onclick="@(() => OnNoteEdit.InvokeAsync(data))" 
+                                data-toggle="tooltip" title="Edit note">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger mx-1"
+                                @onclick="@(() => OnNoteDelete.InvokeAsync(data))"
+                                data-toggle="tooltip" title="Delete note">
+                            <i class="fa fa-minus"></i>
+                        </button>*@                         
+                        <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(data))" Icon="edit" 
+                            ButtonStyle="ButtonStyle.Primary" 
+                            MouseEnter="@(args => tooltipService.Open(args, "Edit note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                        <RadzenButton Click="@(() => OnNoteDelete.InvokeAsync(data))" Icon="delete"
+                            ButtonStyle="ButtonStyle.Danger" 
+                            MouseEnter="@(args => tooltipService.Open(args, "Delete note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns> 
@@ -34,5 +40,4 @@
     [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteEdit { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteView { get; set; }
-
 }

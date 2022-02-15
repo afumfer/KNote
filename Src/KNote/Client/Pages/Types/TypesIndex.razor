@@ -3,6 +3,7 @@
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
+@inject TooltipService tooltipService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -25,53 +26,19 @@
     <div class="row">
         <EntityList List="noteTypes">
             <ItemsFull>
-        @*        <table class="table table-sm table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th width="300px">Name</th>
-                            <th>Description</th>
-                            <th width="100px" class="text-center">(Actions)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in noteTypes)
-                        {
-                            <tr>
-                                <td>@item.Name</td>
-                                <td>@item.Description</td>
-                                <td>
-                                    <span class="float-right">
-                                        <a href="types/edit/@item.NoteTypeId" class="btn btn-sm btn-warning mx-1"
-                                           data-toggle="tooltip" title="Edit type">
-                                            <i class="fa fa-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-danger mx-1"
-                                                @onclick="@(() => Delete(item))"
-                                                data-toggle="tooltip" title="Delete type">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </span>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>*@
                 <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" >
                     <Columns>
                         <RadzenDataGridColumn TItem="NoteTypeDto" Property="Name" Title="Name" />
                         <RadzenDataGridColumn TItem="NoteTypeDto" Property="Description" Title="Full name" />                
                         <RadzenDataGridColumn TItem="NoteTypeDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                             <Template Context="data">                                                        
-                                <button class="btn btn-sm btn-warning mx-1"
-                                        @onclick="@(() => OnEdit(data))" 
-                                        data-toggle="tooltip" title="Edit note">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => OnDelete(data))"
-                                        data-toggle="tooltip" title="Delete note">
-                                    <i class="fa fa-minus"></i>
-                                </button>
+                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" 
+                                    ButtonStyle="ButtonStyle.Primary" 
+                                    MouseEnter="@(args => tooltipService.Open(args, "Edit note type ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete"
+                                    ButtonStyle="ButtonStyle.Danger" 
+                                    MouseEnter="@(args => tooltipService.Open(args, "Delete note type ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns> 
@@ -105,6 +72,16 @@
             await showMessages.ShowErrorMessage(result.Message);
     }
 
+    void OnNew()
+    {
+        navigationManager.NavigateTo($"types/new");
+    }
+
+    void OnEdit(NoteTypeDto noteType)
+    {
+        navigationManager.NavigateTo($"types/edit({noteType.NoteTypeId}");
+    }
+
     private void OnDelete(NoteTypeDto item)
     {
         modalDialog.Show();
@@ -129,16 +106,5 @@
         modalDialog.Hide();
         itemDelete = null;
     }
-
-    void OnNew()
-    {
-        navigationManager.NavigateTo($"types/new");
-    }
-
-    void OnEdit(NoteTypeDto noteType)
-    {
-        navigationManager.NavigateTo($"types/edit({noteType.NoteTypeId}");
-    }
-
 
 }

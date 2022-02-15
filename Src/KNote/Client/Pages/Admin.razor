@@ -17,20 +17,20 @@
              <RadzenSplitterPane Size="30%" Min="200px" Max="50%">   
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Folders managment</h5>
-                        <p class="card-text">Manage the folders where you can structure the information. You can create, edit and update the system's folder tree.</p>                
-                        <RadzenButton Click=@GoFoldersAdmin Text="Go folders admin" Icon="folder"/>
-                    </div>
-                </div>
-    
-                <div class="card">
-                    <div class="card-body">
                         <h5 class="card-title">Users managment</h5>
                         <p class="card-text">Manage the users of the system and the roles to which it belongs. You can create, edit and delete users as well as roles.</p>                
                         <RadzenButton Click=@GoUsersAdmin Text="Go user admin" Icon="person"/>
                     </div>
                 </div>
 
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Folders managment</h5>
+                        <p class="card-text">Manage the folders where you can structure the information. You can create, edit and update the system's folder tree.</p>                
+                        <RadzenButton Click=@GoFoldersAdmin Text="Go folders admin" Icon="folder"/>
+                    </div>
+                </div>
+    
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Types notes managment</h5>
@@ -75,7 +75,7 @@
 </div>
  
 @code {
-    private string _activePanel = "FoldersIndex";
+    private string _activePanel = "UsersIndex";
 
     void GoFoldersAdmin()
     {        

@@ -3,6 +3,7 @@
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
+@inject TooltipService tooltipService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -14,7 +15,7 @@
         <div class="col-6">
             <span class="float-right">
                 <RadzenMenu>
-                    <RadzenMenuItem Text="New user ..." Icon="post_add"  Click="OnUserNew"></RadzenMenuItem>
+                    <RadzenMenuItem Text="New user ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
                 </RadzenMenu>
             </span>
         </div>
@@ -43,16 +44,12 @@
                         <RadzenDataGridColumn TItem="UserDto" Property="RoleDefinition" Title="Roles" />                
                         <RadzenDataGridColumn TItem="UserDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                             <Template Context="data">                                                        
-                                <button class="btn btn-sm btn-warning mx-1"
-                                        @onclick="@(() => OnUserEdit(data))" 
-                                        data-toggle="tooltip" title="Edit note">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger mx-1"
-                                        @onclick="@(() => OnUserDelete(data))"
-                                        data-toggle="tooltip" title="Delete note">
-                                    <i class="fa fa-minus"></i>
-                                </button>
+                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" 
+                                    ButtonStyle="ButtonStyle.Primary" 
+                                    MouseEnter="@(args => tooltipService.Open(args, "Edit user ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete"
+                                    ButtonStyle="ButtonStyle.Danger" 
+                                    MouseEnter="@(args => tooltipService.Open(args, "Delete user ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns> 
@@ -128,7 +125,17 @@
         return rolesDes;
     }
 
-    private void OnUserDelete(UserDto item)
+    void OnNew()
+    {
+        navigationManager.NavigateTo($"users/new");
+    }
+
+    void OnEdit(UserDto user)
+    {
+        navigationManager.NavigateTo($"users/edit/{user.UserId}");
+    }
+
+    private void OnDelete(UserDto item)
     {
         modalDialog.Show();
         itemDelete = item;
@@ -157,14 +164,5 @@
         modalDialog.Hide();
         itemDelete = null;
     }
-
-    void OnUserNew()
-    {
-        navigationManager.NavigateTo($"users/new");
-    }
-
-    void OnUserEdit(UserDto user)
-    {
-        navigationManager.NavigateTo($"users/edit/{user.UserId}");
-    }
+    
 }

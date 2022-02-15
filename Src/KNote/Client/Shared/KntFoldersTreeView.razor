@@ -1,27 +1,6 @@
 ﻿@inject AppState appState
-
+@inject TooltipService tooltipService
 @implements IDisposable
-
-@if (ShowRefreshTree)
-{
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-10">
-                <h5>Folders catalog</h5>
-            </div>
-            <div class="col-2 float-right">
-                <button class="btn btn-sm btn-success float-right"
-                        @onclick="OnRefreshTreeFolders"
-                        data-toggle="tooltip" title="Refresh tree folders">
-                    <i class="fa fa-refresh"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-    <hr class="mt-1" />
-}
-
-@*Expanded=@ShouldExpand *@
 
 <RadzenTree Data=@FoldersInfo  Change=@OnChange>
     <RadzenTreeLevel 
@@ -32,7 +11,18 @@
         HasChildren=@(f => (f as FolderDto).ChildFolders.Any()) >
             <Template>       
                 <RadzenIcon Icon="folder" Style="color: lightgray"/> @context.Text
-           </Template>
+                @if (EditMode)
+                {
+                    <span>
+                        <div class="pl-3" style="font-size:10px">
+                            <RadzenIcon Icon="edit" @onclick="@(() => OnFolderEdit((FolderDto)context.Value))"
+                                MouseEnter="@(args => tooltipService.Open(args, "Edit folder ...", new TooltipOptions(){ Position = TooltipPosition.Top }) )" Class="mr-0 mb-0" />
+                            <RadzenIcon Icon="delete" @onclick="@(() => OnFolderDelete((FolderDto)context.Value))"
+                                MouseEnter="@(args => tooltipService.Open(args, "Delete folder ...", new TooltipOptions(){ Position = TooltipPosition.Right }) )" />
+                        </div>
+                    </span>                    
+                }
+        </Template>
     </RadzenTreeLevel>            
 </RadzenTree>
 
@@ -42,9 +32,7 @@
     [Parameter] public EventCallback<FolderDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderDto> FolderDelete { get; set; }
     [Parameter] public EventCallback<FolderDto> FolderEdit { get; set; }
-    [Parameter] public EventCallback RefreshTreeFolders { get; set; }
-    [Parameter] public bool EditMode { get; set; }
-    [Parameter] public bool ShowRefreshTree { get; set; }
+    [Parameter] public bool EditMode { get; set; }    
 
     protected override void OnInitialized()
     {
@@ -73,11 +61,6 @@
         await FolderEdit.InvokeAsync(folder);
     }
 
-    private async Task OnRefreshTreeFolders()
-    {
-        await RefreshTreeFolders.InvokeAsync(null);
-    }
-
     bool ShouldSelected(object data)
     {
         if(string.IsNullOrEmpty(appState.SelectedFolder.Name))
@@ -104,13 +87,5 @@
         var folder = args.Value as FolderDto;
         await FolderSelected.InvokeAsync(folder);        
     }
-
-    RenderFragment<RadzenTreeItem> NodeFolderTemplate = (context) => builder =>
-        {
-            builder.OpenComponent<RadzenIcon>(0);
-            builder.AddAttribute(1, "folder");
-            builder.CloseComponent();        
-            builder.AddContent(1, context.Text);
-        };
 
 }
