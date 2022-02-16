@@ -2,8 +2,12 @@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
-@inject IShowMessages showMessages
 @inject TooltipService tooltipService
+
+@*@inject IShowMessages showMessages  *@
+
+@inject DialogService DialogService
+@*@implements IDisposable*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -59,14 +63,14 @@
     </div>
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+@*<ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
     <div><p>Are you sure you want to delete user "@itemDelete.UserName (@itemDelete.FullName)" ?</p></div>
 </ModalDialog>
-
+*@
 @code {
 
     private List<UserDto> users { get; set; }
-    private ModalDialog modalDialog;
+    //private ModalDialog modalDialog;
     private UserDto itemDelete;
 
     PaginationContext paginationContext = new PaginationContext();
@@ -77,7 +81,7 @@
     {
         await Load();
     }
-    
+
     private async Task PageChanged(PagerEventArgs args)
     {
         await OnSelectedPage(args.PageIndex + 1);                
@@ -100,8 +104,11 @@
         }
         else
         {
-            await showMessages.ShowErrorMessage(result.Message);
+            //await showMessages.ShowErrorMessage(result.Message);
+            await ShowMessages("Error loading data", result.Message);
         }
+
+        StateHasChanged();
     }
 
     private string RolesDescriptions(string rolesString)
@@ -135,34 +142,77 @@
         navigationManager.NavigateTo($"users/edit/{user.UserId}");
     }
 
-    private void OnDelete(UserDto item)
+    async Task OnDelete(UserDto item)
     {
-        modalDialog.Show();
+        //modalDialog.Show();
+
         itemDelete = item;
-    }
 
-    private async Task OnConfirmDelete()
-    {
-        modalDialog.Hide();
+        //var resultDialog = await DialogService.OpenAsync("Delete user", ds =>
+        //    @<div>
+        //        <p class="mb-4">Are you sure you want to delete user "@itemDelete.UserName (@itemDelete.FullName)" ?</p>
+        //        <hr />
+        //        <div class="row">
+        //            <div class="col-md-12 text-right">
+        //                <RadzenButton Text="Ok" Click="() => ds.Close(true)" Class="mr-1" Style="width: 80px;" />
+        //                <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
+        //            </div>
+        //        </div>
+        //    </div>);
 
-        var result = await webApiService.Users.DeleteAsync(itemDelete.UserId);
-        if (!result.IsValid)
+        var resultDialog = await DialogService.Confirm(
+            $"Are you sure you want to delete user {@itemDelete.UserName} ({@itemDelete.FullName})", 
+            "Delete user", 
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (resultDialog == true)
         {
-            await showMessages.ShowErrorMessage(result.Message);
-        }
-        else
-        {
-            users = null;
-            await Load();
-        }
+            var result = await webApiService.Users.DeleteAsync(itemDelete.UserId);
+            if (!result.IsValid)
+            {
+                //await showMessages.ShowErrorMessage(result.Message);
+                await ShowMessages("Error deleting data ", result.Message);
+            }
+            else
+            {
+                users = null;
+                await Load();
+            }
 
-        itemDelete = null;
+            itemDelete = null;            
+        }
     }
 
-    private void OnCancelDelete()
-    {
-        modalDialog.Hide();
-        itemDelete = null;
-    }
+    //private async Task OnConfirmDelete()
+    //{
+    //    modalDialog.Hide();
+
+    //    var result = await webApiService.Users.DeleteAsync(itemDelete.UserId);
+    //    if (!result.IsValid)
+    //    {
+    //        await showMessages.ShowErrorMessage(result.Message);
+    //    }
+    //    else
+    //    {
+    //        users = null;
+    //        await Load();
+    //    }
+
+    //    itemDelete = null;
+    //}
+
+    //private void OnCancelDelete()
+    //{
+    //    modalDialog.Hide();
+    //    itemDelete = null;
+    //}
     
+    async Task ShowMessages(string title, string message)
+    {
+        await DialogService.OpenAsync(title, ds =>
+            @<div>
+                @message
+            </div>, new DialogOptions() { CloseDialogOnOverlayClick = true });
+    }
+
 }

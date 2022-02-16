@@ -70,12 +70,13 @@
 
                             <div class="form-group row">
                                 <label for="atrExtStartDate" class="col-sm-2 col-form-label">Exp. Start:</label>
-                                <div class="input-group col-sm-4" id="atrExtStartDate">                                    
-                                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedStartDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                                <div class="input-group col-sm-4" id="atrExtStartDate">
+                                    <InputDate type="text" class="form-control" @bind-Value="@task.ExpectedStartDate" />                                    
                                     <ValidationMessage For="@(() => task.ExpectedStartDate)" />
                                 </div>
                                 <label for="atrExpEndDate" class="col-sm-2 col-form-label">Exp. End:</label>
-                                <div class="input-group col-sm-4" id="atrExpEndDate">                                    
+                                <div class="input-group col-sm-4" id="atrExpEndDate">
+                                    @*<InputDate class="form-control" @bind-Value="@task.ExpectedEndDate" />*@
                                     <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedEndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
                                     <ValidationMessage For="@(() => task.ExpectedEndDate)" />
                                 </div>
@@ -83,13 +84,13 @@
 
                             <div class="form-group row">                                               
                                 <label for="atrStartDate" class="col-sm-2 col-form-label">Start:</label>
-                                <div class="input-group col-sm-4" id="atrStartDate">                                    
-                                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.StartDate" ShowTime="true" ShowSeconds="true" HoursStep="1.5"  DateFormat="dd/MM/yyyy HH:mm" />
+                                <div class="input-group col-sm-4" id="atrStartDate">
+                                    <InputDate type="text" class="form-control" @bind-Value="@task.StartDate" />                                    
                                     <ValidationMessage For="@(() => task.StartDate)" />
                                 </div>
                                 <label for="atrEndDate" class="col-sm-2 col-form-label">Resolv:</label>
-                                <div class="input-group col-sm-4" id="atrEndDate">                                    
-                                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.EndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                                <div class="input-group col-sm-4" id="atrEndDate">
+                                    <InputDate type="text" class="form-control" @bind-Value="@task.EndDate" />                                    
                                     <ValidationMessage For="@(() => task.EndDate)" />
                                 </div>
                             </div>
