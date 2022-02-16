@@ -5,9 +5,7 @@
 @inject TooltipService tooltipService
 
 @*@inject IShowMessages showMessages  *@
-
 @inject DialogService DialogService
-@*@implements IDisposable*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -69,13 +67,14 @@
 *@
 @code {
 
-    private List<UserDto> users { get; set; }
-    //private ModalDialog modalDialog;
-    private UserDto itemDelete;
+    List<UserDto> users { get; set; }
+    //ModalDialog modalDialog;
+    UserDto itemDelete;
 
     PaginationContext paginationContext = new PaginationContext();
-    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
-    private RadzenPager pager;
+    string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
+    RadzenPager pager;
+    int actualPage;
 
     protected async override Task OnInitializedAsync()
     {
@@ -89,6 +88,7 @@
 
     private async Task OnSelectedPage(int page)
     {
+        actualPage = page;
         await Load(page);
     }
 
@@ -132,20 +132,32 @@
         return rolesDes;
     }
 
-    void OnNew()
-    {
-        navigationManager.NavigateTo($"users/new");
+    async Task OnNew()
+    {        
+        var res = await DialogService.OpenAsync<UserNew>($"New user",
+               new Dictionary<string, object>() {  },
+               new DialogOptions() { Width = "700px", Height = "370px", Resizable = true, Draggable = true });
+
+        if(res != null)
+        {
+            await Load(actualPage);
+        }
     }
 
-    void OnEdit(UserDto user)
-    {
-        navigationManager.NavigateTo($"users/edit/{user.UserId}");
+    async Task OnEdit(UserDto user)
+    {        
+        var res = await DialogService.OpenAsync<UserEdit>($"Edit user",
+               new Dictionary<string, object>() { { "UserId", user.UserId.ToString() } },
+               new DialogOptions() { Width = "700px", Height = "370px", Resizable = true, Draggable = true });
+
+        if(res != null)
+        {
+            await Load(actualPage);
+        }
     }
 
     async Task OnDelete(UserDto item)
-    {
-        //modalDialog.Show();
-
+    {        
         itemDelete = item;
 
         //var resultDialog = await DialogService.OpenAsync("Delete user", ds =>
@@ -161,7 +173,7 @@
         //    </div>);
 
         var resultDialog = await DialogService.Confirm(
-            $"Are you sure you want to delete user {@itemDelete.UserName} ({@itemDelete.FullName})", 
+            $"Are you sure you want delete user - {@itemDelete.UserName} - ({@itemDelete.FullName})?", 
             "Delete user", 
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
@@ -182,30 +194,6 @@
             itemDelete = null;            
         }
     }
-
-    //private async Task OnConfirmDelete()
-    //{
-    //    modalDialog.Hide();
-
-    //    var result = await webApiService.Users.DeleteAsync(itemDelete.UserId);
-    //    if (!result.IsValid)
-    //    {
-    //        await showMessages.ShowErrorMessage(result.Message);
-    //    }
-    //    else
-    //    {
-    //        users = null;
-    //        await Load();
-    //    }
-
-    //    itemDelete = null;
-    //}
-
-    //private void OnCancelDelete()
-    //{
-    //    modalDialog.Hide();
-    //    itemDelete = null;
-    //}
     
     async Task ShowMessages(string title, string message)
     {

@@ -1,10 +1,8 @@
-﻿@page "/users/new"
+﻿@page "/users/newBS"
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
-
-@inject Radzen.DialogService dialogService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -23,15 +21,13 @@
             if (!result.IsValid)
                 await showMessages.ShowErrorMessage(result.Message);
             else
-                //navigationManager.NavigateTo("users");
-                 dialogService.Close(user);
+                navigationManager.NavigateTo("users");
         }
     }
 
     private void OnExit()
     {
-        //navigationManager.NavigateTo("users");
-        dialogService.Close(null);
+        navigationManager.NavigateTo("users");
     }
 
 }

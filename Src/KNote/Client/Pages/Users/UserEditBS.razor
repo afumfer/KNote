@@ -1,10 +1,8 @@
-﻿@page "/users/edit/{UserId}"
+﻿@page "/users/editBS/{UserId}"
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
-
-@inject Radzen.DialogService dialogService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -40,8 +38,8 @@ else
     private async Task OnSave()
     {
         if (!user.IsDirty())
-        {            
-            dialogService.Close(user);
+        {
+            navigationManager.NavigateTo("users");
         }
         else
         {
@@ -52,15 +50,15 @@ else
                 var result = await webApiService.Users.SaveAsync(user);
                 if (!result.IsValid)
                     await showMessages.ShowErrorMessage(result.Message);
-                else                    
-                    dialogService.Close(user);
+                else
+                    navigationManager.NavigateTo("users");                
             }
         }
     }
 
     private void OnExit()
-    {        
-        dialogService.Close(null);
+    {
+        navigationManager.NavigateTo("users");
     }
 
 }
