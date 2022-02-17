@@ -2,9 +2,8 @@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
-@inject IShowMessages showMessages
-
 @inject Radzen.DialogService dialogService
+@inject NotificationService NotificationService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -27,9 +26,9 @@ else
     {
         var result = await webApiService.Users.GetAsync(Guid.Parse(UserId));
         if (!result.IsValid)
-        {
-            await showMessages.ShowErrorMessage(result.Message);
-            navigationManager.NavigateTo("index");
+        {            
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get user", Detail =  result.Message, Duration = 12000 });
+            dialogService.Close(null);
         }
         else
             user = result.Entity;
@@ -46,14 +45,19 @@ else
         else
         {
             if (!user.IsValid())
-                await showMessages.ShowErrorMessage(user.GetErrorMessage());
+            {                
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  user.GetErrorMessage(), Duration = 12000 });
+            }
             else
             {
                 var result = await webApiService.Users.SaveAsync(user);
-                if (!result.IsValid)
-                    await showMessages.ShowErrorMessage(result.Message);
-                else                    
+                if (!result.IsValid)                    
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  result.Message, Duration = 12000 });
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save user", Detail =  "The data user has been saved.", Duration = 3000 });
                     dialogService.Close(user);
+                }
             }
         }
     }

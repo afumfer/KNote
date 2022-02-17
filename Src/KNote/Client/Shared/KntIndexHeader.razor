@@ -1,0 +1,19 @@
+﻿<div class="col-6">
+    <h3 class="pt-3">@TextHead</h3>
+</div>
+<div class="col-6">
+    <span class="float-right">
+        @if (IndexMenu == null)
+        {
+            <i>&nbsp;</i>     
+        }
+        else
+        {
+           @IndexMenu
+        }
+    </span>
+</div>
+@code {
+    [Parameter] public string TextHead { get; set; }
+    [Parameter] public RenderFragment IndexMenu { get; set; }
+}

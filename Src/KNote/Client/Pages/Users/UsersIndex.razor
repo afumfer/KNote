@@ -3,39 +3,35 @@
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject TooltipService tooltipService
-
-@*@inject IShowMessages showMessages  *@
 @inject DialogService DialogService
+@inject NotificationService NotificationService
 
 @attribute [Authorize(Roles = "Admin")]
 
 <div class="container-fluid bg-light border">
     <div class="row">
-        <div class="col-6">
-            <h3 class="pt-3">Users admin</h3>
-        </div>
-        <div class="col-6">
-            <span class="float-right">
+        <KntIndexHeader TextHead="Users admin">
+            <IndexMenu>
                 <RadzenMenu>
                     <RadzenMenuItem Text="New user ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
                 </RadzenMenu>
-            </span>
-        </div>
+            </IndexMenu>
+        </KntIndexHeader>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-12 pt-2">
-    <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
-                            HorizontalAlign="HorizontalAlign.Right" 
-                            Count="@((int)paginationContext.TotalCount)" 
-                            PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
-                            PageChanged=@PageChanged />
+<div class="col-12 pt-2">
+    <div class="row">
+        <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
+                HorizontalAlign="HorizontalAlign.Right" 
+                Count="@((int)paginationContext.TotalCount)" 
+                PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
+                PageChanged=@PageChanged />
     </div>
 </div>
 
-<div class="row">
-    <div class="col-12">
+<div class="col-12">
+    <div class="row">
         <EntityList List="users">
             <ItemsFull>
                 <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" >
@@ -61,20 +57,14 @@
     </div>
 </div>
 
-@*<ModalDialog @ref="modalDialog" Title="Delete user" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
-    <div><p>Are you sure you want to delete user "@itemDelete.UserName (@itemDelete.FullName)" ?</p></div>
-</ModalDialog>
-*@
 @code {
 
     List<UserDto> users { get; set; }
-    //ModalDialog modalDialog;
     UserDto itemDelete;
 
     PaginationContext paginationContext = new PaginationContext();
     string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
-    RadzenPager pager;
-    int actualPage;
+    RadzenPager pager;    
 
     protected async override Task OnInitializedAsync()
     {
@@ -87,8 +77,7 @@
     }
 
     private async Task OnSelectedPage(int page)
-    {
-        actualPage = page;
+    {        
         await Load(page);
     }
 
@@ -100,12 +89,11 @@
         if (result.IsValid)
         {
             users = result.Entity;
-            paginationContext.TotalCount = result.TotalCount;
+            paginationContext.TotalCount = result.TotalCount;            
         }
         else
         {
-            //await showMessages.ShowErrorMessage(result.Message);
-            await ShowMessages("Error loading data", result.Message);
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading users", Detail =  result.Message, Duration = 12000 });
         }
 
         StateHasChanged();
@@ -139,8 +127,8 @@
                new DialogOptions() { Width = "700px", Height = "370px", Resizable = true, Draggable = true });
 
         if(res != null)
-        {
-            await Load(actualPage);
+        {   
+            await Load(paginationContext.CurrentPage);
         }
     }
 
@@ -152,25 +140,13 @@
 
         if(res != null)
         {
-            await Load(actualPage);
+            await Load(paginationContext.CurrentPage);
         }
     }
 
     async Task OnDelete(UserDto item)
     {        
         itemDelete = item;
-
-        //var resultDialog = await DialogService.OpenAsync("Delete user", ds =>
-        //    @<div>
-        //        <p class="mb-4">Are you sure you want to delete user "@itemDelete.UserName (@itemDelete.FullName)" ?</p>
-        //        <hr />
-        //        <div class="row">
-        //            <div class="col-md-12 text-right">
-        //                <RadzenButton Text="Ok" Click="() => ds.Close(true)" Class="mr-1" Style="width: 80px;" />
-        //                <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        //            </div>
-        //        </div>
-        //    </div>);
 
         var resultDialog = await DialogService.Confirm(
             $"Are you sure you want delete user - {@itemDelete.UserName} - ({@itemDelete.FullName})?", 
@@ -182,12 +158,12 @@
             var result = await webApiService.Users.DeleteAsync(itemDelete.UserId);
             if (!result.IsValid)
             {
-                //await showMessages.ShowErrorMessage(result.Message);
-                await ShowMessages("Error deleting data ", result.Message);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete user", Detail =  result.Message, Duration = 12000 });
             }
             else
             {
                 users = null;
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete user", Detail =  "The user has been deleted.", Duration = 3000 });
                 await Load();
             }
 
@@ -195,12 +171,4 @@
         }
     }
     
-    async Task ShowMessages(string title, string message)
-    {
-        await DialogService.OpenAsync(title, ds =>
-            @<div>
-                @message
-            </div>, new DialogOptions() { CloseDialogOnOverlayClick = true });
-    }
-
 }

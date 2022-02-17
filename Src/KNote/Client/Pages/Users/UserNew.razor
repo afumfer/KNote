@@ -2,7 +2,7 @@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
-@inject IShowMessages showMessages
+@inject NotificationService NotificationService
 
 @inject Radzen.DialogService dialogService
 
@@ -15,22 +15,23 @@
 
     private async Task OnNew()
     {
-        if (!user.IsValid())
-            await showMessages.ShowErrorMessage(user.GetErrorMessage());
+        if (!user.IsValid())            
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  user.GetErrorMessage(), Duration = 12000 });
         else
         {
             var result = await webApiService.Users.SaveAsync(user);
-            if (!result.IsValid)
-                await showMessages.ShowErrorMessage(result.Message);
+            if (!result.IsValid)                
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  result.Message, Duration = 12000 });
             else
-                //navigationManager.NavigateTo("users");
-                 dialogService.Close(user);
+            {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New user", Detail =  "The user has been created.", Duration = 3000 });
+                dialogService.Close(user);
+            }            
         }
     }
 
     private void OnExit()
-    {
-        //navigationManager.NavigateTo("users");
+    {        
         dialogService.Close(null);
     }
 
