@@ -13,14 +13,16 @@
                                 <input type="checkbox" id="@item.Key" checked="checked" onclick="return false;" />
                                 @item.Value                                
                             </label>
-                            @*<RadzenCheckBox @bind-Value="@item.Key"  Name="CheckBox1" TValue="string" />*@
                         </div>
                     }
                  }
             </div>
         </div>
         <div class="col-2 float-right">
-            <RadzenButton Icon="playlist_add_check" Click="() => SelectTags()" ButtonStyle="ButtonStyle.Primary" class="float-right"/>  
+            <button class="btn btn-sm btn-warning mx-1 float-right"
+                    @onclick="SelectTags" data-toggle="tooltip" title="Select tags">
+                 ...
+            </button>            
         </div>
     </div>
 </div>
@@ -69,6 +71,12 @@
     {
         modalDialog.Show();
     }
+
+
+    //private void OnConfirmSelectTags()
+    //{
+    //    modalDialog.Hide();
+    //}
 
     private void OnCancelSelectTags()
     {

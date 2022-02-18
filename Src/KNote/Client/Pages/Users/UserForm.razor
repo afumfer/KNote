@@ -7,17 +7,23 @@
     <div class="form-group row">
         <label for="atrUserName" class="col-sm-2 col-form-label">User name:</label>
         <div class="input-group col-sm-10" id="atrUserName">
-            <InputText class="form-control" @bind-Value="@User.UserName" />
+            <InputText class="form-control" @bind-Value="@User.UserName" />                    
+        </div>              
+        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
+        <div class="col-sm-10 pl-4"  style="font-size:10px">
             <ValidationMessage For="@(() => User.UserName)" />
-        </div>        
+        </div>
     </div>
 
     <div class="form-group row">
         <label for="atrEmail" class="col-sm-2 col-form-label">Email:</label>
         <div class="input-group col-sm-10" id="atrEmail">
             <InputText class="form-control" @bind-Value="@User.EMail" />
+        </div>        
+        <label for="atrEmail" class="col-sm-2 col-form-label" style="font-size:10px"></label>
+        <div class="col-sm-10 pl-4"  style="font-size:10px">
+            <ValidationMessage For="@(() => User.EMail)" />
         </div>
-        <ValidationMessage For="@(() => User.EMail)" />
     </div>
 
     <div class="form-group row">
@@ -25,15 +31,24 @@
         <div class="input-group col-sm-10" id="atrFullName">
             <InputText class="form-control" @bind-Value="@User.FullName" />
         </div>
-        <ValidationMessage For="@(() => User.FullName)" />
+        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
+        <div class="col-sm-10 pl-4"  style="font-size:10px">
+            <ValidationMessage For="@(() => User.FullName)"/>
+        </div>        
     </div>
 
     <div class="form-group row">
+
         <label for="atrRoles" class="col-sm-2 col-form-label">Roles:</label>
-        <div class="input-group col-sm-10" id="atrRoles">                
-            <MultiSelectList Items="roles" />
+        <div class="input-group col-sm-10" id="atrRoles">                                      
+            <RadzenCheckBoxList @bind-Value=@valuesRoles TValue="string" Orientation="Orientation.Horizontal" 
+                            Data="@roles" TextProperty="Value" ValueProperty="Key" />
         </div>
-        <ValidationMessage For="@(() => User.RoleDefinition)" />
+
+        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
+        <div class="col-sm-10 pl-4"  style="font-size:10px">
+            <ValidationMessage For="@(() => User.RoleDefinition)" />
+        </div>        
     </div>
 
     <hr class="mt-1" />
@@ -53,7 +68,9 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
 
-    private List<MultiSelectListDto> roles = new List<MultiSelectListDto>();
+    List<MultiSelectListDto> roles = new List<MultiSelectListDto>();
+    
+    IEnumerable<string> valuesRoles;
 
     protected override void OnInitialized()
     {
@@ -61,11 +78,17 @@
         {
             var selected = false;
             if (User.RoleDefinition?.IndexOf(r.Key.ToString()) >= 0)
-                selected = true;
+            {
+                selected = true;                
+            }
 
-            roles.Add(new MultiSelectListDto(selected, r.Key.ToString(), r.Value));
+            roles.Add(new MultiSelectListDto(selected, r.Key.ToString(), r.Value));          
         }
 
+        valuesRoles = roles
+                .Where(x => x.Selected == true)
+                .Select(_ => _.Key).ToArray();
+       
         base.OnInitialized();
     }
 
@@ -85,9 +108,8 @@
 
     private string GetRolesDefinition()
     {
-        var strReturn = string.Join(", ", roles
-            .Where(x => x.Selected == true)
-            .Select(_ => _.Key).ToArray());
+        var strReturn = string.Join(", ", valuesRoles
+            .Select(_ => _).ToArray());
 
         return strReturn;
     }

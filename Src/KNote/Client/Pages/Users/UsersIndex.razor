@@ -124,7 +124,7 @@
     {        
         var res = await DialogService.OpenAsync<UserNew>($"New user",
                new Dictionary<string, object>() {  },
-               new DialogOptions() { Width = "700px", Height = "370px", Resizable = true, Draggable = true });
+               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
 
         if(res != null)
         {   
@@ -136,7 +136,7 @@
     {        
         var res = await DialogService.OpenAsync<UserEdit>($"Edit user",
                new Dictionary<string, object>() { { "UserId", user.UserId.ToString() } },
-               new DialogOptions() { Width = "700px", Height = "370px", Resizable = true, Draggable = true });
+               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
 
         if(res != null)
         {
