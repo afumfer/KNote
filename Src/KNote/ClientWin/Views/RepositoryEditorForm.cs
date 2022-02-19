@@ -248,7 +248,7 @@ namespace KNote.ClientWin.Views
             else
             {
                 _com.Model.Provider = "Microsoft.Data.SqlClient";
-                _com.Model.ConnectionString = $"Data Source={textSQLServer.Text}; Initial Catalog={textSQLDataBase.Text}; Trusted_Connection=True; Connection Timeout=60; MultipleActiveResultSets=true;";
+                _com.Model.ConnectionString = $"Data Source={textSQLServer.Text}; Initial Catalog={textSQLDataBase.Text}; Trusted_Connection=True; Connection Timeout=60; MultipleActiveResultSets=true;Encrypt=false";
             }
 
             // TODO: hack, EntityFramework is default orm when repository is created. (Dapper version no suport create repository). 
