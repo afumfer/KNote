@@ -1,26 +1,24 @@
 ﻿@page "/types"
 
 @inject IWebApiService webApiService
-@inject NavigationManager navigationManager
-@inject IShowMessages showMessages
 @inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
 
 @attribute [Authorize(Roles = "Admin")]
 
 <div class="container-fluid bg-light border">
     <div class="row">
-        <div class="col-6">
-            <h3 class="pt-3">Note types admin</h3>
-        </div>
-        <div class="col-6">
-            <span class="float-right">
+        <KntIndexHeader TextHead="Note types admin">
+            <IndexMenu>
                 <RadzenMenu>
                     <RadzenMenuItem Text="New type ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
                 </RadzenMenu>
-            </span>
-        </div>
+            </IndexMenu>
+        </KntIndexHeader>
     </div>
 </div>
+
 
 <div class="container-fluid pt-2">
     <div class="row">
@@ -48,14 +46,9 @@
     </div>
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete type" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
-    <div><p>Are you sure you want to delete type "@itemDelete.Name" ?</p></div>
-</ModalDialog>
-
 @code {
 
     private List<NoteTypeDto> noteTypes { get; set; }
-    private ModalDialog modalDialog;
     private NoteTypeDto itemDelete;
 
     protected async override Task OnInitializedAsync()
@@ -68,43 +61,54 @@
         var result = await webApiService.NoteTypes.GetAllAsync();
         if (result.IsValid)
             noteTypes = result.Entity;
-        else
-            await showMessages.ShowErrorMessage(result.Message);
+        else            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading note types", Detail =  result.Message, Duration = 12000 });
+
+        StateHasChanged();
     }
 
-    void OnNew()
-    {
-        navigationManager.NavigateTo($"types/new");
+    async Task OnNew()
+    {        
+        var res = await dialogService.OpenAsync<TypeNew>($"New note type",
+               new Dictionary<string, object>() {  },
+               new DialogOptions() { Width = "700px", Height = "370px", Resizable = true, Draggable = true });
+
+        if(res != null)           
+            await Load();        
     }
 
-    void OnEdit(NoteTypeDto noteType)
-    {
-        navigationManager.NavigateTo($"types/edit({noteType.NoteTypeId}");
+    async Task OnEdit(NoteTypeDto noteType)
+    {        
+        var res = await dialogService.OpenAsync<TypeEdit>($"Edit note type",
+               new Dictionary<string, object>() { { "TypeId", noteType.NoteTypeId.ToString() } },
+               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
+
+        if(res != null)        
+            await Load();        
     }
 
-    private void OnDelete(NoteTypeDto item)
-    {
-        modalDialog.Show();
+    async Task OnDelete(NoteTypeDto item)
+    {             
         itemDelete = item;
-    }
+        var resultDialog = await dialogService.Confirm(
+            $"Are you sure you want delete note type - {@item.Name})?", 
+            "Delete user", 
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
-    private async Task OnConfirmDelete()
-    {
-        modalDialog.Hide();
+        if (resultDialog == true)
+        {
+            var result = await webApiService.NoteTypes.DeleteAsync(itemDelete.NoteTypeId);
+            if (!result.IsValid)            
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note type", Detail =  result.Message, Duration = 12000 });            
+            else
+            {
+                noteTypes = null;
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note type", Detail =  "The note type has been deleted.", Duration = 3000 });
+                await Load();
+            }
 
-        var result = await webApiService.NoteTypes.DeleteAsync(itemDelete.NoteTypeId);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
-        else
-            await Load();
-
-        itemDelete = null;
-    }
-
-    private void OnCancelDelete()
-    {
-        modalDialog.Hide();
-        itemDelete = null;
+            itemDelete = null;            
+        }
     }
 
 }

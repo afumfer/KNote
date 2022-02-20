@@ -1,10 +1,8 @@
 ﻿@page "/users/new"
 
 @inject IWebApiService webApiService
-@inject NavigationManager navigationManager
-@inject NotificationService NotificationService
-
-@inject Radzen.DialogService dialogService
+@inject NotificationService notificationService
+@inject DialogService dialogService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -16,15 +14,15 @@
     private async Task OnNew()
     {
         if (!user.IsValid())            
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  user.GetErrorMessage(), Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  user.GetErrorMessage(), Duration = 12000 });
         else
         {
             var result = await webApiService.Users.SaveAsync(user);
             if (!result.IsValid)                
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  result.Message, Duration = 12000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  result.Message, Duration = 12000 });
             else
             {
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New user", Detail =  "The user has been created.", Duration = 3000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New user", Detail =  "The user has been created.", Duration = 3000 });
                 dialogService.Close(user);
             }            
         }

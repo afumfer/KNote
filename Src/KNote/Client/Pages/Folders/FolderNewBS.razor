@@ -1,12 +1,9 @@
-﻿@page "/folders/new"
+﻿@page "/folders/newBS"
 
 @inject AppState appState
 @inject IWebApiService webApiService 
-@inject DialogService dialogService
-@inject NotificationService notificationService
-
-@*@inject NavigationManager navigationManager
-@inject IShowMessages showMessages*@
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
 
 @implements IDisposable
 
@@ -14,7 +11,7 @@
 
 <FolderForm Title="New folder" OnValidSubmit="OnNew" OnExit="OnExit" Folder="folder" />
 
-@code {
+@code {    
 
     private FolderDto folder;
 
@@ -25,11 +22,8 @@
         folder = new FolderDto();
         if (appState != null)
         {
-            if(appState.SelectedFolder != null)
-            {
-                folder.ParentId = appState.SelectedFolder.FolderId;
-                folder.ParentFolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();                
-            }
+            folder.ParentId = appState.SelectedFolder.FolderId;
+            folder.ParentFolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
         }
         base.OnInitialized();
     }
@@ -44,7 +38,7 @@
         var result = await webApiService.Folders.SaveAsync(folder);
         if (!result.IsValid)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder", Detail =  folder.GetErrorMessage(), Duration = 12000 });
+            await showMessages.ShowErrorMessage(result.Message);
         }
         else
         {
@@ -53,8 +47,7 @@
                 FolderDto toUpdate;
                 var newFolder = result.Entity.GetSimpleDto<FolderDto>();
                 newFolder.Selected = true;
-
-                //appState.folderOldSelected.Selected = false;
+                appState.folderOldSelected.Selected = false;
 
                 if (newFolder.ParentId == null)
                 {
@@ -86,15 +79,14 @@
                 }
             }
 
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New folder", Detail =  "The note type has been created.", Duration = 3000 });
-            dialogService.Close(folder);            
+            navigationManager.NavigateTo("folders");
         }
 
     }
 
     private void OnExit()
     {
-       dialogService.Close(null);
+        navigationManager.NavigateTo("folders");
     }
 
 }

@@ -1,8 +1,18 @@
-﻿@inject NotificationService notificationService
+﻿@inject IShowMessages showMessages
 
 <EditForm Model="NoteType" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <!-- Title -->
+    <ToolingHeader Title="@Title">
+        <Buttons>
+            <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))" data-toggle="tooltip" title="Exit without save">
+                <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
+        </Buttons>
+    </ToolingHeader>
 
     <div class="form-group">
         <label>Name:</label>
@@ -14,15 +24,6 @@
         <label>Description:</label>
         <InputText class="form-control" @bind-Value="@NoteType.Description" />
         <ValidationMessage For="@(() => NoteType.Description)" />
-    </div>
-
-   <hr class="mt-1" />
-
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
     </div>
 
 </EditForm>
@@ -37,8 +38,8 @@
     {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
-        {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+        {
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
             return;
         }
 

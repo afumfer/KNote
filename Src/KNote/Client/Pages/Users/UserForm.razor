@@ -1,4 +1,4 @@
-﻿@inject NotificationService NotificationService
+﻿@inject NotificationService notificationService
 
 <EditForm Model="User" Context="formContext">
 
@@ -99,7 +99,7 @@
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {            
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
 

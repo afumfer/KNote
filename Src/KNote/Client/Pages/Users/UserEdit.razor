@@ -1,9 +1,8 @@
 ﻿@page "/users/edit/{UserId}"
 
 @inject IWebApiService webApiService
-@inject NavigationManager navigationManager
-@inject Radzen.DialogService dialogService
-@inject NotificationService NotificationService
+@inject DialogService dialogService
+@inject NotificationService notificationService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -27,7 +26,7 @@ else
         var result = await webApiService.Users.GetAsync(Guid.Parse(UserId));
         if (!result.IsValid)
         {            
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get user", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get user", Detail =  result.Message, Duration = 12000 });
             dialogService.Close(null);
         }
         else
@@ -44,18 +43,16 @@ else
         }
         else
         {
-            if (!user.IsValid())
-            {                
-                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  user.GetErrorMessage(), Duration = 12000 });
-            }
+            if (!user.IsValid())                            
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  user.GetErrorMessage(), Duration = 12000 });
             else
             {
                 var result = await webApiService.Users.SaveAsync(user);
                 if (!result.IsValid)                    
-                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  result.Message, Duration = 12000 });
+                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  result.Message, Duration = 12000 });
                 else
                 {
-                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save user", Detail =  "The data user has been saved.", Duration = 3000 });
+                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save user", Detail =  "The data has been saved.", Duration = 3000 });
                     dialogService.Close(user);
                 }
             }

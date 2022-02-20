@@ -1,15 +1,19 @@
 ﻿@page "/folders"
 
-@inject IWebApiService webApiService
-@inject NavigationManager navigationManager
-@inject IShowMessages showMessages
 @inject AppState appState
+@inject IWebApiService webApiService
+@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+@*@inject NavigationManager navigationManager
+@inject IShowMessages showMessages*@
 
 @implements IDisposable
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="container-fluid bg-light border">
+@*<div class="container-fluid bg-light border">
     <div class="row">
         <div class="col-6">
             <h3 class="pt-3">Folders admin</h3>
@@ -17,13 +21,27 @@
         <div class="col-6">
             <span class="float-right">
                 <RadzenMenu>
-                    <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="GoNewFolder"></RadzenMenuItem>
+                    <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
                     <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTreeFolders" ></RadzenMenuItem>
                 </RadzenMenu>
             </span>
         </div>
     </div>
+</div>*@
+
+<div class="container-fluid bg-light border">
+    <div class="row">
+        <KntIndexHeader TextHead="Folders admin">
+            <IndexMenu>
+                <RadzenMenu>
+                    <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+                    <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTree" ></RadzenMenuItem>
+                </RadzenMenu>
+            </IndexMenu>
+        </KntIndexHeader>
+    </div>
 </div>
+
 
 <div class="container-fluid border pt-2">
     <div class="row">
@@ -36,21 +54,21 @@
             <KntFoldersTreeView FoldersInfo="foldersTree"
                                 EditMode="true"
                                 FolderSelected="OnFolderSelected"
-                                FolderEdit="OnFolderEdit"
-                                FolderDelete="OnFolderDelete" />
+                                FolderEdit="OnEdit"
+                                FolderDelete="OnDelete" />
         }
     </div>
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete folder" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
+@*<ModalDialog @ref="modalDialog" Title="Delete folder" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
     <div><p>Are you sure you want to delete folder "@itemDelete.Name" ?</p></div>
-</ModalDialog>
+</ModalDialog>*@
 
 @code {
 
     private List<FolderDto> foldersTree;
-    private FolderDto folder;
-    private ModalDialog modalDialog;
+    private FolderDto selectedFolder;
+    //private ModalDialog modalDialog;
     private FolderDto itemDelete;
 
     protected override async Task OnInitializedAsync()
@@ -65,98 +83,145 @@
         appState.OnChange -= StateHasChanged;
     }
 
-    private async Task Load()
+    async Task Load()
     {
-        folder = null;
+        selectedFolder = null;
 
-        if (appState.FoldersTree == null)
+        //if (appState.FoldersTree == null)
+        //{
+        var result = await webApiService.Folders.GetTreeAsync();
+        if (result.IsValid)
+            foldersTree = result.Entity;
+        else
         {
-            var result = await webApiService.Folders.GetTreeAsync();
-            if (!result.IsValid)
-                foldersTree = new List<FolderDto>();
-            else
-                foldersTree = result.Entity;
+            foldersTree = new List<FolderDto>();
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading folders tree", Detail =  result.Message, Duration = 12000 });                
+        }
 
-            appState.FoldersTree = foldersTree;
+        appState.FoldersTree = foldersTree;
 
+        if(appState.SelectedFolder == null)
+        {
             if (foldersTree?.Count > 0)
             {
                 var f = foldersTree.Select(x => x).FirstOrDefault();
                 f.Selected = true;
                 OnFolderSelected(f);
-            }
+            }            
         }
-        else
-        {
-            foldersTree = appState.FoldersTree;
+        else 
             OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
-        }
+
+
+        //}
+        //else
+        //{
+        //    foldersTree = appState.FoldersTree;
+        //    OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
+        //}
+
+        //StateHasChanged();
     }
 
-    private void OnFolderSelected(FolderDto f)
+    void OnFolderSelected(FolderDto f)
     {
-        folder = f;
-        appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
+        selectedFolder = f;
+        appState.SelectedFolder = selectedFolder.GetSimpleDto<FolderDto>();
     }
 
-    private void OnFolderDelete(FolderDto folder)
+    async Task OnNew()
     {
-        modalDialog.Show();
+        // navigationManager.NavigateTo($"folders/new");
+
+        var res = await dialogService.OpenAsync<FolderNew>($"New folder",
+               new Dictionary<string, object>() {  },
+               new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+
+        if(res != null)           
+            await Load();  
+    }
+
+    async Task OnEdit(FolderDto folder)
+    {
+        // navigationManager.NavigateTo($"folders/edit/{folder.FolderId}");
+        var res = await dialogService.OpenAsync<FolderEdit>($"Edit folder",
+               new Dictionary<string, object>() { { "FolderId", folder.FolderId.ToString() } },
+               new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+
+        if(res != null)        
+            await Load(); 
+    }
+
+
+    async Task OnDelete(FolderDto folder)
+    {
+        // modalDialog.Show();
         itemDelete = folder;
-    }
 
-    private async Task OnConfirmDelete()
-    {
-        modalDialog.Hide();
+        var resultDialog = await dialogService.Confirm(
+            $"Are you sure you want delete folder - {@folder.Name})?", 
+            "Delete user", 
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
-        var result = await webApiService.Folders.DeleteAsync(itemDelete.FolderId);
-        if (!result.IsValid)
+        if (resultDialog == true)
         {
-            await showMessages.ShowErrorMessage(result.Message);
-        }
-        else
-        {
-            FolderDto toUpdate;
-            if (itemDelete.ParentId == null)
-            {
-                if (appState.FoldersTree != null)
-                    appState.FoldersTree.Remove(itemDelete);
-            }
+            var result = await webApiService.Folders.DeleteAsync(itemDelete.FolderId);
+            if (!result.IsValid)            
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete folder", Detail =  result.Message, Duration = 12000 });            
             else
             {
-                if (appState.FoldersIndex.TryGetValue((Guid)itemDelete.ParentId, out toUpdate))
-                {
-                    if (toUpdate != null)
-                    {
-                        toUpdate.ChildFolders.Remove(itemDelete);
-                        toUpdate.Selected = true;
-                        toUpdate.Expanded = true;
-                        OnFolderSelected(toUpdate);
-                    }
-                }
+                foldersTree = null;
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete folder", Detail =  "The folder has been deleted.", Duration = 3000 });
+                await Load();
             }
+
+            itemDelete = null;            
         }
 
-        itemDelete = null;
     }
 
-    private void OnCancelDelete()
-    {
-        modalDialog.Hide();
-        itemDelete = null;
-    }
+    //private async Task OnConfirmDelete()
+    //{
+    //    modalDialog.Hide();
 
-    private void OnFolderEdit(FolderDto folder)
-    {
-        navigationManager.NavigateTo($"folders/edit/{folder.FolderId}");
-    }
+    //    var result = await webApiService.Folders.DeleteAsync(itemDelete.FolderId);
+    //    if (!result.IsValid)
+    //    {
+    //        await showMessages.ShowErrorMessage(result.Message);
+    //    }
+    //    else
+    //    {
+    //        FolderDto toUpdate;
+    //        if (itemDelete.ParentId == null)
+    //        {
+    //            if (appState.FoldersTree != null)
+    //                appState.FoldersTree.Remove(itemDelete);
+    //        }
+    //        else
+    //        {
+    //            if (appState.FoldersIndex.TryGetValue((Guid)itemDelete.ParentId, out toUpdate))
+    //            {
+    //                if (toUpdate != null)
+    //                {
+    //                    toUpdate.ChildFolders.Remove(itemDelete);
+    //                    toUpdate.Selected = true;
+    //                    toUpdate.Expanded = true;
+    //                    OnFolderSelected(toUpdate);
+    //                }
+    //            }
+    //        }
+    //    }
 
-    void GoNewFolder()
-    {
-        navigationManager.NavigateTo($"folders/new");
-    }
+    //    itemDelete = null;
+    //}
 
-    private async Task OnRefreshTreeFolders()
+    //private void OnCancelDelete()
+    //{
+    //    modalDialog.Hide();
+    //    itemDelete = null;
+    //}
+
+    private async Task OnRefreshTree()
     {
         foldersTree = null;
         appState.FoldersTree = null;

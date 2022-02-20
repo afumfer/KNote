@@ -1,21 +1,18 @@
-﻿@inject DialogService dialogService
-@inject NotificationService notificationService
-
-@*@inject IShowMessages showMessages*@
+﻿@inject IShowMessages showMessages
 
 <EditForm Model="Folder" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
     <!-- Title -->
-@*    <ToolingHeader Title="@Title">
+    <ToolingHeader Title="@Title">
         <Buttons>
             <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))" data-toggle="tooltip" title="Exit without save">
                 <i class="fa fa-arrow-right" aria-hidden="true"></i>
             </button>
             <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
         </Buttons>
-    </ToolingHeader>*@
+    </ToolingHeader>
 
     <div class="form-group">
         <label>Name:</label>
@@ -68,25 +65,18 @@
 
     <hr />
 
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
-    </div>
-
-    @*<KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>*@
+    <KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>
 
 </EditForm>
 
-@code {
+@code {    
 
     [Parameter] public string Title { get; set; } = "---";
     [Parameter] public FolderDto Folder { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
 
-    //private KntFolderSelector kntFolderSelector;
+    private KntFolderSelector kntFolderSelector;
 
     private string nameParent = "(root)";
 
@@ -103,8 +93,7 @@
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {
-            //await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
             return;
         }
 
@@ -113,38 +102,23 @@
 
     #region Managment FolderSelector
 
-    async Task OnFolderSelector()
+    private void OnFolderSelector()
     {
-        // kntFolderSelector.Show();
-
-        var res = await dialogService.OpenAsync<KntFolderSelector>($"Folder selector",
-               new Dictionary<string, object>() {  },
-               new DialogOptions() { Width = "700px", Height = "520px"});
-
-        // new DialogOptions() { Width = "700px", Height = "520px", Resizable = true, Draggable = true });
-
-        if(res != null)
-        {
-            var f = (FolderDto)res;
-            Folder.ParentId = f.FolderId;
-            Folder.ParentFolderDto = f.GetSimpleDto<FolderDto>();
-            nameParent = Folder.ParentFolderDto.Name;            
-        }        
+        kntFolderSelector.Show();
     }
 
-    //private void onConfirmFolderSelector(FolderDto f)
-    //{
-    //    Folder.ParentId = f.FolderId;
-    //    Folder.ParentFolderDto = f.GetSimpleDto<FolderDto>();
-    //    nameParent = Folder.ParentFolderDto.Name;
-    //    kntFolderSelector.Hide();
-    //}
+    private void onConfirmFolderSelector(FolderDto f)
+    {
+        Folder.ParentId = f.FolderId;
+        Folder.ParentFolderDto = f.GetSimpleDto<FolderDto>();
+        nameParent = Folder.ParentFolderDto.Name;
+        kntFolderSelector.Hide();
+    }
 
-    //private void onCancelFolderSelector()
-    //{
-    //    kntFolderSelector.Hide();
-    //}
-
+    private void onCancelFolderSelector()
+    {
+        kntFolderSelector.Hide();
+    }
 
     private void OnResetParentFolder()
     {

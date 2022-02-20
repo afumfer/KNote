@@ -1,10 +1,9 @@
 ﻿@inject AppState appState
 @inject IGenericDataService  dataService
-@inject DialogService dialogService
 
 @implements IDisposable
 
-@*@if (ShowDialog)
+@if (ShowDialog)
 {
     <div class="modal-backdrop show"></div>
 
@@ -37,29 +36,13 @@
             </div>
         </div>
     </div>
-}*@
-
-<div class="row">
-    <div class="col-md-12 overflow-auto" style="height:380px">
-        <KntFoldersTreeView FoldersInfo="@foldersTree"
-                            FolderSelected="OnFolderSelected">
-        </KntFoldersTreeView>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12 text-right">
-        <RadzenButton Text="Ok" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-    </div>
-</div>
-
+}
 
 @code {    
 
-    //[Parameter] public string Title { get; set; } = "KaNote folder selector";
-    //[Parameter] public EventCallback<FolderDto> OnConfirm { get; set; }
-    //[Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public string Title { get; set; } = "KaNote folder selector";
+    [Parameter] public EventCallback<FolderDto> OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
 
     private List<FolderDto> foldersTree;
     private bool ShowDialog = false;
@@ -104,15 +87,8 @@
         folderSelected = f;
     }
 
-    void OnConfirm()
+    private async Task _onConfirm()
     {
-        //await OnConfirm.InvokeAsync(folderSelected);
-        dialogService.Close(folderSelected);
-    }
-
-    void OnCancel()
-    {
-        //await OnConfirm.InvokeAsync(folderSelected);
-        dialogService.Close(null);
+        await OnConfirm.InvokeAsync(folderSelected);
     }
 }

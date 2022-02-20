@@ -1,0 +1,32 @@
+﻿@page "/types/newBS"
+
+@inject IWebApiService webApiService
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
+
+@attribute [Authorize(Roles = "Admin")]
+
+<TypeForm Title="New type edit" OnValidSubmit="OnNew" OnExit="OnExit" NoteType="noteType" />
+
+@code {
+    NoteTypeDto noteType = new NoteTypeDto();
+
+    private async Task OnNew()
+    {
+        if (!noteType.IsValid())
+            await showMessages.ShowErrorMessage(noteType.GetErrorMessage());
+        else
+        {
+            var result = await webApiService.NoteTypes.SaveAsync(noteType);
+            if(!result.IsValid)
+                await showMessages.ShowErrorMessage(result.Message);
+            else
+                navigationManager.NavigateTo("types");            
+        }
+    }
+
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("types");
+    }
+}

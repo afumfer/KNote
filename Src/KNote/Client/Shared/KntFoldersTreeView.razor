@@ -2,6 +2,8 @@
 @inject TooltipService tooltipService
 @implements IDisposable
 
+@**@
+
 <RadzenTree Data=@FoldersInfo  Change=@OnChange>
     <RadzenTreeLevel 
         TextProperty="Name" 
@@ -65,11 +67,12 @@
     {
         if(string.IsNullOrEmpty(appState.SelectedFolder.Name))
             return false; 
-        
+
         var folder = data as FolderDto;
         return folder.Name == appState.SelectedFolder.Name;              
     }
 
+    // TODO: !!! refactor (is not working when level folder > 1)
     bool ShouldExpanded(object data)
     {
         if(appState.SelectedFolder == null)
@@ -77,9 +80,9 @@
 
         if(appState.SelectedFolder.ParentId == null)
             return false; 
-        
+
         var folder = data as FolderDto;
-        return folder.FolderId == appState.SelectedFolder.ParentId;              
+        return folder.FolderId == appState.SelectedFolder.ParentId;        
     }
 
     async void OnChange(TreeEventArgs args)
