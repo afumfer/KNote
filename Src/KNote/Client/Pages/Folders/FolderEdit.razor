@@ -5,10 +5,6 @@
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
-@*@inject NavigationManager navigationManager
-@inject IShowMessages showMessages
-*@
-
 @implements IDisposable
 
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
@@ -35,16 +31,12 @@ else
         var result = await webApiService.Folders.GetAsync(Guid.Parse(FolderId));
         if (!result.IsValid)
         {
-            //await showMessages.ShowErrorMessage(result.Message);
-            //navigationManager.NavigateTo("folders");
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get folder", Detail =  result.Message, Duration = 12000 });
             dialogService.Close(null);
         }
-        else
-        {
+        else        
             folder = result.Entity;
-        }
-
+        
         base.OnInitialized();
     }
 
@@ -56,11 +48,8 @@ else
     private async Task OnEdit()
     {
         var result = await webApiService.Folders.SaveAsync(folder);
-        if (!result.IsValid)
-        {
-            //await showMessages.ShowErrorMessage(result.Message);
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type", Detail =  result.Message, Duration = 12000 });
-        }
+        if (!result.IsValid)                    
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type", Detail =  result.Message, Duration = 12000 });        
         else
         {
             if (appState.FoldersTree != null)
@@ -79,16 +68,14 @@ else
                     appState.FoldersTree = null;
                 }
             }
-
-            //navigationManager.NavigateTo("folders");
+            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save folder", Detail =  "The data has been saved.", Duration = 3000 });
             dialogService.Close(folder);     
         }
     }
 
     private void OnExit()
-    {
-        //navigationManager.NavigateTo("folders");
+    {        
         dialogService.Close(null);
     }
 

@@ -1,24 +1,21 @@
 ﻿@page "/attributes"
 
 @inject IWebApiService webApiService
-@inject NavigationManager navigationManager
-@inject IShowMessages showMessages
 @inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
 
 @attribute [Authorize(Roles = "Admin")]
 
 <div class="container-fluid bg-light border">
     <div class="row">
-        <div class="col-6">
-            <h3 class="pt-3">Attributes admin</h3>
-        </div>
-        <div class="col-6">
-            <span class="float-right">
+        <KntIndexHeader TextHead="Attributes admin">
+            <IndexMenu>
                 <RadzenMenu>
                     <RadzenMenuItem Text="New attribute ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
                 </RadzenMenu>
-            </span>
-        </div>
+            </IndexMenu>
+        </KntIndexHeader>
     </div>
 </div>
 
@@ -49,15 +46,9 @@
     </div>
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete attribute" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
-    <div><p>Are you sure you want to delete attribute "@itemDelete.Name" ?</p></div>
-</ModalDialog>
-
 @code {
 
     private List<KAttributeInfoDto> attributes { get; set; }
-    private ModalDialog modalDialog;
-    private KAttributeInfoDto itemDelete;
 
     protected async override Task OnInitializedAsync()
     {
@@ -66,46 +57,54 @@
 
     private async Task Load()
     {
-        var response = await webApiService.KAttributes.GetAllAsync();
-        if (!response.IsValid)
-            await showMessages.ShowErrorMessage(response.Message);
-        else
-            attributes = response.Entity;
+        var result = await webApiService.KAttributes.GetAllAsync();
+        if (result.IsValid)
+            attributes = result.Entity;
+        else            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attributes", Detail =  result.Message, Duration = 12000 });
+
+        //StateHasChanged();
     }
 
-    void OnNew()
+    async Task OnNew()
     {
-        navigationManager.NavigateTo($"attributes/new");
+        var res = await dialogService.OpenAsync<AttributeNew>($"New attribute",
+               new Dictionary<string, object>() {  },
+               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
+
+        if(res != null)           
+            await Load();  
     }
 
-    void OnEdit(KAttributeInfoDto attribute)
-    {
-        navigationManager.NavigateTo($"attributes/edit/{attribute.KAttributeId}");
+    async Task OnEdit(KAttributeInfoDto attribute)
+    {     
+        var res = await dialogService.OpenAsync<AttributeEdit>($"Edit note type",
+               new Dictionary<string, object>() { { "AttributeId", attribute.KAttributeId.ToString() } },
+               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
+
+        if(res != null)        
+            await Load(); 
     }
 
-    private void OnDelete(KAttributeInfoDto item)
+    async Task OnDelete(KAttributeInfoDto item)
     {
-        modalDialog.Show();
-        itemDelete = item;
-    }
+        var resultDialog = await dialogService.Confirm(
+            $"Are you sure you want delete attribute - {@item.Name})?", 
+            "Delete attribute", 
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
-    private async Task OnConfirmDelete()
-    {
-        modalDialog.Hide();
-
-        var response = await webApiService.KAttributes.DeleteAsync(itemDelete.KAttributeId);
-        if (!response.IsValid)        
-            await showMessages.ShowErrorMessage(response.Message);        
-        else        
-            await Load();
-        
-        itemDelete = null;
-    }
-
-    private void OnCancelDelete()
-    {
-        modalDialog.Hide();
-        itemDelete = null;
+        if (resultDialog == true)
+        {
+            var result = await webApiService.KAttributes.DeleteAsync(item.KAttributeId);
+            if (!result.IsValid)            
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note type", Detail =  result.Message, Duration = 12000 });            
+            else
+            {
+                attributes = null;
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note type", Detail =  "The note type has been deleted.", Duration = 3000 });
+                await Load();
+            }
+        }
     }
 
 }

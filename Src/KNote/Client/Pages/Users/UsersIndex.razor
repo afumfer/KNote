@@ -59,7 +59,7 @@
 @code {
 
     List<UserDto> users { get; set; }
-    UserDto itemDelete;
+    //UserDto itemDelete;
 
     PaginationContext paginationContext = new PaginationContext();
     string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
@@ -140,17 +140,15 @@
     }
 
     async Task OnDelete(UserDto item)
-    {        
-        itemDelete = item;
-
+    {                
         var resultDialog = await dialogService.Confirm(
-            $"Are you sure you want delete user - {@itemDelete.UserName} - ({@itemDelete.FullName})?", 
+            $"Are you sure you want delete user - {@item.UserName} - ({@item.FullName})?", 
             "Delete user", 
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)
         {
-            var result = await webApiService.Users.DeleteAsync(itemDelete.UserId);
+            var result = await webApiService.Users.DeleteAsync(item.UserId);
             if (!result.IsValid)            
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete user", Detail =  result.Message, Duration = 12000 });            
             else
@@ -158,9 +156,7 @@
                 users = null;
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete user", Detail =  "The user has been deleted.", Duration = 3000 });
                 await Load();
-            }
-
-            itemDelete = null;            
+            }            
         }
     }
     

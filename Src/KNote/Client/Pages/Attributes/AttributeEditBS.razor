@@ -1,0 +1,81 @@
+﻿@page "/attributes/editBS/{AttributeId}"
+
+@inject IWebApiService webApiService
+@inject NavigationManager navigationManager
+@inject IShowMessages showMessages
+
+@attribute [Authorize(Roles = "Admin")]
+
+@if (kattribute != null && showForm)
+{
+    <AttributeForm Title="Attribute Edit" OnValidSubmit="OnSave" OnExit="OnExit" KAttribute="kattribute" NoteTypes="noteTypes" />
+}
+else
+{
+    <text>Loading ... </text>
+}
+
+@code {
+    [Parameter] public string AttributeId { get; set; }
+
+    private KAttributeDto kattribute;
+    private bool showForm = false;
+    private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
+
+    protected async override Task OnInitializedAsync()
+    {
+
+        var result = await webApiService.KAttributes.GetAsync(Guid.Parse(AttributeId));
+        if (!result.IsValid)
+        {
+            await showMessages.ShowErrorMessage(result.Message);
+            navigationManager.NavigateTo("index");
+        }
+        else
+        {
+            kattribute = result.Entity;
+            kattribute.SetIsDirty(false);
+        }
+
+        var result2 = await webApiService.NoteTypes.GetAllAsync();
+        if (!result2.IsValid)
+        {
+            await showMessages.ShowErrorMessage(result2.Message);
+            navigationManager.NavigateTo("index");
+        }
+        else
+        {
+            noteTypes = result2.Entity;
+            showForm = true;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnSave()
+    {
+        if (!kattribute.IsDirty())
+        {
+            navigationManager.NavigateTo("attributes");
+        }
+        else
+        {
+            if (!kattribute.IsValid())
+                await showMessages.ShowErrorMessage(kattribute.GetErrorMessage());
+            else
+            {
+                var result = await webApiService.KAttributes.SaveAsync(kattribute);
+                if (!result.IsValid)
+                    await showMessages.ShowErrorMessage(result.Message);
+                else
+                    navigationManager.NavigateTo("attributes");
+            }
+        }
+    }
+
+    private void OnExit()
+    {
+        navigationManager.NavigateTo("attributes");
+    }
+
+}

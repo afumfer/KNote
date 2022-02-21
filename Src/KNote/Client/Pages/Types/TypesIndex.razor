@@ -19,7 +19,6 @@
     </div>
 </div>
 
-
 <div class="container-fluid pt-2">
     <div class="row">
         <EntityList List="noteTypes">
@@ -48,8 +47,7 @@
 
 @code {
 
-    private List<NoteTypeDto> noteTypes { get; set; }
-    private NoteTypeDto itemDelete;
+    private List<NoteTypeDto> noteTypes { get; set; }    
 
     protected async override Task OnInitializedAsync()
     {
@@ -89,15 +87,14 @@
 
     async Task OnDelete(NoteTypeDto item)
     {             
-        itemDelete = item;
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete note type - {@item.Name})?", 
-            "Delete user", 
+            "Delete note type", 
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)
         {
-            var result = await webApiService.NoteTypes.DeleteAsync(itemDelete.NoteTypeId);
+            var result = await webApiService.NoteTypes.DeleteAsync(item.NoteTypeId);
             if (!result.IsValid)            
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note type", Detail =  result.Message, Duration = 12000 });            
             else
@@ -105,9 +102,7 @@
                 noteTypes = null;
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note type", Detail =  "The note type has been deleted.", Duration = 3000 });
                 await Load();
-            }
-
-            itemDelete = null;            
+            }            
         }
     }
 

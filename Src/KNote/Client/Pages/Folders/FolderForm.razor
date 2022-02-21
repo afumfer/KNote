@@ -1,21 +1,9 @@
 ﻿@inject DialogService dialogService
 @inject NotificationService notificationService
 
-@*@inject IShowMessages showMessages*@
-
 <EditForm Model="Folder" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
-
-    <!-- Title -->
-@*    <ToolingHeader Title="@Title">
-        <Buttons>
-            <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))" data-toggle="tooltip" title="Exit without save">
-                <i class="fa fa-arrow-right" aria-hidden="true"></i>
-            </button>
-            <button class="btn btn-success float-right" @onclick="(() => Save(formContext))">Save changes</button>
-        </Buttons>
-    </ToolingHeader>*@
 
     <div class="form-group">
         <label>Name:</label>
@@ -75,8 +63,6 @@
         </div>
     </div>
 
-    @*<KntFolderSelector @ref="kntFolderSelector" OnCancel="onCancelFolderSelector" OnConfirm="onConfirmFolderSelector"></KntFolderSelector>*@
-
 </EditForm>
 
 @code {
@@ -85,8 +71,6 @@
     [Parameter] public FolderDto Folder { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
-
-    //private KntFolderSelector kntFolderSelector;
 
     private string nameParent = "(root)";
 
@@ -102,8 +86,7 @@
     {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
-        {
-            //await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+        {            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
@@ -114,14 +97,10 @@
     #region Managment FolderSelector
 
     async Task OnFolderSelector()
-    {
-        // kntFolderSelector.Show();
-
+    {        
         var res = await dialogService.OpenAsync<KntFolderSelector>($"Folder selector",
                new Dictionary<string, object>() {  },
-               new DialogOptions() { Width = "700px", Height = "520px"});
-
-        // new DialogOptions() { Width = "700px", Height = "520px", Resizable = true, Draggable = true });
+               new DialogOptions() { Width = "700px", Height = "520px"});        
 
         if(res != null)
         {
@@ -131,20 +110,6 @@
             nameParent = Folder.ParentFolderDto.Name;            
         }        
     }
-
-    //private void onConfirmFolderSelector(FolderDto f)
-    //{
-    //    Folder.ParentId = f.FolderId;
-    //    Folder.ParentFolderDto = f.GetSimpleDto<FolderDto>();
-    //    nameParent = Folder.ParentFolderDto.Name;
-    //    kntFolderSelector.Hide();
-    //}
-
-    //private void onCancelFolderSelector()
-    //{
-    //    kntFolderSelector.Hide();
-    //}
-
 
     private void OnResetParentFolder()
     {
