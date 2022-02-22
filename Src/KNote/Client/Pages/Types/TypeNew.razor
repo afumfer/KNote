@@ -14,16 +14,16 @@
     private async Task OnNew()
     {
         if (!noteType.IsValid())            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type", Detail =  noteType.GetErrorMessage(), Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note type", Detail =  noteType.GetErrorMessage(), Duration = 12000 });
         else
         {
             var result = await webApiService.NoteTypes.SaveAsync(noteType);
             if(!result.IsValid)                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type", Detail =  result.Message, Duration = 12000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note type", Detail =  result.Message, Duration = 12000 });
             else
             {                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note type", Detail =  "The note type has been created.", Duration = 3000 });
-                dialogService.Close(noteType);
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note type", Detail =  "The note type has been created.", Duration = 3000 });                
+                dialogService.Close(result.Entity);
             }                       
         }
     }

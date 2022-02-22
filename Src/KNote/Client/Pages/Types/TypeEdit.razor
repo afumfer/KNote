@@ -54,7 +54,7 @@ else
                 else
                 {                    
                     notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note type", Detail =  "The data has been saved.", Duration = 3000 });
-                    dialogService.Close(noteType);                    
+                    dialogService.Close(result.Entity);
                 }
             }
         }

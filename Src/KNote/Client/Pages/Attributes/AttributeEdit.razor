@@ -1,8 +1,8 @@
 ﻿@page "/attributes/edit/{AttributeId}"
 
 @inject IWebApiService webApiService
-@inject NavigationManager navigationManager
-@inject IShowMessages showMessages
+@inject DialogService dialogService
+@inject NotificationService notificationService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -27,9 +27,9 @@ else
 
         var result = await webApiService.KAttributes.GetAsync(Guid.Parse(AttributeId));
         if (!result.IsValid)
-        {
-            await showMessages.ShowErrorMessage(result.Message);
-            navigationManager.NavigateTo("index");
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get attributes", Detail =  result.Message, Duration = 12000 });
+            dialogService.Close(null);
         }
         else
         {
@@ -39,9 +39,9 @@ else
 
         var result2 = await webApiService.NoteTypes.GetAllAsync();
         if (!result2.IsValid)
-        {
-            await showMessages.ShowErrorMessage(result2.Message);
-            navigationManager.NavigateTo("index");
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types", Detail =  result.Message, Duration = 12000 });
+            dialogService.Close(null);
         }
         else
         {
@@ -55,27 +55,30 @@ else
     private async Task OnSave()
     {
         if (!kattribute.IsDirty())
-        {
-            navigationManager.NavigateTo("attributes");
+        {            
+            dialogService.Close(kattribute);
         }
         else
         {
             if (!kattribute.IsValid())
-                await showMessages.ShowErrorMessage(kattribute.GetErrorMessage());
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute", Detail =  kattribute.GetErrorMessage(), Duration = 12000 });
             else
             {
                 var result = await webApiService.KAttributes.SaveAsync(kattribute);
                 if (!result.IsValid)
-                    await showMessages.ShowErrorMessage(result.Message);
+                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute", Detail =  result.Message, Duration = 12000 });
                 else
-                    navigationManager.NavigateTo("attributes");
+                {
+                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save attribute", Detail =  "The data has been saved.", Duration = 3000 });
+                    dialogService.Close(result.Entity);
+                }
             }
         }
     }
 
     private void OnExit()
     {
-        navigationManager.NavigateTo("attributes");
+        dialogService.Close(null);
     }
 
 }

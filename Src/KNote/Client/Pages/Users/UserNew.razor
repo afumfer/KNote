@@ -14,16 +14,16 @@
     private async Task OnNew()
     {
         if (!user.IsValid())            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  user.GetErrorMessage(), Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New user", Detail =  user.GetErrorMessage(), Duration = 12000 });
         else
         {
             var result = await webApiService.Users.SaveAsync(user);
             if (!result.IsValid)                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user", Detail =  result.Message, Duration = 12000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New user", Detail =  result.Message, Duration = 12000 });
             else
             {
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New user", Detail =  "The user has been created.", Duration = 3000 });
-                dialogService.Close(user);
+                dialogService.Close(result.Entity);
             }            
         }
     }

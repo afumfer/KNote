@@ -70,7 +70,7 @@ else
             }
             
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save folder", Detail =  "The data has been saved.", Duration = 3000 });
-            dialogService.Close(folder);     
+            dialogService.Close(result.Entity);     
         }
     }
 

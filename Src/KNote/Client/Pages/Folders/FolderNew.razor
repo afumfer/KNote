@@ -85,7 +85,7 @@
             }
 
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New folder", Detail =  "The note type has been created.", Duration = 3000 });
-            dialogService.Close(folder);            
+            dialogService.Close(result.Entity);
         }
 
     }
