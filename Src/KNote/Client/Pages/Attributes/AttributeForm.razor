@@ -9,8 +9,11 @@
         <label for="atrName" class="col-sm-2 col-form-label">Name:</label>
         <div class="input-group col-sm-10" id="atrName">
             <InputText class="form-control" @bind-Value="@KAttribute.Name" />
+        </div>        
+        <label for="atrEmail" class="col-sm-2 col-form-label" style="font-size:10px"></label>
+        <div class="col-sm-10 pl-4"  style="font-size:10px">
+            <ValidationMessage For="@(() => KAttribute.Name)"/>
         </div>
-        <ValidationMessage For="@(() => KAttribute.Name)" />
     </div>
 
     <div class="form-group row">
@@ -18,14 +21,17 @@
         <div class="input-group col-sm-10" id="atrDescription">
             <InputTextArea class="form-control" @bind-Value="@KAttribute.Description" />
         </div>
-        <ValidationMessage For="@(() => KAttribute.Description)" />
+        <label for="atrEmail" class="col-sm-2 col-form-label" style="font-size:10px"></label>
+        <div class="col-sm-10 pl-4"  style="font-size:10px">
+            <ValidationMessage For="@(() => KAttribute.Description)" />
+        </div>
+        
     </div>
 
     <div class="form-group row">
-        <label for="atrRequired" class="col-sm-2 col-form-label">Required Value::</label>
+        <label for="atrRequired" class="col-sm-2 col-form-label">Required Value:</label>
         <div class="input-group col-sm-10" id="atrRequired">
             <InputCheckbox class="form-control" @bind-Value="@KAttribute.RequiredValue" />
-
         </div>
         <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
     </div>
@@ -116,7 +122,7 @@
         <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
     </div>
 
-   <hr class="mt-1" />
+    <hr class="mt-1" />
 
     <div class="row">
         <div class="col-md-12 text-right">
@@ -124,20 +130,17 @@
             <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
         </div>
     </div>
-
-    @*<AttributeValueEditor @ref="attributeValueEditor" OnCancel="OnCancelAtrValueEditor" OnConfirm="OnConfirmAtrValueEditor"></AttributeValueEditor>*@
+    
 
 </EditForm>
 
 @code {
-    [Parameter] public string Title { get; set; } = "---";
+    
     [Parameter] public KAttributeDto KAttribute { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
     [Parameter] public List<NoteTypeDto> NoteTypes { get; set; } = new List<NoteTypeDto>();
-
-    //private AttributeValueEditor attributeValueEditor;
-
+    
     protected async Task Save(EditContext formContext)
     {
         bool formIsValid = formContext.Validate();
@@ -152,15 +155,12 @@
     }
 
     async Task OnAtrValueNew()
-    {
-        //attributeValueEditor.Show(null);
+    {        
         await AtrValueEdit(null);
-
     }
 
     async Task OnAtrValueEdit(KAttributeTabulatedValueDto atrEdit)
-    {
-        //attributeValueEditor.Show(atrEdit);
+    {        
         await AtrValueEdit(atrEdit);
     }
 
@@ -178,65 +178,32 @@
         }
     }
 
-    //private void OnCancelAtrValueEditor()
-    //{
-    //    attributeValueEditor.Hide();
-    //}
-
-    //private void OnConfirmAtrValueEditor(KAttributeTabulatedValueDto atrValue)
-    //{
-    //    attributeValueEditor.Hide();
-
-    //    if (!atrValue.IsDirty())
-    //        return;
-
-    //    var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
-
-    //    if (atrOld == null)
-    //    {
-    //        atrValue.KAttributeId = KAttribute.KAttributeId;
-    //        atrValue.SetIsNew(true);
-    //        KAttribute.KAttributeValues.Add(atrValue);
-    //    }
-    //    else
-    //    {
-    //        var i = KAttribute.KAttributeValues.IndexOf(atrOld);
-    //        KAttribute.KAttributeValues.RemoveAt(i);
-    //        KAttribute.KAttributeValues.Insert(i, atrValue);
-    //    }
-    //}
-
     async Task AtrValueEdit(KAttributeTabulatedValueDto atrValue)
     {
-        var res = await dialogService.OpenAsync<AttributeValueEditor>($"Edit attribute tabulated value",
+        var resAtrEdited = await dialogService.OpenAsync<AttributeValueEditor>($"Edit attribute tabulated value",
                new Dictionary<string, object>() { { "AtrValue", atrValue } },
-               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
+               new DialogOptions() { Width = "600px", Height = "300px", Resizable = true, Draggable = true });
 
-        if(res != null)
+        if(resAtrEdited != null)
         {
-            if (!res.IsDirty())
+            if (!resAtrEdited.IsDirty())
                 return;
 
-            var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
+            var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == resAtrEdited.KAttributeTabulatedValueId).SingleOrDefault();
 
             if (atrOld == null)
             {
-                atrValue.KAttributeId = KAttribute.KAttributeId;
-                atrValue.SetIsNew(true);
-                KAttribute.KAttributeValues.Add(atrValue);
+                resAtrEdited.KAttributeId = KAttribute.KAttributeId;
+                resAtrEdited.SetIsNew(true);
+                KAttribute.KAttributeValues.Add(resAtrEdited);
             }
             else
             {
                 var i = KAttribute.KAttributeValues.IndexOf(atrOld);
                 KAttribute.KAttributeValues.RemoveAt(i);
-                KAttribute.KAttributeValues.Insert(i, res);
-            }    
-
-            StateHasChanged();            
-        }         
-        
+                KAttribute.KAttributeValues.Insert(i, resAtrEdited);
+            }                
+        }                 
     }
-
-
 
 }
