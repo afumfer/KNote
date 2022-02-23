@@ -128,7 +128,7 @@
         <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
     </div>
 
-    <AttributeValueEditor @ref="attributeValueEditor" OnCancel="OnCancelAtrValueEditor" OnConfirm="OnConfirmAtrValueEditor"></AttributeValueEditor>
+    <AttributeValueEditorBS @ref="attributeValueEditor" OnCancel="OnCancelAtrValueEditor" OnConfirm="OnConfirmAtrValueEditor"></AttributeValueEditorBS>
 
 </EditForm>
 
@@ -139,7 +139,7 @@
     [Parameter] public EventCallback OnExit { get; set; }
     [Parameter] public List<NoteTypeDto> NoteTypes { get; set; } = new List<NoteTypeDto>();
 
-    private AttributeValueEditor attributeValueEditor;
+    private AttributeValueEditorBS attributeValueEditor;
 
     protected async Task Save(EditContext formContext)
     {

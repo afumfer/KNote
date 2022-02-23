@@ -1,10 +1,13 @@
-﻿@inject IShowMessages showMessages
+﻿@inject NotificationService notificationService
+@inject DialogService dialogService
 
-@if (ShowDialog)
-{
+@*@inject IShowMessages showMessages*@
+
+@*@if (ShowDialog)
+{*@
     <EditForm Model="atrValue" Context="formContextValue">
 
-        <div class="modal-backdrop show"></div>
+@*        <div class="modal-backdrop show"></div>
 
         <div class="modal fade show" id="treeFolderModal" tabindex="-1"
              role="dialog" aria-labelledby="treeFolderModalLabel"
@@ -12,7 +15,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">@Title</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">XX Title</h5>
                         <button @onclick="OnCancel" type="button" class="close" data-dismiss="modal"
                                 aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -20,7 +23,6 @@
                     </div>
                     <div class="modal-body">
                         <div class="overflow-auto" style="height:450px">
-
                             <div class="form-group">
                                 <label>Value:</label>
                                 <InputText class="form-control p-2" @bind-Value="@atrValue.Value" />
@@ -44,26 +46,72 @@
                     </div>
                 </div>
             </div>
+        </div>*@
+
+        @*style="height:250px"*@
+
+        <div class="overflow-auto" >
+            <div class="form-group">
+                <label>Value:</label>
+                <InputText class="form-control p-2" @bind-Value="@atrValue.Value" />
+                <ValidationMessage For="@(() => atrValue.Value)" />
+            </div>
+
+            <div class="form-group">
+                <label>Order:</label>
+                <InputNumber class="form-control p-2" @bind-Value="@atrValue.Order" />
+                <ValidationMessage For="@(() => atrValue.Order)" />
+            </div>
         </div>
 
+        <div class="modal-footer">
+            <button @onclick="OnCancel" type="button" class="btn btn-secondary"
+                    data-dismiss="modal">
+                Cancel
+            </button>
+            <button @onclick="(() => OnConfirmSave(formContextValue))" type="button" class="btn btn-primary">Ok</button>
+        </div>
+
+
     </EditForm>
-}
+@*}*@
 
 @code {
-    [Parameter] public string Title { get; set; } = "Atribute tabulated value editor";
-    [Parameter] public EventCallback<KAttributeTabulatedValueDto> OnConfirm { get; set; }
-    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public KAttributeTabulatedValueDto AtrValue { get; set; }
+    //[Parameter] public EventCallback<KAttributeTabulatedValueDto> OnConfirm { get; set; }
+    //[Parameter] public EventCallback OnCancel { get; set; }
 
-    private bool ShowDialog = false;
-    private KAttributeTabulatedValueDto atrValue;
+    private KAttributeTabulatedValueDto atrValue { get; set; }
 
-    public void Hide() => ShowDialog = false;
 
-    public void Show(KAttributeTabulatedValueDto valueEdit)
+    //[Parameter] public string Title { get; set; } = "Atribute tabulated value editor";
+    //private bool ShowDialog = false;
+    //public void Hide() => ShowDialog = false;
+
+
+    //public void Show(KAttributeTabulatedValueDto valueEdit)
+    //{
+    //    if (valueEdit != null)
+    //    {
+    //        atrValue = valueEdit.GetSimpleDto<KAttributeTabulatedValueDto>();
+    //        atrValue.SetIsNew(false);
+    //    }
+    //    else
+    //    {
+    //        atrValue = new KAttributeTabulatedValueDto();
+    //        atrValue.KAttributeTabulatedValueId = Guid.NewGuid();
+    //        atrValue.SetIsNew(true);
+    //    }
+
+    //    atrValue.SetIsDirty(false);
+    //    ShowDialog = true;
+    //}
+
+    protected async override Task OnInitializedAsync()
     {
-        if (valueEdit != null)
+        if (AtrValue != null)
         {
-            atrValue = valueEdit.GetSimpleDto<KAttributeTabulatedValueDto>();
+            atrValue = AtrValue.GetSimpleDto<KAttributeTabulatedValueDto>();
             atrValue.SetIsNew(false);
         }
         else
@@ -74,19 +122,28 @@
         }
 
         atrValue.SetIsDirty(false);
-        ShowDialog = true;
+
+        await base.OnInitializedAsync();
     }
 
-    private async Task OnConfirmSave(EditContext formContext)
+
+    private void OnConfirmSave(EditContext formContext)
     {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {
-            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+            //await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Edit attribute tabulated value", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });            
             return;
         }
 
-        await OnConfirm.InvokeAsync(atrValue);
+        // await OnConfirm.InvokeAsync(atrValue);
+        dialogService.Close(atrValue);
+    }
+
+    private void OnCancel()
+    {
+        dialogService.Close(null);
     }
 
 }

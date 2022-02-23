@@ -348,9 +348,12 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                 }
             }
 
-            sql = $"DELETE FROM [KAttributeTabulatedValues]  WHERE KAttributeId = '{kattributeId.ToString().ToUpper()}' AND KAttributeTabulatedValueId NOT IN ( {idsTabValues.ToString().ToUpper()} )";
-            r = await db.ExecuteAsync(sql.ToString(),
-                        new { });
+            if (!string.IsNullOrEmpty(idsTabValues))
+            {
+                sql = $"DELETE FROM [KAttributeTabulatedValues]  WHERE KAttributeId = '{kattributeId.ToString().ToUpper()}' AND KAttributeTabulatedValueId NOT IN ( {idsTabValues.ToString().ToUpper()} )";
+                r = await db.ExecuteAsync(sql.ToString(),
+                            new { });
+            }
 
             result.Entity = tabulatedValues;                
         }

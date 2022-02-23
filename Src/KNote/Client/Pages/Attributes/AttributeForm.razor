@@ -1,4 +1,4 @@
-﻿
+﻿@inject DialogService dialogService
 @inject NotificationService notificationService
 
 <EditForm Model="KAttribute" Context="formContext">
@@ -125,7 +125,7 @@
         </div>
     </div>
 
-    <AttributeValueEditor @ref="attributeValueEditor" OnCancel="OnCancelAtrValueEditor" OnConfirm="OnConfirmAtrValueEditor"></AttributeValueEditor>
+    @*<AttributeValueEditor @ref="attributeValueEditor" OnCancel="OnCancelAtrValueEditor" OnConfirm="OnConfirmAtrValueEditor"></AttributeValueEditor>*@
 
 </EditForm>
 
@@ -136,7 +136,7 @@
     [Parameter] public EventCallback OnExit { get; set; }
     [Parameter] public List<NoteTypeDto> NoteTypes { get; set; } = new List<NoteTypeDto>();
 
-    private AttributeValueEditor attributeValueEditor;
+    //private AttributeValueEditor attributeValueEditor;
 
     protected async Task Save(EditContext formContext)
     {
@@ -151,47 +151,92 @@
         await OnValidSubmit.InvokeAsync(formContext);
     }
 
-    private void OnAtrValueNew()
+    async Task OnAtrValueNew()
     {
-        attributeValueEditor.Show(null);
+        //attributeValueEditor.Show(null);
+        await AtrValueEdit(null);
+
     }
 
-    private void OnAtrValueDelete(KAttributeTabulatedValueDto atrValue)
+    async Task OnAtrValueEdit(KAttributeTabulatedValueDto atrEdit)
     {
-        KAttribute.KAttributeValues.Remove(atrValue);
-        KAttribute.SetIsDirty(true, false);
+        //attributeValueEditor.Show(atrEdit);
+        await AtrValueEdit(atrEdit);
     }
 
-    private void OnAtrValueEdit(KAttributeTabulatedValueDto atrEdit)
+    async Task OnAtrValueDelete(KAttributeTabulatedValueDto atrValue)
     {
-        attributeValueEditor.Show(atrEdit);
-    }
+        var resultDialog = await dialogService.Confirm(
+            $"Are you sure you want delete this attribute tabulated value?", 
+            "Delete note type", 
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
-    private void OnCancelAtrValueEditor()
-    {
-        attributeValueEditor.Hide();
-    }
-
-    private void OnConfirmAtrValueEditor(KAttributeTabulatedValueDto atrValue)
-    {
-        attributeValueEditor.Hide();
-
-        if (!atrValue.IsDirty())
-            return;
-
-        var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
-
-        if (atrOld == null)
+        if (resultDialog == true)
         {
-            atrValue.KAttributeId = KAttribute.KAttributeId;
-            atrValue.SetIsNew(true);
-            KAttribute.KAttributeValues.Add(atrValue);
-        }
-        else
-        {
-            var i = KAttribute.KAttributeValues.IndexOf(atrOld);
-            KAttribute.KAttributeValues.RemoveAt(i);
-            KAttribute.KAttributeValues.Insert(i, atrValue);
+            KAttribute.KAttributeValues.Remove(atrValue);
+            KAttribute.SetIsDirty(true, false);
         }
     }
+
+    //private void OnCancelAtrValueEditor()
+    //{
+    //    attributeValueEditor.Hide();
+    //}
+
+    //private void OnConfirmAtrValueEditor(KAttributeTabulatedValueDto atrValue)
+    //{
+    //    attributeValueEditor.Hide();
+
+    //    if (!atrValue.IsDirty())
+    //        return;
+
+    //    var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
+
+    //    if (atrOld == null)
+    //    {
+    //        atrValue.KAttributeId = KAttribute.KAttributeId;
+    //        atrValue.SetIsNew(true);
+    //        KAttribute.KAttributeValues.Add(atrValue);
+    //    }
+    //    else
+    //    {
+    //        var i = KAttribute.KAttributeValues.IndexOf(atrOld);
+    //        KAttribute.KAttributeValues.RemoveAt(i);
+    //        KAttribute.KAttributeValues.Insert(i, atrValue);
+    //    }
+    //}
+
+    async Task AtrValueEdit(KAttributeTabulatedValueDto atrValue)
+    {
+        var res = await dialogService.OpenAsync<AttributeValueEditor>($"Edit attribute tabulated value",
+               new Dictionary<string, object>() { { "AtrValue", atrValue } },
+               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
+
+        if(res != null)
+        {
+            if (!res.IsDirty())
+                return;
+
+            var atrOld = KAttribute.KAttributeValues.Where(v => v.KAttributeTabulatedValueId == atrValue.KAttributeTabulatedValueId).SingleOrDefault();
+
+            if (atrOld == null)
+            {
+                atrValue.KAttributeId = KAttribute.KAttributeId;
+                atrValue.SetIsNew(true);
+                KAttribute.KAttributeValues.Add(atrValue);
+            }
+            else
+            {
+                var i = KAttribute.KAttributeValues.IndexOf(atrOld);
+                KAttribute.KAttributeValues.RemoveAt(i);
+                KAttribute.KAttributeValues.Insert(i, res);
+            }    
+
+            StateHasChanged();            
+        }         
+        
+    }
+
+
+
 }
