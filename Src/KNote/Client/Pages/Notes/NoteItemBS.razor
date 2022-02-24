@@ -1,0 +1,51 @@
+﻿<div class="card m-1 p-1 bg-light">
+
+    <div>
+        <span class="float-left">
+            @((MarkupString)Note.Topic) (#@Note.NoteNumber)<br />
+            <small>&nbsp;&nbsp;&nbsp;<i>Creation: @(Note.CreationDateTime.ToShortDateString()) - Tags: @(Note.Tags)</i></small>
+        </span>
+
+        <span class="float-right mt-2">
+            <AuthorizeView Roles="Admin, ProjecManager, Staff">
+                <Authorized>
+                    <button class="btn btn-sm btn-warning mx-1"
+                            @onclick="@(() => OnNoteEdit.InvokeAsync(Note))" data-toggle="tooltip" title="Edit note">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger mx-1"
+                            @onclick="@(() => OnNoteDelete.InvokeAsync(Note))" data-toggle="tooltip" title="Delete note">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    <span class="float-right">
+                        <button class="badge badge-pill badge-primary"
+                                @onclick="@(() => OnNoteView.InvokeAsync(Note))"
+                                data-toggle="tooltip" title="View note">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </span>
+                </NotAuthorized>
+            </AuthorizeView>
+        </span>
+    </div>
+
+    <div class="card-text bg-white p-1">
+        <p>
+            <span>
+                @*@Note.Description*@
+                <ViewMarkdown MarkdownContent="@Note.Description" />
+            </span>
+
+        </p>
+    </div>
+
+</div>
+
+@code {
+    [Parameter] public NoteInfoDto Note { get; set; }
+    [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
+    [Parameter] public EventCallback<NoteInfoDto> OnNoteEdit { get; set; }
+    [Parameter] public EventCallback<NoteInfoDto> OnNoteView { get; set; }    
+}

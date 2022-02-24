@@ -27,8 +27,8 @@
                     <Columns>
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Order" Title="Order" Width="60px"/>
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Name" Title="Name" />
-                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="NoteTypeDto" Title="Note type" Width="150px" />
-                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="RequiredValue" Title="Requiered" Width="90px"/>                
+                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="NoteTypeDto.Name" Title="Note type" Width="150px" />
+                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="RequiredValueYesNo" Title="Requiered" Width="90px"/>                
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                             <Template Context="data">                                                        
                                 <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" 
@@ -51,7 +51,7 @@
     private List<KAttributeInfoDto> attributes { get; set; }
 
     protected async override Task OnInitializedAsync()
-    {
+    {        
         await Load();
     }
 
@@ -70,7 +70,7 @@
     {
         var res = await dialogService.OpenAsync<AttributeNew>($"New attribute",
                new Dictionary<string, object>() {  },
-               new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+               new DialogOptions() { Width = "860px", Height = "600px", Resizable = true, Draggable = true });
 
         if(res != null)           
             await Load();  
@@ -80,7 +80,7 @@
     {     
         var res = await dialogService.OpenAsync<AttributeEdit>($"Edit attribute",
                new Dictionary<string, object>() { { "AttributeId", attribute.KAttributeId.ToString() } },
-               new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+               new DialogOptions() { Width = "860px", Height = "600px", Resizable = true, Draggable = true });
 
         if(res != null)        
             await Load(); 

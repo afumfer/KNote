@@ -83,6 +83,17 @@ namespace KNote.Model.Dto
             }
         }
 
+        public string RequiredValueYesNo
+        {
+            get
+            {
+                if (_requiredValue)
+                    return "Yes";
+                else
+                    return "No";                
+            }
+        }
+
         private int _order;
         public int Order
         {
