@@ -1,10 +1,6 @@
 ﻿@inject IWebApiService webApiService
-@*@inject IShowMessages showMessages*@
+@inject IShowMessages showMessages
 @inject NavigationManager navigationManger
-
-@inject DialogService dialogService
-@inject NotificationService notificationService
-
 
 <EditForm Model="notesFilter" Context="formContext" class="mb-3">
 
@@ -100,7 +96,7 @@
 
 </EditForm>
 
-@*<KntFolderSelector @ref="kntFolderSelector" OnCancel="OnCancelFolderSelector" OnConfirm="OnConfirmFolderSelector"></KntFolderSelector>*@
+<KntFolderSelectorBS @ref="kntFolderSelector" OnCancel="OnCancelFolderSelector" OnConfirm="OnConfirmFolderSelector"></KntFolderSelectorBS>
 
 <KntAttributeFilterSelector @ref="kntAttributeFilterSelector" OnCancel="OnCancelAtrFilterSelector" OnConfirm="OnConfirmAtrFilterSelector" />
 
@@ -110,7 +106,8 @@
     private NotesFilterDto notesFilter = new NotesFilterDto();
     private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
     private string folderName = "";
-    //private KntFolderSelectorBS kntFolderSelector;
+
+    private KntFolderSelectorBS kntFolderSelector;
     private KntAttributeFilterSelector kntAttributeFilterSelector;
 
     protected async override Task OnInitializedAsync()
@@ -118,8 +115,7 @@
         var result = await webApiService.NoteTypes.GetAllAsync();
         if (!result.IsValid)
         {
-            //await showMessages.ShowErrorMessage(result.Message);
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading note types", Detail =  result.Message, Duration = 12000 });
+            await showMessages.ShowErrorMessage(result.Message);
             navigationManger.NavigateTo("index");
         }
         else
@@ -135,8 +131,7 @@
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {
-            //await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Apply filter", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
             return;
         }
 
@@ -157,37 +152,22 @@
 
     #region Managment FolderSelector
 
-    async Task OnFolderSelector()
-    {        
-        var res = await dialogService.OpenAsync<KntFolderSelector>($"Folder selector",
-               new Dictionary<string, object>() {  },
-               new DialogOptions() { Width = "700px", Height = "520px"});        
-
-        if(res != null)
-        {
-            var f = (FolderDto)res;
-            notesFilter.FolderId = f.FolderId;
-            folderName = f.Name;
-        }        
+    private void OnFolderSelector()
+    {
+        kntFolderSelector.Show();
     }
 
+    private void OnConfirmFolderSelector(FolderDto f)
+    {
+        notesFilter.FolderId = f.FolderId;
+        folderName = f.Name;
+        kntFolderSelector.Hide();
+    }
 
-    //private void OnFolderSelector()
-    //{
-    //    kntFolderSelector.Show();
-    //}
-
-    //private void OnConfirmFolderSelector(FolderDto f)
-    //{
-    //    notesFilter.FolderId = f.FolderId;
-    //    folderName = f.Name;
-    //    kntFolderSelector.Hide();
-    //}
-
-    //private void OnCancelFolderSelector()
-    //{
-    //    kntFolderSelector.Hide();
-    //}
+    private void OnCancelFolderSelector()
+    {
+        kntFolderSelector.Hide();
+    }
 
     private void OnResetFolder()
     {

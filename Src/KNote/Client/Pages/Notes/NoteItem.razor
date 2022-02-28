@@ -1,47 +1,43 @@
-﻿<div class="card m-1 p-1 bg-light">
+﻿@inject TooltipService tooltipService
 
-    <div>
-        <span class="float-left">
-            @((MarkupString)Note.Topic) (#@Note.NoteNumber)<br />
-            <small>&nbsp;&nbsp;&nbsp;<i>Creation: @(Note.CreationDateTime.ToShortDateString()) - Tags: @(Note.Tags)</i></small>
-        </span>
+ <RadzenCard class="m-1 p-1 bg-light">   
+     
+     <div class="row">
+         <div class="col-sm-10">        
+            <strong>@((MarkupString)Note.Topic) (#@Note.NoteNumber)</strong>
+            <br />
+            <small class="ml-3"><i>Creation: @(Note.CreationDateTime.ToShortDateString()) - Tags: @(Note.Tags)</i></small>
+        </div>
+        <div class="col-sm-2">
+            <span class="float-right mt-1 mr-1">
+                <AuthorizeView Roles="Admin, ProjecManager, Staff">
+                    <Authorized>                    
+                        <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(Note))" Icon="edit" 
+                            ButtonStyle="ButtonStyle.Primary" 
+                            MouseEnter="@(args => tooltipService.Open(args, "Edit note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                        <RadzenButton Click="@(() => OnNoteDelete.InvokeAsync(Note))" Icon="delete"
+                            ButtonStyle="ButtonStyle.Danger" 
+                            MouseEnter="@(args => tooltipService.Open(args, "Delete note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
 
-        <span class="float-right mt-2">
-            <AuthorizeView Roles="Admin, ProjecManager, Staff">
-                <Authorized>
-                    <button class="btn btn-sm btn-warning mx-1"
-                            @onclick="@(() => OnNoteEdit.InvokeAsync(Note))" data-toggle="tooltip" title="Edit note">
-                        <i class="fa fa-pencil"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger mx-1"
-                            @onclick="@(() => OnNoteDelete.InvokeAsync(Note))" data-toggle="tooltip" title="Delete note">
-                        <i class="fa fa-minus"></i>
-                    </button>
-                </Authorized>
-                <NotAuthorized>
-                    <span class="float-right">
-                        <button class="badge badge-pill badge-primary"
-                                @onclick="@(() => OnNoteView.InvokeAsync(Note))"
-                                data-toggle="tooltip" title="View note">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                    </span>
-                </NotAuthorized>
-            </AuthorizeView>
-        </span>
-    </div>
-
-    <div class="card-text bg-white p-1">
-        <p>
-            <span>
-                @*@Note.Description*@
-                <ViewMarkdown MarkdownContent="@Note.Description" />
+                    </Authorized>
+                    <NotAuthorized>
+                        <RadzenButton Click="@(() => OnNoteView.InvokeAsync(Note))" Icon="view" 
+                            ButtonStyle="ButtonStyle.Primary" 
+                            MouseEnter="@(args => tooltipService.Open(args, "View note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                    </NotAuthorized>
+                </AuthorizeView>
             </span>
-
-        </p>
+        </div>
     </div>
 
-</div>
+    @*<div class="row">*@
+        <div class="bg-white p-2">
+            <ViewMarkdown MarkdownContent="@Note.Description" />
+        </div>
+    @*</div>*@
+
+</RadzenCard>
+
 
 @code {
     [Parameter] public NoteInfoDto Note { get; set; }

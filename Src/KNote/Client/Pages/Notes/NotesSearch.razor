@@ -3,8 +3,10 @@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
-@inject IShowMessages showMessages
 @inject HttpClient Http
+@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -16,7 +18,7 @@
         <div class="col-6">
             <span class="float-right">
                 <RadzenMenu>
-                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="GoNoteNew"></RadzenMenuItem>
+                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
                     <RadzenMenuItem Text="Display options" Icon="tune">
                         @if (viewMode == 0)
                         {                                 
@@ -32,7 +34,6 @@
         </div>
     </div>
 </div>
-@*<hr class="mt-0" />*@
 
 <!--- Move this to new component -->
 <div class="form-group row pt-3">
@@ -55,8 +56,6 @@
         </button>
     </div>
 </div>
-@*<hr />*@
-<!---->
 
 <div class="row">
     <div class="col-12">
@@ -67,34 +66,27 @@
                         PageChanged=@PageChanged />
     </div>
 </div>
+
 <div class="row">
     <div class="col-12">
         @if (viewMode == 0)
         {
-            <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView"></NotesIndex>
+            <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
         }
         else
         {
-            <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+            <NotesList Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
         }
     </div>
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="ConfirmDelete" onCancel="CancelDelete">
-    <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
-</ModalDialog>
-
 
 @code {
-
-    private List<NoteInfoDto> notes;
-    private ModalDialog modalDialog;
-    private NoteInfoDto itemDelete;
+    private List<NoteInfoDto> notes;        
     private int viewMode = 0;
     private string textSearch = "";
     private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
-
-    PaginationContext paginationContext = new PaginationContext();
+    private PaginationContext paginationContext = new PaginationContext();
     private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
     private RadzenPager pager;
     private bool componentInitialized = false;
@@ -217,7 +209,7 @@
 
         if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(result.Message);
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });            
         }
         else
         {
@@ -230,46 +222,40 @@
 
     #region  Edit / Delete events ...
 
-    private void GoNoteView(NoteInfoDto note)
+    private void OnView(NoteInfoDto note)
     {
         navigationManager.NavigateTo($"notes/{note.NoteId}/search");
     }
 
-    void GoNoteNew()
+    void OnNew()
     {
         navigationManager.NavigateTo($"notes/new/search");
     }
 
-    private void GoNoteEdit(NoteInfoDto note)
+    private void OnEdit(NoteInfoDto note)
     {
         navigationManager.NavigateTo($"notes/edit/{note.NoteId}/search");
     }
 
-    private void GoNoteDelete(NoteInfoDto item)
-    {
-        modalDialog.Show();
-        itemDelete = item;
-    }
+    async Task OnDelete(NoteInfoDto item)
+    {                
+        var resultDialog = await dialogService.Confirm(
+            $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?", 
+            "Delete user", 
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
-    private void CancelDelete()
-    {
-        modalDialog.Hide();
-        itemDelete = null;
-    }
-
-    private async Task ConfirmDelete()
-    {
-        modalDialog.Hide();
-
-        var result = await webApiService.Notes.DeleteAsync(itemDelete.NoteId);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
-        else
-            await LoadListNotes();
-
-        itemDelete = null;
+        if (resultDialog == true)
+        {
+            var result = await webApiService.Notes.DeleteAsync(item.NoteId);
+            if (!result.IsValid)            
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note", Detail =  result.Message, Duration = 12000 });            
+            else
+            {
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note ", Detail =  "The note has been deleted.", Duration = 3000 });
+                await LoadListNotes();
+            }            
+        }
     }
 
     #endregion
-
 }

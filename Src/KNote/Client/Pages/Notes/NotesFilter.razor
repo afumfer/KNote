@@ -3,7 +3,9 @@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
-@inject IShowMessages showMessages
+@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -15,7 +17,7 @@
         <div class="col-6 float-right">
             <span class="float-right">
                 <RadzenMenu>
-                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="GoNoteNew"></RadzenMenuItem>
+                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
                     <RadzenMenuItem Text="Display options" Icon="tune">
                         @if (viewMode == 0)
                         {                                 
@@ -49,24 +51,18 @@
                         PageChanged=@PageChanged/>
                 @if (viewMode == 0)
                 {
-                    <NotesIndex Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit"  OnNoteView="GoNoteView"></NotesIndex>
+                    <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit"  OnNoteView="OnView"></NotesIndex>
                 }
                 else
                 {
-                    <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+                    <NotesList Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
                 } 
              </RadzenSplitterPane>
         </RadzenSplitter>
     </div>
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="ConfirmDelete" onCancel="CancelDelete">
-    <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
-</ModalDialog>
-
-@code {
-    private ModalDialog modalDialog;
-    private NoteInfoDto itemDelete;    
+@code {        
     private List<NoteInfoDto> notes = new List<NoteInfoDto>();
     private NotesFilterDto filter = new NotesFilterDto();
     private PaginationContext paginationContext = new PaginationContext();
@@ -115,7 +111,7 @@
 
         if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(result.Message);
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });
         }
         else
         {
@@ -124,44 +120,39 @@
         }
     }
 
-    private async Task ConfirmDelete()
-    {
-        modalDialog.Hide();
-
-        var result = await webApiService.Notes.DeleteAsync(itemDelete.NoteId);
-        if (!result.IsValid)        
-            await showMessages.ShowErrorMessage(result.Message);        
-        else        
-            await LoadNotesWithPagination();
-        
-        itemDelete = null;
-    }
-
-    private void CancelDelete()
-    {
-        modalDialog.Hide();
-        itemDelete = null;
-    }
-
-    private void GoNoteDelete(NoteInfoDto item)
-    {
-        modalDialog.Show();
-        itemDelete = item;
-    }
-
-    void GoNoteNew()
+    void OnNew()
     {
         navigationManager.NavigateTo($"notes/new/filter");
     }
 
-    void GoNoteView(NoteInfoDto note)
+    void OnView(NoteInfoDto note)
     {
         navigationManager.NavigateTo($"notes/{note.NoteId}/filter");
     }
 
-    void GoNoteEdit(NoteInfoDto note)
+    void OnEdit(NoteInfoDto note)
     {
         navigationManager.NavigateTo($"notes/edit/{note.NoteId}/filter");
+    }
+
+    async Task OnDelete(NoteInfoDto item)
+    {                
+        var resultDialog = await dialogService.Confirm(
+            $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?", 
+            "Delete user", 
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (resultDialog == true)
+        {
+            var result = await webApiService.Notes.DeleteAsync(item.NoteId);
+            if (!result.IsValid)            
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note", Detail =  result.Message, Duration = 12000 });            
+            else
+            {
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note ", Detail =  "The note has been deleted.", Duration = 3000 });
+                await LoadNotesWithPagination();
+            }            
+        }
     }
 
 }
