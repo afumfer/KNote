@@ -1,7 +1,5 @@
 ﻿@inject IWebApiService webApiService
-@*@inject IShowMessages showMessages*@
 @inject NavigationManager navigationManger
-
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
@@ -9,20 +7,6 @@
 <EditForm Model="notesFilter" Context="formContext" class="mb-3">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
-
-    <!-- Title -->
-    <div class="container-fluid">
-        <div class="row">
-            @*<div class="col-6">
-                    /// TODO: selector criteria saved
-                </div>*@
-            <div class="col-12 mb-2">
-                <button class="btn btn-success float-right mx-1 mt-1" @onclick="(() => ApplyFilter(formContext))">Apply</button>
-                <button class="btn btn-info float-right mx-1 mt-1" @onclick="(() => ClearFilter(formContext))">Clear</button>
-            </div>
-        </div>
-    </div>
-    <hr class="mt-1" />
 
     <div class="form-group">
         <label>Topic:</label>
@@ -98,11 +82,16 @@
         </table>
     </div>
 
+    <hr class="mt-1" />
+    <div class="row">
+        <div class="col-12 text-right">
+            <RadzenButton Text="Apply" Icon="filter_alt" Click="() => ApplyFilter(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
+            <RadzenButton Text="Clean" Icon="cleaning_services" Click="() => ClearFilter(formContext)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />  
+        </div>
+    </div>
+    
 </EditForm>
 
-@*<KntFolderSelector @ref="kntFolderSelector" OnCancel="OnCancelFolderSelector" OnConfirm="OnConfirmFolderSelector"></KntFolderSelector>*@
-
-<KntAttributeFilterSelector @ref="kntAttributeFilterSelector" OnCancel="OnCancelAtrFilterSelector" OnConfirm="OnConfirmAtrFilterSelector" />
 
 @code {
     [Parameter] public EventCallback<NotesFilterDto> FilterSelected { get; set; }
@@ -110,15 +99,12 @@
     private NotesFilterDto notesFilter = new NotesFilterDto();
     private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
     private string folderName = "";
-    //private KntFolderSelectorBS kntFolderSelector;
-    private KntAttributeFilterSelector kntAttributeFilterSelector;
 
     protected async override Task OnInitializedAsync()
     {
         var result = await webApiService.NoteTypes.GetAllAsync();
         if (!result.IsValid)
         {
-            //await showMessages.ShowErrorMessage(result.Message);
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading note types", Detail =  result.Message, Duration = 12000 });
             navigationManger.NavigateTo("index");
         }
@@ -134,8 +120,7 @@
     {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
-        {
-            //await showMessages.ShowErrorMessage("Incorrect data, check the required attributes.");
+        {            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Apply filter", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
@@ -150,14 +135,13 @@
         notesFilter.Tags = null;
         notesFilter.FolderId = null;
         notesFilter.Description = null;
-        notesFilter.AttributesFilter = new List<AtrFilterDto>();
+        notesFilter.AttributesFilter = new List<AtrFilterDto>();             
+        folderName = "";
 
         await FilterSelected.InvokeAsync(notesFilter);
     }
-
-    #region Managment FolderSelector
-
-    async Task OnFolderSelector()
+    
+    private async Task OnFolderSelector()
     {        
         var res = await dialogService.OpenAsync<KntFolderSelector>($"Folder selector",
                new Dictionary<string, object>() {  },
@@ -171,55 +155,28 @@
         }        
     }
 
-
-    //private void OnFolderSelector()
-    //{
-    //    kntFolderSelector.Show();
-    //}
-
-    //private void OnConfirmFolderSelector(FolderDto f)
-    //{
-    //    notesFilter.FolderId = f.FolderId;
-    //    folderName = f.Name;
-    //    kntFolderSelector.Hide();
-    //}
-
-    //private void OnCancelFolderSelector()
-    //{
-    //    kntFolderSelector.Hide();
-    //}
-
     private void OnResetFolder()
     {
         notesFilter.FolderId = null;
         folderName = "";
     }
 
-    #endregion
-
-    #region Attribute filter selector
-
     private void OnAtrDelete(AtrFilterDto atr)
     {
         notesFilter.AttributesFilter.Remove(atr);
     }
 
-    private void OnAtrNew()
+    private async Task OnAtrNew()
     {
-        kntAttributeFilterSelector.Show();
-    }
+        var res = await dialogService.OpenAsync<KntAttributeFilterSelector>($"Attribute filter selector",
+               new Dictionary<string, object>() { { "Attribute", new AtrFilterDto() } },
+               new DialogOptions() { Width = "700px", Height = "270px"});        
 
-    private void OnConfirmAtrFilterSelector(AtrFilterDto atr)
-    {
-        notesFilter.AttributesFilter.Add(atr);
-        kntAttributeFilterSelector.Hide();
+        if(res != null)
+        {
+            var atr = (AtrFilterDto)res;
+            notesFilter.AttributesFilter.Add(atr);
+        }  
     }
-
-    private void OnCancelAtrFilterSelector()
-    {
-        kntAttributeFilterSelector.Hide();
-    }
-
-    #endregion
 
 }

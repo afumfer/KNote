@@ -98,7 +98,7 @@
 
 <KntFolderSelectorBS @ref="kntFolderSelector" OnCancel="OnCancelFolderSelector" OnConfirm="OnConfirmFolderSelector"></KntFolderSelectorBS>
 
-<KntAttributeFilterSelector @ref="kntAttributeFilterSelector" OnCancel="OnCancelAtrFilterSelector" OnConfirm="OnConfirmAtrFilterSelector" />
+<KntAttributeFilterSelectorBS @ref="kntAttributeFilterSelector" OnCancel="OnCancelAtrFilterSelector" OnConfirm="OnConfirmAtrFilterSelector" />
 
 @code {
     [Parameter] public EventCallback<NotesFilterDto> FilterSelected { get; set; }
@@ -108,7 +108,7 @@
     private string folderName = "";
 
     private KntFolderSelectorBS kntFolderSelector;
-    private KntAttributeFilterSelector kntAttributeFilterSelector;
+    private KntAttributeFilterSelectorBS kntAttributeFilterSelector;
 
     protected async override Task OnInitializedAsync()
     {
