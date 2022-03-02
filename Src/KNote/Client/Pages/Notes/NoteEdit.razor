@@ -3,7 +3,7 @@
 @inject AppState appState
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
-@inject IShowMessages showMessages
+@inject NotificationService notificationService
 
 @implements IDisposable
 
@@ -19,10 +19,6 @@ else
 }
 
 @code {
-
-    // TODO:
-    // Pendiente de refactorizar, el comportamiento de este caso de uso
-    // se puede generalizar y unificarlo con el caso de uso Nueva Nota.
 
     [Parameter] public string NoteId { get; set; }
     [Parameter] public string PageReturn { get; set; }
@@ -40,7 +36,7 @@ else
         var result = await webApiService.NoteTypes.GetAllAsync();
         if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(result.Message);
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types", Detail =  result.Message, Duration = 12000 });
             navigationManager.NavigateTo("index");
         }
         else
@@ -73,8 +69,8 @@ else
     {
         var result = await webApiService.Notes.GetAsync(Guid.Parse(NoteId));
         if (!result.IsValid)
-        {
-            await showMessages.ShowErrorMessage(result.Message);
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note", Detail =  result.Message, Duration = 12000 });
             navigationManager.NavigateTo("index");
         }
         else
@@ -88,13 +84,13 @@ else
     {
         var result = await webApiService.Notes.SaveAsync(note);
         if (!result.IsValid)
-        {
-            await showMessages.ShowErrorMessage(result.Message);
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note", Detail =  result.Message, Duration = 12000 });
         }
         else
         {
-            note = result.Entity;
-            await showMessages.ShowOkMessage("Note successfully updated.");
+            note = result.Entity;            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note", Detail =  "The note has been saved.", Duration = 3000 });
         }
     }
 
@@ -103,7 +99,7 @@ else
         var result = await webApiService.Notes.NewAsync();
         if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(result.Message);
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note", Detail =  result.Message, Duration = 12000 });            
         }
         else
         {

@@ -1,230 +1,132 @@
 ﻿@inject IWebApiService webApiService
-@inject IWebApiService webApiService
-@inject IShowMessages showMessages
 @inject NavigationManager navigationManager
-<!-- -->
+@inject DialogService dialogService
+@inject NotificationService notificationService
 
 <EditForm Model="Note" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
-
-    <!-- Title -->
+    
     <ToolingHeader Title="@Title">
-        <Buttons>
-            <button class="btn btn-success float-right ml-2" @onclick="(() => OnExit.InvokeAsync(null))" data-toggle="tooltip" title="Exit without save">
-                <i class="fa fa-arrow-right" aria-hidden="true"></i>
-            </button>
-            <button class="btn btn-success float-right ml-2" @onclick="(() => Save(formContext, false))">
-                Save changes
-            </button>
-            <button class="btn btn-success float-right" @onclick="(() => Save(formContext, true))">
-                Save changes and new
-            </button>
+        <Buttons>            
+            <RadzenButton Text="Save changes" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary" Class="mr-1" /> 
+            <RadzenButton Text="Save changes and new" Icon="save" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Primary" Class="mr-1" /> 
+            <RadzenButton Icon="logout" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1"  />  
         </Buttons>
     </ToolingHeader>
 
-    <!-- Tab -->
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link @((selectedPanel == 1) ? "active" : "")" @onclick="@(() => ShowPanel(1))">
-                <span class="oi oi-document mr-2"></span>Overview
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @((selectedPanel == 2) ? "active" : "")" @onclick="@(() => ShowPanel(2))">
-                <span class="oi oi-bookmark mr-2"></span>Attributes
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @((selectedPanel == 3) ? "active" : "")" @onclick="@(() => ShowPanel(3))">
-                <span class="oi oi-cloud-upload mr-2"></span>Resources
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @((selectedPanel == 4) ? "active" : "")" @onclick="@(() => ShowPanel(4))">
-                <span class="oi oi-task mr-2"></span>Task
-            </a>
-        </li>
-        @*
-            //TODO: pending implementation
-            <li class="nav-item">
-                <a class="nav-link @((selectedPanel == 5) ? "active" : "")" @onclick="@(() => ShowPanel(5))">
-                    <span class="oi oi-envelope-open mr-2"></span>Messages
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @((selectedPanel == 6) ? "active" : "")" @onclick="@(() => ShowPanel(6))">
-                    <span class="oi oi-external-link mr-2"></span>TraceNotes
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @((selectedPanel == 7) ? "active" : "")" @onclick="@(() => ShowPanel(7))">
-                    <span class="oi oi-flag mr-2"></span>KEvents
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @((selectedPanel == 8) ? "active" : "")" @onclick="@(() => ShowPanel(8))">
-                    <span class="oi oi-terminal mr-2" aria-hidden="true"></span>Script
-                </a>
-            </li>*@
+    <RadzenTabs Change=@ShowPanel TabPosition = "TabPosition.Left" @bind-SelectedIndex="tabsSelectedIndex">
+        <Tabs>
+            <RadzenTabsItem Text="&nbsp;Overview" Icon="article" >
+                <div class="mt-4"></div>
 
-            @*<li class="nav-item">
-                    <a class="nav-link disabled" href="#">Script</a>
-            </li>*@
-    </ul>
-
-    <!-- Panels -->
-    <div class="@((selectedPanel == 1) ? "" : "d-none")">
-
-        <div class="mt-4"></div>
-
-        <div class="form-group row">
-            <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
-            <div class="input-group col-sm-11" id="atrTopic">
-                <InputText class="form-control" @bind-Value="@Note.Topic" />
-                <div class="input-group-append">
-                    <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Note number (automatically assigned)">
-                        #@Note.NoteNumber
-                    </label>
+                <div class="form-group row">
+                    <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
+                    <div class="input-group col-sm-11" id="atrTopic">
+                        <InputText class="form-control" @bind-Value="@Note.Topic" />
+                        <div class="input-group-append">
+                            <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Note number (automatically assigned)">
+                                #@Note.NoteNumber
+                            </label>
+                        </div>
+                    </div>
+                    <ValidationMessage For="@(() => Note.Topic)" />
                 </div>
-            </div>
-            <ValidationMessage For="@(() => Note.Topic)" />
-        </div>
 
-        <div class="form-group row">
-            <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
-            <div class="input-group col-sm-11" id="atrFolder">
-                <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
-                            data-toggle="tooltip" title="Select folder">
-                        ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
-                    </button>
+                <div class="form-group row">
+                    <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
+                    <div class="input-group col-sm-11" id="atrFolder">
+                        <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
+                                    data-toggle="tooltip" title="Select folder">
+                                ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <ValidationMessage For="@(() => Note.FolderId)" />
                 </div>
-            </div>
-            <ValidationMessage For="@(() => Note.FolderId)" />
-        </div>
 
-        <div class="form-group row">
-            <label for="atrTags" class="col-sm-1 col-form-label">Tags:</label>
-            <div class="input-group col-sm-11" id="atrTags">
-                <InputText class="form-control" @bind-Value="@Note.Tags" />
-            </div>
-            <ValidationMessage For="@(() => Note.Tags)" />
-        </div>
+                <div class="form-group row">
+                    <label for="atrTags" class="col-sm-1 col-form-label">Tags:</label>
+                    <div class="input-group col-sm-11" id="atrTags">
+                        <InputText class="form-control" @bind-Value="@Note.Tags" />
+                    </div>
+                    <ValidationMessage For="@(() => Note.Tags)" />
+                </div>
 
-        <div class="form-group row">
-            <label for="atrPriority" class="col-sm-1 col-form-label">Priority:</label>
-            <div class="input-group col-sm-5" id="atrPriority">
-                <InputNumber class="form-control col-sm-11" @bind-Value="@Note.Priority" />
-                <ValidationMessage For="@(() => Note.Priority)" />
-            </div>
+                <div class="form-group row">
+                    <label for="atrPriority" class="col-sm-1 col-form-label">Priority:</label>
+                    <div class="input-group col-sm-5" id="atrPriority">
+                        <InputNumber class="form-control col-sm-11" @bind-Value="@Note.Priority" />
+                        <ValidationMessage For="@(() => Note.Priority)" />
+                    </div>
 
-            <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
-            <div class="input-group col-sm-5" id="atrNoteType">
-                <InputSelect class="form-control col-sm11"
-                                Value="@Note.NoteTypeId"
-                                ValueChanged="@((Guid? noteTypeId) => OnChangeNoteTypeActions(noteTypeId))"
-                                ValueExpression="@(() => Note.NoteTypeId)">
-                    <option></option>
-                    @if (NoteTypes != null)
-                    {
-                        @foreach (var ntype in NoteTypes)
-                        {
-                            <option value=@ntype.NoteTypeId>@ntype.Name</option>
-                        }
-                    }
-                </InputSelect>                
-                <ValidationMessage For="@(() => Note.NoteTypeId)" />
-            </div>
-        </div>
+                    <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
+                    <div class="input-group col-sm-5" id="atrNoteType">
+                        <InputSelect class="form-control col-sm11"
+                                        Value="@Note.NoteTypeId"
+                                        ValueChanged="@((Guid? noteTypeId) => OnChangeNoteTypeActions(noteTypeId))"
+                                        ValueExpression="@(() => Note.NoteTypeId)">
+                            <option></option>
+                            @if (NoteTypes != null)
+                            {
+                                @foreach (var ntype in NoteTypes)
+                                {
+                                    <option value=@ntype.NoteTypeId>@ntype.Name</option>
+                                }
+                            }
+                        </InputSelect>                
+                        <ValidationMessage For="@(() => Note.NoteTypeId)" />
+                    </div>
+                </div>
 
-        <div class="form-group form-markdown">
-            <InputMarkdown @bind-Value="@Note.Description"
-                           For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
+                <div class="form-group form-markdown">
+                    <InputMarkdown @bind-Value="@Note.Description"
+                                   For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
 
-        </div>
-
-    </div>
-
-    <div class="@((selectedPanel == 2) ? "" : "d-none")">
-        <div class="mt-4"></div>
-        <NoteKAttributes @ref="noteKAttributes" Attributes="Note.KAttributesDto"></NoteKAttributes>
-    </div>
-
-    <div class="@((selectedPanel == 3) ? "" : "d-none")">
-        <div class="mt-2"></div>
-        @if (resources == null)
-        {
-            <p>Loading resources ...</p>
-        }
-        else
-        {
-            <NoteKResources Resources="resources"
-                            OnDelete="OnDeleteResource"
-                            OnInsertInDesription="InsertInDescription"
-                            OnNew="OnNewResource">
-            </NoteKResources>
-        }
-    </div>
-
-    <div class="@((selectedPanel == 4) ? "" : "d-none")">
-        <div class="mt-2"></div>
-        @if (tasks == null)
-        {
-            <p>Loading tasks ...</p>
-        }
-        else
-        {
-            <NoteKTasks Tasks="tasks"
-                        OnDelete="OnDeleteTask"
-                        OnNew="OnNewTask"
-                        OnEdit="OnEditTask">
-            </NoteKTasks>
-        }
-    </div>
-
-    <div class="@((selectedPanel == 5) ? "" : "d-none")">
-
-        <div class="mt-4"></div>
-
-        <h4 class="mt-2"> Messages (panel: @selectedPanel)</h4>
-
-        Data for panel @selectedPanel
-
-    </div>
-
-    <div class="@((selectedPanel == 6) ? "" : "d-none")">
-
-        <div class="mt-4"></div>
-
-        <h4 class="mt-2"> Trace notes (panel: @selectedPanel)</h4>
-
-        Data for panel @selectedPanel
-
-    </div>
-
-    <div class="@((selectedPanel == 7) ? "" : "d-none")">
-
-        <div class="mt-4"></div>
-
-        <h4 class="mt-2"> KEvents (panel: @selectedPanel)</h4>
-
-        Data for panel @selectedPanel
-
-    </div>
-
-    <div class="@((selectedPanel == 8) ? "" : "d-none")">
-
-        <div class="mt-4"></div>
-
-        <h4 class="mt-2"> Script (panel: @selectedPanel)</h4>
-
-        Data for panel @selectedPanel
-
-    </div>
-
-    @*<KntFolderSelector @ref="kntFolderSelector"></KntFolderSelector>*@
+                </div>
+            
+            </RadzenTabsItem>
+            
+            <RadzenTabsItem Text="&nbsp;Attributes" Icon="fact_check">
+                <div class="mt-4"></div>
+                <NoteKAttributes @ref="noteKAttributes" Attributes="Note.KAttributesDto"></NoteKAttributes>
+            </RadzenTabsItem>
+            
+            <RadzenTabsItem Text="&nbsp;Resources" Icon="upload_file">
+                <div class="mt-2"></div>
+                @if (resources == null)
+                {
+                    <p>Loading resources ...</p>
+                }
+                else
+                {
+                    <NoteKResources Resources="resources"
+                                    OnDelete="OnDeleteResource"
+                                    OnInsertInDesription="InsertInDescription"
+                                    OnNew="OnNewResource">
+                    </NoteKResources>
+                }
+            </RadzenTabsItem>
+            
+            <RadzenTabsItem Text="&nbsp;Tasks" Icon="task">
+                <div class="mt-2"></div>
+                @if (tasks == null)
+                {
+                    <p>Loading tasks ...</p>
+                }
+                else
+                {
+                    <NoteKTasks Tasks="tasks"
+                                OnDelete="OnDeleteTask"
+                                OnNew="OnNewTask"
+                                OnEdit="OnEditTask">
+                    </NoteKTasks>
+                }
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
 
     <KntResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelector>
 
@@ -238,21 +140,22 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
-    [Parameter] public List<NoteTypeDto> NoteTypes { get; set; }  //  = new List<NoteTypeDto>();
+    [Parameter] public List<NoteTypeDto> NoteTypes { get; set; } 
 
-    private List<ResourceInfoDto> resources; // { get; set; } 
-    private List<NoteTaskDto> tasks { get; set; }
-    private NoteTaskDto taskEdit; // { get; set; }
+    private List<ResourceInfoDto> resources;
+    private List<NoteTaskDto> tasks; // !!! { get; set; }
+    private NoteTaskDto taskEdit; 
     private List<UserDto> users;
+    private Guid? oldNoteType = null;
 
-    private KntFolderSelector kntFolderSelector;
+    // TODO: !!! eliminar las siguientes líneas
     private KntResourceSelector kntResourceSelector;
     private KntTaskEditor kntTaskEditor;
+    // !!!!!!!!!!!!!!!!!!!!!!!!
+
     private NoteKAttributes noteKAttributes;
-
-    private int selectedPanel = 1;
-
-    private Guid? oldNoteType = null;
+    
+    private int tabsSelectedIndex { get; set; } = 0;
 
     #region Initialized
 
@@ -265,11 +168,11 @@
         }
         else
         {
-            await showMessages.ShowErrorMessage(result.Message);
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get user for note edit", Detail =  result.Message, Duration = 12000 });
         }
 
         oldNoteType = Note.NoteTypeId;
-
+       
         await base.OnInitializedAsync();
     }
 
@@ -323,8 +226,9 @@
         }
 
         if (formIsValid == false)
-        {
-            await showMessages.ShowErrorMessage("Incorrect data, check the required attributes. " + addMessage);
+        {            
+            var msgErr = "Incorrect data, check the required attributes. " + addMessage;
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note", Detail =  msgErr, Duration = 12000 });
             return;
         }
 
@@ -339,47 +243,44 @@
     #region Panel managment
 
     private async Task ShowPanel(int panel)
-    {
-        selectedPanel = panel;
-
-        if (panel == 3 && resources == null)
+    {        
+        if (panel == 2 && resources == null)
         {
             var result = await webApiService.Notes.GetResourcesAsync(Note.NoteId);
-            if (!result.IsValid)
-                await showMessages.ShowErrorMessage(result.Message);
+            if (!result.IsValid)                
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get resources for this note", Detail =  result.Message, Duration = 12000 });
             else
                 resources = result.Entity;
         }
 
-        if (panel == 4 && tasks == null)
+        if (panel == 3 && tasks == null)
         {
             var result = await webApiService.Notes.GetNoteTasksAsync(Note.NoteId);
-            if (!result.IsValid)
-                await showMessages.ShowErrorMessage(result.Message);
+            if (!result.IsValid)                
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get tasks for this note", Detail =  result.Message, Duration = 12000 });
             else
                 tasks = result.Entity;
         }
+
+        StateHasChanged();
     }
 
     #endregion
 
     #region Managment FolderSelector
 
-    private void OnFolderSelector()
-    {
-        kntFolderSelector.Show();
-    }
+    private async Task OnFolderSelector()
+    {        
+        var res = await dialogService.OpenAsync<KntFolderSelector>($"Folder selector",
+               new Dictionary<string, object>() {  },
+               new DialogOptions() { Width = "700px", Height = "520px"});        
 
-    private void OnConfirmFolderSelector(FolderDto f)
-    {
-        Note.FolderDto = f.GetSimpleDto<FolderDto>();
-        Note.FolderId = f.FolderId;
-        kntFolderSelector.Hide();
-    }
-
-    private void OnCancelFolderSelector()
-    {
-        kntFolderSelector.Hide();
+        if(res != null)
+        {
+            var f = (FolderDto)res;
+            Note.FolderDto = f.GetSimpleDto<FolderDto>();
+            Note.FolderId = f.FolderId;
+        }
     }
 
     #endregion
@@ -389,8 +290,8 @@
     private void OnNewResource()
     {
         if (Note.IsNew())
-        {
-            showMessages.ShowErrorMessage("You must save the note before assigning resources to it.");
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New resource for this note", Detail =  "You must save the note before assigning resources to it.", Duration = 12000 });
         }
         else
             kntResourceSelector.Show();
@@ -402,8 +303,8 @@
         resource.Name = Note.NoteId.ToString() + "_" + resource.Name;
 
         var result = await webApiService.Notes.SaveResourceAsync(resource);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
+        if (!result.IsValid)            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save resource for this note", Detail =  result.Message, Duration = 12000 });
         else
             resources.Add(result.Entity);
 
@@ -418,8 +319,8 @@
     private async Task OnDeleteResource(ResourceInfoDto resource)
     {
         var result = await webApiService.Notes.DeleteResourceAsync(resource.ResourceId);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
+        if (!result.IsValid)            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete resource for this note", Detail =  result.Message, Duration = 12000 });
         else
             resources.Remove(resource);
     }
@@ -430,7 +331,9 @@
             Note.Description += "\n\n![alt text](" + resource?.RelativeUrl + " '" + resource?.Description + "' )";
         else
             Note.Description += "\n\n<a href=" + resource?.RelativeUrl + " target='_blank'>" + resource?.Description + "</a>";
-        selectedPanel = 1;
+        
+        tabsSelectedIndex = 0;
+        StateHasChanged();        
     }
 
     #endregion
@@ -440,8 +343,8 @@
     private void OnNewTask()
     {
         if (Note.IsNew())
-        {
-            showMessages.ShowErrorMessage("You must save the note before assigning tasks to it.");
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New task for this note", Detail =  "You must save the note before assigning tasks to it.", Duration = 12000 });
         }
         else
         {
@@ -455,8 +358,8 @@
         task.NoteId = Note.NoteId;
 
         var result = await webApiService.Notes.SaveNoteTaskAsync(task);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
+        if (!result.IsValid)            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save task for this note", Detail =  result.Message, Duration = 12000 });
         else
         {
             var taskUpdated = result.Entity;
@@ -483,8 +386,8 @@
     private async Task OnDeleteTask(NoteTaskDto task)
     {
         var result = await webApiService.Notes.DeleteNoteTaskAsync(task.NoteTaskId);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
+        if (!result.IsValid)            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete task for this note", Detail =  result.Message, Duration = 12000 });
         else
             tasks.Remove(task);
     }
@@ -517,8 +420,8 @@
 
         var result = await webApiService.KAttributes.GetAllAsync(Note.NoteTypeId);
         if (!result.IsValid)
-        {
-            await showMessages.ShowErrorMessage(result.Message);
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get attributes for this note", Detail =  result.Message, Duration = 12000 });
         }
         else
         {

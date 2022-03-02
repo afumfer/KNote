@@ -10,7 +10,7 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="container-fluid bg-light border">
+@*<div class="container-fluid bg-light border">
     <div class="row">
         <div class="col-6">
             <h3 class="pt-3">Notes search</h3>
@@ -33,7 +33,30 @@
             </span>
         </div>
     </div>
+</div>*@
+
+<div class="container-fluid bg-light border">
+    <div class="row">
+        <KntIndexHeader TextHead="Notes search">
+            <IndexMenu>
+                <RadzenMenu>
+                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+                    <RadzenMenuItem Text="Display options" Icon="tune">
+                        @if (viewMode == 0)
+                        {                                 
+                            <RadzenMenuItem Text="Item view" Click="ToggleView"></RadzenMenuItem>                                        
+                        }
+                        else
+                        {                                    
+                            <RadzenMenuItem Text="Table view" Click="ToggleView"></RadzenMenuItem>                        
+                        }            
+                    </RadzenMenuItem>
+                </RadzenMenu>
+            </IndexMenu>
+        </KntIndexHeader>
+    </div>
 </div>
+
 
 <!--- Move this to new component -->
 <div class="form-group row pt-3">
