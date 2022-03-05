@@ -226,9 +226,9 @@
 
     @*<KntFolderSelectorBS @ref="kntFolderSelector"  OnCancel="OnCancelFolderSelector" OnConfirm="OnConfirmFolderSelector" ></KntFolderSelectorBS>*@
 
-    <KntResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelector>
+    <KntResourceSelectorBS @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelectorBS>
 
-    <KntTaskEditor @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" Users="users"></KntTaskEditor>
+    <KntTaskEditorBS @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" Users="users"></KntTaskEditorBS>
 
 </EditForm>
 
@@ -246,8 +246,8 @@
     private List<UserDto> users;
 
     private KntFolderSelector kntFolderSelector;
-    private KntResourceSelector kntResourceSelector;
-    private KntTaskEditor kntTaskEditor;
+    private KntResourceSelectorBS kntResourceSelector;
+    private KntTaskEditorBS kntTaskEditor;
     private NoteKAttributes noteKAttributes;
 
     private int selectedPanel = 1;

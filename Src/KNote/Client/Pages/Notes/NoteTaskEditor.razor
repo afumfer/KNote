@@ -1,0 +1,139 @@
+﻿@inject NotificationService notificationService
+@inject DialogService dialogService
+
+
+<EditForm Model="task" Context="formContextTask">
+
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <div class="col-md-12">
+        <div class="form-group row">
+            <label for="atrUserId" class="col-sm-2 col-form-label">User:</label>                                                                
+            <div class="input-group  col-sm-10" id="atrUserId">
+                <select class="form-control col-sm-11" @bind="@task.UserId">
+                    @if (Users != null)
+                    {
+                        @foreach (var user in Users)
+                        {
+                            <option value=@user.UserId>@user.FullName</option>
+                        }
+                    }
+                </select>
+                <ValidationMessage For="@(() => task.UserId)" />
+            </div>
+        </div>
+              
+        <div class="form-group">
+            <label>Description:</label>
+            <InputTextArea class="form-control p-2" @bind-Value="@task.Description" />
+            <ValidationMessage For="@(() => task.Description)" />
+        </div>
+
+        <div class="form-group row">
+            <label for="atrTags" class="col-sm-2 col-form-label">Tags:</label>
+            <div class="input-group col-sm-10" id="atrTags">
+                <InputText class="form-control" @bind-Value="@task.Tags" />
+            </div>
+            <ValidationMessage For="@(() => task.Tags)" />
+        </div>
+
+        <div class="form-group row">
+            <label for="atrPrority" class="col-sm-2 col-form-label">Prority:</label>
+            <div class="input-group col-sm-4" id="atrPrority">
+                <InputNumber class="form-control" @bind-Value="@task.Priority" />
+                <ValidationMessage For="@(() => task.Priority)" />
+            </div>
+            <label for="atrDifficulty" class="col-sm-2 col-form-label">Difficulty:</label>
+            <div class="input-group col-sm-4" id="atrDifficulty">
+                <InputNumber class="form-control" @bind-Value="@task.DifficultyLevel" />
+                <ValidationMessage For="@(() => task.DifficultyLevel)" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="atrExtStartDate" class="col-sm-2 col-form-label">Exp. Start:</label>
+            <div class="input-group col-sm-4" id="atrExtStartDate">                                    
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedStartDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                <ValidationMessage For="@(() => task.ExpectedStartDate)" />
+            </div>
+            <label for="atrExpEndDate" class="col-sm-2 col-form-label">Exp. End:</label>
+            <div class="input-group col-sm-4" id="atrExpEndDate">                                    
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedEndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                <ValidationMessage For="@(() => task.ExpectedEndDate)" />
+            </div>
+        </div>
+
+        <div class="form-group row">                                               
+            <label for="atrStartDate" class="col-sm-2 col-form-label">Start:</label>
+            <div class="input-group col-sm-4" id="atrStartDate">                                    
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.StartDate" ShowTime="true" ShowSeconds="true" HoursStep="1.5"  DateFormat="dd/MM/yyyy HH:mm" />
+                <ValidationMessage For="@(() => task.StartDate)" />
+            </div>
+            <label for="atrEndDate" class="col-sm-2 col-form-label">Resolv:</label>
+            <div class="input-group col-sm-4" id="atrEndDate">                                    
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.EndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                <ValidationMessage For="@(() => task.EndDate)" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="atrResolved" class="col-sm-2 col-form-label">Resolved:</label>
+            <div class="input-group col-sm-4" id="atrResolved">
+                <InputCheckbox class="form-control" @bind-Value="@task.Resolved" />
+            </div>
+            <label for="atrSpentTime" class="col-sm-2 col-form-label">SpentTime:</label>
+            <div class="input-group col-sm-4 align-content-start" id="atrSpentTime">
+                <InputNumber class="form-control" @bind-Value="@task.SpentTime" />
+                <ValidationMessage For="@(() => task.SpentTime)" />
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="mt-1" />
+
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <RadzenButton Text="Ok" Click="() => OnConfirm(formContextTask)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+    [Parameter] public List<UserDto> Users { get; set; }    
+    [Parameter] public  NoteTaskDto TaskEdit { get; set; }
+
+    private NoteTaskDto task;
+
+    protected override Task OnInitializedAsync()
+    {
+        if (TaskEdit != null)
+            task = TaskEdit.GetSimpleDto<NoteTaskDto>();
+        else
+        {
+            task = new NoteTaskDto();            
+        }        
+        return base.OnInitializedAsync();
+    }
+
+    private async Task OnConfirm(EditContext formContext)
+    {
+        bool formIsValid = formContext.Validate();
+        if (formIsValid == false)
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Validating task", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            return;
+        }
+
+        task.UserFullName = Users.Where(u => u.UserId == task.UserId).Select(u => u.FullName).SingleOrDefault();
+
+        dialogService.Close(task);
+    }
+
+    private void OnCancel()
+    {        
+        dialogService.Close(null);
+    }
+}

@@ -2,6 +2,7 @@
 @inject NavigationManager navigationManager
 @inject DialogService dialogService
 @inject NotificationService notificationService
+@inject TooltipService tooltipService
 
 <EditForm Model="Note" Context="formContext">
 
@@ -15,7 +16,7 @@
         </Buttons>
     </ToolingHeader>
 
-    <RadzenTabs Change=@ShowPanel TabPosition = "TabPosition.Left" @bind-SelectedIndex="tabsSelectedIndex">
+    <RadzenTabs Change=@ShowPanel TabPosition = "TabPosition.Top" @bind-SelectedIndex="tabsSelectedIndex">
         <Tabs>
             <RadzenTabsItem Text="&nbsp;Overview" Icon="article" >
                 <div class="mt-4"></div>
@@ -125,12 +126,11 @@
                     </NoteKTasks>
                 }
             </RadzenTabsItem>
+
         </Tabs>
     </RadzenTabs>
 
-    <KntResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></KntResourceSelector>
-
-    <KntTaskEditor @ref="kntTaskEditor" OnCancel="OnCancelTaskEditor" OnConfirm="OnConfirmTaskEditor" Users="users"></KntTaskEditor>
+    <NoteResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></NoteResourceSelector>
 
 </EditForm>
 
@@ -149,12 +149,11 @@
     private Guid? oldNoteType = null;
 
     // TODO: !!! eliminar las siguientes líneas
-    private KntResourceSelector kntResourceSelector;
-    private KntTaskEditor kntTaskEditor;
+    private NoteResourceSelector kntResourceSelector;    
     // !!!!!!!!!!!!!!!!!!!!!!!!
 
     private NoteKAttributes noteKAttributes;
-    
+
     private int tabsSelectedIndex { get; set; } = 0;
 
     #region Initialized
@@ -172,7 +171,7 @@
         }
 
         oldNoteType = Note.NoteTypeId;
-       
+
         await base.OnInitializedAsync();
     }
 
@@ -331,7 +330,7 @@
             Note.Description += "\n\n![alt text](" + resource?.RelativeUrl + " '" + resource?.Description + "' )";
         else
             Note.Description += "\n\n<a href=" + resource?.RelativeUrl + " target='_blank'>" + resource?.Description + "</a>";
-        
+
         tabsSelectedIndex = 0;
         StateHasChanged();        
     }
@@ -340,7 +339,7 @@
 
     #region Tasks managment
 
-    private void OnNewTask()
+    private async Task OnNewTask()
     {
         if (Note.IsNew())
         {            
@@ -348,12 +347,32 @@
         }
         else
         {
-            taskEdit = null;
-            kntTaskEditor.Show(null);
+            taskEdit = null;            
+
+            var result = await dialogService.OpenAsync<NoteTaskEditor>($"New task",
+                   new Dictionary<string, object>() { { "TaskEdit", null }, { "Users" , users} },
+                   new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+
+            if(result != null)
+                await SaveEditedTask(result); 
         }
     }
 
-    private async Task OnConfirmTaskEditor(NoteTaskDto task)
+    private async Task OnEditTask(NoteTaskDto task)
+    {
+        taskEdit = task;        
+
+        var result = await dialogService.OpenAsync<NoteTaskEditor>($"Edit task",
+               new Dictionary<string, object>() { { "TaskEdit", task }, { "Users" , users} },
+               new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+
+        if(result != null)
+        {
+            await SaveEditedTask(result); 
+        }
+    }
+
+    private async Task SaveEditedTask(NoteTaskDto task)
     {
         task.NoteId = Note.NoteId;
 
@@ -362,25 +381,9 @@
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save task for this note", Detail =  result.Message, Duration = 12000 });
         else
         {
-            var taskUpdated = result.Entity;
-
-            var taskOld = tasks.Where(t => t.NoteTaskId == taskUpdated.NoteTaskId).SingleOrDefault();
-
-            if (taskOld == null)
-                tasks.Add(taskUpdated);
-            else
-            {
-                var i = tasks.IndexOf(taskOld);
-                tasks.RemoveAt(i);
-                tasks.Insert(i, taskUpdated);
-            }
-            kntTaskEditor.Hide();
-        }
-    }
-
-    private void OnCancelTaskEditor()
-    {
-        kntTaskEditor.Hide();
+            tasks = null;
+            await ShowPanel(3);       
+        }        
     }
 
     private async Task OnDeleteTask(NoteTaskDto task)
@@ -389,13 +392,10 @@
         if (!result.IsValid)            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete task for this note", Detail =  result.Message, Duration = 12000 });
         else
-            tasks.Remove(task);
-    }
-
-    private void OnEditTask(NoteTaskDto task)
-    {
-        taskEdit = task;
-        kntTaskEditor.Show(taskEdit);
+        {
+            tasks = null;
+            await ShowPanel(3);
+        }
     }
 
     #endregion
