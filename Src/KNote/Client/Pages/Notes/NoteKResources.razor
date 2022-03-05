@@ -1,14 +1,12 @@
-﻿<div class="container-fluid">
-    <div class="row mb-2" >
-        <div class="col-6">            
-        </div>
-        <div class="col-6 float-right">
-            <button class="btn btn-sm btn-warning mx-1 float-right"
-                    @onclick="@(() => OnNew.InvokeAsync(null))"
-                    data-toggle="tooltip" title="New resource for this note">
-                    Upload new resource
-            </button>
-        </div>
+﻿@inject TooltipService tooltipService
+
+
+<div class="row mb-1">
+    <div class="col-6">
+        <h5>Resources for this note:</h5>
+    </div>
+    <div class="col-6 text-right">
+        <RadzenButton Text="New resource" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Class="mr-1" />  
     </div>
 </div>
 
@@ -46,16 +44,14 @@
                     </td>
                     <td>
                         <span class="float-right">
-                            <button class="btn btn-sm btn-info mx-1"
-                                    @onclick="@(() => OnInsertInDesription.InvokeAsync(item))"
-                                    data-toggle="tooltip" title="Insert in description">
-                                <i class="fa fa-clipboard"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger mx-1"
-                                    @onclick="@(() => OnDelete.InvokeAsync(item))"
-                                    data-toggle="tooltip" title="Delete resource">
-                                <i class="fa fa-minus"></i>
-                            </button>
+                            <RadzenButton Click="@(() => OnInsertInDesription.InvokeAsync(item))" Icon="insert_page_break" 
+                                ButtonStyle="ButtonStyle.Primary" 
+                                MouseEnter="@(args => tooltipService.Open(args, "Insert resource reference in note description ...", 
+                                    new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                            <RadzenButton Click="@(() => OnDelete.InvokeAsync(item))" Icon="delete"
+                                ButtonStyle="ButtonStyle.Danger" 
+                                MouseEnter="@(args => tooltipService.Open(args, "Delete resource ...", 
+                                    new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                         </span>
                     </td>
                 </tr>

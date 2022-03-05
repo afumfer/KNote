@@ -130,8 +130,6 @@
         </Tabs>
     </RadzenTabs>
 
-    <NoteResourceSelector @ref="kntResourceSelector" OnCancel="OnCancelResourceSelector" OnConfirm="OnConfirmResourceSelector"></NoteResourceSelector>
-
 </EditForm>
 
 @code {
@@ -147,11 +145,6 @@
     private NoteTaskDto taskEdit; 
     private List<UserDto> users;
     private Guid? oldNoteType = null;
-
-    // TODO: !!! eliminar las siguientes líneas
-    private NoteResourceSelector kntResourceSelector;    
-    // !!!!!!!!!!!!!!!!!!!!!!!!
-
     private NoteKAttributes noteKAttributes;
 
     private int tabsSelectedIndex { get; set; } = 0;
@@ -286,33 +279,33 @@
 
     #region Managment ResourceSelector
 
-    private void OnNewResource()
+    private async Task OnNewResource()
     {
         if (Note.IsNew())
         {            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New resource for this note", Detail =  "You must save the note before assigning resources to it.", Duration = 12000 });
         }
         else
-            kntResourceSelector.Show();
-    }
+        {            
+            var resultDialog = await dialogService.OpenAsync<NoteResourceSelector>($"New resource",
+                   new Dictionary<string, object>() { },
+                   new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
 
-    private async Task OnConfirmResourceSelector(ResourceInfoDto resource)
-    {
-        resource.NoteId = Note.NoteId;
-        resource.Name = Note.NoteId.ToString() + "_" + resource.Name;
+            if(resultDialog != null)
+            {
+                resultDialog.NoteId = Note.NoteId;
+                resultDialog.Name = Note.NoteId.ToString() + "_" + resultDialog.Name;
 
-        var result = await webApiService.Notes.SaveResourceAsync(resource);
-        if (!result.IsValid)            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save resource for this note", Detail =  result.Message, Duration = 12000 });
-        else
-            resources.Add(result.Entity);
-
-        kntResourceSelector.Hide();
-    }
-
-    private void OnCancelResourceSelector()
-    {
-        kntResourceSelector.Hide();
+                var resultApi = await webApiService.Notes.SaveResourceAsync(resultDialog);
+                if (!resultApi.IsValid)            
+                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save resource for this note", Detail =  resultApi.Message, Duration = 12000 });
+                else
+                {
+                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note resource", Detail =  "The resource has been saved.", Duration = 3000 });
+                    resources.Add(resultApi.Entity);                                    
+                }
+            }
+        }
     }
 
     private async Task OnDeleteResource(ResourceInfoDto resource)
@@ -321,7 +314,10 @@
         if (!result.IsValid)            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete resource for this note", Detail =  result.Message, Duration = 12000 });
         else
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Deleted note resource", Detail =  "The resource has been deleted.", Duration = 3000 });
             resources.Remove(resource);
+        }
     }
 
     private void InsertInDescription(ResourceInfoDto resource)
@@ -382,7 +378,8 @@
         else
         {
             tasks = null;
-            await ShowPanel(3);       
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note task", Detail =  "The note task has been saved.", Duration = 3000 });            
+            await ShowPanel(3);      
         }        
     }
 
@@ -394,6 +391,7 @@
         else
         {
             tasks = null;
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note task", Detail =  "The note task has been deleted.", Duration = 3000 });            
             await ShowPanel(3);
         }
     }

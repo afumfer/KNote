@@ -1,10 +1,14 @@
-﻿@inject IGenericDataService  dataService
+﻿@inject NotificationService notificationService
+@inject DialogService dialogService
+
+
+@*@inject IGenericDataService  dataService*@
 @inject IShowMessages showMessages
 
 @*@inject AppState appState
 @implements IDisposable*@
 
-@if (ShowDialog)
+@*@if (ShowDialog)
 {
     <div class="modal-backdrop show"></div>
 
@@ -50,30 +54,70 @@
                             data-dismiss="modal">
                         Cancel
                     </button>
-                    <button @onclick="_onConfirm" type="button" class="btn btn-primary">Ok</button>
+                    <button @onclick="OnConfirm" type="button" class="btn btn-primary">Ok</button>
                 </div>
             </div>
         </div>
     </div>
 }
+*@
+
+<div class="overflow-auto" style="height:400px">
+
+    <InputFileUpload Label="Upload generic file" OnSelectedFile="OnFileSelected" />
+
+    <div class="form-group">
+        <label>Description:</label>
+        <input type="text" class="form-control" @bind="@resource.Description" />
+    </div>
+    <div class="form-group">
+        <label>Order:</label>
+        <input type="text" class="form-control" @bind="@resource.Order" />
+    </div>
+
+    @if (resourceFlowControl == null)
+    {
+        <p>Upload file .... </p>
+    }
+    else if (resourceFlowControl != "0")
+    {
+        <p></p>
+    }
+
+</div>
+
+<hr class="mt-1" />
+
+<div class="row">
+    <div class="col-md-12 text-right">
+        <RadzenButton Text="Ok" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
+        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
+    </div>
+</div>
 
 @code {
-    [Parameter] public string Title { get; set; } = "KaNote resource selector";
-    [Parameter] public EventCallback<ResourceInfoDto> OnConfirm { get; set; }
-    [Parameter] public EventCallback OnCancel { get; set; }
+    //[Parameter] public string Title { get; set; } = "KaNote resource selector";
+    //[Parameter] public EventCallback<ResourceInfoDto> OnConfirm { get; set; }
+    //[Parameter] public EventCallback OnCancel { get; set; }
 
-    private bool ShowDialog = false;
+    //private bool ShowDialog = false;
     private ResourceInfoDto resource;
     private string resourceFlowControl = "0";
 
-    public void Show()
+    protected override Task OnInitializedAsync()
     {
         resource = new ResourceInfoDto();
-
-        ShowDialog = true;
+        return base.OnInitializedAsync();
     }
 
-    public void Hide() => ShowDialog = false;
+    //public void Show()
+    //{
+    //    resource = new ResourceInfoDto();
+
+    //    ShowDialog = true;
+    //}
+
+    //public void Hide() => ShowDialog = false;
 
     private void OnFileSelected(KntFileInfo file)
     {
@@ -87,8 +131,14 @@
         resourceFlowControl = "1";
     }
 
-    private async Task _onConfirm()
+    private void OnConfirm()
     {
-        await OnConfirm.InvokeAsync(resource);
+        //await OnConfirm.InvokeAsync(resource);
+        dialogService.Close(resource);
+    }
+
+    private void OnCancel()
+    {        
+        dialogService.Close(null);
     }
 }
