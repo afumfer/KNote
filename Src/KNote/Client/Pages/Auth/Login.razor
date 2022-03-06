@@ -1,21 +1,25 @@
-﻿@page "/login"
-
-@inject IWebApiService webApiService
-@inject NavigationManager navigationManager
-@inject IShowMessages showMessages
-@inject ILoginService loginService
+﻿@*@page "/login"*@
 
 @using KNote.Client.Auth
 
-<h3>Login</h3>
+@inject IWebApiService webApiService
+@inject ILoginService loginService
+@inject NavigationManager navigationManager
 
-<EditForm Model="@user" OnValidSubmit="LoginUser">
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+@inject IShowMessages showMessages
+
+
+<EditForm Model="@user" Context="formContext" >
+    
     <DataAnnotationsValidator />
 
     <div class="form-group">
         <label>User name:</label>
         <div>
-            <InputText Class="form-control" @bind-Value="@user.Name" />
+            <InputText class="form-control" @bind-Value="@user.Name" />
             <ValidationMessage For="@(() => user.Name)" />
         </div>
     </div>
@@ -23,30 +27,34 @@
     <div class="form-group">
         <label>Password:</label>
         <div>
-            <InputPassword Class="form-control" @bind-Value="@user.Password" />
+            <InputPassword class="form-control" @bind-Value="@user.Password" />
             <ValidationMessage For="@(() => user.Password)" />
         </div>
     </div>
 
-    <!-- Footer -->
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-6">
-                &nbsp;
-            </div>
-            <div class="col-6 float-right">
-                <button class="btn btn-success float-right" type="submit">Login</button>
-            </div>
-        </div>
-    </div>
     <hr class="mt-1" />
 
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <RadzenButton Text="Login" Click="() => OnLogin(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
+        </div>
+    </div>
+
 </EditForm>
+
+@*<RadzenCard Style="width: 100%;">
+    <h2 class="mb-4">KaNote login</h2>
+    <RadzenTemplateForm Data=@("KaNoteLogin")>
+        <RadzenLogin AllowRegister="false" AllowResetPassword="false" Login=@(args => OnLoginRadzen(args, "Simple login")) />
+    </RadzenTemplateForm>
+</RadzenCard>*@
+
 
 @code {
     private UserCredentialsDto user = new UserCredentialsDto();
 
-    private async Task LoginUser()
+    private async Task LoginOls()
     {
         var result = await webApiService.Users.LoginAsync(user);
         if (!result.success)        
@@ -57,4 +65,27 @@
             navigationManager.NavigateTo("");
         }
     }
+
+    private void OnLogin(EditContext formContext)
+    {        
+        bool formIsValid = formContext.Validate();
+        if (formIsValid == false)
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Login user", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            return;
+        }
+
+        dialogService.Close(user);
+    }
+
+    private void OnCancel()
+    {
+        dialogService.Close(null);
+    }
+
+    //void OnLoginRadzen(LoginArgs args, string name)
+    //{
+    //    //var xx= $"{name} -> Username: {args.Username} and password: {args.Password}";
+    //}
+
 }

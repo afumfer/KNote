@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace KNote.Server.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class FoldersController : ControllerBase

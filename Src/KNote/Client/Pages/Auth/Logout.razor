@@ -1,13 +1,12 @@
 ﻿@page "/logout"
 
-@inject IGenericDataService  dataService
-@inject NavigationManager navigationManager
-@inject IShowMessages showMessages
-@inject ILoginService loginService
-
 @using KNote.Client.Auth
 
-<text>Logout ....</text>
+@inject NavigationManager navigationManager
+@inject ILoginService loginService
+
+
+<text>Logout ...</text>
 
 @code {
     protected async override Task OnInitializedAsync()

@@ -1,22 +1,23 @@
-﻿@page "/register"
+﻿@*@page "/register"*@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
 @inject IShowMessages showMessages
 @inject ILoginService loginService
 
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
 @using KNote.Client.Auth
 
-<h3>Register</h3>
-
-<EditForm Model="@user" OnValidSubmit="CreateUser">
+<EditForm Model="@user" Context="formContext">
 
     <DataAnnotationsValidator />
 
     <div class="form-group">
         <label>User name:</label>
         <div>
-            <InputText Class="form-control" @bind-Value="@user.UserName" />
+            <InputText class="form-control" @bind-Value="@user.UserName" />
             <ValidationMessage For="@(() => user.UserName)" />
         </div>
     </div>
@@ -24,7 +25,7 @@
     <div class="form-group">
         <label>Full name:</label>
         <div>
-            <InputText Class="form-control" @bind-Value="@user.FullName" />
+            <InputText class="form-control" @bind-Value="@user.FullName" />
             <ValidationMessage For="@(() => user.FullName)" />
         </div>
     </div>
@@ -32,7 +33,7 @@
     <div class="form-group">
         <label>Email:</label>
         <div>
-            <InputText Class="form-control" @bind-Value="@user.EMail" />
+            <InputText class="form-control" @bind-Value="@user.EMail" />
             <ValidationMessage For="@(() => user.EMail)" />
         </div>
     </div>
@@ -40,40 +41,38 @@
     <div class="form-group">
         <label>Password:</label>
         <div>
-            <InputPassword Class="form-control" @bind-Value="@user.Password" />
+            <InputPassword class="form-control" @bind-Value="@user.Password" />
             <ValidationMessage For="@(() => user.Password)" />
         </div>
     </div>
 
-    <!-- Footer -->
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-6">
-                &nbsp;
-            </div>
-            <div class="col-6 float-right">
-                <button class="btn btn-success float-right" type="submit">Register</button>
-            </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <RadzenButton Text="Register" Click="() => OnRegister(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
         </div>
     </div>
-    <hr class="mt-1" />
 
 </EditForm>
 
 @code {
     private UserRegisterDto user = new UserRegisterDto();
 
-    private async Task CreateUser()
-    {
-        user.RoleDefinition = "Public";
-
-        var result = await webApiService.Users.RegisterAsync(user);
-        if (!result.success)        
-            await showMessages.ShowErrorMessage(result.error);        
-        else
-        {
-            await loginService.Login(result.token);
-            navigationManager.NavigateTo("");
+    private void OnRegister(EditContext formContext)
+    {        
+        bool formIsValid = formContext.Validate();
+        if (formIsValid == false)
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Register user", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            return;
         }
+
+        dialogService.Close(user);
     }
+
+    private void OnCancel()
+    {
+        dialogService.Close(null);
+    }
+
 }

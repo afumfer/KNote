@@ -108,12 +108,26 @@ public class NoteWebApiService : INoteWebApiService
         return await _httpClient.GetFromJsonAsync<Result<List<NoteInfoDto>>>($"api/notes/getsearch?{queryString}");
     }
 
+    // TODO: !!! Apply the following strategy to the rest of the ClientDataService methods. (Command pattern ?) 
     public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
-    {                        
-        HttpResponseMessage httpRes;         
-        httpRes = await _httpClient.PostAsJsonAsync<NotesFilterDto>($"api/notes/getfilter", notesFilter);
-        var res = await httpRes.Content.ReadFromJsonAsync<Result<List<NoteInfoDto>>>();
-        return res;
+    {
+        var res = new Result<List<NoteInfoDto>>();
+
+        try
+        {
+            HttpResponseMessage httpRes;
+            httpRes = await _httpClient.PostAsJsonAsync<NotesFilterDto>($"api/notes/getfilter", notesFilter);
+            if (httpRes.IsSuccessStatusCode)
+                res = await httpRes.Content.ReadFromJsonAsync<Result<List<NoteInfoDto>>>();
+            else
+                res.AddErrorMessage($"Error. The web server has responded with the following message: {httpRes.ReasonPhrase.ToString()}");
+            return res;
+        }
+        catch (Exception ex)
+        {            
+            res.AddErrorMessage(ex.Message);
+            return res;
+        }
     }
 
 

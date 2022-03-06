@@ -30,8 +30,8 @@
                                 #@Note.NoteNumber
                             </label>
                         </div>
+                        <ValidationMessage For="@(() => Note.Topic)" />
                     </div>
-                    <ValidationMessage For="@(() => Note.Topic)" />
                 </div>
 
                 <div class="form-group row">
@@ -44,27 +44,33 @@
                                 ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
                             </button>
                         </div>
+                        <ValidationMessage For="@(() => Note.FolderId)" />
                     </div>
-                    <ValidationMessage For="@(() => Note.FolderId)" />
                 </div>
 
-                <div class="form-group row">
+@*                <div class="form-group row">
                     <label for="atrTags" class="col-sm-1 col-form-label">Tags:</label>
                     <div class="input-group col-sm-11" id="atrTags">
                         <InputText class="form-control" @bind-Value="@Note.Tags" />
+                        <ValidationMessage For="@(() => Note.Tags)" />
                     </div>
-                    <ValidationMessage For="@(() => Note.Tags)" />
                 </div>
-
+*@
                 <div class="form-group row">
                     <label for="atrPriority" class="col-sm-1 col-form-label">Priority:</label>
-                    <div class="input-group col-sm-5" id="atrPriority">
+                    <div class="input-group col-sm-2" id="atrPriority">
                         <InputNumber class="form-control col-sm-11" @bind-Value="@Note.Priority" />
                         <ValidationMessage For="@(() => Note.Priority)" />
                     </div>
 
+                    <label for="atrTags" class="col-sm-1 col-form-label">Tags:</label>
+                    <div class="input-group col-sm-4" id="atrTags">
+                        <InputText class="form-control" @bind-Value="@Note.Tags" />
+                        <ValidationMessage For="@(() => Note.Tags)" />
+                    </div>
+
                     <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
-                    <div class="input-group col-sm-5" id="atrNoteType">
+                    <div class="input-group col-sm-3" id="atrNoteType">
                         <InputSelect class="form-control col-sm11"
                                         Value="@Note.NoteTypeId"
                                         ValueChanged="@((Guid? noteTypeId) => OnChangeNoteTypeActions(noteTypeId))"
@@ -85,7 +91,6 @@
                 <div class="form-group form-markdown">
                     <InputMarkdown @bind-Value="@Note.Description"
                                    For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
-
                 </div>
             
             </RadzenTabsItem>

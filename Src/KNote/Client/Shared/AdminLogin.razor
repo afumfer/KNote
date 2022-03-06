@@ -1,0 +1,78 @@
+﻿@using KNote.Client.Auth
+@using KNote.Client.Pages.Auth
+@using System.Threading.Tasks
+
+@inject IWebApiService webApiService
+@inject ILoginService loginService
+@inject NavigationManager navigationManager
+
+@inject DialogService dialogService
+@inject NotificationService notificationService
+@inject TooltipService tooltipService
+
+@inject IShowMessages showMessages
+
+
+<AuthorizeView>
+    <Authorized>        
+        <RadzenIcon Icon="person" class="mr-1 ml-1"
+            MouseEnter="@(args => tooltipService.Open(args, @context.User.Identity.Name, new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
+        <RadzenIcon Icon="logout" @onclick="@(() => GoLogout())" class="mr-1 ml-1" 
+            MouseEnter="@(args => tooltipService.Open(args, "Logout", new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
+    </Authorized>
+    <NotAuthorized>        
+        <RadzenIcon Icon="how_to_reg" @onclick="@(() => GoRegister())" class="mr-1 ml-1" 
+            MouseEnter="@(args => tooltipService.Open(args, "Register", new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />            
+        <RadzenIcon Icon="login" @onclick="@(() => GoLogin())" class="mr-1 ml-1" 
+            MouseEnter="@(args => tooltipService.Open(args, "Login", new TooltipOptions(){ Position = TooltipPosition.Bottom }) )"/>            
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    private async Task GoRegister()
+    {
+        var resDialog = await dialogService.OpenAsync<Register>($"Login",
+               new Dictionary<string, object>() {  },
+               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
+
+        if(resDialog != null)
+        {            
+            resDialog.RoleDefinition = "Public";
+
+            var result = await webApiService.Users.RegisterAsync(resDialog);
+            if (!result.success)        
+                await showMessages.ShowErrorMessage(result.error);        
+            else
+            {
+                await loginService.Login(result.token);
+                navigationManager.NavigateTo("");
+            }
+        }
+    }
+
+    private async Task GoLogin()
+    {
+        var resDialog = await dialogService.OpenAsync<Login>($"KaNote login",
+               new Dictionary<string, object>() {  },
+               new DialogOptions() { Width = "500px", Height = "300px", Resizable = true, Draggable = true });
+
+        if(resDialog != null)
+        {
+            var result = await webApiService.Users.LoginAsync(resDialog);
+            if (!result.success)        
+                await showMessages.ShowErrorMessage(result.error);        
+            else
+            {
+                await loginService.Login(result.token);
+                navigationManager.NavigateTo("");
+            }                        
+        }             
+    }
+
+    private void GoLogout()
+    {
+        navigationManager.NavigateTo("Logout");
+    }
+
+}

@@ -55,6 +55,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost("[action]")]   // PUT api/notes/getfilter
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        //[Authorize]
         public async Task <IActionResult> GetFilter([FromBody] NotesFilterDto notesFilter )
         {
             try
@@ -147,6 +148,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("[action]")]    // GET api/notes/new
+        [Authorize]
         public async Task<IActionResult> New()
         {
             try
@@ -295,6 +297,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost("[action]")]    // POST api/notes/savefile
         [HttpPut("[action]")]    // PUT api/notes/savefile
+        [Authorize]
         public async Task<IActionResult> SaveFile(ResourceDto resource)
         {
             Result<ResourceDto> resApi = new Result<ResourceDto>();

@@ -1,11 +1,11 @@
 ﻿<AuthorizeView>
     <Authorized>
-        [ <RadzenIcon Icon="person"/> <span>@context.User.Identity.Name</span> ]
         <a href="Logout" class="nav-link btn btn-link">Log out</a>
+        <RadzenLink Path="Logout" Text="Log out" /> ]
     </Authorized>
     <NotAuthorized>
-        [ <RadzenIcon Icon="person"/> ]
+        [ <RadzenIcon Icon="person" class="mr-1"/> 
         <a href="Register">Register</a>
-        <a href="Login" class="nav-link btn btn-link">Login</a>
+        <a href="Login" class="nav-link btn btn-link">Login</a> ]
     </NotAuthorized>
 </AuthorizeView>

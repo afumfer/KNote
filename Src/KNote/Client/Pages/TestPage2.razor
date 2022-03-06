@@ -171,6 +171,8 @@
     
     <RadzenButton Click="@RadzenButtonClicked" Text="Test go home"></RadzenButton>
 
+    <RadzenLink Icon="accessibility"  @onclick="ShowLink" Text="Go to index" />
+
 </div>
 
 <div class="@((selectedPanel == 5) ? "" : "d-none")">
@@ -334,7 +336,7 @@
 
         args.Children.Data = folders.Where(f => f.ParentId == folder.FolderId).Select(f => f).ToList();
         args.Children.Text = GetTextForNode2;
-                
+
         args.Children.HasChildren = (fo) => folders.Where(f => f.ParentId == ((FolderInfoDto)fo).FolderId).Count() > 0;
 
         //args.Children.Template = FileOrFolderTemplate;
@@ -373,6 +375,11 @@
         var folder = data as FolderDto;
 
         return folder.Name == "Home";
+    }
+
+    private void ShowLink()
+    {
+        navigationManger.NavigateTo("index");
     }
 
 }
