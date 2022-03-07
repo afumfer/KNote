@@ -200,10 +200,10 @@
         {
             var result = await webApiService.Notes.DeleteAsync(item.NoteId);
             if (!result.IsValid)            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note", Detail =  result.Message, Duration = 12000 });            
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
             else
             {
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note ", Detail =  "The note has been deleted.", Duration = 3000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail =  "The note has been deleted.", Duration = 3000 });
                 await LoadNotesWithPagination();
             }            
         }

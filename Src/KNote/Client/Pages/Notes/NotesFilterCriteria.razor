@@ -105,7 +105,7 @@
         var result = await webApiService.NoteTypes.GetAllAsync();
         if (!result.IsValid)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading note types", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading note types.", Detail =  result.Message, Duration = 12000 });
             navigationManger.NavigateTo("index");
         }
         else
@@ -121,7 +121,7 @@
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Apply filter", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Apply filter.", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
 

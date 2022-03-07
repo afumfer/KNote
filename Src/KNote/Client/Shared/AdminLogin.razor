@@ -5,7 +5,6 @@
 @inject IWebApiService webApiService
 @inject ILoginService loginService
 @inject NavigationManager navigationManager
-
 @inject DialogService dialogService
 @inject NotificationService notificationService
 @inject TooltipService tooltipService
@@ -42,9 +41,10 @@
 
             var result = await webApiService.Users.RegisterAsync(resDialog);
             if (!result.success)        
-                await showMessages.ShowErrorMessage(result.error);        
+                await showMessages.ShowErrorMessage(result.error);                        
             else
             {
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Login user.", Detail =  "Authenticated use.", Duration = 3000 });
                 await loginService.Login(result.token);
                 navigationManager.NavigateTo("");
             }
@@ -61,9 +61,10 @@
         {
             var result = await webApiService.Users.LoginAsync(resDialog);
             if (!result.success)        
-                await showMessages.ShowErrorMessage(result.error);        
+                await showMessages.ShowErrorMessage(result.error);                
             else
             {
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Login user.", Detail =  "Authenticated use.", Duration = 3000 });
                 await loginService.Login(result.token);
                 navigationManager.NavigateTo("");
             }                        

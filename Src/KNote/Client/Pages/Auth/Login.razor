@@ -1,15 +1,9 @@
-﻿@*@page "/login"*@
+﻿@page "/login"
 
 @using KNote.Client.Auth
 
-@inject IWebApiService webApiService
-@inject ILoginService loginService
-@inject NavigationManager navigationManager
-
 @inject DialogService dialogService
 @inject NotificationService notificationService
-
-@inject IShowMessages showMessages
 
 
 <EditForm Model="@user" Context="formContext" >
@@ -43,35 +37,16 @@
 
 </EditForm>
 
-@*<RadzenCard Style="width: 100%;">
-    <h2 class="mb-4">KaNote login</h2>
-    <RadzenTemplateForm Data=@("KaNoteLogin")>
-        <RadzenLogin AllowRegister="false" AllowResetPassword="false" Login=@(args => OnLoginRadzen(args, "Simple login")) />
-    </RadzenTemplateForm>
-</RadzenCard>*@
-
 
 @code {
     private UserCredentialsDto user = new UserCredentialsDto();
-
-    private async Task LoginOls()
-    {
-        var result = await webApiService.Users.LoginAsync(user);
-        if (!result.success)        
-            await showMessages.ShowErrorMessage(result.error);        
-        else
-        {
-            await loginService.Login(result.token);
-            navigationManager.NavigateTo("");
-        }
-    }
 
     private void OnLogin(EditContext formContext)
     {        
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Login user", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Login user.", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
 
@@ -82,10 +57,5 @@
     {
         dialogService.Close(null);
     }
-
-    //void OnLoginRadzen(LoginArgs args, string name)
-    //{
-    //    //var xx= $"{name} -> Username: {args.Username} and password: {args.Password}";
-    //}
 
 }

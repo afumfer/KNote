@@ -57,7 +57,7 @@
         }
         else
         {       
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute info", Detail = await httpResponse.GetBody(), Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute info.", Detail = await httpResponse.GetBody(), Duration = 12000 });
         }
 
         if(Attribute == null)
@@ -71,7 +71,7 @@
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute info", Detail = "Incorrect data, check the required attributes.", Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute info.", Detail = "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
 

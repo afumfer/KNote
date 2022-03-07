@@ -91,7 +91,7 @@
             paginationContext.TotalCount = result.TotalCount;            
         }
         else        
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading users", Detail =  result.Message, Duration = 12000 });        
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading users.", Detail =  result.Message, Duration = 12000 });        
 
         StateHasChanged();
     }
@@ -150,11 +150,11 @@
         {
             var result = await webApiService.Users.DeleteAsync(item.UserId);
             if (!result.IsValid)            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete user", Detail =  result.Message, Duration = 12000 });            
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete user.", Detail =  result.Message, Duration = 12000 });            
             else
             {
                 users = null;
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete user", Detail =  "The user has been deleted.", Duration = 3000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete user.", Detail =  "The user has been deleted.", Duration = 3000 });
                 await Load();
             }            
         }

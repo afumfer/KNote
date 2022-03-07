@@ -31,7 +31,7 @@ else
         var result = await webApiService.Folders.GetAsync(Guid.Parse(FolderId));
         if (!result.IsValid)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get folder", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get folder.", Detail =  result.Message, Duration = 12000 });
             dialogService.Close(null);
         }
         else        
@@ -49,7 +49,7 @@ else
     {
         var result = await webApiService.Folders.SaveAsync(folder);
         if (!result.IsValid)                    
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type", Detail =  result.Message, Duration = 12000 });        
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type.", Detail =  result.Message, Duration = 12000 });        
         else
         {
             if (appState.FoldersTree != null)
@@ -69,7 +69,7 @@ else
                 }
             }
             
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save folder", Detail =  "The data has been saved.", Duration = 3000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save folder.", Detail =  "The data has been saved.", Duration = 3000 });
             dialogService.Close(result.Entity);     
         }
     }

@@ -165,7 +165,7 @@
         }
         else
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get user for note edit", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get user for note edit.", Detail =  result.Message, Duration = 12000 });
         }
 
         oldNoteType = Note.NoteTypeId;
@@ -225,7 +225,7 @@
         if (formIsValid == false)
         {            
             var msgErr = "Incorrect data, check the required attributes. " + addMessage;
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note", Detail =  msgErr, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note.", Detail =  msgErr, Duration = 12000 });
             return;
         }
 
@@ -245,7 +245,7 @@
         {
             var result = await webApiService.Notes.GetResourcesAsync(Note.NoteId);
             if (!result.IsValid)                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get resources for this note", Detail =  result.Message, Duration = 12000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get resources for this note.", Detail =  result.Message, Duration = 12000 });
             else
                 resources = result.Entity;
         }
@@ -254,7 +254,7 @@
         {
             var result = await webApiService.Notes.GetNoteTasksAsync(Note.NoteId);
             if (!result.IsValid)                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get tasks for this note", Detail =  result.Message, Duration = 12000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get tasks for this note.", Detail =  result.Message, Duration = 12000 });
             else
                 tasks = result.Entity;
         }
@@ -288,7 +288,7 @@
     {
         if (Note.IsNew())
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New resource for this note", Detail =  "You must save the note before assigning resources to it.", Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New resource for this note.", Detail =  "You must save the note before assigning resources to it.", Duration = 12000 });
         }
         else
         {            
@@ -303,10 +303,10 @@
 
                 var resultApi = await webApiService.Notes.SaveResourceAsync(resultDialog);
                 if (!resultApi.IsValid)            
-                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save resource for this note", Detail =  resultApi.Message, Duration = 12000 });
+                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save resource for this note.", Detail =  resultApi.Message, Duration = 12000 });
                 else
                 {
-                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note resource", Detail =  "The resource has been saved.", Duration = 3000 });
+                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note resource.", Detail =  "The resource has been saved.", Duration = 3000 });
                     resources.Add(resultApi.Entity);                                    
                 }
             }
@@ -317,10 +317,10 @@
     {
         var result = await webApiService.Notes.DeleteResourceAsync(resource.ResourceId);
         if (!result.IsValid)            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete resource for this note", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete resource for this note.", Detail =  result.Message, Duration = 12000 });
         else
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Deleted note resource", Detail =  "The resource has been deleted.", Duration = 3000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Deleted note resource.", Detail =  "The resource has been deleted.", Duration = 3000 });
             resources.Remove(resource);
         }
     }
@@ -344,7 +344,7 @@
     {
         if (Note.IsNew())
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New task for this note", Detail =  "You must save the note before assigning tasks to it.", Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New task for this note.", Detail =  "You must save the note before assigning tasks to it.", Duration = 12000 });
         }
         else
         {
@@ -379,11 +379,11 @@
 
         var result = await webApiService.Notes.SaveNoteTaskAsync(task);
         if (!result.IsValid)            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save task for this note", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save task for this note.", Detail =  result.Message, Duration = 12000 });
         else
         {
             tasks = null;
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note task", Detail =  "The note task has been saved.", Duration = 3000 });            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note task.", Detail =  "The note task has been saved.", Duration = 3000 });            
             await ShowPanel(3);      
         }        
     }
@@ -392,11 +392,11 @@
     {
         var result = await webApiService.Notes.DeleteNoteTaskAsync(task.NoteTaskId);
         if (!result.IsValid)            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete task for this note", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete task for this note.", Detail =  result.Message, Duration = 12000 });
         else
         {
             tasks = null;
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note task", Detail =  "The note task has been deleted.", Duration = 3000 });            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note task.", Detail =  "The note task has been deleted.", Duration = 3000 });            
             await ShowPanel(3);
         }
     }
@@ -424,7 +424,7 @@
         var result = await webApiService.KAttributes.GetAllAsync(Note.NoteTypeId);
         if (!result.IsValid)
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get attributes for this note", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get attributes for this note.", Detail =  result.Message, Duration = 12000 });
         }
         else
         {

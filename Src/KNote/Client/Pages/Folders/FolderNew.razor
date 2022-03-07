@@ -41,7 +41,7 @@
         var result = await webApiService.Folders.SaveAsync(folder);
         if (!result.IsValid)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder", Detail =  folder.GetErrorMessage(), Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder.", Detail =  folder.GetErrorMessage(), Duration = 12000 });
         }
         else
         {
@@ -84,7 +84,7 @@
                 }
             }
 
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New folder", Detail =  "The note type has been created.", Duration = 3000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New folder.", Detail =  "The note type has been created.", Duration = 3000 });
             dialogService.Close(result.Entity);
         }
 

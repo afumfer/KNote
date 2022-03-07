@@ -37,7 +37,7 @@ else
         var result = await webApiService.NoteTypes.GetAllAsync();
         if (!result.IsValid)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types.", Detail =  result.Message, Duration = 12000 });
         }
         else
         {
@@ -67,7 +67,7 @@ else
         var result = await webApiService.Notes.NewAsync();
         if (!result.IsValid)
         {         
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note", Detail =  result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note.", Detail =  result.Message, Duration = 12000 });
         }
         else
         {
@@ -91,7 +91,7 @@ else
 
             if (!result.IsValid)
             {            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save new note", Detail =  result.Message, Duration = 12000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save new note.", Detail =  result.Message, Duration = 12000 });
             }
             else
             {
@@ -115,7 +115,7 @@ else
                 note.NoteId = entitySaved.NoteId;
                 note.SetIsNew(false);
                              
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note", Detail =  "The user has been created.", Duration = 3000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note.", Detail =  "The user has been created.", Duration = 3000 });
                 title = "Note edit";
             }
         }
@@ -124,9 +124,9 @@ else
             var result = await webApiService.Notes.SaveAsync(note);
 
             if (!result.IsValid)                            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note", Detail =  result.Message, Duration = 12000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note.", Detail =  result.Message, Duration = 12000 });
             else                            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note", Detail =  "The user has been created.", Duration = 3000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note.", Detail =  "The user has been created.", Duration = 3000 });
             
         }
     }
