@@ -33,24 +33,14 @@
 </div>
 
 <!--- Move this to new component -->
-<div class="form-group row pt-3">
-    <div class="input-group col-sm-11 mb-2" id="atrText">
+<div class="row pt-2">
+    <div class="col-10 mb-2">
         <input type="text" class="form-control" @bind-value="textSearch" @bind-value:event="oninput"
                @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))"
                placeholder="Text search  ..." />
-        <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" @onclick="@CleanOnClick"
-                    data-toggle="tooltip" title="Clean search">
-                X
-            </button>
-        </div>
     </div>
-
-    <div class="col-1 float-left">
-        <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="OnLoadListNotes"
-                data-toggle="tooltip" title="Apply search">
-            <span class="oi oi-magnifying-glass" aria-hidden="true"></span>
-        </button>
+    <div class="col-2 mb-2">
+        <RadzenButton Text="Search" Icon="search" Click="() => OnLoadListNotes()" ButtonStyle="ButtonStyle.Primary" Class="mr-1" /> 
     </div>
 </div>
 
@@ -164,13 +154,6 @@
         {
             await LoadListNotes();
         }
-    }
-
-    private async Task CleanOnClick()
-    {
-        textSearch = "";
-        paginationContext.CurrentPage = 1;
-        await LoadListNotes();
     }
 
     private async Task PageChanged(PagerEventArgs args)
