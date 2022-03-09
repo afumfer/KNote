@@ -1,0 +1,307 @@
+﻿@using System.IO
+
+@page "/testpage"
+
+@using KNote.Model
+
+@inject HttpClient Http
+@inject AppState appState
+@inject NavigationManager navigationManger
+@*@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment*@
+
+@implements IDisposable
+
+
+<div class="container-fluid bg-light border">
+    <div class="row">
+        <KntIndexHeader TextHead="Test page">
+        </KntIndexHeader>
+    </div>
+</div>
+
+<div class="container-fluid pt-2">    
+
+    <RadzenTabs TabPosition="TabPosition.Left">
+        <Tabs>
+
+            <RadzenTabsItem Text="&nbsp;Load data" Icon="format_list_bulleted" >
+                <div class="mt-4"></div>
+
+                <h4 class="mt-4"> Load data with OnInitializedAsync</h4>
+
+                @if (settings == null)
+                {
+                    <p><em>Loading...</em></p>
+                }
+                else
+                {
+                    foreach (var s in settings)
+                    {
+                        <p>@s</p>
+                    }
+                }
+
+                <p>@appState.AppDescription</p>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="&nbsp;Call API demo" Icon="format_list_bulleted" >
+                <div class="mt-4"></div>
+
+                <h4 class="mt-2"> Call demo api 1 </h4>
+                <p>This component demonstrates fetching data from the server.</p>
+                <button class="btn btn-primary" @onclick="LoadWeatherForecast">Load Weather Forecast</button>
+                <p>...</p>
+
+                @if (forecasts == null)
+                {
+                    <p><em>there is no data ...</em></p>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Temp. (C)</th>
+                                <th>Temp. (F)</th>
+                                <th>Summary</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var forecast in forecasts)
+                            {
+                                <tr>
+                                    <td>@forecast.Date.ToShortDateString()</td>
+                                    <td>@forecast.TemperatureC</td>
+                                    <td>@forecast.TemperatureF</td>
+                                    <td>@forecast.Summary</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="&nbsp;Call API 2" Icon="format_list_bulleted" >
+                <div class="mt-4"></div>
+
+                <h4 class="mt-2"> Call api 2, load folders (panel: @selectedPanel)</h4>
+                <p>This component demonstrates fetching data from the server.</p>
+
+                <button class="btn btn-primary" @onclick="LoadFolders">Load folders</button>
+                <p>...</p>
+
+                @if (folders == null)
+                {
+                    <p><em>Loading...</em></p>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Number</th>
+                                <th>Name</th>
+                                <th>Creation</th>
+                                <th>Modification</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var f in folders)
+                            {
+                                <tr>
+                                    <td>@f.FolderNumber</td>
+                                    <td>@f.Name</td>
+                                    <td>@f.CreationDateTime</td>
+                                    <td>@f.ModificationDateTime</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="&nbsp;Radzen lab 1" Icon="format_list_bulleted" >
+                <h4 class="mt-2"> Test Radzen Controls</h4>
+                
+                <hr />
+    
+                <RadzenButton Click="@RadzenButtonClicked" Text="Test go home"></RadzenButton>
+                <RadzenLink Icon="accessibility"  @onclick="ShowLink" Text="Go to index" />
+                <hr />
+                <RadzenPager Count="100" PageSize="10" PageNumbersCount="5" PageChanged=@(args => Console.WriteLine($"Skip: {args.Skip}, Top: {args.Top}")) />
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="&nbsp;Radzen lab 2" Icon="format_list_bulleted" >
+                <div class="mt-4"></div>
+
+                <h4 class="mt-2">Splitter</h4>
+
+                <RadzenSplitter>
+                    <RadzenSplitterPane Size="50%" Min="30px" Max="70%">
+                         <h4 class="mt-2"> Radzen TreeView (folders)</h4>
+
+                        <button class="btn btn-primary" @onclick="LoadFolders">Load folders</button>
+                        <hr />
+                        <p>@message</p>    
+
+                        <RadzenTree Data=@foldersFull Style="height: 300px" Change=@OnChange>
+                            <RadzenTreeLevel TextProperty="Name" ChildrenProperty="ChildFolders"  Expanded=@ShouldExpand HasChildren=@(f => (f as FolderDto).ChildFolders.Any()) />
+                        </RadzenTree>
+                    </RadzenSplitterPane>
+                    <RadzenSplitterPane>
+                        Pane A2 XXXXXX
+                    </RadzenSplitterPane>
+                </RadzenSplitter>
+            </RadzenTabsItem>
+
+        </Tabs>
+    </RadzenTabs>
+
+</div>
+
+<hr />
+
+
+@code {
+    private WeatherForecast[] forecasts;
+    private List<FolderInfoDto> folders = new List<FolderInfoDto>();
+    private List<FolderDto> foldersFull = new List<FolderDto>();
+    private string[] settings;
+    private int selectedPanel = 1;
+    private string message = "";
+
+
+    IEnumerable<FolderInfoDto> entries2 = new List<FolderInfoDto>();
+
+    object selectedNode = null;    
+    IEnumerable<string> entries;
+
+    protected override async Task OnInitializedAsync()
+    {
+        appState.OnChange += StateHasChanged;
+
+        settings = await Http.GetFromJsonAsync<string[]>("api/WeatherForecast/GetAppSettings");
+
+        entries = Directory.GetDirectories(@"/")
+                           .Where(entry =>
+                           {
+                               var name = Path.GetFileName(entry);
+
+                               return !name.StartsWith("$") && !name.StartsWith("System");
+                           });
+
+        selectedNode = entries.First();
+
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    private async Task LoadWeatherForecast()
+    {
+        forecasts = null;
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("api/WeatherForecast");
+
+        appState.AppDescription += "XX ";
+    }
+
+    private async Task LoadFolders()
+    {
+        folders = null;
+        foldersFull = await Http.GetFromJsonAsync<List<FolderDto>>("api/WeatherForecast/GetFoldersFull");
+        folders = await Http.GetFromJsonAsync<List<FolderInfoDto>>("api/WeatherForecast/GetFolders");
+
+        entries2 = folders.Where(f => f.ParentId == null).Select(f => f).ToList();
+
+        appState.AppMode = "Wiki";
+    }
+
+    private void ShowPanel(int panel)
+    {
+        selectedPanel = panel;
+
+        appState.AppDescription += panel.ToString();
+    }
+
+    void RadzenButtonClicked()
+    {
+        navigationManger.NavigateTo("index");
+    }
+
+
+    void OnChange(TreeEventArgs args)
+    {
+        var f = args.Value as FolderDto;
+
+        message = $"Change Item Text: {args.Text} - {f.FolderId} - {f.Name}";
+    }
+
+    void OnExpand(TreeExpandEventArgs args)
+    {
+        if (args.Value is string text)
+        {
+            message = $"Expand Text: {text}";
+        }
+    }
+
+    string GetTextForNode2(object data)
+    {
+        return ((FolderInfoDto)data).Name;
+    }
+
+    void LoadFoldersTree(TreeExpandEventArgs args)
+    {
+        var folder = args.Value as FolderInfoDto;
+
+        args.Children.Data = folders.Where(f => f.ParentId == folder.FolderId).Select(f => f).ToList();
+        args.Children.Text = GetTextForNode2;
+
+        args.Children.HasChildren = (fo) => folders.Where(f => f.ParentId == ((FolderInfoDto)fo).FolderId).Count() > 0;
+
+        //args.Children.Template = FileOrFolderTemplate;
+    }
+
+
+
+    void LoadFiles(TreeExpandEventArgs args)
+    {
+        var directory = args.Value as string;
+
+        args.Children.Data = Directory.EnumerateFileSystemEntries(directory);
+        args.Children.Text = GetTextForNode;
+        args.Children.HasChildren = (path) => Directory.Exists((string)path);
+        args.Children.Template = FileOrFolderTemplate;
+    }
+
+    string GetTextForNode(object data)
+    {
+        return Path.GetFileName((string)data);
+    }
+
+    RenderFragment<RadzenTreeItem> FileOrFolderTemplate = (context) => builder =>
+    {
+        string path = context.Value as string;
+        bool isDirectory = Directory.Exists(path);
+
+        builder.OpenComponent<RadzenIcon>(0);
+        builder.AddAttribute(1, nameof(RadzenIcon.Icon), isDirectory ? "folder" : "insert_drive_file");
+        builder.CloseComponent();        
+        builder.AddContent(3, context.Text);
+    };
+
+    bool ShouldExpand(object data)
+    {
+        var folder = data as FolderDto;
+
+        return folder.Name == "Home";
+    }
+
+    private void ShowLink()
+    {
+        navigationManger.NavigateTo("index");
+    }
+
+}
