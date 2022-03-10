@@ -1,0 +1,135 @@
+﻿@page "/notes/alarmscalendar"
+@page "/alarmscalendar"
+
+@inject IWebApiService webApiService
+@inject NavigationManager navigationManager
+@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
+<div class="container-fluid bg-light border">
+    <div class="row">
+        <KntIndexHeader TextHead="Notes alarms calendar">
+            <IndexMenu>
+                <RadzenMenu>
+                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+                </RadzenMenu>
+            </IndexMenu>
+        </KntIndexHeader>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 pt-2">
+        <RadzenSplitter> 
+
+             <RadzenSplitterPane Size="60%" Min="500px" Max="80%">   
+
+                <RadzenScheduler @ref=@scheduler  Data=@appointments LoadData="@OnLoadData" TItem="Appointment" 
+                    StartProperty="Start" EndProperty="End" TextProperty="Text" 
+                    SlotSelect=@OnSlotSelect AppointmentSelect=@OnAppointmentSelect 
+                    AppointmentRender=@OnAppointmentRender SlotRender=@OnSlotRender  
+                    SelectedIndex="2" style="height: 640px;" > 
+                    <RadzenDayView />
+                    <RadzenWeekView />
+                    <RadzenMonthView />
+                </RadzenScheduler>
+
+             </RadzenSplitterPane>
+             
+             <RadzenSplitterPane> 
+                <div class="p-2 bg-light border">
+                    Item details
+                </div>
+                <p>@itemSelected</p>
+                <p>@slotSelected</p>
+                <p>@loadData</p>
+             </RadzenSplitterPane>
+
+        </RadzenSplitter>
+    </div>
+</div>
+
+@code {
+
+    RadzenScheduler<Appointment> scheduler;
+    
+    string itemSelected = "Item selected: none";
+    string slotSelected = "Slot selected: none";
+    string loadData = "Load data: none";
+
+    IList<Appointment> appointments = new List<Appointment>
+    {
+        new Appointment { Start = DateTime.Today.AddDays(-2), End = DateTime.Today.AddDays(-2), Text = "Birthday" },
+        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "Day off" },
+        new Appointment { Start = DateTime.Today.AddDays(-10), End = DateTime.Today.AddDays(-8), Text = "Work from home" },
+        new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(12), Text = "Online meeting" },
+        new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(13), Text = "Skype call" },
+        new Appointment { Start = DateTime.Today.AddHours(14), End = DateTime.Today.AddHours(14).AddMinutes(30), Text = "Dentist appointment" },
+        new Appointment { Start = DateTime.Today.AddDays(1), End = DateTime.Today.AddDays(12), Text = "Vacation" },
+    };
+
+    protected override void OnInitialized()
+    {
+
+    }
+
+    void OnLoadData(SchedulerLoadDataEventArgs args)
+    {
+        loadData = $"Load data: {args.Start} - {args.End}";
+
+        // Get the appointments for between the Start and End
+        //data = await MyAppointmentService.GetData(args.Start, args.End);
+    }
+
+    void OnSlotRender(SchedulerSlotRenderEventArgs args) 
+    {
+        // Highlight today in month view
+        if (args.View.Text == "Month" && args.Start.Date == DateTime.Today)
+        {
+            args.Attributes["style"] = "background: rgba(255,220,40,.2);";
+        }
+
+        // Highlight working hours (9-18)
+        if ((args.View.Text == "Week" || args.View.Text == "Day") && args.Start.Hour > 8 && args.Start.Hour < 19)
+        {
+            args.Attributes["style"] = "background: rgba(255,220,40,.2);";
+        }
+    }
+
+    async Task OnSlotSelect(SchedulerSlotSelectEventArgs args)
+    {        
+        slotSelected = $"Slot selected: {args.Start.ToString()} - {args.End.ToString()}";
+        await scheduler.Reload();
+    }
+
+    async Task OnAppointmentSelect(SchedulerAppointmentSelectEventArgs<Appointment> args)
+    {
+        itemSelected = $"Item selected: {args.Data.Text} - {args.Start.ToString()} - {args.End.ToString()}";
+        await scheduler.Reload();
+    }
+
+    void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<Appointment> args)
+    {
+        // Never call StateHasChanged in AppointmentRender - would lead to infinite loop
+
+        if (args.Data.Text == "Birthday")
+        {
+            args.Attributes["style"] = "background: red";
+        }
+    }
+
+    void OnNew()
+    {
+        navigationManager.NavigateTo($"notes/new/calendar");
+    }
+
+    public class Appointment
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+        public string Text { get; set; }
+    }
+}

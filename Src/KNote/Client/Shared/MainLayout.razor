@@ -1,8 +1,4 @@
-﻿@*@using Microsoft.AspNetCore.Components*@
-@*@using Radzen.Blazor
-@using Radzen*@
-
-@using KNote.Client.Pages.Auth
+﻿@using KNote.Client.Pages.Auth
 
 @inherits LayoutComponentBase
 
@@ -52,6 +48,8 @@
                 <RadzenPanelMenuItem Text="Quick search" Path="notes/search" Icon="search"></RadzenPanelMenuItem>
                 <RadzenPanelMenuItem Text="Tree panel" Path="notes/tree" Icon="topic"></RadzenPanelMenuItem>                
                 <RadzenPanelMenuItem Text="Notes filter" Path="notes/filter" Icon="filter_alt"></RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="Tasks calendar" Path="notes/taskscalendar" Icon="calendar_today"></RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="Alarms" Path="notes/alarmscalendar" Icon="alarm"></RadzenPanelMenuItem>
                 <RadzenPanelMenuItem Text="Chat room" Path="notes/chat" Icon="chat"></RadzenPanelMenuItem>
 
                 <AuthorizeView Roles="Admin">
