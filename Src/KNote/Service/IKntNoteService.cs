@@ -33,6 +33,8 @@ namespace KNote.Service
         Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId);
         Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id);
         Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
+        Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime);
+        Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime);
         Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId);
         Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo, bool forceNew = false);       
         Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId);

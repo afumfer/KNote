@@ -23,6 +23,8 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity);
     Task<Result> DeleteResourceAsync(Guid resourceId);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
+    Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime);
+    Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime);
     Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId);
     Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity);
     Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity);        

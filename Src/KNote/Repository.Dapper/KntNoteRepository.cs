@@ -776,6 +776,43 @@ public class KntNoteRepository : KntRepositoryBase, IKntNoteRepository
         return ResultDomainAction(result);
     }
 
+    public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+    {
+        var result = new Result<List<NoteTaskDto>>();
+        try
+        {
+            var db = GetOpenConnection();
+
+            var sql = @"SELECT
+                        NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime, 
+                        NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved, 
+                        NoteTasks.EstimatedTime, NoteTasks.SpentTime, NoteTasks.DifficultyLevel, NoteTasks.ExpectedStartDate, 
+                        NoteTasks.ExpectedEndDate, NoteTasks.StartDate, NoteTasks.EndDate, Users.FullName as UserFullName
+                FROM  NoteTasks LEFT OUTER JOIN
+                        Users ON NoteTasks.UserId = Users.UserId
+                WHERE ((NoteTasks.StartDate >= @startDateTime AND NoteTasks.StartDate <= @endDateTime) OR 
+                       (NoteTasks.EndDate >= @startDateTime AND NoteTasks.EndDate <= @endDateTime) OR 
+                       (NoteTasks.StartDate < @startDateTime AND NoteTasks.EndDate is null) )
+                ORDER BY [Priority], [CreationDateTime];";
+
+            var entity = await db.QueryAsync<NoteTaskDto>(sql.ToString(), new { startDateTime, endDateTime });
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+        }
+        return ResultDomainAction(result);
+    }
+
+    public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+    {
+        throw new NotImplementedException();
+    }
+
+
     public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask)
     {            
         var result = new Result<NoteTaskDto>();

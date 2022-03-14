@@ -22,12 +22,8 @@
 
 @code {    
 
-    private List<FolderDto> foldersTree;
-    private bool ShowDialog = false;
+    private List<FolderDto> foldersTree;    
     private FolderDto folderSelected;
-
-    public void Show() => ShowDialog = true;
-    public void Hide() => ShowDialog = false;
 
     protected override async Task OnInitializedAsync()
     {

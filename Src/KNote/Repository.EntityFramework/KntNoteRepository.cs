@@ -578,6 +578,17 @@ namespace KNote.Repository.EntityFramework
             return ResultDomainAction(result);            
         }
 
+        public Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+        {
+            throw new NotImplementedException();
+        }
+
+
         public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask)
         {
             var result = new Result<NoteTaskDto>();

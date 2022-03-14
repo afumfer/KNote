@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace KNote.Server.Controllers
 {
@@ -352,9 +353,7 @@ namespace KNote.Server.Controllers
                     return Ok(resApi);
                 }
                 else
-                    return BadRequest(resApi);
-
-                
+                    return BadRequest(resApi);                
             }
             catch (Exception ex)
             {
@@ -363,6 +362,32 @@ namespace KNote.Server.Controllers
                 return BadRequest(kresApi);
             }
         }
+
+        [HttpGet("[action]")]    // GET api/notes/getnotetasks
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        public async Task<IActionResult> GetStartedTasksByDateTimeRage([FromQuery] string start, [FromQuery] string end)
+        {
+            try
+            {
+                var satartDateTime = DateTime.ParseExact(start, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                var endDateTime = DateTime.ParseExact(end, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+
+                var resApi = await _service.Notes.GetStartedTasksByDateTimeRageAsync(satartDateTime, endDateTime);
+                if (resApi.IsValid)
+                {
+                    return Ok(resApi);
+                }
+                else
+                    return BadRequest(resApi);
+            }
+            catch (Exception ex)
+            {
+                var kresApi = new Result<List<NoteTaskDto>>();
+                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+                return BadRequest(kresApi);
+            }
+        }
+
 
         [HttpDelete("[action]/{id}")]    // DELETE api/notes/deletenotetask/guid
         [Authorize(Roles = "Admin, Staff, ProjecManager")]

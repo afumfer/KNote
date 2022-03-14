@@ -14,7 +14,9 @@ public interface INoteWebApiService
     Task<Result<List<ResourceInfoDto>>> GetResourcesAsync(Guid noteId);        
     Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto entity);
     Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId);
-    Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);        
+    Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
+    Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime);
+    Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime);
     Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo);
     Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId);
 

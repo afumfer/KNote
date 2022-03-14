@@ -82,6 +82,17 @@ public class NoteWebApiService : INoteWebApiService
         return await _httpClient.GetFromJsonAsync<Result<List<NoteTaskDto>>>($"api/notes/{noteId}/GetNoteTasks");
     }
 
+    public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
+    {        
+        var url = $"api/notes/GetStartedTasksByDateTimeRage?start={startDateTime.ToString("yyyyMMddHHmmss")}&end={endDateTime.ToString("yyyyMMddHHmmss")}";
+        return await _httpClient.GetFromJsonAsync<Result<List<NoteTaskDto>>>(url);
+    }
+
+    public async Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto noteTask)
     {            
         HttpResponseMessage httpRes;
@@ -129,7 +140,6 @@ public class NoteWebApiService : INoteWebApiService
             return res;
         }
     }
-
 
 }
 

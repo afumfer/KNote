@@ -118,7 +118,7 @@
         return base.OnInitializedAsync();
     }
 
-    private async Task OnConfirm(EditContext formContext)
+    private void OnConfirm(EditContext formContext)
     {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)

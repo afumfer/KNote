@@ -62,7 +62,7 @@
 @code {
 
     RadzenScheduler<Appointment> scheduler;
-    
+
     string itemSelected = "Item selected: none";
     string slotSelected = "Slot selected: none";
     string loadData = "Load data: none";
@@ -71,6 +71,10 @@
     {
         new Appointment { Start = DateTime.Today.AddDays(-2), End = DateTime.Today.AddDays(-2), Text = "Birthday" },
         new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "Day off" },
+        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "1111111" },
+        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "2222222" },
+        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "3333333" },
+        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "44444444" },
         new Appointment { Start = DateTime.Today.AddDays(-10), End = DateTime.Today.AddDays(-8), Text = "Work from home" },
         new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(12), Text = "Online meeting" },
         new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(13), Text = "Skype call" },
@@ -83,9 +87,21 @@
 
     }
 
-    void OnLoadData(SchedulerLoadDataEventArgs args)
+    async Task OnLoadData(SchedulerLoadDataEventArgs args)
     {
         loadData = $"Load data: {args.Start} - {args.End}";
+
+        //
+        var result = await webApiService.Notes.GetStartedTasksByDateTimeAsync(args.Start, args.End);
+
+        if (result.IsValid)
+        {
+            loadData += $" - Count: {result.Entity?.Count}";
+        }
+        else
+        {
+            loadData += $" - Error: {result.Message}";
+        }
 
         // Get the appointments for between the Start and End
         //data = await MyAppointmentService.GetData(args.Start, args.End);
@@ -130,7 +146,7 @@
 
     void OnNew()
     {
-        navigationManager.NavigateTo($"notes/new/calendar");
+        navigationManager.NavigateTo($"notes/new/taskscalendar");
     }
 
     public class Appointment

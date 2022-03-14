@@ -486,6 +486,17 @@ namespace KNote.Service.Services
             return await _repository.Notes.GetNoteTasksAsync(idNote);
         }
 
+        public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+        {
+            return await _repository.Notes.GetStartedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        }
+
+        public async Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+        {
+            return await _repository.Notes.GetEstimatedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        }
+
+
         public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId)
         {            
             return await _repository.Notes.GetNoteTaskAsync(noteTaskId);
