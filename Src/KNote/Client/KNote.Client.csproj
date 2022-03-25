@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.3" PrivateAssets="all" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.3" />
-	<PackageReference Include="Radzen.Blazor" Version="3.16.7" />
+	<PackageReference Include="Radzen.Blazor" Version="3.17.1" />
   </ItemGroup>
 
   <ItemGroup>
