@@ -6,14 +6,14 @@
     <UseWindowsForms>true</UseWindowsForms>
 	<ImplicitUsings>enable</ImplicitUsings>
     <AssemblyVersion>0.0.6.1</AssemblyVersion>
-    <FileVersion>0.0.6.1</FileVersion>
+    <FileVersion>0.0.6.2</FileVersion>
     <Version>0.0.5</Version>
     <ApplicationIcon>stickyyellow_32_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.28.0" />
-    <PackageReference Include="ReverseMarkdown" Version="3.23.0" />
+    <PackageReference Include="Markdig" Version="0.30.2" />
+    <PackageReference Include="ReverseMarkdown" Version="3.23.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.IO.Ports" Version="6.0.0" />
   </ItemGroup>

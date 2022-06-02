@@ -108,13 +108,13 @@
             this.buttonAttributeEdit = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.tabResources = new System.Windows.Forms.TabPage();
+            this.labelPreview = new System.Windows.Forms.Label();
+            this.textDescriptionResource = new System.Windows.Forms.TextBox();
             this.webViewResource = new KntWebView.KWebView();
             this.buttonSaveResource = new System.Windows.Forms.Button();
             this.buttonInsertLink = new System.Windows.Forms.Button();
             this.panelPreview = new System.Windows.Forms.Panel();
             this.linkViewFile = new System.Windows.Forms.LinkLabel();
-            this.textDescriptionResource = new System.Windows.Forms.TextBox();
-            this.labelPreview = new System.Windows.Forms.Label();
             this.listViewResources = new System.Windows.Forms.ListView();
             this.buttonResourceEdit = new System.Windows.Forms.Button();
             this.buttonResourceDelete = new System.Windows.Forms.Button();
@@ -438,9 +438,9 @@
             this.webView2.ForceHttps = false;
             this.webView2.IsInitialized = false;
             this.webView2.Location = new System.Drawing.Point(40, 127);
-            this.webView2.Name = "webView2";            
-            this.webView2.ShowNavigationTools = true;
-            this.webView2.ShowStatusInfo = true;
+            this.webView2.Name = "webView2";
+            this.webView2.ShowNavigationTools = false;
+            this.webView2.ShowStatusInfo = false;
             this.webView2.Size = new System.Drawing.Size(277, 166);
             this.webView2.TabIndex = 11;
             this.webView2.TextUrl = "";
@@ -971,12 +971,12 @@
             // 
             // tabResources
             // 
+            this.tabResources.Controls.Add(this.labelPreview);
+            this.tabResources.Controls.Add(this.textDescriptionResource);
             this.tabResources.Controls.Add(this.webViewResource);
             this.tabResources.Controls.Add(this.buttonSaveResource);
             this.tabResources.Controls.Add(this.buttonInsertLink);
             this.tabResources.Controls.Add(this.panelPreview);
-            this.tabResources.Controls.Add(this.textDescriptionResource);
-            this.tabResources.Controls.Add(this.labelPreview);
             this.tabResources.Controls.Add(this.listViewResources);
             this.tabResources.Controls.Add(this.buttonResourceEdit);
             this.tabResources.Controls.Add(this.buttonResourceDelete);
@@ -992,6 +992,26 @@
             this.tabResources.ToolTipText = "Save resource file";
             this.tabResources.UseVisualStyleBackColor = true;
             // 
+            // labelPreview
+            // 
+            this.labelPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelPreview.AutoSize = true;
+            this.labelPreview.Location = new System.Drawing.Point(685, 18);
+            this.labelPreview.Name = "labelPreview";
+            this.labelPreview.Size = new System.Drawing.Size(99, 15);
+            this.labelPreview.TabIndex = 24;
+            this.labelPreview.Text = "Preview resource:";
+            // 
+            // textDescriptionResource
+            // 
+            this.textDescriptionResource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textDescriptionResource.Location = new System.Drawing.Point(396, 513);
+            this.textDescriptionResource.Multiline = true;
+            this.textDescriptionResource.Name = "textDescriptionResource";
+            this.textDescriptionResource.Size = new System.Drawing.Size(392, 52);
+            this.textDescriptionResource.TabIndex = 19;
+            // 
             // webViewResource
             // 
             this.webViewResource.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -1001,7 +1021,7 @@
             this.webViewResource.ForceHttps = false;
             this.webViewResource.IsInitialized = false;
             this.webViewResource.Location = new System.Drawing.Point(392, 39);
-            this.webViewResource.Name = "webViewResource";            
+            this.webViewResource.Name = "webViewResource";
             this.webViewResource.ShowNavigationTools = false;
             this.webViewResource.ShowStatusInfo = false;
             this.webViewResource.Size = new System.Drawing.Size(392, 157);
@@ -1038,7 +1058,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelPreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelPreview.Controls.Add(this.linkViewFile);
-            this.panelPreview.Location = new System.Drawing.Point(396, 202);
+            this.panelPreview.Location = new System.Drawing.Point(392, 202);
             this.panelPreview.Name = "panelPreview";
             this.panelPreview.Size = new System.Drawing.Size(392, 84);
             this.panelPreview.TabIndex = 18;
@@ -1055,26 +1075,6 @@
             this.linkViewFile.TabStop = true;
             this.linkViewFile.Text = "View resource file ...";
             this.linkViewFile.Click += new System.EventHandler(this.linkViewFile_Click);
-            // 
-            // textDescriptionResource
-            // 
-            this.textDescriptionResource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textDescriptionResource.Location = new System.Drawing.Point(396, 506);
-            this.textDescriptionResource.Multiline = true;
-            this.textDescriptionResource.Name = "textDescriptionResource";
-            this.textDescriptionResource.Size = new System.Drawing.Size(392, 59);
-            this.textDescriptionResource.TabIndex = 16;
-            // 
-            // labelPreview
-            // 
-            this.labelPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelPreview.AutoSize = true;
-            this.labelPreview.Location = new System.Drawing.Point(689, 18);
-            this.labelPreview.Name = "labelPreview";
-            this.labelPreview.Size = new System.Drawing.Size(99, 15);
-            this.labelPreview.TabIndex = 15;
-            this.labelPreview.Text = "Preview resource:";
             // 
             // listViewResources
             // 
@@ -1157,10 +1157,10 @@
             // 
             this.textTaskTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTaskTags.Location = new System.Drawing.Point(398, 543);
+            this.textTaskTags.Location = new System.Drawing.Point(400, 543);
             this.textTaskTags.Name = "textTaskTags";
             this.textTaskTags.Size = new System.Drawing.Size(389, 23);
-            this.textTaskTags.TabIndex = 17;
+            this.textTaskTags.TabIndex = 16;
             // 
             // label17
             // 
@@ -1528,8 +1528,7 @@
             // 
             // NoteEditorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(808, 637);
             this.Controls.Add(this.panelForm);
             this.Controls.Add(this.toolBarNoteEditor);
@@ -1643,7 +1642,6 @@
         private System.Windows.Forms.TextBox textFolderNumber;
         private System.Windows.Forms.TextBox textNoteNumber;
         private System.Windows.Forms.ListView listViewAttributes;
-        private System.Windows.Forms.Label labelPreview;
         private System.Windows.Forms.ListView listViewResources;
         private System.Windows.Forms.ListView listViewTasks;
         private System.Windows.Forms.ListView listViewAlarms;
@@ -1676,7 +1674,6 @@
         private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS1;
         private System.Windows.Forms.ToolStripSeparator toolDescriptionMarkdownS2;
         private System.Windows.Forms.ToolStripMenuItem toolDescriptionMarkdownCode;
-        private System.Windows.Forms.TextBox textDescriptionResource;
         private System.Windows.Forms.Panel panelPreview;
         private System.Windows.Forms.LinkLabel linkViewFile;
         private System.Windows.Forms.Button buttonInsertLink;
@@ -1689,7 +1686,6 @@
         private System.Windows.Forms.ToolStripButton toolDescriptionUploadResourceFromClipboard;
         private System.Windows.Forms.TextBox textStatus;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox textTaskTags;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox textTaskDescription;
         private System.Windows.Forms.Label label16;
@@ -1698,5 +1694,8 @@
         private Button buttonNavigate;
         private KntWebView.KWebView webView2;
         private KntWebView.KWebView webViewResource;
+        private TextBox textDescriptionResource;
+        private TextBox textTaskTags;
+        private Label labelPreview;
     }
 }

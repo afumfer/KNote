@@ -407,7 +407,7 @@
             this.menuFoldersExplorer.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuFoldersExplorer.Name = "menuFoldersExplorer";
             this.menuFoldersExplorer.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.menuFoldersExplorer.Size = new System.Drawing.Size(301, 22);
+            this.menuFoldersExplorer.Size = new System.Drawing.Size(263, 22);
             this.menuFoldersExplorer.Text = "&Folders explorer";
             this.menuFoldersExplorer.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -415,20 +415,20 @@
             // 
             this.menuSearchPanel.Name = "menuSearchPanel";
             this.menuSearchPanel.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.menuSearchPanel.Size = new System.Drawing.Size(301, 22);
+            this.menuSearchPanel.Size = new System.Drawing.Size(263, 22);
             this.menuSearchPanel.Text = "Search panel";
             this.menuSearchPanel.Click += new System.EventHandler(this.menu_Click);
             // 
             // menuViewS1
             // 
             this.menuViewS1.Name = "menuViewS1";
-            this.menuViewS1.Size = new System.Drawing.Size(298, 6);
+            this.menuViewS1.Size = new System.Drawing.Size(260, 6);
             // 
             // menuVerticalPanelForNotes
             // 
             this.menuVerticalPanelForNotes.Name = "menuVerticalPanelForNotes";
             this.menuVerticalPanelForNotes.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F9)));
-            this.menuVerticalPanelForNotes.Size = new System.Drawing.Size(301, 22);
+            this.menuVerticalPanelForNotes.Size = new System.Drawing.Size(263, 22);
             this.menuVerticalPanelForNotes.Text = "Vertical panel for list notes";
             this.menuVerticalPanelForNotes.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -439,7 +439,7 @@
             this.menuHeaderPanelVisible.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuHeaderPanelVisible.Name = "menuHeaderPanelVisible";
             this.menuHeaderPanelVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F10)));
-            this.menuHeaderPanelVisible.Size = new System.Drawing.Size(301, 22);
+            this.menuHeaderPanelVisible.Size = new System.Drawing.Size(263, 22);
             this.menuHeaderPanelVisible.Text = "Show header panel";
             this.menuHeaderPanelVisible.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -449,7 +449,7 @@
             this.menuToolbarVisible.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuToolbarVisible.Name = "menuToolbarVisible";
             this.menuToolbarVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F11)));
-            this.menuToolbarVisible.Size = new System.Drawing.Size(301, 22);
+            this.menuToolbarVisible.Size = new System.Drawing.Size(263, 22);
             this.menuToolbarVisible.Text = "Show toolbar";
             this.menuToolbarVisible.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -460,7 +460,7 @@
             this.menuMainVisible.CheckState = System.Windows.Forms.CheckState.Checked;
             this.menuMainVisible.Name = "menuMainVisible";
             this.menuMainVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F12)));
-            this.menuMainVisible.Size = new System.Drawing.Size(301, 22);
+            this.menuMainVisible.Size = new System.Drawing.Size(263, 22);
             this.menuMainVisible.Text = "Show main menu";
             this.menuMainVisible.Click += new System.EventHandler(this.menu_Click);
             // 
@@ -798,8 +798,7 @@
             // 
             // KNoteManagmentForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(1014, 690);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.panelSupManagment);

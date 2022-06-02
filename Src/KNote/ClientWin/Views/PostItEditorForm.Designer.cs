@@ -189,7 +189,7 @@ namespace KNote.ClientWin.Views
             this.menuAlarmWithin,
             this.menuMoreActions});
             this.menuPostIt.Name = "menuPostIt";
-            this.menuPostIt.Size = new System.Drawing.Size(216, 214);
+            this.menuPostIt.Size = new System.Drawing.Size(216, 192);
             // 
             // menuHide
             // 
@@ -369,8 +369,7 @@ namespace KNote.ClientWin.Views
             // 
             // PostItEditorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.BackColor = System.Drawing.SystemColors.Info;
             this.ClientSize = new System.Drawing.Size(481, 342);
             this.ControlBox = false;
