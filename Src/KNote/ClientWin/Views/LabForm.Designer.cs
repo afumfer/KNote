@@ -452,7 +452,7 @@
             this.textHuIdsRedmine.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textHuIdsRedmine.Size = new System.Drawing.Size(273, 394);
             this.textHuIdsRedmine.TabIndex = 5;
-            this.textHuIdsRedmine.Text = "146149";
+            this.textHuIdsRedmine.Text = "173755";
             // 
             // textApiKey
             // 

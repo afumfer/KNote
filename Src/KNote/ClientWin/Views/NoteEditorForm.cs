@@ -225,6 +225,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
     private void buttonViewHtml_Click(object sender, EventArgs e)
     {
+        // TODO: !!! use try catch here ...
         var MarkdownContent = textDescription.Text;
         var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
         var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);

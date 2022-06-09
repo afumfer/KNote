@@ -30,8 +30,8 @@ public partial class LabForm : Form
 
     public LabForm()
     {
-        InitializeComponent();    
-            
+        InitializeComponent();
+
 
     }
 
@@ -41,7 +41,7 @@ public partial class LabForm : Form
     }
     private async void LabForm_Load(object sender, EventArgs e)
     {
-        if(Directory.Exists(_pathSampleScripts))
+        if (Directory.Exists(_pathSampleScripts))
             LoadListScripts(_pathSampleScripts);
 
         webView2.CoreWebView2InitializationCompleted += WebView2_CoreWebView2InitializationCompleted;
@@ -51,7 +51,7 @@ public partial class LabForm : Form
         await webView2.EnsureCoreWebView2Async(null);
 
         if ((webView2 == null) || (webView2.CoreWebView2 == null))
-        {                
+        {
             textStatusWebView2.Text = "webView2 not ready";
         }
 
@@ -80,7 +80,7 @@ public partial class LabForm : Form
                         readvar {""Example input str var:"": str };
                         printline str;
                         printline ""<< end >>"";                            
-                    ");            
+                    ");
     }
 
     private void buttonInteract_Click(object sender, EventArgs e)
@@ -138,7 +138,7 @@ public partial class LabForm : Form
         // --- Asynchronous version
         var t = new Thread(() => kntScript.Run(code));
         t.IsBackground = false;
-        t.Start();            
+        t.Start();
     }
 
     private void buttonShowConsole_Click(object sender, EventArgs e)
@@ -165,7 +165,7 @@ public partial class LabForm : Form
 
         var com = new KntScriptConsoleComponent(_store);
         com.KntSEngine = kntEngine;
-        com.CodeFile = Path.Combine(_pathSampleScripts , _selectedFile);
+        com.CodeFile = Path.Combine(_pathSampleScripts, _selectedFile);
 
         com.Run();
         //KntScriptConsoleForm f = new KntScriptConsoleForm(com);
@@ -177,7 +177,7 @@ public partial class LabForm : Form
         if (string.IsNullOrEmpty(_selectedFile))
         {
             MessageBox.Show("File no seleted.");
-            return;                   
+            return;
         }
 
         var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
@@ -351,7 +351,7 @@ public partial class LabForm : Form
 
     private async void buttonTest4_Click(object sender, EventArgs e)
     {
-        if(_store.ActiveFolderWithServiceRef == null)
+        if (_store.ActiveFolderWithServiceRef == null)
         {
             MessageBox.Show("There is no archive selected ");
             return;
@@ -364,8 +364,8 @@ public partial class LabForm : Form
         var userDto = (await service.Users.GetByUserNameAsync(_store.AppUserName)).Entity;
         if (userDto != null)
             userId = userDto.UserId;
-            
-        if(userId == null)
+
+        if (userId == null)
         {
             MessageBox.Show("There is no valid user to import data ");
             return;
@@ -379,7 +379,7 @@ public partial class LabForm : Form
         {
             xmlFile = openFileDialog.FileName;
         }
-            
+
         try
         {
             if (!File.Exists(xmlFile))
@@ -403,7 +403,7 @@ public partial class LabForm : Form
                         else
                             desEtiqueta = e.DesEtiqueta;
 
-                        return new EtiquetaExport{ CodEtiqueta = e.CodEtiqueta, DesEtiqueta = desEtiqueta, CodPadre = e.CodPadre };
+                        return new EtiquetaExport { CodEtiqueta = e.CodEtiqueta, DesEtiqueta = desEtiqueta, CodPadre = e.CodPadre };
                     }
                 )
                 .OrderBy(e => e.DesEtiqueta).ToList();
@@ -425,7 +425,7 @@ public partial class LabForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message);                
+            MessageBox.Show(ex.Message);
         }
 
         MessageBox.Show("Process finished ");
@@ -437,7 +437,7 @@ public partial class LabForm : Form
         var allNotes = (await service.Notes.GetAllAsync()).Entity;
         var i = 0;
         var nRegs = allNotes.Count;
-        foreach(var n in allNotes)
+        foreach (var n in allNotes)
         {
             i++;
 
@@ -445,16 +445,16 @@ public partial class LabForm : Form
             {
                 var tags = ProcessTag(n.Tags);
                 var note = (await service.Notes.GetAsync(n.NoteId)).Entity;
-                foreach(var t in tags)
+                foreach (var t in tags)
                 {
-                    foreach(var atr in note.KAttributesDto)
+                    foreach (var atr in note.KAttributesDto)
                     {
                         if (atr.Description.Contains(t.Key))
                         {
 
                             // TODO: hay que quitar el ! inicial
                             var etiqueta = etiquetas.Find(e => e.CodEtiqueta == t.Value);
-                            if(etiqueta != null)
+                            if (etiqueta != null)
                             {
                                 if (!string.IsNullOrEmpty(atr.Value))
                                     atr.Value += ", ";
@@ -468,7 +468,7 @@ public partial class LabForm : Form
                 label1.Text = $"{note.NoteId} - {i}/{nRegs}";
                 label2.Text = note.Tags.ToString();
                 var resSave = await service.Notes.SaveAsync(note);
-            }                
+            }
         }
 
         return await Task.FromResult<bool>(true);
@@ -511,7 +511,7 @@ public partial class LabForm : Form
 
         foreach (var e in filtroEtiquetas)
         {
-                
+
             listMessages.Items.Add($"{e.DesEtiqueta} - {e.CodEtiqueta} - {e.CodPadre?.ToString()}");
             KAttributeDto attributeDto = new KAttributeDto
             {
@@ -520,7 +520,7 @@ public partial class LabForm : Form
                 KAttributeDataType = EnumKAttributeDataType.TagsValue,
                 Disabled = false,
                 Order = orderAtr++,
-                RequiredValue = false                    
+                RequiredValue = false
             };
 
             var tabulatedValues = etiquetas.Where(ev => ev.CodPadre == e.CodEtiqueta).Select(ev => ev).ToList();
@@ -528,7 +528,7 @@ public partial class LabForm : Form
             orderAtrTab = 0;
             foreach (var t in tabulatedValues)
             {
-                    
+
                 KAttributeTabulatedValueDto atrValue = new KAttributeTabulatedValueDto
                 {
                     Value = t.DesEtiqueta,
@@ -541,7 +541,7 @@ public partial class LabForm : Form
             attributeDto.KAttributeValues = tabulatedValuesAtr;
 
             // Hack import TareasDesarrolloDB
-            if(attributeDto.Name == "Consejería de Educación")
+            if (attributeDto.Name == "Consejería de Educación")
             {
                 attributeDto.Name = "00 - Usuario Consejería de Educación";
                 attributeDto.Description = $"[{e.CodEtiqueta}] - " + attributeDto.Name;
@@ -557,7 +557,7 @@ public partial class LabForm : Form
             //    attributeDto.Name = attributeDto.Name.Substring(1, attributeDto.Name.Length - 1 );
 
             // Save Data
-            var res = await service.KAttributes.SaveAsync(attributeDto);                
+            var res = await service.KAttributes.SaveAsync(attributeDto);
         }
 
         return await Task.FromResult<bool>(true);
@@ -567,7 +567,7 @@ public partial class LabForm : Form
     {
         string r11 = "\r\n";
         string r12 = "\n";
-            
+
         string r21 = "&#x";
         string r22 = "$$$";
 
@@ -614,14 +614,14 @@ public partial class LabForm : Form
             OrderNotes = carpetaExport.OrdenNotas,
             ParentId = parent
         };
-            
+
         var resNewFolder = await service.Folders.SaveAsync(newFolderDto);
         label1.Text = $"Added folder: {resNewFolder.Entity?.Name}";
         label1.Refresh();
 
         var folder = resNewFolder.Entity;
 
-        foreach(var n in carpetaExport.Notas)
+        foreach (var n in carpetaExport.Notas)
         {
             try
             {
@@ -694,7 +694,7 @@ public partial class LabForm : Form
                     {
                         NoteId = Guid.Empty,
                         UserId = (Guid)userId,
-                        CreationDateTime = n.FechaHoraCreacion,                            
+                        CreationDateTime = n.FechaHoraCreacion,
                         ModificationDateTime = fecMod,
                         Description = newNote.Topic,
                         Tags = "(ANotas import)",
@@ -802,8 +802,8 @@ public partial class LabForm : Form
                     if (n.NotaEx[0] == '\\')
                         n.NotaEx = n.NotaEx.Substring(1);
 
-                    string fileImport = Path.Combine( new[] { service.RepositoryRef.ResourcesContainerCacheRootPath, service.RepositoryRef.ResourcesContainer, n.NotaEx });
-                        
+                    string fileImport = Path.Combine(new[] { service.RepositoryRef.ResourcesContainerCacheRootPath, service.RepositoryRef.ResourcesContainer, n.NotaEx });
+
                     ResourceDto resource = new ResourceDto
                     {
                         NoteId = Guid.Empty,
@@ -869,7 +869,7 @@ public partial class LabForm : Form
             {
                 // TODO: hack, hay un registro erróneo en la exportación. 
                 nErrors++;
-                if(nErrors > 1)
+                if (nErrors > 1)
                     MessageBox.Show($"Más de error. Error: {ex.Message}");
                 //throw;
             }
@@ -877,7 +877,7 @@ public partial class LabForm : Form
         }
 
         // For each folder child all recursively  to this method
-        foreach(var c in carpetaExport.CarpetasHijas)
+        foreach (var c in carpetaExport.CarpetasHijas)
         {
             await SaveFolderDto(service, userId, c, folder.FolderId, etiquetas);
         }
@@ -895,12 +895,12 @@ public partial class LabForm : Form
         {
             DirectoryInfo directory = new DirectoryInfo(pathSampleScripts);
             FileInfo[] files = directory.GetFiles("*.knts");
-                
+
             foreach (var file in files)
                 listSamples.Items.Add(file.Name);
         }
-        else            
-            MessageBox.Show("{0} is not a valid directory.", _pathSampleScripts);            
+        else
+            MessageBox.Show("{0} is not a valid directory.", _pathSampleScripts);
     }
 
     private (string, string) ExtractAnTScriptCode(string descriptionIn)
@@ -951,7 +951,7 @@ public partial class LabForm : Form
     }
 
     private void WebView2_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
-    {        
+    {
         //textStatusWebView2.Text = webView2.Source.ToString();
     }
 
@@ -976,22 +976,106 @@ public partial class LabForm : Form
 
     #region KntRedmineApi
 
-    private void buttonTestKntRedmineApi_Click(object sender, EventArgs e)
+    private async void buttonTestKntRedmineApi_Click(object sender, EventArgs e)
     {
+        if (_store.ActiveFolderWithServiceRef == null)
+        {
+            MessageBox.Show("There is no archive selected ");
+            return;
+        }
+
+        var serviceRef = _store.ActiveFolderWithServiceRef.ServiceRef;
+        var service = serviceRef.Service;
+
+        Guid? userId = null;
+        var userDto = (await service.Users.GetByUserNameAsync(_store.AppUserName)).Entity;
+        if (userDto != null)
+            userId = userDto.UserId;
+
+        if (userId == null)
+        {
+            MessageBox.Show("There is no valid user to import data ");
+            return;
+        }
+
+        var folder = (await service.Folders.GetHomeAsync()).Entity;
+
+        // ----
+
         _store.AppConfig.HostRedmine = textHost.Text;
         _store.AppConfig.ApiKeyRedmine = textApiKey.Text;
 
         var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
+        var filter = new NotesFilterDto();
 
-        var note = new NoteDto();
+        var hhuu = GetHUs(textHuIdsRedmine.Text);
 
-        var res = manager.IssueToNoteDto(textHuIdsRedmine.Text, note);
+        foreach(var hu in hhuu)
+        {
+            var note = (await service.Notes.NewAsync()).Entity;
 
-        listInfoRedmine.Items.Add($"{note.NoteNumber} - {note.Topic}");
+            filter.Tags = $"HU#{hu}";
+            note.Tags = $"HU#{hu}";
+
+            var notes = (await service.Notes.GetFilter(filter)).Entity;
+
+            if (notes != null)
+            {
+                if (notes.Count > 0)
+                    note = notes[0].GetSimpleDto<NoteDto>();
+            }
+
+            note.FolderId = folder.FolderId;
+
+            var res = manager.IssueToNoteDto(hu, note);
+
+            if (res)
+            {
+                var resSaveNote = await service.Notes.SaveAsync(note);
+                listInfoRedmine.Items.Add($"{note.NoteNumber} - {note.Topic}");
+                listInfoRedmine.Refresh();
+            }
+            else
+            {
+                listInfoRedmine.Items.Add($"Error");
+                listInfoRedmine.Refresh();
+            }
+        }
+
+
 
     }
 
+    private string[] GetHUs(string strHU)
+    {
+        var ids = @"173755
+173771
+173785
+173913
+173952
+173983
+174018
+174097
+174131
+174132
+174169
+174177
+174206
+174438
+174692
+174821
+174841
+174886
+174887
+174957
+174986
+175053
+175158
+175270
+175271";
 
+        return ids.Split("\r\n");
+    }
 
     #endregion
 }
