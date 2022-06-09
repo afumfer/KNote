@@ -57,7 +57,16 @@
             this.btnNavigate = new System.Windows.Forms.Button();
             this.textStatusWebView2 = new System.Windows.Forms.TextBox();
             this.textUrlWebView2 = new System.Windows.Forms.TextBox();
-            this.tabBlazorWebView = new System.Windows.Forms.TabPage();
+            this.tabRedMineLab = new System.Windows.Forms.TabPage();
+            this.label6 = new System.Windows.Forms.Label();
+            this.listInfoRedmine = new System.Windows.Forms.ListBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textHuIdsRedmine = new System.Windows.Forms.TextBox();
+            this.textApiKey = new System.Windows.Forms.TextBox();
+            this.textHost = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.buttonTestKntRedmineApi = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.tabControlLab.SuspendLayout();
             this.tabAppLab.SuspendLayout();
@@ -66,6 +75,7 @@
             this.tabRichEditor.SuspendLayout();
             this.tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
+            this.tabRedMineLab.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControlLab
@@ -77,7 +87,7 @@
             this.tabControlLab.Controls.Add(this.tabKntScriptLab);
             this.tabControlLab.Controls.Add(this.tabRichEditor);
             this.tabControlLab.Controls.Add(this.tabWebView2);
-            this.tabControlLab.Controls.Add(this.tabBlazorWebView);
+            this.tabControlLab.Controls.Add(this.tabRedMineLab);
             this.tabControlLab.Location = new System.Drawing.Point(12, 12);
             this.tabControlLab.Name = "tabControlLab";
             this.tabControlLab.SelectedIndex = 0;
@@ -104,7 +114,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(316, 102);
+            this.button3.Location = new System.Drawing.Point(14, 164);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(296, 26);
             this.button3.TabIndex = 11;
@@ -116,7 +126,7 @@
             // 
             this.button2.Location = new System.Drawing.Point(14, 133);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(294, 25);
+            this.button2.Size = new System.Drawing.Size(296, 25);
             this.button2.TabIndex = 10;
             this.button2.Text = "Test ProcessStart";
             this.button2.UseVisualStyleBackColor = true;
@@ -166,7 +176,7 @@
             // 
             this.buttonTest4.Location = new System.Drawing.Point(12, 51);
             this.buttonTest4.Name = "buttonTest4";
-            this.buttonTest4.Size = new System.Drawing.Size(300, 28);
+            this.buttonTest4.Size = new System.Drawing.Size(298, 28);
             this.buttonTest4.TabIndex = 5;
             this.buttonTest4.Text = "Import anotas xml";
             this.buttonTest4.UseVisualStyleBackColor = true;
@@ -176,7 +186,7 @@
             // 
             this.buttonTest1.Location = new System.Drawing.Point(13, 16);
             this.buttonTest1.Name = "buttonTest1";
-            this.buttonTest1.Size = new System.Drawing.Size(300, 28);
+            this.buttonTest1.Size = new System.Drawing.Size(297, 28);
             this.buttonTest1.TabIndex = 2;
             this.buttonTest1.Text = "Run monitor";
             this.buttonTest1.UseVisualStyleBackColor = true;
@@ -331,6 +341,7 @@
             // 
             // webView2
             // 
+            this.webView2.AllowExternalDrop = true;
             this.webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -383,14 +394,112 @@
             this.textUrlWebView2.TabIndex = 0;
             this.textUrlWebView2.Text = "https://www.gobiernodecanarias.org/educacion/9/pekweb/ekade";
             // 
-            // tabBlazorWebView
+            // tabRedMineLab
             // 
-            this.tabBlazorWebView.Location = new System.Drawing.Point(4, 24);
-            this.tabBlazorWebView.Name = "tabBlazorWebView";
-            this.tabBlazorWebView.Size = new System.Drawing.Size(662, 549);
-            this.tabBlazorWebView.TabIndex = 4;
-            this.tabBlazorWebView.Text = "Blazor WebView";
-            this.tabBlazorWebView.UseVisualStyleBackColor = true;
+            this.tabRedMineLab.Controls.Add(this.label6);
+            this.tabRedMineLab.Controls.Add(this.listInfoRedmine);
+            this.tabRedMineLab.Controls.Add(this.label5);
+            this.tabRedMineLab.Controls.Add(this.textHuIdsRedmine);
+            this.tabRedMineLab.Controls.Add(this.textApiKey);
+            this.tabRedMineLab.Controls.Add(this.textHost);
+            this.tabRedMineLab.Controls.Add(this.label4);
+            this.tabRedMineLab.Controls.Add(this.label3);
+            this.tabRedMineLab.Controls.Add(this.buttonTestKntRedmineApi);
+            this.tabRedMineLab.Location = new System.Drawing.Point(4, 24);
+            this.tabRedMineLab.Name = "tabRedMineLab";
+            this.tabRedMineLab.Size = new System.Drawing.Size(662, 549);
+            this.tabRedMineLab.TabIndex = 4;
+            this.tabRedMineLab.Text = "RedMine lab";
+            this.tabRedMineLab.UseVisualStyleBackColor = true;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(291, 118);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(28, 15);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "Info";
+            // 
+            // listInfoRedmine
+            // 
+            this.listInfoRedmine.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listInfoRedmine.FormattingEnabled = true;
+            this.listInfoRedmine.ItemHeight = 15;
+            this.listInfoRedmine.Location = new System.Drawing.Point(291, 136);
+            this.listInfoRedmine.Name = "listInfoRedmine";
+            this.listInfoRedmine.Size = new System.Drawing.Size(358, 394);
+            this.listInfoRedmine.TabIndex = 7;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 118);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(43, 15);
+            this.label5.TabIndex = 6;
+            this.label5.Text = "HU IDs";
+            // 
+            // textHuIdsRedmine
+            // 
+            this.textHuIdsRedmine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.textHuIdsRedmine.Location = new System.Drawing.Point(12, 136);
+            this.textHuIdsRedmine.Multiline = true;
+            this.textHuIdsRedmine.Name = "textHuIdsRedmine";
+            this.textHuIdsRedmine.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textHuIdsRedmine.Size = new System.Drawing.Size(273, 394);
+            this.textHuIdsRedmine.TabIndex = 5;
+            this.textHuIdsRedmine.Text = "146149";
+            // 
+            // textApiKey
+            // 
+            this.textApiKey.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textApiKey.Location = new System.Drawing.Point(12, 75);
+            this.textApiKey.Name = "textApiKey";
+            this.textApiKey.Size = new System.Drawing.Size(457, 23);
+            this.textApiKey.TabIndex = 4;
+            // 
+            // textHost
+            // 
+            this.textHost.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textHost.Location = new System.Drawing.Point(12, 25);
+            this.textHost.Name = "textHost";
+            this.textHost.Size = new System.Drawing.Size(457, 23);
+            this.textHost.TabIndex = 3;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(10, 57);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(44, 15);
+            this.label4.TabIndex = 2;
+            this.label4.Text = "ApiKey";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(10, 8);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(32, 15);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "Host";
+            // 
+            // buttonTestKntRedmineApi
+            // 
+            this.buttonTestKntRedmineApi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonTestKntRedmineApi.Location = new System.Drawing.Point(503, 25);
+            this.buttonTestKntRedmineApi.Name = "buttonTestKntRedmineApi";
+            this.buttonTestKntRedmineApi.Size = new System.Drawing.Size(144, 27);
+            this.buttonTestKntRedmineApi.TabIndex = 0;
+            this.buttonTestKntRedmineApi.Text = "Test KntRedmineApi";
+            this.buttonTestKntRedmineApi.UseVisualStyleBackColor = true;
+            this.buttonTestKntRedmineApi.Click += new System.EventHandler(this.buttonTestKntRedmineApi_Click);
             // 
             // LabForm
             // 
@@ -401,7 +510,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LabForm";
             this.Text = "KntScript AppHost demo";
-            this.Load += new System.EventHandler(this.DemoForm_Load);
+            this.Load += new System.EventHandler(this.LabForm_Load);
             this.tabControlLab.ResumeLayout(false);
             this.tabAppLab.ResumeLayout(false);
             this.tabAppLab.PerformLayout();
@@ -411,6 +520,8 @@
             this.tabWebView2.ResumeLayout(false);
             this.tabWebView2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
+            this.tabRedMineLab.ResumeLayout(false);
+            this.tabRedMineLab.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -440,11 +551,20 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private TabPage tabWebView2;
-        private TabPage tabBlazorWebView;
+        private TabPage tabRedMineLab;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
         private Button btnGoBack;
         private Button btnNavigate;
         private TextBox textStatusWebView2;
         private TextBox textUrlWebView2;
+        private Button buttonTestKntRedmineApi;
+        private TextBox textApiKey;
+        private TextBox textHost;
+        private Label label4;
+        private Label label3;
+        private TextBox textHuIdsRedmine;
+        private Label label6;
+        private ListBox listInfoRedmine;
+        private Label label5;
     }
 }

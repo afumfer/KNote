@@ -11,7 +11,9 @@ using KNote.Service;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace KNote.ClientWin.Views; 
+using KntRedmineApi;
+
+namespace KNote.ClientWin.Views;
 
 public partial class LabForm : Form
 {
@@ -37,7 +39,7 @@ public partial class LabForm : Form
     {
         _store = store;
     }
-    private async void DemoForm_Load(object sender, EventArgs e)
+    private async void LabForm_Load(object sender, EventArgs e)
     {
         if(Directory.Exists(_pathSampleScripts))
             LoadListScripts(_pathSampleScripts);
@@ -52,6 +54,9 @@ public partial class LabForm : Form
         {                
             textStatusWebView2.Text = "webView2 not ready";
         }
+
+        textHost.Text = _store.AppConfig.HostRedmine;
+        textApiKey.Text = _store.AppConfig.ApiKeyRedmine;
 
     }
 
@@ -189,11 +194,160 @@ public partial class LabForm : Form
 
     #region Form events handlers (app lab)
 
+    private void buttonSelectScriptDirectory_Click(object sender, EventArgs e)
+    {
+        using (var fbd = new FolderBrowserDialog())
+        {
+            DialogResult result = fbd.ShowDialog();
+
+            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+            {
+                _pathSampleScripts = fbd.SelectedPath;
+                listSamples.Items.Clear();
+                LoadListScripts(_pathSampleScripts);
+            }
+        }
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        var listVars = new List<ReadVarItem>();
+
+        listVars.Add(new ReadVarItem
+        {
+            Label = "Type new tag:",
+            VarIdent = "Tag",
+            VarValue = "",
+            VarNewValueText = ""
+        });
+
+        var formReadVar = new ReadVarForm(listVars);
+        formReadVar.Text = "Tags for selected notes";
+        formReadVar.Size = new Size(500, 150);
+        var result = formReadVar.ShowDialog();
+
+        if (result == DialogResult.Cancel)
+            MessageBox.Show("Cancel");
+        else
+        {
+            var xx = listVars[0].VarNewValueText;
+            MessageBox.Show(xx);
+        }
+
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        string url = @"https://github.com/afumfer/kntscript/blob/master/README.md";
+
+        try
+        {
+            Process.Start(url);
+        }
+        catch
+        {
+            // hack because of this: https://github.com/dotnet/corefx/issues/10361
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                url = url.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Process.Start("xdg-open", url);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", url);
+            }
+            else
+            {
+                throw;
+            }
+        }
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        var attribute = new KAttributeDto();
+
+        attribute.NoteTypeDto = new NoteTypeDto { Description = "aaa", Name = "bbbbb", NoteTypeId = Guid.NewGuid(), ParenNoteTypeId = null };
+
+        attribute.KAttributeValues.Add(new KAttributeTabulatedValueDto
+        {
+            Description = "bbb",
+            KAttributeId = Guid.NewGuid()
+            ,
+            KAttributeTabulatedValueId = Guid.NewGuid(),
+            Order = 1,
+            Value = "111"
+        });
+
+        listMessages.Items.Add("TEST IsDirty: ");
+        listMessages.Items.Add("----------------");
+        listMessages.Items.Add("Original value IsDirty: " + attribute.IsDirty());
+        listMessages.Items.Add("Original value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
+        foreach (var a in attribute.KAttributeValues)
+            listMessages.Items.Add("Original value KAttributeValue IsDirty: " + a.IsDirty());
+
+        attribute.SetIsDirty(false);
+        listMessages.Items.Add("==== changed IsDirty attribute to false with SetIsDirty()");
+
+        listMessages.Items.Add("Changed value IsDirty: " + attribute.IsDirty());
+        listMessages.Items.Add("Changed value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
+        foreach (var a in attribute.KAttributeValues)
+            listMessages.Items.Add("Changed value KAttributeValue IsDirty: " + a.IsDirty());
+
+        attribute.KAttributeValues[0].Value = "222";
+        listMessages.Items.Add("==== changed value to child object");
+
+        listMessages.Items.Add("Changed value IsDirty: " + attribute.IsDirty());
+        listMessages.Items.Add("Changed value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
+        foreach (var a in attribute.KAttributeValues)
+            listMessages.Items.Add("Changed value KAttributeValue IsDirty: " + a.IsDirty());
+
+        listMessages.Items.Add("");
+        listMessages.Items.Add("TEST IsValid: ");
+        listMessages.Items.Add("----------------");
+        listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
+        listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
+        foreach (var a in attribute.KAttributeValues)
+            listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
+
+        attribute.Name = "ZZZZZZZZZZ";
+
+        listMessages.Items.Add("--OK --------------");
+        listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
+        listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
+        foreach (var a in attribute.KAttributeValues)
+            listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
+
+        attribute.KAttributeValues[0].Value = "";
+
+        listMessages.Items.Add("--Error --------------");
+        listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
+        listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
+        foreach (var a in attribute.KAttributeValues)
+            listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
+
+        attribute.NoteTypeDto.Name = "";
+        attribute.Name = "";
+        listMessages.Items.Add("--GetErrorMessage --------------");
+        var errMsg = attribute.GetErrorMessage(false);
+        listMessages.Items.Add(errMsg);
+        errMsg = attribute.GetErrorMessage();
+        listMessages.Items.Add(errMsg);
+    }
+
     private void buttonTest1_Click(object sender, EventArgs e)
     {
         var monitor = new MonitorComponent(_store);
         monitor.Run();
     }
+
+    #endregion
+
+    #region ANotas import
 
     private async void buttonTest4_Click(object sender, EventArgs e)
     {
@@ -749,88 +903,12 @@ public partial class LabForm : Form
             MessageBox.Show("{0} is not a valid directory.", _pathSampleScripts);            
     }
 
-    #endregion
-
-    private void buttonSelectScriptDirectory_Click(object sender, EventArgs e)
-    {
-        using (var fbd = new FolderBrowserDialog())
-        {
-            DialogResult result = fbd.ShowDialog();
-
-            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-            {
-                _pathSampleScripts = fbd.SelectedPath;
-                listSamples.Items.Clear();
-                LoadListScripts(_pathSampleScripts);
-            }
-        }
-    }
-
-    private void button1_Click(object sender, EventArgs e)
-    {
-        var listVars = new List<ReadVarItem>();
-
-        listVars.Add(new ReadVarItem
-        {
-            Label = "Type new tag:",
-            VarIdent = "Tag",
-            VarValue = "",
-            VarNewValueText = ""
-        });
-
-        var formReadVar = new ReadVarForm(listVars);
-        formReadVar.Text = "Tags for selected notes";
-        formReadVar.Size = new Size(500, 150);
-        var result = formReadVar.ShowDialog();
-
-        if(result == DialogResult.Cancel)
-            MessageBox.Show("Cancel");
-        else
-        {
-            var xx = listVars[0].VarNewValueText;
-            MessageBox.Show(xx);
-        }
-
-    }
-
-    private void button2_Click(object sender, EventArgs e)
-    {
-        string url = @"https://github.com/afumfer/kntscript/blob/master/README.md";
-
-        try
-        {
-            Process.Start(url);
-        }
-        catch
-        {
-            // hack because of this: https://github.com/dotnet/corefx/issues/10361
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Process.Start("xdg-open", url);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                Process.Start("open", url);
-            }
-            else
-            {
-                throw;
-            }
-        }
-    }
-
-
-    public (string, string) ExtractAnTScriptCode(string descriptionIn)
+    private (string, string) ExtractAnTScriptCode(string descriptionIn)
     {
         int indFrom, indTo, lenCode;
 
         if (string.IsNullOrEmpty(descriptionIn))
-            return (descriptionIn, null) ;
+            return (descriptionIn, null);
 
         indFrom = descriptionIn.IndexOf("[!AnTScript]");
         indFrom = (indFrom >= 0) ? indFrom + 12 : -1;
@@ -854,80 +932,10 @@ public partial class LabForm : Form
 
             return (DescriptionOut, ScriptOut);
         }
-            
+
     }
 
-    private void button3_Click(object sender, EventArgs e)
-    {
-        var attribute = new KAttributeDto();           
-
-        attribute.NoteTypeDto = new NoteTypeDto { Description = "aaa", Name = "bbbbb", NoteTypeId = Guid.NewGuid(), ParenNoteTypeId = null };
-
-        attribute.KAttributeValues.Add(new KAttributeTabulatedValueDto
-        {
-            Description = "bbb",
-            KAttributeId = Guid.NewGuid()
-            ,
-            KAttributeTabulatedValueId = Guid.NewGuid(),
-            Order = 1,
-            Value = "111"
-        });
-
-        listMessages.Items.Add("TEST IsDirty: ");
-        listMessages.Items.Add("----------------");
-        listMessages.Items.Add("Original value IsDirty: " + attribute.IsDirty());
-        listMessages.Items.Add("Original value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
-        foreach(var a in attribute.KAttributeValues)
-            listMessages.Items.Add("Original value KAttributeValue IsDirty: " + a.IsDirty());
-            
-        attribute.SetIsDirty(false);
-        listMessages.Items.Add("==== changed IsDirty attribute to false with SetIsDirty()");
-
-        listMessages.Items.Add("Changed value IsDirty: " + attribute.IsDirty());
-        listMessages.Items.Add("Changed value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
-        foreach (var a in attribute.KAttributeValues)
-            listMessages.Items.Add("Changed value KAttributeValue IsDirty: " + a.IsDirty());
-
-        attribute.KAttributeValues[0].Value = "222";
-        listMessages.Items.Add("==== changed value to child object");
-
-        listMessages.Items.Add("Changed value IsDirty: " + attribute.IsDirty());
-        listMessages.Items.Add("Changed value NoteType IsDirty: " + attribute.NoteTypeDto.IsDirty());
-        foreach (var a in attribute.KAttributeValues)
-            listMessages.Items.Add("Changed value KAttributeValue IsDirty: " + a.IsDirty());
-
-        listMessages.Items.Add("");
-        listMessages.Items.Add("TEST IsValid: ");
-        listMessages.Items.Add("----------------");
-        listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
-        listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
-        foreach (var a in attribute.KAttributeValues)
-            listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
-
-        attribute.Name = "ZZZZZZZZZZ";
-
-        listMessages.Items.Add("--OK --------------");
-        listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
-        listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
-        foreach (var a in attribute.KAttributeValues)
-            listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
-
-        attribute.KAttributeValues[0].Value = "";
-
-        listMessages.Items.Add("--Error --------------");
-        listMessages.Items.Add("Original value IsValid: " + attribute.IsValid());
-        listMessages.Items.Add("Original value NoteType IsValid: " + attribute.NoteTypeDto.IsValid());
-        foreach (var a in attribute.KAttributeValues)
-            listMessages.Items.Add("Original value KAttributeValue IsValid: " + a.IsValid());
-
-        attribute.NoteTypeDto.Name = "";
-        attribute.Name = "";
-        listMessages.Items.Add("--GetErrorMessage --------------");
-        var errMsg = attribute.GetErrorMessage(false);
-        listMessages.Items.Add(errMsg);
-        errMsg = attribute.GetErrorMessage();
-        listMessages.Items.Add(errMsg);
-    }
+    #endregion
 
     #region WebView2
 
@@ -964,7 +972,28 @@ public partial class LabForm : Form
         textStatusWebView2.Text = "WebView_CoreWebView2InitializationCompleted";
     }
 
-    #endregion 
+    #endregion
+
+    #region KntRedmineApi
+
+    private void buttonTestKntRedmineApi_Click(object sender, EventArgs e)
+    {
+        _store.AppConfig.HostRedmine = textHost.Text;
+        _store.AppConfig.ApiKeyRedmine = textApiKey.Text;
+
+        var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
+
+        var note = new NoteDto();
+
+        var res = manager.IssueToNoteDto(textHuIdsRedmine.Text, note);
+
+        listInfoRedmine.Items.Add($"{note.NoteNumber} - {note.Topic}");
+
+    }
+
+
+
+    #endregion
 }
 
 

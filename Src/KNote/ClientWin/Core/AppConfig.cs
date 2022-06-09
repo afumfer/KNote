@@ -218,6 +218,40 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    #region Provisional !!!
+
+    private string _hostRedmine;
+    public string HostRedmine
+    {
+        get { return _hostRedmine; }
+        set
+        {
+            if (_hostRedmine != value)
+            {
+                _hostRedmine = value;
+                OnPropertyChanged("HostRedmine");
+            }
+        }
+    }
+
+    // TODO: Encript this property
+
+    private string _apiKeyRedmine;
+    public string ApiKeyRedmine
+    {
+        get { return _apiKeyRedmine; }
+        set
+        {
+            if (_apiKeyRedmine != value)
+            {
+                _apiKeyRedmine = value;
+                OnPropertyChanged("ApiKeyRedmine");
+            }
+        }
+    }
+
+    #endregion 
+
     private List<RepositoryRef> _respositoryRef;
     public List<RepositoryRef> RespositoryRefs
     {
