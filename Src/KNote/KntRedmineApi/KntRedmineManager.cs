@@ -20,7 +20,7 @@ public class KntRedmineManager
         _manager = new RedmineManager(_host, _apiKey);
     }
 
-    public bool IssueToNoteDto(string id, NoteDto noteDto)
+    public bool IssueToNoteDto(string id, NoteDto? noteDto, ref string? folder)
     {
         try
         {
@@ -35,10 +35,36 @@ public class KntRedmineManager
             noteDto.Topic = issue.Subject;
             noteDto.Description = issue.Description;
             noteDto.Tags = $"HU#{issue.Id}";
-            //noteDto.ContentType = 
-            //noteDto.CreationDateTime = 
-            //noteDto.FolderId = 
-            // ...
+            var customFields = issue?.CustomFields;
+
+            // TODO: hack for extract folder name.
+            if (customFields != null)
+            {
+                folder = customFields[0].Values[0].Info.ToString();
+                noteDto.KAttributesDto[2].Value = customFields[0].Values[0].Info.ToString();
+                noteDto.KAttributesDto[5].Value = customFields[1].Values[0].Info.ToString();
+                noteDto.KAttributesDto[14].Value = customFields[2].Values[0].Info.ToString();
+                noteDto.KAttributesDto[15].Value = customFields[3].Values[0].Info.ToString();
+            }
+            
+            noteDto.KAttributesDto[0].Value = issue?.Author.Name;
+            noteDto.KAttributesDto[1].Value = issue?.Project.Name;
+            noteDto.KAttributesDto[3].Value = issue?.Priority.Name;
+            noteDto.KAttributesDto[4].Value = issue?.Status.Name;
+            noteDto.KAttributesDto[6].Value = issue?.TotalEstimatedHours.ToString();
+            noteDto.KAttributesDto[7].Value = issue?.TotalSpentHours.ToString();
+            noteDto.KAttributesDto[8].Value = issue?.CreatedOn.ToString();
+            noteDto.KAttributesDto[9].Value = issue?.UpdatedOn.ToString();
+            noteDto.KAttributesDto[10].Value = issue?.DueDate.ToString();
+            noteDto.KAttributesDto[11].Value = issue?.StartDate.ToString();
+            noteDto.KAttributesDto[12].Value = issue?.ClosedOn.ToString();
+            noteDto.KAttributesDto[13].Value = issue?.DoneRatio.ToString();
+            noteDto.KAttributesDto[16].Value = issue?.FixedVersion?.Name;
+
+            var a = noteDto.KAttributesDto;
+
+            //noteDto.ContentType =
+            //...
 
             return true;
 

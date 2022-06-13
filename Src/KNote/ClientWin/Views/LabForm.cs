@@ -998,7 +998,8 @@ public partial class LabForm : Form
             return;
         }
 
-        var folder = (await service.Folders.GetHomeAsync()).Entity;
+        var parentFolder = (await service.Folders.GetAsync(424)).Entity;
+        var folders = (await service.Folders.GetAllAsync()).Entity;
 
         // ----
 
@@ -1012,22 +1013,53 @@ public partial class LabForm : Form
 
         foreach(var hu in hhuu)
         {
-            var note = (await service.Notes.NewAsync()).Entity;
+            string folderName;
+            NoteDto note = (await service.Notes.NewAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
 
             filter.Tags = $"HU#{hu}";
-            note.Tags = $"HU#{hu}";
-
+            
             var notes = (await service.Notes.GetFilter(filter)).Entity;
 
             if (notes != null)
             {
                 if (notes.Count > 0)
-                    note = notes[0].GetSimpleDto<NoteDto>();
+                    note = (await service.Notes.GetAsync(notes[0].NoteId)).Entity;
+
             }
 
-            note.FolderId = folder.FolderId;
+            note.Tags = filter.Tags;
+            folderName = "";
+            
+            var res = manager.IssueToNoteDto(hu, note, ref folderName);
 
-            var res = manager.IssueToNoteDto(hu, note);
+
+            // .......
+
+            var folder = folders.FirstOrDefault(f => f.Name == folderName);
+
+            if (folder != null)
+            {
+                note.FolderId = folder.FolderId;
+            }
+            else
+            {
+                FolderDto newFolder = new FolderDto
+                {
+                    Name = folderName,
+                    ParentId = parentFolder.FolderId
+                };
+
+                var resSave = await service.Folders.SaveAsync(newFolder);
+
+                if (resSave.IsValid)
+                {
+                    folders = (await service.Folders.GetAllAsync()).Entity;
+                    note.FolderId = resSave.Entity.FolderId;
+                }
+                else
+                    note.FolderId = parentFolder.FolderId;
+
+            }               
 
             if (res)
             {
@@ -1046,8 +1078,14 @@ public partial class LabForm : Form
 
     }
 
+
+
     private string[] GetHUs(string strHU)
     {
+        //        var ids = @"173755
+        //173771
+        //173785";
+
         var ids = @"173755
 173771
 173785
@@ -1073,6 +1111,7 @@ public partial class LabForm : Form
 175158
 175270
 175271";
+
 
         return ids.Split("\r\n");
     }

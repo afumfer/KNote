@@ -326,7 +326,7 @@ public class KntNoteRepository : KntRepositoryBase, IKntNoteRepository
             newNote.CreationDateTime = DateTime.Now;
             newNote.ModificationDateTime = DateTime.Now;
             newNote.KAttributesDto = new List<NoteKAttributeDto>();                
-            newNote.KAttributesDto = await CompleteNoteAttributes(db, newNote.KAttributesDto, newNote.NoteId);
+            newNote.KAttributesDto = await CompleteNoteAttributes(db, newNote.KAttributesDto, newNote.NoteId, entity?.NoteTypeId);
 
             result.Entity = newNote;
 

@@ -199,50 +199,71 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
 
     private void buttonEditMarkdown_Click(object sender, EventArgs e)
     {
-        if (htmlDescription.Visible)
+        try
         {
-            var config = new ReverseMarkdown.Config
+            if (htmlDescription.Visible)
             {
-                UnknownTags = ReverseMarkdown.Config.UnknownTagsOption.PassThrough, // Include the unknown tag completely in the result (default as well)
-                GithubFlavored = true, // generate GitHub flavoured markdown, supported for BR, PRE and table tags
-                RemoveComments = false, // will ignore all comments
-                SmartHrefHandling = true // remove markdown output for links where appropriate
-            };       
-            var converter = new ReverseMarkdown.Converter(config);
-            string html = htmlDescription.BodyHtml;
-            string result = converter.Convert(html);
-            textDescription.Text = result;
+                var config = new ReverseMarkdown.Config
+                {
+                    UnknownTags = ReverseMarkdown.Config.UnknownTagsOption.PassThrough, // Include the unknown tag completely in the result (default as well)
+                    GithubFlavored = true, // generate GitHub flavoured markdown, supported for BR, PRE and table tags
+                    RemoveComments = false, // will ignore all comments
+                    SmartHrefHandling = true // remove markdown output for links where appropriate
+                };       
+                var converter = new ReverseMarkdown.Converter(config);
+                string html = htmlDescription.BodyHtml;
+                string result = converter.Convert(html);
+                textDescription.Text = result;
+            }
+            else if (webView2.Visible)
+            {
+                textDescription.Text = webView2.TextUrl;
+            }
+
+            _com.Model.ContentType = "markdown";
+
+            EnableMarkdownView();
         }
-        else if (webView2.Visible)
+        catch (Exception ex)
         {
-            textDescription.Text = webView2.TextUrl;
+            _com.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
         }
-
-        _com.Model.ContentType = "markdown";
-
-        EnableMarkdownView();
     }
 
     private void buttonViewHtml_Click(object sender, EventArgs e)
-    {
-        // TODO: !!! use try catch here ...
-        var MarkdownContent = textDescription.Text;
-        var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-        var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
+    {        
+        try
+        {
+            var MarkdownContent = textDescription.Text;
+            var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
 
-        htmlDescription.BodyHtml = HtmlContent;
-        _com.Model.ContentType = "html";
+            htmlDescription.BodyHtml = HtmlContent;
+            _com.Model.ContentType = "html";
 
-        EnableHtmlView();
+            EnableHtmlView();
+
+        }
+        catch (Exception ex)
+        {
+            _com.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
+        }
     }
 
     private async void buttonNavigate_Click(object sender, EventArgs e)
     {
-        webView2.TextUrl = textDescription.Text;
-        await webView2.Navigate();
-        _com.Model.ContentType = "navigation";
+        try
+        {
+            webView2.TextUrl = textDescription.Text;
+            await webView2.Navigate();
+            _com.Model.ContentType = "navigation";
 
-        EnableWebView2View();
+            EnableWebView2View();
+        }
+        catch (Exception ex)
+        {
+            _com.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
+        }
     }
 
     private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
@@ -259,7 +280,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"OnSelectedResourceItemChanged error: {ex.Message}");
+            _com.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
         }
     }
 
