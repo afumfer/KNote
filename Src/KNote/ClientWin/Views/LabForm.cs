@@ -1,15 +1,15 @@
 ﻿using System.Data;
 using System.Text;
+using System.Xml.Serialization;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
+using KNote.Service;
 using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
-using System.Xml.Serialization;
-using KNote.Service;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 using KntRedmineApi;
 
@@ -1018,8 +1018,8 @@ public partial class LabForm : Form
 
         foreach(var hu in hhuu)
         {
-            string folderName;
-            NoteDto note = (await service.Notes.NewAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
+            string folderName;            
+            NoteExtendedDto note = (await service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
 
             filter.Tags = $"HU#{hu}";
             
@@ -1028,7 +1028,7 @@ public partial class LabForm : Form
             if (notes != null)
             {
                 if (notes.Count > 0)
-                    note = (await service.Notes.GetAsync(notes[0].NoteId)).Entity;
+                    note = (await service.Notes.GetExtendedAsync(notes[0].NoteId)).Entity;
 
             }
 
@@ -1037,8 +1037,10 @@ public partial class LabForm : Form
             
             var res = manager.IssueToNoteDto(hu, note, ref folderName);
 
-
-            // .......
+            foreach(var r in note.Resources)
+            {
+                r.FileType = _store.ExtensionFileToFileType(Path.GetExtension(r.Name));                
+            }
 
             var folder = folders.FirstOrDefault(f => f.Name == folderName);
 
@@ -1068,7 +1070,7 @@ public partial class LabForm : Form
 
             if (res)
             {
-                var resSaveNote = await service.Notes.SaveAsync(note);
+                var resSaveNote = await service.Notes.SaveExtendedAsync(note);
                 listInfoRedmine.Items.Add($"{note.NoteNumber} - {note.Topic}");
                 listInfoRedmine.Refresh();
             }
@@ -1079,8 +1081,7 @@ public partial class LabForm : Form
             }
         }
 
-
-
+        MessageBox.Show("End import");
     }
 
 

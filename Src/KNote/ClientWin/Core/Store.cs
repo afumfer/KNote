@@ -373,25 +373,28 @@ namespace KNote.ClientWin.Core
         public string ExtensionFileToFileType(string extension)
         {
             // TODO: Refactor this method
-            if (extension == ".jpg")
+
+            var ext = extension.ToLower();
+
+            if (ext == ".jpg")
                 return @"image/jpeg";
-            else if (extension == ".jpeg")
+            else if (ext == ".jpeg")
                 return @"image/jpeg";
-            else if (extension == ".png")
+            else if (ext == ".png")
                 return "image/png";
-            else if (extension == ".pdf")
+            else if (ext == ".pdf")
                 return "application/pdf";
-            else if (extension == ".mp4")
+            else if (ext == ".mp4")
                 return "video/mp4";
-            else if (extension == ".mp3")
+            else if (ext == ".mp3")
                 return "audio/mp3";
-            else if (extension == ".txt")
+            else if (ext == ".txt")
                 return "text/plain";
-            else if (extension == ".text")
+            else if (ext == ".text")
                 return "text/plain";
-            else if (extension == ".htm")
+            else if (ext == ".htm")
                 return "text/plain";
-            else if (extension == ".html")
+            else if (ext == ".html")
                 return "text/plain";
             else
                 return "";            

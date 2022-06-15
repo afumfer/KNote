@@ -20,7 +20,7 @@ public class KntRedmineManager
         _manager = new RedmineManager(_host, _apiKey);
     }
 
-    public bool IssueToNoteDto(string id, NoteDto? noteDto, ref string? folder)
+    public bool IssueToNoteDto(string id, NoteExtendedDto? noteDto, ref string? folder)
     {
         try
         {
@@ -61,10 +61,27 @@ public class KntRedmineManager
             noteDto.KAttributesDto[13].Value = issue?.DoneRatio.ToString();
             noteDto.KAttributesDto[16].Value = issue?.FixedVersion?.Name;
 
-            var a = noteDto.KAttributesDto;
+            if (issue?.Attachments != null)
+            {
+                foreach (var atch in issue.Attachments)
+                {
+                    var resource = new ResourceDto();
 
-            //noteDto.ContentType =
-            //...
+                    var findRes = noteDto.Resources.FirstOrDefault(r => r.Name.IndexOf(atch.FileName)>-1);
+
+                    if(findRes == null)
+                    {
+                        resource.ResourceId = Guid.NewGuid();
+                        resource.ContentInDB = false;
+                        resource.Name = $"{resource.ResourceId}_{atch.FileName}";
+                        resource.Description = atch.Description;
+                        resource.Order = 0;
+                        resource.ContentArrayBytes = _manager.DownloadFile(atch.ContentUrl);
+                    
+                        noteDto.Resources.Add(resource);
+                    }
+                }
+            }
 
             return true;
 
