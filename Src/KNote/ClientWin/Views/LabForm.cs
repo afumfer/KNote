@@ -998,7 +998,12 @@ public partial class LabForm : Form
             return;
         }
 
-        var parentFolder = (await service.Folders.GetAsync(424)).Entity;
+        int rootFolNum = 1;
+
+        int.TryParse(textFolderNumForImportIssues.Text, out rootFolNum);
+
+        var parentFolder = (await service.Folders.GetAsync(rootFolNum)).Entity;
+
         var folders = (await service.Folders.GetAllAsync()).Entity;
 
         // ----

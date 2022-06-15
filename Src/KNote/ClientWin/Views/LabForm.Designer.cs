@@ -68,6 +68,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.buttonTestKntRedmineApi = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textFolderNumForImportIssues = new System.Windows.Forms.TextBox();
             this.tabControlLab.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -396,6 +398,8 @@
             // 
             // tabRedMineLab
             // 
+            this.tabRedMineLab.Controls.Add(this.textFolderNumForImportIssues);
+            this.tabRedMineLab.Controls.Add(this.label7);
             this.tabRedMineLab.Controls.Add(this.label6);
             this.tabRedMineLab.Controls.Add(this.listInfoRedmine);
             this.tabRedMineLab.Controls.Add(this.label5);
@@ -415,7 +419,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(291, 118);
+            this.label6.Location = new System.Drawing.Point(291, 178);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(28, 15);
             this.label6.TabIndex = 8;
@@ -428,15 +432,15 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listInfoRedmine.FormattingEnabled = true;
             this.listInfoRedmine.ItemHeight = 15;
-            this.listInfoRedmine.Location = new System.Drawing.Point(291, 136);
+            this.listInfoRedmine.Location = new System.Drawing.Point(291, 196);
             this.listInfoRedmine.Name = "listInfoRedmine";
-            this.listInfoRedmine.Size = new System.Drawing.Size(358, 394);
+            this.listInfoRedmine.Size = new System.Drawing.Size(358, 334);
             this.listInfoRedmine.TabIndex = 7;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 118);
+            this.label5.Location = new System.Drawing.Point(12, 180);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(43, 15);
             this.label5.TabIndex = 6;
@@ -446,11 +450,11 @@
             // 
             this.textHuIdsRedmine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.textHuIdsRedmine.Location = new System.Drawing.Point(12, 136);
+            this.textHuIdsRedmine.Location = new System.Drawing.Point(12, 198);
             this.textHuIdsRedmine.Multiline = true;
             this.textHuIdsRedmine.Name = "textHuIdsRedmine";
             this.textHuIdsRedmine.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textHuIdsRedmine.Size = new System.Drawing.Size(273, 394);
+            this.textHuIdsRedmine.Size = new System.Drawing.Size(273, 332);
             this.textHuIdsRedmine.TabIndex = 5;
             this.textHuIdsRedmine.Text = "173755";
             // 
@@ -477,29 +481,47 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(10, 57);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(44, 15);
+            this.label4.Size = new System.Drawing.Size(47, 15);
             this.label4.TabIndex = 2;
-            this.label4.Text = "ApiKey";
+            this.label4.Text = "ApiKey:";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(10, 8);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(32, 15);
+            this.label3.Size = new System.Drawing.Size(35, 15);
             this.label3.TabIndex = 1;
-            this.label3.Text = "Host";
+            this.label3.Text = "Host:";
             // 
             // buttonTestKntRedmineApi
             // 
             this.buttonTestKntRedmineApi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonTestKntRedmineApi.Location = new System.Drawing.Point(503, 25);
+            this.buttonTestKntRedmineApi.Location = new System.Drawing.Point(505, 21);
             this.buttonTestKntRedmineApi.Name = "buttonTestKntRedmineApi";
             this.buttonTestKntRedmineApi.Size = new System.Drawing.Size(144, 27);
             this.buttonTestKntRedmineApi.TabIndex = 0;
             this.buttonTestKntRedmineApi.Text = "Test KntRedmineApi";
             this.buttonTestKntRedmineApi.UseVisualStyleBackColor = true;
             this.buttonTestKntRedmineApi.Click += new System.EventHandler(this.buttonTestKntRedmineApi_Click);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(12, 110);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(170, 15);
+            this.label7.TabIndex = 9;
+            this.label7.Text = "Root folder # for import issues:";
+            // 
+            // textFolderNumForImportIssues
+            // 
+            this.textFolderNumForImportIssues.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textFolderNumForImportIssues.Location = new System.Drawing.Point(12, 128);
+            this.textFolderNumForImportIssues.Name = "textFolderNumForImportIssues";
+            this.textFolderNumForImportIssues.Size = new System.Drawing.Size(163, 23);
+            this.textFolderNumForImportIssues.TabIndex = 10;
             // 
             // LabForm
             // 
@@ -566,5 +588,7 @@
         private Label label6;
         private ListBox listInfoRedmine;
         private Label label5;
+        private TextBox textFolderNumForImportIssues;
+        private Label label7;
     }
 }
