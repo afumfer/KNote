@@ -57,6 +57,13 @@ public partial class LabForm : Form
 
         textHost.Text = _store.AppConfig.HostRedmine;
         textApiKey.Text = _store.AppConfig.ApiKeyRedmine;
+        textIssuesImportFile.Text = _store.AppConfig.IssuesImportFile;
+
+        try
+        {
+            textIssuesId.Text = File.ReadAllText(textIssuesImportFile.Text);
+        }
+        catch {}
 
     }
 
@@ -998,9 +1005,16 @@ public partial class LabForm : Form
             return;
         }
 
+        if (string.IsNullOrEmpty(textIssuesId.Text))
+        {
+            MessageBox.Show("Issues ID not selected.");
+            return;
+        }
+
         int rootFolNum = 1;
 
-        int.TryParse(textFolderNumForImportIssues.Text, out rootFolNum);
+        if(!string.IsNullOrEmpty(textFolderNumForImportIssues.Text))
+            int.TryParse(textFolderNumForImportIssues.Text, out rootFolNum);
 
         var parentFolder = (await service.Folders.GetAsync(rootFolNum)).Entity;
 
@@ -1010,13 +1024,16 @@ public partial class LabForm : Form
 
         _store.AppConfig.HostRedmine = textHost.Text;
         _store.AppConfig.ApiKeyRedmine = textApiKey.Text;
+        _store.AppConfig.IssuesImportFile = textIssuesImportFile.Text;
 
         var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
         var filter = new NotesFilterDto();
 
-        var hhuu = GetHUs(textHuIdsRedmine.Text);
+        var hhuu = GetHUs(textIssuesId.Text);
+        var i = 1;
+        listInfoRedmine.Items.Clear();
 
-        foreach(var hu in hhuu)
+        foreach (var hu in hhuu)
         {
             string folderName;            
             NoteExtendedDto note = (await service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
@@ -1069,9 +1086,9 @@ public partial class LabForm : Form
             }               
 
             if (res)
-            {
+            {                
                 var resSaveNote = await service.Notes.SaveExtendedAsync(note);
-                listInfoRedmine.Items.Add($"{note.NoteNumber} - {note.Topic}");
+                listInfoRedmine.Items.Add($"{i++} - #{note.Tags}: {note.Topic}");
                 listInfoRedmine.Refresh();
             }
             else
@@ -1086,43 +1103,23 @@ public partial class LabForm : Form
 
 
 
-    private string[] GetHUs(string strHU)
+    private string[] GetHUs(string strIssuesId)
     {
-        //        var ids = @"173755
-        //173771
-        //173785";
+        return strIssuesId.Split("\r\n");
+    }
 
-        var ids = @"173755
-173771
-173785
-173913
-173952
-173983
-174018
-174097
-174131
-174132
-174169
-174177
-174206
-174438
-174692
-174821
-174841
-174886
-174887
-174957
-174986
-175053
-175158
-175270
-175271";
-
-
-        return ids.Split("\r\n");
+    private void buttonIssuesImportFile_Click(object sender, EventArgs e)
+    {
+        openFileDialog.Title = "Select file Issues ID file";
+        if (openFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            var fileTmp = openFileDialog.FileName;
+            textIssuesImportFile.Text = fileTmp;
+            textIssuesId.Text = File.ReadAllText(fileTmp);
+            _store.AppConfig.IssuesImportFile = textIssuesImportFile.Text;
+        }
     }
 
     #endregion
+
 }
-
-

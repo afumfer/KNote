@@ -250,6 +250,21 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    private string _issuesImportFile;
+    public string IssuesImportFile
+    {
+        get { return _issuesImportFile; }
+        set
+        {
+            if (_issuesImportFile != value)
+            {
+                _issuesImportFile = value;
+                OnPropertyChanged("IssuesImportFile");
+            }
+        }
+    }
+
+
     #endregion 
 
     private List<RepositoryRef> _respositoryRef;

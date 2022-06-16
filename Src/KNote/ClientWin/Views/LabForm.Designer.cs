@@ -58,18 +58,21 @@
             this.textStatusWebView2 = new System.Windows.Forms.TextBox();
             this.textUrlWebView2 = new System.Windows.Forms.TextBox();
             this.tabRedMineLab = new System.Windows.Forms.TabPage();
+            this.buttonIssuesImportFile = new System.Windows.Forms.Button();
+            this.textIssuesImportFile = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.textFolderNumForImportIssues = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.listInfoRedmine = new System.Windows.Forms.ListBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.textHuIdsRedmine = new System.Windows.Forms.TextBox();
+            this.textIssuesId = new System.Windows.Forms.TextBox();
             this.textApiKey = new System.Windows.Forms.TextBox();
             this.textHost = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.buttonTestKntRedmineApi = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.label7 = new System.Windows.Forms.Label();
-            this.textFolderNumForImportIssues = new System.Windows.Forms.TextBox();
             this.tabControlLab.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -398,12 +401,15 @@
             // 
             // tabRedMineLab
             // 
+            this.tabRedMineLab.Controls.Add(this.buttonIssuesImportFile);
+            this.tabRedMineLab.Controls.Add(this.textIssuesImportFile);
+            this.tabRedMineLab.Controls.Add(this.label8);
             this.tabRedMineLab.Controls.Add(this.textFolderNumForImportIssues);
             this.tabRedMineLab.Controls.Add(this.label7);
             this.tabRedMineLab.Controls.Add(this.label6);
             this.tabRedMineLab.Controls.Add(this.listInfoRedmine);
             this.tabRedMineLab.Controls.Add(this.label5);
-            this.tabRedMineLab.Controls.Add(this.textHuIdsRedmine);
+            this.tabRedMineLab.Controls.Add(this.textIssuesId);
             this.tabRedMineLab.Controls.Add(this.textApiKey);
             this.tabRedMineLab.Controls.Add(this.textHost);
             this.tabRedMineLab.Controls.Add(this.label4);
@@ -415,6 +421,53 @@
             this.tabRedMineLab.TabIndex = 4;
             this.tabRedMineLab.Text = "RedMine lab";
             this.tabRedMineLab.UseVisualStyleBackColor = true;
+            // 
+            // buttonIssuesImportFile
+            // 
+            this.buttonIssuesImportFile.Location = new System.Drawing.Point(416, 128);
+            this.buttonIssuesImportFile.Name = "buttonIssuesImportFile";
+            this.buttonIssuesImportFile.Size = new System.Drawing.Size(24, 24);
+            this.buttonIssuesImportFile.TabIndex = 13;
+            this.buttonIssuesImportFile.Text = "...";
+            this.buttonIssuesImportFile.UseVisualStyleBackColor = true;
+            this.buttonIssuesImportFile.Click += new System.EventHandler(this.buttonIssuesImportFile_Click);
+            // 
+            // textIssuesImportFile
+            // 
+            this.textIssuesImportFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textIssuesImportFile.Location = new System.Drawing.Point(12, 128);
+            this.textIssuesImportFile.Name = "textIssuesImportFile";
+            this.textIssuesImportFile.Size = new System.Drawing.Size(398, 23);
+            this.textIssuesImportFile.TabIndex = 12;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(12, 110);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(109, 15);
+            this.label8.TabIndex = 11;
+            this.label8.Text = "Issues # import file:";
+            // 
+            // textFolderNumForImportIssues
+            // 
+            this.textFolderNumForImportIssues.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textFolderNumForImportIssues.Location = new System.Drawing.Point(476, 128);
+            this.textFolderNumForImportIssues.Name = "textFolderNumForImportIssues";
+            this.textFolderNumForImportIssues.Size = new System.Drawing.Size(163, 23);
+            this.textFolderNumForImportIssues.TabIndex = 10;
+            this.textFolderNumForImportIssues.Text = "1";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(476, 110);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(170, 15);
+            this.label7.TabIndex = 9;
+            this.label7.Text = "Root folder # for import issues:";
             // 
             // label6
             // 
@@ -446,17 +499,16 @@
             this.label5.TabIndex = 6;
             this.label5.Text = "HU IDs";
             // 
-            // textHuIdsRedmine
+            // textIssuesId
             // 
-            this.textHuIdsRedmine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.textIssuesId.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.textHuIdsRedmine.Location = new System.Drawing.Point(12, 198);
-            this.textHuIdsRedmine.Multiline = true;
-            this.textHuIdsRedmine.Name = "textHuIdsRedmine";
-            this.textHuIdsRedmine.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textHuIdsRedmine.Size = new System.Drawing.Size(273, 332);
-            this.textHuIdsRedmine.TabIndex = 5;
-            this.textHuIdsRedmine.Text = "173755";
+            this.textIssuesId.Location = new System.Drawing.Point(12, 198);
+            this.textIssuesId.Multiline = true;
+            this.textIssuesId.Name = "textIssuesId";
+            this.textIssuesId.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textIssuesId.Size = new System.Drawing.Size(273, 332);
+            this.textIssuesId.TabIndex = 5;
             // 
             // textApiKey
             // 
@@ -501,27 +553,9 @@
             this.buttonTestKntRedmineApi.Name = "buttonTestKntRedmineApi";
             this.buttonTestKntRedmineApi.Size = new System.Drawing.Size(144, 27);
             this.buttonTestKntRedmineApi.TabIndex = 0;
-            this.buttonTestKntRedmineApi.Text = "Test KntRedmineApi";
+            this.buttonTestKntRedmineApi.Text = "Import RedMine Issues";
             this.buttonTestKntRedmineApi.UseVisualStyleBackColor = true;
             this.buttonTestKntRedmineApi.Click += new System.EventHandler(this.buttonTestKntRedmineApi_Click);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 110);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(170, 15);
-            this.label7.TabIndex = 9;
-            this.label7.Text = "Root folder # for import issues:";
-            // 
-            // textFolderNumForImportIssues
-            // 
-            this.textFolderNumForImportIssues.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFolderNumForImportIssues.Location = new System.Drawing.Point(12, 128);
-            this.textFolderNumForImportIssues.Name = "textFolderNumForImportIssues";
-            this.textFolderNumForImportIssues.Size = new System.Drawing.Size(163, 23);
-            this.textFolderNumForImportIssues.TabIndex = 10;
             // 
             // LabForm
             // 
@@ -584,11 +618,14 @@
         private TextBox textHost;
         private Label label4;
         private Label label3;
-        private TextBox textHuIdsRedmine;
+        private TextBox textIssuesId;
         private Label label6;
         private ListBox listInfoRedmine;
         private Label label5;
         private TextBox textFolderNumForImportIssues;
         private Label label7;
+        private Button buttonIssuesImportFile;
+        private TextBox textIssuesImportFile;
+        private Label label8;
     }
 }
