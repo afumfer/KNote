@@ -40,11 +40,16 @@ public class KntRedmineManager
             // TODO: hack for extract folder name.
             if (customFields != null)
             {
-                folder = customFields[0].Values[0].Info.ToString();
-                noteDto.KAttributesDto[2].Value = customFields[0].Values[0].Info.ToString();
-                noteDto.KAttributesDto[5].Value = customFields[1].Values[0].Info.ToString();
-                noteDto.KAttributesDto[14].Value = customFields[2].Values[0].Info.ToString();
-                noteDto.KAttributesDto[15].Value = customFields[3].Values[0].Info.ToString();
+                if (customFields[0]?.Values != null)
+                    folder = customFields[0].Values[0].Info.ToString();
+                if (customFields[0]?.Values != null)
+                    noteDto.KAttributesDto[2].Value = customFields[0]?.Values[0]?.Info?.ToString();
+                if (customFields[1]?.Values != null)
+                    noteDto.KAttributesDto[5].Value = customFields[1]?.Values[0]?.Info?.ToString();
+                if(customFields[2]?.Values != null)
+                    noteDto.KAttributesDto[14].Value = customFields[2]?.Values[0]?.Info?.ToString();
+                if (customFields[3]?.Values != null)
+                    noteDto.KAttributesDto[15].Value = customFields[3]?.Values[0]?.Info?.ToString();
             }
             
             noteDto.KAttributesDto[0].Value = issue?.Author.Name;
@@ -86,8 +91,9 @@ public class KntRedmineManager
             return true;
 
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            var a = ex.Message;
             throw;
         }
     }
