@@ -1120,6 +1120,47 @@ public partial class LabForm : Form
         }
     }
 
-    #endregion
 
+
+    private async void buttonFindIssue_Click(object sender, EventArgs e)
+    {
+        if (_store.ActiveFolderWithServiceRef == null)
+        {
+            MessageBox.Show("There is no archive selected ");
+            return;
+        }
+
+        var serviceRef = _store.ActiveFolderWithServiceRef.ServiceRef;
+        var service = serviceRef.Service;
+        var folderName = "";
+        NoteExtendedDto note = (await service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
+        var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
+
+        textPredictSubject.Text = "";
+        textPredictDescription.Text = "";
+        textPredictCategory.Text = "";
+
+        var res = manager.IssueToNoteDto(textPredictFindIssue.Text, note, ref folderName, false);
+
+        textPredictSubject.Text = note.Topic;
+        textPredictDescription.Text = note.Description;
+        textPredictCategory.Text = folderName;
+
+    }
+
+    private void buttonPredictGestion_Click(object sender, EventArgs e)
+    {
+        textPredictionGestion.Text = "";
+        var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
+        textPredictionGestion.Text = manager.PredictGestion(textPredictSubject.Text, textPredictDescription.Text);
+    }
+
+    private void buttonPredictPH_Click(object sender, EventArgs e)
+    {
+        textPredictionPH.Text = "";
+        var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
+        textPredictionPH.Text = manager.PredictPH(textPredictCategory.Text, textPredictSubject.Text, textPredictDescription.Text);
+    }
+
+    #endregion
 }

@@ -20,7 +20,7 @@ public class KntRedmineManager
         _manager = new RedmineManager(_host, _apiKey);
     }
 
-    public bool IssueToNoteDto(string id, NoteExtendedDto? noteDto, ref string? folder)
+    public bool IssueToNoteDto(string id, NoteExtendedDto? noteDto, ref string? folder, bool loadAttachments = true)
     {
         try
         {
@@ -37,36 +37,39 @@ public class KntRedmineManager
             noteDto.Tags = $"HU#{issue.Id}";
             var customFields = issue?.CustomFields;
 
-            // TODO: hack for extract folder name.
-            if (customFields != null)
+            if(noteDto.KAttributesDto.Count > 0)
             {
-                if (customFields[0]?.Values != null)
-                    folder = customFields[0].Values[0].Info.ToString();
-                if (customFields[0]?.Values != null)
-                    noteDto.KAttributesDto[2].Value = customFields[0]?.Values[0]?.Info?.ToString();
-                if (customFields[1]?.Values != null)
-                    noteDto.KAttributesDto[5].Value = customFields[1]?.Values[0]?.Info?.ToString();
-                if(customFields[2]?.Values != null)
-                    noteDto.KAttributesDto[14].Value = customFields[2]?.Values[0]?.Info?.ToString();
-                if (customFields[3]?.Values != null)
-                    noteDto.KAttributesDto[15].Value = customFields[3]?.Values[0]?.Info?.ToString();
-            }
+                // TODO: hack for extract folder name.
+                if (customFields != null)
+                {
+                    if (customFields[0]?.Values != null)
+                        folder = customFields[0].Values[0].Info.ToString();
+                    if (customFields[0]?.Values != null)
+                        noteDto.KAttributesDto[2].Value = customFields[0]?.Values[0]?.Info?.ToString();
+                    if (customFields[1]?.Values != null)
+                        noteDto.KAttributesDto[5].Value = customFields[1]?.Values[0]?.Info?.ToString();
+                    if(customFields[2]?.Values != null)
+                        noteDto.KAttributesDto[14].Value = customFields[2]?.Values[0]?.Info?.ToString();
+                    if (customFields[3]?.Values != null)
+                        noteDto.KAttributesDto[15].Value = customFields[3]?.Values[0]?.Info?.ToString();
+                }
             
-            noteDto.KAttributesDto[0].Value = issue?.Author.Name;
-            noteDto.KAttributesDto[1].Value = issue?.Project.Name;
-            noteDto.KAttributesDto[3].Value = issue?.Priority.Name;
-            noteDto.KAttributesDto[4].Value = issue?.Status.Name;
-            noteDto.KAttributesDto[6].Value = issue?.TotalEstimatedHours.ToString();
-            noteDto.KAttributesDto[7].Value = issue?.TotalSpentHours.ToString();
-            noteDto.KAttributesDto[8].Value = issue?.CreatedOn.ToString();
-            noteDto.KAttributesDto[9].Value = issue?.UpdatedOn.ToString();
-            noteDto.KAttributesDto[10].Value = issue?.DueDate.ToString();
-            noteDto.KAttributesDto[11].Value = issue?.StartDate.ToString();
-            noteDto.KAttributesDto[12].Value = issue?.ClosedOn.ToString();
-            noteDto.KAttributesDto[13].Value = issue?.DoneRatio.ToString();
-            noteDto.KAttributesDto[16].Value = issue?.FixedVersion?.Name;
+                noteDto.KAttributesDto[0].Value = issue?.Author.Name;
+                noteDto.KAttributesDto[1].Value = issue?.Project.Name;
+                noteDto.KAttributesDto[3].Value = issue?.Priority.Name;
+                noteDto.KAttributesDto[4].Value = issue?.Status.Name;
+                noteDto.KAttributesDto[6].Value = issue?.TotalEstimatedHours.ToString();
+                noteDto.KAttributesDto[7].Value = issue?.TotalSpentHours.ToString();
+                noteDto.KAttributesDto[8].Value = issue?.CreatedOn.ToString();
+                noteDto.KAttributesDto[9].Value = issue?.UpdatedOn.ToString();
+                noteDto.KAttributesDto[10].Value = issue?.DueDate.ToString();
+                noteDto.KAttributesDto[11].Value = issue?.StartDate.ToString();
+                noteDto.KAttributesDto[12].Value = issue?.ClosedOn.ToString();
+                noteDto.KAttributesDto[13].Value = issue?.DoneRatio.ToString();
+                noteDto.KAttributesDto[16].Value = issue?.FixedVersion?.Name;
+            }
 
-            if (issue?.Attachments != null)
+            if (issue?.Attachments != null && loadAttachments)
             {
                 foreach (var atch in issue.Attachments)
                 {
@@ -96,6 +99,33 @@ public class KntRedmineManager
             var a = ex.Message;
             throw;
         }
+    }
+
+    public string PredictPH(string gestion, string tema, string descripcion)
+    {        
+        RedMinePunHis.ModelInput dataInput = new RedMinePunHis.ModelInput()
+        {
+            Gestion = gestion,
+            Tema = tema,
+            Descripcion = descripcion
+        };
+
+        var predictionResult = RedMinePunHis.Predict(dataInput);
+
+        return predictionResult.PredictedLabel;
+    }
+
+    public string PredictGestion(string tema, string descripcion)
+    {
+        RedMineGestion.ModelInput dataInput = new RedMineGestion.ModelInput()
+        {            
+            Tema = tema,
+            Descripcion = descripcion
+        };
+
+        var predictionResult = RedMineGestion.Predict(dataInput);
+
+        return predictionResult.PredictedLabel;
     }
 
 

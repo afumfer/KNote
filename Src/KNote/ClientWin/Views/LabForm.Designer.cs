@@ -57,7 +57,7 @@
             this.btnNavigate = new System.Windows.Forms.Button();
             this.textStatusWebView2 = new System.Windows.Forms.TextBox();
             this.textUrlWebView2 = new System.Windows.Forms.TextBox();
-            this.tabRedMineLab = new System.Windows.Forms.TabPage();
+            this.tabRedMineImport = new System.Windows.Forms.TabPage();
             this.buttonIssuesImportFile = new System.Windows.Forms.Button();
             this.textIssuesImportFile = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -72,7 +72,23 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.buttonTestKntRedmineApi = new System.Windows.Forms.Button();
+            this.tabRedMinePredict = new System.Windows.Forms.TabPage();
+            this.buttonFindIssue = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.buttonPredictPH = new System.Windows.Forms.Button();
+            this.textPredictionPH = new System.Windows.Forms.TextBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.buttonPredictGestion = new System.Windows.Forms.Button();
+            this.textPredictionGestion = new System.Windows.Forms.TextBox();
+            this.textPredictDescription = new System.Windows.Forms.TextBox();
+            this.textPredictSubject = new System.Windows.Forms.TextBox();
+            this.textPredictFindIssue = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.textPredictCategory = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.tabControlLab.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -80,7 +96,10 @@
             this.tabRichEditor.SuspendLayout();
             this.tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
-            this.tabRedMineLab.SuspendLayout();
+            this.tabRedMineImport.SuspendLayout();
+            this.tabRedMinePredict.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControlLab
@@ -92,7 +111,8 @@
             this.tabControlLab.Controls.Add(this.tabKntScriptLab);
             this.tabControlLab.Controls.Add(this.tabRichEditor);
             this.tabControlLab.Controls.Add(this.tabWebView2);
-            this.tabControlLab.Controls.Add(this.tabRedMineLab);
+            this.tabControlLab.Controls.Add(this.tabRedMineImport);
+            this.tabControlLab.Controls.Add(this.tabRedMinePredict);
             this.tabControlLab.Location = new System.Drawing.Point(12, 12);
             this.tabControlLab.Name = "tabControlLab";
             this.tabControlLab.SelectedIndex = 0;
@@ -399,28 +419,28 @@
             this.textUrlWebView2.TabIndex = 0;
             this.textUrlWebView2.Text = "https://www.gobiernodecanarias.org/educacion/9/pekweb/ekade";
             // 
-            // tabRedMineLab
+            // tabRedMineImport
             // 
-            this.tabRedMineLab.Controls.Add(this.buttonIssuesImportFile);
-            this.tabRedMineLab.Controls.Add(this.textIssuesImportFile);
-            this.tabRedMineLab.Controls.Add(this.label8);
-            this.tabRedMineLab.Controls.Add(this.textFolderNumForImportIssues);
-            this.tabRedMineLab.Controls.Add(this.label7);
-            this.tabRedMineLab.Controls.Add(this.label6);
-            this.tabRedMineLab.Controls.Add(this.listInfoRedmine);
-            this.tabRedMineLab.Controls.Add(this.label5);
-            this.tabRedMineLab.Controls.Add(this.textIssuesId);
-            this.tabRedMineLab.Controls.Add(this.textApiKey);
-            this.tabRedMineLab.Controls.Add(this.textHost);
-            this.tabRedMineLab.Controls.Add(this.label4);
-            this.tabRedMineLab.Controls.Add(this.label3);
-            this.tabRedMineLab.Controls.Add(this.buttonTestKntRedmineApi);
-            this.tabRedMineLab.Location = new System.Drawing.Point(4, 24);
-            this.tabRedMineLab.Name = "tabRedMineLab";
-            this.tabRedMineLab.Size = new System.Drawing.Size(662, 549);
-            this.tabRedMineLab.TabIndex = 4;
-            this.tabRedMineLab.Text = "RedMine lab";
-            this.tabRedMineLab.UseVisualStyleBackColor = true;
+            this.tabRedMineImport.Controls.Add(this.buttonIssuesImportFile);
+            this.tabRedMineImport.Controls.Add(this.textIssuesImportFile);
+            this.tabRedMineImport.Controls.Add(this.label8);
+            this.tabRedMineImport.Controls.Add(this.textFolderNumForImportIssues);
+            this.tabRedMineImport.Controls.Add(this.label7);
+            this.tabRedMineImport.Controls.Add(this.label6);
+            this.tabRedMineImport.Controls.Add(this.listInfoRedmine);
+            this.tabRedMineImport.Controls.Add(this.label5);
+            this.tabRedMineImport.Controls.Add(this.textIssuesId);
+            this.tabRedMineImport.Controls.Add(this.textApiKey);
+            this.tabRedMineImport.Controls.Add(this.textHost);
+            this.tabRedMineImport.Controls.Add(this.label4);
+            this.tabRedMineImport.Controls.Add(this.label3);
+            this.tabRedMineImport.Controls.Add(this.buttonTestKntRedmineApi);
+            this.tabRedMineImport.Location = new System.Drawing.Point(4, 24);
+            this.tabRedMineImport.Name = "tabRedMineImport";
+            this.tabRedMineImport.Size = new System.Drawing.Size(662, 549);
+            this.tabRedMineImport.TabIndex = 4;
+            this.tabRedMineImport.Text = "RedMine import";
+            this.tabRedMineImport.UseVisualStyleBackColor = true;
             // 
             // buttonIssuesImportFile
             // 
@@ -557,6 +577,171 @@
             this.buttonTestKntRedmineApi.UseVisualStyleBackColor = true;
             this.buttonTestKntRedmineApi.Click += new System.EventHandler(this.buttonTestKntRedmineApi_Click);
             // 
+            // tabRedMinePredict
+            // 
+            this.tabRedMinePredict.Controls.Add(this.label12);
+            this.tabRedMinePredict.Controls.Add(this.textPredictCategory);
+            this.tabRedMinePredict.Controls.Add(this.buttonFindIssue);
+            this.tabRedMinePredict.Controls.Add(this.groupBox2);
+            this.tabRedMinePredict.Controls.Add(this.groupBox1);
+            this.tabRedMinePredict.Controls.Add(this.textPredictDescription);
+            this.tabRedMinePredict.Controls.Add(this.textPredictSubject);
+            this.tabRedMinePredict.Controls.Add(this.textPredictFindIssue);
+            this.tabRedMinePredict.Controls.Add(this.label11);
+            this.tabRedMinePredict.Controls.Add(this.label10);
+            this.tabRedMinePredict.Controls.Add(this.label9);
+            this.tabRedMinePredict.Location = new System.Drawing.Point(4, 24);
+            this.tabRedMinePredict.Name = "tabRedMinePredict";
+            this.tabRedMinePredict.Size = new System.Drawing.Size(662, 549);
+            this.tabRedMinePredict.TabIndex = 5;
+            this.tabRedMinePredict.Text = "RedMine predict";
+            this.tabRedMinePredict.UseVisualStyleBackColor = true;
+            // 
+            // buttonFindIssue
+            // 
+            this.buttonFindIssue.Location = new System.Drawing.Point(194, 17);
+            this.buttonFindIssue.Name = "buttonFindIssue";
+            this.buttonFindIssue.Size = new System.Drawing.Size(119, 23);
+            this.buttonFindIssue.TabIndex = 8;
+            this.buttonFindIssue.Text = "Find Issue";
+            this.buttonFindIssue.UseVisualStyleBackColor = true;
+            this.buttonFindIssue.Click += new System.EventHandler(this.buttonFindIssue_Click);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.buttonPredictPH);
+            this.groupBox2.Controls.Add(this.textPredictionPH);
+            this.groupBox2.Location = new System.Drawing.Point(16, 438);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(633, 98);
+            this.groupBox2.TabIndex = 7;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Predict -> PH";
+            // 
+            // buttonPredictPH
+            // 
+            this.buttonPredictPH.Location = new System.Drawing.Point(6, 23);
+            this.buttonPredictPH.Name = "buttonPredictPH";
+            this.buttonPredictPH.Size = new System.Drawing.Size(122, 22);
+            this.buttonPredictPH.TabIndex = 2;
+            this.buttonPredictPH.Text = "Predict";
+            this.buttonPredictPH.UseVisualStyleBackColor = true;
+            this.buttonPredictPH.Click += new System.EventHandler(this.buttonPredictPH_Click);
+            // 
+            // textPredictionPH
+            // 
+            this.textPredictionPH.Location = new System.Drawing.Point(134, 22);
+            this.textPredictionPH.Name = "textPredictionPH";
+            this.textPredictionPH.Size = new System.Drawing.Size(163, 23);
+            this.textPredictionPH.TabIndex = 0;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.buttonPredictGestion);
+            this.groupBox1.Controls.Add(this.textPredictionGestion);
+            this.groupBox1.Location = new System.Drawing.Point(16, 334);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(633, 98);
+            this.groupBox1.TabIndex = 6;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Predict -> Gestión";
+            // 
+            // buttonPredictGestion
+            // 
+            this.buttonPredictGestion.Location = new System.Drawing.Point(6, 21);
+            this.buttonPredictGestion.Name = "buttonPredictGestion";
+            this.buttonPredictGestion.Size = new System.Drawing.Size(122, 22);
+            this.buttonPredictGestion.TabIndex = 1;
+            this.buttonPredictGestion.Text = "Predict";
+            this.buttonPredictGestion.UseVisualStyleBackColor = true;
+            this.buttonPredictGestion.Click += new System.EventHandler(this.buttonPredictGestion_Click);
+            // 
+            // textPredictionGestion
+            // 
+            this.textPredictionGestion.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textPredictionGestion.Location = new System.Drawing.Point(134, 22);
+            this.textPredictionGestion.Name = "textPredictionGestion";
+            this.textPredictionGestion.Size = new System.Drawing.Size(483, 23);
+            this.textPredictionGestion.TabIndex = 0;
+            // 
+            // textPredictDescription
+            // 
+            this.textPredictDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textPredictDescription.Location = new System.Drawing.Point(101, 73);
+            this.textPredictDescription.Multiline = true;
+            this.textPredictDescription.Name = "textPredictDescription";
+            this.textPredictDescription.Size = new System.Drawing.Size(548, 227);
+            this.textPredictDescription.TabIndex = 5;
+            // 
+            // textPredictSubject
+            // 
+            this.textPredictSubject.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textPredictSubject.Location = new System.Drawing.Point(101, 44);
+            this.textPredictSubject.Name = "textPredictSubject";
+            this.textPredictSubject.Size = new System.Drawing.Size(548, 23);
+            this.textPredictSubject.TabIndex = 4;
+            // 
+            // textPredictFindIssue
+            // 
+            this.textPredictFindIssue.Location = new System.Drawing.Point(101, 17);
+            this.textPredictFindIssue.Name = "textPredictFindIssue";
+            this.textPredictFindIssue.Size = new System.Drawing.Size(81, 23);
+            this.textPredictFindIssue.TabIndex = 3;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(18, 73);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(70, 15);
+            this.label11.TabIndex = 2;
+            this.label11.Text = "Description:";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(18, 47);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(49, 15);
+            this.label10.TabIndex = 1;
+            this.label10.Text = "Subject:";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(18, 20);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(46, 15);
+            this.label9.TabIndex = 0;
+            this.label9.Text = "Issue #:";
+            // 
+            // textPredictCategory
+            // 
+            this.textPredictCategory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textPredictCategory.Location = new System.Drawing.Point(101, 306);
+            this.textPredictCategory.Name = "textPredictCategory";
+            this.textPredictCategory.Size = new System.Drawing.Size(548, 23);
+            this.textPredictCategory.TabIndex = 9;
+            // 
+            // label12
+            // 
+            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(22, 306);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(58, 15);
+            this.label12.TabIndex = 10;
+            this.label12.Text = "Category:";
+            // 
             // LabForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -565,7 +750,7 @@
             this.Controls.Add(this.tabControlLab);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LabForm";
-            this.Text = "KntScript AppHost demo";
+            this.Text = "KNote Lab";
             this.Load += new System.EventHandler(this.LabForm_Load);
             this.tabControlLab.ResumeLayout(false);
             this.tabAppLab.ResumeLayout(false);
@@ -576,8 +761,14 @@
             this.tabWebView2.ResumeLayout(false);
             this.tabWebView2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
-            this.tabRedMineLab.ResumeLayout(false);
-            this.tabRedMineLab.PerformLayout();
+            this.tabRedMineImport.ResumeLayout(false);
+            this.tabRedMineImport.PerformLayout();
+            this.tabRedMinePredict.ResumeLayout(false);
+            this.tabRedMinePredict.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -607,7 +798,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private TabPage tabWebView2;
-        private TabPage tabRedMineLab;
+        private TabPage tabRedMineImport;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
         private Button btnGoBack;
         private Button btnNavigate;
@@ -627,5 +818,21 @@
         private Button buttonIssuesImportFile;
         private TextBox textIssuesImportFile;
         private Label label8;
+        private TabPage tabRedMinePredict;
+        private TextBox textPredictSubject;
+        private TextBox textPredictFindIssue;
+        private Label label11;
+        private Label label10;
+        private Label label9;
+        private Button buttonFindIssue;
+        private GroupBox groupBox2;
+        private Button buttonPredictPH;
+        private TextBox textPredictionPH;
+        private GroupBox groupBox1;
+        private Button buttonPredictGestion;
+        private TextBox textPredictionGestion;
+        private TextBox textPredictDescription;
+        private Label label12;
+        private TextBox textPredictCategory;
     }
 }
