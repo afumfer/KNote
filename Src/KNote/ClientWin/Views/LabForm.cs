@@ -1052,7 +1052,7 @@ public partial class LabForm : Form
             note.Tags = filter.Tags;
             folderName = "";
             
-            var res = manager.IssueToNoteDto(hu, note, ref folderName);
+            var res = manager.IssueToNoteDto(hu, note, ref folderName, true, Path.GetDirectoryName(textIssuesImportFile.Text), service.RepositoryRef.ResourcesContainer);
 
             foreach(var r in note.Resources)
             {

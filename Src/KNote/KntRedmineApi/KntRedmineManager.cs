@@ -3,6 +3,7 @@ using Redmine.Net.Api.Types;
 using KNote.Model;
 using KNote.Model.Dto;
 using System.Collections.Specialized;
+using System.Diagnostics;
 
 namespace KntRedmineApi;
 
@@ -20,7 +21,7 @@ public class KntRedmineManager
         _manager = new RedmineManager(_host, _apiKey);
     }
 
-    public bool IssueToNoteDto(string id, NoteExtendedDto? noteDto, ref string? folder, bool loadAttachments = true)
+    public bool IssueToNoteDto(string id, NoteExtendedDto? noteDto, ref string? folder, bool loadAttachments = true, string pathUtils = "", string rootContainer = "")
     {
         try
         {
@@ -32,9 +33,10 @@ public class KntRedmineManager
             if (issue == null)
                 return false;
 
-            noteDto.Topic = issue.Subject;
-            noteDto.Description = issue.Description;
+            noteDto.Topic = issue.Subject;                        
             noteDto.Tags = $"HU#{issue.Id}";
+            noteDto.ContentType = "markdown";
+            var tmpDescription = issue.Description;
             var customFields = issue?.CustomFields;
 
             if(noteDto.KAttributesDto.Count > 0)
@@ -73,26 +75,39 @@ public class KntRedmineManager
             {
                 foreach (var atch in issue.Attachments)
                 {
-                    var resource = new ResourceDto();
+                    // TODO: Go to to service layer for get new resourceDto (with container completed).
+                    //var resource = new ResourceDto();
 
                     var findRes = noteDto.Resources.FirstOrDefault(r => r.Name.IndexOf(atch.FileName)>-1);
 
-                    if(findRes == null)
+                    if (findRes == null)
                     {
-                        resource.ResourceId = Guid.NewGuid();
-                        resource.ContentInDB = false;
-                        resource.Name = $"{resource.ResourceId}_{atch.FileName}";
-                        resource.Description = atch.Description;
-                        resource.Order = 0;
-                        resource.ContentArrayBytes = _manager.DownloadFile(atch.ContentUrl);
+                        findRes = new ResourceDto();
+                        findRes.ResourceId = Guid.NewGuid();
+                        findRes.Container = $"{rootContainer}/{DateTime.Now.Year.ToString()}";
+                        findRes.ContentInDB = false;
+                        findRes.Name = $"{findRes.ResourceId}_{atch.FileName}";
+                        findRes.Description = atch.Description;
+                        findRes.Order = 0;
+                        findRes.ContentArrayBytes = _manager.DownloadFile(atch.ContentUrl);
                     
-                        noteDto.Resources.Add(resource);
+                        noteDto.Resources.Add(findRes);                        
                     }
+                    var container = findRes?.Container.Replace('\\', '/');                        
+
+                    var org = $"!{findRes?.NameOut}!";
+                    var dest = $"![alt text]({container}/{findRes?.Name})";
+
+                    tmpDescription = tmpDescription.Replace(org, dest);
                 }
             }
+            
+            tmpDescription = TextToMarkdown(pathUtils, tmpDescription);
+            tmpDescription = tmpDescription.Replace("\\[", "[");
+            tmpDescription = tmpDescription.Replace("\\]", "]");
+            noteDto.Description = tmpDescription;
 
             return true;
-
         }
         catch (Exception ex)
         {
@@ -126,6 +141,40 @@ public class KntRedmineManager
         var predictionResult = RedMineGestion.Predict(dataInput);
 
         return predictionResult.PredictedLabel;
+    }
+
+    public string TextToMarkdown(string pathUtils, string text)
+    {
+        // TODO: refactor this method
+
+        // pandoc -f textile -t markdown --wrap=preserve prueba1.text -o pruebaS1.md
+
+        var textOut = "";
+
+        if (!Directory.Exists(pathUtils))
+            return text;
+
+        string fileIn = Path.Combine(pathUtils, "input.text");
+        string fileOut = Path.Combine(pathUtils, "output.md");
+        string exPandoc = Path.Combine(pathUtils, "pandoc.exe");
+        string param = $" -f textile -t markdown --wrap=preserve {fileIn} -o {fileOut}";
+
+        if (System.IO.File.Exists(fileIn))
+            System.IO.File.Delete(fileIn);
+
+        if (System.IO.File.Exists(fileOut))
+            System.IO.File.Delete(fileOut);
+
+        System.IO.File.WriteAllText(fileIn,text);
+
+        var process = Process.Start(exPandoc, param );
+        process.WaitForExit();
+        var exitCode = process.ExitCode;
+
+        if (System.IO.File.Exists(fileOut))
+            textOut = System.IO.File.ReadAllText(fileOut);
+
+        return textOut;
     }
 
 
