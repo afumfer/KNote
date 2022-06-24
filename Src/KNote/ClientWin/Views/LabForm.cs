@@ -12,6 +12,8 @@ using KNote.Model.Dto;
 using KntScript;
 
 using KntRedmineApi;
+using Pandoc;
+using CliWrap;
 
 namespace KNote.ClientWin.Views;
 
@@ -31,8 +33,6 @@ public partial class LabForm : Form
     public LabForm()
     {
         InitializeComponent();
-
-
     }
 
     public LabForm(Store store) : this()
@@ -41,9 +41,11 @@ public partial class LabForm : Form
     }
     private async void LabForm_Load(object sender, EventArgs e)
     {
+        // KntScript
         if (Directory.Exists(_pathSampleScripts))
             LoadListScripts(_pathSampleScripts);
 
+        // WebView2
         webView2.CoreWebView2InitializationCompleted += WebView2_CoreWebView2InitializationCompleted;
         webView2.NavigationStarting += WebView2_NavigationStarting;
         webView2.NavigationCompleted += WebView2_NavigationCompleted;
@@ -55,6 +57,7 @@ public partial class LabForm : Form
             textStatusWebView2.Text = "webView2 not ready";
         }
 
+        // RedMineAPI
         textHost.Text = _store.AppConfig.HostRedmine;
         textApiKey.Text = _store.AppConfig.ApiKeyRedmine;
         textIssuesImportFile.Text = _store.AppConfig.IssuesImportFile;
@@ -1011,31 +1014,31 @@ public partial class LabForm : Form
             return;
         }
 
-        int rootFolNum = 1;
-
-        if(!string.IsNullOrEmpty(textFolderNumForImportIssues.Text))
-            int.TryParse(textFolderNumForImportIssues.Text, out rootFolNum);
-
-        var parentFolder = (await service.Folders.GetAsync(rootFolNum)).Entity;
-
-        var folders = (await service.Folders.GetAllAsync()).Entity;
-
-        // ----
-
+        // TODO: Refactor this ....
         _store.AppConfig.HostRedmine = textHost.Text;
         _store.AppConfig.ApiKeyRedmine = textApiKey.Text;
         _store.AppConfig.IssuesImportFile = textIssuesImportFile.Text;
-
+        _store.AppConfig.ToolsPath = Path.GetDirectoryName(_store.AppConfig.IssuesImportFile);
+        
         var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
+        var pandocEngine = new PandocEngine($"{_store.AppConfig.ToolsPath}/pandoc.exe");        
+        // ----
+
         var filter = new NotesFilterDto();
 
+        int rootFolNum = 1;
+        if(!string.IsNullOrEmpty(textFolderNumForImportIssues.Text))
+            int.TryParse(textFolderNumForImportIssues.Text, out rootFolNum);
+        var parentFolder = (await service.Folders.GetAsync(rootFolNum)).Entity;
+        var folders = (await service.Folders.GetAllAsync()).Entity;
+        
         var hhuu = GetHUs(textIssuesId.Text);
         var i = 1;
         listInfoRedmine.Items.Clear();
 
         foreach (var hu in hhuu)
         {
-            string folderName;            
+            string folderName = "";            
             NoteExtendedDto note = (await service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
 
             filter.Tags = $"HU#{hu}";
@@ -1048,45 +1051,67 @@ public partial class LabForm : Form
                     note = (await service.Notes.GetExtendedAsync(notes[0].NoteId)).Entity;
 
             }
-
-            note.Tags = filter.Tags;
-            folderName = "";
             
-            var res = manager.IssueToNoteDto(hu, note, ref folderName, true, Path.GetDirectoryName(textIssuesImportFile.Text), service.RepositoryRef.ResourcesContainer);
-
-            foreach(var r in note.Resources)
-            {
-                r.FileType = _store.ExtensionFileToFileType(Path.GetExtension(r.Name));                
-            }
-
-            var folder = folders.FirstOrDefault(f => f.Name == folderName);
-
-            if (folder != null)
-            {
-                note.FolderId = folder.FolderId;
-            }
-            else
-            {
-                FolderDto newFolder = new FolderDto
-                {
-                    Name = folderName,
-                    ParentId = parentFolder.FolderId
-                };
-
-                var resSave = await service.Folders.SaveAsync(newFolder);
-
-                if (resSave.IsValid)
-                {
-                    folders = (await service.Folders.GetAllAsync()).Entity;
-                    note.FolderId = resSave.Entity.FolderId;
-                }
-                else
-                    note.FolderId = parentFolder.FolderId;
-
-            }               
+            var res = manager.IssueToNoteDto(hu, note);
 
             if (res)
-            {                
+            {
+                note.Tags = filter.Tags;
+                folderName = note.KAttributesDto[2].Value;
+
+                foreach(var r in note.Resources)
+                {
+                    r.FileType = _store.ExtensionFileToFileType(Path.GetExtension(r.Name));                
+                }
+
+                var folder = folders.FirstOrDefault(f => f.Name == folderName);
+
+                if (folder != null)
+                {
+                    note.FolderId = folder.FolderId;
+                }
+                else
+                {
+                    FolderDto newFolder = new FolderDto
+                    {
+                        Name = folderName,
+                        ParentId = parentFolder.FolderId
+                    };
+
+                    var resSave = await service.Folders.SaveAsync(newFolder);
+
+                    if (resSave.IsValid)
+                    {
+                        folders = (await service.Folders.GetAllAsync()).Entity;
+                        note.FolderId = resSave.Entity.FolderId;
+                    }
+                    else
+                        note.FolderId = parentFolder.FolderId;
+                }
+
+                foreach(var r in note.Resources)
+                {                
+                    if (string.IsNullOrEmpty(r.Container))
+                    {
+                        r.Container = $"{service.RepositoryRef.ResourcesContainer}/{DateTime.Now.Year.ToString()}";                    
+                    }
+
+                    r.Container = r.Container.Replace('\\', '/');
+                
+                    var org = $"!{r.NameOut}!";
+                    var dest = $"![alt text]({r.Container}/{r.Name})";
+
+                    note.Description = note.Description.Replace(org, dest);
+                }
+
+                // iIefficient version
+                note.Description = TextToMarkdown(_store.AppConfig.ToolsPath, note.Description);
+
+                // This version, pending encoding issue ...
+                //note.Description = await pandocEngine.ConvertToText<TextileIn, CommonMarkOut>(note.Description);
+                //note.Description = note.Description.Replace("\\[", "[");
+                //note.Description = note.Description.Replace("\\]", "]");
+
                 var resSaveNote = await service.Notes.SaveExtendedAsync(note);
                 listInfoRedmine.Items.Add($"{i++} - #{note.Tags}: {note.Topic}");
                 listInfoRedmine.Refresh();
@@ -1100,8 +1125,6 @@ public partial class LabForm : Form
 
         MessageBox.Show("End import");
     }
-
-
 
     private string[] GetHUs(string strIssuesId)
     {
@@ -1120,8 +1143,6 @@ public partial class LabForm : Form
         }
     }
 
-
-
     private async void buttonFindIssue_Click(object sender, EventArgs e)
     {
         if (_store.ActiveFolderWithServiceRef == null)
@@ -1132,7 +1153,7 @@ public partial class LabForm : Form
 
         var serviceRef = _store.ActiveFolderWithServiceRef.ServiceRef;
         var service = serviceRef.Service;
-        var folderName = "";
+        
         NoteExtendedDto note = (await service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
         var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
 
@@ -1140,11 +1161,11 @@ public partial class LabForm : Form
         textPredictDescription.Text = "";
         textPredictCategory.Text = "";
 
-        var res = manager.IssueToNoteDto(textPredictFindIssue.Text, note, ref folderName, false);
+        var res = manager.IssueToNoteDto(textPredictFindIssue.Text, note, false);
 
         textPredictSubject.Text = note.Topic;
         textPredictDescription.Text = note.Description;
-        textPredictCategory.Text = folderName;
+        textPredictCategory.Text = note.KAttributesDto[2].Value; 
 
     }
 
@@ -1160,6 +1181,65 @@ public partial class LabForm : Form
         textPredictionPH.Text = "";
         var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
         textPredictionPH.Text = manager.PredictPH(textPredictCategory.Text, textPredictSubject.Text, textPredictDescription.Text);
+    }
+
+    private string TextToMarkdown(string pathUtils, string text)
+    {
+        // TODO: refactor this method
+
+        // pandoc -f textile -t markdown --wrap=preserve prueba1.text -o pruebaS1.md
+
+        var textOut = "";
+
+        if (!Directory.Exists(pathUtils))
+            return text;
+
+        string fileIn = Path.Combine(pathUtils, "input.text");
+        string fileOut = Path.Combine(pathUtils, "output.md");
+        string exPandoc = Path.Combine(pathUtils, "pandoc.exe");
+        string param = $" -f textile -t markdown --wrap=preserve {fileIn} -o {fileOut}";
+
+        if (System.IO.File.Exists(fileIn))
+            System.IO.File.Delete(fileIn);
+
+        if (System.IO.File.Exists(fileOut))
+            System.IO.File.Delete(fileOut);
+
+        System.IO.File.WriteAllText(fileIn, text);
+
+        var process = Process.Start(exPandoc, param);
+        process.WaitForExit();
+        var exitCode = process.ExitCode;
+
+        if (System.IO.File.Exists(fileOut))
+            textOut = System.IO.File.ReadAllText(fileOut);
+
+        textOut = textOut.Replace("\\[", "[");
+        textOut = textOut.Replace("\\]", "]");
+        return textOut;
+
+    }
+
+
+    private async Task<string> TextToMarkdown3(string pathUtils, string text)
+    {
+        var stdOutBuffer = new StringBuilder();
+        var stdErrBuffer = new StringBuilder();
+
+        // ⚠ This particular example can also be simplified with ExecuteBufferedAsync().
+        // Continue reading below!
+        var result = await Cli.Wrap("path/to/exe")
+            .WithArguments("--foo bar")
+            .WithWorkingDirectory("work/dir/path")
+            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
+            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
+            .ExecuteAsync();
+
+        // Contains stdOut/stdErr buffered in-memory as string
+        var stdOut = stdOutBuffer.ToString();
+        var stdErr = stdErrBuffer.ToString();
+
+        return stdOut;
     }
 
     #endregion

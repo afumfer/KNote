@@ -264,6 +264,20 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    private string _toolsPath;
+    public string ToolsPath
+    {
+        get { return _toolsPath; }
+        set
+        {
+            if (_toolsPath != value)
+            {
+                _toolsPath = value;
+                OnPropertyChanged("ToolsPath");
+            }
+        }
+    }
+
 
     #endregion 
 
