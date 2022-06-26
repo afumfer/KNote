@@ -12,7 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CliWrap" Version="3.4.4" />
     <PackageReference Include="Markdig" Version="0.30.2" />
     <PackageReference Include="Pandoc" Version="1.0.0" />
     <PackageReference Include="ReverseMarkdown" Version="3.23.1" />

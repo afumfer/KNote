@@ -1021,7 +1021,9 @@ public partial class LabForm : Form
         _store.AppConfig.ToolsPath = Path.GetDirectoryName(_store.AppConfig.IssuesImportFile);
         
         var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
-        var pandocEngine = new PandocEngine($"{_store.AppConfig.ToolsPath}/pandoc.exe");        
+        //var pandocEngine = new PandocEngine($"{_store.AppConfig.ToolsPath}/pandoc.exe");        
+        PandocInstance.SetPandocPath($"{_store.AppConfig.ToolsPath}/pandoc.exe");
+
         // ----
 
         var filter = new NotesFilterDto();
@@ -1105,10 +1107,13 @@ public partial class LabForm : Form
                 }
 
                 // iIefficient version
-                note.Description = TextToMarkdown(_store.AppConfig.ToolsPath, note.Description);
+                //note.Description = TextToMarkdown(_store.AppConfig.ToolsPath, note.Description);
+                
+                // Other version
+                note.Description = await TextToMarkdown2(_store.AppConfig.ToolsPath, note.Description);
 
                 // This version, pending encoding issue ...
-                //note.Description = await pandocEngine.ConvertToText<TextileIn, CommonMarkOut>(note.Description);
+                //note.Description = await pandocEngine.ConvertToText<TextileIn, CommonMarkOut>(note.Description);                
                 //note.Description = note.Description.Replace("\\[", "[");
                 //note.Description = note.Description.Replace("\\]", "]");
 
@@ -1220,26 +1225,33 @@ public partial class LabForm : Form
 
     }
 
-
-    private async Task<string> TextToMarkdown3(string pathUtils, string text)
+    private async Task<string> TextToMarkdown2(string pathUtils, string text)
     {
-        var stdOutBuffer = new StringBuilder();
-        var stdErrBuffer = new StringBuilder();
+        // TODO: refactor this method
+        var textOut = "";
 
-        // ⚠ This particular example can also be simplified with ExecuteBufferedAsync().
-        // Continue reading below!
-        var result = await Cli.Wrap("path/to/exe")
-            .WithArguments("--foo bar")
-            .WithWorkingDirectory("work/dir/path")
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
-            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
-            .ExecuteAsync();
+        if (!Directory.Exists(pathUtils))
+            return text;
 
-        // Contains stdOut/stdErr buffered in-memory as string
-        var stdOut = stdOutBuffer.ToString();
-        var stdErr = stdErrBuffer.ToString();
+        string fileIn = Path.Combine(pathUtils, "__input.text");
+        string fileOut = Path.Combine(pathUtils, "__output.md");                
 
-        return stdOut;
+        if (System.IO.File.Exists(fileIn))
+            System.IO.File.Delete(fileIn);
+
+        if (System.IO.File.Exists(fileOut))
+            System.IO.File.Delete(fileOut);
+
+        System.IO.File.WriteAllText(fileIn, text);
+
+        await PandocInstance.Convert<TextileIn, CommonMarkOut>(fileIn, fileOut);
+        
+        if (System.IO.File.Exists(fileOut))
+            textOut = System.IO.File.ReadAllText(fileOut);
+
+        textOut = textOut.Replace("\\[", "[");
+        textOut = textOut.Replace("\\]", "]");
+        return textOut;
     }
 
     #endregion
