@@ -14,6 +14,7 @@ using KntScript;
 using KntRedmineApi;
 using Pandoc;
 using CliWrap;
+using System.Globalization;
 
 namespace KNote.ClientWin.Views;
 
@@ -1103,7 +1104,7 @@ public partial class LabForm : Form
                     var org = $"!{r.NameOut}!";
                     var dest = $"![alt text]({r.Container}/{r.Name})";
 
-                    note.Description = note.Description.Replace(org, dest);
+                    note.Description = note.Description.Replace(org, dest, true, CultureInfo.CurrentCulture);
                 }
 
                 // iIefficient version
@@ -1234,7 +1235,7 @@ public partial class LabForm : Form
             return text;
 
         string fileIn = Path.Combine(pathUtils, "__input.text");
-        string fileOut = Path.Combine(pathUtils, "__output.md");                
+        string fileOut = Path.Combine(pathUtils, "__output.md");
 
         if (System.IO.File.Exists(fileIn))
             System.IO.File.Delete(fileIn);
@@ -1244,7 +1245,7 @@ public partial class LabForm : Form
 
         System.IO.File.WriteAllText(fileIn, text);
 
-        await PandocInstance.Convert<TextileIn, CommonMarkOut>(fileIn, fileOut);
+        await PandocInstance.Convert<TextileIn, CommonMarkOut>(fileIn, fileOut, new TextileIn { }, new CommonMarkOut { Wrap = Wrap.Preserve}, default);
         
         if (System.IO.File.Exists(fileOut))
             textOut = System.IO.File.ReadAllText(fileOut);

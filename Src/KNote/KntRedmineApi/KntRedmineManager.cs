@@ -12,7 +12,7 @@ public class KntRedmineManager
     private readonly string _host;
     private readonly string _apiKey;
     private readonly RedmineManager _manager;
-    private NameValueCollection _parameters = new NameValueCollection { { "include", "attachments,relations" } };
+    private NameValueCollection _parameters = new NameValueCollection { { "include", "attachments,relations,journals" } };
 
     public KntRedmineManager(string host, string apiKey)
     {
@@ -69,6 +69,29 @@ public class KntRedmineManager
                 noteDto.KAttributesDto[16].Value = issue?.FixedVersion?.Name;
             }
 
+            var annotations = issue?.Journals;
+            if (annotations != null)
+            {
+                var nl = $"{Environment.NewLine} ";
+                var annString = nl;
+                foreach (var an in annotations)
+                {
+                    if (!string.IsNullOrEmpty(an.Notes))
+                    {
+                        annString += $"User: {an.User?.Name} {nl}";
+                        annString += $"Created on: {an.CreatedOn}{nl}{nl}";
+                        annString += $"{an.Notes}  {nl} {nl}";
+                        annString += $"----------------------------------{nl}{nl}";
+                    }
+                }
+
+                var notes = $"{nl}{nl}{nl}{nl}{nl}///////////////////////////////////{nl}";
+                notes += $"  NOTES: {nl}";
+                notes += $"///////////////////////////////////{nl}";
+                notes += annString;
+                noteDto.Description += notes;
+            }
+
             if (issue?.Attachments != null && loadAttachments)
             {
                 foreach (var atch in issue.Attachments)
@@ -91,7 +114,7 @@ public class KntRedmineManager
                     }
                 }
             }
-                        
+                                    
             return true;
         }
         catch (Exception ex)
