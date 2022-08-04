@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
 using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
@@ -14,11 +17,19 @@ static class Program
     [STAThread]
     static void Main()        
     {
+        Process[] instancias = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
+
+        if (instancias.Length > 1)
+        {
+            BringToFront();
+            return;
+        }
+
         // Old .net versions
         //Application.SetHighDpiMode(HighDpiMode.SystemAware);
         //Application.EnableVisualStyles();
         //Application.SetCompatibleTextRenderingDefault(false);
-            
+
         // new in .net 6
         ApplicationConfiguration.Initialize();
 
@@ -123,6 +134,26 @@ static class Program
         var firstService = store.GetFirstServiceRef();
         var folder = (await firstService.Service.Folders.GetHomeAsync()).Entity;
         store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
+    }
+
+    [DllImport("USER32.DLL", CharSet = CharSet.Unicode)]
+    public static extern IntPtr FindWindow(String lpClassName, String lpWindowName);
+
+    [DllImport("USER32.DLL")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("USER32.DLL")]
+    public static extern bool ShowWindow(IntPtr hWnd, int i);
+
+    public static void BringToFront()
+    {
+        IntPtr handle = FindWindow(null, "KaNote Managment");
+
+        if (handle == IntPtr.Zero)
+            return;
+
+        ShowWindow(handle, 1);
+        SetForegroundWindow(handle);
     }
 }
 

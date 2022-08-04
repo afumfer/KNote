@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using KNote.Model;
 using KNote.Repository;
@@ -41,6 +37,7 @@ namespace KNote.Service
             {
                 if (_repository == null)
                 {
+                    // TODO: hack, implement here IoC.
                     if (RepositoryRef.Orm == "Dapper")                        
                         _repository = new DP.KntRepository(RepositoryRef);
                     else if (RepositoryRef.Orm == "EntityFramework")                        
