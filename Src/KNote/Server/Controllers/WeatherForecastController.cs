@@ -66,9 +66,9 @@ namespace KNote.Server.Controllers
         {
             string[] values = new string[] 
             { 
-                "aa",
-                appSettings.Version, 
-                appSettings.ApplicationName 
+                appSettings.ResourcesContainer,
+                appSettings.ResourcesContainerRootPath, 
+                appSettings.ResourcesContainerRootUrl 
             };
             return values;
         }
