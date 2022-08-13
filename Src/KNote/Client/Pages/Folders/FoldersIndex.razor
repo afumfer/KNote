@@ -118,7 +118,7 @@
     {
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete folder - {@folder.Name})?", 
-            "Delete user", 
+            "Delete folder", 
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)

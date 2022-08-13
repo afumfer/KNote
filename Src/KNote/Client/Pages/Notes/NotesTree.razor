@@ -193,7 +193,7 @@
     {                
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?", 
-            "Delete user", 
+            "Delete note", 
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)
