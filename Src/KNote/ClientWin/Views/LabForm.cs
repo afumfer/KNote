@@ -1166,13 +1166,18 @@ public partial class LabForm : Form
         textPredictSubject.Text = "";
         textPredictDescription.Text = "";
         textPredictCategory.Text = "";
+        textPredictionGestion.Text = "";
+        textPredictionPH.Text = "";
 
         var res = manager.IssueToNoteDto(textPredictFindIssue.Text, note, false);
 
         textPredictSubject.Text = note.Topic;
         textPredictDescription.Text = note.Description;
-        textPredictCategory.Text = note.KAttributesDto[2].Value; 
 
+        if (note.KAttributesDto.Count < 3)
+            MessageBox.Show("You do not have the experimental database selected with the RedMine Educa import.");
+        else
+            textPredictCategory.Text = note.KAttributesDto[2].Value; 
     }
 
     private void buttonPredictGestion_Click(object sender, EventArgs e)

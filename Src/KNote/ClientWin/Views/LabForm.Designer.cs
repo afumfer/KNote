@@ -73,6 +73,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.buttonTestKntRedmineApi = new System.Windows.Forms.Button();
             this.tabRedMinePredict = new System.Windows.Forms.TabPage();
+            this.label12 = new System.Windows.Forms.Label();
+            this.textPredictCategory = new System.Windows.Forms.TextBox();
             this.buttonFindIssue = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.buttonPredictPH = new System.Windows.Forms.Button();
@@ -87,8 +89,6 @@
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.textPredictCategory = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
             this.tabControlLab.SuspendLayout();
             this.tabAppLab.SuspendLayout();
             this.tabKntScriptLab.SuspendLayout();
@@ -597,6 +597,25 @@
             this.tabRedMinePredict.Text = "RedMine predict";
             this.tabRedMinePredict.UseVisualStyleBackColor = true;
             // 
+            // label12
+            // 
+            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(22, 306);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(58, 15);
+            this.label12.TabIndex = 10;
+            this.label12.Text = "Category:";
+            // 
+            // textPredictCategory
+            // 
+            this.textPredictCategory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textPredictCategory.Location = new System.Drawing.Point(101, 306);
+            this.textPredictCategory.Name = "textPredictCategory";
+            this.textPredictCategory.Size = new System.Drawing.Size(548, 23);
+            this.textPredictCategory.TabIndex = 9;
+            // 
             // buttonFindIssue
             // 
             this.buttonFindIssue.Location = new System.Drawing.Point(194, 17);
@@ -677,6 +696,7 @@
             this.textPredictDescription.Location = new System.Drawing.Point(101, 73);
             this.textPredictDescription.Multiline = true;
             this.textPredictDescription.Name = "textPredictDescription";
+            this.textPredictDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textPredictDescription.Size = new System.Drawing.Size(548, 227);
             this.textPredictDescription.TabIndex = 5;
             // 
@@ -722,25 +742,6 @@
             this.label9.Size = new System.Drawing.Size(46, 15);
             this.label9.TabIndex = 0;
             this.label9.Text = "Issue #:";
-            // 
-            // textPredictCategory
-            // 
-            this.textPredictCategory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textPredictCategory.Location = new System.Drawing.Point(101, 306);
-            this.textPredictCategory.Name = "textPredictCategory";
-            this.textPredictCategory.Size = new System.Drawing.Size(548, 23);
-            this.textPredictCategory.TabIndex = 9;
-            // 
-            // label12
-            // 
-            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(22, 306);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(58, 15);
-            this.label12.TabIndex = 10;
-            this.label12.Text = "Category:";
             // 
             // LabForm
             // 
