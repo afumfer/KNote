@@ -6,7 +6,9 @@
 @inject AppState appState
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManager
-@inject IShowMessages showMessages
+@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
 
 @implements IDisposable
 
@@ -15,21 +17,22 @@
 <div>
     <h3>@appState.AppName home page</h3>
     <p><i>@appInfo</i></p>
-    <hr />
-    <NotesList Notes="notes" OnNoteDelete="GoNoteDelete" OnNoteEdit="GoNoteEdit" OnNoteView="GoNoteView" />
+    
 </div>
 
-<ModalDialog @ref="modalDialog" Title="Delete note" onConfirm="OnConfirmDelete" onCancel="OnCancelDelete">
-    <div><p>Are you sure you want to delete note "@itemDelete.Topic (@itemDelete.NoteNumber)" ?</p></div>
-</ModalDialog>
+<hr />    
+
+<div class="row">
+    <div class="col-12">
+        <NotesList Notes="notes" OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
+    </div>
+</div>
+
 
 @code {    
 
     private List<NoteInfoDto> notes;
-
-    private ModalDialog modalDialog;
     private NoteInfoDto itemDelete;
-
     private string appInfo;
 
     protected override async Task OnInitializedAsync()
@@ -49,45 +52,40 @@
     {
         notes = null;
         var result = await webApiService.Notes.GetHomeNotesAsync();
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
+        if (!result.IsValid)            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
         else
             notes = result.Entity;
     }
 
-    private void GoNoteView(NoteInfoDto note)
+    private void OnNoteView(NoteInfoDto note)
     {
         navigationManager.NavigateTo($"notes/{note.NoteId}/index");
     }
 
-    private void GoNoteEdit(NoteInfoDto note)
+    private void OnNoteEdit(NoteInfoDto note)
     {
         navigationManager.NavigateTo($"notes/edit/{note.NoteId}/index");
     }
 
-    private void GoNoteDelete(NoteInfoDto item)
+    async Task OnNoteDelete(NoteInfoDto item)
     {
-        modalDialog.Show();
-        itemDelete = item;
-    }
+        var resultDialog = await dialogService.Confirm(
+            $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?",
+            "Delete note",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
-    private async Task OnConfirmDelete()
-    {
-        modalDialog.Hide();
-
-        var result = await webApiService.Notes.DeleteAsync(itemDelete.NoteId);
-        if (!result.IsValid)
-            await showMessages.ShowErrorMessage(result.Message);
-        else
-            await LoadNotes();
-
-        itemDelete = null;
-    }
-
-    private void OnCancelDelete()
-    {
-        modalDialog.Hide();
-        itemDelete = null;
+        if (resultDialog == true)
+        {
+            var result = await webApiService.Notes.DeleteAsync(item.NoteId);
+            if (!result.IsValid)
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail = result.Message, Duration = 12000 });
+            else
+            {
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail = "The note has been deleted.", Duration = 3000 });
+                await LoadNotes();
+            }
+        }
     }
 
 }

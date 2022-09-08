@@ -2,9 +2,13 @@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManger
-@inject IShowMessages showMessages
+@*@inject IShowMessages showMessages*@
 
-@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+@*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
 <div class="container-fluid">
     <div class="row">
@@ -48,7 +52,8 @@ else
         var result = await webApiService.Notes.GetAsync(Guid.Parse(NoteId));
         if (!result.IsValid)
         {
-            await showMessages.ShowErrorMessage(result.Message);
+            //await showMessages.ShowErrorMessage(result.Message);
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
             navigationManger.NavigateTo("index");
         }
         else
