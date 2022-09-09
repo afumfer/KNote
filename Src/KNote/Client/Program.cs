@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 
+using KNote.Client.AppStateService;
 using KNote.Client.ClientDataServices;
 using KNote.Client.Helpers;
 using KNote.Client.Auth;
-using KNote.Client.Shared;
 
 using Radzen;
+
 
 namespace KNote.Client;
 
@@ -24,8 +25,9 @@ public class Program
             
         builder.Services.AddScoped<IShowMessages, ShowMessages>();
 
-        // TODO: deprecated
+        // TODO: deprecated ....
         builder.Services.AddScoped<IGenericDataService, GenericDataService>();  
+        //......................
 
         builder.Services.AddScoped<IWebApiService, WebApiService>();
 

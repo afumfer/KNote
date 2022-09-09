@@ -1,6 +1,6 @@
 ﻿using KNote.Model.Dto;
 
-namespace KNote.Client.Shared;
+namespace KNote.Client.AppStateService;
 
 public class AppState
 {
@@ -26,7 +26,7 @@ public class AppState
         get { return _appDescription; }
         set { _appDescription = value; NotifyStateChanged(); }
     }
-                
+
     public Version AppVersion
     {
         get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; }
@@ -46,22 +46,22 @@ public class AppState
     private FolderDto _selectedFolder;
     public FolderDto SelectedFolder
     {
-        get 
+        get
         {
             if (_selectedFolder == null)
                 _selectedFolder = new FolderDto();
-            return _selectedFolder; 
+            return _selectedFolder;
         }
-        set 
-        { 
-            _selectedFolder = value; 
-            NotifyStateChanged(); 
+        set
+        {
+            _selectedFolder = value;
+            NotifyStateChanged();
         }
     }
 
     private List<FolderDto> _foldersTree;
-    public List<FolderDto> FoldersTree 
-    { 
+    public List<FolderDto> FoldersTree
+    {
         get
         {
             return _foldersTree;
@@ -69,18 +69,18 @@ public class AppState
         set
         {
             _foldersTree = value;
-            if(_foldersIndex != null)
+            if (_foldersIndex != null)
                 _foldersIndex = null;
             NotifyStateChanged();
-        } 
+        }
     }
 
     private Dictionary<Guid, FolderDto> _foldersIndex;
-    public Dictionary<Guid, FolderDto> FoldersIndex 
+    public Dictionary<Guid, FolderDto> FoldersIndex
     {
         get
         {
-            if(_foldersIndex == null)
+            if (_foldersIndex == null)
                 _foldersIndex = new Dictionary<Guid, FolderDto>();
             return _foldersIndex;
         }
