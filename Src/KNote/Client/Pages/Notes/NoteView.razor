@@ -2,38 +2,37 @@
 
 @inject IWebApiService webApiService
 @inject NavigationManager navigationManger
-@*@inject IShowMessages showMessages*@
-
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-6">
-            <h3>Note view</h3>
-        </div>
-        <div class="col-6 float-right">
-            <button class="btn btn-success float-right ml-2" @onclick="OnExit"><i class="fa fa-arrow-right" aria-hidden="true"></i></button>            
-        </div>
-    </div>
-</div>
-<hr class="mt-1" />
+<ToolingHeader Title="Note view">
+    <Buttons>            
+        <RadzenButton Icon="logout" Click="() => OnExit()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1"  />  
+    </Buttons>
+</ToolingHeader>
 
 @if (note != null)
 {
-    <h5>@note.Topic</h5>
-    <h6> >> @note.FolderDto.Name</h6>
-    <p>     >> NoteId: @NoteId / @note.NoteId</p>
-    <hr />
-    <p>Description:</p>
-    <p>@((MarkupString)note.Description)</p>
-    <hr />
-    <p>Tags:</p>
-    <p>@(note.Tags)</p>
-    <hr />
+    <RadzenCard >
+        <div>
+            <h4 class="h4">@note.Topic</h4>
+        </div>
+        <hr />
+        <div class="bg-white p-2">
+            <p>@((MarkupString)note.Description)</p>
+        </div>
+        <hr />
+        <div>
+            <i>
+                <p>Tags: @(note.Tags)</p>
+                <p>Creation date: @(note.CreationDateTime)</p>
+                <p>Modification date: @(note.ModificationDateTime)</p>
+            </i>
+        </div>
+    </RadzenCard>
 }
 else
 {
@@ -51,8 +50,7 @@ else
     {
         var result = await webApiService.Notes.GetAsync(Guid.Parse(NoteId));
         if (!result.IsValid)
-        {
-            //await showMessages.ShowErrorMessage(result.Message);
+        {            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
             navigationManger.NavigateTo("index");
         }

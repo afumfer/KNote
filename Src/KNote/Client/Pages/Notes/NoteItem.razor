@@ -12,16 +12,18 @@
             <span class="float-right mt-1 mr-1">
                 <AuthorizeView Roles="Admin, ProjecManager, Staff">
                     <Authorized>                    
+                        <RadzenButton Click="@(() => OnNoteView.InvokeAsync(Note))" Icon="launch"
+                            ButtonStyle="ButtonStyle.Primary"
+                            MouseEnter="@(args => tooltipService.Open(args, "View note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0" />
                         <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(Note))" Icon="edit" 
                             ButtonStyle="ButtonStyle.Primary" 
                             MouseEnter="@(args => tooltipService.Open(args, "Edit note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
                         <RadzenButton Click="@(() => OnNoteDelete.InvokeAsync(Note))" Icon="delete"
                             ButtonStyle="ButtonStyle.Danger" 
                             MouseEnter="@(args => tooltipService.Open(args, "Delete note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-
                     </Authorized>
                     <NotAuthorized>
-                        <RadzenButton Click="@(() => OnNoteView.InvokeAsync(Note))" Icon="view" 
+                        <RadzenButton Click="@(() => OnNoteView.InvokeAsync(Note))" Icon="launch"
                             ButtonStyle="ButtonStyle.Primary" 
                             MouseEnter="@(args => tooltipService.Open(args, "View note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
                     </NotAuthorized>
@@ -29,13 +31,19 @@
             </span>
         </div>
     </div>
-
-    @*<div class="row">*@
-        <div class="bg-white p-2">
+    
+    <div class="bg-white p-2">
+        @if ((Note.Description?.Length > 6000))
+        {
+            <ViewMarkdown MarkdownContent="@(Note.Description?.Substring(0,6000))" />
+            <p>...</p>
+        }
+        else
+        {
             <ViewMarkdown MarkdownContent="@Note.Description" />
-        </div>
-    @*</div>*@
-
+        }
+    </div>
+    
 </RadzenCard>
 
 
