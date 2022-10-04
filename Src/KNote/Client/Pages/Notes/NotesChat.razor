@@ -1,12 +1,95 @@
-﻿@page "/notes/chat"
+﻿@page "/chat"
+
+@using Microsoft.AspNetCore.SignalR.Client
+
+@inject NavigationManager NavigationManager
+
+@implements IDisposable
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<h3>Chat room</h3>
-<hr /> 
+<div class="container-fluid bg-light border">
+    <div class="row">
+        <KntIndexHeader TextHead="Chat room">
+            <IndexMenu> 
+            </IndexMenu>
+        </KntIndexHeader>
+    </div>
+</div>
 
-TODO: ...
+<div class="row">
+    <div class="col-12 pt-2">
+        <AuthorizeView>
+            <Authorized>
+                <RadzenCard>
+                    <div class="form-group text-right">
+                        <label>@(userInput = context.User.Identity.Name)</label>
+                    </div>
 
-@code {
+                    <div class="form-group">
+                        <label class="mr-2 mb-2">Your message </label>
+                        <input type="text" @bind-value="messageInput" @bind-value:event="oninput" style="width:100%;" @onkeypress="@((KeyboardEventArgs e) => MessageKeyPress(e))" />
+                    </div>
+                </RadzenCard>
+        
+                <div class="col-md-12 text-center mt-3">
+                    <RadzenButton Text="Send" Click="() => Send()" ButtonStyle="ButtonStyle.Primary" Class="mr-1" Disabled="@(!IsConnected)" />
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+</div>
 
+<hr />
+
+<ul>
+    @foreach (var message in Messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+@code
+{
+    private HubConnection hubConnection;
+    private List<string> Messages = new List<string>();
+    private string userInput;
+    private string messageInput;
+
+    protected override async Task OnInitializedAsync()
+    {        
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodeMessage = $"{user}: {message}";
+            Messages.Add(encodeMessage);
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
+
+    protected async Task Send()
+    {
+        await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+        messageInput = "";
+    }
+
+    private async Task MessageKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Send();
+        }
+    }
+
+    public void Dispose()
+    {
+        _ = hubConnection.DisposeAsync();
+    }
 }

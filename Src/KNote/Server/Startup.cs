@@ -18,6 +18,7 @@ using KNote.Model;
 using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 using Microsoft.AspNetCore.Http;
+using KNote.Server.Hubs;
 
 namespace KNote.Server
 {
@@ -96,6 +97,8 @@ namespace KNote.Server
                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddRazorPages();
+            
+            services.AddSignalR();
 
             services.AddResponseCompression(opts =>
             {
@@ -107,7 +110,7 @@ namespace KNote.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) // 
         {
-            //app.UseResponseCompression();
+            app.UseResponseCompression();
 
             if (env.IsDevelopment())
             {
@@ -130,12 +133,13 @@ namespace KNote.Server
 
             app.UseAuthentication();
             app.UseAuthorization();            
-            app.UseCors("KntPolicy");
+            app.UseCors("KntPolicy");            
 
             app.UseEndpoints(endpoints =>
             {                
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chathub");
                 endpoints.MapFallbackToFile("index.html");
             });
         }
