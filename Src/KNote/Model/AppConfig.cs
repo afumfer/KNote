@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using KNote.Model;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace KNote.ClientWin.Core;
+namespace KNote.Model;
 
 [Serializable]
 public class AppConfig : SmartModelDtoBase

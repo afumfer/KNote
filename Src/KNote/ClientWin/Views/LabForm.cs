@@ -15,6 +15,7 @@ using KntRedmineApi;
 using Pandoc;
 using CliWrap;
 using System.Globalization;
+using System.Reflection;
 
 namespace KNote.ClientWin.Views;
 
@@ -220,7 +221,7 @@ public partial class LabForm : Form
         }
     }
 
-    private void button1_Click(object sender, EventArgs e)
+    private void buttonReadVar_Click(object sender, EventArgs e)
     {
         var listVars = new List<ReadVarItem>();
 
@@ -247,7 +248,7 @@ public partial class LabForm : Form
 
     }
 
-    private void button2_Click(object sender, EventArgs e)
+    private void buttonProcessStart_Click(object sender, EventArgs e)
     {
         string url = @"https://github.com/afumfer/kntscript/blob/master/README.md";
 
@@ -278,7 +279,7 @@ public partial class LabForm : Form
         }
     }
 
-    private void button3_Click(object sender, EventArgs e)
+    private void buttonReflection_Click(object sender, EventArgs e)
     {
         var attribute = new KAttributeDto();
 
@@ -350,7 +351,7 @@ public partial class LabForm : Form
         listMessages.Items.Add(errMsg);
     }
 
-    private void buttonTest1_Click(object sender, EventArgs e)
+    private void buttonRunMonitor_Click(object sender, EventArgs e)
     {
         var monitor = new MonitorComponent(_store);
         monitor.Run();
@@ -360,7 +361,7 @@ public partial class LabForm : Form
 
     #region ANotas import
 
-    private async void buttonTest4_Click(object sender, EventArgs e)
+    private async void buttonImportAnotasXML_Click(object sender, EventArgs e)
     {
         if (_store.ActiveFolderWithServiceRef == null)
         {
@@ -1261,4 +1262,42 @@ public partial class LabForm : Form
     }
 
     #endregion
+
+    #region Plugin
+
+    private void buttonPlugin_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textPlugin.Text))
+        {
+            MessageBox.Show("Intro a valid plugin path file.");
+            return;
+        }
+
+        var pluginLocation = textPlugin.Text;
+        Assembly pluginAssembly = _store.LoadPlugin(pluginLocation);
+        var com = _store.CreateCommands(pluginAssembly);
+
+        foreach (var c in com)
+        {
+            //c.InjectAppconfig(_store.AppConfig);
+
+            var serviceRef = _store.ActiveFolderWithServiceRef?.ServiceRef;
+            var service = serviceRef?.Service;
+
+            //c.InjectService(service);
+            c.Execute();
+        }
+            
+
+    }
+
+    #endregion
+
+    private void buttonGetPluginFile_Click(object sender, EventArgs e)
+    {
+        var relativePath = @"KntRedminePlugin\bin\Debug\net6.0-windows\KntRedminePlugin.dll";
+        var root = _store.GetVsSolutionRootPath();
+        string pluginLocation = Path.GetFullPath(Path.Combine(root, relativePath.Replace('\\', Path.DirectorySeparatorChar)));
+        textPlugin.Text = pluginLocation;
+    }
 }

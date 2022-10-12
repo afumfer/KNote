@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 using KNote.Service;
 using KNote.Service.Services;
 
-namespace KNote.ClientWin.Core
-{
-    public class ServiceWithNoteId
-    {
-        public IKntService Service { get; set; }
-        public Guid NoteId { get; set; }
+namespace KNote.ClientWin.Core;
 
-    }
+public class ServiceWithNoteId
+{
+    public IKntService Service { get; set; }
+    public Guid NoteId { get; set; }
+
 }

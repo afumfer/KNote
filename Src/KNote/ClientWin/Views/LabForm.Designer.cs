@@ -31,14 +31,17 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LabForm));
             this.tabControlLab = new System.Windows.Forms.TabControl();
             this.tabAppLab = new System.Windows.Forms.TabPage();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.buttonGetPluginFile = new System.Windows.Forms.Button();
+            this.textPlugin = new System.Windows.Forms.TextBox();
+            this.buttonPlugin = new System.Windows.Forms.Button();
+            this.buttonTestReflection = new System.Windows.Forms.Button();
+            this.buttonTestProcessStart = new System.Windows.Forms.Button();
+            this.buttonTestReadVarItem = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.listMessages = new System.Windows.Forms.ListBox();
-            this.buttonTest4 = new System.Windows.Forms.Button();
-            this.buttonTest1 = new System.Windows.Forms.Button();
+            this.buttonImportAnotasXML = new System.Windows.Forms.Button();
+            this.buttonRunMonitor = new System.Windows.Forms.Button();
             this.tabKntScriptLab = new System.Windows.Forms.TabPage();
             this.groupSamples = new System.Windows.Forms.GroupBox();
             this.buttonSelectScriptDirectory = new System.Windows.Forms.Button();
@@ -121,14 +124,17 @@
             // 
             // tabAppLab
             // 
-            this.tabAppLab.Controls.Add(this.button3);
-            this.tabAppLab.Controls.Add(this.button2);
-            this.tabAppLab.Controls.Add(this.button1);
+            this.tabAppLab.Controls.Add(this.buttonGetPluginFile);
+            this.tabAppLab.Controls.Add(this.textPlugin);
+            this.tabAppLab.Controls.Add(this.buttonPlugin);
+            this.tabAppLab.Controls.Add(this.buttonTestReflection);
+            this.tabAppLab.Controls.Add(this.buttonTestProcessStart);
+            this.tabAppLab.Controls.Add(this.buttonTestReadVarItem);
             this.tabAppLab.Controls.Add(this.label2);
             this.tabAppLab.Controls.Add(this.label1);
             this.tabAppLab.Controls.Add(this.listMessages);
-            this.tabAppLab.Controls.Add(this.buttonTest4);
-            this.tabAppLab.Controls.Add(this.buttonTest1);
+            this.tabAppLab.Controls.Add(this.buttonImportAnotasXML);
+            this.tabAppLab.Controls.Add(this.buttonRunMonitor);
             this.tabAppLab.Location = new System.Drawing.Point(4, 24);
             this.tabAppLab.Name = "tabAppLab";
             this.tabAppLab.Padding = new System.Windows.Forms.Padding(3);
@@ -137,35 +143,62 @@
             this.tabAppLab.Text = "Lab app components";
             this.tabAppLab.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // buttonGetPluginFile
             // 
-            this.button3.Location = new System.Drawing.Point(14, 164);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(296, 26);
-            this.button3.TabIndex = 11;
-            this.button3.Text = "Test Reflection Model Objects";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.buttonGetPluginFile.Location = new System.Drawing.Point(607, 15);
+            this.buttonGetPluginFile.Name = "buttonGetPluginFile";
+            this.buttonGetPluginFile.Size = new System.Drawing.Size(39, 23);
+            this.buttonGetPluginFile.TabIndex = 14;
+            this.buttonGetPluginFile.Text = "<-";
+            this.buttonGetPluginFile.UseVisualStyleBackColor = true;
+            this.buttonGetPluginFile.Click += new System.EventHandler(this.buttonGetPluginFile_Click);
             // 
-            // button2
+            // textPlugin
             // 
-            this.button2.Location = new System.Drawing.Point(14, 133);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(296, 25);
-            this.button2.TabIndex = 10;
-            this.button2.Text = "Test ProcessStart";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.textPlugin.Location = new System.Drawing.Point(352, 15);
+            this.textPlugin.Name = "textPlugin";
+            this.textPlugin.Size = new System.Drawing.Size(247, 23);
+            this.textPlugin.TabIndex = 13;
             // 
-            // button1
+            // buttonPlugin
             // 
-            this.button1.Location = new System.Drawing.Point(14, 101);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(296, 26);
-            this.button1.TabIndex = 9;
-            this.button1.Text = "Test ReadVarItem";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.buttonPlugin.Location = new System.Drawing.Point(352, 51);
+            this.buttonPlugin.Name = "buttonPlugin";
+            this.buttonPlugin.Size = new System.Drawing.Size(297, 28);
+            this.buttonPlugin.TabIndex = 12;
+            this.buttonPlugin.Text = "Test Plugin";
+            this.buttonPlugin.UseVisualStyleBackColor = true;
+            this.buttonPlugin.Click += new System.EventHandler(this.buttonPlugin_Click);
+            // 
+            // buttonTestReflection
+            // 
+            this.buttonTestReflection.Location = new System.Drawing.Point(14, 164);
+            this.buttonTestReflection.Name = "buttonTestReflection";
+            this.buttonTestReflection.Size = new System.Drawing.Size(296, 26);
+            this.buttonTestReflection.TabIndex = 11;
+            this.buttonTestReflection.Text = "Test Reflection Model Objects";
+            this.buttonTestReflection.UseVisualStyleBackColor = true;
+            this.buttonTestReflection.Click += new System.EventHandler(this.buttonReflection_Click);
+            // 
+            // buttonTestProcessStart
+            // 
+            this.buttonTestProcessStart.Location = new System.Drawing.Point(14, 133);
+            this.buttonTestProcessStart.Name = "buttonTestProcessStart";
+            this.buttonTestProcessStart.Size = new System.Drawing.Size(296, 25);
+            this.buttonTestProcessStart.TabIndex = 10;
+            this.buttonTestProcessStart.Text = "Test ProcessStart";
+            this.buttonTestProcessStart.UseVisualStyleBackColor = true;
+            this.buttonTestProcessStart.Click += new System.EventHandler(this.buttonProcessStart_Click);
+            // 
+            // buttonTestReadVarItem
+            // 
+            this.buttonTestReadVarItem.Location = new System.Drawing.Point(14, 101);
+            this.buttonTestReadVarItem.Name = "buttonTestReadVarItem";
+            this.buttonTestReadVarItem.Size = new System.Drawing.Size(296, 26);
+            this.buttonTestReadVarItem.TabIndex = 9;
+            this.buttonTestReadVarItem.Text = "Test ReadVarItem";
+            this.buttonTestReadVarItem.UseVisualStyleBackColor = true;
+            this.buttonTestReadVarItem.Click += new System.EventHandler(this.buttonReadVar_Click);
             // 
             // label2
             // 
@@ -197,25 +230,25 @@
             this.listMessages.Size = new System.Drawing.Size(636, 274);
             this.listMessages.TabIndex = 6;
             // 
-            // buttonTest4
+            // buttonImportAnotasXML
             // 
-            this.buttonTest4.Location = new System.Drawing.Point(12, 51);
-            this.buttonTest4.Name = "buttonTest4";
-            this.buttonTest4.Size = new System.Drawing.Size(298, 28);
-            this.buttonTest4.TabIndex = 5;
-            this.buttonTest4.Text = "Import anotas xml";
-            this.buttonTest4.UseVisualStyleBackColor = true;
-            this.buttonTest4.Click += new System.EventHandler(this.buttonTest4_Click);
+            this.buttonImportAnotasXML.Location = new System.Drawing.Point(12, 51);
+            this.buttonImportAnotasXML.Name = "buttonImportAnotasXML";
+            this.buttonImportAnotasXML.Size = new System.Drawing.Size(298, 28);
+            this.buttonImportAnotasXML.TabIndex = 5;
+            this.buttonImportAnotasXML.Text = "Import anotas xml";
+            this.buttonImportAnotasXML.UseVisualStyleBackColor = true;
+            this.buttonImportAnotasXML.Click += new System.EventHandler(this.buttonImportAnotasXML_Click);
             // 
-            // buttonTest1
+            // buttonRunMonitor
             // 
-            this.buttonTest1.Location = new System.Drawing.Point(13, 16);
-            this.buttonTest1.Name = "buttonTest1";
-            this.buttonTest1.Size = new System.Drawing.Size(297, 28);
-            this.buttonTest1.TabIndex = 2;
-            this.buttonTest1.Text = "Run monitor";
-            this.buttonTest1.UseVisualStyleBackColor = true;
-            this.buttonTest1.Click += new System.EventHandler(this.buttonTest1_Click);
+            this.buttonRunMonitor.Location = new System.Drawing.Point(13, 16);
+            this.buttonRunMonitor.Name = "buttonRunMonitor";
+            this.buttonRunMonitor.Size = new System.Drawing.Size(297, 28);
+            this.buttonRunMonitor.TabIndex = 2;
+            this.buttonRunMonitor.Text = "Run monitor";
+            this.buttonRunMonitor.UseVisualStyleBackColor = true;
+            this.buttonRunMonitor.Click += new System.EventHandler(this.buttonRunMonitor_Click);
             // 
             // tabKntScriptLab
             // 
@@ -786,18 +819,18 @@
         private System.Windows.Forms.Button buttonRunSample;
         private System.Windows.Forms.Button buttonShowSample;
         private System.Windows.Forms.ListBox listSamples;
-        private System.Windows.Forms.Button buttonTest1;
+        private System.Windows.Forms.Button buttonRunMonitor;
         private System.Windows.Forms.ListBox listMessages;
-        private System.Windows.Forms.Button buttonTest4;
+        private System.Windows.Forms.Button buttonImportAnotasXML;
         private System.Windows.Forms.TabPage tabRichEditor;
         private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button buttonSelectScriptDirectory;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button buttonTestReadVarItem;
+        private System.Windows.Forms.Button buttonTestProcessStart;
+        private System.Windows.Forms.Button buttonTestReflection;
         private TabPage tabWebView2;
         private TabPage tabRedMineImport;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
@@ -835,5 +868,8 @@
         private TextBox textPredictDescription;
         private Label label12;
         private TextBox textPredictCategory;
+        private Button buttonPlugin;
+        private TextBox textPlugin;
+        private Button buttonGetPluginFile;
     }
 }
