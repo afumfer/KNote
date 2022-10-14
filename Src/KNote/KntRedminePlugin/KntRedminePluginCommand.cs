@@ -1,33 +1,45 @@
 ﻿using KNote.Model;
 using KNote.Service;
+using SQLitePCL;
 
-namespace KntRedminePlugin
+namespace KntRedminePlugin;
+
+public class KntRedminePluginCommand : IPluginCommand
 {
-    public class KntRedminePluginCommand : IPluginCommand
-    {
-        public string Name 
+    public string Name 
+    { 
+        get 
         { 
-            get 
-            { 
-                return "Name"; 
-            } 
+            return "KntRedminePlugin"; 
         } 
-    
-        public string Description
-        {
-            get
-            {
-                return "Description";
-            }
-        }
+    } 
 
-        public int Execute()
+    public string Description
+    {
+        get
         {
-            var f = new RedminePluginForm();
-            f.Text = Description;
-            f.Show();
-            return 0;
+            return "Redmine Plugin for KaNote";
         }
     }
 
+    private ServiceContext _serviceContext;  
+    public ServiceContext ServiceContext
+    {
+        get { return _serviceContext; }
+    }
+
+    public void InjectRepositoryParam(ServiceContext serviceContext)
+    {
+        _serviceContext = serviceContext;
+    }
+
+    public int Execute()
+    {
+        var f = new RedminePluginForm();
+        f.Text = _serviceContext?.Alias;
+        f.Show();
+        return 0;
+    }
+
 }
+

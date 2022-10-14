@@ -1278,13 +1278,11 @@ public partial class LabForm : Form
         var com = _store.CreateCommands(pluginAssembly);
 
         foreach (var c in com)
-        {
-            //c.InjectAppconfig(_store.AppConfig);
-
+        {            
             var serviceRef = _store.ActiveFolderWithServiceRef?.ServiceRef;
             var service = serviceRef?.Service;
 
-            //c.InjectService(service);
+            c.InjectRepositoryParam(new ServiceContext {Alias = "aaaaa" });
             c.Execute();
         }
             
