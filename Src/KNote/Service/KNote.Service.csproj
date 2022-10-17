@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyVersion>0.0.6.4</AssemblyVersion>
-    <FileVersion>0.0.6.4</FileVersion>
+    <FileVersion>0.0.6.4</FileVersion>	  
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Model\KNote.Model.csproj" />
-    <ProjectReference Include="..\Repository.Dapper\KNote.Repository.Dapper.csproj" />
+	<ProjectReference Include="..\Model\KNote.Model.csproj" />
+	<ProjectReference Include="..\Repository.Dapper\KNote.Repository.Dapper.csproj" />
     <ProjectReference Include="..\Repository.EntityFramework\KNote.Repository.EntityFramework.csproj" />
     <ProjectReference Include="..\Repository\KNote.Repository.csproj" />
   </ItemGroup>

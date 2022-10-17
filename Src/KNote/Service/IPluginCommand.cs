@@ -8,15 +8,21 @@ public interface IPluginCommand
     string Name { get; }
     string Description { get; }
     
-    ServiceContext ServiceContext { get; }
+    PluginContext? PluginContext { get; }
 
     public int Execute();
 
-    public void InjectRepositoryParam(ServiceContext serviceContext);    
+    public void InjectRepositoryParam(PluginContext? serviceContext);    
 
 }
 
-public class ServiceContext
+public class PluginContext
+{
+    public PluginRepositoryInfo RepositoryInfo { get; set;}
+}
+
+
+public class PluginRepositoryInfo
 {
     public string Alias { get; set; }
     public string ConnectionString { get; set; }

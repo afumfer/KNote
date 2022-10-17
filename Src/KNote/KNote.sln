@@ -30,8 +30,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KntWebView", "KntWebView\Kn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KntRedmineApi", "KntRedmineApi\KntRedmineApi.csproj", "{2CC720E7-2C87-4305-AC74-54EF2697FE98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KntRedminePlugin", "KntRedminePlugin\KntRedminePlugin.csproj", "{1FDB1704-60E5-4CE7-8D27-A593F8236D95}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,10 +80,6 @@ Global
 		{2CC720E7-2C87-4305-AC74-54EF2697FE98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CC720E7-2C87-4305-AC74-54EF2697FE98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CC720E7-2C87-4305-AC74-54EF2697FE98}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1FDB1704-60E5-4CE7-8D27-A593F8236D95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1FDB1704-60E5-4CE7-8D27-A593F8236D95}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1FDB1704-60E5-4CE7-8D27-A593F8236D95}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1FDB1704-60E5-4CE7-8D27-A593F8236D95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

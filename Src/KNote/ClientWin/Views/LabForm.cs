@@ -68,7 +68,7 @@ public partial class LabForm : Form
         {
             textIssuesId.Text = File.ReadAllText(textIssuesImportFile.Text);
         }
-        catch {}
+        catch { }
 
     }
 
@@ -1021,7 +1021,7 @@ public partial class LabForm : Form
         _store.AppConfig.ApiKeyRedmine = textApiKey.Text;
         _store.AppConfig.IssuesImportFile = textIssuesImportFile.Text;
         _store.AppConfig.ToolsPath = Path.GetDirectoryName(_store.AppConfig.IssuesImportFile);
-        
+
         var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
         //var pandocEngine = new PandocEngine($"{_store.AppConfig.ToolsPath}/pandoc.exe");        
         PandocInstance.SetPandocPath($"{_store.AppConfig.ToolsPath}/pandoc.exe");
@@ -1031,22 +1031,22 @@ public partial class LabForm : Form
         var filter = new NotesFilterDto();
 
         int rootFolNum = 1;
-        if(!string.IsNullOrEmpty(textFolderNumForImportIssues.Text))
+        if (!string.IsNullOrEmpty(textFolderNumForImportIssues.Text))
             int.TryParse(textFolderNumForImportIssues.Text, out rootFolNum);
         var parentFolder = (await service.Folders.GetAsync(rootFolNum)).Entity;
         var folders = (await service.Folders.GetAllAsync()).Entity;
-        
+
         var hhuu = GetHUs(textIssuesId.Text);
         var i = 1;
         listInfoRedmine.Items.Clear();
 
         foreach (var hu in hhuu)
         {
-            string folderName = "";            
+            string folderName = "";
             NoteExtendedDto note = (await service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
 
             filter.Tags = $"HU#{hu}";
-            
+
             var notes = (await service.Notes.GetFilter(filter)).Entity;
 
             if (notes != null)
@@ -1055,7 +1055,7 @@ public partial class LabForm : Form
                     note = (await service.Notes.GetExtendedAsync(notes[0].NoteId)).Entity;
 
             }
-            
+
             var res = manager.IssueToNoteDto(hu, note);
 
             if (res)
@@ -1063,9 +1063,9 @@ public partial class LabForm : Form
                 note.Tags = filter.Tags;
                 folderName = note.KAttributesDto[2].Value;
 
-                foreach(var r in note.Resources)
+                foreach (var r in note.Resources)
                 {
-                    r.FileType = _store.ExtensionFileToFileType(Path.GetExtension(r.Name));                
+                    r.FileType = _store.ExtensionFileToFileType(Path.GetExtension(r.Name));
                 }
 
                 var folder = folders.FirstOrDefault(f => f.Name == folderName);
@@ -1093,15 +1093,15 @@ public partial class LabForm : Form
                         note.FolderId = parentFolder.FolderId;
                 }
 
-                foreach(var r in note.Resources)
-                {                
+                foreach (var r in note.Resources)
+                {
                     if (string.IsNullOrEmpty(r.Container))
                     {
-                        r.Container = $"{service.RepositoryRef.ResourcesContainer}/{DateTime.Now.Year.ToString()}";                    
+                        r.Container = $"{service.RepositoryRef.ResourcesContainer}/{DateTime.Now.Year.ToString()}";
                     }
 
                     r.Container = r.Container.Replace('\\', '/');
-                
+
                     var org = $"!{r.NameOut}!";
                     var dest = $"![alt text]({r.Container}/{r.Name})";
 
@@ -1110,7 +1110,7 @@ public partial class LabForm : Form
 
                 // iIefficient version
                 //note.Description = TextToMarkdown(_store.AppConfig.ToolsPath, note.Description);
-                
+
                 // Other version
                 note.Description = await TextToMarkdown2(_store.AppConfig.ToolsPath, note.Description);
 
@@ -1160,7 +1160,7 @@ public partial class LabForm : Form
 
         var serviceRef = _store.ActiveFolderWithServiceRef.ServiceRef;
         var service = serviceRef.Service;
-        
+
         NoteExtendedDto note = (await service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
         var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
 
@@ -1168,6 +1168,7 @@ public partial class LabForm : Form
         textPredictDescription.Text = "";
         textPredictCategory.Text = "";
         textPredictionGestion.Text = "";
+        
         textPredictionPH.Text = "";
 
         var res = manager.IssueToNoteDto(textPredictFindIssue.Text, note, false);
@@ -1178,7 +1179,7 @@ public partial class LabForm : Form
         if (note.KAttributesDto.Count < 3)
             MessageBox.Show("You do not have the experimental database selected with the RedMine Educa import.");
         else
-            textPredictCategory.Text = note.KAttributesDto[2].Value; 
+            textPredictCategory.Text = note.KAttributesDto[2].Value;
     }
 
     private void buttonPredictGestion_Click(object sender, EventArgs e)
@@ -1251,8 +1252,8 @@ public partial class LabForm : Form
 
         System.IO.File.WriteAllText(fileIn, text);
 
-        await PandocInstance.Convert<TextileIn, CommonMarkOut>(fileIn, fileOut, new TextileIn { }, new CommonMarkOut { Wrap = Wrap.Preserve}, default);
-        
+        await PandocInstance.Convert<TextileIn, CommonMarkOut>(fileIn, fileOut, new TextileIn { }, new CommonMarkOut { Wrap = Wrap.Preserve }, default);
+
         if (System.IO.File.Exists(fileOut))
             textOut = System.IO.File.ReadAllText(fileOut);
 
@@ -1267,35 +1268,85 @@ public partial class LabForm : Form
 
     private void buttonPlugin_Click(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(textPlugin.Text))
+        //if (string.IsNullOrEmpty(textPlugin.Text))
+        //{
+        //    MessageBox.Show("Intro a valid plugin path file.");
+        //    return;
+        //}
+
+        //var pluginLocation = textPlugin.Text;
+        //Assembly pluginAssembly = _store.LoadPlugin(pluginLocation);
+        //var com = _store.CreateCommands(pluginAssembly);
+
+        //foreach (var c in com)
+        //{
+        //    var repositoryRef = _store.ActiveFolderWithServiceRef?.ServiceRef.RepositoryRef;
+
+        //    var pi = new PluginRepositoryInfo
+        //    {
+        //        Alias = repositoryRef.Alias,
+        //        ConnectionString = repositoryRef.ConnectionString,
+        //        Provider = repositoryRef.Provider,
+        //        Orm = repositoryRef.Orm,
+        //        ResourcesContainer = repositoryRef.ResourcesContainer,
+        //        ResourcesContainerCacheRootPath = repositoryRef.ResourcesContainerCacheRootPath,
+        //        ResourcesContainerCacheRootUrl = repositoryRef.ResourcesContainerCacheRootUrl
+        //    };
+
+        //    c.InjectRepositoryParam(new PluginContext { RepositoryInfo = pi });
+        //    c.Execute();
+        //}
+
+        // ............
+
+        //var r0= _store.ActiveFolderWithServiceRef?.ServiceRef.RepositoryRef;
+
+        //var repositoryRef = new RepositoryRef
+        //{
+
+        //    Alias = r0.Alias,
+        //    ConnectionString = r0.ConnectionString,
+        //    Provider = r0.Provider,
+        //    Orm = r0.Orm,
+        //    ResourcesContainer = r0.ResourcesContainer,
+        //    ResourcesContainerCacheRootPath = r0.ResourcesContainerCacheRootPath,
+        //    ResourcesContainerCacheRootUrl = r0.ResourcesContainerCacheRootUrl
+        //};
+
+        //var aa = repositoryRef;
+
+        //var serviceRef = new ServiceRef();
+        //var serviceRef2 = new ServiceRef(repositoryRef);
+
+        // ..........
+
+        var repositoryRef = _store.ActiveFolderWithServiceRef?.ServiceRef.RepositoryRef;
+
+        var pi = new PluginRepositoryInfo
         {
-            MessageBox.Show("Intro a valid plugin path file.");
-            return;
-        }
+            Alias = repositoryRef.Alias,
+            ConnectionString = repositoryRef.ConnectionString,
+            Provider = repositoryRef.Provider,
+            Orm = repositoryRef.Orm,
+            ResourcesContainer = repositoryRef.ResourcesContainer,
+            ResourcesContainerCacheRootPath = repositoryRef.ResourcesContainerCacheRootPath,
+            ResourcesContainerCacheRootUrl = repositoryRef.ResourcesContainerCacheRootUrl
+        };
 
-        var pluginLocation = textPlugin.Text;
-        Assembly pluginAssembly = _store.LoadPlugin(pluginLocation);
-        var com = _store.CreateCommands(pluginAssembly);
-
-        foreach (var c in com)
-        {            
-            var serviceRef = _store.ActiveFolderWithServiceRef?.ServiceRef;
-            var service = serviceRef?.Service;
-
-            c.InjectRepositoryParam(new ServiceContext {Alias = "aaaaa" });
-            c.Execute();
-        }
-            
+        var c = new KntRedminePluginCommand();
+        c.InjectRepositoryParam(new PluginContext { RepositoryInfo = pi });
+        c.Execute();
 
     }
 
-    #endregion
-
     private void buttonGetPluginFile_Click(object sender, EventArgs e)
     {
-        var relativePath = @"KntRedminePlugin\bin\Debug\net6.0-windows\KntRedminePlugin.dll";
+        var relativePath = @"KntRedmineApi\bin\Debug\net6.0-windows\KntRedmineApi.dll";
         var root = _store.GetVsSolutionRootPath();
         string pluginLocation = Path.GetFullPath(Path.Combine(root, relativePath.Replace('\\', Path.DirectorySeparatorChar)));
         textPlugin.Text = pluginLocation;
     }
+
+    #endregion
+
 }

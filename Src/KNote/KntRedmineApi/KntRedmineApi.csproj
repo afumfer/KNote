@@ -1,21 +1,27 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyVersion>0.0.6.4</AssemblyVersion>
     <FileVersion>0.0.6.4</FileVersion>
+	<UseWindowsForms>true</UseWindowsForms>
+	<EnableDynamicLoading>true</EnableDynamicLoading>	  
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ML" Version="1.7.1" />
     <PackageReference Include="Microsoft.ML.LightGbm" Version="1.7.1" />
+    <PackageReference Include="Pandoc" Version="1.0.0" />
     <PackageReference Include="redmine-api" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Model\KNote.Model.csproj" />
+    <ProjectReference Include="..\Service\KNote.Service.csproj" >
+		<Private>false</Private>
+		<ExcludeAssets>runtime</ExcludeAssets>
+	</ProjectReference>		
   </ItemGroup>
 
   <ItemGroup>
