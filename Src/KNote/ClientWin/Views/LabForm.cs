@@ -1268,83 +1268,17 @@ public partial class LabForm : Form
 
     private void buttonPlugin_Click(object sender, EventArgs e)
     {
-        //if (string.IsNullOrEmpty(textPlugin.Text))
-        //{
-        //    MessageBox.Show("Intro a valid plugin path file.");
-        //    return;
-        //}
-
-        //var pluginLocation = textPlugin.Text;
-        //Assembly pluginAssembly = _store.LoadPlugin(pluginLocation);
-        //var com = _store.CreateCommands(pluginAssembly);
-
-        //foreach (var c in com)
-        //{
-        //    var repositoryRef = _store.ActiveFolderWithServiceRef?.ServiceRef.RepositoryRef;
-
-        //    var pi = new PluginRepositoryInfo
-        //    {
-        //        Alias = repositoryRef.Alias,
-        //        ConnectionString = repositoryRef.ConnectionString,
-        //        Provider = repositoryRef.Provider,
-        //        Orm = repositoryRef.Orm,
-        //        ResourcesContainer = repositoryRef.ResourcesContainer,
-        //        ResourcesContainerCacheRootPath = repositoryRef.ResourcesContainerCacheRootPath,
-        //        ResourcesContainerCacheRootUrl = repositoryRef.ResourcesContainerCacheRootUrl
-        //    };
-
-        //    c.InjectRepositoryParam(new PluginContext { RepositoryInfo = pi });
-        //    c.Execute();
-        //}
-
-        // ............
-
-        //var r0= _store.ActiveFolderWithServiceRef?.ServiceRef.RepositoryRef;
-
-        //var repositoryRef = new RepositoryRef
-        //{
-
-        //    Alias = r0.Alias,
-        //    ConnectionString = r0.ConnectionString,
-        //    Provider = r0.Provider,
-        //    Orm = r0.Orm,
-        //    ResourcesContainer = r0.ResourcesContainer,
-        //    ResourcesContainerCacheRootPath = r0.ResourcesContainerCacheRootPath,
-        //    ResourcesContainerCacheRootUrl = r0.ResourcesContainerCacheRootUrl
-        //};
-
-        //var aa = repositoryRef;
-
-        //var serviceRef = new ServiceRef();
-        //var serviceRef2 = new ServiceRef(repositoryRef);
-
-        // ..........
-
-        var repositoryRef = _store.ActiveFolderWithServiceRef?.ServiceRef.RepositoryRef;
-
-        var pi = new PluginRepositoryInfo
-        {
-            Alias = repositoryRef.Alias,
-            ConnectionString = repositoryRef.ConnectionString,
-            Provider = repositoryRef.Provider,
-            Orm = repositoryRef.Orm,
-            ResourcesContainer = repositoryRef.ResourcesContainer,
-            ResourcesContainerCacheRootPath = repositoryRef.ResourcesContainerCacheRootPath,
-            ResourcesContainerCacheRootUrl = repositoryRef.ResourcesContainerCacheRootUrl
-        };
-
         var c = new KntRedminePluginCommand();
-        c.InjectRepositoryParam(new PluginContext { RepositoryInfo = pi });
+        c.InjectService(_store.ActiveFolderWithServiceRef?.ServiceRef.Service);
         c.Execute();
-
     }
 
     private void buttonGetPluginFile_Click(object sender, EventArgs e)
     {
-        var relativePath = @"KntRedmineApi\bin\Debug\net6.0-windows\KntRedmineApi.dll";
-        var root = _store.GetVsSolutionRootPath();
-        string pluginLocation = Path.GetFullPath(Path.Combine(root, relativePath.Replace('\\', Path.DirectorySeparatorChar)));
-        textPlugin.Text = pluginLocation;
+        //var relativePath = @"KntRedmineApi\bin\Debug\net6.0-windows\KntRedmineApi.exe";
+        //var root = _store.GetVsSolutionRootPath();
+        //string pluginLocation = Path.GetFullPath(Path.Combine(root, relativePath.Replace('\\', Path.DirectorySeparatorChar)));
+        //textPlugin.Text = pluginLocation;
     }
 
     #endregion

@@ -22,49 +22,25 @@ public class KntRedminePluginCommand : IPluginCommand
         }
     }
 
-    private PluginContext? _pluginContext;  
-    public PluginContext? PluginContext
+    IKntService? _service;
+    public IKntService? Service
     {
-        get { return _pluginContext; }
+        get { return _service; }
     }
 
-    public void InjectRepositoryParam(PluginContext? pluginContext)
+    public void InjectService(IKntService? service)
     {
-        _pluginContext = pluginContext;
+        _service = service;
     }
 
     public int Execute()
-    {
-        var xx = _pluginContext;
-        var f = new KntRedminePluginForm(_pluginContext);
-        //var f = new KntRedminePluginForm();
+    {        
+        var f = new KntRedmineForm(_service);
         f.Show();
-
-        //if (_pluginContext != null)
-        //{
-
-        //    var repositoryRef = new RepositoryRef
-        //    {
-
-        //        Alias = _pluginContext?.RepositoryInfo.Alias,
-        //        ConnectionString = _pluginContext?.RepositoryInfo.ConnectionString,
-        //        Provider = _pluginContext?.RepositoryInfo.Provider,
-        //        Orm = _pluginContext?.RepositoryInfo.Orm,
-        //        ResourcesContainer = _pluginContext?.RepositoryInfo.ResourcesContainer,
-        //        ResourcesContainerCacheRootPath = _pluginContext?.RepositoryInfo.ResourcesContainerCacheRootPath,
-        //        ResourcesContainerCacheRootUrl = _pluginContext?.RepositoryInfo.ResourcesContainerCacheRootUrl
-        //    };
-
-
-        //    var serviceRef = new ServiceRef();
-        //    var serviceRef2 = new ServiceRef(repositoryRef);
-        //    //_service = serviceRef.Service;            
-        //}
-
-
-
+       
         return 0;
     }
+
 
 }
 

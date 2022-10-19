@@ -437,7 +437,7 @@ public class Store
     }
 
     public Assembly LoadPlugin(string pluginLocation)
-    {        
+    {
         PluginLoadContext loadContext = new PluginLoadContext(pluginLocation);
         return loadContext.LoadFromAssemblyName(AssemblyName.GetAssemblyName(pluginLocation));
     }
@@ -445,15 +445,15 @@ public class Store
     public IEnumerable<IPluginCommand> CreateCommands(Assembly assembly)
     {
         int count = 0;
-        
+
         foreach (Type type in assembly.GetTypes())
-        {            
-            if (typeof(IPluginCommand).IsAssignableFrom(type))            
+        {
+            if (typeof(IPluginCommand).IsAssignableFrom(type))
             {
-                IPluginCommand result = Activator.CreateInstance(type) as IPluginCommand;        
+                IPluginCommand result = Activator.CreateInstance(type) as IPluginCommand;
                 if (result != null)
                 {
-                    count++;                    
+                    count++;
                     yield return result;
                 }
             }
@@ -468,7 +468,7 @@ public class Store
         }
     }
 
-    #endregion 
+    #endregion
 
     #region Helper event handlers 
 

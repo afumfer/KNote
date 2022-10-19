@@ -1,6 +1,6 @@
 ﻿namespace KntRedmineApi
 {
-    partial class KntRedminePluginForm
+    partial class KntRedmineForm
     {
         /// <summary>
         /// Required designer variable.
@@ -73,16 +73,13 @@
             // 
             // tabRedmineUtils
             // 
-            this.tabRedmineUtils.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabRedmineUtils.Controls.Add(this.tabImport);
             this.tabRedmineUtils.Controls.Add(this.tabPredict);
             this.tabRedmineUtils.Controls.Add(this.tabLab);
             this.tabRedmineUtils.Location = new System.Drawing.Point(12, 12);
             this.tabRedmineUtils.Name = "tabRedmineUtils";
             this.tabRedmineUtils.SelectedIndex = 0;
-            this.tabRedmineUtils.Size = new System.Drawing.Size(674, 576);
+            this.tabRedmineUtils.Size = new System.Drawing.Size(676, 582);
             this.tabRedmineUtils.TabIndex = 0;
             // 
             // tabImport
@@ -104,7 +101,7 @@
             this.tabImport.Location = new System.Drawing.Point(4, 24);
             this.tabImport.Name = "tabImport";
             this.tabImport.Padding = new System.Windows.Forms.Padding(3);
-            this.tabImport.Size = new System.Drawing.Size(666, 548);
+            this.tabImport.Size = new System.Drawing.Size(668, 554);
             this.tabImport.TabIndex = 0;
             this.tabImport.Text = "Import";
             this.tabImport.UseVisualStyleBackColor = true;
@@ -112,54 +109,54 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 104);
+            this.label8.Location = new System.Drawing.Point(9, 109);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(109, 15);
-            this.label8.TabIndex = 27;
+            this.label8.TabIndex = 41;
             this.label8.Text = "Issues # import file:";
             // 
             // buttonIssuesImportFile
             // 
-            this.buttonIssuesImportFile.Location = new System.Drawing.Point(448, 122);
+            this.buttonIssuesImportFile.Location = new System.Drawing.Point(451, 127);
             this.buttonIssuesImportFile.Name = "buttonIssuesImportFile";
             this.buttonIssuesImportFile.Size = new System.Drawing.Size(24, 24);
-            this.buttonIssuesImportFile.TabIndex = 26;
+            this.buttonIssuesImportFile.TabIndex = 40;
             this.buttonIssuesImportFile.Text = "...";
             this.buttonIssuesImportFile.UseVisualStyleBackColor = true;
             // 
             // textIssuesImportFile
             // 
-            this.textIssuesImportFile.Location = new System.Drawing.Point(6, 122);
+            this.textIssuesImportFile.Location = new System.Drawing.Point(9, 127);
             this.textIssuesImportFile.Name = "textIssuesImportFile";
             this.textIssuesImportFile.Size = new System.Drawing.Size(436, 23);
-            this.textIssuesImportFile.TabIndex = 25;
+            this.textIssuesImportFile.TabIndex = 39;
             // 
             // textFolderNumForImportIssues
             // 
             this.textFolderNumForImportIssues.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFolderNumForImportIssues.Location = new System.Drawing.Point(489, 122);
+            this.textFolderNumForImportIssues.Location = new System.Drawing.Point(492, 127);
             this.textFolderNumForImportIssues.Name = "textFolderNumForImportIssues";
-            this.textFolderNumForImportIssues.Size = new System.Drawing.Size(170, 23);
-            this.textFolderNumForImportIssues.TabIndex = 24;
+            this.textFolderNumForImportIssues.Size = new System.Drawing.Size(166, 23);
+            this.textFolderNumForImportIssues.TabIndex = 38;
             this.textFolderNumForImportIssues.Text = "1";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(489, 104);
+            this.label7.Location = new System.Drawing.Point(492, 109);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(170, 15);
-            this.label7.TabIndex = 23;
+            this.label7.TabIndex = 37;
             this.label7.Text = "Root folder # for import issues:";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(285, 172);
+            this.label6.Location = new System.Drawing.Point(288, 177);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(28, 15);
-            this.label6.TabIndex = 22;
+            this.label6.TabIndex = 36;
             this.label6.Text = "Info";
             // 
             // listInfoRedmine
@@ -169,74 +166,74 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listInfoRedmine.FormattingEnabled = true;
             this.listInfoRedmine.ItemHeight = 15;
-            this.listInfoRedmine.Location = new System.Drawing.Point(285, 190);
+            this.listInfoRedmine.Location = new System.Drawing.Point(288, 195);
             this.listInfoRedmine.Name = "listInfoRedmine";
-            this.listInfoRedmine.Size = new System.Drawing.Size(375, 349);
-            this.listInfoRedmine.TabIndex = 21;
+            this.listInfoRedmine.Size = new System.Drawing.Size(371, 349);
+            this.listInfoRedmine.TabIndex = 35;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 174);
+            this.label5.Location = new System.Drawing.Point(9, 179);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(43, 15);
-            this.label5.TabIndex = 20;
+            this.label5.TabIndex = 34;
             this.label5.Text = "HU IDs";
             // 
             // textIssuesId
             // 
             this.textIssuesId.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.textIssuesId.Location = new System.Drawing.Point(6, 192);
+            this.textIssuesId.Location = new System.Drawing.Point(9, 197);
             this.textIssuesId.Multiline = true;
             this.textIssuesId.Name = "textIssuesId";
             this.textIssuesId.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textIssuesId.Size = new System.Drawing.Size(273, 350);
-            this.textIssuesId.TabIndex = 19;
+            this.textIssuesId.TabIndex = 33;
             // 
             // textApiKey
             // 
             this.textApiKey.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textApiKey.Location = new System.Drawing.Point(6, 69);
+            this.textApiKey.Location = new System.Drawing.Point(9, 74);
             this.textApiKey.Name = "textApiKey";
-            this.textApiKey.Size = new System.Drawing.Size(491, 23);
-            this.textApiKey.TabIndex = 18;
+            this.textApiKey.Size = new System.Drawing.Size(487, 23);
+            this.textApiKey.TabIndex = 32;
             // 
             // textHost
             // 
             this.textHost.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textHost.Location = new System.Drawing.Point(6, 19);
+            this.textHost.Location = new System.Drawing.Point(9, 24);
             this.textHost.Name = "textHost";
-            this.textHost.Size = new System.Drawing.Size(491, 23);
-            this.textHost.TabIndex = 17;
+            this.textHost.Size = new System.Drawing.Size(487, 23);
+            this.textHost.TabIndex = 31;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 51);
+            this.label4.Location = new System.Drawing.Point(9, 56);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(47, 15);
-            this.label4.TabIndex = 16;
+            this.label4.TabIndex = 30;
             this.label4.Text = "ApiKey:";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 2);
+            this.label3.Location = new System.Drawing.Point(7, 7);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(35, 15);
-            this.label3.TabIndex = 15;
+            this.label3.TabIndex = 29;
             this.label3.Text = "Host:";
             // 
             // buttonTestKntRedmineApi
             // 
             this.buttonTestKntRedmineApi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonTestKntRedmineApi.Location = new System.Drawing.Point(516, 15);
+            this.buttonTestKntRedmineApi.Location = new System.Drawing.Point(515, 20);
             this.buttonTestKntRedmineApi.Name = "buttonTestKntRedmineApi";
             this.buttonTestKntRedmineApi.Size = new System.Drawing.Size(144, 27);
-            this.buttonTestKntRedmineApi.TabIndex = 14;
+            this.buttonTestKntRedmineApi.TabIndex = 28;
             this.buttonTestKntRedmineApi.Text = "Import RedMine Issues";
             this.buttonTestKntRedmineApi.UseVisualStyleBackColor = true;
             // 
@@ -256,7 +253,7 @@
             this.tabPredict.Location = new System.Drawing.Point(4, 24);
             this.tabPredict.Name = "tabPredict";
             this.tabPredict.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPredict.Size = new System.Drawing.Size(666, 548);
+            this.tabPredict.Size = new System.Drawing.Size(668, 554);
             this.tabPredict.TabIndex = 1;
             this.tabPredict.Text = "Predict";
             this.tabPredict.UseVisualStyleBackColor = true;
@@ -265,27 +262,27 @@
             // 
             this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(11, 303);
+            this.label12.Location = new System.Drawing.Point(15, 307);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(58, 15);
-            this.label12.TabIndex = 21;
+            this.label12.TabIndex = 32;
             this.label12.Text = "Category:";
             // 
             // textPredictCategory
             // 
             this.textPredictCategory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textPredictCategory.Location = new System.Drawing.Point(90, 303);
+            this.textPredictCategory.Location = new System.Drawing.Point(94, 307);
             this.textPredictCategory.Name = "textPredictCategory";
-            this.textPredictCategory.Size = new System.Drawing.Size(570, 23);
-            this.textPredictCategory.TabIndex = 20;
+            this.textPredictCategory.Size = new System.Drawing.Size(566, 23);
+            this.textPredictCategory.TabIndex = 31;
             // 
             // buttonFindIssue
             // 
-            this.buttonFindIssue.Location = new System.Drawing.Point(183, 14);
+            this.buttonFindIssue.Location = new System.Drawing.Point(187, 18);
             this.buttonFindIssue.Name = "buttonFindIssue";
             this.buttonFindIssue.Size = new System.Drawing.Size(119, 23);
-            this.buttonFindIssue.TabIndex = 19;
+            this.buttonFindIssue.TabIndex = 30;
             this.buttonFindIssue.Text = "Find Issue";
             this.buttonFindIssue.UseVisualStyleBackColor = true;
             // 
@@ -295,10 +292,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.buttonPredictPH);
             this.groupBox2.Controls.Add(this.textPredictionPH);
-            this.groupBox2.Location = new System.Drawing.Point(5, 435);
+            this.groupBox2.Location = new System.Drawing.Point(9, 439);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(655, 98);
-            this.groupBox2.TabIndex = 18;
+            this.groupBox2.Size = new System.Drawing.Size(651, 98);
+            this.groupBox2.TabIndex = 29;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Predict -> PH";
             // 
@@ -324,10 +321,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.buttonPredictGestion);
             this.groupBox1.Controls.Add(this.textPredictionGestion);
-            this.groupBox1.Location = new System.Drawing.Point(5, 331);
+            this.groupBox1.Location = new System.Drawing.Point(9, 335);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(655, 98);
-            this.groupBox1.TabIndex = 17;
+            this.groupBox1.Size = new System.Drawing.Size(651, 98);
+            this.groupBox1.TabIndex = 28;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Predict -> Gestión";
             // 
@@ -346,7 +343,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textPredictionGestion.Location = new System.Drawing.Point(134, 22);
             this.textPredictionGestion.Name = "textPredictionGestion";
-            this.textPredictionGestion.Size = new System.Drawing.Size(515, 23);
+            this.textPredictionGestion.Size = new System.Drawing.Size(962, 23);
             this.textPredictionGestion.TabIndex = 0;
             // 
             // textPredictDescription
@@ -354,54 +351,54 @@
             this.textPredictDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textPredictDescription.Location = new System.Drawing.Point(90, 70);
+            this.textPredictDescription.Location = new System.Drawing.Point(94, 74);
             this.textPredictDescription.Multiline = true;
             this.textPredictDescription.Name = "textPredictDescription";
             this.textPredictDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textPredictDescription.Size = new System.Drawing.Size(570, 227);
-            this.textPredictDescription.TabIndex = 16;
+            this.textPredictDescription.Size = new System.Drawing.Size(566, 227);
+            this.textPredictDescription.TabIndex = 27;
             // 
             // textPredictSubject
             // 
             this.textPredictSubject.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textPredictSubject.Location = new System.Drawing.Point(90, 41);
+            this.textPredictSubject.Location = new System.Drawing.Point(94, 45);
             this.textPredictSubject.Name = "textPredictSubject";
-            this.textPredictSubject.Size = new System.Drawing.Size(570, 23);
-            this.textPredictSubject.TabIndex = 15;
+            this.textPredictSubject.Size = new System.Drawing.Size(566, 23);
+            this.textPredictSubject.TabIndex = 26;
             // 
             // textPredictFindIssue
             // 
-            this.textPredictFindIssue.Location = new System.Drawing.Point(90, 14);
+            this.textPredictFindIssue.Location = new System.Drawing.Point(94, 18);
             this.textPredictFindIssue.Name = "textPredictFindIssue";
             this.textPredictFindIssue.Size = new System.Drawing.Size(81, 23);
-            this.textPredictFindIssue.TabIndex = 14;
+            this.textPredictFindIssue.TabIndex = 25;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(7, 70);
+            this.label11.Location = new System.Drawing.Point(11, 74);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(70, 15);
-            this.label11.TabIndex = 13;
+            this.label11.TabIndex = 24;
             this.label11.Text = "Description:";
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(7, 44);
+            this.label10.Location = new System.Drawing.Point(11, 48);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(49, 15);
-            this.label10.TabIndex = 12;
+            this.label10.TabIndex = 23;
             this.label10.Text = "Subject:";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(7, 17);
+            this.label9.Location = new System.Drawing.Point(11, 21);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(46, 15);
-            this.label9.TabIndex = 11;
+            this.label9.TabIndex = 22;
             this.label9.Text = "Issue #:";
             // 
             // tabLab
@@ -410,7 +407,7 @@
             this.tabLab.Controls.Add(this.buttonTestService);
             this.tabLab.Location = new System.Drawing.Point(4, 24);
             this.tabLab.Name = "tabLab";
-            this.tabLab.Size = new System.Drawing.Size(666, 548);
+            this.tabLab.Size = new System.Drawing.Size(668, 554);
             this.tabLab.TabIndex = 2;
             this.tabLab.Text = "Lab";
             this.tabLab.UseVisualStyleBackColor = true;
@@ -419,30 +416,30 @@
             // 
             this.listInfoLab.FormattingEnabled = true;
             this.listInfoLab.ItemHeight = 15;
-            this.listInfoLab.Location = new System.Drawing.Point(12, 148);
+            this.listInfoLab.Location = new System.Drawing.Point(14, 148);
             this.listInfoLab.Name = "listInfoLab";
             this.listInfoLab.Size = new System.Drawing.Size(640, 394);
-            this.listInfoLab.TabIndex = 1;
+            this.listInfoLab.TabIndex = 3;
             // 
             // buttonTestService
             // 
-            this.buttonTestService.Location = new System.Drawing.Point(12, 13);
+            this.buttonTestService.Location = new System.Drawing.Point(14, 13);
             this.buttonTestService.Name = "buttonTestService";
             this.buttonTestService.Size = new System.Drawing.Size(90, 24);
-            this.buttonTestService.TabIndex = 0;
+            this.buttonTestService.TabIndex = 2;
             this.buttonTestService.Text = "Test Service";
             this.buttonTestService.UseVisualStyleBackColor = true;
             this.buttonTestService.Click += new System.EventHandler(this.buttonTestService_Click);
             // 
-            // KntRedminePluginForm
+            // KntRedmineForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(694, 600);
+            this.ClientSize = new System.Drawing.Size(694, 605);
             this.Controls.Add(this.tabRedmineUtils);
-            this.Name = "KntRedminePluginForm";
-            this.Text = "KntRedmine Plugin";
-            this.Load += new System.EventHandler(this.KntRedminePluginForm_Load);
+            this.Name = "KntRedmineForm";
+            this.Text = "KntRedmineForm";
+            this.Load += new System.EventHandler(this.KntRedmineForm_Load);
             this.tabRedmineUtils.ResumeLayout(false);
             this.tabImport.ResumeLayout(false);
             this.tabImport.PerformLayout();
@@ -463,6 +460,7 @@
         private TabPage tabImport;
         private TabPage tabPredict;
         private TabPage tabLab;
+        private Label label8;
         private Button buttonIssuesImportFile;
         private TextBox textIssuesImportFile;
         private TextBox textFolderNumForImportIssues;
@@ -476,7 +474,6 @@
         private Label label4;
         private Label label3;
         private Button buttonTestKntRedmineApi;
-        private Label label8;
         private Label label12;
         private TextBox textPredictCategory;
         private Button buttonFindIssue;
