@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntRedmineForm));
             this.tabRedmineUtils = new System.Windows.Forms.TabControl();
             this.tabImport = new System.Windows.Forms.TabPage();
             this.label8 = new System.Windows.Forms.Label();
@@ -43,7 +44,7 @@
             this.textHost = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.buttonTestKntRedmineApi = new System.Windows.Forms.Button();
+            this.buttonImportRedmineIssues = new System.Windows.Forms.Button();
             this.tabPredict = new System.Windows.Forms.TabPage();
             this.label12 = new System.Windows.Forms.Label();
             this.textPredictCategory = new System.Windows.Forms.TextBox();
@@ -60,22 +61,21 @@
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.tabLab = new System.Windows.Forms.TabPage();
-            this.listInfoLab = new System.Windows.Forms.ListBox();
-            this.buttonTestService = new System.Windows.Forms.Button();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.tabRedmineUtils.SuspendLayout();
             this.tabImport.SuspendLayout();
             this.tabPredict.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.tabLab.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabRedmineUtils
             // 
+            this.tabRedmineUtils.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabRedmineUtils.Controls.Add(this.tabImport);
             this.tabRedmineUtils.Controls.Add(this.tabPredict);
-            this.tabRedmineUtils.Controls.Add(this.tabLab);
             this.tabRedmineUtils.Location = new System.Drawing.Point(12, 12);
             this.tabRedmineUtils.Name = "tabRedmineUtils";
             this.tabRedmineUtils.SelectedIndex = 0;
@@ -97,7 +97,7 @@
             this.tabImport.Controls.Add(this.textHost);
             this.tabImport.Controls.Add(this.label4);
             this.tabImport.Controls.Add(this.label3);
-            this.tabImport.Controls.Add(this.buttonTestKntRedmineApi);
+            this.tabImport.Controls.Add(this.buttonImportRedmineIssues);
             this.tabImport.Location = new System.Drawing.Point(4, 24);
             this.tabImport.Name = "tabImport";
             this.tabImport.Padding = new System.Windows.Forms.Padding(3);
@@ -123,6 +123,7 @@
             this.buttonIssuesImportFile.TabIndex = 40;
             this.buttonIssuesImportFile.Text = "...";
             this.buttonIssuesImportFile.UseVisualStyleBackColor = true;
+            this.buttonIssuesImportFile.Click += new System.EventHandler(this.buttonIssuesImportFile_Click);
             // 
             // textIssuesImportFile
             // 
@@ -227,15 +228,16 @@
             this.label3.TabIndex = 29;
             this.label3.Text = "Host:";
             // 
-            // buttonTestKntRedmineApi
+            // buttonImportRedmineIssues
             // 
-            this.buttonTestKntRedmineApi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonTestKntRedmineApi.Location = new System.Drawing.Point(515, 20);
-            this.buttonTestKntRedmineApi.Name = "buttonTestKntRedmineApi";
-            this.buttonTestKntRedmineApi.Size = new System.Drawing.Size(144, 27);
-            this.buttonTestKntRedmineApi.TabIndex = 28;
-            this.buttonTestKntRedmineApi.Text = "Import RedMine Issues";
-            this.buttonTestKntRedmineApi.UseVisualStyleBackColor = true;
+            this.buttonImportRedmineIssues.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonImportRedmineIssues.Location = new System.Drawing.Point(515, 20);
+            this.buttonImportRedmineIssues.Name = "buttonImportRedmineIssues";
+            this.buttonImportRedmineIssues.Size = new System.Drawing.Size(144, 27);
+            this.buttonImportRedmineIssues.TabIndex = 28;
+            this.buttonImportRedmineIssues.Text = "Import RedMine Issues";
+            this.buttonImportRedmineIssues.UseVisualStyleBackColor = true;
+            this.buttonImportRedmineIssues.Click += new System.EventHandler(this.buttonImportRedmineIssues_Click);
             // 
             // tabPredict
             // 
@@ -285,6 +287,7 @@
             this.buttonFindIssue.TabIndex = 30;
             this.buttonFindIssue.Text = "Find Issue";
             this.buttonFindIssue.UseVisualStyleBackColor = true;
+            this.buttonFindIssue.Click += new System.EventHandler(this.buttonFindIssue_Click);
             // 
             // groupBox2
             // 
@@ -307,6 +310,7 @@
             this.buttonPredictPH.TabIndex = 2;
             this.buttonPredictPH.Text = "Predict";
             this.buttonPredictPH.UseVisualStyleBackColor = true;
+            this.buttonPredictPH.Click += new System.EventHandler(this.buttonPredictPH_Click);
             // 
             // textPredictionPH
             // 
@@ -336,6 +340,7 @@
             this.buttonPredictGestion.TabIndex = 1;
             this.buttonPredictGestion.Text = "Predict";
             this.buttonPredictGestion.UseVisualStyleBackColor = true;
+            this.buttonPredictGestion.Click += new System.EventHandler(this.buttonPredictGestion_Click);
             // 
             // textPredictionGestion
             // 
@@ -401,44 +406,15 @@
             this.label9.TabIndex = 22;
             this.label9.Text = "Issue #:";
             // 
-            // tabLab
-            // 
-            this.tabLab.Controls.Add(this.listInfoLab);
-            this.tabLab.Controls.Add(this.buttonTestService);
-            this.tabLab.Location = new System.Drawing.Point(4, 24);
-            this.tabLab.Name = "tabLab";
-            this.tabLab.Size = new System.Drawing.Size(668, 554);
-            this.tabLab.TabIndex = 2;
-            this.tabLab.Text = "Lab";
-            this.tabLab.UseVisualStyleBackColor = true;
-            // 
-            // listInfoLab
-            // 
-            this.listInfoLab.FormattingEnabled = true;
-            this.listInfoLab.ItemHeight = 15;
-            this.listInfoLab.Location = new System.Drawing.Point(14, 148);
-            this.listInfoLab.Name = "listInfoLab";
-            this.listInfoLab.Size = new System.Drawing.Size(640, 394);
-            this.listInfoLab.TabIndex = 3;
-            // 
-            // buttonTestService
-            // 
-            this.buttonTestService.Location = new System.Drawing.Point(14, 13);
-            this.buttonTestService.Name = "buttonTestService";
-            this.buttonTestService.Size = new System.Drawing.Size(90, 24);
-            this.buttonTestService.TabIndex = 2;
-            this.buttonTestService.Text = "Test Service";
-            this.buttonTestService.UseVisualStyleBackColor = true;
-            this.buttonTestService.Click += new System.EventHandler(this.buttonTestService_Click);
-            // 
             // KntRedmineForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(694, 605);
             this.Controls.Add(this.tabRedmineUtils);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "KntRedmineForm";
-            this.Text = "KntRedmineForm";
+            this.Text = "KaNote Redmine utils";
             this.Load += new System.EventHandler(this.KntRedmineForm_Load);
             this.tabRedmineUtils.ResumeLayout(false);
             this.tabImport.ResumeLayout(false);
@@ -449,7 +425,6 @@
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.tabLab.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -459,7 +434,6 @@
         private TabControl tabRedmineUtils;
         private TabPage tabImport;
         private TabPage tabPredict;
-        private TabPage tabLab;
         private Label label8;
         private Button buttonIssuesImportFile;
         private TextBox textIssuesImportFile;
@@ -473,7 +447,7 @@
         private TextBox textHost;
         private Label label4;
         private Label label3;
-        private Button buttonTestKntRedmineApi;
+        private Button buttonImportRedmineIssues;
         private Label label12;
         private TextBox textPredictCategory;
         private Button buttonFindIssue;
@@ -489,7 +463,6 @@
         private Label label11;
         private Label label10;
         private Label label9;
-        private ListBox listInfoLab;
-        private Button buttonTestService;
+        private OpenFileDialog openFileDialog;
     }
 }

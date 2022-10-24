@@ -20,7 +20,7 @@ namespace KntRedmineApi
             Application.Run(new KntRedmineForm(CreateServiceFromConfig()));
         }
 
-        static IKntService CreateServiceFromConfig()
+        static IPluginCommand CreateServiceFromConfig()
         {
             // TODO: Create new service object from app file config. 
 

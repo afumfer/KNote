@@ -6,6 +6,7 @@ namespace KntRedmineApi;
 
 public class KntRedminePluginCommand : IPluginCommand
 {
+
     public string Name 
     { 
         get 
@@ -26,16 +27,16 @@ public class KntRedminePluginCommand : IPluginCommand
     public IKntService? Service
     {
         get { return _service; }
+        set { _service = value; }
     }
 
-    public void InjectService(IKntService? service)
-    {
-        _service = service;
-    }
+    public string? AppUserName { get; set; }
+
+    public string? ToolsPath { get; set; }
 
     public int Execute()
     {        
-        var f = new KntRedmineForm(_service);
+        var f = new KntRedmineForm(this);
         f.Show();
        
         return 0;
