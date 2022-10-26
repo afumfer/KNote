@@ -348,7 +348,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textPredictionGestion.Location = new System.Drawing.Point(134, 22);
             this.textPredictionGestion.Name = "textPredictionGestion";
-            this.textPredictionGestion.Size = new System.Drawing.Size(962, 23);
+            this.textPredictionGestion.Size = new System.Drawing.Size(511, 23);
             this.textPredictionGestion.TabIndex = 0;
             // 
             // textPredictDescription

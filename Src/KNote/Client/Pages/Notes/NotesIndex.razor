@@ -4,7 +4,7 @@
 
 <EntityList List="Notes">
     <ItemsFull>        
-        <RadzenDataGrid Data="@Notes" TItem="NoteInfoDto" AllowColumnResize="true">
+        <RadzenDataGrid Data="@Notes" TItem="NoteInfoDto" AllowColumnResize="true" Density="@Density.Compact">
             <Columns>                
                 <RadzenDataGridColumn TItem="NoteInfoDto" Property="NoteNumber" Title="Note #" Width="80px" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn TItem="NoteInfoDto" Property="Topic" Title="Topic" />
@@ -12,10 +12,10 @@
                 <RadzenDataGridColumn TItem="NoteInfoDto" Property="CreationDateTime" Title="Date " FormatString="{0:d}" Width="80px"  TextAlign="TextAlign.Right" />                
                 <RadzenDataGridColumn TItem="NoteInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                     <Template Context="data">                                                
-                        <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(data))" Icon="edit" 
+                        <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(data))" Icon="edit" Size="ButtonSize.Small"
                             ButtonStyle="ButtonStyle.Primary" 
                             MouseEnter="@(args => tooltipService.Open(args, "Edit note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                        <RadzenButton Click="@(() => OnNoteDelete.InvokeAsync(data))" Icon="delete"
+                        <RadzenButton Click="@(() => OnNoteDelete.InvokeAsync(data))" Icon="delete" Size="ButtonSize.Small"
                             ButtonStyle="ButtonStyle.Danger" 
                             MouseEnter="@(args => tooltipService.Open(args, "Delete note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                     </Template>

@@ -23,16 +23,16 @@
     <div class="row">
         <EntityList List="noteTypes">
             <ItemsFull>
-                <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" >
+                <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" Density="@Density.Compact">
                     <Columns>
                         <RadzenDataGridColumn TItem="NoteTypeDto" Property="Name" Title="Name" />
                         <RadzenDataGridColumn TItem="NoteTypeDto" Property="Description" Title="Full name" />                
                         <RadzenDataGridColumn TItem="NoteTypeDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                             <Template Context="data">                                                        
-                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" 
+                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
                                     ButtonStyle="ButtonStyle.Primary" 
                                     MouseEnter="@(args => tooltipService.Open(args, "Edit note type ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete"
+                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
                                     ButtonStyle="ButtonStyle.Danger" 
                                     MouseEnter="@(args => tooltipService.Open(args, "Delete note type ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                             </Template>

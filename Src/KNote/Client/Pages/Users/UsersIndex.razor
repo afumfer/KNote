@@ -33,7 +33,7 @@
     <div class="row">
         <EntityList List="users">
             <ItemsFull>
-                <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" >
+                <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" Density="@Density.Compact">
                     <Columns>
                         <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="User name" />
                         <RadzenDataGridColumn TItem="UserDto" Property="FullName" Title="Full name" />
@@ -41,10 +41,10 @@
                         <RadzenDataGridColumn TItem="UserDto" Property="RoleDefinition" Title="Roles" />                
                         <RadzenDataGridColumn TItem="UserDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                             <Template Context="data">                                                        
-                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" 
+                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
                                     ButtonStyle="ButtonStyle.Primary" 
                                     MouseEnter="@(args => tooltipService.Open(args, "Edit user ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete"
+                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
                                     ButtonStyle="ButtonStyle.Danger" 
                                     MouseEnter="@(args => tooltipService.Open(args, "Delete user ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                             </Template>

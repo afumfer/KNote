@@ -89,16 +89,16 @@
                         <i class="fa fa-plus"></i>
                     </button>
                 </span>
-                <RadzenDataGrid Data="@atributeValues" TItem="KAttributeTabulatedValueDto" AllowColumnResize="true" >
+                <RadzenDataGrid Data="@atributeValues" TItem="KAttributeTabulatedValueDto" AllowColumnResize="true" Density="@Density.Compact">
                     <Columns>
                         <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Property="Value" Title="Value" />
                         <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Property="Order" Title="Order" Width="190px" />                
                         <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                             <Template Context="data">                                                        
-                                <RadzenButton Click="@(() => OnAtrValueEdit(data))" Icon="edit" 
+                                <RadzenButton Click="@(() => OnAtrValueEdit(data))" Icon="edit" Size="ButtonSize.Small"
                                     ButtonStyle="ButtonStyle.Primary" 
                                     MouseEnter="@(args => tooltipService.Open(args, "Edit  ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                                <RadzenButton Click="@(() => OnAtrValueDelete(data))" Icon="delete"
+                                <RadzenButton Click="@(() => OnAtrValueDelete(data))" Icon="delete" Size="ButtonSize.Small"
                                     ButtonStyle="ButtonStyle.Danger" 
                                     MouseEnter="@(args => tooltipService.Open(args, "Delete ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                             </Template>

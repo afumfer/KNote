@@ -23,7 +23,7 @@
     <div class="row">
         <EntityList List="attributes">
             <ItemsFull>
-                <RadzenDataGrid Data="@attributes" TItem="KAttributeInfoDto" AllowColumnResize="true" >
+                <RadzenDataGrid Data="@attributes" TItem="KAttributeInfoDto" AllowColumnResize="true" Density="@Density.Compact">
                     <Columns>
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Order" Title="Order" Width="60px"/>
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Name" Title="Name" />
@@ -31,10 +31,10 @@
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="RequiredValueYesNo" Title="Requiered" Width="90px"/>                
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                             <Template Context="data">                                                        
-                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" 
+                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
                                     ButtonStyle="ButtonStyle.Primary" 
                                     MouseEnter="@(args => tooltipService.Open(args, "Edit attribute ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete"
+                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
                                     ButtonStyle="ButtonStyle.Danger" 
                                     MouseEnter="@(args => tooltipService.Open(args, "Delete attribute ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />                           
                             </Template>

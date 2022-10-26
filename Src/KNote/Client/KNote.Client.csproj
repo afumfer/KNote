@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.10" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.10" />
-	<PackageReference Include="Radzen.Blazor" Version="4.1.7" />
+	<PackageReference Include="Radzen.Blazor" Version="4.1.14" />
   </ItemGroup>
 
   <ItemGroup>
