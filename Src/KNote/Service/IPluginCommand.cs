@@ -16,6 +16,4 @@ public interface IPluginCommand
 
     public int Execute();
 
-    //public void InjectService(IKntService? service);    
-
 }

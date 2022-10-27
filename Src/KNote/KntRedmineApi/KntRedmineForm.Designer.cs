@@ -76,10 +76,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabRedmineUtils.Controls.Add(this.tabImport);
             this.tabRedmineUtils.Controls.Add(this.tabPredict);
-            this.tabRedmineUtils.Location = new System.Drawing.Point(12, 12);
+            this.tabRedmineUtils.Location = new System.Drawing.Point(6, 6);
             this.tabRedmineUtils.Name = "tabRedmineUtils";
             this.tabRedmineUtils.SelectedIndex = 0;
-            this.tabRedmineUtils.Size = new System.Drawing.Size(676, 582);
+            this.tabRedmineUtils.Size = new System.Drawing.Size(684, 594);
             this.tabRedmineUtils.TabIndex = 0;
             // 
             // tabImport
@@ -101,7 +101,7 @@
             this.tabImport.Location = new System.Drawing.Point(4, 24);
             this.tabImport.Name = "tabImport";
             this.tabImport.Padding = new System.Windows.Forms.Padding(3);
-            this.tabImport.Size = new System.Drawing.Size(668, 554);
+            this.tabImport.Size = new System.Drawing.Size(676, 566);
             this.tabImport.TabIndex = 0;
             this.tabImport.Text = "Import";
             this.tabImport.UseVisualStyleBackColor = true;
@@ -138,7 +138,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textFolderNumForImportIssues.Location = new System.Drawing.Point(492, 127);
             this.textFolderNumForImportIssues.Name = "textFolderNumForImportIssues";
-            this.textFolderNumForImportIssues.Size = new System.Drawing.Size(166, 23);
+            this.textFolderNumForImportIssues.Size = new System.Drawing.Size(174, 23);
             this.textFolderNumForImportIssues.TabIndex = 38;
             this.textFolderNumForImportIssues.Text = "1";
             // 
@@ -169,7 +169,7 @@
             this.listInfoRedmine.ItemHeight = 15;
             this.listInfoRedmine.Location = new System.Drawing.Point(288, 195);
             this.listInfoRedmine.Name = "listInfoRedmine";
-            this.listInfoRedmine.Size = new System.Drawing.Size(371, 349);
+            this.listInfoRedmine.Size = new System.Drawing.Size(379, 364);
             this.listInfoRedmine.TabIndex = 35;
             // 
             // label5
@@ -189,7 +189,7 @@
             this.textIssuesId.Multiline = true;
             this.textIssuesId.Name = "textIssuesId";
             this.textIssuesId.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textIssuesId.Size = new System.Drawing.Size(273, 350);
+            this.textIssuesId.Size = new System.Drawing.Size(273, 362);
             this.textIssuesId.TabIndex = 33;
             // 
             // textApiKey
@@ -198,7 +198,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textApiKey.Location = new System.Drawing.Point(9, 74);
             this.textApiKey.Name = "textApiKey";
-            this.textApiKey.Size = new System.Drawing.Size(487, 23);
+            this.textApiKey.Size = new System.Drawing.Size(495, 23);
             this.textApiKey.TabIndex = 32;
             // 
             // textHost
@@ -207,7 +207,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textHost.Location = new System.Drawing.Point(9, 24);
             this.textHost.Name = "textHost";
-            this.textHost.Size = new System.Drawing.Size(487, 23);
+            this.textHost.Size = new System.Drawing.Size(495, 23);
             this.textHost.TabIndex = 31;
             // 
             // label4
@@ -231,7 +231,7 @@
             // buttonImportRedmineIssues
             // 
             this.buttonImportRedmineIssues.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonImportRedmineIssues.Location = new System.Drawing.Point(515, 20);
+            this.buttonImportRedmineIssues.Location = new System.Drawing.Point(523, 20);
             this.buttonImportRedmineIssues.Name = "buttonImportRedmineIssues";
             this.buttonImportRedmineIssues.Size = new System.Drawing.Size(144, 27);
             this.buttonImportRedmineIssues.TabIndex = 28;
@@ -255,7 +255,7 @@
             this.tabPredict.Location = new System.Drawing.Point(4, 24);
             this.tabPredict.Name = "tabPredict";
             this.tabPredict.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPredict.Size = new System.Drawing.Size(668, 554);
+            this.tabPredict.Size = new System.Drawing.Size(676, 566);
             this.tabPredict.TabIndex = 1;
             this.tabPredict.Text = "Predict";
             this.tabPredict.UseVisualStyleBackColor = true;

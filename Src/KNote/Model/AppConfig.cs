@@ -219,52 +219,6 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
-    #region Provisional !!!
-
-    private string _hostRedmine;
-    public string HostRedmine
-    {
-        get { return _hostRedmine; }
-        set
-        {
-            if (_hostRedmine != value)
-            {
-                _hostRedmine = value;
-                OnPropertyChanged("HostRedmine");
-            }
-        }
-    }
-
-    // TODO: Encript this property
-
-    private string _apiKeyRedmine;
-    public string ApiKeyRedmine
-    {
-        get { return _apiKeyRedmine; }
-        set
-        {
-            if (_apiKeyRedmine != value)
-            {
-                _apiKeyRedmine = value;
-                OnPropertyChanged("ApiKeyRedmine");
-            }
-        }
-    }
-
-    private string _issuesImportFile;
-    public string IssuesImportFile
-    {
-        get { return _issuesImportFile; }
-        set
-        {
-            if (_issuesImportFile != value)
-            {
-                _issuesImportFile = value;
-                OnPropertyChanged("IssuesImportFile");
-            }
-        }
-    }
-
     private string _toolsPath;
     public string ToolsPath
     {
@@ -278,9 +232,6 @@ public class AppConfig : SmartModelDtoBase
             }
         }
     }
-
-
-    #endregion 
 
     private List<RepositoryRef> _respositoryRef;
     public List<RepositoryRef> RespositoryRefs

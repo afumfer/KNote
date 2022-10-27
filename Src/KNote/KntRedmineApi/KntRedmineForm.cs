@@ -1,95 +1,77 @@
-﻿using KNote.Model;
-using KNote.Model.Dto;
+﻿using KNote.Model.Dto;
 using KNote.Service;
 using Pandoc;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace KntRedmineApi
+namespace KntRedmineApi;
+
+public partial class KntRedmineForm : Form
 {
-    public partial class KntRedmineForm : Form
+    #region Fields
+
+    private IPluginCommand? _pluginCommand;
+    private IKntService? _service;
+    private KntRedmineManager? _manager;
+
+    #endregion
+
+    #region Constructors
+
+    public KntRedmineForm()
     {
-        private IPluginCommand? _pluginCommand;
-        private IKntService? _service;
-        private KntRedmineManager? _manager;
+        InitializeComponent();
+    }
 
-        public KntRedmineForm()
+    public KntRedmineForm(IPluginCommand? pluginCommand) : this()
+    {
+        _pluginCommand = pluginCommand;
+        _service = pluginCommand?.Service;
+    }
+
+    #endregion
+
+    #region Events handlers methods
+
+    private async void KntRedmineForm_Load(object sender, EventArgs e)
+    {
+        var isValidService = await IsValidService();
+        if (!isValidService)
         {
-            InitializeComponent();
+            MessageBox.Show("This database not support KaNote Redmine utils.");
+            this.Close();
+            return;
         }
 
-        public KntRedmineForm(IPluginCommand? pluginCommand) : this()
+        // RedMineAPI variables
+        var host = await GetSystemPlugInVariable("HOST"); 
+        var apiKey = await GetSystemPlugInVariable("APIKEY");
+        var importFile = await GetSystemPlugInVariable("IMPORTFILE");
+
+        textHost.Text = host;
+        textApiKey.Text = apiKey;
+        textIssuesImportFile.Text = importFile;
+
+        _manager = new KntRedmineManager(host, apiKey);
+
+        try
         {
-            _pluginCommand = pluginCommand;
-            _service = pluginCommand?.Service;
+            if(!string.IsNullOrEmpty(textIssuesImportFile.Text))
+                textIssuesId.Text = File.ReadAllText(textIssuesImportFile.Text);
         }
+        catch { }
+    }
 
-        private async void KntRedmineForm_Load(object sender, EventArgs e)
+    private async void buttonImportRedmineIssues_Click(object sender, EventArgs e)
+    {
+        try
         {
-            var isValidService = await IsValidService();
-            if (!isValidService)
-            {
-                MessageBox.Show("This database not support KaNote Redmine utils.");
-                this.Close();
-                return;
-            }
+            UseWaitCursor = true;
 
-            // RedMineAPI
-            var host = await GetSystemPlugInVariable("HOST"); 
-            var apiKey = await GetSystemPlugInVariable("APIKEY");
-            var importFile = await GetSystemPlugInVariable("IMPORTFILE");
-
-            textHost.Text = host;
-            textApiKey.Text = apiKey;
-            textIssuesImportFile.Text = importFile;
-
-            _manager = new KntRedmineManager(host, apiKey);
-
-            try
-            {
-                if(!string.IsNullOrEmpty(textIssuesImportFile.Text))
-                    textIssuesId.Text = File.ReadAllText(textIssuesImportFile.Text);
-            }
-            catch { }
-        }
-
-        private async Task<bool> IsValidService()
-        {
-            var supportEducaRedmine = await GetSystemPlugInVariable("PLUGIN_SUPPORT");
-                        
-            if (supportEducaRedmine.ToLower() == "true")
-                return true;
-            else
-                return false;                      
-        }
-
-        private async Task<string> GetSystemPlugInVariable(string variable)
-        {
-            // TODO: refactor this method
-            if (_service == null)
-                return "";
-
-            var supportEducaRedmine = await _service.SystemValues.GetAsync("KNT_REDMINEEDUCA_PLUGIN", variable);
-            if (supportEducaRedmine.IsValid)            
-                return supportEducaRedmine.Entity.Value;                                
-            else            
-                return "";                        
-        }
-
-        private async void buttonImportRedmineIssues_Click(object sender, EventArgs e)
-        {
             if (_service == null || _manager == null || _pluginCommand == null)
             {
-                MessageBox.Show("There is no correct context selected.");
+                MessageBox.Show("There is no correct context selected.", "KaNote");
                 return;
             }
 
@@ -110,16 +92,8 @@ namespace KntRedmineApi
                 return;
             }
 
-            //// TODO: Refactor this ....
-            //_store.AppConfig.HostRedmine = textHost.Text;
-            //_store.AppConfig.ApiKeyRedmine = textApiKey.Text;
-            //_store.AppConfig.IssuesImportFile = textIssuesImportFile.Text;
-            //_store.AppConfig.ToolsPath = Path.GetDirectoryName(_store.AppConfig.IssuesImportFile);
-            
             //var pandocEngine = new PandocEngine($"{_store.AppConfig.ToolsPath}/pandoc.exe");        
             PandocInstance.SetPandocPath($"{_pluginCommand.ToolsPath}/pandoc.exe");
-
-            //// ----
 
             var filter = new NotesFilterDto();
 
@@ -201,7 +175,7 @@ namespace KntRedmineApi
                         note.Description = note.Description.Replace(org, dest, true, CultureInfo.CurrentCulture);
                     }
 
-                    // iIefficient version
+                    // Inefficient version
                     //note.Description = TextToMarkdown(_store.AppConfig.ToolsPath, note.Description);
 
                     // Other version
@@ -223,112 +197,30 @@ namespace KntRedmineApi
                 }
             }
 
-            MessageBox.Show("End import");
+            // Save variables
+            await SaveSystemPlugInVariable("HOST", textHost.Text);
+            await SaveSystemPlugInVariable("APIKEY", textApiKey.Text);
+            await SaveSystemPlugInVariable("IMPORTFILE", textIssuesImportFile.Text);
+
+            UseWaitCursor = false;
+            MessageBox.Show("End import", "KaNote");
 
         }
-
-        private string[] GetHUs(string strIssuesId)
+        catch (Exception ex)
         {
-            return strIssuesId.Split("\r\n");
+            UseWaitCursor = false;
+            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");                
         }
-
-        private string TextToMarkdown(string pathUtils, string text)
+        finally
         {
-            // TODO: refactor this method
-
-            // pandoc -f textile -t markdown --wrap=preserve prueba1.text -o pruebaS1.md
-
-            var textOut = "";
-
-            if (!Directory.Exists(pathUtils))
-                return text;
-
-            string fileIn = Path.Combine(pathUtils, "input.text");
-            string fileOut = Path.Combine(pathUtils, "output.md");
-            string exPandoc = Path.Combine(pathUtils, "pandoc.exe");
-            string param = $" -f textile -t markdown --wrap=preserve {fileIn} -o {fileOut}";
-
-            if (System.IO.File.Exists(fileIn))
-                System.IO.File.Delete(fileIn);
-
-            if (System.IO.File.Exists(fileOut))
-                System.IO.File.Delete(fileOut);
-
-            System.IO.File.WriteAllText(fileIn, text);
-
-            var process = Process.Start(exPandoc, param);
-            process.WaitForExit();
-            var exitCode = process.ExitCode;
-
-            if (System.IO.File.Exists(fileOut))
-                textOut = System.IO.File.ReadAllText(fileOut);
-
-            textOut = textOut.Replace("\\[", "[");
-            textOut = textOut.Replace("\\]", "]");
-            return textOut;
-
+            UseWaitCursor = false;
         }
 
-        private async Task<string> TextToMarkdown2(string pathUtils, string text)
-        {
-            // TODO: refactor this method
-            var textOut = "";
+    }
 
-            if (!Directory.Exists(pathUtils))
-                return text;
-
-            string fileIn = Path.Combine(pathUtils, "__input.text");
-            string fileOut = Path.Combine(pathUtils, "__output.md");
-
-            if (System.IO.File.Exists(fileIn))
-                System.IO.File.Delete(fileIn);
-
-            if (System.IO.File.Exists(fileOut))
-                System.IO.File.Delete(fileOut);
-
-            System.IO.File.WriteAllText(fileIn, text);
-
-            await PandocInstance.Convert<TextileIn, CommonMarkOut>(fileIn, fileOut, new TextileIn { }, new CommonMarkOut { Wrap = Wrap.Preserve }, default);
-
-            if (System.IO.File.Exists(fileOut))
-                textOut = System.IO.File.ReadAllText(fileOut);
-
-            textOut = textOut.Replace("\\[", "[");
-            textOut = textOut.Replace("\\]", "]");
-            return textOut;
-        }
-
-        public string ExtensionFileToFileType(string extension)
-        {
-            // TODO: Refactor this method
-
-            var ext = extension.ToLower();
-
-            if (ext == ".jpg")
-                return @"image/jpeg";
-            else if (ext == ".jpeg")
-                return @"image/jpeg";
-            else if (ext == ".png")
-                return "image/png";
-            else if (ext == ".pdf")
-                return "application/pdf";
-            else if (ext == ".mp4")
-                return "video/mp4";
-            else if (ext == ".mp3")
-                return "audio/mp3";
-            else if (ext == ".txt")
-                return "text/plain";
-            else if (ext == ".text")
-                return "text/plain";
-            else if (ext == ".htm")
-                return "text/plain";
-            else if (ext == ".html")
-                return "text/plain";
-            else
-                return "";
-        }
-
-        private void buttonIssuesImportFile_Click(object sender, EventArgs e)
+    private void buttonIssuesImportFile_Click(object sender, EventArgs e)
+    {
+        try
         {
             openFileDialog.Title = "Select file Issues ID file";
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -336,52 +228,232 @@ namespace KntRedmineApi
                 var fileTmp = openFileDialog.FileName;
                 textIssuesImportFile.Text = fileTmp;
                 textIssuesId.Text = File.ReadAllText(fileTmp);
-                // !!!
-                //_store.AppConfig.IssuesImportFile = textIssuesImportFile.Text;
             }
         }
-
-        private async void buttonFindIssue_Click(object sender, EventArgs e)
+        catch (Exception ex)
         {
+            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
+        }            
+    }
+
+    private async void buttonFindIssue_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            UseWaitCursor = true;
             if (_service == null || _manager == null)
             {
                 MessageBox.Show("There is no archive selected ");
                 return;
             }
 
-            NoteExtendedDto note = (await _service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
-            //var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
-
             textPredictSubject.Text = "";
             textPredictDescription.Text = "";
             textPredictCategory.Text = "";
             textPredictionGestion.Text = "";
-
             textPredictionPH.Text = "";
+
+            NoteExtendedDto note = (await _service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
 
             var res = _manager.IssueToNoteDto(textPredictFindIssue.Text, note, false);
 
             textPredictSubject.Text = note.Topic;
             textPredictDescription.Text = note.Description;
-
-            if (note.KAttributesDto.Count < 3)
-                MessageBox.Show("You do not have the experimental database selected with the RedMine Educa import.");
-            else
-                textPredictCategory.Text = note.KAttributesDto[2].Value;
+            textPredictCategory.Text = note.KAttributesDto[2].Value;
         }
-
-        private void buttonPredictGestion_Click(object sender, EventArgs e)
+        catch (Exception ex)
         {
-            textPredictionGestion.Text = "";
-            //var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
-            textPredictionGestion.Text = _manager?.PredictGestion(textPredictSubject.Text, textPredictDescription.Text);
+            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
         }
-
-        private void buttonPredictPH_Click(object sender, EventArgs e)
+        finally
         {
-            textPredictionPH.Text = "";
-            //var manager = new KntRedmineManager(_store.AppConfig.HostRedmine, _store.AppConfig.ApiKeyRedmine);
-            textPredictionPH.Text = _manager?.PredictPH(textPredictCategory.Text, textPredictSubject.Text, textPredictDescription.Text);
+            UseWaitCursor = false;
         }
     }
+
+    private void buttonPredictGestion_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            UseWaitCursor = true;
+            Application.DoEvents();
+            textPredictionGestion.Text = "";            
+            textPredictionGestion.Text = _manager?.PredictGestion(textPredictSubject.Text, textPredictDescription.Text);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
+    }
+
+    private void buttonPredictPH_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            UseWaitCursor = true;
+            Application.DoEvents();
+            textPredictionPH.Text = "";            
+            textPredictionPH.Text = _manager?.PredictPH(textPredictCategory.Text, textPredictSubject.Text, textPredictDescription.Text);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private string[] GetHUs(string strIssuesId)
+    {
+        return strIssuesId.Split("\r\n");
+    }
+
+    private string TextToMarkdown(string pathUtils, string text)
+    {
+        // TODO: refactor this method
+
+        var textOut = "";
+
+        if (!Directory.Exists(pathUtils))
+            return text;
+
+        string fileIn = Path.Combine(pathUtils, "input.text");
+        string fileOut = Path.Combine(pathUtils, "output.md");
+        string exPandoc = Path.Combine(pathUtils, "pandoc.exe");
+        string param = $" -f textile -t markdown --wrap=preserve {fileIn} -o {fileOut}";
+
+        if (System.IO.File.Exists(fileIn))
+            System.IO.File.Delete(fileIn);
+
+        if (System.IO.File.Exists(fileOut))
+            System.IO.File.Delete(fileOut);
+
+        System.IO.File.WriteAllText(fileIn, text);
+
+        var process = Process.Start(exPandoc, param);
+        process.WaitForExit();
+        var exitCode = process.ExitCode;
+
+        if (System.IO.File.Exists(fileOut))
+            textOut = System.IO.File.ReadAllText(fileOut);
+
+        textOut = textOut.Replace("\\[", "[");
+        textOut = textOut.Replace("\\]", "]");
+        return textOut;
+
+    }
+
+    private async Task<string> TextToMarkdown2(string pathUtils, string text)
+    {
+        // TODO: refactor this method
+        var textOut = "";
+
+        if (!Directory.Exists(pathUtils))
+            return text;
+
+        string fileIn = Path.Combine(pathUtils, "__input.text");
+        string fileOut = Path.Combine(pathUtils, "__output.md");
+
+        if (System.IO.File.Exists(fileIn))
+            System.IO.File.Delete(fileIn);
+
+        if (System.IO.File.Exists(fileOut))
+            System.IO.File.Delete(fileOut);
+
+        System.IO.File.WriteAllText(fileIn, text);
+
+        await PandocInstance.Convert<TextileIn, CommonMarkOut>(fileIn, fileOut, new TextileIn { }, new CommonMarkOut { Wrap = Wrap.Preserve }, default);
+
+        if (System.IO.File.Exists(fileOut))
+            textOut = System.IO.File.ReadAllText(fileOut);
+
+        textOut = textOut.Replace("\\[", "[");
+        textOut = textOut.Replace("\\]", "]");
+        return textOut;
+    }
+
+    public string ExtensionFileToFileType(string extension)
+    {
+        // TODO: Refactor this method
+
+        var ext = extension.ToLower();
+
+        if (ext == ".jpg")
+            return @"image/jpeg";
+        else if (ext == ".jpeg")
+            return @"image/jpeg";
+        else if (ext == ".png")
+            return "image/png";
+        else if (ext == ".pdf")
+            return "application/pdf";
+        else if (ext == ".mp4")
+            return "video/mp4";
+        else if (ext == ".mp3")
+            return "audio/mp3";
+        else if (ext == ".txt")
+            return "text/plain";
+        else if (ext == ".text")
+            return "text/plain";
+        else if (ext == ".htm")
+            return "text/plain";
+        else if (ext == ".html")
+            return "text/plain";
+        else
+            return "";
+    }
+
+    private async Task<bool> IsValidService()
+    {
+        var value = await GetSystemPlugInVariable("PLUGIN_SUPPORT");
+
+        if (value.ToLower() == "true")
+            return true;
+        else
+            return false;
+    }
+
+    private async Task<string> GetSystemPlugInVariable(string variable)
+    {            
+        if (_service == null)
+            return "";
+
+        var valueDto = await _service.SystemValues.GetAsync("KNT_REDMINEEDUCA_PLUGIN", variable);
+        if (valueDto.IsValid)
+            return valueDto.Entity.Value;
+        else
+            return "";
+    }
+
+    private async Task<string> SaveSystemPlugInVariable(string variable, string value)
+    {
+        // TODO: refactor this method
+        if (_service == null)
+            return "";
+
+        var valueDto = await _service.SystemValues.GetAsync("KNT_REDMINEEDUCA_PLUGIN", variable);
+        if (valueDto.IsValid)
+        {
+            valueDto.Entity.Value = value;
+            var resSave = await _service.SystemValues.SaveAsync(valueDto.Entity);
+            if(resSave.IsValid)
+                return resSave.Entity.Value;
+            else
+                return "";
+        }
+        else
+            return "";
+    }
+
+    #endregion 
+
 }
