@@ -1,6 +1,8 @@
 ﻿using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using SQLitePCL;
+using System.Windows.Forms;
 
 namespace KNote.ClientWin.Views;
 
@@ -141,6 +143,10 @@ public partial class OptionsEditorForm : Form, IEditorView<AppConfig>
         checkAutoSaveActivated.Checked = _com.Model.AutoSaveActivated;
         textAutosaveSeconds.Text = _com.Model.AutoSaveSeconds.ToString();
         checkCompactViewNotesList.Checked = _com.Model.CompactViewNoteslist;
+        listPlugIns.Items.Clear();
+        foreach (var p in _com.Model.Plugins)
+            listPlugIns.Items.Add(p);
+
         //var x5 = _com.Model.LogActivated;
         //var x6 = _com.Model.LogFile;
     }
@@ -152,8 +158,29 @@ public partial class OptionsEditorForm : Form, IEditorView<AppConfig>
         _com.Model.AutoSaveActivated = checkAutoSaveActivated.Checked;
         _com.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
         _com.Model.CompactViewNoteslist = checkCompactViewNotesList.Checked;
+        _com.Model.Plugins.Clear();
+        foreach (var p in listPlugIns.Items)
+            _com.Model.Plugins.Add(p.ToString());
     }
 
-    #endregion 
+    #endregion
+
+    private void buttonAddPlugin_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            openFileDialog.Title = "Select KaNote plugin file";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var fileTmp = openFileDialog.FileName;
+                // TODO, valid file here !!!
+                listPlugIns.Items.Add(fileTmp);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
+        }
+    }
 }
 

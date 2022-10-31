@@ -51,6 +51,10 @@ public class OptionsEditorComponent : ComponentEditor<IEditorView<AppConfig>, Ap
         Store.AppConfig.AutoSaveActivated = Model.AutoSaveActivated;
         Store.AppConfig.AutoSaveSeconds = Model.AutoSaveSeconds;
         Store.AppConfig.CompactViewNoteslist = Model.CompactViewNoteslist;
+        Store.AppConfig.Plugins = Model.Plugins;
+        //Store.AppConfig.Plugins = new List<string>();
+        //foreach (var p in Model.Plugins)
+        //    Store.AppConfig.Plugins.Add(p);
         Store.SaveConfig();
 
         return await Task.FromResult<bool>(true);

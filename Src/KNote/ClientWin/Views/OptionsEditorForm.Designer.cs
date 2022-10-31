@@ -35,6 +35,7 @@ namespace KNote.ClientWin.Views
             this.panelForm = new System.Windows.Forms.Panel();
             this.tabOptions = new System.Windows.Forms.TabControl();
             this.tabGlobalOptions = new System.Windows.Forms.TabPage();
+            this.labelInfo = new System.Windows.Forms.Label();
             this.checkCompactViewNotesList = new System.Windows.Forms.CheckBox();
             this.textAutosaveSeconds = new System.Windows.Forms.TextBox();
             this.textAlarmSeconds = new System.Windows.Forms.TextBox();
@@ -42,18 +43,22 @@ namespace KNote.ClientWin.Views
             this.labelAlarmSeconds = new System.Windows.Forms.Label();
             this.checkAutoSaveActivated = new System.Windows.Forms.CheckBox();
             this.checkAlarmActivated = new System.Windows.Forms.CheckBox();
+            this.tabPlugins = new System.Windows.Forms.TabPage();
+            this.buttonRemovePlugin = new System.Windows.Forms.Button();
+            this.buttonAddPlugin = new System.Windows.Forms.Button();
+            this.listPlugIns = new System.Windows.Forms.ListBox();
             this.buttonSelectDirectoryResources = new System.Windows.Forms.Button();
             this.buttonFolderSearch = new System.Windows.Forms.Button();
-            this.labelInfo = new System.Windows.Forms.Label();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.panelForm.SuspendLayout();
             this.tabOptions.SuspendLayout();
             this.tabGlobalOptions.SuspendLayout();
+            this.tabPlugins.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(407, 294);
+            this.buttonCancel.Location = new System.Drawing.Point(407, 287);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(78, 29);
             this.buttonCancel.TabIndex = 12;
@@ -63,8 +68,7 @@ namespace KNote.ClientWin.Views
             // 
             // buttonAccept
             // 
-            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(325, 294);
+            this.buttonAccept.Location = new System.Drawing.Point(325, 287);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(76, 29);
             this.buttonAccept.TabIndex = 11;
@@ -80,16 +84,17 @@ namespace KNote.ClientWin.Views
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(497, 292);
+            this.panelForm.Size = new System.Drawing.Size(497, 276);
             this.panelForm.TabIndex = 10;
             // 
             // tabOptions
             // 
             this.tabOptions.Controls.Add(this.tabGlobalOptions);
+            this.tabOptions.Controls.Add(this.tabPlugins);
             this.tabOptions.Location = new System.Drawing.Point(6, 6);
             this.tabOptions.Name = "tabOptions";
             this.tabOptions.SelectedIndex = 0;
-            this.tabOptions.Size = new System.Drawing.Size(485, 274);
+            this.tabOptions.Size = new System.Drawing.Size(485, 268);
             this.tabOptions.TabIndex = 18;
             // 
             // tabGlobalOptions
@@ -105,10 +110,19 @@ namespace KNote.ClientWin.Views
             this.tabGlobalOptions.Location = new System.Drawing.Point(4, 24);
             this.tabGlobalOptions.Name = "tabGlobalOptions";
             this.tabGlobalOptions.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGlobalOptions.Size = new System.Drawing.Size(477, 246);
+            this.tabGlobalOptions.Size = new System.Drawing.Size(477, 240);
             this.tabGlobalOptions.TabIndex = 0;
             this.tabGlobalOptions.Text = "Global options";
             this.tabGlobalOptions.UseVisualStyleBackColor = true;
+            // 
+            // labelInfo
+            // 
+            this.labelInfo.AutoSize = true;
+            this.labelInfo.Location = new System.Drawing.Point(6, 217);
+            this.labelInfo.Name = "labelInfo";
+            this.labelInfo.Size = new System.Drawing.Size(181, 15);
+            this.labelInfo.TabIndex = 25;
+            this.labelInfo.Text = "(*) Application restart is required ";
             // 
             // checkCompactViewNotesList
             // 
@@ -174,6 +188,46 @@ namespace KNote.ClientWin.Views
             this.checkAlarmActivated.Text = "Alarm activated";
             this.checkAlarmActivated.UseVisualStyleBackColor = true;
             // 
+            // tabPlugins
+            // 
+            this.tabPlugins.Controls.Add(this.buttonRemovePlugin);
+            this.tabPlugins.Controls.Add(this.buttonAddPlugin);
+            this.tabPlugins.Controls.Add(this.listPlugIns);
+            this.tabPlugins.Location = new System.Drawing.Point(4, 24);
+            this.tabPlugins.Name = "tabPlugins";
+            this.tabPlugins.Size = new System.Drawing.Size(477, 240);
+            this.tabPlugins.TabIndex = 1;
+            this.tabPlugins.Text = "Plugins";
+            this.tabPlugins.UseVisualStyleBackColor = true;
+            // 
+            // buttonRemovePlugin
+            // 
+            this.buttonRemovePlugin.Location = new System.Drawing.Point(447, 33);
+            this.buttonRemovePlugin.Name = "buttonRemovePlugin";
+            this.buttonRemovePlugin.Size = new System.Drawing.Size(27, 23);
+            this.buttonRemovePlugin.TabIndex = 2;
+            this.buttonRemovePlugin.Text = "-";
+            this.buttonRemovePlugin.UseVisualStyleBackColor = true;
+            // 
+            // buttonAddPlugin
+            // 
+            this.buttonAddPlugin.Location = new System.Drawing.Point(447, 4);
+            this.buttonAddPlugin.Name = "buttonAddPlugin";
+            this.buttonAddPlugin.Size = new System.Drawing.Size(27, 23);
+            this.buttonAddPlugin.TabIndex = 1;
+            this.buttonAddPlugin.Text = "+";
+            this.buttonAddPlugin.UseVisualStyleBackColor = true;
+            this.buttonAddPlugin.Click += new System.EventHandler(this.buttonAddPlugin_Click);
+            // 
+            // listPlugIns
+            // 
+            this.listPlugIns.FormattingEnabled = true;
+            this.listPlugIns.ItemHeight = 15;
+            this.listPlugIns.Location = new System.Drawing.Point(9, 4);
+            this.listPlugIns.Name = "listPlugIns";
+            this.listPlugIns.Size = new System.Drawing.Size(434, 229);
+            this.listPlugIns.TabIndex = 0;
+            // 
             // buttonSelectDirectoryResources
             // 
             this.buttonSelectDirectoryResources.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -197,20 +251,11 @@ namespace KNote.ClientWin.Views
             this.buttonFolderSearch.Text = "...";
             this.buttonFolderSearch.UseVisualStyleBackColor = false;
             // 
-            // labelInfo
-            // 
-            this.labelInfo.AutoSize = true;
-            this.labelInfo.Location = new System.Drawing.Point(6, 224);
-            this.labelInfo.Name = "labelInfo";
-            this.labelInfo.Size = new System.Drawing.Size(181, 15);
-            this.labelInfo.TabIndex = 25;
-            this.labelInfo.Text = "(*) Application restart is required ";
-            // 
             // OptionsEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(497, 335);
+            this.ClientSize = new System.Drawing.Size(497, 326);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
             this.Controls.Add(this.panelForm);
@@ -229,6 +274,7 @@ namespace KNote.ClientWin.Views
             this.tabOptions.ResumeLayout(false);
             this.tabGlobalOptions.ResumeLayout(false);
             this.tabGlobalOptions.PerformLayout();
+            this.tabPlugins.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -250,5 +296,10 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.CheckBox checkAlarmActivated;
         private CheckBox checkCompactViewNotesList;
         private Label labelInfo;
+        private TabPage tabPlugins;
+        private ListBox listPlugIns;
+        private Button buttonRemovePlugin;
+        private Button buttonAddPlugin;
+        private OpenFileDialog openFileDialog;
     }
 }

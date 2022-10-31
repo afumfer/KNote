@@ -219,19 +219,20 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
-    private string _toolsPath;
-    public string ToolsPath
+    private List<string> _plugins;
+    public List<string> Plugins
     {
-        get { return _toolsPath; }
+        get { return _plugins; }
         set
         {
-            if (_toolsPath != value)
+            if (_plugins != value)
             {
-                _toolsPath = value;
-                OnPropertyChanged("ToolsPath");
+                _plugins = value;
+                OnPropertyChanged("Plugins");
             }
         }
     }
+
 
     private List<RepositoryRef> _respositoryRef;
     public List<RepositoryRef> RespositoryRefs

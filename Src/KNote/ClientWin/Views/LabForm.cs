@@ -984,7 +984,7 @@ public partial class LabForm : Form
         //{
         //    Service = _store.ActiveFolderWithServiceRef?.ServiceRef.Service,
         //    AppUserName = _store.AppUserName,
-        //    ToolsPath = _store.AppConfig.ToolsPath
+        //    ToolsPath = "" //_store.AppConfig.ToolsPath
         //};
 
         //c.Execute();
