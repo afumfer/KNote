@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KntRedmineApi\KntRedmineApi.csproj" />
     <ProjectReference Include="..\KntScript\KntScript.csproj" />
     <ProjectReference Include="..\KntWebView\KntWebView.csproj" />
     <ProjectReference Include="..\Model\KNote.Model.csproj" />

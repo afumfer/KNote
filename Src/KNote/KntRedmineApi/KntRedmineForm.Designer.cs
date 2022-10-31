@@ -415,6 +415,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "KntRedmineForm";
             this.Text = "KaNote Redmine utils";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KntRedmineForm_FormClosing);
             this.Load += new System.EventHandler(this.KntRedmineForm_Load);
             this.tabRedmineUtils.ResumeLayout(false);
             this.tabImport.ResumeLayout(false);

@@ -1,9 +1,11 @@
-﻿using KNote.Model.Dto;
+﻿using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Service;
 using Pandoc;
 using System.Diagnostics;
 using System.Globalization;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace KntRedmineApi;
 
@@ -36,6 +38,13 @@ public partial class KntRedmineForm : Form
 
     private async void KntRedmineForm_Load(object sender, EventArgs e)
     {
+        if(_pluginCommand == null || _service == null)
+        {
+            MessageBox.Show("Configuration context is invalid.");
+            this.Close();
+            return;
+        }
+
         var isValidService = await IsValidService();
         if (!isValidService)
         {
@@ -61,6 +70,33 @@ public partial class KntRedmineForm : Form
                 textIssuesId.Text = File.ReadAllText(textIssuesImportFile.Text);
         }
         catch { }
+    }
+
+    private void KntRedmineForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (_pluginCommand == null)
+            return;
+
+        try
+        {
+            var configFile = Path.Combine(Application.StartupPath, "KntRedmine.config");
+
+            var kntRedmineConfig = new KntRedmineConfig
+            {
+                AppUserName = _pluginCommand.AppUserName,
+                ToolsPath = _pluginCommand.ToolsPath,
+                RepositoryRef = _pluginCommand.Service.RepositoryRef
+            };
+
+            TextWriter w = new StreamWriter(configFile);
+            XmlSerializer serializer = new XmlSerializer(typeof(KntRedmineConfig));
+            serializer.Serialize(w, kntRedmineConfig);
+            w.Close();
+        }
+        catch (Exception)
+        {
+
+        }
     }
 
     private async void buttonImportRedmineIssues_Click(object sender, EventArgs e)
@@ -454,6 +490,6 @@ public partial class KntRedmineForm : Form
             return "";
     }
 
-    #endregion 
+    #endregion
 
 }

@@ -3,6 +3,8 @@ using System.Text;
 using System.Xml.Serialization;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Globalization;
+using System.Reflection;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
@@ -11,11 +13,10 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
 
-using KntRedmineApi;
-using Pandoc;
-using CliWrap;
-using System.Globalization;
-using System.Reflection;
+//using KntRedmineApi;
+//using Pandoc;
+//using CliWrap;
+
 
 namespace KNote.ClientWin.Views;
 
@@ -979,14 +980,17 @@ public partial class LabForm : Form
 
     private void buttonPlugin_Click(object sender, EventArgs e)
     {
-        var c = new KntRedminePluginCommand
-        {
-            Service = _store.ActiveFolderWithServiceRef?.ServiceRef.Service,
-            AppUserName = _store.AppUserName,
-            ToolsPath = _store.AppConfig.ToolsPath
-        };
-        
-        c.Execute();
+        //var c = new KntRedminePluginCommand
+        //{
+        //    Service = _store.ActiveFolderWithServiceRef?.ServiceRef.Service,
+        //    AppUserName = _store.AppUserName,
+        //    ToolsPath = _store.AppConfig.ToolsPath
+        //};
+
+        //c.Execute();
+        //Process.Start("notepad", "readme.txt");
+
+        Process.Start(@"D:\KaNote\Plugins\KntRedmine\KntRedmineApi.exe");
     }
 
     private void buttonGetPluginFile_Click(object sender, EventArgs e)
