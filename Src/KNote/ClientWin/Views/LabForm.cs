@@ -12,6 +12,7 @@ using KNote.Service;
 using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
+using System.Runtime.Loader;
 
 //using KntRedmineApi;
 //using Pandoc;
@@ -999,6 +1000,20 @@ public partial class LabForm : Form
         //var root = _store.GetVsSolutionRootPath();
         //string pluginLocation = Path.GetFullPath(Path.Combine(root, relativePath.Replace('\\', Path.DirectorySeparatorChar)));
         //textPlugin.Text = pluginLocation;
+
+        var pFile = @"D:\Dev\KNote\Src\KNote\KntRedmineApi\bin\Debug\net6.0-windows\KntRedmineApi.exe";
+
+        //var aa = AssemblyLoadContext.GetExecutingAssembly();
+        var a = _store.LoadPlugin(pFile);
+        var listCommands = _store.CreateCommands(a);
+
+        foreach (var c in listCommands)
+        {
+            textPlugin.Text = c.Description;
+            break;
+        }
+        return; 
+
     }
 
     #endregion

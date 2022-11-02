@@ -89,8 +89,8 @@ namespace KNote.ClientWin.Components
             Store.ChangedActiveFilterWithServiceRef += Store_ChangedActiveFilterWithServiceRef;
 
             Store.AddedPostIt += PostItEditorComponent_AddedEntity;
-            Store.SavedPostIt += PostItEditorComponent_SavedEntity;
-            Store.DeletedPostIt += PostItEditorComponent_SavedEntity;
+            Store.SavedPostIt += PostItEditorComponent_SavedEntity;            
+            Store.DeletedPostIt += PostItEditorComponent_DeletedEntity;            
             Store.ExtendedEditPostIt += PostItEditorComponent_ExtendedEdit;
 
             Store.AddedNote += NoteEditorComponent_AddedEntity;

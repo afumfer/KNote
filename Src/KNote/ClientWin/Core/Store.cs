@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using KNote.Model.Dto;
 using System.Reflection;
 using System.Windows.Input;
+using System.Runtime.Loader;
 
 namespace KNote.ClientWin.Core;
 
