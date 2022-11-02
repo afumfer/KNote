@@ -219,19 +219,19 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
-    private List<string> _plugins;
-    public List<string> Plugins
-    {
-        get { return _plugins; }
-        set
-        {
-            if (_plugins != value)
-            {
-                _plugins = value;
-                OnPropertyChanged("Plugins");
-            }
-        }
-    }
+    //private List<string> _plugins;
+    //public List<string> Plugins
+    //{
+    //    get { return _plugins; }
+    //    set
+    //    {
+    //        if (_plugins != value)
+    //        {
+    //            _plugins = value;
+    //            OnPropertyChanged("Plugins");
+    //        }
+    //    }
+    //}
 
 
     private List<RepositoryRef> _respositoryRef;

@@ -283,7 +283,23 @@ public class KNoteScriptLibrary: Library
             }
         }
     }
-     
+
+    public void Exec(string fileName)
+    {       
+        try
+        {            
+            var startInfo = new ProcessStartInfo(fileName);
+            startInfo.WorkingDirectory = Path.GetDirectoryName(fileName);        
+
+            var proc = Process.Start(startInfo);
+        }
+        catch
+        {           
+            throw;           
+        }
+    }
+
+
     public async Task<bool> LoadVarsFromRepository(string varIdentifier, string repositoryAlias)
     {
         ServiceRef serviceRef;

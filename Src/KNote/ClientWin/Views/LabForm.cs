@@ -989,8 +989,7 @@ public partial class LabForm : Form
         //};
 
         //c.Execute();
-        //Process.Start("notepad", "readme.txt");
-
+        
         Process.Start(@"D:\KaNote\Plugins\KntRedmine\KntRedmineApi.exe");
     }
 
