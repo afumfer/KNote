@@ -535,7 +535,3 @@ public class Store
     #endregion
 
 }
-
-#region  Context typos 
-
-#endregion 

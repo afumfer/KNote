@@ -104,6 +104,7 @@
             this.tabSearch = new System.Windows.Forms.TabPage();
             this.imageTabExplorer = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.menuChat = new System.Windows.Forms.ToolStripMenuItem();
             this.menuMangment.SuspendLayout();
             this.statusBarManagment.SuspendLayout();
             this.toolBarManagment.SuspendLayout();
@@ -470,6 +471,7 @@
             this.menuReports,
             this.menuToolsS1,
             this.menuKntScriptConsole,
+            this.menuChat,
             this.menuKNoteLab,
             this.menuToolsS2,
             this.menuOptions});
@@ -796,6 +798,13 @@
             this.splitContainer2.SplitterWidth = 7;
             this.splitContainer2.TabIndex = 0;
             // 
+            // menuChat
+            // 
+            this.menuChat.Name = "menuChat";
+            this.menuChat.Size = new System.Drawing.Size(185, 22);
+            this.menuChat.Text = "Chat ...";
+            this.menuChat.Click += new System.EventHandler(this.menu_Click);
+            // 
             // KNoteManagmentForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
@@ -908,5 +917,6 @@
         private System.Windows.Forms.ToolStripMenuItem menuVerticalPanelForNotes;
         private System.Windows.Forms.ToolStripSeparator menuViewS1;
         private ToolStripMenuItem menuToolbarVisible;
+        private ToolStripMenuItem menuChat;
     }
 }

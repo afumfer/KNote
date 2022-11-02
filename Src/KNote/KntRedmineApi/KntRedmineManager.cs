@@ -119,8 +119,8 @@ public class KntRedmineManager
         }
         catch (Exception ex)
         {
-            var a = ex.Message;
-            throw;
+            //throw new Exception($"Loading Redmine issue: {ex.Message}");
+            return false;
         }
     }
 

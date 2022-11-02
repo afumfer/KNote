@@ -143,6 +143,7 @@ public partial class OptionsEditorForm : Form, IEditorView<AppConfig>
         checkAutoSaveActivated.Checked = _com.Model.AutoSaveActivated;
         textAutosaveSeconds.Text = _com.Model.AutoSaveSeconds.ToString();
         checkCompactViewNotesList.Checked = _com.Model.CompactViewNoteslist;
+        textChatHubUrl.Text = _com.Model.ChatHubUrl;
 
         //var x5 = _com.Model.LogActivated;
         //var x6 = _com.Model.LogFile;
@@ -155,6 +156,7 @@ public partial class OptionsEditorForm : Form, IEditorView<AppConfig>
         _com.Model.AutoSaveActivated = checkAutoSaveActivated.Checked;
         _com.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
         _com.Model.CompactViewNoteslist = checkCompactViewNotesList.Checked;
+        _com.Model.ChatHubUrl = textChatHubUrl.Text;
     }
 
     #endregion

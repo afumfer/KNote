@@ -167,10 +167,12 @@ namespace KNote.ClientWin.Views
             ToolStripMenuItem menuSel;
             menuSel = (ToolStripMenuItem)sender;
 
-            if (menuSel == menuKNoteLab) {
+            if (menuSel == menuKNoteLab) 
+            {
                 // For test ...
                 var labForm = new LabForm(_com.Store);
-                labForm.Show(); }
+                labForm.Show(); 
+            }
             else if (menuSel == menuNewFolder)
             {
                 _com.NewFolder();            
@@ -299,6 +301,12 @@ namespace KNote.ClientWin.Views
             {
                 SaveViewSizeAndPosition();
                 await _com.FinalizeApp();            
+            }
+            else if (menuSel == menuChat)
+            {
+                // For test ...
+                var chatForm = new ChatForm(_com.Store);
+                chatForm.Show();
             }
             else
                 MessageBox.Show("In construction ... ");            

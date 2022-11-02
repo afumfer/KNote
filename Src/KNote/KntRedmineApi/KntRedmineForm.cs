@@ -228,7 +228,7 @@ public partial class KntRedmineForm : Form
                 }
                 else
                 {
-                    listInfoRedmine.Items.Add($"Error");
+                    listInfoRedmine.Items.Add($"{i++} - Error");
                     listInfoRedmine.Refresh();
                 }
             }

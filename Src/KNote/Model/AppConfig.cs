@@ -219,20 +219,19 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
-    //private List<string> _plugins;
-    //public List<string> Plugins
-    //{
-    //    get { return _plugins; }
-    //    set
-    //    {
-    //        if (_plugins != value)
-    //        {
-    //            _plugins = value;
-    //            OnPropertyChanged("Plugins");
-    //        }
-    //    }
-    //}
-
+    private string _chatHubUrl;
+    public string ChatHubUrl
+    {
+        get { return _chatHubUrl; }
+        set
+        {
+            if (_chatHubUrl != value)
+            {
+                _chatHubUrl = value;
+                OnPropertyChanged("ChatHubUrl");
+            }
+        }
+    }
 
     private List<RepositoryRef> _respositoryRef;
     public List<RepositoryRef> RespositoryRefs

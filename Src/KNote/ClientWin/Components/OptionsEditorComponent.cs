@@ -50,7 +50,8 @@ public class OptionsEditorComponent : ComponentEditor<IEditorView<AppConfig>, Ap
         Store.AppConfig.AlarmSeconds = Model.AlarmSeconds;
         Store.AppConfig.AutoSaveActivated = Model.AutoSaveActivated;
         Store.AppConfig.AutoSaveSeconds = Model.AutoSaveSeconds;
-        Store.AppConfig.CompactViewNoteslist = Model.CompactViewNoteslist;        
+        Store.AppConfig.CompactViewNoteslist = Model.CompactViewNoteslist;
+        Store.AppConfig.ChatHubUrl = Model.ChatHubUrl;
         Store.SaveConfig();
 
         return await Task.FromResult<bool>(true);

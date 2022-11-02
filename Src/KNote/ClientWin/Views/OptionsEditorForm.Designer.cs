@@ -46,6 +46,8 @@ namespace KNote.ClientWin.Views
             this.buttonSelectDirectoryResources = new System.Windows.Forms.Button();
             this.buttonFolderSearch = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textChatHubUrl = new System.Windows.Forms.TextBox();
             this.panelForm.SuspendLayout();
             this.tabOptions.SuspendLayout();
             this.tabGlobalOptions.SuspendLayout();
@@ -93,6 +95,8 @@ namespace KNote.ClientWin.Views
             // 
             // tabGlobalOptions
             // 
+            this.tabGlobalOptions.Controls.Add(this.textChatHubUrl);
+            this.tabGlobalOptions.Controls.Add(this.label1);
             this.tabGlobalOptions.Controls.Add(this.labelInfo);
             this.tabGlobalOptions.Controls.Add(this.checkCompactViewNotesList);
             this.tabGlobalOptions.Controls.Add(this.textAutosaveSeconds);
@@ -205,6 +209,23 @@ namespace KNote.ClientWin.Views
             this.buttonFolderSearch.Text = "...";
             this.buttonFolderSearch.UseVisualStyleBackColor = false;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(13, 128);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(76, 15);
+            this.label1.TabIndex = 26;
+            this.label1.Text = "Chat hub url:";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // textChatHubUrl
+            // 
+            this.textChatHubUrl.Location = new System.Drawing.Point(95, 125);
+            this.textChatHubUrl.Name = "textChatHubUrl";
+            this.textChatHubUrl.Size = new System.Drawing.Size(367, 23);
+            this.textChatHubUrl.TabIndex = 27;
+            // 
             // OptionsEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -250,5 +271,7 @@ namespace KNote.ClientWin.Views
         private CheckBox checkCompactViewNotesList;
         private Label labelInfo;
         private OpenFileDialog openFileDialog;
+        private TextBox textChatHubUrl;
+        private Label label1;
     }
 }
