@@ -7,7 +7,7 @@ using KNote.Client.Helpers;
 using KNote.Client.Auth;
 
 using Radzen;
-
+using Microsoft.AspNetCore.Components.Web;
 
 namespace KNote.Client;
 
@@ -17,9 +17,10 @@ public class Program
     {
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
         builder.RootComponents.Add<App>("app");
-                        
-        builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-        //builder.Services.AddScoped(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+        builder.RootComponents.Add<HeadOutlet>("head::after");
+
+        //builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });        
+        builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
         builder.Services.AddOptions();
             
