@@ -32,7 +32,7 @@ public partial class ChatForm : Form
     {
         if (string.IsNullOrEmpty(_store.AppConfig.ChatHubUrl))
         {
-            MessageBox.Show("Chat hub url is not defined. Set the chat hub url y Options menú.");
+            MessageBox.Show("Chat hub url is not defined. Set the chat hub url y Options menú.", "KaNote");
             this.Close();
             return;
         }
@@ -72,6 +72,7 @@ public partial class ChatForm : Form
     {
         try
         {
+            UseWaitCursor = true;
             if (hubConnection.State == HubConnectionState.Disconnected)
                 await hubConnection.StartAsync();
 
@@ -83,6 +84,11 @@ public partial class ChatForm : Form
         catch (Exception ex)
         {
             listMessages.Items.Add($"The message coundn't be sent. Error: {ex.Message}");
+            UseWaitCursor = false;
+        }
+        finally
+        {
+            UseWaitCursor = false;
         }
     }
 }
