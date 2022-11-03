@@ -13,8 +13,7 @@ using System.Windows.Forms;
 namespace KNote.ClientWin.Views;
 
 public partial class ChatForm : Form
-{
-    //private string url = ""; // = @"https://localhost:44339/KNote/chathub";
+{    
     private HubConnection hubConnection;
     private Store _store;
 
@@ -27,37 +26,45 @@ public partial class ChatForm : Form
     {
         _store = store;
 
-        hubConnection = new HubConnectionBuilder()
-                       .WithUrl(_store.AppConfig.ChatHubUrl)
-                       .Build();
-
-        // Si se desconecta => debe intentar reconectar
-        hubConnection.Closed += async (error) =>
-        {
-            Thread.Sleep(5000);
-            await hubConnection.StartAsync();
-        };
     }
 
     private async void ChatForm_Load(object sender, EventArgs e)
     {
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        if (string.IsNullOrEmpty(_store.AppConfig.ChatHubUrl))
         {
-            var encodeMessage = $"{user}: {message}";
-            listMessages.Items.Add(encodeMessage);
-            listMessages.Refresh();
-        });
-        
-        Text += $" [{_store.AppUserName}]";
-        labelServer.Text = _store.AppConfig.ChatHubUrl;
+            MessageBox.Show("Chat hub url is not defined. Set the chat hub url y Options menú.");
+            this.Close();
+            return;
+        }
 
         try
         {
+            hubConnection = new HubConnectionBuilder()
+                           .WithUrl(_store.AppConfig.ChatHubUrl)
+                           .Build();
+
+            // Si se desconecta => debe intentar reconectar
+            hubConnection.Closed += async (error) =>
+            {
+                Thread.Sleep(5000);
+                await hubConnection.StartAsync();
+            };
+
+            hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+            {
+                var encodeMessage = $"{user}: {message}";
+                listMessages.Items.Add(encodeMessage);
+                listMessages.Refresh();
+            });
+
+            Text += $" [{_store.AppUserName}]";
+            labelServer.Text = _store.AppConfig.ChatHubUrl;
+
             await hubConnection.StartAsync();
         }
         catch (Exception)
         {
-            listMessages.Items.Add($"No se ha podido inicar la conexión.");
+            listMessages.Items.Add($"The connection could not be started.");
         }
     }
 
@@ -75,7 +82,7 @@ public partial class ChatForm : Form
         }
         catch (Exception ex)
         {
-            listMessages.Items.Add($"No se ha podido enviar el mensaje. Error: {ex.Message}");
+            listMessages.Items.Add($"The message coundn't be sent. Error: {ex.Message}");
         }
     }
 }
