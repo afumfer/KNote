@@ -42,8 +42,6 @@ public static class Program
 
             IPluginCommand plugin = new KntRedminePluginCommand
             {
-                AppUserName = appConfig.AppUserName,
-                ToolsPath = appConfig.ToolsPath,
                 Service = serviceRef.Service
             };
 

@@ -9,18 +9,17 @@ using System.Threading.Tasks;
 namespace KntRedmineApi;
 
 public class KntRedmineConfig
-{
-    public string AppUserName { get; set; }
-
-    public string ToolsPath { get; set; }
-
+{    
     public RepositoryRef RepositoryRef { get; set; }
 
     public KntRedmineConfig()
     {
-        AppUserName = "";
-        ToolsPath = "";
         RepositoryRef = new RepositoryRef();
+    }
+
+    public KntRedmineConfig(RepositoryRef repositoryRef)
+    {
+        RepositoryRef = repositoryRef;
     }
 
 }
