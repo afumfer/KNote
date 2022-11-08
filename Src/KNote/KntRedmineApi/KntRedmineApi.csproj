@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 	<OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyVersion>0.0.6.4</AssemblyVersion>
@@ -12,8 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ML" Version="1.7.1" />
-    <PackageReference Include="Microsoft.ML.LightGbm" Version="1.7.1" />
+    <PackageReference Include="Microsoft.ML" Version="2.0.0" />
+    <PackageReference Include="Microsoft.ML.LightGbm" Version="2.0.0" />
     <PackageReference Include="Pandoc" Version="1.0.0" />
     <PackageReference Include="redmine-api" Version="4.3.0" />
   </ItemGroup>
