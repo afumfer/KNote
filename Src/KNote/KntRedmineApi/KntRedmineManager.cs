@@ -188,9 +188,6 @@ public class KntRedmineManager
             {
                 foreach (var atch in issue.Attachments)
                 {
-                    // TODO: Go to to service layer for get new resourceDto (with container completed).
-                    //var resource = new ResourceDto();
-
                     var findRes = noteDto.Resources.FirstOrDefault(r => r.Name.IndexOf(atch.FileName)>-1);
 
                     if (findRes == null)
@@ -206,9 +203,7 @@ public class KntRedmineManager
                     }
                 }
             }
-
-            // ............................
-
+            
             noteDto.Tags = $"HU#{id}";
             var folderName = noteDto.KAttributesDto[2].Value;
 
@@ -257,19 +252,12 @@ public class KntRedmineManager
                 noteDto.Description = noteDto.Description.Replace(org, dest, true, CultureInfo.CurrentCulture);
             }
 
-            // Inefficient version
-            //note.Description = TextToMarkdown(_store.AppConfig.ToolsPath, note.Description);
+            noteDto.Description = await TextToMarkdown(_toolsPath, noteDto.Description);
 
-            // Other version
-            noteDto.Description = await TextToMarkdown2(_toolsPath, noteDto.Description);
-
-            // This version, pending encoding issue ...
+            // This pandoc code version has encoding issue ...
             //note.Description = await pandocEngine.ConvertToText<TextileIn, CommonMarkOut>(note.Description);                
             //note.Description = note.Description.Replace("\\[", "[");
             //note.Description = note.Description.Replace("\\]", "]");
-
-
-            // ............................
 
             return true;
         }
@@ -306,45 +294,8 @@ public class KntRedmineManager
         return predictionResult.PredictedLabel;
     }
 
-
-    public string TextToMarkdown(string pathUtils, string text)
-    {
-        // TODO: refactor this method
-
-        var textOut = "";
-
-        if (!Directory.Exists(pathUtils))
-            return text;
-
-        string fileIn = Path.Combine(pathUtils, "input.text");
-        string fileOut = Path.Combine(pathUtils, "output.md");
-        string exPandoc = Path.Combine(pathUtils, "pandoc.exe");
-        string param = $" -f textile -t markdown --wrap=preserve {fileIn} -o {fileOut}";
-
-        if (System.IO.File.Exists(fileIn))
-            System.IO.File.Delete(fileIn);
-
-        if (System.IO.File.Exists(fileOut))
-            System.IO.File.Delete(fileOut);
-
-        System.IO.File.WriteAllText(fileIn, text);
-
-        var process = Process.Start(exPandoc, param);
-        process.WaitForExit();
-        var exitCode = process.ExitCode;
-
-        if (System.IO.File.Exists(fileOut))
-            textOut = System.IO.File.ReadAllText(fileOut);
-
-        textOut = textOut.Replace("\\[", "[");
-        textOut = textOut.Replace("\\]", "]");
-        return textOut;
-
-    }
-
-    public async Task<string> TextToMarkdown2(string pathUtils, string text)
-    {
-        // TODO: refactor this method
+    public async Task<string> TextToMarkdown(string pathUtils, string text)
+    {        
         var textOut = "";
 
         if (!Directory.Exists(pathUtils))
@@ -424,8 +375,7 @@ public class KntRedmineManager
     }
 
     public async Task<string> SaveSystemPlugInVariable(string variable, string value)
-    {
-        // TODO: refactor this method
+    {        
         if (_service == null)
             return "";
 

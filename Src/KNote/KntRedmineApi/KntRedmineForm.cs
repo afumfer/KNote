@@ -1,12 +1,5 @@
-﻿using KNote.Model;
-using KNote.Model.Dto;
+﻿using KNote.Model.Dto;
 using KNote.Service;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.ML.Runtime;
-using Pandoc;
-using System.Diagnostics;
-using System.Globalization;
-using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace KntRedmineApi;
@@ -177,7 +170,6 @@ public partial class KntRedmineForm : Form
         {
             UseWaitCursor = false;
         }
-
     }
     
     private void buttonIssuesImportFile_Click(object sender, EventArgs e)
