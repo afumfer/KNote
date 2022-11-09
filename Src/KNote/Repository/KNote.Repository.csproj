@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>0.0.6.8</AssemblyVersion>
-    <FileVersion>0.0.6.8</FileVersion>
-    <Version>0.0.6</Version>
+    <AssemblyVersion>0.0.7.0</AssemblyVersion>
+    <FileVersion>0.0.7.0</FileVersion>
+    <Version>0.0.7</Version>
   </PropertyGroup>
 
   <ItemGroup>
