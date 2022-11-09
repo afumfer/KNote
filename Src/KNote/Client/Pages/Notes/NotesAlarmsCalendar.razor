@@ -9,7 +9,7 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="container-fluid bg-light border">
+<div class="container-fluid border">
     <div class="row">
         <KntIndexHeader TextHead="Notes alarms calendar">
             <IndexMenu>
@@ -40,7 +40,7 @@
              </RadzenSplitterPane>
              
              <RadzenSplitterPane> 
-                <div class="p-2 bg-light border">
+                <div class="p-2 border">
                     Item details
                 </div>
                 <p>@itemSelected</p>

@@ -1,6 +1,7 @@
 ﻿@inject TooltipService tooltipService
 
- <RadzenCard class="m-1 p-1 bg-light">   
+@*bg-light*@
+ <RadzenCard class="m-1 p-1">   
      
      <div class="row mb-1">
          <div class="col-sm-10">        
@@ -13,18 +14,18 @@
                 <AuthorizeView Roles="Admin, ProjecManager, Staff">
                     <Authorized>                    
                         <RadzenButton Click="@(() => OnNoteView.InvokeAsync(Note))" Icon="launch"
-                            ButtonStyle="ButtonStyle.Primary"
+                            ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
                             MouseEnter="@(args => tooltipService.Open(args, "View note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0" />
-                        <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(Note))" Icon="edit" 
-                            ButtonStyle="ButtonStyle.Primary" 
+                        <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(Note))" Icon="edit"
+                            ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
                             MouseEnter="@(args => tooltipService.Open(args, "Edit note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
                         <RadzenButton Click="@(() => OnNoteDelete.InvokeAsync(Note))" Icon="delete"
-                            ButtonStyle="ButtonStyle.Danger" 
+                                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
                             MouseEnter="@(args => tooltipService.Open(args, "Delete note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                     </Authorized>
                     <NotAuthorized>
                         <RadzenButton Click="@(() => OnNoteView.InvokeAsync(Note))" Icon="launch"
-                            ButtonStyle="ButtonStyle.Primary" 
+                            ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
                             MouseEnter="@(args => tooltipService.Open(args, "View note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
                     </NotAuthorized>
                 </AuthorizeView>

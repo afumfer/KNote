@@ -7,7 +7,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<div class="container-fluid bg-light border">
+<div class="container-fluid border">
     <div class="row">
         <KntIndexHeader TextHead="Users admin">
             <IndexMenu>
@@ -136,7 +136,7 @@
         if(res != null)
         {
             await Load(paginationContext.CurrentPage);
-        }
+        }        
     }
 
     async Task OnDelete(UserDto item)

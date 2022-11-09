@@ -12,7 +12,7 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="col-lg-12 bg-light border">
+<div class="col-lg-12 border">
     <div class="row">
         <div class="col-6">                    
             @if(folder != null)
@@ -45,7 +45,7 @@
     </div>        
 </div>
 
-<div class="col-lg-12 border pt-2">    
+<div class="col-lg-12 pt-2">    
     <div class="row">
         <RadzenSplitter>
             <RadzenSplitterPane Size="25%" Min="200px" Max="45%">            
