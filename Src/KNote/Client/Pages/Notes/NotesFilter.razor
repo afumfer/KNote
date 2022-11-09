@@ -9,7 +9,8 @@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-<div class="container-fluid bg-light border">
+@*bg-light*@
+<div class="container-fluid border">
     <div class="row">
         <KntIndexHeader TextHead="Notes filter">
             <IndexMenu>
@@ -36,7 +37,7 @@
     <div class="col-12 pt-2">
         <RadzenSplitter> 
              <RadzenSplitterPane Size="30%" Min="200px" Max="50%">   
-                 <div class="p-2 bg-light border">
+                 <div class="p-2 border">
                     <NotesFilterCriteria FilterSelected="FilterSelected" />
                 </div>
              </RadzenSplitterPane>

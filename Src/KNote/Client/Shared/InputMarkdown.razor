@@ -7,7 +7,6 @@
 @typeparam TValue
 
 
-
 <div class="row">
     <div class="col-2">
         <label class="mt-2">@labelMode</label>
@@ -62,24 +61,26 @@
         </div>                
     </div>
 </div>
-      
-@if (editMode)
-{
-    <div>
-        <InputTextArea @bind-Value="CurrentValue" class="p-2" />
-        <ValidationMessage For="For" />
-    </div>
-}
-else
-{
-    <div>
-        <hr class="mt-0"/>
-        <ViewMarkdown MarkdownContent="@CurrentValue">
-        </ViewMarkdown>
-        <hr />
-    </div>
-}
 
+<RadzenCard class="m-1 p-1">       
+    @if (editMode)
+    {
+        <div>
+            <InputTextArea @bind-Value="CurrentValue" class="p-2" />
+            <ValidationMessage For="For" />
+        </div>
+    }
+    else
+    {
+        <div>
+            <hr class="mt-0"/>
+            <div class="bg-white p-2">
+                <ViewMarkdown MarkdownContent="@CurrentValue" />        
+            </div>
+            <hr />
+        </div>
+    }
+</RadzenCard>
 
 @code {
 
