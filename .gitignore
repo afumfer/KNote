@@ -351,3 +351,4 @@ MigrationBackup/
 
 # KNote resources web site
 /Src/KNote/Server/wwwroot/NotesResources
+/Src/KNote/Server/wwwroot/KntResCon/2022
