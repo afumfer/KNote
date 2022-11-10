@@ -13,7 +13,8 @@
             :
         </label>
 
-        <div class="input-group col-sm-9 bg-light border pt-2 pb-2" id="atrTags">
+        @*bg-light*@
+        <div class="input-group col-sm-9 border pt-1 pb-1" id="atrTags">
             @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.String)
             {
                 <InputText class="form-control" @bind-Value="@KAttribute.ValueString" />

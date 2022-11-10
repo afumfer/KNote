@@ -12,46 +12,36 @@
         <label class="mt-2">@labelMode</label>
     </div>
     <div class="col-10 float-right">            
-        <div class="btn-toolbar mb-1" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
             <div class="mr-2" role="group" aria-label="First group">
                 @if (editMode)
                 {
-@*                            <button type="button" class="btn btn-light" data-toggle="tooltip" title="Preview html mode" @onclick="ViewMode">
-                        <i class="fa fa-eye"></i>
-                    </button>*@
-                    <RadzenButton Icon="preview" Click="() => ViewMode()" ButtonStyle="ButtonStyle.Secondary" 
-                        MouseEnter="@(args => tooltipService.Open(args, "View html", new TooltipOptions(){ Position = TooltipPosition.Left }) )"
-                        Class="mr-2"  />  
+                    <RadzenButton Icon="preview" Text="Html view" Click="() => ViewMode()" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Class="mr-2"  />  
                 }
                 else
                 {
-@*                            <button type="button" class="btn btn-light" data-toggle="tooltip" title="Show markdown edit mode" @onclick="EditMode">
-                        <i class="fa fa-edit"></i>
-                    </button>*@
-                    <RadzenButton Icon="edit" Click="() => EditMode()" ButtonStyle="ButtonStyle.Secondary" 
-                        MouseEnter="@(args => tooltipService.Open(args, "Markdown mini editor", new TooltipOptions(){ Position = TooltipPosition.Left }) )"
-                        Class="mr-2"  />  
+                    <RadzenButton Icon="edit" Text="Markdown editor" Click="() => EditMode()" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Class="mr-2"  />  
                 }
             </div>
             @if (editMode)
             {
-                <div class="btn-group mr-2" role="group" aria-label="Group 1">
+                <div class="btn-group-sm mr-2" role="group" aria-label="Group 1">
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Bold))"><b>B</b></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Strikethrough))"><del>S</del></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Italic))"><i>I</i></button>
                 </div>
-                <div class="btn-group mr-2" role="group" aria-label="Group 2">
+                <div class="btn-group-sm mr-2" role="group" aria-label="Group 2">
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H1))">H1</button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H2))">H2</button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H3))">H3</button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H4))">H3</button>
                 </div>
-                <div class="btn-group mr-2" role="group" aria-label="Group 1">
+                <div class="btn-group-sm mr-2" role="group" aria-label="Group 1">
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.List))"><i class="fa fa-list"></i></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.ListOrdered))"><i class="fa fa-list-ol"></i></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Line))"><b>-</b></button>
                 </div>
-                <div class="btn-group mr-2" role="group" aria-label="Group 3">
+                <div class="btn-group-sm mr-2" role="group" aria-label="Group 3">
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Link))"><i class="fa fa-link"></i></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Image))"><i class="fa fa-image"></i></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Code))"><i class="fa fa-code"></i></button>
@@ -61,26 +51,21 @@
         </div>                
     </div>
 </div>
+    
+@if (editMode)
+{
+    <div>
+        <InputTextArea @bind-Value="CurrentValue" class="m-1 p-2" />
+        <ValidationMessage For="For" />
+    </div>
+}
+else
+{
+    <RadzenCard class="m-1 p-2">
+        <ViewMarkdown MarkdownContent="@CurrentValue" />        
+    </RadzenCard>
+}
 
-<RadzenCard class="m-1 p-1">       
-    @if (editMode)
-    {
-        <div>
-            <InputTextArea @bind-Value="CurrentValue" class="p-2" />
-            <ValidationMessage For="For" />
-        </div>
-    }
-    else
-    {
-        <div>
-            <hr class="mt-0"/>
-            <div class="bg-white p-2">
-                <ViewMarkdown MarkdownContent="@CurrentValue" />        
-            </div>
-            <hr />
-        </div>
-    }
-</RadzenCard>
 
 @code {
 
