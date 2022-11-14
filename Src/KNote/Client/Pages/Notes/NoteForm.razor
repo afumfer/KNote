@@ -18,8 +18,7 @@
 
     <RadzenTabs Change=@ShowPanel TabPosition = "TabPosition.Top" @bind-SelectedIndex="tabsSelectedIndex">
         <Tabs>
-            <RadzenTabsItem Text="&nbsp;Overview" Icon="article" >
-                <div class="mt-4"></div>
+            <RadzenTabsItem Text="&nbsp;Overview" Icon="article" >                
 
                 <div class="form-group row">
                     <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
@@ -82,18 +81,16 @@
                                
                 <div class="form-group form-markdown">
                     <InputMarkdown @bind-Value="@Note.Description"
-                                   For="@(() => Note.Description)" Label="Description:"></InputMarkdown>
+                                   For="@(() => Note.Description)"></InputMarkdown>
                 </div>
             
             </RadzenTabsItem>
             
-            <RadzenTabsItem Text="&nbsp;Attributes" Icon="fact_check">
-                <div class="mt-4"></div>
+            <RadzenTabsItem Text="&nbsp;Attributes" Icon="fact_check">                
                 <NoteKAttributes @ref="noteKAttributes" Attributes="Note.KAttributesDto"></NoteKAttributes>
             </RadzenTabsItem>
             
-            <RadzenTabsItem Text="&nbsp;Resources" Icon="upload_file">
-                <div class="mt-2"></div>
+            <RadzenTabsItem Text="&nbsp;Resources" Icon="upload_file">                
                 @if (resources == null)
                 {
                     <p>Loading resources ...</p>
@@ -108,8 +105,7 @@
                 }
             </RadzenTabsItem>
             
-            <RadzenTabsItem Text="&nbsp;Tasks" Icon="task">
-                <div class="mt-2"></div>
+            <RadzenTabsItem Text="&nbsp;Tasks" Icon="task">                
                 @if (tasks == null)
                 {
                     <p>Loading tasks ...</p>

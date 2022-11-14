@@ -20,12 +20,16 @@
             </div>
         </div>
         <div class="col-2 float-right">
-            <RadzenButton Icon="playlist_add_check" Click="() => SelectTags()" ButtonStyle="ButtonStyle.Primary" class="float-right"/>  
+            <RadzenButton Icon="playlist_add_check" Click="() => SelectTags()" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" class="float-right"/>  
         </div>
     </div>
 </div>
 
 <ModalDialog @ref="modalDialog" Title="Select tags values" onClose="OnCancelSelectTags" Mode="1">
+
+@*    <RadzenCheckBoxList @bind-Value=@values TValue="string" Orientation="Orientation.Vertical"
+                        Data="@Items" TextProperty="Value" ValueProperty="Key" />*@
+
     <div id="MultiSelectCheck" class="overflow-auto" style="height: 200px;">
         @foreach (var item in Items)
         {
@@ -51,14 +55,15 @@
     [Parameter] public List<MultiSelectListDto> Items { get; set; } = null!;
     [Parameter] public EventCallback<MultiSelectListDto> OnItemChange { get; set; }
 
+    //IEnumerable<string> values = new string[] { "aaa" };
+    
     private ModalDialog modalDialog;
 
     private async Task CheckboxChanged(ChangeEventArgs e, string key)
     {
         var i = this.Items.FirstOrDefault(i => i.Key == key);
         if (i != null)
-        {
-            //i.Selected = (bool)e.Value;
+        {            
             i.Selected = !i.Selected;
         }
         await OnItemChange.InvokeAsync(i);

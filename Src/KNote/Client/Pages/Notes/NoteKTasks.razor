@@ -1,13 +1,8 @@
 ﻿@inject TooltipService tooltipService
 
 
-<div class="row mb-1">
-    <div class="col-6">
-        <h5>Tasks for this note:</h5>
-    </div>
-    <div class="col-6 text-right">
-        <RadzenButton Text="New task" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Class="mr-1" />  
-    </div>
+<div class="mb-1 text-right">
+    <RadzenButton Text="New task" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Class="mr-1" />
 </div>
 
 <EntityList List="Tasks">
@@ -23,10 +18,10 @@
                 <RadzenDataGridColumn TItem="NoteTaskDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
                     <Template Context="data">                                                        
                         <RadzenButton Click="@(() => OnEdit.InvokeAsync(data))" Icon="edit" Size="ButtonSize.Small"
-                            ButtonStyle="ButtonStyle.Primary" 
+                                      ButtonStyle="ButtonStyle.Primary" 
                             MouseEnter="@(args => tooltipService.Open(args, "Edit task ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
                         <RadzenButton Click="@(() => OnDelete.InvokeAsync(data))" Icon="delete" Size="ButtonSize.Small"
-                            ButtonStyle="ButtonStyle.Danger" 
+                                      ButtonStyle="ButtonStyle.Danger" 
                             MouseEnter="@(args => tooltipService.Open(args, "Delete task ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                     </Template>
                 </RadzenDataGridColumn>

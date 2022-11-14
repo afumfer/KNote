@@ -7,24 +7,15 @@
 @typeparam TValue
 
 
-<div class="row">
-    <div class="col-2">
-        <label class="mt-2">@labelMode</label>
-    </div>
-    <div class="col-10 float-right">            
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-            <div class="mr-2" role="group" aria-label="First group">
-                @if (editMode)
-                {
-                    <RadzenButton Icon="preview" Text="Html view" Click="() => ViewMode()" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Class="mr-2"  />  
-                }
-                else
-                {
-                    <RadzenButton Icon="edit" Text="Markdown editor" Click="() => EditMode()" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Class="mr-2"  />  
-                }
-            </div>
-            @if (editMode)
-            {
+<RadzenTabs  TabPosition = "TabPosition.Top" >    
+    <Tabs>
+
+        <RadzenTabsItem Text="&nbsp;Preview">            
+            <ViewMarkdown MarkdownContent="@CurrentValue" />            
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="&nbsp;Modify">
+            <div class="btn-toolbar mb-1" role="toolbar" aria-label="Toolbar with button groups">
                 <div class="btn-group-sm mr-2" role="group" aria-label="Group 1">
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Bold))"><b>B</b></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Strikethrough))"><del>S</del></button>
@@ -46,50 +37,21 @@
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Image))"><i class="fa fa-image"></i></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Code))"><i class="fa fa-code"></i></button>
                     <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Table))"><i class="fa fa-table"></i></button>
-                </div>
-            }
-        </div>                
-    </div>
-</div>
-    
-@if (editMode)
-{
-    <div>
-        <InputTextArea @bind-Value="CurrentValue" class="m-1 p-2" />
-        <ValidationMessage For="For" />
-    </div>
-}
-else
-{
-    <RadzenCard class="m-1 p-2">
-        <ViewMarkdown MarkdownContent="@CurrentValue" />        
-    </RadzenCard>
-}
+                </div>            
+            </div>                
+            <div>
+                <InputTextArea @bind-Value="CurrentValue" />
+                <ValidationMessage For="For" />
+            </div>
+        </RadzenTabsItem>
+
+    </Tabs>
+</RadzenTabs>
 
 
 @code {
 
     [Parameter] public Expression<Func<TValue>> For { get; set; }
-    [Parameter] public string Label { get; set; }
-
-    private string labelMode;
-    private bool editMode = false;
-
-    protected override void OnInitialized()
-    {
-        labelMode = Label;
-        base.OnInitialized();
-    }
-
-    private void EditMode()
-    {
-        editMode = true;
-    }
-
-    private void ViewMode()
-    {
-        editMode = false;
-    }
 
     private void InsertMarkDownCommand(enumMarkDownCommand command)
     {

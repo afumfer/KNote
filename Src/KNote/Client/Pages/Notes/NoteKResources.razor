@@ -1,13 +1,8 @@
 ﻿@inject TooltipService tooltipService
 
 
-<div class="row mb-1">
-    <div class="col-6">
-        <h5>Resources for this note:</h5>
-    </div>
-    <div class="col-6 text-right">
-        <RadzenButton Text="New resource" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Class="mr-1" />  
-    </div>
+<div class="mb-1 text-right">
+    <RadzenButton Text="New resource" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Class="mr-1" />
 </div>
 
 <EntityList List="Resources">
@@ -44,12 +39,12 @@
                     </td>
                     <td>
                         <span class="float-right">
-                            <RadzenButton Click="@(() => OnInsertInDesription.InvokeAsync(item))" Icon="insert_page_break" 
-                                ButtonStyle="ButtonStyle.Primary" 
+                            <RadzenButton Click="@(() => OnInsertInDesription.InvokeAsync(item))" Icon="insert_page_break"
+                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
                                 MouseEnter="@(args => tooltipService.Open(args, "Insert resource reference in note description ...", 
                                     new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
                             <RadzenButton Click="@(() => OnDelete.InvokeAsync(item))" Icon="delete"
-                                ButtonStyle="ButtonStyle.Danger" 
+                                          ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
                                 MouseEnter="@(args => tooltipService.Open(args, "Delete resource ...", 
                                     new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                         </span>
