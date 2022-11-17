@@ -1,4 +1,5 @@
 ﻿@inject IWebApiService webApiService
+@inject NotificationService notificationService
 
 
 @foreach (var KAttribute in Attributes)
@@ -12,8 +13,7 @@
             }
             :
         </label>
-
-        @*bg-light*@
+        
         <div class="input-group col-sm-9 border pt-1 pb-1" id="atrTags">
             @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.String)
             {
@@ -41,8 +41,8 @@
                 <InputCheckbox class="form-control" @bind-Value="@KAttribute.ValueBool" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-            {                
-                <MultiSelectList Items="KAttribute.TagsValues" OnItemChange="(() => onItemChange(KAttribute))" />
+            {
+                <MultiSelectList2 Items="KAttribute.TagsValues" OnAttributeChange="(it) => onAttributeChange(KAttribute, it)" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
             {
@@ -113,9 +113,8 @@
     {
         var result = await webApiService.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
-        {
-            // TODO: Pending, thinking about how errors are displayed
-            //await showMessages.ShowErrorMessage(result.Message);
+        {            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.Message, Duration = 12000 });
             return new List<KAttributeTabulatedValueDto>();
         }
         else
@@ -131,8 +130,7 @@
         var result = await webApiService.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
         {
-            // TODO: Pending, thinking about how errors are displayed
-            //await showMessages.ShowErrorMessage(result.Message);
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.Message, Duration = 12000 });
             tagsSel = new List<MultiSelectListDto>();
         }
         else
@@ -153,11 +151,18 @@
         return tagsSel;
     }
 
-    private void onItemChange(NoteKAttributeDto item)
+    private void onAttributeChange(NoteKAttributeDto item, string value)
     {
-        item.ValueTags = string.Join(", ", item.TagsValues
-            .Where(x => x.Selected == true)
-            .Select(_ => _.Key).ToArray());
+        item.ValueTags = value;
+
+        foreach (var t in item.TagsValues)
+        {
+            var selected = false;
+            if (value.IndexOf(t.Value.ToString()) >= 0)
+                selected = true;
+
+            t.Selected = selected;
+        }
     }
 
 }

@@ -67,6 +67,7 @@
             // dataGridNotes
             // 
             this.dataGridNotes.AllowUserToAddRows = false;
+            this.dataGridNotes.AllowUserToResizeRows = false;
             this.dataGridNotes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -75,9 +76,11 @@
             this.dataGridNotes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridNotes.ContextMenuStrip = this.contextMenu;
             this.dataGridNotes.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
+            this.dataGridNotes.GridColor = System.Drawing.SystemColors.ControlDark;
             this.dataGridNotes.Location = new System.Drawing.Point(0, 0);
             this.dataGridNotes.Name = "dataGridNotes";
             this.dataGridNotes.ReadOnly = true;
+            this.dataGridNotes.RowHeadersVisible = false;
             this.dataGridNotes.RowHeadersWidth = 25;
             this.dataGridNotes.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridNotes.Size = new System.Drawing.Size(541, 443);

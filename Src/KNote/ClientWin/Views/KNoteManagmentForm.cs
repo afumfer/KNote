@@ -101,20 +101,18 @@ namespace KNote.ClientWin.Views
                 if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
                     msg1 = "(No folder selected)";
                 else
-                    msg1 = _com.SelectedFolderInfo?.Name;
+                    msg1 = $"{_com.SelectedFolderInfo?.Name}";
             }
             else
                 msg1 = "(Filtered notes)";
 
-            msg2 = $"{_com.FolderPath?.ToString()} ";
+            msg2 = $"{_com.FolderPath?.ToString()}  [{_com.SelectedFolderInfo?.FolderNumber.ToString()}]";
 
             if (menuHeaderPanelVisible.Checked)
             {
                 labelFolder.Text = msg1;
                 labelFolderDetail.Text = msg2;                
             }
-            else
-                Text = $"KaNote Managment - {msg2} ";
 
             statusLabel1.Text = $"Notes: {_com.CountNotes.ToString()}";
             

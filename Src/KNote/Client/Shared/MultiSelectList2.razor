@@ -1,0 +1,50 @@
+﻿@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-10">
+            <div id="MultiSelectCheck">
+                @foreach (var item in Items)
+                {
+                    @if (item.Selected)
+                    {
+                        <div>
+                            <label>
+                                <input type="checkbox" id="@item.Key" checked="checked" onclick="return false;" />
+                                @item.Value
+                            </label>
+                            @*<RadzenCheckBox @bind-Value="@item.Key"  Name="CheckBox1" TValue="string" />*@
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="col-2 float-right">
+            <RadzenButton Icon="playlist_add_check" Click="() => SelectTags()" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" class="float-right" />
+        </div>
+    </div>
+</div>
+
+
+@code
+{
+    [Parameter] public List<MultiSelectListDto> Items { get; set; } = null!;
+    [Parameter] public EventCallback<string> OnAttributeChange { get; set; }
+
+
+    private async Task SelectTags()
+    {
+        var res = await dialogService.OpenAsync<InputMultiSelectList>($"Select tags",
+               new Dictionary<string, object>() { { "Items", Items } },
+               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
+
+        if(res != null)
+        {            
+            var r2 = string.Join(", ", res);
+            await OnAttributeChange.InvokeAsync(r2);
+        }        
+    }
+
+}

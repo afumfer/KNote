@@ -1,0 +1,42 @@
+﻿@inject DialogService dialogService
+
+<div class="row">
+    @**@
+    <div class="col-md-12 overflow-auto" style="height:320px">
+        <RadzenCheckBoxList @bind-Value=@values TValue="string" Orientation="Orientation.Vertical"
+                            Data="@Items" TextProperty="Value" ValueProperty="Key" />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 text-right">
+        <RadzenButton Text="Ok" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" Class="mr-1" />
+        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter] public List<MultiSelectListDto> Items { get; set; } = null!;
+    [Parameter] public EventCallback<MultiSelectListDto> OnItemChange { get; set; }
+    
+    IEnumerable<string> values;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        values = Items.Where(i => i.Selected == true).Select(i => i.Value);
+    }
+
+    void OnConfirm()
+    {
+        dialogService.Close(values);
+    }
+
+    void OnCancel()
+    {
+        dialogService.Close(null);
+    }
+}

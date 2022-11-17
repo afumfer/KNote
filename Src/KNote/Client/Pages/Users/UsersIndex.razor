@@ -91,7 +91,7 @@
             paginationContext.TotalCount = result.TotalCount;            
         }
         else        
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading users.", Detail =  result.Message, Duration = 12000 });        
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading users.", Detail =  result.Message, Duration = 12000 });
 
         StateHasChanged();
     }
