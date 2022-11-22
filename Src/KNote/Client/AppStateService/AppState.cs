@@ -6,31 +6,22 @@ public class AppState
 {
     #region Generic configuration properties
 
-    private string _appMode = "Task";
-    public string AppMode
+    public readonly string AppName = "KaNote";
+    
+    public readonly string AppDescription = "Another keynotes managment.";
+
+    public readonly Version AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+
+    private string _tag = "";
+    public string Tag
     {
-        get { return _appMode; }
-        set { _appMode = value; NotifyStateChanged(); }
+        get { return _tag; }
+        set { _tag = value; NotifyStateChanged(); }
     }
 
-    private string _appName = "KaNote";
-    public string AppName
-    {
-        get { return _appName; }
-        set { _appName = value; NotifyStateChanged(); }
-    }
+    #endregion
 
-    private string _appDescription = $"Another keynotes managment.";
-    public string AppDescription
-    {
-        get { return _appDescription; }
-        set { _appDescription = value; NotifyStateChanged(); }
-    }
-
-    public Version AppVersion
-    {
-        get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; }
-    }
+    #region AppSatate properties
 
     private bool _defaultContentResourcesInDB = false;
     public bool DefaultContentResourcesInDB
@@ -38,10 +29,6 @@ public class AppState
         get { return _defaultContentResourcesInDB; }
         set { _defaultContentResourcesInDB = value; NotifyStateChanged(); }
     }
-
-    #endregion
-
-    #region AppSatate properties
 
     private FolderDto _selectedFolder;
     public FolderDto SelectedFolder
@@ -94,14 +81,6 @@ public class AppState
     private void NotifyStateChanged() => OnChange?.Invoke();
 
     #endregion
-
-    #region Utils
-
-    // Only used in KntFoldersTreeView  (hack)
-    public FolderDto folderOldSelected { get; set; }
-
-
-    #endregion 
 
 }
 

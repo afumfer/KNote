@@ -205,7 +205,7 @@
         forecasts = null;
         forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("api/WeatherForecast");
 
-        appState.AppDescription += "XX ";
+        appState.Tag += "XX ";
     }
 
     private async Task LoadFolders()
@@ -216,14 +216,14 @@
 
         entries2 = folders.Where(f => f.ParentId == null).Select(f => f).ToList();
 
-        appState.AppMode = "Wiki";
+        appState.Tag = "Wiki";
     }
 
     private void ShowPanel(int panel)
     {
         selectedPanel = panel;
 
-        appState.AppDescription += panel.ToString();
+        appState.Tag += panel.ToString();
     }
 
     void RadzenButtonClicked()

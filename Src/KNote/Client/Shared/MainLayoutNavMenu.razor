@@ -1,0 +1,17 @@
+﻿<RadzenPanelMenu style="height: 100%">
+    <RadzenPanelMenuItem Text="Home" Path="index" Icon="home"></RadzenPanelMenuItem>
+    <RadzenPanelMenuItem Text="Quick search" Path="notes/search" Icon="search"></RadzenPanelMenuItem>
+    <RadzenPanelMenuItem Text="Tree panel" Path="notes/tree" Icon="topic"></RadzenPanelMenuItem>
+    <RadzenPanelMenuItem Text="Notes filter" Path="notes/filter" Icon="filter_alt"></RadzenPanelMenuItem>
+    <RadzenPanelMenuItem Text="Tasks calendar" Path="notes/taskscalendar" Icon="calendar_today"></RadzenPanelMenuItem>
+    <RadzenPanelMenuItem Text="Alarms" Path="notes/alarmscalendar" Icon="alarm"></RadzenPanelMenuItem>
+    <RadzenPanelMenuItem Text="Chat room" Path="chat" Icon="chat"></RadzenPanelMenuItem>
+    <AuthorizeView Roles="Admin">
+        <Authorized>
+            <RadzenPanelMenuItem Text="Admin" Path="admin" Icon="admin_panel_settings"></RadzenPanelMenuItem>
+            <RadzenPanelMenuItem Text="Test" Icon="quiz">
+                <RadzenPanelMenuItem Text="Test page (lab)" Path="testpage"></RadzenPanelMenuItem>
+            </RadzenPanelMenuItem>
+        </Authorized>
+    </AuthorizeView>
+</RadzenPanelMenu>
