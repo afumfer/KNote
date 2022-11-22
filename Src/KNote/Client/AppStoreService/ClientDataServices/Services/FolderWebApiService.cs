@@ -2,7 +2,7 @@
 using KNote.Model;
 using KNote.Model.Dto;
 
-namespace KNote.Client.ClientDataServices;
+namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public class FolderWebApiService : IFolderWebApiService
 {
@@ -12,7 +12,7 @@ public class FolderWebApiService : IFolderWebApiService
     {
         _httpClient = httpClient;
     }
-        
+
     public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
     {
         return await _httpClient.GetFromJsonAsync<Result<List<FolderInfoDto>>>("api/folders");
@@ -20,11 +20,11 @@ public class FolderWebApiService : IFolderWebApiService
 
     public async Task<Result<List<FolderDto>>> GetTreeAsync()
     {
-        return await _httpClient.GetFromJsonAsync<Result<List<FolderDto>>>("api/folders/gettree");            
+        return await _httpClient.GetFromJsonAsync<Result<List<FolderDto>>>("api/folders/gettree");
     }
 
     public async Task<Result<FolderDto>> GetAsync(Guid folderId)
-    {                        
+    {
         return await _httpClient.GetFromJsonAsync<Result<FolderDto>>($"api/folders/{folderId}");
     }
 
@@ -33,9 +33,9 @@ public class FolderWebApiService : IFolderWebApiService
         HttpResponseMessage httpRes;
 
         if (folder.FolderId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync<FolderDto>($"api/folders", folder);
+            httpRes = await _httpClient.PostAsJsonAsync($"api/folders", folder);
         else
-            httpRes = await _httpClient.PutAsJsonAsync<FolderDto>($"api/folders", folder);
+            httpRes = await _httpClient.PutAsJsonAsync($"api/folders", folder);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<FolderDto>>();
 

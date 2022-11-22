@@ -2,7 +2,7 @@
 using KNote.Model;
 using KNote.Model.Dto;
 
-namespace KNote.Client.ClientDataServices;
+namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public class NoteWebApiService : INoteWebApiService
 {
@@ -29,13 +29,13 @@ public class NoteWebApiService : INoteWebApiService
     }
 
     public async Task<Result<NoteDto>> SaveAsync(NoteDto note, bool updateStatus = true)
-    {            
+    {
         HttpResponseMessage httpRes;
 
         if (note.NoteId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync<NoteDto>($"api/notes", note);
+            httpRes = await _httpClient.PostAsJsonAsync($"api/notes", note);
         else
-            httpRes = await _httpClient.PutAsJsonAsync<NoteDto>($"api/notes", note);
+            httpRes = await _httpClient.PutAsJsonAsync($"api/notes", note);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteDto>>();
 
@@ -57,13 +57,13 @@ public class NoteWebApiService : INoteWebApiService
     }
 
     public async Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resource)
-    {                        
+    {
         HttpResponseMessage httpRes;
 
         if (resource.ResourceId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync<ResourceInfoDto>($"api/notes/saveresource", resource);
+            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/saveresource", resource);
         else
-            httpRes = await _httpClient.PutAsJsonAsync<ResourceInfoDto>($"api/notes/saveresource", resource);
+            httpRes = await _httpClient.PutAsJsonAsync($"api/notes/saveresource", resource);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<ResourceInfoDto>>();
 
@@ -71,7 +71,7 @@ public class NoteWebApiService : INoteWebApiService
     }
 
     public async Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId)
-    {                        
+    {
         var httpRes = await _httpClient.DeleteAsync($"api/notes/deleteresource/{resourceId}");
         var res = await httpRes.Content.ReadFromJsonAsync<Result<ResourceInfoDto>>();
         return res;
@@ -83,7 +83,7 @@ public class NoteWebApiService : INoteWebApiService
     }
 
     public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
-    {        
+    {
         var url = $"api/notes/GetStartedTasksByDateTimeRage?start={startDateTime.ToString("yyyyMMddHHmmss")}&end={endDateTime.ToString("yyyyMMddHHmmss")}";
         return await _httpClient.GetFromJsonAsync<Result<List<NoteTaskDto>>>(url);
     }
@@ -94,13 +94,13 @@ public class NoteWebApiService : INoteWebApiService
     }
 
     public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto noteTask)
-    {            
+    {
         HttpResponseMessage httpRes;
 
         if (noteTask.NoteTaskId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync<NoteTaskDto>($"api/notes/savenotetask", noteTask);
+            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/savenotetask", noteTask);
         else
-            httpRes = await _httpClient.PutAsJsonAsync<NoteTaskDto>($"api/notes/savenotetask", noteTask);
+            httpRes = await _httpClient.PutAsJsonAsync($"api/notes/savenotetask", noteTask);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTaskDto>>();
 
@@ -108,14 +108,14 @@ public class NoteWebApiService : INoteWebApiService
     }
 
     public async Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId)
-    {                     
+    {
         var httpRes = await _httpClient.DeleteAsync($"api/notes/deletenotetask/{noteTaskId}");
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTaskDto>>();
         return res;
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetSearch(string queryString)
-    {                        
+    {
         return await _httpClient.GetFromJsonAsync<Result<List<NoteInfoDto>>>($"api/notes/getsearch?{queryString}");
     }
 
@@ -127,7 +127,7 @@ public class NoteWebApiService : INoteWebApiService
         try
         {
             HttpResponseMessage httpRes;
-            httpRes = await _httpClient.PostAsJsonAsync<NotesFilterDto>($"api/notes/getfilter", notesFilter);
+            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/getfilter", notesFilter);
             if (httpRes.IsSuccessStatusCode)
                 res = await httpRes.Content.ReadFromJsonAsync<Result<List<NoteInfoDto>>>();
             else
@@ -135,7 +135,7 @@ public class NoteWebApiService : INoteWebApiService
             return res;
         }
         catch (Exception ex)
-        {            
+        {
             res.AddErrorMessage(ex.Message);
             return res;
         }

@@ -1,4 +1,4 @@
-﻿namespace KNote.Client.ClientDataServices;
+﻿namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public interface IWebApiService
 {

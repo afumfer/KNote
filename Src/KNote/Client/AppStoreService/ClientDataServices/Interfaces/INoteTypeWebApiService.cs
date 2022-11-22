@@ -1,7 +1,7 @@
 ﻿using KNote.Model;
 using KNote.Model.Dto;
 
-namespace KNote.Client.ClientDataServices;
+namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public interface INoteTypeWebApiService
 {

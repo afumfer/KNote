@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 
-namespace KNote.Client.ClientDataServices;
+namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public class GenericDataService : IGenericDataService
 {
@@ -22,9 +22,7 @@ public class GenericDataService : IGenericDataService
             return new HttpResponseWrapper<T>(response, false, responseHTTP);
         }
         else
-        {
             return new HttpResponseWrapper<T>(default, true, responseHTTP);
-        }
     }
 
     public async Task<HttpResponseWrapper<object>> Post<T>(string url, T enviar)
@@ -46,9 +44,7 @@ public class GenericDataService : IGenericDataService
             return new HttpResponseWrapper<TResponse>(response, false, responseHttp);
         }
         else
-        {
             return new HttpResponseWrapper<TResponse>(default, true, responseHttp);
-        }
     }
 
     public async Task<HttpResponseWrapper<object>> Put<T>(string url, T enviar)

@@ -1,10 +1,12 @@
-﻿using KNote.Model.Dto;
+﻿using KNote.Client.AppStoreService.ClientDataServices;
+using KNote.Model.Dto;
 
-namespace KNote.Client.AppStateService;
+namespace KNote.Client.AppStoreService;
 
-public class AppState
+public class AppStore
 {
-    #region Generic configuration properties
+
+    #region Generic readonly configuration properties
 
     public readonly string AppName = "KaNote";
     
@@ -12,16 +14,28 @@ public class AppState
 
     public readonly Version AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 
+    //private IWebApiService _data;
+    //public IWebApiService Data
+    //{
+    //    get { return _data; }
+    //    private set { _data = value; }
+    //}
+
+    #endregion
+
+    //public AppStore(IWebApiService webApiService)
+    //{
+    //    _data = webApiService;
+    //}
+
+    #region AppSatate properties
+
     private string _tag = "";
     public string Tag
     {
         get { return _tag; }
         set { _tag = value; NotifyStateChanged(); }
     }
-
-    #endregion
-
-    #region AppSatate properties
 
     private bool _defaultContentResourcesInDB = false;
     public bool DefaultContentResourcesInDB

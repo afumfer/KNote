@@ -2,7 +2,7 @@
 using KNote.Model;
 using KNote.Model.Dto;
 
-namespace KNote.Client.ClientDataServices;
+namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public class NoteTypeWebApiService : INoteTypeWebApiService
 {
@@ -28,9 +28,9 @@ public class NoteTypeWebApiService : INoteTypeWebApiService
         HttpResponseMessage httpRes;
 
         if (noteType.NoteTypeId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync<NoteTypeDto>($"api/notetypes", noteType);
+            httpRes = await _httpClient.PostAsJsonAsync($"api/notetypes", noteType);
         else
-            httpRes = await _httpClient.PutAsJsonAsync<NoteTypeDto>($"api/notetypes", noteType);
+            httpRes = await _httpClient.PutAsJsonAsync($"api/notetypes", noteType);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTypeDto>>();
 

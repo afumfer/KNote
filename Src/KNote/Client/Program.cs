@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 
-using KNote.Client.AppStateService;
-using KNote.Client.ClientDataServices;
+using KNote.Client.AppStoreService;
 using KNote.Client.Helpers;
 using KNote.Client.Auth;
 
 using Radzen;
 using Microsoft.AspNetCore.Components.Web;
+using KNote.Client.AppStoreService.ClientDataServices;
 
 namespace KNote.Client;
 
@@ -23,8 +23,10 @@ public class Program
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
         builder.Services.AddOptions();
-            
+
+        // TODO: deprecated ....
         builder.Services.AddScoped<IShowMessages, ShowMessages>();
+        //......................
 
         // TODO: deprecated ....
         builder.Services.AddScoped<IGenericDataService, GenericDataService>();  
@@ -32,8 +34,9 @@ public class Program
 
         builder.Services.AddScoped<IWebApiService, WebApiService>();
 
-        builder.Services.AddSingleton<AppState>();
-            
+        //builder.Services.AddSingleton<AppStore>();
+        builder.Services.AddScoped<AppStore>();
+
         builder.Services.AddAuthorizationCore();
 
         // Test ...

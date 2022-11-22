@@ -1,4 +1,4 @@
-﻿namespace KNote.Client.ClientDataServices;
+﻿namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public class WebApiService : IWebApiService
 {
@@ -42,7 +42,6 @@ public class WebApiService : IWebApiService
         }
     }
 
-
     private IFolderWebApiService _folders;
     public IFolderWebApiService Folders
     {
@@ -54,7 +53,6 @@ public class WebApiService : IWebApiService
         }
     }
 
-
     private INoteWebApiService _notes;
     public INoteWebApiService Notes
     {
@@ -65,6 +63,5 @@ public class WebApiService : IWebApiService
             return _notes;
         }
     }
-
 }
 

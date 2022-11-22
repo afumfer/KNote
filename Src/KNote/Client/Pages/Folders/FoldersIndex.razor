@@ -1,6 +1,6 @@
 ﻿@page "/folders"
 
-@inject AppState appState
+@inject AppStore appStore
 @inject IWebApiService webApiService
 @inject TooltipService tooltipService
 @inject DialogService dialogService
@@ -47,21 +47,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        appState.OnChange += StateHasChanged;
+        appStore.OnChange += StateHasChanged;
 
         await Load();
     }
 
     public void Dispose()
     {
-        appState.OnChange -= StateHasChanged;
+        appStore.OnChange -= StateHasChanged;
     }
 
     async Task Load()
     {
         selectedFolder = null;
 
-        var result = await webApiService.Folders.GetTreeAsync();
+        var result = await webApiService.Folders.GetTreeAsync();        
         if (result.IsValid)
             foldersTree = result.Entity;
         else
@@ -70,9 +70,9 @@
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading folders tree.", Detail =  result.Message, Duration = 12000 });                
         }
 
-        appState.FoldersTree = foldersTree;
+        appStore.FoldersTree = foldersTree;
 
-        if(appState.SelectedFolder == null)
+        if (appStore.SelectedFolder == null)
         {
             if (foldersTree?.Count > 0)
             {
@@ -82,7 +82,7 @@
             }            
         }
         else 
-            OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
+            OnFolderSelected(appStore.SelectedFolder.GetSimpleDto<FolderDto>());
 
         //StateHasChanged();
     }
@@ -90,7 +90,7 @@
     void OnFolderSelected(FolderDto f)
     {
         selectedFolder = f;
-        appState.SelectedFolder = selectedFolder.GetSimpleDto<FolderDto>();
+        appStore.SelectedFolder = selectedFolder.GetSimpleDto<FolderDto>();
     }
 
     async Task OnNew()
@@ -123,7 +123,7 @@
 
         if (resultDialog == true)
         {
-            var result = await webApiService.Folders.DeleteAsync(folder.FolderId);
+            var result = await webApiService.Folders.DeleteAsync(folder.FolderId);            
             if (!result.IsValid)            
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete folder.", Detail =  result.Message, Duration = 12000 });            
             else
@@ -139,7 +139,7 @@
     private async Task OnRefreshTree()
     {
         foldersTree = null;
-        appState.FoldersTree = null;
+        appStore.FoldersTree = null;
         await Load();
     }
 }
