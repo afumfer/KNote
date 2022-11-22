@@ -1,7 +1,10 @@
-﻿namespace KNote.Client.AppStoreService.ClientDataServices;
+﻿using KNote.Client.AppStoreService.ClientDataServices;
 
-public interface IWebApiService
+namespace KNote.Client.AppStoreService;
+
+public interface IStore
 {
+    AppState AppState { get; }
     IUserWebApiService Users { get; }
     INoteTypeWebApiService NoteTypes { get; }
     IKAttributeWebApiService KAttributes { get; }

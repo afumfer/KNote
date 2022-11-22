@@ -3,7 +3,7 @@ using KNote.Model.Dto;
 
 namespace KNote.Client.AppStoreService;
 
-public class AppStore
+public class AppState
 {
 
     #region Generic readonly configuration properties

@@ -8,9 +8,12 @@ public class FolderWebApiService : IFolderWebApiService
 {
     private readonly HttpClient _httpClient;
 
-    public FolderWebApiService(HttpClient httpClient)
+    private readonly AppState _appState;
+
+    public FolderWebApiService(AppState appState, HttpClient httpClient)
     {
         _httpClient = httpClient;
+        _appState = appState;
     }
 
     public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
@@ -20,6 +23,7 @@ public class FolderWebApiService : IFolderWebApiService
 
     public async Task<Result<List<FolderDto>>> GetTreeAsync()
     {
+        _appState.Tag = "xxxxxx GetTreeAsync xxxxxx";
         return await _httpClient.GetFromJsonAsync<Result<List<FolderDto>>>("api/folders/gettree");
     }
 

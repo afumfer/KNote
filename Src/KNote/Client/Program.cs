@@ -32,10 +32,10 @@ public class Program
         builder.Services.AddScoped<IGenericDataService, GenericDataService>();  
         //......................
 
-        builder.Services.AddScoped<IWebApiService, WebApiService>();
+        builder.Services.AddScoped<IStore, Store>();
 
         //builder.Services.AddSingleton<AppStore>();
-        builder.Services.AddScoped<AppStore>();
+        builder.Services.AddScoped<AppState>();
 
         builder.Services.AddAuthorizationCore();
 

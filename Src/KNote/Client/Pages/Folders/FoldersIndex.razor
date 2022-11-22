@@ -1,7 +1,7 @@
 ﻿@page "/folders"
 
-@inject AppStore appStore
-@inject IWebApiService webApiService
+@*@inject AppState appState*@
+@inject IStore webApiService
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject NotificationService notificationService
@@ -40,21 +40,25 @@
     </div>
 </div>
 
+<h4>@appState.Tag</h4>
+
 @code {
 
     private List<FolderDto> foldersTree;
-    private FolderDto selectedFolder;        
+    private FolderDto selectedFolder;
+    AppState appState;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()    
     {
-        appStore.OnChange += StateHasChanged;
+        appState = webApiService.AppState;
+        appState.OnChange += StateHasChanged;
 
         await Load();
     }
 
     public void Dispose()
     {
-        appStore.OnChange -= StateHasChanged;
+        appState.OnChange -= StateHasChanged;
     }
 
     async Task Load()
@@ -70,9 +74,9 @@
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading folders tree.", Detail =  result.Message, Duration = 12000 });                
         }
 
-        appStore.FoldersTree = foldersTree;
+        appState.FoldersTree = foldersTree;
 
-        if (appStore.SelectedFolder == null)
+        if (appState.SelectedFolder == null)
         {
             if (foldersTree?.Count > 0)
             {
@@ -82,7 +86,7 @@
             }            
         }
         else 
-            OnFolderSelected(appStore.SelectedFolder.GetSimpleDto<FolderDto>());
+            OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
 
         //StateHasChanged();
     }
@@ -90,7 +94,7 @@
     void OnFolderSelected(FolderDto f)
     {
         selectedFolder = f;
-        appStore.SelectedFolder = selectedFolder.GetSimpleDto<FolderDto>();
+        appState.SelectedFolder = selectedFolder.GetSimpleDto<FolderDto>();
     }
 
     async Task OnNew()
@@ -139,7 +143,7 @@
     private async Task OnRefreshTree()
     {
         foldersTree = null;
-        appStore.FoldersTree = null;
+        appState.FoldersTree = null;
         await Load();
     }
 }

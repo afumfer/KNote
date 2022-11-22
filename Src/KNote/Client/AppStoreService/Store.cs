@@ -1,13 +1,28 @@
-﻿namespace KNote.Client.AppStoreService.ClientDataServices;
+﻿using KNote.Client.AppStoreService.ClientDataServices;
 
-public class WebApiService : IWebApiService
+namespace KNote.Client.AppStoreService;
+
+public class Store : IStore
 {
+    #region Private members
+
     private readonly HttpClient _httpClient;
 
-    public WebApiService(HttpClient httpClient)
+    #endregion
+
+    #region Constructor
+
+    public Store(HttpClient httpClient)
     {
         _httpClient = httpClient;
+        AppState = new AppState();
     }
+
+    #endregion 
+
+    #region IStore members
+
+    public AppState AppState { get; }
 
     private IUserWebApiService _users;
     public IUserWebApiService Users
@@ -48,7 +63,7 @@ public class WebApiService : IWebApiService
         get
         {
             if (_folders == null)
-                _folders = new FolderWebApiService(_httpClient);
+                _folders = new FolderWebApiService(AppState, _httpClient);
             return _folders;
         }
     }
@@ -63,5 +78,7 @@ public class WebApiService : IWebApiService
             return _notes;
         }
     }
+
+    #endregion 
 }
 
