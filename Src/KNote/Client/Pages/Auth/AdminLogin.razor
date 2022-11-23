@@ -2,7 +2,7 @@
 @using KNote.Client.Pages.Auth
 @using System.Threading.Tasks
 
-@inject IStore webApiService
+@inject IStore store
 @inject ILoginService loginService
 @inject NavigationManager navigationManager
 @inject DialogService dialogService
@@ -39,7 +39,7 @@
         {            
             resDialog.RoleDefinition = "Public";
 
-            var result = await webApiService.Users.RegisterAsync(resDialog);
+            var result = await store.Users.RegisterAsync(resDialog);
             if (!result.success)        
                 await showMessages.ShowErrorMessage(result.error);                        
             else
@@ -59,7 +59,7 @@
 
         if(resDialog != null)
         {
-            var result = await webApiService.Users.LoginAsync(resDialog);
+            var result = await store.Users.LoginAsync(resDialog);
             if (!result.success)        
                 await showMessages.ShowErrorMessage(result.error);                
             else

@@ -18,8 +18,7 @@ public class Program
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
         builder.RootComponents.Add<App>("app");
         builder.RootComponents.Add<HeadOutlet>("head::after");
-
-        //builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });        
+        
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
         builder.Services.AddOptions();
@@ -31,17 +30,11 @@ public class Program
 
         builder.Services.AddScoped<IStore, Store>();
 
-        builder.Services.AddAuthorizationCore();
-
-        // Test ...
-        //builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderTest>();
-            
+        builder.Services.AddAuthorizationCore();            
         builder.Services.AddScoped<AuthenticationProviderJWT>();
-
         builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderJWT>(
             provider => provider.GetRequiredService<AuthenticationProviderJWT>()
         );
-
         builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(
             provider => provider.GetRequiredService<AuthenticationProviderJWT>()
         );
@@ -50,9 +43,6 @@ public class Program
         builder.Services.AddScoped<NotificationService>();
         builder.Services.AddScoped<TooltipService>();
         builder.Services.AddScoped<ContextMenuService>();
-
-        // TODO: deprecated
-        //builder.Services.AddFileReaderService(options => options.InitializeOnFirstCall = true);
 
         await builder.Build().RunAsync();
     }

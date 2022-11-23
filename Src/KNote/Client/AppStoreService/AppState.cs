@@ -37,6 +37,13 @@ public class AppState
         set { _tag = value; NotifyStateChanged(); }
     }
 
+    private string _userName = "";
+    public string UserName
+    {
+        get { return _userName; }
+        set { _userName = value; NotifyStateChanged(); }
+    }
+
     private bool _defaultContentResourcesInDB = false;
     public bool DefaultContentResourcesInDB
     {
