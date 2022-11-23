@@ -9,8 +9,6 @@
 @inject NotificationService notificationService
 @inject TooltipService tooltipService
 
-@inject IShowMessages showMessages
-
 
 <AuthorizeView>
     <Authorized>        
@@ -40,11 +38,11 @@
             resDialog.RoleDefinition = "Public";
 
             var result = await store.Users.RegisterAsync(resDialog);
-            if (!result.success)        
-                await showMessages.ShowErrorMessage(result.error);                        
+            if (!result.success)                
+                await dialogService.Alert(result.error, "Error", new AlertOptions() { OkButtonText = "OK" });
             else
             {
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Login user.", Detail =  "Authenticated use.", Duration = 3000 });
+                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Login user.", Detail = "Authenticated use.", Duration = 3000 });
                 await loginService.Login(result.token);
                 navigationManager.NavigateTo("");
             }
@@ -60,8 +58,8 @@
         if(resDialog != null)
         {
             var result = await store.Users.LoginAsync(resDialog);
-            if (!result.success)        
-                await showMessages.ShowErrorMessage(result.error);                
+            if (!result.success)                        
+                await dialogService.Alert(result.error, "Error", new AlertOptions() { OkButtonText = "OK" });
             else
             {
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Login user.", Detail =  "Authenticated use.", Duration = 3000 });
