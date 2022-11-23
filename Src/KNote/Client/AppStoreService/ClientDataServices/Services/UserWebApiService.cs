@@ -8,9 +8,12 @@ public class UserWebApiService : IUserWebApiService
 {
     private readonly HttpClient _httpClient;
 
-    public UserWebApiService(HttpClient httpClient)
+    private readonly AppState _appState;
+
+    public UserWebApiService(AppState appState, HttpClient httpClient)
     {
         _httpClient = httpClient;
+        _appState = appState;
     }
 
     public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)

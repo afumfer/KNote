@@ -1,8 +1,9 @@
-﻿@inject AppState appState
+﻿@implements IDisposable
+
+@inject IStore store
 @inject IGenericDataService  dataService
 @inject DialogService dialogService
 
-@implements IDisposable
 
 <div class="row">
     <div class="col-md-12 overflow-auto" style="height:380px">
@@ -24,9 +25,11 @@
 
     private List<FolderDto> foldersTree;    
     private FolderDto folderSelected;
+    private AppState appState;
 
     protected override async Task OnInitializedAsync()
     {
+        appState = store.AppState;
         appState.OnChange += StateHasChanged;
         if (foldersTree == null)
         {

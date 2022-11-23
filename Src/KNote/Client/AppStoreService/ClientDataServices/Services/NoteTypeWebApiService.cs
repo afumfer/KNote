@@ -8,9 +8,12 @@ public class NoteTypeWebApiService : INoteTypeWebApiService
 {
     private readonly HttpClient _httpClient;
 
-    public NoteTypeWebApiService(HttpClient httpClient)
+    private readonly AppState _appState;
+
+    public NoteTypeWebApiService(AppState appState, HttpClient httpClient)
     {
         _httpClient = httpClient;
+        _appState = appState;
     }
 
     public async Task<Result<List<NoteTypeDto>>> GetAllAsync()

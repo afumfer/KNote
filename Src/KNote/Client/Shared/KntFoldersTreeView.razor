@@ -1,6 +1,7 @@
-﻿@inject AppState appState
+﻿@implements IDisposable
+
+@inject IStore store
 @inject TooltipService tooltipService
-@implements IDisposable
 
 
 <RadzenTree Data=@FoldersInfo  Change=@OnChange>
@@ -35,8 +36,11 @@
     [Parameter] public EventCallback<FolderDto> FolderEdit { get; set; }
     [Parameter] public bool EditMode { get; set; }    
 
+    private AppState appState;
+
     protected override void OnInitialized()
     {
+        appState = store.AppState;
         appState.OnChange += StateHasChanged;
 
         base.OnInitialized();

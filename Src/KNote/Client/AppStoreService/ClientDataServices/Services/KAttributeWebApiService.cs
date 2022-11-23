@@ -8,9 +8,12 @@ public class KAttributeWebApiService : IKAttributeWebApiService
 {
     private readonly HttpClient _httpClient;
 
-    public KAttributeWebApiService(HttpClient httpClient)
+    private readonly AppState _appState;
+
+    public KAttributeWebApiService(AppState appState, HttpClient httpClient)
     {
         _httpClient = httpClient;
+        _appState = appState;
     }
 
     public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()

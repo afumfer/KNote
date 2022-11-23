@@ -30,7 +30,7 @@ public class Store : IStore
         get
         {
             if (_users == null)
-                _users = new UserWebApiService(_httpClient);
+                _users = new UserWebApiService(AppState, _httpClient);
             return _users;
         }
     }
@@ -41,7 +41,7 @@ public class Store : IStore
         get
         {
             if (_noteTypes == null)
-                _noteTypes = new NoteTypeWebApiService(_httpClient);
+                _noteTypes = new NoteTypeWebApiService(AppState, _httpClient);
             return _noteTypes;
         }
     }
@@ -52,7 +52,7 @@ public class Store : IStore
         get
         {
             if (_kAttributes == null)
-                _kAttributes = new KAttributeWebApiService(_httpClient);
+                _kAttributes = new KAttributeWebApiService(AppState, _httpClient);
             return _kAttributes;
         }
     }
@@ -74,7 +74,7 @@ public class Store : IStore
         get
         {
             if (_notes == null)
-                _notes = new NoteWebApiService(_httpClient);
+                _notes = new NoteWebApiService(AppState, _httpClient);
             return _notes;
         }
     }

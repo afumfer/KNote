@@ -1,13 +1,13 @@
 ﻿@page "/notes/new/{PageReturn}"
 
-@inject AppState appState
-@inject IStore webApiService
+@implements IDisposable
+
+@inject IStore store
 @inject NavigationManager navigationManger
 @inject NotificationService notificationService
 
-@implements IDisposable
-
 @attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
+
 
 @if (showForm)
 {
@@ -25,16 +25,17 @@ else
     private NoteDto note;
     private bool showForm = false;
     private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
-
+    private AppState appState;
     private string title = "Note new";
 
     #region Initialize and dispose
 
     protected async override Task OnInitializedAsync()
     {
+        appState = store.AppState;
         appState.OnChange += StateHasChanged;
 
-        var result = await webApiService.NoteTypes.GetAllAsync();
+        var result = await store.NoteTypes.GetAllAsync();
         if (!result.IsValid)
         {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types.", Detail =  result.Message, Duration = 12000 });
@@ -64,7 +65,7 @@ else
 
     private async Task GetNewNote()
     {
-        var result = await webApiService.Notes.NewAsync();
+        var result = await store.Notes.NewAsync();
         if (!result.IsValid)
         {         
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note.", Detail =  result.Message, Duration = 12000 });
@@ -87,7 +88,7 @@ else
     {
         if (note.IsNew())
         {
-            var result = await webApiService.Notes.SaveAsync(note);
+            var result = await store.Notes.SaveAsync(note);
 
             if (!result.IsValid)
             {            
@@ -121,7 +122,7 @@ else
         }
         else
         {
-            var result = await webApiService.Notes.SaveAsync(note);
+            var result = await store.Notes.SaveAsync(note);
 
             if (!result.IsValid)                            
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note.", Detail =  result.Message, Duration = 12000 });

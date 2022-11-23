@@ -1,21 +1,23 @@
-﻿@inject AppState appState
+﻿@implements IDisposable
 
-@implements IDisposable
+@inject IStore store
 
-<h5>@appState.SelectedFolder?.Name</h5>
+
+<h5>@store.AppState.SelectedFolder?.Name</h5>
 
 @code {    
-
+    
     #region  AppState changed subscription
 
     protected override void OnInitialized()
     {
-        appState.OnChange += StateHasChanged;
+
+        store.AppState.OnChange += StateHasChanged;
     }
 
     public void Dispose()
     {
-        appState.OnChange -= StateHasChanged;
+        store.AppState.OnChange -= StateHasChanged;
     }
 
     #endregion

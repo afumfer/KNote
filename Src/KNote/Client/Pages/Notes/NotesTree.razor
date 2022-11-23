@@ -1,14 +1,13 @@
 ﻿@page "/notes/tree"
 @page "/tree"
 
-@inject AppState appState
-@inject IStore webApiService
+@implements IDisposable
+
+@inject IStore store
 @inject NavigationManager navigationManager
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject NotificationService notificationService
-
-@implements IDisposable
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -89,9 +88,11 @@
     private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";    
     private int viewMode = 0;    
     private bool componentInitialized = false;
+    private AppState appState;
 
     protected override async Task OnInitializedAsync()
     {
+        appState = store.AppState;
         appState.OnChange += StateHasChanged;
         await Load();
         componentInitialized = true;
@@ -101,7 +102,7 @@
     {
         if (appState.FoldersTree == null)
         {
-            var result = await webApiService.Folders.GetTreeAsync();
+            var result = await store.Folders.GetTreeAsync();
             foldersTree = result.Entity;
             appState.FoldersTree = foldersTree;
 
@@ -159,7 +160,7 @@
         filter.FolderId = folder.FolderId;
         filter.PageIdentifier = paginationContext.PageIdentifier;
 
-        var result = await webApiService.Notes.GetFilter(filter);
+        var result = await store.Notes.GetFilter(filter);
 
         if (!result.IsValid)
         {
@@ -198,7 +199,7 @@
 
         if (resultDialog == true)
         {
-            var result = await webApiService.Notes.DeleteAsync(item.NoteId);
+            var result = await store.Notes.DeleteAsync(item.NoteId);
             if (!result.IsValid)            
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
             else

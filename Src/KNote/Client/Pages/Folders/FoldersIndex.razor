@@ -1,14 +1,14 @@
 ﻿@page "/folders"
 
-@*@inject AppState appState*@
-@inject IStore webApiService
+@implements IDisposable
+
+@inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
-@implements IDisposable
-
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
 
 <div class="container-fluid border">
     <div class="row">
@@ -40,17 +40,16 @@
     </div>
 </div>
 
-<h4>@appState.Tag</h4>
 
 @code {
 
     private List<FolderDto> foldersTree;
     private FolderDto selectedFolder;
-    AppState appState;
+    private AppState appState;
 
     protected override async Task OnInitializedAsync()    
     {
-        appState = webApiService.AppState;
+        appState = store.AppState;
         appState.OnChange += StateHasChanged;
 
         await Load();
@@ -65,7 +64,7 @@
     {
         selectedFolder = null;
 
-        var result = await webApiService.Folders.GetTreeAsync();        
+        var result = await store.Folders.GetTreeAsync();
         if (result.IsValid)
             foldersTree = result.Entity;
         else
@@ -127,7 +126,7 @@
 
         if (resultDialog == true)
         {
-            var result = await webApiService.Folders.DeleteAsync(folder.FolderId);            
+            var result = await store.Folders.DeleteAsync(folder.FolderId);
             if (!result.IsValid)            
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete folder.", Detail =  result.Message, Duration = 12000 });            
             else

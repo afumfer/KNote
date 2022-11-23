@@ -24,18 +24,12 @@ public class Program
 
         builder.Services.AddOptions();
 
-        // TODO: deprecated ....
+        // TODO: will be deprecated ....
         builder.Services.AddScoped<IShowMessages, ShowMessages>();
-        //......................
-
-        // TODO: deprecated ....
         builder.Services.AddScoped<IGenericDataService, GenericDataService>();  
         //......................
 
         builder.Services.AddScoped<IStore, Store>();
-
-        //builder.Services.AddSingleton<AppStore>();
-        builder.Services.AddScoped<AppState>();
 
         builder.Services.AddAuthorizationCore();
 
@@ -51,7 +45,6 @@ public class Program
         builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(
             provider => provider.GetRequiredService<AuthenticationProviderJWT>()
         );
-
 
         builder.Services.AddScoped<DialogService>();
         builder.Services.AddScoped<NotificationService>();

@@ -3,14 +3,13 @@
 
 @using KNote.Client.Pages.Notes
 
-@inject AppState appState
-@inject IStore webApiService
+@implements IDisposable
+
+@inject IStore store
 @inject NavigationManager navigationManager
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject NotificationService notificationService
-
-@implements IDisposable
 
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
@@ -34,9 +33,11 @@
     private List<NoteInfoDto> notes;
     private NoteInfoDto itemDelete;
     private string appInfo;
+    private AppState appState;
 
     protected override async Task OnInitializedAsync()
     {
+        appState = store.AppState;
         appState.OnChange += StateHasChanged;
 
         appInfo = $"{appState.AppDescription} ({appState.AppVersion})";
@@ -51,7 +52,7 @@
     private async Task LoadNotes()
     {
         notes = null;
-        var result = await webApiService.Notes.GetHomeNotesAsync();
+        var result = await store.Notes.GetHomeNotesAsync();
         if (!result.IsValid)            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
         else
@@ -77,7 +78,7 @@
 
         if (resultDialog == true)
         {
-            var result = await webApiService.Notes.DeleteAsync(item.NoteId);
+            var result = await store.Notes.DeleteAsync(item.NoteId);
             if (!result.IsValid)
                 notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail = result.Message, Duration = 12000 });
             else

@@ -1,22 +1,24 @@
 ﻿@page "/folders/new"
 
-@inject AppState appState
-@inject IStore webApiService 
+@implements IDisposable
+
+@inject IStore store 
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
-@implements IDisposable
-
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
+
 
 <FolderForm Title="New folder" OnValidSubmit="OnNew" OnExit="OnExit" Folder="folder" />
 
 @code {
 
     private FolderDto folder;
+    private AppState appState;
 
     protected override void OnInitialized()
     {
+        appState = store.AppState;
         appState.OnChange += StateHasChanged;
 
         folder = new FolderDto();
@@ -38,7 +40,7 @@
 
     private async Task OnNew()
     {
-        var result = await webApiService.Folders.SaveAsync(folder);
+        var result = await store.Folders.SaveAsync(folder);
         if (!result.IsValid)
         {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder.", Detail =  folder.GetErrorMessage(), Duration = 12000 });

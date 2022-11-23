@@ -4,12 +4,12 @@
 
 @using KNote.Model
 
+@implements IDisposable
+
 @inject HttpClient Http
-@inject AppState appState
+@inject IStore store
 @inject NavigationManager navigationManger
 @*@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment*@
-
-@implements IDisposable
 
 
 <div class="container-fluid border">
@@ -170,7 +170,7 @@
     private string[] settings;
     private int selectedPanel = 1;
     private string message = "";
-
+    private AppState appState;
 
     IEnumerable<FolderInfoDto> entries2 = new List<FolderInfoDto>();
 
@@ -179,6 +179,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        appState = store.AppState;
         appState.OnChange += StateHasChanged;
 
         settings = await Http.GetFromJsonAsync<string[]>("api/WeatherForecast/GetAppSettings");
