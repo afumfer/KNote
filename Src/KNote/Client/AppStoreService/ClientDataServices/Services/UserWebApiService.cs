@@ -1,19 +1,15 @@
 ﻿using System.Net.Http.Json;
+using KNote.Client.AppStoreService.ClientDataServices.Base;
 using KNote.Model;
 using KNote.Model.Dto;
 
 namespace KNote.Client.AppStoreService.ClientDataServices;
 
-public class UserWebApiService : IUserWebApiService
+public class UserWebApiService : BaseService, IUserWebApiService
 {
-    private readonly HttpClient _httpClient;
-
-    private readonly AppState _appState;
-
-    public UserWebApiService(AppState appState, HttpClient httpClient)
+    public UserWebApiService(AppState appState, HttpClient httpClient) : base(appState, httpClient)
     {
-        _httpClient = httpClient;
-        _appState = appState;
+
     }
 
     public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)

@@ -1,19 +1,16 @@
 ﻿using System.Net.Http.Json;
+using KNote.Client.AppStoreService.ClientDataServices.Base;
 using KNote.Model;
 using KNote.Model.Dto;
 
 namespace KNote.Client.AppStoreService.ClientDataServices;
 
-public class NoteWebApiService : INoteWebApiService
+public class NoteWebApiService : BaseService, INoteWebApiService
 {
-    private readonly HttpClient _httpClient;
 
-    private readonly AppState _appState;
-
-    public NoteWebApiService(AppState appState, HttpClient httpClient)
+    public NoteWebApiService(AppState appState, HttpClient httpClient) : base(appState, httpClient)
     {
-        _httpClient = httpClient;
-        _appState = appState;
+
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync()
