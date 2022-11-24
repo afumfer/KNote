@@ -14,19 +14,7 @@ public class AppState
 
     public readonly Version AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 
-    //private IWebApiService _data;
-    //public IWebApiService Data
-    //{
-    //    get { return _data; }
-    //    private set { _data = value; }
-    //}
-
     #endregion
-
-    //public AppStore(IWebApiService webApiService)
-    //{
-    //    _data = webApiService;
-    //}
 
     #region AppSatate properties
 
