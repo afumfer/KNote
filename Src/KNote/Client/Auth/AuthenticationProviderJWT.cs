@@ -11,23 +11,23 @@ namespace KNote.Client.Auth;
 public class AuthenticationProviderJWT : AuthenticationStateProvider, ILoginService
 {
     public static readonly string TOKENKEY = "TOKENKEY";
-    private readonly IJSRuntime _js;
-    private readonly HttpClient _httpClient;
-    private readonly IStore _store;
+    private readonly IJSRuntime js;
+    private readonly HttpClient httpClient;
+    private readonly IStore store;
 
     private AuthenticationState Anonymous =>
         new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
     public AuthenticationProviderJWT(IJSRuntime js, HttpClient httpClient, IStore store)
     {
-        _js = js;
-        _httpClient = httpClient;
-        _store = store;
+        this.js = js;
+        this.httpClient = httpClient;
+        this.store = store;
     }
 
     public async override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = await _js.LocalStorageGetItem(TOKENKEY);
+        var token = await js.LocalStorageGetItem(TOKENKEY);
 
         if (string.IsNullOrEmpty(token))            
             return Anonymous;
@@ -37,9 +37,9 @@ public class AuthenticationProviderJWT : AuthenticationStateProvider, ILoginServ
 
     public AuthenticationState BuildAuthenticationState(string token)
     {
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);       
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);       
         var authState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));        
-        _store.AppState.UserName = authState.User.Identity.Name;
+        store.AppState.UserName = authState.User.Identity.Name;
         return authState;
     }
 
@@ -87,16 +87,16 @@ public class AuthenticationProviderJWT : AuthenticationStateProvider, ILoginServ
 
     public async Task Login(string token)
     {
-        await _js.LocalStorageSetItem(TOKENKEY, token);
+        await js.LocalStorageSetItem(TOKENKEY, token);
         var authState = BuildAuthenticationState(token);
         NotifyAuthenticationStateChanged(Task.FromResult(authState));
     }
 
     public async Task Logout()
     {
-        await _js.LocalStorageRemoveItem(TOKENKEY);
-        _httpClient.DefaultRequestHeaders.Authorization = null;
-        _store.AppState.UserName = null;
+        await js.LocalStorageRemoveItem(TOKENKEY);
+        httpClient.DefaultRequestHeaders.Authorization = null;
+        store.AppState.UserName = null;
         NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
     }
 }

@@ -15,17 +15,17 @@ public class NoteWebApiService : BaseService, INoteWebApiService
 
     public async Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync()
     {
-        return await _httpClient.GetFromJsonAsync<Result<List<NoteInfoDto>>>("api/notes/homenotes");
+        return await httpClient.GetFromJsonAsync<Result<List<NoteInfoDto>>>("api/notes/homenotes");
     }
 
     public async Task<Result<NoteDto>> GetAsync(Guid noteId)
     {
-        return await _httpClient.GetFromJsonAsync<Result<NoteDto>>($"api/notes/{noteId}");
+        return await httpClient.GetFromJsonAsync<Result<NoteDto>>($"api/notes/{noteId}");
     }
 
     public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
     {
-        return await _httpClient.GetFromJsonAsync<Result<NoteDto>>($"api/notes/new");
+        return await httpClient.GetFromJsonAsync<Result<NoteDto>>($"api/notes/new");
     }
 
     public async Task<Result<NoteDto>> SaveAsync(NoteDto note, bool updateStatus = true)
@@ -33,9 +33,9 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         HttpResponseMessage httpRes;
 
         if (note.NoteId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notes", note);
+            httpRes = await httpClient.PostAsJsonAsync($"api/notes", note);
         else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notes", note);
+            httpRes = await httpClient.PutAsJsonAsync($"api/notes", note);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteDto>>();
 
@@ -44,7 +44,7 @@ public class NoteWebApiService : BaseService, INoteWebApiService
 
     public async Task<Result<NoteDto>> DeleteAsync(Guid noteId)
     {
-        var httpRes = await _httpClient.DeleteAsync($"api/notes/{noteId}");
+        var httpRes = await httpClient.DeleteAsync($"api/notes/{noteId}");
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteDto>>();
 
@@ -53,7 +53,7 @@ public class NoteWebApiService : BaseService, INoteWebApiService
 
     public async Task<Result<List<ResourceInfoDto>>> GetResourcesAsync(Guid noteId)
     {
-        return await _httpClient.GetFromJsonAsync<Result<List<ResourceInfoDto>>>($"api/notes/{noteId}/getresources");
+        return await httpClient.GetFromJsonAsync<Result<List<ResourceInfoDto>>>($"api/notes/{noteId}/getresources");
     }
 
     public async Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resource)
@@ -61,9 +61,9 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         HttpResponseMessage httpRes;
 
         if (resource.ResourceId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/saveresource", resource);
+            httpRes = await httpClient.PostAsJsonAsync($"api/notes/saveresource", resource);
         else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notes/saveresource", resource);
+            httpRes = await httpClient.PutAsJsonAsync($"api/notes/saveresource", resource);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<ResourceInfoDto>>();
 
@@ -72,20 +72,20 @@ public class NoteWebApiService : BaseService, INoteWebApiService
 
     public async Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId)
     {
-        var httpRes = await _httpClient.DeleteAsync($"api/notes/deleteresource/{resourceId}");
+        var httpRes = await httpClient.DeleteAsync($"api/notes/deleteresource/{resourceId}");
         var res = await httpRes.Content.ReadFromJsonAsync<Result<ResourceInfoDto>>();
         return res;
     }
 
     public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId)
     {
-        return await _httpClient.GetFromJsonAsync<Result<List<NoteTaskDto>>>($"api/notes/{noteId}/GetNoteTasks");
+        return await httpClient.GetFromJsonAsync<Result<List<NoteTaskDto>>>($"api/notes/{noteId}/GetNoteTasks");
     }
 
     public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
     {
         var url = $"api/notes/GetStartedTasksByDateTimeRage?start={startDateTime.ToString("yyyyMMddHHmmss")}&end={endDateTime.ToString("yyyyMMddHHmmss")}";
-        return await _httpClient.GetFromJsonAsync<Result<List<NoteTaskDto>>>(url);
+        return await httpClient.GetFromJsonAsync<Result<List<NoteTaskDto>>>(url);
     }
 
     public async Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
@@ -98,9 +98,9 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         HttpResponseMessage httpRes;
 
         if (noteTask.NoteTaskId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/savenotetask", noteTask);
+            httpRes = await httpClient.PostAsJsonAsync($"api/notes/savenotetask", noteTask);
         else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notes/savenotetask", noteTask);
+            httpRes = await httpClient.PutAsJsonAsync($"api/notes/savenotetask", noteTask);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTaskDto>>();
 
@@ -109,14 +109,14 @@ public class NoteWebApiService : BaseService, INoteWebApiService
 
     public async Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId)
     {
-        var httpRes = await _httpClient.DeleteAsync($"api/notes/deletenotetask/{noteTaskId}");
+        var httpRes = await httpClient.DeleteAsync($"api/notes/deletenotetask/{noteTaskId}");
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTaskDto>>();
         return res;
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetSearch(string queryString)
     {
-        return await _httpClient.GetFromJsonAsync<Result<List<NoteInfoDto>>>($"api/notes/getsearch?{queryString}");
+        return await httpClient.GetFromJsonAsync<Result<List<NoteInfoDto>>>($"api/notes/getsearch?{queryString}");
     }
 
     // TODO: !!! Apply the following strategy to the rest of the ClientDataService methods. (Command pattern ?) 
@@ -127,7 +127,7 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         try
         {
             HttpResponseMessage httpRes;
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/getfilter", notesFilter);
+            httpRes = await httpClient.PostAsJsonAsync($"api/notes/getfilter", notesFilter);
             if (httpRes.IsSuccessStatusCode)
                 res = await httpRes.Content.ReadFromJsonAsync<Result<List<NoteInfoDto>>>();
             else

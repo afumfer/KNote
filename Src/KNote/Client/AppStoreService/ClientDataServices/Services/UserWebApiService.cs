@@ -21,7 +21,7 @@ public class UserWebApiService : BaseService, IUserWebApiService
             urlApi = $"api/users?pageNumber={pagination.PageNumber}&pageSize={pagination.PageSize}";
 
         // option 1
-        return await _httpClient.GetFromJsonAsync<Result<List<UserDto>>>(urlApi);
+        return await httpClient.GetFromJsonAsync<Result<List<UserDto>>>(urlApi);
 
         // option 2
         //var httpRes = await _httpClient.GetAsync(urlApi);
@@ -31,7 +31,7 @@ public class UserWebApiService : BaseService, IUserWebApiService
 
     public async Task<Result<UserDto>> DeleteAsync(Guid userId)
     {
-        var httpRes = await _httpClient.DeleteAsync($"api/users/{userId}");
+        var httpRes = await httpClient.DeleteAsync($"api/users/{userId}");
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
 
@@ -40,7 +40,7 @@ public class UserWebApiService : BaseService, IUserWebApiService
 
     public async Task<Result<UserDto>> GetAsync(Guid userId)
     {
-        return await _httpClient.GetFromJsonAsync<Result<UserDto>>($"api/users/{userId}");
+        return await httpClient.GetFromJsonAsync<Result<UserDto>>($"api/users/{userId}");
     }
 
     public async Task<Result<UserDto>> SaveAsync(UserDto user)
@@ -48,9 +48,9 @@ public class UserWebApiService : BaseService, IUserWebApiService
         HttpResponseMessage httpRes;
 
         if (user.UserId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/users", user);
+            httpRes = await httpClient.PostAsJsonAsync($"api/users", user);
         else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/users", user);
+            httpRes = await httpClient.PutAsJsonAsync($"api/users", user);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
 
@@ -59,7 +59,7 @@ public class UserWebApiService : BaseService, IUserWebApiService
 
     public async Task<UserTokenDto> RegisterAsync(UserRegisterDto user)
     {
-        var httpRes = await _httpClient.PostAsJsonAsync($"api/users/register", user);
+        var httpRes = await httpClient.PostAsJsonAsync($"api/users/register", user);
 
         var res = await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();
 
@@ -68,7 +68,7 @@ public class UserWebApiService : BaseService, IUserWebApiService
 
     public async Task<UserTokenDto> LoginAsync(UserCredentialsDto user)
     {
-        var httpRes = await _httpClient.PostAsJsonAsync($"api/users/login", user);
+        var httpRes = await httpClient.PostAsJsonAsync($"api/users/login", user);
 
         var res = await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();
 

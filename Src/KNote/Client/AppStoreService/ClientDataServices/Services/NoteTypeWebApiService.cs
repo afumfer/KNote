@@ -14,12 +14,12 @@ public class NoteTypeWebApiService : BaseService, INoteTypeWebApiService
 
     public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
     {
-        return await _httpClient.GetFromJsonAsync<Result<List<NoteTypeDto>>>($"api/notetypes");
+        return await httpClient.GetFromJsonAsync<Result<List<NoteTypeDto>>>($"api/notetypes");
     }
 
     public async Task<Result<NoteTypeDto>> GetAsync(Guid id)
     {
-        return await _httpClient.GetFromJsonAsync<Result<NoteTypeDto>>($"api/notetypes/{id}");
+        return await httpClient.GetFromJsonAsync<Result<NoteTypeDto>>($"api/notetypes/{id}");
     }
 
     public async Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto noteType)
@@ -27,9 +27,9 @@ public class NoteTypeWebApiService : BaseService, INoteTypeWebApiService
         HttpResponseMessage httpRes;
 
         if (noteType.NoteTypeId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notetypes", noteType);
+            httpRes = await httpClient.PostAsJsonAsync($"api/notetypes", noteType);
         else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notetypes", noteType);
+            httpRes = await httpClient.PutAsJsonAsync($"api/notetypes", noteType);
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTypeDto>>();
 
@@ -38,7 +38,7 @@ public class NoteTypeWebApiService : BaseService, INoteTypeWebApiService
 
     public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
     {
-        var httpRes = await _httpClient.DeleteAsync($"api/notetypes/{id}");
+        var httpRes = await httpClient.DeleteAsync($"api/notetypes/{id}");
 
         var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTypeDto>>();
 
