@@ -4,7 +4,8 @@
 {
     @if (Loading == null)
     {
-        <p>Loading ... </p>    
+        <RadzenLabel Text="Loading ..."/>
+        <RadzenProgressBar  ProgressBarStyle="ProgressBarStyle.Light" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
     }
     else
     {

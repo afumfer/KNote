@@ -9,7 +9,6 @@
 @inject HttpClient Http
 @inject IStore store
 @inject NavigationManager navigationManger
-@*@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment*@
 
 
 <div class="container-fluid border">
@@ -24,10 +23,8 @@
     <RadzenTabs TabPosition="TabPosition.Left">
         <Tabs>
 
-            <RadzenTabsItem Text="&nbsp;Load data" Icon="format_list_bulleted" >
-                <div class="mt-4"></div>
-
-                <h4 class="mt-4"> Load data with OnInitializedAsync</h4>
+            <RadzenTabsItem Text="&nbsp;Load data" Icon="format_list_bulleted" >                
+                <h4> Load data with OnInitializedAsync</h4>
 
                 @if (settings == null)
                 {
@@ -44,10 +41,8 @@
                 <p>@appState.AppDescription</p>
             </RadzenTabsItem>
 
-            <RadzenTabsItem Text="&nbsp;Call API demo" Icon="format_list_bulleted" >
-                <div class="mt-4"></div>
-
-                <h4 class="mt-2"> Call demo api 1 </h4>
+            <RadzenTabsItem Text="&nbsp;Call API demo" Icon="format_list_bulleted" >                
+                <h4> Call demo api 1 </h4>
                 <p>This component demonstrates fetching data from the server.</p>
                 <button class="btn btn-primary" @onclick="LoadWeatherForecast">Load Weather Forecast</button>
                 <p>...</p>
@@ -82,10 +77,8 @@
                 }
             </RadzenTabsItem>
 
-            <RadzenTabsItem Text="&nbsp;Call API 2" Icon="format_list_bulleted" >
-                <div class="mt-4"></div>
-
-                <h4 class="mt-2"> Call api 2, load folders (panel: @selectedPanel)</h4>
+            <RadzenTabsItem Text="&nbsp;Call API 2" Icon="format_list_bulleted" >                
+                <h4> Call api 2, load folders (panel: @selectedPanel)</h4>
                 <p>This component demonstrates fetching data from the server.</p>
 
                 <button class="btn btn-primary" @onclick="LoadFolders">Load folders</button>
@@ -122,7 +115,7 @@
             </RadzenTabsItem>
 
             <RadzenTabsItem Text="&nbsp;Radzen lab 1" Icon="format_list_bulleted" >
-                <h4 class="mt-2"> Test Radzen Controls</h4>
+                <h4> Test Radzen Controls</h4>
                 
                 <hr />
     
@@ -132,10 +125,8 @@
                 <RadzenPager Count="100" PageSize="10" PageNumbersCount="5" PageChanged=@(args => Console.WriteLine($"Skip: {args.Skip}, Top: {args.Top}")) />
             </RadzenTabsItem>
 
-            <RadzenTabsItem Text="&nbsp;Radzen lab 2" Icon="format_list_bulleted" >
-                <div class="mt-4"></div>
-
-                <h4 class="mt-2">Splitter</h4>
+            <RadzenTabsItem Text="&nbsp;Radzen lab 2" Icon="format_list_bulleted" >                
+                <h4>Splitter</h4>
 
                 <RadzenSplitter>
                     <RadzenSplitterPane Size="50%" Min="30px" Max="70%">

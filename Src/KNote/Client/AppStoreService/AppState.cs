@@ -10,9 +10,9 @@ public class AppState
 
     public readonly string AppName = "KaNote";
     
-    public readonly string AppDescription = "Another keynotes managment.";
+    public readonly string AppDescription = "Another keynotes managment";
 
-    public readonly Version AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+    public readonly Version AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName()?.Version;
 
     #endregion
 

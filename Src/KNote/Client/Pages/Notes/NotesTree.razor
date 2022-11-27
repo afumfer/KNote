@@ -44,38 +44,40 @@
     </div>        
 </div>
 
-<div class="col-lg-12 pt-2">    
-    <div class="row">
-        <RadzenSplitter>
-            <RadzenSplitterPane Size="25%" Min="200px" Max="45%">            
-                <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
-            </RadzenSplitterPane>
-            <RadzenSplitterPane>                            
-                <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
-                            HorizontalAlign="HorizontalAlign.Right" 
-                            Count="@((int)paginationContext.TotalCount)" 
-                            PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
-                            PageChanged=@PageChanged/>
+<RadzenCard class="docu pt-1 pl-0 pr-1 pb-0 mt-2">
+    <div class="col-lg-12">    
+        <div class="row">
+            <RadzenSplitter>
+                <RadzenSplitterPane Size="25%" Min="200px" Max="45%">            
+                    <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
+                </RadzenSplitterPane>
+                <RadzenSplitterPane>                            
+                    <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
+                                HorizontalAlign="HorizontalAlign.Right" 
+                                Count="@((int)paginationContext.TotalCount)" 
+                                PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
+                                PageChanged=@PageChanged/>
 
-                @if (folder == null)
-                {
-                    <h5>  </h5>
-                }
-                else
-                {                    
-                    @if (viewMode == 0)
+                    @if (folder == null)
                     {
-                        <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
+                        <h5>  </h5>
                     }
                     else
-                    {
-                        <NotesList Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
-                    }
-                }           
-            </RadzenSplitterPane>
-        </RadzenSplitter>
+                    {                    
+                        @if (viewMode == 0)
+                        {
+                            <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
+                        }
+                        else
+                        {
+                            <NotesList Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
+                        }
+                    }           
+                </RadzenSplitterPane>
+            </RadzenSplitter>
+        </div>
     </div>
-</div>
+</RadzenCard>
 
 
 @code {    

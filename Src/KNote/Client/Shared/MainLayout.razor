@@ -1,7 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-@inject NavigationManager UriHelper
-@inject IJSRuntime JSRuntime
+@inject IStore store
 
 <RadzenDialog/>
 <RadzenNotification/>
@@ -11,49 +10,35 @@
 <RadzenLayout>
 
     <RadzenHeader>
-        <ChildContent>
-            <div class="row justify-content-start align-items-center">
-                <div class="col-5 d-flex align-items-center">
-                    <RadzenSidebarToggle Click="@SidebarToggle0Click" />                    
-                    <RadzenLabel Text="KaNote" Style="font-size:large"/>                    
-                </div>
-                <div class="col-7 d-flex align-items-center justify-content-end">
-                    <MainLayoutHeader />
-                </div>
-            </div>        
-        </ChildContent>
+        <div class="row justify-content-start align-items-center">
+            <div class="col-5 d-flex align-items-center">
+                <RadzenSidebarToggle Click="@(() => sidebar = !sidebar)" />                    
+                <RadzenLabel Text="@store.AppState.AppName" Style="font-size:large"/>                    
+            </div>
+            <div class="col-7 d-flex align-items-center justify-content-end">
+                <MainLayoutHeader />
+            </div>
+        </div>        
     </RadzenHeader>
 
-    <RadzenBody @ref="@body0">
-        <ChildContent>
-            <RadzenContentContainer Name="main">
-                @Body
-            </RadzenContentContainer>
-        </ChildContent>
+    <RadzenBody>        
+        @Body
     </RadzenBody>
 
-    <RadzenSidebar @ref="@sidebar0" >
-        <ChildContent>
-            <MainLayoutNavMenu />
-        </ChildContent>
+    <RadzenSidebar @bind-Expanded="@sidebar">
+        <MainLayoutNavMenu />
     </RadzenSidebar>
 
-@*    <RadzenFooter>
-      <ChildContent>
-        <RadzenLabel Text="BlazorCustomPaging, Copyright Ⓒ 2020"  />
-      </ChildContent>
-    </RadzenFooter>*@
+    <RadzenFooter class="p-1 ml-1 mr-1">
+        <MainLayoutFooter 
+            TextLeft="@($"{store.AppState.AppName} - v{store.AppState.AppVersion}")" 
+            TextRight="@store.AppState.AppDescription"/>
+    </RadzenFooter>
 
 </RadzenLayout>
 
 @code {
 
-    RadzenSidebar sidebar0;
-    RadzenBody body0;
+    bool sidebar;
 
-    protected void SidebarToggle0Click(dynamic args)
-    {
-        sidebar0.Toggle();
-        body0.Toggle();
-    }
 }
