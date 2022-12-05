@@ -13,7 +13,7 @@ namespace KntRedmineApi;
 
 public class KntRedmineManager
 {
-    private RedmineManager? _manager;
+    private RedmineManager _manager;
     private NameValueCollection _parameters = new () { { "include", "attachments,relations,journals" } };
     
     private List<FolderInfoDto> _folders = new();
@@ -32,15 +32,15 @@ public class KntRedmineManager
         get { return _service; }
     }
 
-    private string? _host;
-    public string? Host
+    private string _host;
+    public string Host
     {
         get { return _host; }
         set { _host = value; }
     }
 
-    private string? _apiKey;
-    public string? ApiKey
+    private string _apiKey;
+    public string ApiKey
     {
         get { return _apiKey; } 
         set { _apiKey = value; }
@@ -53,22 +53,22 @@ public class KntRedmineManager
         set { _toolsPath = value; }
     }
 
-    private string? _importFile;
-    public string? ImportFile
+    private string _importFile;
+    public string ImportFile
     {
         get { return _importFile; }
         set { _importFile = value; }
     }
 
-    private string? _rootFolderForImport;
-    public string? RootFolderForImport
+    private string _rootFolderForImport;
+    public string RootFolderForImport
     {
         get { return _rootFolderForImport; }
         set { _rootFolderForImport = value; }   
     }
 
-    private string? _appUserName;
-    public string? AppUserName   
+    private string _appUserName;
+    public string AppUserName   
     {
         get { return _appUserName; }
         set { _appUserName = value; }
@@ -106,7 +106,7 @@ public class KntRedmineManager
         }
     }
 
-    public async Task<bool> IssueToNoteDto(string id, NoteExtendedDto? noteDto, bool loadAttachments = true)
+    public async Task<bool> IssueToNoteDto(string id, NoteExtendedDto noteDto, bool loadAttachments = true)
     {
         try
         {

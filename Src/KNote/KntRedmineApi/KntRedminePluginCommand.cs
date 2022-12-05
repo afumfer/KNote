@@ -23,16 +23,16 @@ public class KntRedminePluginCommand : IPluginCommand
         }
     }
 
-    IKntService? _service;
-    public IKntService? Service
+    IKntService _service;
+    public IKntService Service
     {
         get { return _service; }
         set { _service = value; }
     }
 
-    public string? AppUserName { get; set; }
+    public string AppUserName { get; set; }
 
-    public string? ToolsPath { get; set; }
+    public string ToolsPath { get; set; }
 
     public int Execute()
     {        

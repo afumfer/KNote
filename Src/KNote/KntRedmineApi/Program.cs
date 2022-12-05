@@ -22,7 +22,7 @@ public static class Program
         Application.Run(new KntRedmineForm(CreateServiceFromConfig()));            
     }
 
-    static IPluginCommand? CreateServiceFromConfig()
+    static IPluginCommand CreateServiceFromConfig()
     {
         var configFile = Path.Combine(Application.StartupPath, "KntRedmine.config");
         try

@@ -8,8 +8,8 @@ public partial class KntRedmineForm : Form
 {
     #region Fields
 
-    private IPluginCommand? _pluginCommand;    
-    private KntRedmineManager? _manager;
+    private IPluginCommand _pluginCommand;    
+    private KntRedmineManager _manager;
 
     #endregion
 
@@ -20,7 +20,7 @@ public partial class KntRedmineForm : Form
         InitializeComponent();
     }
 
-    public KntRedmineForm(IPluginCommand? pluginCommand) : this()
+    public KntRedmineForm(IPluginCommand pluginCommand) : this()
     {
         if (pluginCommand == null)
             throw new Exception("Invalid KntRedmine plugin command.");
