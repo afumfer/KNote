@@ -1,8 +1,8 @@
 ﻿@page "/attributes/edit/{AttributeId}"
 
-@inject IStore webApiService
+@inject IStore store
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -25,10 +25,10 @@ else
     protected async override Task OnInitializedAsync()
     {
 
-        var result = await webApiService.KAttributes.GetAsync(Guid.Parse(AttributeId));
+        var result = await store.KAttributes.GetAsync(Guid.Parse(AttributeId));
         if (!result.IsValid)
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get attributes.", Detail =  result.Message, Duration = 12000 });
+            //notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get attributes.", Detail =  result.Message, Duration = 12000 });
             dialogService.Close(null);
         }
         else
@@ -37,10 +37,10 @@ else
             kattribute.SetIsDirty(false);
         }
 
-        var result2 = await webApiService.NoteTypes.GetAllAsync();
+        var result2 = await store.NoteTypes.GetAllAsync();
         if (!result2.IsValid)
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types.", Detail =  result.Message, Duration = 12000 });
+            //notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types.", Detail =  result.Message, Duration = 12000 });
             dialogService.Close(null);
         }
         else
@@ -60,16 +60,31 @@ else
         }
         else
         {
-            if (!kattribute.IsValid())
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail =  kattribute.GetErrorMessage(), Duration = 12000 });
-            else
+            //if (!kattribute.IsValid())
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail =  kattribute.GetErrorMessage(), Duration = 12000 });
+            //else
+            //{
+            //    var result = await store.KAttributes.SaveAsync(kattribute);
+            //    if (!result.IsValid)
+            //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail =  result.Message, Duration = 12000 });
+            //    else
+            //    {
+            //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save attribute.", Detail =  "The data has been saved.", Duration = 3000 });
+            //        dialogService.Close(result.Entity);
+            //    }
+            //}
+            if (kattribute.IsValid())
             {
-                var result = await webApiService.KAttributes.SaveAsync(kattribute);
-                if (!result.IsValid)
-                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail =  result.Message, Duration = 12000 });
-                else
-                {
-                    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save attribute.", Detail =  "The data has been saved.", Duration = 3000 });
+                var result = await store.KAttributes.SaveAsync(kattribute);
+                //if (!result.IsValid)
+                //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail = result.Message, Duration = 12000 });
+                //else
+                //{
+                //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save attribute.", Detail = "The data has been saved.", Duration = 3000 });
+                //    dialogService.Close(result.Entity);
+                //}
+                if (result.IsValid)                                    
+                {                    
                     dialogService.Close(result.Entity);
                 }
             }

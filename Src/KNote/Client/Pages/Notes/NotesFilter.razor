@@ -1,11 +1,11 @@
 ﻿@page "/notes/filter"
 @page "/filter"
 
-@inject IStore webApiService
-@inject NavigationManager navigationManager
+@inject IStore store
+@*@inject NavigationManager navigationManager*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -106,13 +106,18 @@
         notes = null;
 
         filter.PageIdentifier = paginationContext.PageIdentifier;
-        var result = await webApiService.Notes.GetFilter(filter);
+        var result = await store.Notes.GetFilter(filter);
 
-        if (!result.IsValid)
-        {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });
-        }
-        else
+        //if (!result.IsValid)
+        //{
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });
+        //}
+        //else
+        //{
+        //    paginationContext.TotalCount = result.TotalCount;
+        //    notes = result.Entity;
+        //}
+        if (result.IsValid)
         {
             paginationContext.TotalCount = result.TotalCount;
             notes = result.Entity;
@@ -121,17 +126,17 @@
 
     void OnNew()
     {
-        navigationManager.NavigateTo($"notes/new/filter");
+        store.NavigateTo($"notes/new/filter");
     }
 
     void OnView(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/{note.NoteId}/filter");
+        store.NavigateTo($"notes/{note.NoteId}/filter");
     }
 
     void OnEdit(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/filter");
+        store.NavigateTo($"notes/edit/{note.NoteId}/filter");
     }
 
     async Task OnDelete(NoteInfoDto item)
@@ -143,14 +148,18 @@
 
         if (resultDialog == true)
         {
-            var result = await webApiService.Notes.DeleteAsync(item.NoteId);
-            if (!result.IsValid)            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
-            else
+            var result = await store.Notes.DeleteAsync(item.NoteId);
+            //if (!result.IsValid)            
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
+            //else
+            //{
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note. ", Detail =  "The note has been deleted.", Duration = 3000 });
+            //    await LoadNotesWithPagination();
+            //}            
+            if (result.IsValid)
             {
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note. ", Detail =  "The note has been deleted.", Duration = 3000 });
                 await LoadNotesWithPagination();
-            }            
+            }
         }
     }
 

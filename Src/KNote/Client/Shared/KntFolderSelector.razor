@@ -1,7 +1,7 @@
 ﻿@implements IDisposable
 
 @inject IStore store
-@inject IGenericDataService  dataService
+@*@inject IGenericDataService  dataService*@
 @inject DialogService dialogService
 
 
@@ -21,7 +21,7 @@
 </div>
 
 
-@code {    
+@code {
 
     private List<FolderDto> foldersTree;    
     private FolderDto folderSelected;
@@ -35,8 +35,10 @@
         {
             if (appState.FoldersTree == null)
             {
-                var res = await dataService.Get<Result<List<FolderDto>>>("api/folders/gettree");
-                foldersTree = res.Response.Entity;
+                //var res = await dataService.Get<Result<List<FolderDto>>>("api/folders/tree");
+                //foldersTree = res.Response.Entity;
+                var res = await store.Folders.GetTreeAsync();
+                foldersTree = res.Entity;
                 appState.FoldersTree = foldersTree;
 
                 if (foldersTree?.Count > 0)

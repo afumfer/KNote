@@ -89,6 +89,19 @@ public class AppState
     public event Action OnChange;
     private void NotifyStateChanged() => OnChange?.Invoke();
 
+    public event Action<string, string> OnNotifyError;
+    public void NotifyError(string summary, string details) 
+    {
+        OnNotifyError?.Invoke(summary, details); 
+    }
+
+    public event Action<string, string> OnNotifySuccess;
+    public void NotifySuccess(string summary, string details)
+    {
+        OnNotifySuccess?.Invoke(summary, details);
+    }
+
+
     #endregion
 
 }

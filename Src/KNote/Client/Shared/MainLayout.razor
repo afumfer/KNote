@@ -1,6 +1,9 @@
 ﻿@inherits LayoutComponentBase
 
+@implements IDisposable
+
 @inject IStore store
+@inject NotificationService notificationService
 
 <RadzenDialog/>
 <RadzenNotification/>
@@ -39,6 +42,33 @@
 
 @code {
 
-    bool sidebar;
+    private bool sidebar;
+    private AppState appState;
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        appState = store.AppState;
+        appState.OnChange += StateHasChanged;
+        appState.OnNotifyError += NotifyError;
+        appState.OnNotifySuccess += NotifySuccess;
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+        appState.OnNotifyError -= NotifyError;
+        appState.OnNotifySuccess -= NotifySuccess;
+    }
+
+    private void NotifyError(string summary, string details)
+    {
+        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = summary, Detail = details, Duration = 12000 });
+    }
+
+    private void NotifySuccess(string summary, string details)
+    {
+        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = summary, Detail = details, Duration = 3000 });
+    }
 }

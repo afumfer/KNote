@@ -54,10 +54,10 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpPost("[action]")]   // PUT api/notes/getfilter
+        [HttpPost("[action]")]   // POST api/notes/filter        
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
         //[Authorize]
-        public async Task <IActionResult> GetFilter([FromBody] NotesFilterDto notesFilter )
+        public async Task <IActionResult> Filter([FromBody] NotesFilterDto notesFilter)
         {
             try
             {                
@@ -76,8 +76,8 @@ namespace KNote.Server.Controllers
             }
         }
                 
-        [HttpGet("[action]")]   // GET api/notes/getsearch
-        public async Task<IActionResult> GetSearch([FromQuery] NotesSearchParam notesSearchParam)  // NotesSearchDto notesSearch
+        [HttpGet("[action]")]   // GET api/notes/search
+        public async Task<IActionResult> Search([FromQuery] NotesSearchParam notesSearchParam)  // NotesSearchDto notesSearch
         {
             try
             {
@@ -125,7 +125,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("{noteId}")]    // GET api/notes/guidnote
+        [HttpGet("{noteId}")]    // GET api/notes/{guidnote}
         public async Task<IActionResult> Get(Guid noteId)
         {
             try
@@ -170,25 +170,25 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/folderId        
-        public async Task<IActionResult> GetByFolder(Guid folderId)
-        {
-            try
-            {                
-                var resApi = await _service.Notes.GetByFolderAsync(folderId);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
+        //[HttpGet("[action]/{folderId}")]    // GET api/notes/GetByFolder/folderId        
+        //public async Task<IActionResult> GetByFolder(Guid folderId)
+        //{
+        //    try
+        //    {                
+        //        var resApi = await _service.Notes.GetByFolderAsync(folderId);
+        //        if (resApi.IsValid)
+        //            return Ok(resApi);
+        //        else
+        //            return BadRequest(resApi);
 
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<List<NoteInfoDto>>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var kresApi = new Result<List<NoteInfoDto>>();
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
         [HttpPost]   // POST api/notes
         [HttpPut]    // PUT api/notes
@@ -238,7 +238,7 @@ namespace KNote.Server.Controllers
         [HttpPost("[action]")]
         [HttpPut("[action]")]
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> SaveResource([FromBody]ResourceInfoDto entity)
+        public async Task<IActionResult> Resources([FromBody]ResourceInfoDto entity)
         {
             try
             {                             
@@ -258,7 +258,7 @@ namespace KNote.Server.Controllers
 
         [HttpGet("{id}/[action]")]    // GET api/notes/getresources
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> GetResources(Guid id)
+        public async Task<IActionResult> Resources(Guid id)
         {
             try
             {
@@ -276,9 +276,9 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpDelete("[action]/{id}")]    // DELETE api/notes/deleteresource/guid
+        [HttpDelete("resources/{id}")]    // DELETE api/notes/resources/guid
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> DeleteResource(Guid id)
+        public async Task<IActionResult> DeleteResources(Guid id)
         {
             try
             {
@@ -321,7 +321,7 @@ namespace KNote.Server.Controllers
         [HttpPost("[action]")]
         [HttpPut("[action]")]
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> SaveNoteTask([FromBody]NoteTaskDto entity)
+        public async Task<IActionResult> Tasks([FromBody]NoteTaskDto entity)
         {            
             try
             {
@@ -341,9 +341,9 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("{id}/[action]")]    // GET api/notes/getnotetasks
+        [HttpGet("{id}/[action]")]    // GET api/notes/tasks
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> GetNoteTasks(Guid id)
+        public async Task<IActionResult> Tasks(Guid id)
         {
             try
             {
@@ -389,9 +389,9 @@ namespace KNote.Server.Controllers
         }
 
 
-        [HttpDelete("[action]/{id}")]    // DELETE api/notes/deletenotetask/guid
+        [HttpDelete("tasks/{id}")]    // DELETE api/notes/deletenotetask/guid
         [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        public async Task<IActionResult> DeleteNoteTask(Guid id)
+        public async Task<IActionResult> DeleteTask(Guid id)
         {
             try
             {

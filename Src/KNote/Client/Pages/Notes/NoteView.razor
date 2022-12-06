@@ -1,10 +1,10 @@
 ﻿@page "/notes/{NoteId}/{PageReturn}"
 
-@inject IStore webApiService
-@inject NavigationManager navigationManger
+@inject IStore store
+@*@inject NavigationManager navigationManger*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
@@ -48,11 +48,19 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var result = await webApiService.Notes.GetAsync(Guid.Parse(NoteId));
+        var result = await store.Notes.GetAsync(Guid.Parse(NoteId));
+        //if (!result.IsValid)
+        //{            
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
+        //    store.NavigateTo("index");
+        //}
+        //else
+        //{
+        //    note = result.Entity;
+        //}
         if (!result.IsValid)
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
-            navigationManger.NavigateTo("index");
+            store.NavigateTo("index");
         }
         else
         {
@@ -64,7 +72,7 @@ else
 
     private void OnExit()
     {
-        navigationManger.NavigateTo(PageReturn);
+        store.NavigateTo(PageReturn);
     }
 
 }

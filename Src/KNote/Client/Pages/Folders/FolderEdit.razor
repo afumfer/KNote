@@ -4,7 +4,7 @@
 
 @inject IStore store 
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
@@ -31,14 +31,21 @@ else
         appState.OnChange += StateHasChanged;
 
         var result = await store.Folders.GetAsync(Guid.Parse(FolderId));
+        //if (!result.IsValid)
+        //{
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get folder.", Detail =  result.Message, Duration = 12000 });
+        //    dialogService.Close(null);
+        //}
+        //else        
+        //    folder = result.Entity;
         if (!result.IsValid)
-        {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get folder.", Detail =  result.Message, Duration = 12000 });
+        {            
             dialogService.Close(null);
         }
-        else        
+        else
             folder = result.Entity;
-        
+
+
         base.OnInitialized();
     }
 
@@ -50,9 +57,31 @@ else
     private async Task OnEdit()
     {
         var result = await store.Folders.SaveAsync(folder);
-        if (!result.IsValid)                    
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type.", Detail =  result.Message, Duration = 12000 });        
-        else
+        //if (!result.IsValid)                    
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type.", Detail =  result.Message, Duration = 12000 });        
+        //else
+        //{
+        //    if (appState.FoldersTree != null)
+        //    {
+        //        FolderDto toUpdate;
+        //        appState.FoldersIndex.TryGetValue(folder.FolderId, out toUpdate);
+        //        if (toUpdate != null)
+        //        {
+        //            if (toUpdate.ParentId == folder.ParentId)
+        //                toUpdate.Name = folder.Name;
+        //            else
+        //                appState.FoldersTree = null;
+        //        }
+        //        else
+        //        {
+        //            appState.FoldersTree = null;
+        //        }
+        //    }
+            
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save folder.", Detail =  "The data has been saved.", Duration = 3000 });
+        //    dialogService.Close(result.Entity);     
+        //}
+        if (result.IsValid)
         {
             if (appState.FoldersTree != null)
             {
@@ -69,10 +98,8 @@ else
                 {
                     appState.FoldersTree = null;
                 }
-            }
-            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save folder.", Detail =  "The data has been saved.", Duration = 3000 });
-            dialogService.Close(result.Entity);     
+            }            
+            dialogService.Close(result.Entity);
         }
     }
 

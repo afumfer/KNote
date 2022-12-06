@@ -6,10 +6,10 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NavigationManager navigationManager
+@*@inject NavigationManager store*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
@@ -53,20 +53,23 @@
     {
         notes = null;
         var result = await store.Notes.GetHomeNotesAsync();
-        if (!result.IsValid)            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
-        else
+        //if (!result.IsValid)            
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
+        //else
+        //    notes = result.Entity;
+        if (result.IsValid)                    
             notes = result.Entity;
+
     }
 
     private void OnNoteView(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/{note.NoteId}/index");
+        store.NavigateTo($"notes/{note.NoteId}/index");
     }
 
     private void OnNoteEdit(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/index");
+        store.NavigateTo($"notes/edit/{note.NoteId}/index");
     }
 
     async Task OnNoteDelete(NoteInfoDto item)
@@ -79,11 +82,15 @@
         if (resultDialog == true)
         {
             var result = await store.Notes.DeleteAsync(item.NoteId);
-            if (!result.IsValid)
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail = result.Message, Duration = 12000 });
-            else
-            {
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail = "The note has been deleted.", Duration = 3000 });
+            //if (!result.IsValid)
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail = result.Message, Duration = 12000 });
+            //else
+            //{
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail = "The note has been deleted.", Duration = 3000 });
+            //    await LoadNotes();
+            //}
+            if (result.IsValid)                            
+            {            
                 await LoadNotes();
             }
         }

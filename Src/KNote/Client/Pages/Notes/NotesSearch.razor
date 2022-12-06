@@ -1,12 +1,12 @@
 ﻿@page "/notes/search"
 @page "/search"
 
-@inject IStore webApiService
-@inject NavigationManager navigationManager
-@inject HttpClient Http
+@inject IStore store
+@*@inject NavigationManager navigationManager*@
+@*@inject HttpClient Http*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -80,8 +80,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var url = navigationManager.Uri;
-        var queries = navigationManager.GetQueryStrings(url);
+        var url = store.GetUri();
+        var queries = store.GetQueryStrings(url);
 
         if (queries == null)
         {
@@ -174,7 +174,7 @@
     private async Task LoadListNotes()
     {
         var queryStrings = BuildQueryStrings();
-        navigationManager.NavigateTo("notes/search?" + queryStrings);
+        store.NavigateTo("notes/search?" + queryStrings);
         await GetFilteredNotes(queryStrings);
     }
 
@@ -185,13 +185,18 @@
         if (string.IsNullOrEmpty(queryString))
             queryString = $"pageNumber={paginationContext.CurrentPage}&pageSize={paginationContext.PageSize}";
 
-        var result = await webApiService.Notes.GetSearch(queryString);
+        var result = await store.Notes.GetSearch(queryString);
 
-        if (!result.IsValid)
-        {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });            
-        }
-        else
+        //if (!result.IsValid)
+        //{
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });            
+        //}
+        //else
+        //{
+        //    notes = result.Entity;
+        //    paginationContext.TotalCount = result.TotalCount;
+        //}
+        if (result.IsValid)
         {
             notes = result.Entity;
             paginationContext.TotalCount = result.TotalCount;
@@ -204,17 +209,17 @@
 
     private void OnView(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/{note.NoteId}/search");
+        store.NavigateTo($"notes/{note.NoteId}/search");
     }
 
     void OnNew()
     {
-        navigationManager.NavigateTo($"notes/new/search");
+        store.NavigateTo($"notes/new/search");
     }
 
     private void OnEdit(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/search");
+        store.NavigateTo($"notes/edit/{note.NoteId}/search");
     }
 
     async Task OnDelete(NoteInfoDto item)
@@ -226,14 +231,18 @@
 
         if (resultDialog == true)
         {
-            var result = await webApiService.Notes.DeleteAsync(item.NoteId);
-            if (!result.IsValid)            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
-            else
+            var result = await store.Notes.DeleteAsync(item.NoteId);
+            //if (!result.IsValid)            
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
+            //else
+            //{
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail =  "The note has been deleted.", Duration = 3000 });
+            //    await LoadListNotes();
+            //}            
+            if (result.IsValid)
             {
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail =  "The note has been deleted.", Duration = 3000 });
                 await LoadListNotes();
-            }            
+            }
         }
     }
 

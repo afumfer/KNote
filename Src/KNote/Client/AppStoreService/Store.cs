@@ -1,4 +1,6 @@
 ﻿using KNote.Client.AppStoreService.ClientDataServices;
+using KNote.Client.Helpers;
+using Microsoft.AspNetCore.Components;
 
 namespace KNote.Client.AppStoreService;
 
@@ -7,14 +9,16 @@ public class Store : IStore
     #region Private members
 
     private readonly HttpClient _httpClient;
+    private readonly NavigationManager _navigationManager;
 
     #endregion
 
     #region Constructor
 
-    public Store(HttpClient httpClient)
+    public Store(HttpClient httpClient, NavigationManager navigationManager)
     {
         _httpClient = httpClient;
+        _navigationManager = navigationManager;
         AppState = new AppState();
     }
 
@@ -33,6 +37,22 @@ public class Store : IStore
                 _users = new UserWebApiService(AppState, _httpClient);
             return _users;
         }
+    }
+
+    public void NavigateTo(string uri)
+    {
+        _navigationManager.NavigateTo(uri);
+    }
+
+    public string GetUri()
+    {
+        return _navigationManager.Uri;
+        
+    }
+
+    public Dictionary<string, string> GetQueryStrings(string url)
+    {                
+        return  _navigationManager.GetQueryStrings(url);
     }
 
     private INoteTypeWebApiService _noteTypes;
@@ -79,6 +99,7 @@ public class Store : IStore
         }
     }
 
-    #endregion 
+    #endregion
+
 }
 

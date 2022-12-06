@@ -1,8 +1,8 @@
 ﻿@page "/attributes/new"
 
-@inject IStore webApiService
+@inject IStore store
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -22,14 +22,20 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var result = await webApiService.NoteTypes.GetAllAsync();
-        if(!result.IsValid)            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types.", Detail =  result.Message, Duration = 12000 });
-        else
+        var result = await store.NoteTypes.GetAllAsync();
+        //if(!result.IsValid)            
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types.", Detail =  result.Message, Duration = 12000 });
+        //else
+        //{
+        //    noteTypes = result.Entity;
+        //    showForm = true;
+        //}
+        if (result.IsValid)
         {
             noteTypes = result.Entity;
             showForm = true;
         }
+
 
         kattribute.SetIsNew(true);
 
@@ -38,17 +44,33 @@ else
 
     private async Task OnNew()
     {
-        if (!kattribute.IsValid())            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail =  kattribute.GetErrorMessage(), Duration = 12000 });
-        else
+        //if (!kattribute.IsValid())            
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail =  kattribute.GetErrorMessage(), Duration = 12000 });
+        //else
+        //{
+        //    var result = await store.KAttributes.SaveAsync(kattribute);
+        //    if (!result.IsValid)                
+        //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail = result.Message, Duration = 12000 });
+        //    else
+        //    {                
+        //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New attribute.", Detail =  "The attribute has been created.", Duration = 3000 });
+        //        //dialogService.Close(kattribute);
+        //        dialogService.Close(result.Entity);
+        //    }
+        //}
+        if (kattribute.IsValid())
         {
-            var result = await webApiService.KAttributes.SaveAsync(kattribute);
-            if (!result.IsValid)                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail = result.Message, Duration = 12000 });
-            else
-            {                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New attribute.", Detail =  "The attribute has been created.", Duration = 3000 });
-                //dialogService.Close(kattribute);
+            var result = await store.KAttributes.SaveAsync(kattribute);
+            //if (!result.IsValid)
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save attribute.", Detail = result.Message, Duration = 12000 });
+            //else
+            //{
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New attribute.", Detail = "The attribute has been created.", Duration = 3000 });
+            //    //dialogService.Close(kattribute);
+            //    dialogService.Close(result.Entity);
+            //}
+            if (result.IsValid)
+            {
                 dialogService.Close(result.Entity);
             }
         }

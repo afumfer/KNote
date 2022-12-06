@@ -1,11 +1,11 @@
 ﻿@page "/notes/taskscalendar"
 @page "/taskscalendar"
 
-@inject IStore webApiService
-@inject NavigationManager navigationManager
+@inject IStore store
+@*@inject NavigationManager navigationManager*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -92,7 +92,7 @@
         loadData = $"Load data: {args.Start} - {args.End}";
 
         //
-        var result = await webApiService.Notes.GetStartedTasksByDateTimeAsync(args.Start, args.End);
+        var result = await store.Notes.GetStartedTasksByDateTimeAsync(args.Start, args.End);
 
         if (result.IsValid)
         {
@@ -146,7 +146,7 @@
 
     void OnNew()
     {
-        navigationManager.NavigateTo($"notes/new/taskscalendar");
+        store.NavigateTo($"notes/new/taskscalendar");
     }
 
     public class Appointment

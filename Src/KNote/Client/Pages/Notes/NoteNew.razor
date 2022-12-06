@@ -3,8 +3,8 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NavigationManager navigationManger
-@inject NotificationService notificationService
+@*@inject NavigationManager navigationManger*@
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
 
@@ -36,11 +36,16 @@ else
         appState.OnChange += StateHasChanged;
 
         var result = await store.NoteTypes.GetAllAsync();
-        if (!result.IsValid)
-        {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types.", Detail =  result.Message, Duration = 12000 });
-        }
-        else
+        //if (!result.IsValid)
+        //{
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note types.", Detail =  result.Message, Duration = 12000 });
+        //}
+        //else
+        //{
+        //    noteTypes = result.Entity;
+        //    await GetNewNote();
+        //}
+        if (result.IsValid)
         {
             noteTypes = result.Entity;
             await GetNewNote();
@@ -66,11 +71,23 @@ else
     private async Task GetNewNote()
     {
         var result = await store.Notes.NewAsync();
-        if (!result.IsValid)
-        {         
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note.", Detail =  result.Message, Duration = 12000 });
-        }
-        else
+        //if (!result.IsValid)
+        //{         
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note.", Detail =  result.Message, Duration = 12000 });
+        //}
+        //else
+        //{
+        //    note = result.Entity;
+        //    if (appState.SelectedFolder != null)
+        //    {
+        //        note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
+        //        note.FolderId = appState.SelectedFolder.FolderId;
+        //    }
+        //    note.ContentType = "markdown";
+        //    note.SetIsNew(true);
+        //    showForm = true;
+        //}
+        if (result.IsValid)
         {
             note = result.Entity;
             if (appState.SelectedFolder != null)
@@ -90,11 +107,37 @@ else
         {
             var result = await store.Notes.SaveAsync(note);
 
-            if (!result.IsValid)
-            {            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save new note.", Detail =  result.Message, Duration = 12000 });
-            }
-            else
+            //if (!result.IsValid)
+            //{            
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save new note.", Detail =  result.Message, Duration = 12000 });
+            //}
+            //else
+            //{
+            //    var entitySaved = result.Entity;
+
+            //    // TODO: Hack ... bucar una implementación más eficiente.
+            //    //       Se refrescan valores asignados automáticamente
+            //    //       en la capa de negocio.
+
+            //    foreach (var atrSaved in entitySaved.KAttributesDto)
+            //    {
+            //        foreach (var atrEdit in note.KAttributesDto)
+            //        {
+            //            if (atrEdit.KAttributeId == atrSaved.KAttributeId)
+            //            {
+            //                atrEdit.NoteKAttributeId = atrSaved.NoteKAttributeId;
+            //            }
+            //        }
+            //    }
+            //    note.NoteNumber = entitySaved.NoteNumber;
+            //    note.NoteId = entitySaved.NoteId;
+            //    note.SetIsNew(false);
+                             
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note.", Detail =  "The note has been created.", Duration = 3000 });
+            //    title = "Note edit";
+            //}
+
+            if (result.IsValid)
             {
                 var entitySaved = result.Entity;
 
@@ -115,8 +158,7 @@ else
                 note.NoteNumber = entitySaved.NoteNumber;
                 note.NoteId = entitySaved.NoteId;
                 note.SetIsNew(false);
-                             
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note.", Detail =  "The note has been created.", Duration = 3000 });
+                
                 title = "Note edit";
             }
         }
@@ -124,10 +166,10 @@ else
         {
             var result = await store.Notes.SaveAsync(note);
 
-            if (!result.IsValid)                            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note.", Detail =  result.Message, Duration = 12000 });
-            else                            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note.", Detail =  "The note has been created.", Duration = 3000 });
+            //if (!result.IsValid)                            
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note.", Detail =  result.Message, Duration = 12000 });
+            //else                            
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note.", Detail =  "The note has been created.", Duration = 3000 });
             
         }
     }
@@ -149,7 +191,7 @@ else
 
     private void OnExit()
     {
-        navigationManger.NavigateTo(PageReturn);
+        store.NavigateTo(PageReturn);
     }
 
     #endregion

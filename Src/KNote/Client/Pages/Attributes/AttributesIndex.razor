@@ -1,9 +1,9 @@
 ﻿@page "/attributes"
 
-@inject IStore webApiService
+@inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -57,11 +57,11 @@
 
     private async Task Load()
     {
-        var result = await webApiService.KAttributes.GetAllAsync();
+        var result = await store.KAttributes.GetAllAsync();
         if (result.IsValid)
             attributes = result.Entity;
-        else            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attributes.", Detail =  result.Message, Duration = 12000 });
+        //else            
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attributes.", Detail =  result.Message, Duration = 12000 });
 
         //StateHasChanged();
     }
@@ -95,13 +95,18 @@
 
         if (resultDialog == true)
         {
-            var result = await webApiService.KAttributes.DeleteAsync(item.KAttributeId);
-            if (!result.IsValid)            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note type.", Detail =  result.Message, Duration = 12000 });            
-            else
+            var result = await store.KAttributes.DeleteAsync(item.KAttributeId);
+            //if (!result.IsValid)            
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note type.", Detail =  result.Message, Duration = 12000 });            
+            //else
+            //{
+            //    attributes = null;
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note type.", Detail =  "The note type has been deleted.", Duration = 3000 });
+            //    await Load();
+            //}
+            if (result.IsValid)
             {
                 attributes = null;
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note type.", Detail =  "The note type has been deleted.", Duration = 3000 });
                 await Load();
             }
         }

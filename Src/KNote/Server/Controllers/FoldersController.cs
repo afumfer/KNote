@@ -47,8 +47,8 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("gettree")]   // GET api/folders/gettree
-        public async Task<IActionResult> GeTree()
+        [HttpGet("[action]")]   // GET api/folders/gettree
+        public async Task<IActionResult> Tree()
         {
             try
             {
@@ -86,24 +86,24 @@ namespace KNote.Server.Controllers
             }
         }
 
-        [HttpGet("{folderId}/[action]")]    // GET api/folders/folderId/getnotes
-        public async Task<IActionResult> GetNotes(Guid folderId)
-        {
-            try
-            {
-                var resApi = await _service.Notes.GetByFolderAsync(folderId);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<List<FolderInfoDto>>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
+        //[HttpGet("{folderId}/[action]")]    // GET api/folders/folderId/getnotes
+        //public async Task<IActionResult> GetNotes(Guid folderId)
+        //{
+        //    try
+        //    {
+        //        var resApi = await _service.Notes.GetByFolderAsync(folderId);
+        //        if (resApi.IsValid)
+        //            return Ok(resApi);
+        //        else
+        //            return BadRequest(resApi);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var kresApi = new Result<List<FolderInfoDto>>();
+        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
+        //        return BadRequest(kresApi);
+        //    }
+        //}
 
         [HttpPost]   // POST api/folders
         [HttpPut]    // PUT api/folders

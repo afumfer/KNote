@@ -4,10 +4,10 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NavigationManager navigationManager
+@*@inject NavigationManager navigationManager*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -112,13 +112,13 @@
             {
                 var f = foldersTree.Select(x => x).FirstOrDefault();
                 f.Selected = true;
-                await FolderSelected(f);
+                //await FolderSelected(f);
             }
         }
         else
         {
             foldersTree = appState.FoldersTree;
-            await FolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
+            //await FolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
         }
     }
 
@@ -164,11 +164,16 @@
 
         var result = await store.Notes.GetFilter(filter);
 
-        if (!result.IsValid)
-        {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });
-        }
-        else
+        //if (!result.IsValid)
+        //{
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });
+        //}
+        //else
+        //{
+        //    notes = result.Entity;
+        //    paginationContext.TotalCount = result.TotalCount;
+        //}
+        if (result.IsValid)
         {
             notes = result.Entity;
             paginationContext.TotalCount = result.TotalCount;
@@ -179,17 +184,17 @@
 
     void OnNew()
     {
-        navigationManager.NavigateTo($"notes/new/tree");
+        store.NavigateTo($"notes/new/tree");
     }
 
     void OnView(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/{note.NoteId}/tree");
+        store.NavigateTo($"notes/{note.NoteId}/tree");
     }
 
     void OnEdit(NoteInfoDto note)
     {
-        navigationManager.NavigateTo($"notes/edit/{note.NoteId}/tree");
+        store.NavigateTo($"notes/edit/{note.NoteId}/tree");
     }
 
     async Task OnDelete(NoteInfoDto item)
@@ -202,13 +207,17 @@
         if (resultDialog == true)
         {
             var result = await store.Notes.DeleteAsync(item.NoteId);
-            if (!result.IsValid)            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
-            else
+            //if (!result.IsValid)            
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
+            //else
+            //{
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail =  "The note has been deleted.", Duration = 3000 });
+            //    await LoadNotesWithPagination();
+            //}            
+            if (result.IsValid)
             {
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail =  "The note has been deleted.", Duration = 3000 });
                 await LoadNotesWithPagination();
-            }            
+            }
         }
     }
 

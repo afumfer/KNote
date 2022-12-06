@@ -21,26 +21,29 @@ public class UserWebApiService : BaseService, IUserWebApiService
             urlApi = $"api/users?pageNumber={pagination.PageNumber}&pageSize={pagination.PageSize}";
 
         // option 1
-        return await httpClient.GetFromJsonAsync<Result<List<UserDto>>>(urlApi);
+        //return await httpClient.GetFromJsonAsync<Result<List<UserDto>>>(urlApi);
 
         // option 2
-        //var httpRes = await _httpClient.GetAsync(urlApi);
-        //var res = await  httpRes.Content.ReadFromJsonAsync<Result<List<UserDto>>>();
+        var httpRes = await httpClient.GetAsync(urlApi);
+        //var res = await httpRes.Content.ReadFromJsonAsync<Result<List<UserDto>>>();
         //return res;
+        return await ProcessResultFromHttpResponse<List<UserDto>>(httpRes, "Get users");
     }
 
     public async Task<Result<UserDto>> DeleteAsync(Guid userId)
     {
         var httpRes = await httpClient.DeleteAsync($"api/users/{userId}");
 
-        var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
-
-        return res;
+        //var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
+        //return res;
+        return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Delete user", true);
     }
 
     public async Task<Result<UserDto>> GetAsync(Guid userId)
     {
-        return await httpClient.GetFromJsonAsync<Result<UserDto>>($"api/users/{userId}");
+        //return await httpClient.GetFromJsonAsync<Result<UserDto>>($"api/users/{userId}");
+        var httpRes = await httpClient.GetAsync($"api/users/{userId}");
+        return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Get user");
     }
 
     public async Task<Result<UserDto>> SaveAsync(UserDto user)
@@ -52,9 +55,9 @@ public class UserWebApiService : BaseService, IUserWebApiService
         else
             httpRes = await httpClient.PutAsJsonAsync($"api/users", user);
 
-        var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
-
-        return res;
+        //var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
+        //return res;
+        return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Save user", true);
     }
 
     public async Task<UserTokenDto> RegisterAsync(UserRegisterDto user)

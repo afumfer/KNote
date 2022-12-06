@@ -1,6 +1,6 @@
 ﻿@page "/types/new"
 
-@inject IStore webApiService
+@inject IStore store
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
@@ -13,18 +13,33 @@
 
     private async Task OnNew()
     {
-        if (!noteType.IsValid())            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note type.", Detail =  noteType.GetErrorMessage(), Duration = 12000 });
-        else
+        //if (!noteType.IsValid())            
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note type.", Detail =  noteType.GetErrorMessage(), Duration = 12000 });
+        //else
+        //{
+        //    var result = await store.NoteTypes.SaveAsync(noteType);
+        //    if(!result.IsValid)                
+        //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note type.", Detail =  result.Message, Duration = 12000 });
+        //    else
+        //    {                
+        //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note type.", Detail =  "The note type has been created.", Duration = 3000 });                
+        //        dialogService.Close(result.Entity);
+        //    }                       
+        //}
+        if (noteType.IsValid())            
         {
-            var result = await webApiService.NoteTypes.SaveAsync(noteType);
-            if(!result.IsValid)                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note type.", Detail =  result.Message, Duration = 12000 });
-            else
+            var result = await store.NoteTypes.SaveAsync(noteType);
+            //if(!result.IsValid)                
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New note type.", Detail =  result.Message, Duration = 12000 });
+            //else
+            //{                
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note type.", Detail =  "The note type has been created.", Duration = 3000 });                
+            //    dialogService.Close(result.Entity);
+            //}                       
+            if (result.IsValid)
             {                
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New note type.", Detail =  "The note type has been created.", Duration = 3000 });                
                 dialogService.Close(result.Entity);
-            }                       
+            }
         }
     }
 

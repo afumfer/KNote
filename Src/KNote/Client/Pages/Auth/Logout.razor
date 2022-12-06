@@ -2,7 +2,8 @@
 
 @using KNote.Client.Auth
 
-@inject NavigationManager navigationManager
+@inject IStore store
+@*@inject NavigationManager navigationManager*@
 @inject ILoginService loginService
 
 
@@ -12,6 +13,6 @@
     protected async override Task OnInitializedAsync()
     {
         await loginService.Logout();
-        navigationManager.NavigateTo("");
+        store.NavigateTo("");
     }
 }

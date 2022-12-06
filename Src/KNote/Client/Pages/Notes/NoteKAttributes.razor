@@ -1,4 +1,4 @@
-﻿@inject IStore webApiService
+﻿@inject IStore store
 @inject NotificationService notificationService
 
 
@@ -111,7 +111,7 @@
 
     public async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(Guid idAttribute)
     {
-        var result = await webApiService.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
+        var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
         {            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.Message, Duration = 12000 });
@@ -127,7 +127,7 @@
     {
         List<MultiSelectListDto> tagsSel;
 
-        var result = await webApiService.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
+        var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
         {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.Message, Duration = 12000 });

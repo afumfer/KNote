@@ -1,9 +1,9 @@
 ﻿@page "/users"
 
-@inject IStore webApiService
+@inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@inject NotificationService notificationService
+@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -58,12 +58,11 @@
 
 @code {
 
-    List<UserDto> users { get; set; }
-    //UserDto itemDelete;
-
-    PaginationContext paginationContext = new PaginationContext();
-    string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
-    RadzenPager pager;    
+    private List<UserDto> users { get; set; }
+    
+    private PaginationContext paginationContext = new PaginationContext();
+    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
+    private RadzenPager pager;
 
     protected async override Task OnInitializedAsync()
     {
@@ -84,14 +83,14 @@
     {
         paginationContext.CurrentPage = page;
 
-        var result = await webApiService.Users.GetAllAsync(paginationContext.PageIdentifier);
+        var result = await store.Users.GetAllAsync(paginationContext.PageIdentifier);
         if (result.IsValid)
         {
             users = result.Entity;
             paginationContext.TotalCount = result.TotalCount;            
         }
-        else        
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading users.", Detail =  result.Message, Duration = 12000 });
+        //else        
+        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading users.", Detail =  result.Message, Duration = 12000 });
 
         StateHasChanged();
     }
@@ -148,15 +147,21 @@
 
         if (resultDialog == true)
         {
-            var result = await webApiService.Users.DeleteAsync(item.UserId);
-            if (!result.IsValid)            
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete user.", Detail =  result.Message, Duration = 12000 });            
-            else
+            var result = await store.Users.DeleteAsync(item.UserId);
+            //if (!result.IsValid)            
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete user.", Detail =  result.Message, Duration = 12000 });            
+            //else
+            //{
+            //    users = null;
+            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete user.", Detail =  "The user has been deleted.", Duration = 3000 });
+            //    await Load();
+            //}            
+
+            if (result.IsValid)                            
             {
-                users = null;
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete user.", Detail =  "The user has been deleted.", Duration = 3000 });
+                users = null;                
                 await Load();
-            }            
+            }
         }
     }
     
