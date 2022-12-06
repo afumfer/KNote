@@ -7,52 +7,34 @@
 
 <EntityList List="Resources">
     <ItemsFull>
-        <table class="table table-sm table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th width="240px">Resource name</th>
-                    <th>Description</th>
-                    <th width="120px" class="text-center">Content</th>
-                    <th width="40px" class="text-center">Order</th>
-                    <th width="100px" class="text-center">(Actions)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Resources)
-                {
-                <tr>
-                    <td>
-                        <a href="@item.RelativeUrl" target="_blank">
-                            @item.NameOut
-                        </a>
-                    </td>
-                    <td>@item.Description</td>
-                    <td>                        
+        <RadzenDataGrid Data="@Resources" TItem="ResourceInfoDto" AllowColumnResize="true" Density="@Density.Compact">
+            <Columns>
+                <RadzenDataGridColumn TItem="ResourceInfoDto" Property="NameOut" Title="Resource name" />
+                <RadzenDataGridColumn TItem="ResourceInfoDto" Property="Description" Title="Description" />
+                <RadzenDataGridColumn TItem="ResourceInfoDto" Property="Content" Title="Content" Width="150px"TextAlign="TextAlign.Center">
+                    <Template Context="item">
                         <a href="@item.FullUrl" target="_blank" rel="noopener noreferrer">
                             <center>
                                 <img style="width: @(ImgWidth(item))px" src="@ImgPreview(item)" />
                             </center>
                         </a>
-                    </td>
-                    <td>
-                        <center>@item.Order</center>                        
-                    </td>
-                    <td>
-                        <span class="float-right">
-                            <RadzenButton Click="@(() => OnInsertInDesription.InvokeAsync(item))" Icon="insert_page_break"
-                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
-                                MouseEnter="@(args => tooltipService.Open(args, "Insert resource reference in note description ...", 
-                                    new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                            <RadzenButton Click="@(() => OnDelete.InvokeAsync(item))" Icon="delete"
-                                          ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                MouseEnter="@(args => tooltipService.Open(args, "Delete resource ...", 
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ResourceInfoDto" Property="Order" Title="Order" Width="80px" TextAlign="TextAlign.Center" />
+                <RadzenDataGridColumn TItem="ResourceInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
+                    <Template Context="data">
+                        <RadzenButton Click="@(() => OnInsertInDesription.InvokeAsync(data))" Icon="insert_page_break"
+                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                      MouseEnter="@(args => tooltipService.Open(args, "Insert resource reference in note description ...",
+                                    new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0" />
+                        <RadzenButton Click="@(() => OnDelete.InvokeAsync(data))" Icon="delete"
+                                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                      MouseEnter="@(args => tooltipService.Open(args, "Delete resource ...",
                                     new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                        </span>
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
     </ItemsFull>
 </EntityList>
 
