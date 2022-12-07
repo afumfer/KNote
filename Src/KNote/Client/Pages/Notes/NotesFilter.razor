@@ -2,14 +2,12 @@
 @page "/filter"
 
 @inject IStore store
-@*@inject NavigationManager navigationManager*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
-@*bg-light*@
+
 <div class="container-fluid border">
     <div class="row">
         <KntIndexHeader TextHead="Notes filter">
@@ -107,16 +105,6 @@
 
         filter.PageIdentifier = paginationContext.PageIdentifier;
         var result = await store.Notes.GetFilter(filter);
-
-        //if (!result.IsValid)
-        //{
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });
-        //}
-        //else
-        //{
-        //    paginationContext.TotalCount = result.TotalCount;
-        //    notes = result.Entity;
-        //}
         if (result.IsValid)
         {
             paginationContext.TotalCount = result.TotalCount;
@@ -149,13 +137,6 @@
         if (resultDialog == true)
         {
             var result = await store.Notes.DeleteAsync(item.NoteId);
-            //if (!result.IsValid)            
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
-            //else
-            //{
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note. ", Detail =  "The note has been deleted.", Duration = 3000 });
-            //    await LoadNotesWithPagination();
-            //}            
             if (result.IsValid)
             {
                 await LoadNotesWithPagination();

@@ -2,7 +2,6 @@
 
 @inject IStore store
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -23,15 +22,6 @@ else
     protected async override Task OnInitializedAsync()
     {
         var result = await store.NoteTypes.GetAsync(Guid.Parse(TypeId));
-        //if (!result.IsValid)
-        //{
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get note type.", Detail =  result.Message, Duration = 12000 });
-        //    dialogService.Close(null);
-        //}
-        //else
-        //{
-        //    noteType = result.Entity;
-        //}
         if (!result.IsValid)
         {            
             dialogService.Close(null);
@@ -52,29 +42,9 @@ else
         }
         else
         {
-            //if (!noteType.IsValid())         
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type.", Detail =  noteType.GetErrorMessage(), Duration = 12000 });
-            //else
-            //{
-            //    var result = await store.NoteTypes.SaveAsync(noteType);
-            //    if (!result.IsValid)                    
-            //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type.", Detail =  result.Message, Duration = 12000 });
-            //    else
-            //    {                    
-            //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note type.", Detail =  "The data has been saved.", Duration = 3000 });
-            //        dialogService.Close(result.Entity);
-            //    }
-            //}
             if (noteType.IsValid())
             {
                 var result = await store.NoteTypes.SaveAsync(noteType);
-                //if (!result.IsValid)
-                //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save note type.", Detail = result.Message, Duration = 12000 });
-                //else
-                //{
-                //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note type.", Detail = "The data has been saved.", Duration = 3000 });
-                //    dialogService.Close(result.Entity);
-                //}
                 if (result.IsValid)                                    
                 {                    
                     dialogService.Close(result.Entity);

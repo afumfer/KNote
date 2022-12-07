@@ -5,7 +5,6 @@
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -65,13 +64,6 @@
         selectedFolder = null;
 
         var result = await store.Folders.GetTreeAsync();
-        //if (result.IsValid)
-        //    foldersTree = result.Entity;
-        //else
-        //{
-        //    foldersTree = new List<FolderDto>();
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading folders tree.", Detail =  result.Message, Duration = 12000 });                
-        //}
         if (result.IsValid)
             foldersTree = result.Entity;
         else
@@ -92,8 +84,6 @@
         }
         else 
             OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
-
-        //StateHasChanged();
     }
 
     void OnFolderSelected(FolderDto f)
@@ -133,14 +123,6 @@
         if (resultDialog == true)
         {
             var result = await store.Folders.DeleteAsync(folder.FolderId);
-            //if (!result.IsValid)            
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete folder.", Detail =  result.Message, Duration = 12000 });            
-            //else
-            //{
-            //    foldersTree = null;
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete folder.", Detail =  "The folder has been deleted.", Duration = 3000 });
-            //    await Load();
-            //}            
             if (result.IsValid)                            
             {
                 foldersTree = null;                

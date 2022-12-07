@@ -2,7 +2,6 @@
 
 @inject IStore store
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -24,14 +23,6 @@ else
     protected async override Task OnInitializedAsync()
     {
         var result = await store.Users.GetAsync(Guid.Parse(UserId));
-        //if (!result.IsValid)
-        //{            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get user.", Detail =  result.Message, Duration = 12000 });
-        //    dialogService.Close(null);
-        //}
-        //else
-        //    user = result.Entity;
-
         if (!result.IsValid)                    
             dialogService.Close(null);        
         else
@@ -48,36 +39,14 @@ else
         }
         else
         {
-            //if (!user.IsValid())                            
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user.", Detail =  user.GetErrorMessage(), Duration = 12000 });
-            //else
-            //{
-            //    var result = await store.Users.SaveAsync(user);
-            //    if (!result.IsValid)                    
-            //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user.", Detail =  result.Message, Duration = 12000 });
-            //    else
-            //    {
-            //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save user.", Detail =  "The data has been saved.", Duration = 3000 });
-            //        dialogService.Close(result.Entity);
-            //    }
-            //}
-
             if (user.IsValid())                            
             {
                 var result = await store.Users.SaveAsync(user);
-                //if (!result.IsValid)
-                //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save user.", Detail = result.Message, Duration = 12000 });
-                //else
-                //{
-                //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save user.", Detail = "The data has been saved.", Duration = 3000 });
-                //    dialogService.Close(result.Entity);
-                //}
                 if (result.IsValid)                                    
                 {                    
                     dialogService.Close(result.Entity);
                 }
             }
-
         }
     }
 

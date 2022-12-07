@@ -3,7 +3,6 @@
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -56,11 +55,6 @@
     private async Task Load()
     {
         var result = await store.NoteTypes.GetAllAsync();
-        //if (result.IsValid)
-        //    noteTypes = result.Entity;
-        //else            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading note types.", Detail =  result.Message, Duration = 12000 });
-
         if (result.IsValid)
             noteTypes = result.Entity;
 
@@ -97,14 +91,6 @@
         if (resultDialog == true)
         {
             var result = await store.NoteTypes.DeleteAsync(item.NoteTypeId);
-            //if (!result.IsValid)            
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note type.", Detail =  result.Message, Duration = 12000 });            
-            //else
-            //{
-            //    noteTypes = null;
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note type.", Detail =  "The note type has been deleted.", Duration = 3000 });
-            //    await Load();
-            //}            
             if (result.IsValid)
             {
                 noteTypes = null;                

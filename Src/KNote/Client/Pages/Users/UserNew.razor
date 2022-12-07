@@ -1,7 +1,6 @@
 ﻿@page "/users/new"
 
 @inject IStore store
-@*@inject NotificationService notificationService*@
 @inject DialogService dialogService
 
 @attribute [Authorize(Roles = "Admin")]
@@ -13,29 +12,9 @@
 
     private async Task OnNew()
     {
-        //if (!user.IsValid())            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New user.", Detail =  user.GetErrorMessage(), Duration = 12000 });
-        //else
-        //{
-        //    var result = await store.Users.SaveAsync(user);
-        //    if (!result.IsValid)                
-        //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New user.", Detail =  result.Message, Duration = 12000 });
-        //    else
-        //    {
-        //        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New user.", Detail =  "The user has been created.", Duration = 3000 });
-        //        dialogService.Close(result.Entity);
-        //    }            
-        //}
         if (user.IsValid())
         {
             var result = await store.Users.SaveAsync(user);
-            //if (!result.IsValid)
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New user.", Detail = result.Message, Duration = 12000 });
-            //else
-            //{
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New user.", Detail = "The user has been created.", Duration = 3000 });
-            //    dialogService.Close(result.Entity);
-            //}
             if (result.IsValid)                            
             {                
                 dialogService.Close(result.Entity);

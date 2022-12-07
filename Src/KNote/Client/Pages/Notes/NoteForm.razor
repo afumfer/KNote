@@ -1,5 +1,4 @@
 ﻿@inject IStore webApiService
-@*@inject NavigationManager navigationManager*@
 @inject NotificationService notificationService
 @inject DialogService dialogService
 @inject TooltipService tooltipService
@@ -151,10 +150,6 @@
         {
             users = result.Entity;
         }
-        //else
-        //{
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get user for note edit.", Detail =  result.Message, Duration = 12000 });
-        //}
 
         oldNoteType = Note.NoteTypeId;
 
@@ -232,10 +227,6 @@
         if (panel == 2 && resources == null)
         {
             var result = await webApiService.Notes.GetResourcesAsync(Note.NoteId);
-            //if (!result.IsValid)                
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get resources for this note.", Detail =  result.Message, Duration = 12000 });
-            //else
-            //    resources = result.Entity;
             if (result.IsValid)
                 resources = result.Entity;
         }
@@ -243,10 +234,6 @@
         if (panel == 3 && tasks == null)
         {
             var result = await webApiService.Notes.GetNoteTasksAsync(Note.NoteId);
-            //if (!result.IsValid)                
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get tasks for this note.", Detail =  result.Message, Duration = 12000 });
-            //else
-            //    tasks = result.Entity;
             if (result.IsValid)
                 tasks = result.Entity;
         }
@@ -294,13 +281,6 @@
                 resultDialog.Name = Note.NoteId.ToString() + "_" + resultDialog.Name;
 
                 var resultApi = await webApiService.Notes.SaveResourceAsync(resultDialog);
-                //if (!resultApi.IsValid)            
-                //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save resource for this note.", Detail =  resultApi.Message, Duration = 12000 });
-                //else
-                //{
-                //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note resource.", Detail =  "The resource has been saved.", Duration = 3000 });
-                //    resources.Add(resultApi.Entity);                    
-                //}
                 if (resultApi.IsValid)
                 {
                     // TODO: This not refresh UI, ?? 
@@ -317,13 +297,6 @@
     private async Task OnDeleteResource(ResourceInfoDto resource)
     {
         var result = await webApiService.Notes.DeleteResourceAsync(resource.ResourceId);
-        //if (!result.IsValid)            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete resource for this note.", Detail =  result.Message, Duration = 12000 });
-        //else
-        //{            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Deleted note resource.", Detail =  "The resource has been deleted.", Duration = 3000 });
-        //    resources.Remove(resource);
-        //}
         if (result.IsValid)
         {
             // TODO: This not refresh UI, ??
@@ -387,14 +360,6 @@
         task.NoteId = Note.NoteId;
 
         var result = await webApiService.Notes.SaveNoteTaskAsync(task);
-        //if (!result.IsValid)            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save task for this note.", Detail =  result.Message, Duration = 12000 });
-        //else
-        //{
-        //    tasks = null;
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Save note task.", Detail =  "The note task has been saved.", Duration = 3000 });            
-        //    await ShowPanel(3);      
-        //}        
         if (result.IsValid)
         {
             tasks = null;
@@ -405,14 +370,6 @@
     private async Task OnDeleteTask(NoteTaskDto task)
     {
         var result = await webApiService.Notes.DeleteNoteTaskAsync(task.NoteTaskId);
-        //if (!result.IsValid)            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete task for this note.", Detail =  result.Message, Duration = 12000 });
-        //else
-        //{
-        //    tasks = null;
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note task.", Detail =  "The note task has been deleted.", Duration = 3000 });            
-        //    await ShowPanel(3);
-        //}
         if (result.IsValid)
         {
             tasks = null;
@@ -441,35 +398,6 @@
             return;
 
         var result = await webApiService.KAttributes.GetAllAsync(Note.NoteTypeId);
-        //if (!result.IsValid)
-        //{            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Get attributes for this note.", Detail =  result.Message, Duration = 12000 });
-        //}
-        //else
-        //{
-        //    var listA = result.Entity;
-
-        //    Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
-
-        //    foreach (var a in listA)
-        //    {
-        //        var newA = a.GetSimpleDto<NoteKAttributeDto>();
-        //        newA.NoteId = Note.NoteId;
-        //        newA.KAttributeNoteTypeId = Note.NoteTypeId;
-        //        Note.KAttributesDto.Add(newA);
-        //    }
-
-        //    foreach (var a in Note.KAttributesDto)
-        //    {
-        //        if (a.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
-        //            a.TabulatedValues = await noteKAttributes.GetTabulatedValues(a.KAttributeId);
-        //        if (a.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-        //            a.TagsValues = await noteKAttributes.GetTagsValues(a.KAttributeId, "");
-        //    }
-
-        //    Note.NoteTypeDto = NoteTypes.Where(_ => _.NoteTypeId == Note.NoteTypeId).FirstOrDefault();
-        //    oldNoteType = Note.NoteTypeId;
-        //}
         if (result.IsValid)
         {
             var listA = result.Entity;

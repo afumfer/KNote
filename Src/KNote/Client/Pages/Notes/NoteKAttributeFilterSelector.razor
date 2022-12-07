@@ -1,5 +1,4 @@
-﻿@*@inject IGenericDataService  dataService*@
-@inject IStore store
+﻿@inject IStore store
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
@@ -51,16 +50,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //var httpResponse = await dataService.Get<Result<List<KAttributeInfoDto>>>($"api/kattributes");
-        //if (!httpResponse.Error)
-        //{
-        //    listAtr = httpResponse.Response.Entity;
-        //}
-        //else
-        //{       
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute info.", Detail = await httpResponse.GetBody(), Duration = 12000 });
-        //}
-
         var result = await store.KAttributes.GetAllAsync();
         if (result.IsValid)
             listAtr = result.Entity;

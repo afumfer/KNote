@@ -2,11 +2,8 @@
 @page "/search"
 
 @inject IStore store
-@*@inject NavigationManager navigationManager*@
-@*@inject HttpClient Http*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
@@ -186,16 +183,6 @@
             queryString = $"pageNumber={paginationContext.CurrentPage}&pageSize={paginationContext.PageSize}";
 
         var result = await store.Notes.GetSearch(queryString);
-
-        //if (!result.IsValid)
-        //{
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail =  result.Message, Duration = 12000 });            
-        //}
-        //else
-        //{
-        //    notes = result.Entity;
-        //    paginationContext.TotalCount = result.TotalCount;
-        //}
         if (result.IsValid)
         {
             notes = result.Entity;
@@ -232,13 +219,6 @@
         if (resultDialog == true)
         {
             var result = await store.Notes.DeleteAsync(item.NoteId);
-            //if (!result.IsValid)            
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete note.", Detail =  result.Message, Duration = 12000 });            
-            //else
-            //{
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete note.", Detail =  "The note has been deleted.", Duration = 3000 });
-            //    await LoadListNotes();
-            //}            
             if (result.IsValid)
             {
                 await LoadListNotes();

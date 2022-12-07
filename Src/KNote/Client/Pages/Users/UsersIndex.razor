@@ -3,7 +3,6 @@
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -89,8 +88,6 @@
             users = result.Entity;
             paginationContext.TotalCount = result.TotalCount;            
         }
-        //else        
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading users.", Detail =  result.Message, Duration = 12000 });
 
         StateHasChanged();
     }
@@ -148,15 +145,6 @@
         if (resultDialog == true)
         {
             var result = await store.Users.DeleteAsync(item.UserId);
-            //if (!result.IsValid)            
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Delete user.", Detail =  result.Message, Duration = 12000 });            
-            //else
-            //{
-            //    users = null;
-            //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Delete user.", Detail =  "The user has been deleted.", Duration = 3000 });
-            //    await Load();
-            //}            
-
             if (result.IsValid)                            
             {
                 users = null;                

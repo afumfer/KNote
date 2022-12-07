@@ -4,7 +4,6 @@
 
 @inject IStore store 
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
@@ -41,54 +40,6 @@
     private async Task OnNew()
     {
         var result = await store.Folders.SaveAsync(folder);
-        //if (!result.IsValid)
-        //{
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder.", Detail =  folder.GetErrorMessage(), Duration = 12000 });
-        //}
-        //else
-        //{
-        //    if (appState.FoldersTree != null)
-        //    {
-        //        FolderDto toUpdate;
-        //        var newFolder = result.Entity.GetSimpleDto<FolderDto>();
-        //        newFolder.Selected = true;
-
-        //        // TODO: !!!
-        //        //appState.folderOldSelected.Selected = false;
-
-        //        if (newFolder.ParentId == null)
-        //        {
-        //            if (appState.FoldersTree != null)
-        //                appState.FoldersTree.Add(newFolder.GetSimpleDto<FolderDto>());
-        //        }
-        //        else
-        //        {
-        //            if (appState.FoldersIndex.TryGetValue((Guid)folder.ParentId, out toUpdate))
-        //            {
-        //                if (toUpdate != null)
-        //                {
-        //                    if (toUpdate.Expanded == true)
-        //                    {
-        //                        toUpdate.ChildFolders.Add(newFolder);
-        //                        toUpdate.Selected = false;
-        //                        toUpdate.Expanded = true;
-        //                    }
-        //                    else
-        //                    {
-        //                        appState.FoldersTree = null;
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    appState.FoldersTree = null;
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "New folder.", Detail =  "The note type has been created.", Duration = 3000 });
-        //    dialogService.Close(result.Entity);
-        //}
         if (result.IsValid)
         {
             if (appState.FoldersTree != null)
@@ -96,9 +47,6 @@
                 FolderDto toUpdate;
                 var newFolder = result.Entity.GetSimpleDto<FolderDto>();
                 newFolder.Selected = true;
-
-                // TODO: !!!
-                //appState.folderOldSelected.Selected = false;
 
                 if (newFolder.ParentId == null)
                 {

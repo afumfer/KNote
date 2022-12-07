@@ -1,10 +1,8 @@
 ﻿@page "/notes/{NoteId}/{PageReturn}"
 
 @inject IStore store
-@*@inject NavigationManager navigationManger*@
 @inject TooltipService tooltipService
 @inject DialogService dialogService
-@*@inject NotificationService notificationService*@
 
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
@@ -49,15 +47,6 @@ else
     protected async override Task OnInitializedAsync()
     {
         var result = await store.Notes.GetAsync(Guid.Parse(NoteId));
-        //if (!result.IsValid)
-        //{            
-        //    notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Load notes ...", Detail = result.Message, Duration = 12000 });
-        //    store.NavigateTo("index");
-        //}
-        //else
-        //{
-        //    note = result.Entity;
-        //}
         if (!result.IsValid)
         {            
             store.NavigateTo("index");
