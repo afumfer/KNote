@@ -212,6 +212,8 @@
             return;
         }
 
+        var xx = Note.KAttributesDto;
+
         if (saveAndNew)
             await OnValidSubmitWithNew.InvokeAsync(formContext);
         else

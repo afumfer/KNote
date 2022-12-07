@@ -76,39 +76,37 @@ else
 
     private async Task SaveNote()
     {
-        if (note.IsNew())
+        var result = await store.Notes.SaveAsync(note);
+
+        if (result.IsValid)
         {
-            var result = await store.Notes.SaveAsync(note);
+            var entitySaved = result.Entity;
 
-            if (result.IsValid)
+            // TODO: Hack ... bucar una implementación más eficiente.
+            //       Se refrescan valores asignados automáticamente
+            //       en la capa de negocio.
+
+            foreach (var atrSaved in entitySaved.KAttributesDto)
             {
-                var entitySaved = result.Entity;
-
-                // TODO: Hack ... bucar una implementación más eficiente.
-                //       Se refrescan valores asignados automáticamente
-                //       en la capa de negocio.
-
-                foreach (var atrSaved in entitySaved.KAttributesDto)
+                foreach (var atrEdit in note.KAttributesDto)
                 {
-                    foreach (var atrEdit in note.KAttributesDto)
+                    if (atrEdit.KAttributeId == atrSaved.KAttributeId)
                     {
-                        if (atrEdit.KAttributeId == atrSaved.KAttributeId)
-                        {
-                            atrEdit.NoteKAttributeId = atrSaved.NoteKAttributeId;
-                        }
+                        atrEdit.NoteKAttributeId = atrSaved.NoteKAttributeId;
+                        atrEdit.NoteId = atrSaved.NoteId;
                     }
                 }
+            }
+            if (note.IsNew())
+            {
                 note.NoteNumber = entitySaved.NoteNumber;
                 note.NoteId = entitySaved.NoteId;
                 note.SetIsNew(false);
-                
-                title = "Note edit";
+
+                title = "Note edit";                
             }
         }
-        else
-        {
-            var result = await store.Notes.SaveAsync(note);            
-        }
+        
     }
 
     #endregion
