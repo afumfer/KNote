@@ -29,9 +29,7 @@ public abstract class ResultBase
     {
         get { return (_errorList.Count == 0); }
     }
-
-    // public string Tag { get; set; }
-
+    
     #endregion
 
     #region Constructor
