@@ -8,95 +8,93 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Model
+namespace KNote.Model;
+
+public abstract class SmartModelDtoBase : ModelBase, INotifyPropertyChanged
 {
-    public abstract class SmartModelDtoBase : ModelBase, INotifyPropertyChanged
+    protected const string KMSG = "Attribute {0} is required. ";
+    
+    protected bool _isDirty = false;
+    protected bool _isNew = false;
+    protected bool _isDeleted = false;
+    
+    public virtual bool IsDirty(bool incluideChildsChek = true)
     {
-        protected const string KMSG = "Attribute {0} is required. ";
-        
-        protected bool _isDirty = false;
-        protected bool _isNew = false;
-        protected bool _isDeleted = false;
-        
-        public virtual bool IsDirty(bool incluideChildsChek = true)
-        {
-            bool _isChilsDirty = false;
+        bool _isChilsDirty = false;
 
-            if (incluideChildsChek)
+        if (incluideChildsChek)
+        {
+            var childs = GetChilds<SmartModelDtoBase>();
+            foreach (var child in childs)
             {
-                var childs = GetChilds<SmartModelDtoBase>();
-                foreach (var child in childs)
+                if (child.IsDirty() || child.IsNew() || child.IsDeleted())
                 {
-                    if (child.IsDirty() || child.IsNew() || child.IsDeleted())
-                    {
-                        _isChilsDirty = true;
-                        break;
-                    }
+                    _isChilsDirty = true;
+                    break;
                 }
-                if (_isDirty || _isChilsDirty)
-                    return true;
-                else
-                    return false;
             }
+            if (_isDirty || _isChilsDirty)
+                return true;
             else
-                return _isDirty;
-
+                return false;
         }
-        
-        public virtual void SetIsDirty(bool isDirty, bool forceChildsSet = true)
+        else
+            return _isDirty;
+
+    }
+    
+    public virtual void SetIsDirty(bool isDirty, bool forceChildsSet = true)
+    {
+        _isDirty = isDirty;
+
+        if (forceChildsSet)
         {
-            _isDirty = isDirty;
+            var childs = GetChilds<SmartModelDtoBase>();
 
-            if (forceChildsSet)
+            foreach (var child in childs)
             {
-                var childs = GetChilds<SmartModelDtoBase>();
-
-                foreach (var child in childs)
-                {
-                    child.SetIsDirty(isDirty);                
-                }
+                child.SetIsDirty(isDirty);                
             }
         }
-        
-        public virtual bool IsNew()
-        {
-            return _isNew;
-        }
-
-        public virtual void SetIsNew(bool isNew)
-        {
-            _isNew = isNew;
-        }
-
-        public virtual bool IsDeleted()
-        {
-            return _isDeleted;
-        }
-
-        public virtual void SetIsDeleted(bool isDeleted)
-        {
-            _isDeleted = isDeleted;
-        }
-        
-        #region INotifyPropertyChanged members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-        {
-            _isDirty = true;
-            if (PropertyChanged != null)                           
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));            
-        }
-
-        #endregion
-
     }
-
-    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = true)]
-    public class ChildModelDtoIgnoreAttribute : Attribute
+    
+    public virtual bool IsNew()
     {
-
+        return _isNew;
     }
+
+    public virtual void SetIsNew(bool isNew)
+    {
+        _isNew = isNew;
+    }
+
+    public virtual bool IsDeleted()
+    {
+        return _isDeleted;
+    }
+
+    public virtual void SetIsDeleted(bool isDeleted)
+    {
+        _isDeleted = isDeleted;
+    }
+    
+    #region INotifyPropertyChanged members
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected void OnPropertyChanged(string propertyName)
+    {
+        _isDirty = true;
+        if (PropertyChanged != null)                           
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));            
+    }
+
+    #endregion
+
+}
+
+[AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = true)]
+public class ChildModelDtoIgnoreAttribute : Attribute
+{
 
 }

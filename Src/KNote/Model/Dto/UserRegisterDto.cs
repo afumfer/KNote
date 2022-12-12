@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Model.Dto
-{ 
-    public class UserRegisterDto : UserDto
-    {        
-        [Required]
-        public string Password { get; set; }
-    }
+namespace KNote.Model.Dto;
+
+public class UserRegisterDto : UserDto
+{        
+    [Required]
+    public string Password { get; set; }
 }

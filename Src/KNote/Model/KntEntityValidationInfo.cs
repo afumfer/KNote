@@ -5,17 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Model
+namespace KNote.Model;
+
+public class KntEntityValidationInfo
 {
-    public class KntEntityValidationInfo
+    public string EntityDescription { get;  }
+    public List<ValidationResult> ValidationResults { get; }
+    
+    public KntEntityValidationInfo (string entityDescription, List<ValidationResult> validationResults)
     {
-        public string EntityDescription { get;  }
-        public List<ValidationResult> ValidationResults { get; }
-        
-        public KntEntityValidationInfo (string entityDescription, List<ValidationResult> validationResults)
-        {
-            EntityDescription = entityDescription;
-            ValidationResults = validationResults;
-        }
+        EntityDescription = entityDescription;
+        ValidationResults = validationResults;
     }
 }
