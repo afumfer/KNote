@@ -10,38 +10,12 @@ namespace KNote.Model
     {
         protected bool ExceptionHasHappened = false;
 
-        //protected void AddDBEntityErrorsToErrorsList(KntEntityValidationException ex, List<string> errList)
-        //{
-        //    foreach (var errEntity in ex.ValidationResults)
-        //        foreach (var err in errEntity.ValidationResults)
-        //            errList.Add($"{errEntity.ToString()} - {err.ErrorMessage}");
-        //}
-
         protected void AddDBEntityErrorsToResult(KntEntityValidationException ex, ResultBase result)
         {
             foreach (var errEntity in ex.ValidationResults)
                 foreach (var err in errEntity.ValidationResults)
                     result.AddErrorMessage($"{errEntity.ToString()} - {err.ErrorMessage}");
         }
-
-
-        //protected void AddExecptionsMessagesToErrorsList(Exception ex, List<string> errList)
-        //{            
-        //    Exception tmpEx = ex;            
-        //    string tmpStr = "";
-
-        //    ExceptionHasHappened = true;
-
-        //    while (tmpEx != null)
-        //    {
-        //        if (tmpEx.Message != tmpStr)
-        //        {
-        //            errList.Add(tmpEx.Message);
-        //            tmpStr = tmpEx.Message;
-        //        }
-        //        tmpEx = tmpEx.InnerException;
-        //    }            
-        //}
 
         protected void AddExecptionsMessagesToResult(Exception ex, ResultBase result)
         {
@@ -60,19 +34,6 @@ namespace KNote.Model
                 tmpEx = tmpEx.InnerException;
             }
         }
-
-
-        //protected void CopyErrorList(List<string> listSource, List<string> listTarget)
-        //{
-        //    foreach (string message in listSource)
-        //        listTarget.Add(message);
-        //}
-
-        //protected void CopyResultErrorList(ResultBase resultSource, ResultBase resultTarget)
-        //{            
-        //    resultTarget.AddListErrorMessage(resultSource.ListErrorMessage);
-        //}
-
 
         protected Result<T> ResultDomainAction<T>(Result<T> resultRepositoryAction)
         {
