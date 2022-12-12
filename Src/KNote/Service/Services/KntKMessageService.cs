@@ -35,11 +35,11 @@ namespace KNote.Service.Services
         //    {
         //        var resRep = await _repository.KMessages.GetAllAsync();
         //        resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageDto>()).ToList();
-        //        resService.ErrorList = resRep.ErrorList;
+        //        resService.AddListErrorMessage(resRep.ListErrorMessage);
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
         //    return ResultDomainAction(resService);
         //}
@@ -51,11 +51,11 @@ namespace KNote.Service.Services
         //    {
         //        var resRep = await _repository.KMessages.GetAllAsync( m => m.UserId == id);
         //        resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageDto>()).ToList();
-        //        resService.ErrorList = resRep.ErrorList;
+        //        resService.AddListErrorMessage(resRep.ListErrorMessage);
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
         //    return ResultDomainAction(resService);
         //}
@@ -67,11 +67,11 @@ namespace KNote.Service.Services
         //    {
         //        var resRep = await _repository.KMessages.GetAllAsync(m => m.NoteId == id);
         //        resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KMessageDto>()).ToList();
-        //        resService.ErrorList = resRep.ErrorList;
+        //        resService.AddListErrorMessage(resRep.ListErrorMessage);
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
         //    return ResultDomainAction(resService);
         //}
@@ -83,11 +83,11 @@ namespace KNote.Service.Services
         //    {                
         //        var resRep = await _repository.KMessages.GetAsync((object)id);
         //        resService.Entity = resRep.Entity?.GetSimpleDto<KMessageDto>();
-        //        resService.ErrorList = resRep.ErrorList;
+        //        resService.AddListErrorMessage(resRep.ListErrorMessage);
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
         //    return ResultDomainAction(resService);
         //}
@@ -146,11 +146,11 @@ namespace KNote.Service.Services
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
 
         //    resService.Entity = resRep.Entity?.GetSimpleDto<KMessageDto>();
-        //    resService.ErrorList = resRep.ErrorList;
+        //    resService.AddListErrorMessage(resRep.ListErrorMessage);
 
         //    return ResultDomainAction(resService);
         //}
@@ -167,14 +167,14 @@ namespace KNote.Service.Services
         //            if (resRep.IsValid)
         //                resService.Entity = resRep.Entity?.GetSimpleDto<KMessageDto>();
         //            else
-        //                resService.ErrorList = resRep.ErrorList;
+        //                resService.AddListErrorMessage(resRep.ListErrorMessage);
         //        }
         //        else
-        //            resService.ErrorList = resRep.ErrorList;
+        //            resService.AddListErrorMessage(resRep.ListErrorMessage);
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
         //    return ResultDomainAction(resService);
         //}

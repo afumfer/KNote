@@ -8,24 +8,21 @@ namespace KNote.Model
 {
     public abstract class ResultBase
     {
-        #region Fields
-
-        protected List<string> _errorList;
-
-        #endregion
-
         #region Properties
 
-        public string Message {
-            get { return GetErrorMessageString(); }
-            protected set { }
+        public string ErrorMessage {
+            get { return string.Join(" ", _errorList); }            
         }
 
-        // TODO: Pendiente de refactorizar esta propiedad (sólo debe ser de lectura ??)
-        public List<string> ErrorList
+        public List<string> ListErrorMessage
         {
-            get { return _errorList; }
-            set { _errorList = value; }
+            get { return  _errorList.Select( err => err).ToList(); }            
+        }
+        
+        private List<string> _errorList;
+        protected List<string> ErrorList
+        {
+            get { return _errorList; }            
         }
 
         public virtual bool IsValid
@@ -41,8 +38,7 @@ namespace KNote.Model
 
         public ResultBase()
         {
-            _errorList = new List<string>();
-            Message = "";
+            _errorList = new List<string>();            
         }
 
         #endregion 
@@ -54,9 +50,10 @@ namespace KNote.Model
             _errorList.Add(errorMessage);
         }
 
-        private string GetErrorMessageString()
+        public void AddListErrorMessage(IEnumerable<string> listErrorMessage)
         {
-            return string.Join(" ", _errorList);
+            foreach(var errMsg in listErrorMessage)
+                _errorList.Add(errMsg);
         }
 
         #endregion

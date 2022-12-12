@@ -152,7 +152,7 @@ namespace KNote.Server.Controllers
                 }
                 else
                 {
-                    return BadRequest(new UserTokenDto { success = kresService.IsValid, token = "", error = kresService.Message });
+                    return BadRequest(new UserTokenDto { success = kresService.IsValid, token = "", error = kresService.ErrorMessage });
                 }                    
             }
             catch (Exception ex)
@@ -172,7 +172,7 @@ namespace KNote.Server.Controllers
 
                 if (!kresRep.IsValid)
                 {                    
-                    return BadRequest(new UserTokenDto { success = false, token = "", error = kresRep.Message });
+                    return BadRequest(new UserTokenDto { success = false, token = "", error = kresRep.ErrorMessage });
                 }
 
                 return Ok(BuildToken(user));

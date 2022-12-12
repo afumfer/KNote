@@ -28,7 +28,7 @@ public class BaseService
                 appState.NotifySuccess(action, $"The action '{action}' has been executed.");
         }
         else
-            appState.NotifyError(action, res.Message);
+            appState.NotifyError(action, res.ErrorMessage);
         
         return res;
     }

@@ -114,7 +114,7 @@
         var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
         {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.ErrorMessage, Duration = 12000 });
             return new List<KAttributeTabulatedValueDto>();
         }
         else
@@ -130,7 +130,7 @@
         var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.Message, Duration = 12000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.ErrorMessage, Duration = 12000 });
             tagsSel = new List<MultiSelectListDto>();
         }
         else

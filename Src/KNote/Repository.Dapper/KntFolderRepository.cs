@@ -34,7 +34,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -55,7 +55,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -81,11 +81,11 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         }
         catch (KntEntityValidationException ex)
         {
-            AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+            AddDBEntityErrorsToResult(ex, result);
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
 
         return ResultDomainAction<List<FolderDto>>(result);
@@ -141,7 +141,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -178,7 +178,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
                 });
 
             if (r == 0)
-                result.ErrorList.Add("Entity not inserted");
+                result.AddErrorMessage("Entity not inserted");
 
             result.Entity = entity;
                 
@@ -186,7 +186,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -229,7 +229,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
                 });
 
             if (r == 0)
-                result.ErrorList.Add("Entity not updated");
+                result.AddErrorMessage("Entity not updated");
 
             result.Entity = entity;
 
@@ -237,7 +237,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -260,7 +260,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -276,7 +276,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }

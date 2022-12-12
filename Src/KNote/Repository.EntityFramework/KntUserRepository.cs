@@ -54,7 +54,7 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -73,7 +73,7 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -90,13 +90,13 @@ namespace KNote.Repository.EntityFramework
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
 
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -113,13 +113,13 @@ namespace KNote.Repository.EntityFramework
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
 
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -136,13 +136,13 @@ namespace KNote.Repository.EntityFramework
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserInternalDto>();
 
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -161,13 +161,13 @@ namespace KNote.Repository.EntityFramework
 
                 resService.Entity = resRep.Entity?.GetSimpleDto<UserInternalDto>();
 
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -186,13 +186,13 @@ namespace KNote.Repository.EntityFramework
                 var resGenRep = await users.AddAsync(newEntity);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }
@@ -223,13 +223,13 @@ namespace KNote.Repository.EntityFramework
                 }
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
 
             return ResultDomainAction(response);
@@ -245,13 +245,13 @@ namespace KNote.Repository.EntityFramework
 
                 var resGenRep = await users.DeleteAsync(id);
                 if (!resGenRep.IsValid)
-                    response.ErrorList = resGenRep.ErrorList;
+                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }

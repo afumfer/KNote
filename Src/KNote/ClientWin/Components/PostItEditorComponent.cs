@@ -151,7 +151,7 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
             }
             else
             {
-                View.ShowInfo(response.Message);
+                View.ShowInfo(response.ErrorMessage);
             }
 
             if (WindowPostIt != null)
@@ -189,7 +189,7 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
                     return true;
                 }
                 else
-                    View.ShowInfo(response.Message);
+                    View.ShowInfo(response.ErrorMessage);
             }
             catch (Exception ex)
             {

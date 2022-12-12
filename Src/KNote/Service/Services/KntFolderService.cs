@@ -99,11 +99,11 @@ namespace KNote.Service.Services
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
-                    result.ErrorList = resDelEntity.ErrorList;
+                    result.AddListErrorMessage(resDelEntity.ListErrorMessage);                
             }
             else
             {
-                result.ErrorList = resGetEntity.ErrorList;
+                result.AddListErrorMessage(resGetEntity.ListErrorMessage);                
             }
 
             return result;

@@ -32,7 +32,7 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -56,7 +56,7 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }            
         return ResultDomainAction(result);
     }
@@ -73,7 +73,7 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
             var r = await db.ExecuteAsync(sql.ToString(), 
                 new { entity.NoteTypeId, entity.Name, entity.Description, entity.ParenNoteTypeId });
             if (r == 0)                                   
-                result.ErrorList.Add("Entity not inserted");
+                result.AddErrorMessage("Entity not inserted");
 
             result.Entity = entity;
 
@@ -81,7 +81,7 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -101,14 +101,14 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
             var r = await db.ExecuteAsync(sql.ToString(),
                 new { entity.NoteTypeId, entity.Name, entity.Description, entity.ParenNoteTypeId });
             if (r == 0)
-                result.ErrorList.Add("Entity not updated");
+                result.AddErrorMessage("Entity not updated");
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -129,7 +129,7 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }

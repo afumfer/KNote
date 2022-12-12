@@ -35,11 +35,11 @@ namespace KNote.Service.Services
         //    {
         //        var resRep = await _repository.KEvents.GetAllAsync();
         //        resService.Entity = resRep.Entity?.Select(u => u.GetSimpleDto<KEventDto>()).ToList();
-        //        resService.ErrorList = resRep.ErrorList;
+        //        resService.AddListErrorMessage(resRep.ListErrorMessage);
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
         //    return ResultDomainAction(resService);
         //}
@@ -51,11 +51,11 @@ namespace KNote.Service.Services
         //    {
         //        var resRep = await _repository.KEvents.GetAsync((object)eventId);
         //        resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
-        //        resService.ErrorList = resRep.ErrorList;
+        //        resService.AddListErrorMessage(resRep.ListErrorMessage);
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
         //    return ResultDomainAction(resService);
         //}
@@ -113,11 +113,11 @@ namespace KNote.Service.Services
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
 
         //    resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
-        //    resService.ErrorList = resRep.ErrorList;
+        //    resService.AddListErrorMessage(resRep.ListErrorMessage);
 
         //    return ResultDomainAction(resService);
         //}
@@ -134,14 +134,14 @@ namespace KNote.Service.Services
         //            if (resRep.IsValid)
         //                resService.Entity = resRep.Entity?.GetSimpleDto<KEventDto>();
         //            else
-        //                resService.ErrorList = resRep.ErrorList;
+        //                resService.AddListErrorMessage(resRep.ListErrorMessage);
         //        }
         //        else
-        //            resService.ErrorList = resRep.ErrorList;
+        //            resService.AddListErrorMessage(resRep.ListErrorMessage);
         //    }
         //    catch (Exception ex)
         //    {
-        //        AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+        //        AddExecptionsMessagesToErrorsList(ex, resService);
         //    }
         //    return ResultDomainAction(resService);
         //}

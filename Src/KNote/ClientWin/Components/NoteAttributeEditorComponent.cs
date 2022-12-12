@@ -84,7 +84,7 @@ namespace KNote.ClientWin.Components
                     Finalize();
                 }
                 else
-                    View.ShowInfo(response.Message);
+                    View.ShowInfo(response.ErrorMessage);
             }
             catch (Exception ex)
             {

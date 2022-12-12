@@ -134,7 +134,7 @@ public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>,
                 // NotifyMessage($"Note {Model?.NoteNumber.ToString()} saved");
             }
             else            
-                View.ShowInfo(response.Message);
+                View.ShowInfo(response.ErrorMessage);
         }
         catch (Exception ex)
         {
@@ -406,7 +406,7 @@ public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>,
         }
         else if (res.Entity == EComponentResult.Error)
         {
-            View.ShowInfo($"Error: {res.Message}");
+            View.ShowInfo($"Error: {res.ErrorMessage}");
             return null;
         }
         else

@@ -90,7 +90,7 @@ namespace KNote.ClientWin.Components
                 }
                 else
                 {
-                    View.ShowInfo(response.Message);
+                    View.ShowInfo(response.ErrorMessage);
                     return false;
                 }
             }
@@ -140,7 +140,7 @@ namespace KNote.ClientWin.Components
                 }
                 else
                 {
-                    View.ShowInfo(response.Message);
+                    View.ShowInfo(response.ErrorMessage);
                     resLoad = await Task.FromResult<bool>(false); 
                 }
             }

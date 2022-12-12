@@ -49,7 +49,7 @@ namespace KNote.ClientWin.Components
                 }
                 else
                 {
-                    View.ShowInfo(response.Message);
+                    View.ShowInfo(response.ErrorMessage);
                     return false;
                 }
             }

@@ -34,13 +34,13 @@ namespace KNote.Repository.EntityFramework
                     .Select(t => t.GetSimpleDto<NoteTypeDto>())
                     .OrderBy(t => t.Name)
                     .ToList();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }
@@ -56,13 +56,13 @@ namespace KNote.Repository.EntityFramework
                 var resGenRep = await noteTypes.GetAsync((object)id);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<NoteTypeDto>();
-                response.ErrorList = resGenRep.ErrorList;
-
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
+                
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }
@@ -81,13 +81,13 @@ namespace KNote.Repository.EntityFramework
                 var resGenRep = await noteTypes.AddAsync(newEntity);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<NoteTypeDto>();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }
@@ -118,13 +118,13 @@ namespace KNote.Repository.EntityFramework
                 }
                 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<NoteTypeDto>();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             
             return ResultDomainAction(response);
@@ -140,13 +140,13 @@ namespace KNote.Repository.EntityFramework
 
                 var resGenRep = await noteTypes.DeleteAsync(id);
                 if (!resGenRep.IsValid)
-                    response.ErrorList = resGenRep.ErrorList;
+                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }

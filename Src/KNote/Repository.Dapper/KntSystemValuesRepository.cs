@@ -32,7 +32,7 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -55,7 +55,7 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -78,7 +78,7 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -95,14 +95,14 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
             var r = await db.ExecuteAsync(sql.ToString(),
                 new { entity.SystemValueId, entity.Scope, entity.Key, entity.Value });
             if (r == 0)
-                result.ErrorList.Add("Entity not inserted");
+                result.AddErrorMessage("Entity not inserted");
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -122,14 +122,14 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
             var r = await db.ExecuteAsync(sql.ToString(),
                 new { entity.SystemValueId, entity.Scope, entity.Key, entity.Value });
             if (r == 0)
-                result.ErrorList.Add("Entity not updated");
+                result.AddErrorMessage("Entity not updated");
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -150,7 +150,7 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }

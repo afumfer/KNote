@@ -133,7 +133,7 @@ namespace KNote.Service.Services
                 {
                     var res = await DeleteMessageAsync(item.KMessageId);
                     if (!res.IsValid)
-                        CopyErrorList(res.ErrorList, result.ErrorList);
+                        result.AddListErrorMessage(res.ListErrorMessage);
                 }
                 else if (item.IsDirty())
                 {
@@ -141,7 +141,7 @@ namespace KNote.Service.Services
                         item.NoteId = noteEdited.NoteId;
                     var res = await SaveMessageAsync(item, true);
                     if (!res.IsValid)
-                        CopyErrorList(res.ErrorList, result.ErrorList);
+                        result.AddListErrorMessage(res.ListErrorMessage);
                     else
                         result.Entity.Messages.Add(res.Entity);
                 }
@@ -156,7 +156,7 @@ namespace KNote.Service.Services
                 {
                     var res = await DeleteResourceAsync(item.ResourceId);
                     if (!res.IsValid)
-                        CopyErrorList(res.ErrorList, result.ErrorList);
+                        result.AddListErrorMessage(res.ListErrorMessage);
                 }
                 else if (item.IsDirty())
                 {
@@ -164,7 +164,7 @@ namespace KNote.Service.Services
                         item.NoteId = noteEdited.NoteId;
                     var res = await SaveResourceAsync(item, true);
                     if (!res.IsValid)
-                        CopyErrorList(res.ErrorList, result.ErrorList);
+                        result.AddListErrorMessage(res.ListErrorMessage);
                     else
                         result.Entity.Resources.Add(res.Entity);
                 }
@@ -179,7 +179,7 @@ namespace KNote.Service.Services
                 {
                     var res = await DeleteNoteTaskAsync(item.NoteTaskId);
                     if (!res.IsValid)
-                        CopyErrorList(res.ErrorList, result.ErrorList);
+                        result.AddListErrorMessage(res.ListErrorMessage);
                 }
                 else if (item.IsDirty())
                 {
@@ -187,7 +187,7 @@ namespace KNote.Service.Services
                         item.NoteId = noteEdited.NoteId;
                     var res = await SaveNoteTaskAsync(item, true);
                     if (!res.IsValid)
-                        CopyErrorList(res.ErrorList, result.ErrorList);
+                        result.AddListErrorMessage(res.ListErrorMessage);
                     else
                         result.Entity.Tasks.Add(res.Entity);
                 }
@@ -212,11 +212,11 @@ namespace KNote.Service.Services
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
-                    result.ErrorList = resDelEntity.ErrorList;
+                    result.AddListErrorMessage(resDelEntity.ListErrorMessage);
             }
             else
             {
-                result.ErrorList = resGetEntity.ErrorList;
+                result.AddListErrorMessage(resGetEntity.ListErrorMessage);
             }
 
             return result;
@@ -232,24 +232,24 @@ namespace KNote.Service.Services
             {
                 var res = await DeleteMessageAsync(item.KMessageId);
                 if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
+                    result.AddListErrorMessage(res.ListErrorMessage);
             }
             foreach (var item in neForDelete.Resources)
             {
                 var res = await DeleteResourceAsync(item.ResourceId);
                 if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
+                    result.AddListErrorMessage(res.ListErrorMessage);
             }
             foreach (var item in neForDelete.Tasks)
             {
                 var res = await DeleteNoteTaskAsync(item.NoteTaskId);
                 if (!res.IsValid)
-                    CopyErrorList(res.ErrorList, result.ErrorList);
+                    result.AddListErrorMessage(res.ListErrorMessage);
             }
 
             var resNote = await DeleteAsync(id);
             if (!resNote.IsValid)
-                CopyErrorList(resNote.ErrorList, result.ErrorList);
+                result.AddListErrorMessage(resNote.ListErrorMessage);
 
             result.Entity = neForDelete;
 
@@ -275,8 +275,8 @@ namespace KNote.Service.Services
             var res = new Result<List<ResourceInfoDto>>();
 
             var resGetResources = await GetResourcesAsync(noteId);
-            
-            res.ErrorList = resGetResources.ErrorList;
+                        
+            res.AddListErrorMessage(resGetResources.ListErrorMessage);
             res.Entity = new List<ResourceInfoDto>();
             foreach (var r in resGetResources.Entity)
                 res.Entity.Add(r.GetSimpleDto<ResourceInfoDto>());
@@ -365,8 +365,8 @@ namespace KNote.Service.Services
             var resource = resourceInfo.GetSimpleDto<ResourceDto>();
 
             var resSaveResource = await SaveResourceAsync(resource, forceNew);
-
-            res.ErrorList = resSaveResource.ErrorList;
+            
+            res.AddListErrorMessage(resSaveResource.ListErrorMessage);
             res.Entity = resSaveResource.Entity.GetSimpleDto<ResourceInfoDto>();
 
             return res;
@@ -461,11 +461,11 @@ namespace KNote.Service.Services
                     }
                 }
                 else
-                    result.ErrorList = resDelEntity.ErrorList;
+                    result.AddListErrorMessage(resDelEntity.ListErrorMessage);
             }
             else
             {
-                result.ErrorList = resGetEntity.ErrorList;
+                result.AddListErrorMessage(resGetEntity.ListErrorMessage);
             }
 
             return result;
@@ -475,8 +475,8 @@ namespace KNote.Service.Services
         {
             var res = new Result<ResourceInfoDto>();
 
-            var resDelete = await DeleteResourceAsync(id);
-            res.ErrorList = resDelete.ErrorList;
+            var resDelete = await DeleteResourceAsync(id);            
+            res.AddListErrorMessage(resDelete.ListErrorMessage);
             res.Entity = resDelete.Entity.GetSimpleDto<ResourceInfoDto>();
             return res;
         }
@@ -537,11 +537,11 @@ namespace KNote.Service.Services
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
-                    result.ErrorList = resDelEntity.ErrorList;
+                    result.AddListErrorMessage(resDelEntity.ListErrorMessage);
             }
             else
             {
-                result.ErrorList = resGetEntity.ErrorList;
+                result.AddListErrorMessage(resGetEntity.ListErrorMessage);
             }
 
             return result;
@@ -598,11 +598,11 @@ namespace KNote.Service.Services
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
-                    result.ErrorList = resDelEntity.ErrorList;
+                    result.AddListErrorMessage(resDelEntity.ListErrorMessage);
             }
             else
             {
-                result.ErrorList = resGetEntity.ErrorList;
+                result.AddListErrorMessage(resGetEntity.ListErrorMessage);
             }
 
             return result;

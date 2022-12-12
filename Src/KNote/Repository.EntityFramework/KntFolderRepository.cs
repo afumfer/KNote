@@ -32,13 +32,13 @@ namespace KNote.Repository.EntityFramework
 
                 var resRep = await folders.GetAllAsync();
                 resService.Entity = resRep.Entity?.Select(f => f.GetSimpleDto<FolderInfoDto>()).ToList();
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -78,13 +78,13 @@ namespace KNote.Repository.EntityFramework
                 var resultChilds = await GetTreeAsync(resService.Entity.FolderId);
                 resService.Entity.ChildFolders = resultChilds.Entity;
 
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -116,11 +116,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<List<FolderDto>>(result);
@@ -145,7 +145,7 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
 
             return ResultDomainAction(resService);
@@ -168,13 +168,13 @@ namespace KNote.Repository.EntityFramework
                 var resGenRep = await folders.AddAsync(newEntity);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<FolderDto>();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }
@@ -206,13 +206,13 @@ namespace KNote.Repository.EntityFramework
                 }
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<FolderDto>();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
 
             return ResultDomainAction(response);
@@ -228,13 +228,13 @@ namespace KNote.Repository.EntityFramework
 
                 var resGenRep = await folders.DeleteAsync(id);
                 if (!resGenRep.IsValid)
-                    response.ErrorList = resGenRep.ErrorList;
+                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }
@@ -251,7 +251,7 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
             return ResultDomainAction(result);
         }

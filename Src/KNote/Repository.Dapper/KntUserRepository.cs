@@ -49,7 +49,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -69,7 +69,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+            AddExecptionsMessagesToResult(ex, resService);
         }
 
         return ResultDomainAction(resService);
@@ -96,7 +96,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -122,7 +122,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -148,7 +148,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -167,7 +167,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
                 new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled });
 
             if (r == 0)
-                result.ErrorList.Add("Entity not inserted");
+                result.AddErrorMessage("Entity not inserted");
 
             result.Entity = entity;
 
@@ -175,7 +175,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -199,7 +199,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
                 new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled });
 
             if (r == 0)
-                result.ErrorList.Add("Entity not updated");
+                result.AddErrorMessage("Entity not updated");
 
             result.Entity = entity;
 
@@ -207,7 +207,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -226,7 +226,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
                 new { entity.UserId, entity.UserName, entity.EMail, entity.FullName, entity.RoleDefinition, entity.Disabled, entity.PasswordHash, entity.PasswordSalt });
 
             if (r == 0)
-                result.ErrorList.Add("Entity not inserted");
+                result.AddErrorMessage("Entity not inserted");
 
             result.Entity = entity;
 
@@ -234,7 +234,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -257,7 +257,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -286,7 +286,7 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }

@@ -87,7 +87,7 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         return await ProcessResultFromHttpResponse<List<NoteTaskDto>>(httpRes, "Get note tasks by datetime.");
     }
 
-    public async Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
+    public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
     {
         throw new NotImplementedException();
     }

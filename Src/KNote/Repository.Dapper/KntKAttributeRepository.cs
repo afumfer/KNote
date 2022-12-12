@@ -99,7 +99,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -119,11 +119,11 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                 var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
                 if (r == 0)
-                    result.ErrorList.Add("Entity not inserted");
+                    result.AddErrorMessage("Entity not inserted");
                 
                 var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
                 if (!resTabValues.IsValid)
-                    CopyErrorList(resTabValues.ErrorList, result.ErrorList);
+                    result.AddListErrorMessage(resTabValues.ListErrorMessage);
                 
                 result.Entity = entity;
 
@@ -134,7 +134,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -181,11 +181,11 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                 var r = await db.ExecuteAsync(sql.ToString(),
                     new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
                 if (r == 0)
-                    result.ErrorList.Add("Entity not updated");
+                    result.AddErrorMessage("Entity not updated");
 
                 var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
                 if (!resTabValues.IsValid)
-                    CopyErrorList(resTabValues.ErrorList, result.ErrorList);
+                    result.AddListErrorMessage(resTabValues.ListErrorMessage);
 
                 result.Entity = entity;
 
@@ -196,7 +196,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -217,7 +217,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -239,7 +239,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -297,7 +297,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }
@@ -340,7 +340,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                         new { tv.KAttributeTabulatedValueId, tv.KAttributeId, tv.Value, tv.Description, tv.Order });
 
                     if (r == 0)
-                        result.ErrorList.Add($"Entity tabulated value - {tv.KAttributeTabulatedValueId} - not updated.");
+                        result.AddErrorMessage($"Entity tabulated value - {tv.KAttributeTabulatedValueId} - not updated.");
 
                     if (!string.IsNullOrEmpty(idsTabValues))
                         idsTabValues += ", ";
@@ -359,7 +359,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+            AddExecptionsMessagesToResult(ex, result);
         }
         return ResultDomainAction(result);
     }

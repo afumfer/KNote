@@ -32,13 +32,13 @@ namespace KNote.Repository.EntityFramework
 
                 var resRep = await systemValues.GetAllAsync();
                 resService.Entity = resRep.Entity?.Select(sv => sv.GetSimpleDto<SystemValueDto>()).ToList();
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -53,13 +53,14 @@ namespace KNote.Repository.EntityFramework
 
                 var resRep = await systemValues.GetAsync(sv => sv.Scope == scope && sv.Key == key);
                 resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
+                
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -74,13 +75,13 @@ namespace KNote.Repository.EntityFramework
 
                 var resRep = await systemValues.GetAsync((object)id);
                 resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -99,13 +100,13 @@ namespace KNote.Repository.EntityFramework
                 var resGenRep = await systemValues.AddAsync(newEntity);
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }
@@ -136,13 +137,13 @@ namespace KNote.Repository.EntityFramework
                 }
 
                 response.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
-                response.ErrorList = resGenRep.ErrorList;
+                response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
 
             return ResultDomainAction(response);
@@ -158,13 +159,13 @@ namespace KNote.Repository.EntityFramework
 
                 var resGenRep = await systemValues.DeleteAsync(id);
                 if (!resGenRep.IsValid)
-                    response.ErrorList = resGenRep.ErrorList;
+                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
 

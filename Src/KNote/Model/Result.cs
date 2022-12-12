@@ -32,22 +32,6 @@ namespace KNote.Model
 
         #endregion
 
-        #region Override methods
-
-        // TODO: Penditne de comprobar y eliminar este código
-
-        //public override bool IsValid
-        //{
-        //    get
-        //    {
-        //        // TODO: Revisar / repensar la condición de que la entidasd tenga que ser 
-        //        //       distinta de null
-        //        return (base.IsValid && Entity != null);                
-        //    }
-        //}
-
-        #endregion
-
     }
 
 }

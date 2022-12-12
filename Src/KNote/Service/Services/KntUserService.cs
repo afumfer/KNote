@@ -70,11 +70,11 @@ namespace KNote.Service.Services
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
-                    result.ErrorList = resDelEntity.ErrorList;
+                    result.AddListErrorMessage(resDelEntity.ListErrorMessage);
             }
             else
             {
-                result.ErrorList = resGetEntity.ErrorList;
+                result.AddListErrorMessage(resGetEntity.ListErrorMessage);
             }
 
             return result;
@@ -138,14 +138,14 @@ namespace KNote.Service.Services
                     var resRep = await _repository.Users.AddInternalAsync(newEntity);
                     resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
                     if (!resRep.IsValid)
-                        CopyErrorList(resRep.ErrorList, resService.ErrorList);
+                        resService.AddListErrorMessage(resRep.ListErrorMessage);
                 }
             }
             catch (Exception ex)
             {
                 if (resService == null)
                     resService = new Result<UserDto>();
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }

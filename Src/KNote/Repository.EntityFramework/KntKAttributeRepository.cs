@@ -51,7 +51,7 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -73,13 +73,13 @@ namespace KNote.Repository.EntityFramework
                     .OrderBy(a => a.Order).ThenBy(a => a.Name)
                     .ToList();
 
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -101,13 +101,13 @@ namespace KNote.Repository.EntityFramework
                     .OrderBy(a => a.Order).ThenBy(a => a.Name)
                     .ToList();
 
-                resService.ErrorList = resRep.ErrorList;
+                resService.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -122,10 +122,10 @@ namespace KNote.Repository.EntityFramework
 
                 var resRep = await kattributes.GetAsync((object)id);
                 if (!resRep.IsValid)
-                    CopyErrorList(resRep.ErrorList, resService.ErrorList);
+                    resService.AddListErrorMessage(resRep.ListErrorMessage);
                 resRep = kattributes.LoadCollection(resRep.Entity, tv => tv.KAttributeTabulatedValues);
                 if (!resRep.IsValid)
-                    CopyErrorList(resRep.ErrorList, resService.ErrorList);
+                    resService.AddListErrorMessage(resRep.ListErrorMessage);
                 //
                 resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
                 resService.Entity.KAttributeValues = resRep.Entity?.KAttributeTabulatedValues?
@@ -135,7 +135,7 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
             return ResultDomainAction(resService);
         }
@@ -156,13 +156,13 @@ namespace KNote.Repository.EntityFramework
                     var resGenRep = await kattributes.AddAsync(newEntity);
 
                     response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
-                    response.ErrorList = resGenRep.ErrorList;
+                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                     foreach (var value in entity.KAttributeValues)
                     {
                         var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
                         if (!res.IsValid)
-                            response.ErrorList.Add(res.Message);
+                            response.AddErrorMessage(res.ErrorMessage);
                         response.Entity.KAttributeValues.Add(res.Entity);
                     }
 
@@ -173,7 +173,7 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
         }
@@ -221,14 +221,14 @@ namespace KNote.Repository.EntityFramework
                             {
                                 var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
                                 if (!res.IsValid)
-                                    response.ErrorList.Add(res.Message);
+                                    response.AddErrorMessage(res.ErrorMessage);
                                 response.Entity.KAttributeValues.Add(res.Entity);
                                 guidsUpdated.Add(value.KAttributeTabulatedValueId);
                             }
 
                             await DeleteNoContainsTabulateValueAsync(ctx, response.Entity.KAttributeId, guidsUpdated);
 
-                            response.ErrorList = resGenRep.ErrorList;
+                            response.AddListErrorMessage(resGenRep.ListErrorMessage);
                         }                      
                     }
                     else
@@ -244,7 +244,7 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
 
             return ResultDomainAction(response);
@@ -260,13 +260,13 @@ namespace KNote.Repository.EntityFramework
 
                 var resGenRep = await kattributes.DeleteAsync(id);
                 if (!resGenRep.IsValid)
-                    response.ErrorList = resGenRep.ErrorList;
+                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, response.ErrorList);
+                AddExecptionsMessagesToResult(ex, response);
             }
             return ResultDomainAction(response);
 
@@ -287,13 +287,13 @@ namespace KNote.Repository.EntityFramework
                     result.Entity = resRep.Entity.Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
                 }
                 else
-                    result.ErrorList = resRep.ErrorList;
+                    result.AddListErrorMessage(resRep.ListErrorMessage);
 
                 await CloseIsTempConnection(ctx);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
             return ResultDomainAction(result);
         }
@@ -343,11 +343,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, resService.ErrorList);
+                AddExecptionsMessagesToResult(ex, resService);
             }
 
             resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueDto>();
-            resService.ErrorList = resRep.ErrorList;
+            resService.AddListErrorMessage(resRep.ListErrorMessage);
 
             return ResultDomainAction(resService);
         }

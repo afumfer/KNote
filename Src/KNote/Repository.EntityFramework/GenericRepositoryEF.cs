@@ -77,11 +77,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -104,11 +104,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -133,11 +133,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -158,11 +158,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -184,11 +184,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<List<TEntity>>(result);
@@ -210,11 +210,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<List<TEntity>>(result);
@@ -273,11 +273,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<List<TEntity>>(result);
@@ -297,11 +297,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -320,11 +320,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -344,11 +344,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<IEnumerable<TEntity>>(result);
@@ -368,11 +368,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<IEnumerable<TEntity>>(result);
@@ -391,11 +391,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -413,11 +413,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -437,11 +437,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<IEnumerable<TEntity>>(result);
@@ -466,11 +466,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -496,11 +496,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {                
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -519,11 +519,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -542,11 +542,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -565,11 +565,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<IEnumerable<TEntity>>(result);
@@ -587,11 +587,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
@@ -610,11 +610,11 @@ namespace KNote.Repository.EntityFramework
             }
             catch (KntEntityValidationException ex)
             {
-                AddDBEntityErrorsToErrorsList(ex, result.ErrorList);
+                AddDBEntityErrorsToResult(ex, result);
             }
             catch (Exception ex)
             {
-                AddExecptionsMessagesToErrorsList(ex, result.ErrorList);
+                AddExecptionsMessagesToResult(ex, result);
             }
 
             return ResultDomainAction<TEntity>(result);
