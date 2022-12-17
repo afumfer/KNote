@@ -6,25 +6,32 @@ using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
 using System.Linq.Expressions;
-using KNote.Service;
 using KNote.Repository;
+using KNote.Service.Interfaces;
+using KNote.Service.Core;
 
 namespace KNote.Service.Services
 {
-    public class KntKAttributeService : DomainActionBase, IKntKAttributeService
+    public class KntKAttributeService : KntServiceBase, IKntKAttributeService
     {
         #region Fields
 
-        private readonly IKntRepository _repository;
+        // private readonly IKntRepository Repository;
 
         #endregion
 
         #region Constructor
 
-        protected internal KntKAttributeService(IKntRepository repository)
+        //protected internal KntKAttributeService(IKntRepository repository)
+        //{
+        //    Repository = repository;
+        //}
+
+        public KntKAttributeService(IKntService service) : base(service)
         {
-            _repository = repository;
+
         }
+
 
         #endregion
 
@@ -32,17 +39,17 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
         {
-            return await _repository.KAttributes.GetAllAsync();
+            return await Repository.KAttributes.GetAllAsync();
         }
 
         public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
         {
-            return await _repository.KAttributes.GetAllAsync(typeId);
+            return await Repository.KAttributes.GetAllAsync(typeId);
         }
 
         public async Task<Result<KAttributeDto>> GetAsync(Guid id)
         {
-            return await _repository.KAttributes.GetAsync(id);
+            return await Repository.KAttributes.GetAsync(id);
         }
 
         public async Task<Result<KAttributeDto>> SaveAsync(KAttributeDto entity)
@@ -50,11 +57,11 @@ namespace KNote.Service.Services
             if (entity.KAttributeId == Guid.Empty)
             {
                 entity.KAttributeId = Guid.NewGuid();
-                return await _repository.KAttributes.AddAsync(entity);
+                return await Repository.KAttributes.AddAsync(entity);
             }
             else
             {                
-                return await _repository.KAttributes.UpdateAsync(entity);
+                return await Repository.KAttributes.UpdateAsync(entity);
             }
         }
 
@@ -66,7 +73,7 @@ namespace KNote.Service.Services
 
             if (resGetEntity.IsValid)
             {
-                var resDelEntity = await _repository.KAttributes.DeleteAsync(id);
+                var resDelEntity = await Repository.KAttributes.DeleteAsync(id);
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
@@ -82,7 +89,7 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
         {
-            return await _repository.KAttributes.GetKAttributeTabulatedValuesAsync(attributeId);
+            return await Repository.KAttributes.GetKAttributeTabulatedValuesAsync(attributeId);
         }
 
         #endregion 

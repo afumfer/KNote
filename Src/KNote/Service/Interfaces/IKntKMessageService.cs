@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
 
-namespace KNote.Service
+namespace KNote.Service.Interfaces
 {
     public interface IKntKMessageService
     {

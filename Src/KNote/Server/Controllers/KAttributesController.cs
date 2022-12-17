@@ -5,14 +5,13 @@ using System.Threading.Tasks;
 using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-
+using KNote.Service.Core;
 
 namespace KNote.Server.Controllers
-{    
+{
     //[Authorize(Roles = "Administrators")]
     [ApiController]
     [Route("api/[controller]")]

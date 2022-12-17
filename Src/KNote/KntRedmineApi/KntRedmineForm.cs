@@ -1,5 +1,5 @@
 ﻿using KNote.Model.Dto;
-using KNote.Service;
+using KNote.Service.Core;
 using System.Xml.Serialization;
 
 namespace KntRedmineApi;

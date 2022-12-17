@@ -1,5 +1,6 @@
 ﻿using KNote.Model;
 using KNote.Service;
+using KNote.Service.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

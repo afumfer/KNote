@@ -4,10 +4,10 @@ using KNote.Model;
 using KNote.Model.Dto;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using KNote.Service;
 using Pandoc;
 using KNote.Repository.EntityFramework.Entities;
 using System.Globalization;
+using KNote.Service.Core;
 
 namespace KntRedmineApi;
 

@@ -1,6 +1,6 @@
 ﻿using KNote.Model;
 using KNote.Repository;
-using KNote.Service;
+using KNote.Service.Core;
 
 namespace KntRedmineApi;
 

@@ -6,24 +6,30 @@ using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
 using System.Linq.Expressions;
-using KNote.Service;
 using KNote.Repository;
+using KNote.Service.Interfaces;
+using KNote.Service.Core;
 
 namespace KNote.Service.Services
 {
-    public class KntFolderService : DomainActionBase, IKntFolderService
+    public class KntFolderService : KntServiceBase, IKntFolderService
     {
         #region Fields
 
-        private readonly IKntRepository _repository;
+        //private readonly IKntRepository Repository;
 
         #endregion
 
         #region Constructor
 
-        protected internal KntFolderService(IKntRepository repository)
+        //protected internal KntFolderService(IKntRepository repository)
+        //{
+        //    _repository = repository;
+        //}
+
+        public KntFolderService(IKntService service) : base(service)
         {
-            _repository = repository;
+            
         }
 
         #endregion
@@ -32,27 +38,27 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
         {
-            return await _repository.Folders.GetAllAsync();
+            return await Repository.Folders.GetAllAsync();
         }
         
         public async Task<Result<FolderDto>> GetAsync(Guid folderId)
         {
-            return await _repository.Folders.GetAsync(folderId);
+            return await Repository.Folders.GetAsync(folderId);
         }
 
         public async Task<Result<FolderDto>> GetAsync(int folderNumber)
         {
-            return await _repository.Folders.GetAsync(folderNumber);
+            return await Repository.Folders.GetAsync(folderNumber);
         }
 
         public async Task<Result<List<FolderDto>>> GetTreeAsync()
         {
-            return await _repository.Folders.GetTreeAsync();
+            return await Repository.Folders.GetTreeAsync();
         }
 
         public async Task<Result<FolderDto>> GetHomeAsync()
         {
-            return await _repository.Folders.GetHomeAsync();
+            return await Repository.Folders.GetHomeAsync();
         }
 
 
@@ -61,12 +67,12 @@ namespace KNote.Service.Services
             if (entity.FolderId == Guid.Empty)
             {
                 entity.FolderId = Guid.NewGuid();
-                var res = await _repository.Folders.AddAsync(entity);                
+                var res = await Repository.Folders.AddAsync(entity);                
                 return res;
             }
             else
             {
-                var res = await _repository.Folders.UpdateAsync(entity);                
+                var res = await Repository.Folders.UpdateAsync(entity);                
                 return res;
             }
         }
@@ -88,14 +94,14 @@ namespace KNote.Service.Services
                 if (resGetEntity.Entity.ChildFolders.Count > 0)                
                     result.AddErrorMessage("This folder has child folders. Delete is not possible.");
                                                         
-                if ((await _repository.Notes.CountNotesInFolder(id)).Entity > 0)
+                if ((await Repository.Notes.CountNotesInFolder(id)).Entity > 0)
                     result.AddErrorMessage("This folder has notes. Delete is not possible.");
 
                 if(!result.IsValid)
                     return result;
 
                 // Is OK then delete entity
-                var resDelEntity = await _repository.Folders.DeleteAsync(id);
+                var resDelEntity = await Repository.Folders.DeleteAsync(id);
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else

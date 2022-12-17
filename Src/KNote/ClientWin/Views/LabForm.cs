@@ -8,11 +8,11 @@ using System.Reflection;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
-using KNote.Service;
 using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
 using System.Runtime.Loader;
+using KNote.Service.Core;
 
 //using KntRedmineApi;
 //using Pandoc;

@@ -5,12 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using KNote.Service;
 using KNote.Model.Dto;
 using Microsoft.Extensions.Configuration;
 using KNote.Server.Helpers;
 using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
+using KNote.Service.Core;
 
 namespace KNote.Server.Controllers
 {

@@ -6,26 +6,32 @@ using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
 using System.Linq.Expressions;
-using KNote.Service;
 using KNote.Repository;
 using System.IO;
+using KNote.Service.Interfaces;
+using KNote.Service.Core;
 
 namespace KNote.Service.Services
 {
-    public class KntNoteService : DomainActionBase, IKntNoteService
+    public class KntNoteService : KntServiceBase, IKntNoteService
     {
         #region Fields
 
-        private readonly IKntRepository _repository;
+        // private readonly IKntRepository Repository;
 
         #endregion
 
         #region Constructor
 
-        protected internal KntNoteService(IKntRepository repository)
+        //protected internal KntNoteService(IKntRepository repository)
+        //{
+        //    Repository = repository;
+        //}
+        public KntNoteService(IKntService service) : base(service)
         {
-            _repository = repository;
+
         }
+
 
         #endregion
 
@@ -33,22 +39,22 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<NoteInfoDto>>> GetAllAsync()
         {
-            return await _repository.Notes.GetAllAsync();
+            return await Repository.Notes.GetAllAsync();
         }
         
         public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
         {
-            return await _repository.Notes.HomeNotesAsync();
+            return await Repository.Notes.HomeNotesAsync();
         }
 
         public async Task <Result<NoteDto>> GetAsync(Guid noteId)
         {
-            return await _repository.Notes.GetAsync(noteId);
+            return await Repository.Notes.GetAsync(noteId);
         }
 
         public async Task<Result<NoteDto>> GetAsync(int noteNumber)
         {
-            return await _repository.Notes.GetAsync(noteNumber);
+            return await Repository.Notes.GetAsync(noteNumber);
         }
 
         public async Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId)
@@ -66,29 +72,29 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
         {
-            return await _repository.Notes.GetByFolderAsync(folderId);
+            return await Repository.Notes.GetByFolderAsync(folderId);
         }
 
         public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
         {
-            return await _repository.Notes.GetFilter(notesFilter);
+            return await Repository.Notes.GetFilter(notesFilter);
         }
 
         public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
         {
-            return await _repository.Notes.GetSearch(notesSearch);
+            return await Repository.Notes.GetSearch(notesSearch);
         }
 
         public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entityInfo = null)
         {
-            return await _repository.Notes.NewAsync(entityInfo);
+            return await Repository.Notes.NewAsync(entityInfo);
         }
 
         public async Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entityInfo = null)
         {
             var result = new Result<NoteExtendedDto>();
             
-            var entity = (await _repository.Notes.NewAsync(entityInfo)).Entity.GetSimpleDto<NoteExtendedDto>();
+            var entity = (await Repository.Notes.NewAsync(entityInfo)).Entity.GetSimpleDto<NoteExtendedDto>();
             
             result.Entity = entity;
             return result;
@@ -99,14 +105,14 @@ namespace KNote.Service.Services
             if (entity.NoteId == Guid.Empty)
             {
                 entity.NoteId = Guid.NewGuid();
-                var res = await _repository.Notes.AddAsync(entity);                
+                var res = await Repository.Notes.AddAsync(entity);                
                 return res;
             }
             else
             {
                 if (updateStatus)
                     entity.InternalTags = GetNoteStatus((await GetNoteTasksAsync(entity.NoteId)).Entity, (await GetMessagesAsync(entity.NoteId)).Entity);
-                var res =  await _repository.Notes.UpdateAsync(entity);                
+                var res =  await Repository.Notes.UpdateAsync(entity);                
                 return res;
             }
         }
@@ -208,7 +214,7 @@ namespace KNote.Service.Services
 
             if (resGetEntity.IsValid)
             {
-                var resDelEntity = await _repository.Notes.DeleteAsync(id);
+                var resDelEntity = await Repository.Notes.DeleteAsync(id);
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
@@ -258,12 +264,12 @@ namespace KNote.Service.Services
 
         public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
         {
-            return await _repository.Notes.CompleteNoteAttributes(attributesNotes, noteId, noteTypeId);
+            return await Repository.Notes.CompleteNoteAttributes(attributesNotes, noteId, noteTypeId);
         }
 
         public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId)
         {
-            var res = await _repository.Notes.GetResourcesAsync(noteId);         
+            var res = await Repository.Notes.GetResourcesAsync(noteId);         
             if(res.IsValid)
                 foreach(var r in res.Entity)                    
                     ManageResourceContent(r);
@@ -286,7 +292,7 @@ namespace KNote.Service.Services
 
         public async Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId)
         {            
-            var res = await _repository.Notes.GetResourceAsync(resourceId);
+            var res = await Repository.Notes.GetResourceAsync(resourceId);
             if(res.IsValid)
                 ManageResourceContent(res.Entity);
             return res;
@@ -306,7 +312,7 @@ namespace KNote.Service.Services
             if (resource.ResourceId == Guid.Empty)
             {
                 resource.ResourceId = Guid.NewGuid();
-                result = await _repository.Notes.AddResourceAsync(resource);
+                result = await Repository.Notes.AddResourceAsync(resource);
             }
             else
             {
@@ -335,15 +341,15 @@ namespace KNote.Service.Services
 
                 if (!forceNew)
                 {
-                    result = await _repository.Notes.UpdateResourceAsync(resource);
+                    result = await Repository.Notes.UpdateResourceAsync(resource);
                 }
                 else
                 {
                     
                     if(checkExist.IsValid)
-                        result = await _repository.Notes.UpdateResourceAsync(resource);
+                        result = await Repository.Notes.UpdateResourceAsync(resource);
                     else
-                        result = await _repository.Notes.AddResourceAsync(resource);
+                        result = await Repository.Notes.AddResourceAsync(resource);
                 }
             }
 
@@ -377,13 +383,13 @@ namespace KNote.Service.Services
             if (resource == null)
                 return false;
 
-            string rootCacheResource = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
+            string rootCacheResource = Repository.RespositoryRef.ResourcesContainerCacheRootPath;
             if (string.IsNullOrEmpty(resource.Container))
             {
                 if (forceUpdateDto)
                 {
-                    resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
-                    resource.ContentInDB = _repository.RespositoryRef.ResourceContentInDB;
+                    resource.Container = Repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+                    resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
                 }
             }
                         
@@ -423,7 +429,7 @@ namespace KNote.Service.Services
 
         public string GetResourcePath(ResourceDto resource)
         {
-            string rootPath = _repository.RespositoryRef.ResourcesContainerCacheRootPath;
+            string rootPath = Repository.RespositoryRef.ResourcesContainerCacheRootPath;
             string relativePath;
             string fullPath;
 
@@ -440,16 +446,16 @@ namespace KNote.Service.Services
         {            
             var result = new Result<ResourceDto>();
 
-            var resGetEntity = await _repository.Notes.GetResourceAsync(id);
+            var resGetEntity = await Repository.Notes.GetResourceAsync(id);
             if (resGetEntity.IsValid)
             {
-                var resDelEntity = await _repository.Notes.DeleteResourceAsync(id);
+                var resDelEntity = await Repository.Notes.DeleteResourceAsync(id);
                 if (resDelEntity.IsValid)
                 {
                     result.Entity = resGetEntity.Entity;
                     try
                     {
-                        var repRef = _repository.RespositoryRef;
+                        var repRef = Repository.RespositoryRef;
                         var fullPathRec  = Path.Combine(repRef.ResourcesContainerCacheRootPath, result.Entity.Container, result.Entity.Name);
                         if(File.Exists(fullPathRec))
                             File.Delete(fullPathRec);
@@ -483,23 +489,23 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
         {
-            return await _repository.Notes.GetNoteTasksAsync(idNote);
+            return await Repository.Notes.GetNoteTasksAsync(idNote);
         }
 
         public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
         {
-            return await _repository.Notes.GetStartedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+            return await Repository.Notes.GetStartedTasksByDateTimeRageAsync(startDateTime, endDateTime);
         }
 
         public async Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
         {
-            return await _repository.Notes.GetEstimatedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+            return await Repository.Notes.GetEstimatedTasksByDateTimeRageAsync(startDateTime, endDateTime);
         }
 
 
         public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId)
         {            
-            return await _repository.Notes.GetNoteTaskAsync(noteTaskId);
+            return await Repository.Notes.GetNoteTaskAsync(noteTaskId);
         }
 
         public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entity, bool forceNew = false)
@@ -507,21 +513,21 @@ namespace KNote.Service.Services
             if (entity.NoteTaskId == Guid.Empty)
             {
                 entity.NoteTaskId = Guid.NewGuid();
-                return await _repository.Notes.AddNoteTaskAsync(entity);
+                return await Repository.Notes.AddNoteTaskAsync(entity);
             }
             else
             {
                 if (!forceNew)
                 {
-                    return await _repository.Notes.UpdateNoteTaskAsync(entity);
+                    return await Repository.Notes.UpdateNoteTaskAsync(entity);
                 }
                 else
                 {
                     var checkExist = await GetNoteTaskAsync(entity.NoteTaskId);
                     if (checkExist.IsValid)
-                        return await _repository.Notes.UpdateNoteTaskAsync(entity);
+                        return await Repository.Notes.UpdateNoteTaskAsync(entity);
                     else
-                        return await _repository.Notes.AddNoteTaskAsync(entity);
+                        return await Repository.Notes.AddNoteTaskAsync(entity);
                 }
             }
         }
@@ -530,10 +536,10 @@ namespace KNote.Service.Services
         {         
             var result = new Result<NoteTaskDto>();
 
-            var resGetEntity = await _repository.Notes.GetNoteTaskAsync(id);
+            var resGetEntity = await Repository.Notes.GetNoteTaskAsync(id);
             if (resGetEntity.IsValid)
             {
-                var resDelEntity = await _repository.Notes.DeleteNoteTaskAsync(id);
+                var resDelEntity = await Repository.Notes.DeleteNoteTaskAsync(id);
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
@@ -549,12 +555,12 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId)
         {
-            return await _repository.Notes.GetMessagesAsync(noteId);
+            return await Repository.Notes.GetMessagesAsync(noteId);
         }
 
         public async Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
         {
-            return await _repository.Notes.GetMessageAsync(messageId);
+            return await Repository.Notes.GetMessageAsync(messageId);
         }
 
         public async Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false)
@@ -564,21 +570,21 @@ namespace KNote.Service.Services
             if (entity.KMessageId == Guid.Empty)
             {
                 entity.KMessageId = Guid.NewGuid();                
-                resSavedEntity = await _repository.Notes.AddMessageAsync(entity);
+                resSavedEntity = await Repository.Notes.AddMessageAsync(entity);
             }
             else
             {
                 if (!forceNew)
                 {                    
-                    resSavedEntity = await _repository.Notes.UpdateMessageAsync(entity);
+                    resSavedEntity = await Repository.Notes.UpdateMessageAsync(entity);
                 }
                 else
                 {
                     var checkExist = await GetMessageAsync(entity.KMessageId);
                     if (checkExist.IsValid)                        
-                        resSavedEntity = await _repository.Notes.UpdateMessageAsync(entity);
+                        resSavedEntity = await Repository.Notes.UpdateMessageAsync(entity);
                     else                        
-                        resSavedEntity = await _repository.Notes.AddMessageAsync(entity);
+                        resSavedEntity = await Repository.Notes.AddMessageAsync(entity);
                 }
             }
 
@@ -594,7 +600,7 @@ namespace KNote.Service.Services
 
             if (resGetEntity.IsValid)
             {
-                var resDelEntity = await _repository.Notes.DeleteMessageAsync(messageId);
+                var resDelEntity = await Repository.Notes.DeleteMessageAsync(messageId);
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
@@ -610,7 +616,7 @@ namespace KNote.Service.Services
 
         public async Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId)
         {
-            return await _repository.Notes.GetWindowAsync(noteId, userId);
+            return await Repository.Notes.GetWindowAsync(noteId, userId);
         }
 
         public async Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false)
@@ -618,21 +624,21 @@ namespace KNote.Service.Services
             if (entity.WindowId == Guid.Empty)
             {
                 entity.WindowId = Guid.NewGuid();
-                return await _repository.Notes.AddWindowAsync(entity);
+                return await Repository.Notes.AddWindowAsync(entity);
             }
             else
             {
                 if (!forceNew)
                 {
-                    return await _repository.Notes.UpdateWindowAsync(entity);
+                    return await Repository.Notes.UpdateWindowAsync(entity);
                 }
                 else
                 {
                     var checkExist = await GetWindowAsync(entity.NoteId, entity.UserId);
                     if (checkExist.IsValid)
-                        return await _repository.Notes.UpdateWindowAsync(entity);
+                        return await Repository.Notes.UpdateWindowAsync(entity);
                     else
-                        return await _repository.Notes.AddWindowAsync(entity);
+                        return await Repository.Notes.AddWindowAsync(entity);
                 }
             }
         }
@@ -641,32 +647,32 @@ namespace KNote.Service.Services
         {
             var userId = Guid.Empty;
 
-            var userDto = (await _repository.Users.GetByUserNameAsync(userName)).Entity;
+            var userDto = (await Repository.Users.GetByUserNameAsync(userName)).Entity;
             if (userDto != null)
                 userId = userDto.UserId;
 
-            return await _repository.Notes.GetVisibleNotesIdAsync(userId);
+            return await Repository.Notes.GetVisibleNotesIdAsync(userId);
         }
 
         public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null)
         {
             var userId = Guid.Empty;
 
-            var userDto = (await _repository.Users.GetByUserNameAsync(userName)).Entity;
+            var userDto = (await Repository.Users.GetByUserNameAsync(userName)).Entity;
             if (userDto != null)
                 userId = userDto.UserId;
 
-            return await _repository.Notes.GetAlarmNotesIdAsync(userId, notificationType);
+            return await Repository.Notes.GetAlarmNotesIdAsync(userId, notificationType);
         }
 
         public async Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId)
         {
-            return await _repository.Notes.PatchFolder(noteId, folderId);
+            return await Repository.Notes.PatchFolder(noteId, folderId);
         }
 
         public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
         {                        
-            return await _repository.Notes.PatchChangeTags(noteId, oldTag, newTag);
+            return await Repository.Notes.PatchChangeTags(noteId, oldTag, newTag);
         }
 
         #endregion
@@ -723,14 +729,14 @@ namespace KNote.Service.Services
 
         private (string, string) GetResourceUrls(ResourceDto resource)
         {
-            string rootUrl = _repository.RespositoryRef.ResourcesContainerCacheRootUrl;
+            string rootUrl = Repository.RespositoryRef.ResourcesContainerCacheRootUrl;
             string relativeUrl;
             string fullUrl;
 
             if (string.IsNullOrEmpty(resource.Container))
             {
-                resource.Container = _repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
-                resource.ContentInDB = _repository.RespositoryRef.ResourceContentInDB;
+                resource.Container = Repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+                resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
             }
 
             if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))

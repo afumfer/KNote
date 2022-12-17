@@ -4,24 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using KNote.Model;
-using KNote.Service;
 using KNote.Repository;
+using KNote.Service.Core;
+using KNote.Service.Interfaces;
 
 namespace KNote.Service.Services
 {
-    public class KntKEventService : DomainActionBase, IKntKEventService
+    public class KntKEventService : KntServiceBase, IKntKEventService
     {
         #region Fields
 
-        private readonly IKntRepository _repository;
+        // private readonly IKntRepository _repository;
 
         #endregion
 
         #region Constructor
 
-        protected internal KntKEventService(IKntRepository repository)
+        //protected internal KntKEventService(IKntRepository repository)
+        //{
+        //    _repository = repository;
+        //}
+
+        public KntKEventService(IKntService service) : base(service)
         {
-            _repository = repository;
+
         }
 
         #endregion

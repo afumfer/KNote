@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
 using System.Linq.Expressions;
-using KNote.Service;
 using KNote.Repository;
+using KNote.Service.Interfaces;
+using KNote.Service.Core;
 
 namespace KNote.Service.Services
 {
-    public class KntUserService : DomainActionBase, IKntUserService
+    public class KntUserService : KntServiceBase, IKntUserService
     {
         #region Fields
 

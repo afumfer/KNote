@@ -16,8 +16,8 @@ using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model.Dto;
 using KNote.Model;
-using KNote.Service;
 using KntScript;
+using KNote.Service.Core;
 
 namespace KNote.ClientWin.Core;
 

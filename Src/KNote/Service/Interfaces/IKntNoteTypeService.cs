@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace KNote.Service
+namespace KNote.Service.Interfaces
 {
     public interface IKntNoteTypeService
     {

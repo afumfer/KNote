@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Service;
 using KNote.Repository;
+using KNote.Service.Core;
+using KNote.Service.Interfaces;
 
 namespace KNote.Service.Services
 {
-    public class KntSystemValuesService : DomainActionBase, IKntSystemValuesService
+    public class KntSystemValuesService : KntServiceBase, IKntSystemValuesService
     {
         #region Fields
 

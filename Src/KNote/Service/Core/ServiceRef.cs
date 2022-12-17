@@ -6,7 +6,7 @@ using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 using KNote.Service.Services;
 
-namespace KNote.Service
+namespace KNote.Service.Core
 {
     public class ServiceRef
     {
@@ -36,13 +36,11 @@ namespace KNote.Service
             get
             {
                 if (_repository == null)
-                {
                     // TODO: hack, implement here IoC.
-                    if (RepositoryRef.Orm == "Dapper")                        
+                    if (RepositoryRef.Orm == "Dapper")
                         _repository = new DP.KntRepository(RepositoryRef);
-                    else if (RepositoryRef.Orm == "EntityFramework")                        
+                    else if (RepositoryRef.Orm == "EntityFramework")
                         _repository = new EF.KntRepository(RepositoryRef);
-                }
                 return _repository;
             }
 

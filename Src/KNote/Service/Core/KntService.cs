@@ -11,21 +11,23 @@ using KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Service.Interfaces;
+using KNote.Service.Services;
 
-namespace KNote.Service.Services
+namespace KNote.Service.Core
 {
-    public class KntService: IKntService, IDisposable
+    public class KntService : IKntService, IDisposable
     {
-        #region Fields
-
-        protected IKntRepository _repository;
-
-        #endregion
-
         #region Properties
 
         public Guid IdServiceRef { get; }
-        
+
+        private readonly IKntRepository _repository;
+        public IKntRepository Repository
+        {
+            get { return _repository; }
+        }
+
         #endregion 
 
         #region Constructors
@@ -33,7 +35,7 @@ namespace KNote.Service.Services
         public KntService(IKntRepository repository)
         {
             _repository = repository;
-            IdServiceRef = Guid.NewGuid();                        
+            IdServiceRef = Guid.NewGuid();
         }
 
         #endregion
@@ -101,7 +103,8 @@ namespace KNote.Service.Services
             get
             {
                 if (_noteTypes == null)
-                    _noteTypes = new KntNoteTypeService(_repository);
+                    //_noteTypes = new KntNoteTypeService(_repository);
+                    _noteTypes = new KntNoteTypeService(this);
                 return _noteTypes;
             }
         }
@@ -122,7 +125,7 @@ namespace KNote.Service.Services
             {
                 var res = await SystemValues.GetAllAsync();
                 if (!res.IsValid)
-                    return await Task.FromResult<bool>(false);
+                    return await Task.FromResult(false);
 
                 if (!string.IsNullOrEmpty(newOwner))
                 {
@@ -131,18 +134,18 @@ namespace KNote.Service.Services
                     {
                         resGetU.Entity.UserName = newOwner;
                         var resUpdateU = await Users.SaveAsync(resGetU.Entity);
-                        if(!resUpdateU.IsValid)
-                            return await Task.FromResult<bool>(false);
+                        if (!resUpdateU.IsValid)
+                            return await Task.FromResult(false);
                     }
                     else
-                        return await Task.FromResult<bool>(false);
+                        return await Task.FromResult(false);
                 }
             }
             catch (Exception)
             {
-                return await Task.FromResult<bool>(false);
+                return await Task.FromResult(false);
             }
-            return await Task.FromResult<bool>(true);
+            return await Task.FromResult(true);
         }
 
         #endregion

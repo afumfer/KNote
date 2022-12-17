@@ -1,5 +1,3 @@
-using KNote.Service.Services;
-using KNote.Service;
 using KNote.Server.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -19,6 +17,7 @@ using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 using Microsoft.AspNetCore.Http;
 using KNote.Server.Hubs;
+using KNote.Service.Core;
 
 namespace KNote.Server
 {

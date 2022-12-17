@@ -11,11 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
-using KNote.Service;
 using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
 using System.Threading;
+using KNote.Service.Core;
 
 namespace KNote.Server.Controllers
 {

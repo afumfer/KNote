@@ -1,10 +1,10 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Service;
+using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
-    
+
 public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>, NoteExtendedDto>
 {
     #region Properties

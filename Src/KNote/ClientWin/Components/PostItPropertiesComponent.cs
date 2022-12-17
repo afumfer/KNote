@@ -9,9 +9,9 @@ using System.Windows.Forms;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Service;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components
 {

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using KNote.ClientWin.Core;
-using KNote.Service;
+using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views
 {

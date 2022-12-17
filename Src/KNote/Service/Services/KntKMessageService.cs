@@ -4,24 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using KNote.Model;
-using KNote.Service;
 using KNote.Repository;
+using KNote.Service.Core;
+using KNote.Service.Interfaces;
 
 namespace KNote.Service.Services
 {
-    public class KntKMessageService : DomainActionBase, IKntKMessageService
+    public class KntKMessageService : KntServiceBase, IKntKMessageService
     {
         #region Fields
 
-        private readonly IKntRepository _repository;
+        //private readonly IKntRepository _repository;
 
         #endregion
 
         #region Constructor
 
-        protected internal KntKMessageService(IKntRepository repository)
+        //protected internal KntKMessageService(IKntRepository repository)
+        //{
+        //    _repository = repository;
+        //}
+
+        public KntKMessageService(IKntService service) : base(service)
         {
-            _repository = repository;
+
         }
 
         #endregion

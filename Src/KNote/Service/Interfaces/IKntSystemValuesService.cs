@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
 
-namespace KNote.Service
+namespace KNote.Service.Interfaces
 {
     public interface IKntSystemValuesService
     {
