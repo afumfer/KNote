@@ -16,16 +16,21 @@ namespace KNote.Service.Services
     {
         #region Fields
 
-        private readonly IKntRepository _repository;
+        // private readonly IKntRepository Repository;
 
         #endregion
 
         #region Constructor
 
-        protected internal KntUserService(IKntRepository repository)
+        //protected internal KntUserService(IKntRepository repository)
+        //{
+        //    Repository = repository;
+        //}
+        public KntUserService(IKntService service) : base(service)
         {
-            _repository = repository;
+
         }
+
 
         #endregion
 
@@ -33,17 +38,17 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
         {
-            return await _repository.Users.GetAllAsync(pagination);
+            return await Repository.Users.GetAllAsync(pagination);
         }
 
         public async Task<Result<UserDto>> GetAsync(Guid userId)
         {
-            return await _repository.Users.GetAsync(userId);
+            return await Repository.Users.GetAsync(userId);
         }
 
         public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
         {
-            return await _repository.Users.GetByUserNameAsync(userName);
+            return await Repository.Users.GetByUserNameAsync(userName);
         }
 
         public async Task<Result<UserDto>> SaveAsync(UserDto user)
@@ -51,11 +56,11 @@ namespace KNote.Service.Services
             if (user.UserId == Guid.Empty)
             {
                 user.UserId = Guid.NewGuid();
-                return await _repository.Users.AddAsync(user);
+                return await Repository.Users.AddAsync(user);
             }
             else
             {
-                return await _repository.Users.UpdateAsync(user);
+                return await Repository.Users.UpdateAsync(user);
             }
         }
 
@@ -67,7 +72,7 @@ namespace KNote.Service.Services
 
             if (resGetEntity.IsValid)
             {
-                var resDelEntity = await _repository.Users.DeleteAsync(id);
+                var resDelEntity = await Repository.Users.DeleteAsync(id);
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else
@@ -92,7 +97,7 @@ namespace KNote.Service.Services
                 return resService;
             }
             
-            var resRep = await _repository.Users.GetInternalAsync(username);
+            var resRep = await Repository.Users.GetInternalAsync(username);
 
             if (!resRep.IsValid)
             {
@@ -123,7 +128,7 @@ namespace KNote.Service.Services
                 if (string.IsNullOrWhiteSpace(password))
                     throw new AppException("Password is required");
                 
-                if ((await _repository.Users.GetInternalAsync(userRegisterInfo.UserName)).Entity != null)
+                if ((await Repository.Users.GetInternalAsync(userRegisterInfo.UserName)).Entity != null)
                         throw new AppException("Username \"" + userRegisterInfo.UserName + "\" is already taken");
                 else
                 {                                        
@@ -136,7 +141,7 @@ namespace KNote.Service.Services
                     newEntity.PasswordHash = passwordHash;
                     newEntity.PasswordSalt = passwordSalt;
                     
-                    var resRep = await _repository.Users.AddInternalAsync(newEntity);
+                    var resRep = await Repository.Users.AddInternalAsync(newEntity);
                     resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
                     if (!resRep.IsValid)
                         resService.AddListErrorMessage(resRep.ListErrorMessage);

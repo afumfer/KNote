@@ -15,15 +15,20 @@ namespace KNote.Service.Services
     {
         #region Fields
 
-        private readonly IKntRepository _repository;
+        //private readonly IKntRepository Repository;
 
         #endregion
 
         #region Constructor
 
-        protected internal KntSystemValuesService(IKntRepository repository)
+        //protected internal KntSystemValuesService(IKntRepository repository)
+        //{
+        //    _repository = repository;
+        //}
+
+        public KntSystemValuesService(IKntService service) : base(service)
         {
-            _repository = repository;
+
         }
 
         #endregion
@@ -32,17 +37,17 @@ namespace KNote.Service.Services
 
         public async Task<Result<List<SystemValueDto>>> GetAllAsync()
         {
-            return await _repository.SystemValues.GetAllAsync();
+            return await Repository.SystemValues.GetAllAsync();
         }
 
         public async Task<Result<SystemValueDto>> GetAsync(string scope, string key)
         {
-            return await _repository.SystemValues.GetAsync(scope, key);
+            return await Repository.SystemValues.GetAsync(scope, key);
         }
 
         public async Task<Result<SystemValueDto>> GetAsync(Guid id)
         {
-            return await _repository.SystemValues.GetAsync(id);
+            return await Repository.SystemValues.GetAsync(id);
         }
 
         public async Task<Result<SystemValueDto>> SaveAsync(SystemValueDto entity)
@@ -50,11 +55,11 @@ namespace KNote.Service.Services
             if (entity.SystemValueId == Guid.Empty)
             {
                 entity.SystemValueId = Guid.NewGuid();
-                return await _repository.SystemValues.AddAsync(entity);
+                return await Repository.SystemValues.AddAsync(entity);
             }
             else
             {
-                return await _repository.SystemValues.UpdateAsync(entity);
+                return await Repository.SystemValues.UpdateAsync(entity);
             }
         }
 
@@ -66,7 +71,7 @@ namespace KNote.Service.Services
 
             if (resGetEntity.IsValid)
             {
-                var resDelEntity = await _repository.SystemValues.DeleteAsync(id);
+                var resDelEntity = await Repository.SystemValues.DeleteAsync(id);
                 if (resDelEntity.IsValid)
                     result.Entity = resGetEntity.Entity;
                 else

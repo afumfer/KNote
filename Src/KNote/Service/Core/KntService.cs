@@ -48,7 +48,7 @@ namespace KNote.Service.Core
             get
             {
                 if (_users == null)
-                    _users = new KntUserService(_repository);
+                    _users = new KntUserService(this);
                 return _users;
             }
         }
@@ -59,7 +59,7 @@ namespace KNote.Service.Core
             get
             {
                 if (_kattributes == null)
-                    _kattributes = new KntKAttributeService(_repository);
+                    _kattributes = new KntKAttributeService(this);
                 return _kattributes;
             }
         }
@@ -70,7 +70,7 @@ namespace KNote.Service.Core
             get
             {
                 if (_systemValues == null)
-                    _systemValues = new KntSystemValuesService(_repository);
+                    _systemValues = new KntSystemValuesService(this);
                 return _systemValues;
             }
         }
@@ -81,7 +81,7 @@ namespace KNote.Service.Core
             get
             {
                 if (_folders == null)
-                    _folders = new KntFolderService(_repository);
+                    _folders = new KntFolderService(this);
                 return _folders;
             }
         }
@@ -92,7 +92,7 @@ namespace KNote.Service.Core
             get
             {
                 if (_notes == null)
-                    _notes = new KntNoteService(_repository);
+                    _notes = new KntNoteService(this);
                 return _notes;
             }
         }
