@@ -52,18 +52,25 @@ namespace KNote.Service.Core
             get
             {
                 if (_service == null)
+                {
                     _service = new KntService(Repository);
+                    _service.UserIdentityName = UserIdentityName;
+                }
                 return _service;
             }
         }
+
+        public string UserIdentityName { get; init; }
+
 
         #endregion
 
         #region Constructor
 
-        public ServiceRef(RepositoryRef repositoryRef)
+        public ServiceRef(RepositoryRef repositoryRef, string userIdentityName)
         {
             RepositoryRef = repositoryRef;
+            UserIdentityName = userIdentityName;
         }
 
         #endregion 

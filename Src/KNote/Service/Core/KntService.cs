@@ -13,6 +13,7 @@ using KNote.Model.Dto;
 using KNote.Model;
 using KNote.Service.Interfaces;
 using KNote.Service.Services;
+using System.Threading;
 
 namespace KNote.Service.Core
 {
@@ -35,7 +36,7 @@ namespace KNote.Service.Core
         public KntService(IKntRepository repository)
         {
             _repository = repository;
-            IdServiceRef = Guid.NewGuid();
+            IdServiceRef = Guid.NewGuid();            
         }
 
         #endregion
@@ -102,8 +103,7 @@ namespace KNote.Service.Core
         {
             get
             {
-                if (_noteTypes == null)
-                    //_noteTypes = new KntNoteTypeService(_repository);
+                if (_noteTypes == null)                    
                     _noteTypes = new KntNoteTypeService(this);
                 return _noteTypes;
             }
@@ -113,6 +113,8 @@ namespace KNote.Service.Core
         {
             get { return _repository.RespositoryRef; }
         }
+
+        public string UserIdentityName { get; set; }
 
         public async Task<bool> TestDbConnection()
         {
@@ -154,7 +156,7 @@ namespace KNote.Service.Core
 
         public void Dispose()
         {
-            // TODO: call dispose all properties with reflection ?? 
+            // TODO: call dispose all properties
 
             if (_repository != null)
                 _repository.Dispose();

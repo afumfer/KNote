@@ -11,23 +11,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using KNote.Service.Core;
+using Microsoft.AspNetCore.Http;
+using System.Threading;
 
 namespace KNote.Server.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class NotesController : ControllerBase
     {
-        private IKntService _service { get; set; }
-        private readonly AppSettings _appSettings;
+        private readonly IKntService _service;
         private readonly IFileStore _fileStore;
 
-        public NotesController(IKntService service, IOptions<AppSettings> appSettings, IFileStore fileStore)
+        public NotesController(IKntService service, IFileStore fileStore, IHttpContextAccessor httpContextAccessor)
         {
-            _service = service;
-            _appSettings = appSettings.Value;
+            _service = service;            
             _fileStore = fileStore;
+
+            _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
 
             if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerCacheRootPath))
                 _service.RepositoryRef.ResourcesContainerCacheRootPath = _fileStore.GetResourcesContainerRootPath();
@@ -55,8 +57,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpPost("[action]")]   // POST api/notes/filter        
-        [Authorize(Roles = "Admin, Staff, ProjecManager")]
-        //[Authorize]
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]        
         public async Task <IActionResult> Filter([FromBody] NotesFilterDto notesFilter)
         {
             try
@@ -104,7 +105,7 @@ namespace KNote.Server.Controllers
             }
         }
 
-        //[Authorize]
+        [AllowAnonymous]
         [HttpGet("[action]")]   // GET api/notes/homenotes
         public async Task<IActionResult> HomeNotes()
         {
@@ -149,7 +150,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("[action]")]    // GET api/notes/new
-        [Authorize]
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> New()
         {
             try
@@ -237,7 +238,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("{id}/[action]")]    // GET api/notes/getresources
-        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        [Authorize]
         public async Task<IActionResult> Resources(Guid id)
         {
             try
@@ -278,7 +279,7 @@ namespace KNote.Server.Controllers
 
         [HttpPost("[action]")]    // POST api/notes/savefile
         [HttpPut("[action]")]    // PUT api/notes/savefile
-        [Authorize]
+        [Authorize(Roles = "Admin, Staff, ProjecManager")]
         public async Task<IActionResult> SaveFile(ResourceDto resource)
         {
             Result<ResourceDto> resApi = new Result<ResourceDto>();
@@ -322,7 +323,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("{id}/[action]")]    // GET api/notes/tasks
-        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        [Authorize]
         public async Task<IActionResult> Tasks(Guid id)
         {
             try
@@ -344,7 +345,7 @@ namespace KNote.Server.Controllers
         }
 
         [HttpGet("[action]")]    // GET api/notes/getnotetasks
-        [Authorize(Roles = "Admin, Staff, ProjecManager")]
+        [Authorize]
         public async Task<IActionResult> GetStartedTasksByDateTimeRage([FromQuery] string start, [FromQuery] string end)
         {
             try

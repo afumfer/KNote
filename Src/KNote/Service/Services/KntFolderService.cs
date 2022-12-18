@@ -14,18 +14,7 @@ namespace KNote.Service.Services
 {
     public class KntFolderService : KntServiceBase, IKntFolderService
     {
-        #region Fields
-
-        //private readonly IKntRepository Repository;
-
-        #endregion
-
         #region Constructor
-
-        //protected internal KntFolderService(IKntRepository repository)
-        //{
-        //    _repository = repository;
-        //}
 
         public KntFolderService(IKntService service) : base(service)
         {

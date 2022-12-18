@@ -7,23 +7,23 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using KNote.Service.Core;
+using Microsoft.AspNetCore.Http;
 
 namespace KNote.Server.Controllers
 {
     // TODO: Diseñar e implementar el API que mantiene los parámetros del sistema
 
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class SystemValuesController : ControllerBase
     {
-        private IKntService _service { get; set; }
-        private readonly AppSettings _appSettings;
+        private readonly IKntService _service;
 
-        public SystemValuesController(IKntService service, IOptions<AppSettings> appSettings)
+        public SystemValuesController(IKntService service, IHttpContextAccessor httpContextAccessor)
         {
             _service = service;
-            _appSettings = appSettings.Value;
+            _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         }
 
         [HttpGet]    // GET api/users

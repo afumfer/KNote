@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using KNote.Service.Core;
+using Microsoft.AspNetCore.Http;
 
 namespace KNote.Server.Controllers
 {
@@ -17,13 +18,12 @@ namespace KNote.Server.Controllers
     [Route("api/[controller]")]
     public class FoldersController : ControllerBase
     {
-        private IKntService _service { get; set; }
-        private readonly AppSettings _appSettings;
+        private readonly IKntService _service;
 
-        public FoldersController(IKntService service, IOptions<AppSettings> appSettings)
+        public FoldersController(IKntService service, IHttpContextAccessor httpContextAccessor)
         {
             _service = service;
-            _appSettings = appSettings.Value;
+            _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         }
 
         [HttpGet]   // GET api/folders

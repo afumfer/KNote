@@ -7,6 +7,7 @@ using KNote.ClientWin.Components;
 using KNote.Model;
 using KNote.Service;
 using KNote.Service.Core;
+using System.Windows.Forms;
 
 namespace KNote.ClientWin;
 
@@ -97,7 +98,7 @@ static class Program
                 ResourcesContainerCacheRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
             };
 
-            var initialServiceRef = new ServiceRef(r0);
+            var initialServiceRef = new ServiceRef(r0, SystemInformation.UserName);
             var resCreateDB = await initialServiceRef.Service.CreateDataBase(SystemInformation.UserName);
 
             if (resCreateDB)
@@ -120,7 +121,7 @@ static class Program
         {
             store.LoadConfig(appFileConfig);
             foreach (var r in store.AppConfig.RespositoryRefs)                
-                store.AddServiceRef(new ServiceRef(r));                
+                store.AddServiceRef(new ServiceRef(r, SystemInformation.UserName));
         }
 
         // Set session values

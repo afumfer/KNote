@@ -116,7 +116,7 @@ namespace KNote.ClientWin.Components
                 else if (EditorMode == EnumRepositoryEditorMode.AddLink)
                 {                    
                     // Add link repository
-                    var newService = new ServiceRef(Model);
+                    var newService = new ServiceRef(Model, Store.AppUserName);                    
                     if (await newService.Service.TestDbConnection())
                     {
                         Store.AddServiceRef(newService);                    
@@ -135,7 +135,7 @@ namespace KNote.ClientWin.Components
                 else if (EditorMode == EnumRepositoryEditorMode.Create)
                 {
                     // Create repository and add link                    
-                    var newService = new ServiceRef(Model);
+                    var newService = new ServiceRef(Model, Store.AppUserName);
                     if (await newService.Service.CreateDataBase(SystemInformation.UserName))
                     {
                         Store.AddServiceRef(newService);

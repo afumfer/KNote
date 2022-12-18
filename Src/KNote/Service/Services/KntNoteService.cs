@@ -15,23 +15,12 @@ namespace KNote.Service.Services
 {
     public class KntNoteService : KntServiceBase, IKntNoteService
     {
-        #region Fields
-
-        // private readonly IKntRepository Repository;
-
-        #endregion
-
         #region Constructor
 
-        //protected internal KntNoteService(IKntRepository repository)
-        //{
-        //    Repository = repository;
-        //}
         public KntNoteService(IKntService service) : base(service)
         {
 
         }
-
 
         #endregion
 

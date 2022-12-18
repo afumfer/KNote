@@ -39,7 +39,7 @@ public static class Program
             if (appConfig == null)
                 return null;
 
-            var serviceRef = new ServiceRef(appConfig.RepositoryRef);
+            var serviceRef = new ServiceRef(appConfig.RepositoryRef, SystemInformation.UserName);
 
             IPluginCommand plugin = new KntRedminePluginCommand
             {

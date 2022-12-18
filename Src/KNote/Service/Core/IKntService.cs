@@ -22,5 +22,6 @@ namespace KNote.Service.Core
         Task<bool> TestDbConnection();
         Task<bool> CreateDataBase(string newOwner = null);
         RepositoryRef RepositoryRef { get; }
+        string UserIdentityName { get; set; }
     }
 }

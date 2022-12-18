@@ -16,6 +16,7 @@ using KNote.Model;
 using KNote.Model.Dto;
 using System.Threading;
 using KNote.Service.Core;
+using Microsoft.AspNetCore.Http;
 
 namespace KNote.Server.Controllers
 {
@@ -24,34 +25,15 @@ namespace KNote.Server.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private IKntService _service { get; set; }
+        private readonly IKntService _service;
         private readonly AppSettings _appSettings;
 
-
-        public UsersController(IKntService service, IOptions<AppSettings> appSettings)
+        public UsersController(IKntService service, IHttpContextAccessor httpContextAccessor, IOptions<AppSettings> appSettings)
         {
             _service = service;
+            _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
             _appSettings = appSettings.Value;
         }
-
-        //[HttpGet("[action]")]    // GET api/users/getall        
-        //public async Task<IActionResult> GetAll()
-        //{
-        //    try
-        //    {
-        //        var kresApi = await _service.Users.GetAllAsync();
-        //        if (kresApi.IsValid)
-        //            return Ok(kresApi);
-        //        else
-        //            return BadRequest(kresApi);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var kresApi = new Result<List<UserDto>>();
-        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
-        //        return BadRequest(kresApi);
-        //    }
-        //}
 
         [HttpGet]    // GET api/users        
         public async Task<IActionResult> Get([FromQuery] PageIdentifier pagination)
@@ -189,9 +171,14 @@ namespace KNote.Server.Controllers
         {
             var claims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
+                //new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
+                //new Claim(ClaimTypes.Name, userDto.UserName),
+
                 new Claim(ClaimTypes.Name, userDto.UserName),
+                new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
+                                
                 //new Claim("KaNoteApp", "KaNoteWeb"),
+
                 // Jti es un identificador del toquen, podría ser útil para llevar un registro y en algún 
                 // momento poder invalidar dicho token. (Podría servir también como un id de sesión). 
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -221,21 +208,6 @@ namespace KNote.Server.Controllers
                 token = new JwtSecurityTokenHandler().WriteToken(token),
                 uid = userDto.UserId.ToString()
             };
-        }
-
-        [HttpGet]
-        [Route("[action]")]
-        public IActionResult EchoPing()
-        {
-            return Ok(true);
-        }
-
-        [HttpGet]
-        [Route("[action]")]
-        public IActionResult EchoUser()
-        {
-            var identity = Thread.CurrentPrincipal.Identity;
-            return Ok($" IPrincipal-user: {identity.Name} - IsAuthenticated: {identity.IsAuthenticated}");
         }
 
         #endregion 

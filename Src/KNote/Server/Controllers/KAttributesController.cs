@@ -9,22 +9,21 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using KNote.Service.Core;
+using Microsoft.AspNetCore.Http;
 
 namespace KNote.Server.Controllers
 {
-    //[Authorize(Roles = "Administrators")]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class KAttributesController : ControllerBase
     {
-        private IKntService _service { get; set; }
-        private readonly AppSettings _appSettings;
+        private readonly IKntService _service;
 
-        public KAttributesController(IKntService service, IOptions<AppSettings> appSettings)
+        public KAttributesController(IKntService service, IHttpContextAccessor httpContextAccessor)
         {
             _service = service;
-            _appSettings = appSettings.Value;
-
+            _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         }
 
         [HttpGet]    // GET api/kattributes       
