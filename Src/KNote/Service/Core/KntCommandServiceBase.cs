@@ -1,36 +1,51 @@
-﻿using System;
+﻿using KNote.Model;
+using KNote.Repository;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Service.Core
+namespace KNote.Service.Core;
+
+public abstract class KntCommandServiceBase<TParam, TResult> : KntCommandServiceBase<TResult>
 {
-    internal abstract class KntCommandServiceBase<TParam, TResult>
+    public TParam Param { get; init; }
+
+    public KntCommandServiceBase(IKntService service, TParam param) : base(service)
     {
-        public TParam Param { get; init; }
+        Param = param;
+    }
+}
 
-        public KntCommandServiceBase()
-        {
+public abstract class KntCommandServiceBase<TResult>
+{
+    private readonly IKntService _service;
+    internal IKntService Service
+    {
+        get { return _service; }
+    }
 
-        }
+    internal IKntRepository Repository
+    {
+        get { return _service.Repository; }
+    }
 
-        public KntCommandServiceBase(TParam param)
-        {
-            Param = param;
-        }
-
-        public virtual bool ValidateAuthorization()
-        {
-            return true;
-        }
-
-        public virtual bool ValidateParamn()
-        {
-            return true;
-        }
-
-        public abstract TResult Execute();
+    public KntCommandServiceBase(IKntService service)
+    {
+        _service = service;
 
     }
+
+    public virtual bool ValidateAuthorization()
+    {
+        return true;
+    }
+
+    public virtual bool ValidateParamn()
+    {
+        return true;
+    }
+
+    public abstract Task<TResult> Execute();
 }
