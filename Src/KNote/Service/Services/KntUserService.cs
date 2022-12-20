@@ -10,192 +10,180 @@ using KNote.Repository;
 using KNote.Service.Interfaces;
 using KNote.Service.Core;
 
-namespace KNote.Service.Services
+namespace KNote.Service.Services;
+
+public class KntUserService : KntServiceBase, IKntUserService
 {
-    public class KntUserService : KntServiceBase, IKntUserService
+    #region Constructor
+
+    public KntUserService(IKntService service) : base(service)
     {
-        #region Fields
-
-        // private readonly IKntRepository Repository;
-
-        #endregion
-
-        #region Constructor
-
-        //protected internal KntUserService(IKntRepository repository)
-        //{
-        //    Repository = repository;
-        //}
-        public KntUserService(IKntService service) : base(service)
-        {
-
-        }
-
-
-        #endregion
-
-        #region IKntUserService  
-
-        public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
-        {
-            return await Repository.Users.GetAllAsync(pagination);
-        }
-
-        public async Task<Result<UserDto>> GetAsync(Guid userId)
-        {
-            return await Repository.Users.GetAsync(userId);
-        }
-
-        public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
-        {
-            return await Repository.Users.GetByUserNameAsync(userName);
-        }
-
-        public async Task<Result<UserDto>> SaveAsync(UserDto user)
-        {            
-            if (user.UserId == Guid.Empty)
-            {
-                user.UserId = Guid.NewGuid();
-                return await Repository.Users.AddAsync(user);
-            }
-            else
-            {
-                return await Repository.Users.UpdateAsync(user);
-            }
-        }
-
-        public async Task<Result<UserDto>> DeleteAsync(Guid id)
-        {            
-            var result = new Result<UserDto>();
-
-            var resGetEntity = await GetAsync(id);
-
-            if (resGetEntity.IsValid)
-            {
-                var resDelEntity = await Repository.Users.DeleteAsync(id);
-                if (resDelEntity.IsValid)
-                    result.Entity = resGetEntity.Entity;
-                else
-                    result.AddListErrorMessage(resDelEntity.ListErrorMessage);
-            }
-            else
-            {
-                result.AddListErrorMessage(resGetEntity.ListErrorMessage);
-            }
-
-            return result;
-        }
-
-        public async Task<Result<UserDto>> Authenticate(string username, string password)
-        {
-            var resService = new Result<UserDto>();
-
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
-                resService.AddErrorMessage("User not authenticated");
-                resService.Entity = null;
-                return resService;
-            }
-            
-            var resRep = await Repository.Users.GetInternalAsync(username);
-
-            if (!resRep.IsValid)
-            {
-                resService.AddErrorMessage("User not authenticated");
-                resService.Entity = null;
-                return resService;
-            }
-
-            if (!VerifyPasswordHash(password, resRep.Entity.PasswordHash, resRep.Entity.PasswordSalt))
-            {
-                resService.AddErrorMessage("User not authenticated");
-                resService.Entity = null;
-                return resService;
-            }
-            
-            resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-            return resService;
-        }
-                
-        public async Task<Result<UserDto>> Create(UserRegisterDto userRegisterInfo)
-        {
-            Result<UserDto> resService = new Result<UserDto>();
-            
-            var password = userRegisterInfo.Password;
-
-            try
-            {
-                if (string.IsNullOrWhiteSpace(password))
-                    throw new AppException("Password is required");
-                
-                if ((await Repository.Users.GetInternalAsync(userRegisterInfo.UserName)).Entity != null)
-                        throw new AppException("Username \"" + userRegisterInfo.UserName + "\" is already taken");
-                else
-                {                                        
-                    byte[] passwordHash, passwordSalt;
-                    CreatePasswordHash(password, out passwordHash, out passwordSalt);
-
-                    var newEntity = new UserInternalDto();                    
-                    newEntity.SetSimpleDto(userRegisterInfo);
-                    newEntity.UserId = Guid.NewGuid();
-                    newEntity.PasswordHash = passwordHash;
-                    newEntity.PasswordSalt = passwordSalt;
-                    
-                    var resRep = await Repository.Users.AddInternalAsync(newEntity);
-                    resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-                    if (!resRep.IsValid)
-                        resService.AddListErrorMessage(resRep.ListErrorMessage);
-                }
-            }
-            catch (Exception ex)
-            {
-                if (resService == null)
-                    resService = new Result<UserDto>();
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        #endregion
-
-        #region Private helper methods
-
-        private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            if (password == null) throw new ArgumentNullException("password");
-            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
-
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-
-                // TODO: remove (for debug and seed data).
-                //var strSalt = Convert.ToBase64String(passwordSalt);
-                //var strHash = Convert.ToBase64String(passwordHash);
-            }
-        }
-
-        private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-        {
-            if (password == null) throw new ArgumentNullException("password");
-            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
-            if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
-            if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "passwordHash");
-
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < computedHash.Length; i++)
-                {
-                    if (computedHash[i] != storedHash[i]) return false;
-                }
-            }
-
-            return true;
-        }
-
-        #endregion
 
     }
+
+    #endregion
+
+    #region IKntUserService  
+
+    public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
+    {
+        return await Repository.Users.GetAllAsync(pagination);
+    }
+
+    public async Task<Result<UserDto>> GetAsync(Guid userId)
+    {
+        return await Repository.Users.GetAsync(userId);
+    }
+
+    public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
+    {
+        return await Repository.Users.GetByUserNameAsync(userName);
+    }
+
+    public async Task<Result<UserDto>> SaveAsync(UserDto user)
+    {            
+        if (user.UserId == Guid.Empty)
+        {
+            user.UserId = Guid.NewGuid();
+            return await Repository.Users.AddAsync(user);
+        }
+        else
+        {
+            return await Repository.Users.UpdateAsync(user);
+        }
+    }
+
+    public async Task<Result<UserDto>> DeleteAsync(Guid id)
+    {            
+        var result = new Result<UserDto>();
+
+        var resGetEntity = await GetAsync(id);
+
+        if (resGetEntity.IsValid)
+        {
+            var resDelEntity = await Repository.Users.DeleteAsync(id);
+            if (resDelEntity.IsValid)
+                result.Entity = resGetEntity.Entity;
+            else
+                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
+        }
+        else
+        {
+            result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+        }
+
+        return result;
+    }
+
+    public async Task<Result<UserDto>> Authenticate(string username, string password)
+    {
+        var resService = new Result<UserDto>();
+
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+        {
+            resService.AddErrorMessage("User not authenticated");
+            resService.Entity = null;
+            return resService;
+        }
+        
+        var resRep = await Repository.Users.GetInternalAsync(username);
+
+        if (!resRep.IsValid)
+        {
+            resService.AddErrorMessage("User not authenticated");
+            resService.Entity = null;
+            return resService;
+        }
+
+        if (!VerifyPasswordHash(password, resRep.Entity.PasswordHash, resRep.Entity.PasswordSalt))
+        {
+            resService.AddErrorMessage("User not authenticated");
+            resService.Entity = null;
+            return resService;
+        }
+        
+        resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+        return resService;
+    }
+            
+    public async Task<Result<UserDto>> Create(UserRegisterDto userRegisterInfo)
+    {
+        Result<UserDto> resService = new Result<UserDto>();
+        
+        var password = userRegisterInfo.Password;
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new AppException("Password is required");
+            
+            if ((await Repository.Users.GetInternalAsync(userRegisterInfo.UserName)).Entity != null)
+                    throw new AppException("Username \"" + userRegisterInfo.UserName + "\" is already taken");
+            else
+            {                                        
+                byte[] passwordHash, passwordSalt;
+                CreatePasswordHash(password, out passwordHash, out passwordSalt);
+
+                var newEntity = new UserInternalDto();                    
+                newEntity.SetSimpleDto(userRegisterInfo);
+                newEntity.UserId = Guid.NewGuid();
+                newEntity.PasswordHash = passwordHash;
+                newEntity.PasswordSalt = passwordSalt;
+                
+                var resRep = await Repository.Users.AddInternalAsync(newEntity);
+                resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+                if (!resRep.IsValid)
+                    resService.AddListErrorMessage(resRep.ListErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            if (resService == null)
+                resService = new Result<UserDto>();
+            AddExecptionsMessagesToResult(ex, resService);
+        }
+        return ResultDomainAction(resService);
+    }
+
+    #endregion
+
+    #region Private helper methods
+
+    private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+    {
+        if (password == null) throw new ArgumentNullException("password");
+        if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
+
+        using (var hmac = new System.Security.Cryptography.HMACSHA512())
+        {
+            passwordSalt = hmac.Key;
+            passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+            // TODO: remove (for debug and seed data).
+            //var strSalt = Convert.ToBase64String(passwordSalt);
+            //var strHash = Convert.ToBase64String(passwordHash);
+        }
+    }
+
+    private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+    {
+        if (password == null) throw new ArgumentNullException("password");
+        if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
+        if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
+        if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "passwordHash");
+
+        using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
+        {
+            var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            for (int i = 0; i < computedHash.Length; i++)
+            {
+                if (computedHash[i] != storedHash[i]) return false;
+            }
+        }
+
+        return true;
+    }
+
+    #endregion
+
 }

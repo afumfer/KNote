@@ -28,6 +28,8 @@ public abstract class KntServiceBase : DomainActionBase
 
     public async Task<TResult> ExecuteCommand<TParam, TResult>(KntCommandServiceBase<TParam, TResult> command) 
     {
+        // TODO: init result 
+
         // TODO: valid param
 
         // TODO: valid authorization 
@@ -43,7 +45,7 @@ public abstract class KntServiceBase : DomainActionBase
 
     public async Task<TResult> ExecuteCommand<TResult>(KntCommandServiceBase<TResult> command)
     {
-        // init result 
+        // TODO: init result 
 
         // TODO: valid authorization 
 
@@ -52,6 +54,7 @@ public abstract class KntServiceBase : DomainActionBase
         var res = await command.Execute();
 
         // TODO: other post execute methods (log, events, ...)
+
         return res;
     }
 
