@@ -13,7 +13,7 @@ namespace KNote.Service.Interfaces
         Task<Result<UserDto>> GetByUserNameAsync(string userName);
         Task<Result<UserDto>> SaveAsync(UserDto user);
         Task<Result<UserDto>> DeleteAsync(Guid userId);
-        Task<Result<UserDto>> Authenticate(string username, string password);
-        Task<Result<UserDto>> Create(UserRegisterDto userRegisterInfoDto);
+        Task<Result<UserDto>> AuthenticateAsync(UserCredentialsDto userCredentials);
+        Task<Result<UserDto>> CreateAsync(UserRegisterDto userRegisterInfoDto);
     }
 }

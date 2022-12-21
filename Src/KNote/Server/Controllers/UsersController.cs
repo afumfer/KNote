@@ -126,7 +126,7 @@ namespace KNote.Server.Controllers
         {            
             try
             {
-                var kresService = await _service.Users.Create(user);
+                var kresService = await _service.Users.CreateAsync(user);
 
                 if (kresService.IsValid)
                 {
@@ -149,7 +149,7 @@ namespace KNote.Server.Controllers
         {            
             try
             {
-                var kresRep = await _service.Users.Authenticate(credentials.Name, credentials.Password);
+                var kresRep = await _service.Users.AuthenticateAsync(credentials);
                 var user = kresRep.Entity;
 
                 if (!kresRep.IsValid)

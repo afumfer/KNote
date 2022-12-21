@@ -26,35 +26,55 @@ public abstract class KntServiceBase : DomainActionBase
         _service = service;
     }
 
-    public async Task<TResult> ExecuteCommand<TParam, TResult>(KntCommandServiceBase<TParam, TResult> command) 
-    {
-        // TODO: init result 
+    public async Task<TResult> ExecuteCommand<TParam, TResult>(KntCommandServiceBase<TParam, TResult> command) where TResult : ResultBase, new() 
+    {        
+        TResult res = new TResult(); 
 
-        // TODO: valid param
+        try
+        {
+            // TODO: valid param
 
-        // TODO: valid authorization 
+            // TODO: valid authorization 
 
-        // TODO: other pre execute methods (log, events, ...)
+            // TODO: other pre execute methods (log, events, ...)
 
-        var res = await command.Execute();
+            res = await command.Execute();
 
-        // TODO: other post execute methods (log, events, ...)
+            // TODO: other post execute methods (log, events, ...)
 
+        }
+        catch (Exception ex)
+        {
+            if (res == null)
+                res = new TResult();
+            AddExecptionsMessagesToResult(ex, res);
+
+        }
         return res;
     }
 
-    public async Task<TResult> ExecuteCommand<TResult>(KntCommandServiceBase<TResult> command)
+    public async Task<TResult> ExecuteCommand<TResult>(KntCommandServiceBase<TResult> command) where TResult : ResultBase, new()
     {
-        // TODO: init result 
+        TResult res = new TResult();
 
-        // TODO: valid authorization 
+        try
+        {            
+            // TODO: valid authorization 
 
-        // TODO: other pre execute methods (log, events, ...)
+            // TODO: other pre execute methods (log, events, ...)
 
-        var res = await command.Execute();
+            res = await command.Execute();
 
-        // TODO: other post execute methods (log, events, ...)
+            // TODO: other post execute methods (log, events, ...)
 
+        }
+        catch (Exception ex)
+        {
+            if (res == null)
+                res = new TResult();
+            AddExecptionsMessagesToResult(ex, res);
+
+        }
         return res;
     }
 

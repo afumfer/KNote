@@ -18,7 +18,7 @@ public abstract class KntCommandServiceBase<TParam, TResult> : KntCommandService
     }
 }
 
-public abstract class KntCommandServiceBase<TResult>
+public abstract class KntCommandServiceBase<TResult> 
 {
     private readonly IKntService _service;
     internal IKntService Service

@@ -366,8 +366,8 @@ public class KntRedmineManager
     {
         if (_service == null)
             return "";
-
-        var valueDto = await _service.SystemValues.GetAsync("KNT_REDMINEEDUCA_PLUGIN", variable);
+        
+        var valueDto = await _service.SystemValues.GetAsync(new KeyValuePair<string, string> ("KNT_REDMINEEDUCA_PLUGIN", variable ));
         if (valueDto.IsValid)
             return valueDto.Entity.Value;
         else
@@ -379,7 +379,7 @@ public class KntRedmineManager
         if (_service == null)
             return "";
 
-        var valueDto = await _service.SystemValues.GetAsync("KNT_REDMINEEDUCA_PLUGIN", variable);
+        var valueDto = await _service.SystemValues.GetAsync(new KeyValuePair<string, string>("KNT_REDMINEEDUCA_PLUGIN", variable));
         if (valueDto.IsValid)
         {
             valueDto.Entity.Value = value;
