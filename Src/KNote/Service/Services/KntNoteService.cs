@@ -10,6 +10,8 @@ using KNote.Repository;
 using System.IO;
 using KNote.Service.Interfaces;
 using KNote.Service.Core;
+using KNote.Service.ServicesCommands;
+using KNote.Repository.EntityFramework.Entities;
 
 namespace KNote.Service.Services;
 
@@ -28,40 +30,52 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     public async Task<Result<List<NoteInfoDto>>> GetAllAsync()
     {
-        return await Repository.Notes.GetAllAsync();
+        //return await Repository.Notes.GetAllAsync();
+        var command = new KntNotesGetAllAsyncCommand(Service);
+        return await ExecuteCommand(command);
     }
     
     public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
     {
-        return await Repository.Notes.HomeNotesAsync();
+        //return await Repository.Notes.HomeNotesAsync();
+        var command = new KntNotesHomeAllAsyncCommand(Service);
+        return await ExecuteCommand(command);
     }
 
     public async Task <Result<NoteDto>> GetAsync(Guid noteId)
     {
-        return await Repository.Notes.GetAsync(noteId);
+        //return await Repository.Notes.GetAsync(noteId);
+        var command = new KntNotesGetAsyncCommand(Service, noteId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteDto>> GetAsync(int noteNumber)
     {
-        return await Repository.Notes.GetAsync(noteNumber);
+        //return await Repository.Notes.GetAsync(noteNumber);
+        var command = new KntNotesGetByNumberAsyncCommand(Service, noteNumber);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId)
     {
-        var result = new Result<NoteExtendedDto>();            
+        //var result = new Result<NoteExtendedDto>();            
 
-        var entity = (await GetAsync(noteId)).Entity.GetSimpleDto<NoteExtendedDto>();
-        entity.Resources = (await GetResourcesAsync(noteId)).Entity;
-        entity.Tasks = (await GetNoteTasksAsync(noteId)).Entity;
-        entity.Messages = (await GetMessagesAsync(noteId)).Entity;
+        //var entity = (await GetAsync(noteId)).Entity.GetSimpleDto<NoteExtendedDto>();
+        //entity.Resources = (await GetResourcesAsync(noteId)).Entity;
+        //entity.Tasks = (await GetNoteTasksAsync(noteId)).Entity;
+        //entity.Messages = (await GetMessagesAsync(noteId)).Entity;
 
-        result.Entity = entity;
-        return result;
+        //result.Entity = entity;
+        //return result;
+        var command = new KntNotesGetExtendedAsyncCommand(Service, noteId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
     {
-        return await Repository.Notes.GetByFolderAsync(folderId);
+        //return await Repository.Notes.GetByFolderAsync(folderId);
+        var command = new KntNotesGetByFolderAsyncCommand(Service, folderId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
