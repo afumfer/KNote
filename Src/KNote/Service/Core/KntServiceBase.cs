@@ -27,30 +27,15 @@ public abstract class KntServiceBase : DomainActionBase
     }
 
     public async Task<TResult> ExecuteCommand<TParam, TResult>(KntCommandServiceBase<TParam, TResult> command) where TResult : ResultBase, new() 
-    {        
-        TResult res = new TResult(); 
-
-        try
+    {
+        if(command.ValidateParam())
+            return await ExecuteCommand<TResult>(command);
+        else
         {
-            // TODO: valid param
-
-            // TODO: valid authorization 
-
-            // TODO: other pre execute methods (log, events, ...)
-
-            res = await command.Execute();
-
-            // TODO: other post execute methods (log, events, ...)
-
+            TResult res = new TResult();
+            res.AddErrorMessage("Invalid param");
+            return res;
         }
-        catch (Exception ex)
-        {
-            if (res == null)
-                res = new TResult();
-            AddExecptionsMessagesToResult(ex, res);
-
-        }
-        return res;
     }
 
     public async Task<TResult> ExecuteCommand<TResult>(KntCommandServiceBase<TResult> command) where TResult : ResultBase, new()
@@ -77,6 +62,7 @@ public abstract class KntServiceBase : DomainActionBase
         }
         return res;
     }
+
 
 
 }

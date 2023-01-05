@@ -12,6 +12,8 @@ using KNote.Service.Interfaces;
 using KNote.Service.Core;
 using KNote.Service.ServicesCommands;
 using KNote.Repository.EntityFramework.Entities;
+using System.Data;
+using static Dapper.SqlMapper;
 
 namespace KNote.Service.Services;
 
@@ -80,309 +82,338 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
     {
-        return await Repository.Notes.GetFilter(notesFilter);
+        //return await Repository.Notes.GetFilter(notesFilter);
+        var command = new KntNotesGetFilterAsyncCommand(Service, notesFilter);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
     {
-        return await Repository.Notes.GetSearch(notesSearch);
+        //return await Repository.Notes.GetSearch(notesSearch);
+        var command = new KntNotesGetSearchAsyncCommand(Service, notesSearch);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entityInfo = null)
     {
-        return await Repository.Notes.NewAsync(entityInfo);
+        //return await Repository.Notes.NewAsync(entityInfo);
+        var command = new KntNotesNewAsyncCommand(Service, entityInfo);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entityInfo = null)
     {
-        var result = new Result<NoteExtendedDto>();
-        
-        var entity = (await Repository.Notes.NewAsync(entityInfo)).Entity.GetSimpleDto<NoteExtendedDto>();
-        
-        result.Entity = entity;
-        return result;
+        //var result = new Result<NoteExtendedDto>();
+
+        //var entity = (await Repository.Notes.NewAsync(entityInfo)).Entity.GetSimpleDto<NoteExtendedDto>();
+
+        //result.Entity = entity;
+        //return result;
+        var command = new KntNotesNewExtendedAsyncCommand(Service, entityInfo);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true)
     {
-        if (entity.NoteId == Guid.Empty)
-        {
-            entity.NoteId = Guid.NewGuid();
-            var res = await Repository.Notes.AddAsync(entity);                
-            return res;
-        }
-        else
-        {
-            if (updateStatus)
-                entity.InternalTags = GetNoteStatus((await GetNoteTasksAsync(entity.NoteId)).Entity, (await GetMessagesAsync(entity.NoteId)).Entity);
-            var res =  await Repository.Notes.UpdateAsync(entity);                
-            return res;
-        }
+        //if (entity.NoteId == Guid.Empty)
+        //{
+        //    entity.NoteId = Guid.NewGuid();
+        //    var res = await Repository.Notes.AddAsync(entity);                
+        //    return res;
+        //}
+        //else
+        //{
+        //    if (updateStatus)
+        //        entity.InternalTags = GetNoteStatus((await GetNoteTasksAsync(entity.NoteId)).Entity, (await GetMessagesAsync(entity.NoteId)).Entity);
+        //    var res =  await Repository.Notes.UpdateAsync(entity);                
+        //    return res;
+        //}
+        var command = new KntNotesSaveAsyncCommand(Service, entity, updateStatus);
+        return await ExecuteCommand(command);
     }
     
     public async Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity)
-    {            
-        var result = new Result<NoteExtendedDto>();
-        
-        entity.InternalTags = GetNoteStatus(entity.Tasks, entity.Messages);
+    {
+        //var result = new Result<NoteExtendedDto>();
 
-        if (entity.IsDirty())
-        {
-            var resNote = await SaveAsync(entity.GetSimpleDto<NoteDto>(), false);
-            result.Entity = resNote.Entity.GetSimpleDto<NoteExtendedDto>();
-        }
-        else
-            result.Entity = entity;
+        //entity.InternalTags = GetNoteStatus(entity.Tasks, entity.Messages);
 
-        var noteEdited = result.Entity;
+        //if (entity.IsDirty())
+        //{
+        //    var resNote = await SaveAsync(entity.GetSimpleDto<NoteDto>(), false);
+        //    result.Entity = resNote.Entity.GetSimpleDto<NoteExtendedDto>();
+        //}
+        //else
+        //    result.Entity = entity;
 
-        foreach (var item in entity.Messages)
-        {
-            if (item.IsDeleted())
-            {
-                var res = await DeleteMessageAsync(item.KMessageId);
-                if (!res.IsValid)
-                    result.AddListErrorMessage(res.ListErrorMessage);
-            }
-            else if (item.IsDirty())
-            {
-                if (item.NoteId == Guid.Empty)
-                    item.NoteId = noteEdited.NoteId;
-                var res = await SaveMessageAsync(item, true);
-                if (!res.IsValid)
-                    result.AddListErrorMessage(res.ListErrorMessage);
-                else
-                    result.Entity.Messages.Add(res.Entity);
-            }
-            else
-                result.Entity.Messages.Add(item);
-        }
-        entity.Messages.RemoveAll( m => m.IsDeleted());
+        //var noteEdited = result.Entity;
 
-        foreach (var item in entity.Resources)
-        {
-            if (item.IsDeleted())
-            {
-                var res = await DeleteResourceAsync(item.ResourceId);
-                if (!res.IsValid)
-                    result.AddListErrorMessage(res.ListErrorMessage);
-            }
-            else if (item.IsDirty())
-            {
-                if (item.NoteId == Guid.Empty)
-                    item.NoteId = noteEdited.NoteId;
-                var res = await SaveResourceAsync(item, true);
-                if (!res.IsValid)
-                    result.AddListErrorMessage(res.ListErrorMessage);
-                else
-                    result.Entity.Resources.Add(res.Entity);
-            }
-            else
-                result.Entity.Resources.Add(item);
-        }
-        entity.Resources.RemoveAll(r => r.IsDeleted());
+        //foreach (var item in entity.Messages)
+        //{
+        //    if (item.IsDeleted())
+        //    {
+        //        var res = await DeleteMessageAsync(item.KMessageId);
+        //        if (!res.IsValid)
+        //            result.AddListErrorMessage(res.ListErrorMessage);
+        //    }
+        //    else if (item.IsDirty())
+        //    {
+        //        if (item.NoteId == Guid.Empty)
+        //            item.NoteId = noteEdited.NoteId;
+        //        var res = await SaveMessageAsync(item, true);
+        //        if (!res.IsValid)
+        //            result.AddListErrorMessage(res.ListErrorMessage);
+        //        else
+        //            result.Entity.Messages.Add(res.Entity);
+        //    }
+        //    else
+        //        result.Entity.Messages.Add(item);
+        //}
+        //entity.Messages.RemoveAll( m => m.IsDeleted());
 
-        foreach (var item in entity.Tasks)
-        {
-            if (item.IsDeleted())
-            {
-                var res = await DeleteNoteTaskAsync(item.NoteTaskId);
-                if (!res.IsValid)
-                    result.AddListErrorMessage(res.ListErrorMessage);
-            }
-            else if (item.IsDirty())
-            {
-                if (item.NoteId == Guid.Empty)
-                    item.NoteId = noteEdited.NoteId;
-                var res = await SaveNoteTaskAsync(item, true);
-                if (!res.IsValid)
-                    result.AddListErrorMessage(res.ListErrorMessage);
-                else
-                    result.Entity.Tasks.Add(res.Entity);
-            }
-            else
-                result.Entity.Tasks.Add(item);
+        //foreach (var item in entity.Resources)
+        //{
+        //    if (item.IsDeleted())
+        //    {
+        //        var res = await DeleteResourceAsync(item.ResourceId);
+        //        if (!res.IsValid)
+        //            result.AddListErrorMessage(res.ListErrorMessage);
+        //    }
+        //    else if (item.IsDirty())
+        //    {
+        //        if (item.NoteId == Guid.Empty)
+        //            item.NoteId = noteEdited.NoteId;
+        //        var res = await SaveResourceAsync(item, true);
+        //        if (!res.IsValid)
+        //            result.AddListErrorMessage(res.ListErrorMessage);
+        //        else
+        //            result.Entity.Resources.Add(res.Entity);
+        //    }
+        //    else
+        //        result.Entity.Resources.Add(item);
+        //}
+        //entity.Resources.RemoveAll(r => r.IsDeleted());
 
-        }
-        entity.Tasks.RemoveAll(t => t.IsDeleted());
+        //foreach (var item in entity.Tasks)
+        //{
+        //    if (item.IsDeleted())
+        //    {
+        //        var res = await DeleteNoteTaskAsync(item.NoteTaskId);
+        //        if (!res.IsValid)
+        //            result.AddListErrorMessage(res.ListErrorMessage);
+        //    }
+        //    else if (item.IsDirty())
+        //    {
+        //        if (item.NoteId == Guid.Empty)
+        //            item.NoteId = noteEdited.NoteId;
+        //        var res = await SaveNoteTaskAsync(item, true);
+        //        if (!res.IsValid)
+        //            result.AddListErrorMessage(res.ListErrorMessage);
+        //        else
+        //            result.Entity.Tasks.Add(res.Entity);
+        //    }
+        //    else
+        //        result.Entity.Tasks.Add(item);
 
-        return result;
+        //}
+        //entity.Tasks.RemoveAll(t => t.IsDeleted());
+
+        //return result;
+        var command = new KntNotesSaveExtendedAsyncCommand(Service, entity);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteDto>> DeleteAsync(Guid id)
-    {            
-        var result = new Result<NoteDto>();
+    {
+        //var result = new Result<NoteDto>();
 
-        var resGetEntity = await GetAsync(id);
+        //var resGetEntity = await GetAsync(id);
 
-        if (resGetEntity.IsValid)
-        {
-            var resDelEntity = await Repository.Notes.DeleteAsync(id);
-            if (resDelEntity.IsValid)
-                result.Entity = resGetEntity.Entity;
-            else
-                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
-        }
-        else
-        {
-            result.AddListErrorMessage(resGetEntity.ListErrorMessage);
-        }
+        //if (resGetEntity.IsValid)
+        //{
+        //    var resDelEntity = await Repository.Notes.DeleteAsync(id);
+        //    if (resDelEntity.IsValid)
+        //        result.Entity = resGetEntity.Entity;
+        //    else
+        //        result.AddListErrorMessage(resDelEntity.ListErrorMessage);
+        //}
+        //else
+        //{
+        //    result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+        //}
 
-        return result;
+        //return result;
+        var command = new KntNotesDeleteAsyncCommand(Service, id);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteExtendedDto>> DeleteExtendedAsync(Guid id)
-    {            
-        var result = new Result<NoteExtendedDto>();
-        
-        var neForDelete = (await GetExtendedAsync(id)).Entity;
+    {
+        //var result = new Result<NoteExtendedDto>();
 
-        foreach (var item in neForDelete.Messages)
-        {
-            var res = await DeleteMessageAsync(item.KMessageId);
-            if (!res.IsValid)
-                result.AddListErrorMessage(res.ListErrorMessage);
-        }
-        foreach (var item in neForDelete.Resources)
-        {
-            var res = await DeleteResourceAsync(item.ResourceId);
-            if (!res.IsValid)
-                result.AddListErrorMessage(res.ListErrorMessage);
-        }
-        foreach (var item in neForDelete.Tasks)
-        {
-            var res = await DeleteNoteTaskAsync(item.NoteTaskId);
-            if (!res.IsValid)
-                result.AddListErrorMessage(res.ListErrorMessage);
-        }
+        //var neForDelete = (await GetExtendedAsync(id)).Entity;
 
-        var resNote = await DeleteAsync(id);
-        if (!resNote.IsValid)
-            result.AddListErrorMessage(resNote.ListErrorMessage);
+        //foreach (var item in neForDelete.Messages)
+        //{
+        //    var res = await DeleteMessageAsync(item.KMessageId);
+        //    if (!res.IsValid)
+        //        result.AddListErrorMessage(res.ListErrorMessage);
+        //}
+        //foreach (var item in neForDelete.Resources)
+        //{
+        //    var res = await DeleteResourceAsync(item.ResourceId);
+        //    if (!res.IsValid)
+        //        result.AddListErrorMessage(res.ListErrorMessage);
+        //}
+        //foreach (var item in neForDelete.Tasks)
+        //{
+        //    var res = await DeleteNoteTaskAsync(item.NoteTaskId);
+        //    if (!res.IsValid)
+        //        result.AddListErrorMessage(res.ListErrorMessage);
+        //}
 
-        result.Entity = neForDelete;
+        //var resNote = await DeleteAsync(id);
+        //if (!resNote.IsValid)
+        //    result.AddListErrorMessage(resNote.ListErrorMessage);
 
-        return result;
+        //result.Entity = neForDelete;
+
+        //return result;
+        var command = new KntNotesDeleteExtendedAsyncCommand(Service, id);
+        return await ExecuteCommand(command);
     }
 
     public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
     {
-        return await Repository.Notes.CompleteNoteAttributes(attributesNotes, noteId, noteTypeId);
+        // No use KntCommandService here, this method not return Result type.
+        return await Repository.Notes.CompleteNoteAttributes(attributesNotes, noteId, noteTypeId);        
     }
 
     public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId)
     {
-        var res = await Repository.Notes.GetResourcesAsync(noteId);         
-        if(res.IsValid)
-            foreach(var r in res.Entity)                    
-                ManageResourceContent(r);
-        return res;
+        //var res = await Repository.Notes.GetResourcesAsync(noteId);         
+        //if(res.IsValid)
+        //    foreach(var r in res.Entity)                    
+        //        ManageResourceContent(r);
+        //return res;
+        var command = new KntNotesGetResourcesAsyncCommand(Service, noteId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<ResourceInfoDto>>> GetResourcesInfoAsync(Guid noteId)
     {
-        var res = new Result<List<ResourceInfoDto>>();
+        //var res = new Result<List<ResourceInfoDto>>();
 
-        var resGetResources = await GetResourcesAsync(noteId);
-                    
-        res.AddListErrorMessage(resGetResources.ListErrorMessage);
-        res.Entity = new List<ResourceInfoDto>();
-        foreach (var r in resGetResources.Entity)
-            res.Entity.Add(r.GetSimpleDto<ResourceInfoDto>());
+        //var resGetResources = await GetResourcesAsync(noteId);
 
-        return res;
+        //res.AddListErrorMessage(resGetResources.ListErrorMessage);
+        //res.Entity = new List<ResourceInfoDto>();
+        //foreach (var r in resGetResources.Entity)
+        //    res.Entity.Add(r.GetSimpleDto<ResourceInfoDto>());
+
+        //return res;
+        var command = new KntNotesGetResourcesInfoAsyncCommand(Service, noteId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId)
-    {            
-        var res = await Repository.Notes.GetResourceAsync(resourceId);
-        if(res.IsValid)
-            ManageResourceContent(res.Entity);
-        return res;
+    {
+        //var res = await Repository.Notes.GetResourceAsync(resourceId);
+        //if(res.IsValid)
+        //    ManageResourceContent(res.Entity);
+        //return res;
+        var command = new KntNotesGetResourceAsyncCommand(Service, resourceId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto resource, bool forceNew = false)
     {
-        Result<ResourceDto> result;
+        //Result<ResourceDto> result;
 
-        ManageResourceContent(resource);
+        //ManageResourceContent(resource);
 
-        var tmpContent = resource.ContentArrayBytes;
+        //var tmpContent = resource.ContentArrayBytes;
 
-        if (!resource.ContentInDB)                            
-            resource.ContentArrayBytes = null;
-                               
-        if (resource.ResourceId == Guid.Empty)
-        {
-            resource.ResourceId = Guid.NewGuid();
-            result = await Repository.Notes.AddResourceAsync(resource);
-        }
-        else
-        {
-            var checkExist = await GetResourceAsync(resource.ResourceId);
+        //if (!resource.ContentInDB)                            
+        //    resource.ContentArrayBytes = null;
 
-            // Delete old resource file
-            if (checkExist.IsValid)
-            {
-                var oldResource = checkExist.Entity;
+        //if (resource.ResourceId == Guid.Empty)
+        //{
+        //    resource.ResourceId = Guid.NewGuid();
+        //    result = await Repository.Notes.AddResourceAsync(resource);
+        //}
+        //else
+        //{
+        //    var checkExist = await GetResourceAsync(resource.ResourceId);
 
-                if (oldResource.Name != resource.Name && oldResource.ContentInDB == false)
-                {
-                    var oldFile = GetResourcePath(oldResource);
-                    try
-                    {
-                        if (File.Exists(oldFile))
-                            File.Delete(oldFile);
-                    }
-                    catch (Exception ex)
-                    {
-                        // TODO: anotate this meesage in log
-                        var errMsg = ex.ToString();
-                    }
-                }
-            }
+        //    // Delete old resource file
+        //    if (checkExist.IsValid)
+        //    {
+        //        var oldResource = checkExist.Entity;
 
-            if (!forceNew)
-            {
-                result = await Repository.Notes.UpdateResourceAsync(resource);
-            }
-            else
-            {
-                
-                if(checkExist.IsValid)
-                    result = await Repository.Notes.UpdateResourceAsync(resource);
-                else
-                    result = await Repository.Notes.AddResourceAsync(resource);
-            }
-        }
+        //        if (oldResource.Name != resource.Name && oldResource.ContentInDB == false)
+        //        {
+        //            var oldFile = GetResourcePath(oldResource);
+        //            try
+        //            {
+        //                if (File.Exists(oldFile))
+        //                    File.Delete(oldFile);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                // TODO: anotate this meesage in log
+        //                var errMsg = ex.ToString();
+        //            }
+        //        }
+        //    }
 
-        if (!result.Entity.ContentInDB)
-            result.Entity.ContentArrayBytes = tmpContent;
+        //    if (!forceNew)
+        //    {
+        //        result = await Repository.Notes.UpdateResourceAsync(resource);
+        //    }
+        //    else
+        //    {
 
-        (result.Entity.RelativeUrl, result.Entity.FullUrl) = GetResourceUrls(result.Entity);
+        //        if(checkExist.IsValid)
+        //            result = await Repository.Notes.UpdateResourceAsync(resource);
+        //        else
+        //            result = await Repository.Notes.AddResourceAsync(resource);
+        //    }
+        //}
 
-        return result;
+        //if (!result.Entity.ContentInDB)
+        //    result.Entity.ContentArrayBytes = tmpContent;
+
+        //(result.Entity.RelativeUrl, result.Entity.FullUrl) = GetResourceUrls(result.Entity);
+
+        //return result;
+        var command = new KntNotesSaveResourceAsyncCommand(Service, resource, forceNew);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resourceInfo, bool forceNew = false)
     {
-        if (resourceInfo == null)
-            throw new ArgumentException("Resource can't be null");
+        //if (resourceInfo == null)
+        //    throw new ArgumentException("Resource can't be null");
 
-        var res = new Result<ResourceInfoDto>();
+        //var res = new Result<ResourceInfoDto>();
 
-        var resource = resourceInfo.GetSimpleDto<ResourceDto>();
+        //var resource = resourceInfo.GetSimpleDto<ResourceDto>();
 
-        var resSaveResource = await SaveResourceAsync(resource, forceNew);
-        
-        res.AddListErrorMessage(resSaveResource.ListErrorMessage);
-        res.Entity = resSaveResource.Entity.GetSimpleDto<ResourceInfoDto>();
+        //var resSaveResource = await SaveResourceAsync(resource, forceNew);
 
-        return res;
+        //res.AddListErrorMessage(resSaveResource.ListErrorMessage);
+        //res.Entity = resSaveResource.Entity.GetSimpleDto<ResourceInfoDto>();
+
+        //return res;
+        var command = new KntNotesSaveResourceInfoAsyncCommand(Service, resourceInfo, forceNew);
+        return await ExecuteCommand(command);
     }
 
     public bool ManageResourceContent(ResourceDto resource, bool forceUpdateDto = true)
     {
+        // No use KntCommandService here, this method not return Result type.
+
         if (resource == null)
             return false;
 
@@ -432,6 +463,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     public string GetResourcePath(ResourceDto resource)
     {
+        // No use KntCommandService here, this method not return Result type.
         string rootPath = Repository.RespositoryRef.ResourcesContainerCacheRootPath;
         string relativePath;
         string fullPath;
@@ -446,289 +478,329 @@ public class KntNoteService : KntServiceBase, IKntNoteService
     }
 
     public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
-    {            
-        var result = new Result<ResourceDto>();
+    {
+        //var result = new Result<ResourceDto>();
 
-        var resGetEntity = await Repository.Notes.GetResourceAsync(id);
-        if (resGetEntity.IsValid)
-        {
-            var resDelEntity = await Repository.Notes.DeleteResourceAsync(id);
-            if (resDelEntity.IsValid)
-            {
-                result.Entity = resGetEntity.Entity;
-                try
-                {
-                    var repRef = Repository.RespositoryRef;
-                    var fullPathRec  = Path.Combine(repRef.ResourcesContainerCacheRootPath, result.Entity.Container, result.Entity.Name);
-                    if(File.Exists(fullPathRec))
-                        File.Delete(fullPathRec);
-                }
-                catch (Exception ex)
-                {
-                    // TODO: anotate this meesage in log
-                    var errMsg = ex.ToString();
-                }
-            }
-            else
-                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
-        }
-        else
-        {
-            result.AddListErrorMessage(resGetEntity.ListErrorMessage);
-        }
+        //var resGetEntity = await Repository.Notes.GetResourceAsync(id);
+        //if (resGetEntity.IsValid)
+        //{
+        //    var resDelEntity = await Repository.Notes.DeleteResourceAsync(id);
+        //    if (resDelEntity.IsValid)
+        //    {
+        //        result.Entity = resGetEntity.Entity;
+        //        try
+        //        {
+        //            var repRef = Repository.RespositoryRef;
+        //            var fullPathRec  = Path.Combine(repRef.ResourcesContainerCacheRootPath, result.Entity.Container, result.Entity.Name);
+        //            if(File.Exists(fullPathRec))
+        //                File.Delete(fullPathRec);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            // TODO: anotate this meesage in log
+        //            var errMsg = ex.ToString();
+        //        }
+        //    }
+        //    else
+        //        result.AddListErrorMessage(resDelEntity.ListErrorMessage);
+        //}
+        //else
+        //{
+        //    result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+        //}
 
-        return result;
+        //return result;
+        var command = new KntNotesDeleteResourceAsyncCommand(Service, id);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id)
     {
-        var res = new Result<ResourceInfoDto>();
+        //var res = new Result<ResourceInfoDto>();
 
-        var resDelete = await DeleteResourceAsync(id);            
-        res.AddListErrorMessage(resDelete.ListErrorMessage);
-        res.Entity = resDelete.Entity.GetSimpleDto<ResourceInfoDto>();
-        return res;
+        //var resDelete = await DeleteResourceAsync(id);            
+        //res.AddListErrorMessage(resDelete.ListErrorMessage);
+        //res.Entity = resDelete.Entity.GetSimpleDto<ResourceInfoDto>();
+        //return res;
+        var command = new KntNotesDeleteResourceInfoAsyncCommand(Service, id);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
     {
-        return await Repository.Notes.GetNoteTasksAsync(idNote);
+        //return await Repository.Notes.GetNoteTasksAsync(idNote);
+        var command = new KntNotesGetNoteTasksAsyncCommand(Service, idNote);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
     {
-        return await Repository.Notes.GetStartedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        // return await Repository.Notes.GetStartedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        var command = new KntNotesGetStartedTasksByDateTimeRageAsyncCommand(Service, startDateTime, endDateTime);
+        return await ExecuteCommand(command);
+
     }
 
     public async Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
     {
-        return await Repository.Notes.GetEstimatedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        //return await Repository.Notes.GetEstimatedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        var command = new KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand(Service, startDateTime, endDateTime);
+        return await ExecuteCommand(command);
     }
 
 
     public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId)
-    {            
-        return await Repository.Notes.GetNoteTaskAsync(noteTaskId);
+    {
+        //return await Repository.Notes.GetNoteTaskAsync(noteTaskId);
+        var command = new KntNotesGetNoteTaskAsyncCommand(Service, noteTaskId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entity, bool forceNew = false)
-    {            
-        if (entity.NoteTaskId == Guid.Empty)
-        {
-            entity.NoteTaskId = Guid.NewGuid();
-            return await Repository.Notes.AddNoteTaskAsync(entity);
-        }
-        else
-        {
-            if (!forceNew)
-            {
-                return await Repository.Notes.UpdateNoteTaskAsync(entity);
-            }
-            else
-            {
-                var checkExist = await GetNoteTaskAsync(entity.NoteTaskId);
-                if (checkExist.IsValid)
-                    return await Repository.Notes.UpdateNoteTaskAsync(entity);
-                else
-                    return await Repository.Notes.AddNoteTaskAsync(entity);
-            }
-        }
+    {
+        //if (entity.NoteTaskId == Guid.Empty)
+        //{
+        //    entity.NoteTaskId = Guid.NewGuid();
+        //    return await Repository.Notes.AddNoteTaskAsync(entity);
+        //}
+        //else
+        //{
+        //    if (!forceNew)
+        //    {
+        //        return await Repository.Notes.UpdateNoteTaskAsync(entity);
+        //    }
+        //    else
+        //    {
+        //        var checkExist = await GetNoteTaskAsync(entity.NoteTaskId);
+        //        if (checkExist.IsValid)
+        //            return await Repository.Notes.UpdateNoteTaskAsync(entity);
+        //        else
+        //            return await Repository.Notes.AddNoteTaskAsync(entity);
+        //    }
+        //}
+        var command = new KntNotesSaveNoteTaskAsyncCommand(Service, entity, forceNew);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid id)
-    {         
-        var result = new Result<NoteTaskDto>();
+    {
+        //var result = new Result<NoteTaskDto>();
 
-        var resGetEntity = await Repository.Notes.GetNoteTaskAsync(id);
-        if (resGetEntity.IsValid)
-        {
-            var resDelEntity = await Repository.Notes.DeleteNoteTaskAsync(id);
-            if (resDelEntity.IsValid)
-                result.Entity = resGetEntity.Entity;
-            else
-                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
-        }
-        else
-        {
-            result.AddListErrorMessage(resGetEntity.ListErrorMessage);
-        }
+        //var resGetEntity = await Repository.Notes.GetNoteTaskAsync(id);
+        //if (resGetEntity.IsValid)
+        //{
+        //    var resDelEntity = await Repository.Notes.DeleteNoteTaskAsync(id);
+        //    if (resDelEntity.IsValid)
+        //        result.Entity = resGetEntity.Entity;
+        //    else
+        //        result.AddListErrorMessage(resDelEntity.ListErrorMessage);
+        //}
+        //else
+        //{
+        //    result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+        //}
 
-        return result;
+        //return result;
+        var command = new KntNotesDeleteNoteTaskAsyncCommand(Service, id);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId)
     {
-        return await Repository.Notes.GetMessagesAsync(noteId);
+        //return await Repository.Notes.GetMessagesAsync(noteId);
+        var command = new KntNotesGetMessagesAsyncCommand(Service, noteId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
     {
-        return await Repository.Notes.GetMessageAsync(messageId);
+        //return await Repository.Notes.GetMessageAsync(messageId);
+        var command = new KntNotesGetMessageAsyncCommand(Service, messageId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false)
     {
-        Result<KMessageDto> resSavedEntity;
+        //Result<KMessageDto> resSavedEntity;
 
-        if (entity.KMessageId == Guid.Empty)
-        {
-            entity.KMessageId = Guid.NewGuid();                
-            resSavedEntity = await Repository.Notes.AddMessageAsync(entity);
-        }
-        else
-        {
-            if (!forceNew)
-            {                    
-                resSavedEntity = await Repository.Notes.UpdateMessageAsync(entity);
-            }
-            else
-            {
-                var checkExist = await GetMessageAsync(entity.KMessageId);
-                if (checkExist.IsValid)                        
-                    resSavedEntity = await Repository.Notes.UpdateMessageAsync(entity);
-                else                        
-                    resSavedEntity = await Repository.Notes.AddMessageAsync(entity);
-            }
-        }
+        //if (entity.KMessageId == Guid.Empty)
+        //{
+        //    entity.KMessageId = Guid.NewGuid();                
+        //    resSavedEntity = await Repository.Notes.AddMessageAsync(entity);
+        //}
+        //else
+        //{
+        //    if (!forceNew)
+        //    {                    
+        //        resSavedEntity = await Repository.Notes.UpdateMessageAsync(entity);
+        //    }
+        //    else
+        //    {
+        //        var checkExist = await GetMessageAsync(entity.KMessageId);
+        //        if (checkExist.IsValid)                        
+        //            resSavedEntity = await Repository.Notes.UpdateMessageAsync(entity);
+        //        else                        
+        //            resSavedEntity = await Repository.Notes.AddMessageAsync(entity);
+        //    }
+        //}
 
-        resSavedEntity.Entity.UserFullName = entity.UserFullName;
-        return resSavedEntity;
+        //resSavedEntity.Entity.UserFullName = entity.UserFullName;
+        //return resSavedEntity;
+        var command = new KntNotesSaveMessageAsyncCommand(Service, entity, forceNew);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId)
     {
-        var result = new Result<KMessageDto>();
+        //var result = new Result<KMessageDto>();
 
-        var resGetEntity = await GetMessageAsync(messageId);
+        //var resGetEntity = await GetMessageAsync(messageId);
 
-        if (resGetEntity.IsValid)
-        {
-            var resDelEntity = await Repository.Notes.DeleteMessageAsync(messageId);
-            if (resDelEntity.IsValid)
-                result.Entity = resGetEntity.Entity;
-            else
-                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
-        }
-        else
-        {
-            result.AddListErrorMessage(resGetEntity.ListErrorMessage);
-        }
+        //if (resGetEntity.IsValid)
+        //{
+        //    var resDelEntity = await Repository.Notes.DeleteMessageAsync(messageId);
+        //    if (resDelEntity.IsValid)
+        //        result.Entity = resGetEntity.Entity;
+        //    else
+        //        result.AddListErrorMessage(resDelEntity.ListErrorMessage);
+        //}
+        //else
+        //{
+        //    result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+        //}
 
-        return result;
+        //return result;
+        var command = new KntNotesDeleteMessageAsyncCommand(Service, messageId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId)
     {
-        return await Repository.Notes.GetWindowAsync(noteId, userId);
+        //return await Repository.Notes.GetWindowAsync(noteId, userId);
+        var command = new KntNotesGetWindowAsyncCommand(Service, noteId, userId);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false)
     {
-        if (entity.WindowId == Guid.Empty)
-        {
-            entity.WindowId = Guid.NewGuid();
-            return await Repository.Notes.AddWindowAsync(entity);
-        }
-        else
-        {
-            if (!forceNew)
-            {
-                return await Repository.Notes.UpdateWindowAsync(entity);
-            }
-            else
-            {
-                var checkExist = await GetWindowAsync(entity.NoteId, entity.UserId);
-                if (checkExist.IsValid)
-                    return await Repository.Notes.UpdateWindowAsync(entity);
-                else
-                    return await Repository.Notes.AddWindowAsync(entity);
-            }
-        }
+        //if (entity.WindowId == Guid.Empty)
+        //{
+        //    entity.WindowId = Guid.NewGuid();
+        //    return await Repository.Notes.AddWindowAsync(entity);
+        //}
+        //else
+        //{
+        //    if (!forceNew)
+        //    {
+        //        return await Repository.Notes.UpdateWindowAsync(entity);
+        //    }
+        //    else
+        //    {
+        //        var checkExist = await GetWindowAsync(entity.NoteId, entity.UserId);
+        //        if (checkExist.IsValid)
+        //            return await Repository.Notes.UpdateWindowAsync(entity);
+        //        else
+        //            return await Repository.Notes.AddWindowAsync(entity);
+        //    }
+        //}
+        var command = new KntNotesSaveWindowAsyncCommand(Service, entity, forceNew);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName)
     {
-        var userId = Guid.Empty;
+        //var userId = Guid.Empty;
 
-        var userDto = (await Repository.Users.GetByUserNameAsync(userName)).Entity;
-        if (userDto != null)
-            userId = userDto.UserId;
+        //var userDto = (await Repository.Users.GetByUserNameAsync(userName)).Entity;
+        //if (userDto != null)
+        //    userId = userDto.UserId;
 
-        return await Repository.Notes.GetVisibleNotesIdAsync(userId);
+        //return await Repository.Notes.GetVisibleNotesIdAsync(userId);
+        var command = new KntNotesGetVisibleNotesIdAsyncCommand(Service, userName);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null)
     {
-        var userId = Guid.Empty;
+        //var userId = Guid.Empty;
 
-        var userDto = (await Repository.Users.GetByUserNameAsync(userName)).Entity;
-        if (userDto != null)
-            userId = userDto.UserId;
+        //var userDto = (await Repository.Users.GetByUserNameAsync(userName)).Entity;
+        //if (userDto != null)
+        //    userId = userDto.UserId;
 
-        return await Repository.Notes.GetAlarmNotesIdAsync(userId, notificationType);
+        //return await Repository.Notes.GetAlarmNotesIdAsync(userId, notificationType);
+        var command = new KntNotesGetAlarmNotesIdAsyncCommand(Service, userName, notificationType);
+        return await ExecuteCommand(command);
     }
 
     public async Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId)
     {
-        return await Repository.Notes.PatchFolder(noteId, folderId);
+        //return await Repository.Notes.PatchFolder(noteId, folderId);
+        var command = new KntNotesPatchFolderAsyncCommand(Service, noteId, folderId);
+        return await ExecuteCommand(command);
+
     }
 
     public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
-    {                        
-        return await Repository.Notes.PatchChangeTags(noteId, oldTag, newTag);
+    {
+        //return await Repository.Notes.PatchChangeTags(noteId, oldTag, newTag);
+        var command = new KntNotesPatchChangeTagsAsyncCommand(Service, noteId, oldTag, newTag);
+        return await ExecuteCommand(command);
     }
 
     #endregion
 
-    #region Private methods
+    #region Private methods  
+    
+    //!!! TODO: Delete this method ....
 
-    private string GetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages)
-    {
-        string status = "";
+    //internal string GetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages)
+    //{
+    //    string status = "";
 
-        var tasksValid = tasks.Where(t => t.IsDeleted() == false).Select(t => t).ToList();
-        var messagesValid = messages.Where(m => m.IsDeleted() == false).Select(m => m).ToList();
+    //    var tasksValid = tasks.Where(t => t.IsDeleted() == false).Select(t => t).ToList();
+    //    var messagesValid = messages.Where(m => m.IsDeleted() == false).Select(m => m).ToList();
 
-        bool allTaskResolved = true;
-        if (tasksValid?.Count > 0)
-        {
-            foreach (var item in tasks)
-            {
-                if (item.Resolved == false)
-                {
-                    allTaskResolved = false;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            allTaskResolved = false;
-        }
+    //    bool allTaskResolved = true;
+    //    if (tasksValid?.Count > 0)
+    //    {
+    //        foreach (var item in tasks)
+    //        {
+    //            if (item.Resolved == false)
+    //            {
+    //                allTaskResolved = false;
+    //                break;
+    //            }
+    //        }
+    //    }
+    //    else
+    //    {
+    //        allTaskResolved = false;
+    //    }
 
-        bool alarmsPending = false;
-        foreach (var item in messagesValid)
-        {
-            if (item.AlarmActivated == true)
-            {
-                alarmsPending = true;
-                break;
-            }
+    //    bool alarmsPending = false;
+    //    foreach (var item in messagesValid)
+    //    {
+    //        if (item.AlarmActivated == true)
+    //        {
+    //            alarmsPending = true;
+    //            break;
+    //        }
 
-        }
+    //    }
 
-        if (allTaskResolved == true)
-            status = KntConst.Status[EnumStatus.Resolved];
+    //    if (allTaskResolved == true)
+    //        status = KntConst.Status[EnumStatus.Resolved];
 
-        if (alarmsPending == true)
-        {
-            if (!string.IsNullOrEmpty(status))
-                status += "; ";
-            status += KntConst.Status[EnumStatus.AlarmsPending];
-        }
+    //    if (alarmsPending == true)
+    //    {
+    //        if (!string.IsNullOrEmpty(status))
+    //            status += "; ";
+    //        status += KntConst.Status[EnumStatus.AlarmsPending];
+    //    }
 
-        return status;
-    }
+    //    return status;
+    //}
 
     private (string, string) GetResourceUrls(ResourceDto resource)
     {
