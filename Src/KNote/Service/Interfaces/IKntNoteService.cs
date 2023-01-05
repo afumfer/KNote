@@ -19,8 +19,7 @@ namespace KNote.Service.Interfaces
         Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);
         Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entity = null);
         Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true);
-        Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity);
-        Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
+        Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity);       
         Task<Result<NoteDto>> DeleteAsync(Guid noteId);
         Task<Result<NoteExtendedDto>> DeleteExtendedAsync(Guid noteId);
         Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);
@@ -28,8 +27,6 @@ namespace KNote.Service.Interfaces
         Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId);
         Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity, bool forceNew = false);
         Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resourceInfo, bool forceNew = false);
-        bool ManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);
-        string GetResourcePath(ResourceDto resource);
         Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId);
         Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id);
         Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
@@ -46,8 +43,15 @@ namespace KNote.Service.Interfaces
         Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false);
         Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName);
         Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null);
-        Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId);
-        Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag);
 
+        #region Utils 
+        Task<Result<bool>> UtilPatchFolder(Guid noteId, Guid folderId);
+        Task<Result<bool>> UtilPatchChangeTags(Guid noteId, string oldTag, string newTag);        
+        Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
+        string UtilGetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages);
+        (string, string) UtilGetResourceUrls(ResourceDto resource);
+        bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);
+        string UtilGetResourcePath(ResourceDto resource);
+        #endregion 
     }
 }

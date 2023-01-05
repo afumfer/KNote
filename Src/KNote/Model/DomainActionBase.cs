@@ -35,24 +35,34 @@ public abstract class DomainActionBase
         }
     }
 
-    protected Result<T> ResultDomainAction<T>(Result<T> resultRepositoryAction)
+    protected Result<T> ResultDomainAction<T>(Result<T> resultDomainAction)
     {
         if (ExceptionHasHappened)
         {
             ExceptionHasHappened = false;
-            throw new Exception(resultRepositoryAction.ErrorMessage);
+            throw new Exception(resultDomainAction.ErrorMessage);
         }                                                            
-        return resultRepositoryAction;
+        return resultDomainAction;
     }
 
-    protected Result ResultDomainAction(Result resultRepositoryAction)
+    protected Result ResultDomainAction(Result resultDomainAction)
     {
         if (ExceptionHasHappened)
         {
             ExceptionHasHappened = false;
-            throw new Exception(resultRepositoryAction.ErrorMessage);
+            throw new Exception(resultDomainAction.ErrorMessage);
         }
-        return resultRepositoryAction;
+        return resultDomainAction;
+    }
+
+    protected ResultBase ResultDomainAction(ResultBase resultDomainAction)
+    {
+        if (ExceptionHasHappened)
+        {
+            ExceptionHasHappened = false;
+            throw new Exception(resultDomainAction.ErrorMessage);
+        }
+        return resultDomainAction;
     }
 
     protected int ExtractNoteNumberSearch(string textSearch)

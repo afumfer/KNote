@@ -787,7 +787,7 @@ namespace KNote.ClientWin.Components
 
             var newFolderId = folderSelector.SelectedEntity.FolderInfo.FolderId;                          
             foreach (var n in selectedNotes)                            
-                await SelectedServiceRef.Service.Notes.PatchFolder(n.NoteId, newFolderId);
+                await SelectedServiceRef.Service.Notes.UtilPatchFolder(n.NoteId, newFolderId);
 
             ForceRefreshListNotes();
         }
@@ -1008,9 +1008,9 @@ namespace KNote.ClientWin.Components
                 var tag = listVars[0].VarNewValueText;
                 foreach (var note in selectedNotes)
                     if (action == EnumChangeTag.Add)
-                        await SelectedServiceRef.Service.Notes.PatchChangeTags(note.NoteId, "", tag);
+                        await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
                     else
-                        await SelectedServiceRef.Service.Notes.PatchChangeTags(note.NoteId, tag, "");
+                        await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
 
                 ForceRefreshListNotes();
             }

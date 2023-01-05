@@ -8,7 +8,7 @@ public class Result : ResultBase
 
 }
 
-public class Result<TEntity>: ResultBase
+public class Result<TEntity>: Result
 {
     #region Properties
 

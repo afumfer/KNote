@@ -228,7 +228,7 @@ public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>,
                 return await Task.FromResult(true);
 
             // Add new attributes
-            Model.KAttributesDto = await Service.Notes.CompleteNoteAttributes(Model.KAttributesDto, Model.NoteId, newType.NoteTypeId);                
+            Model.KAttributesDto = await Service.Notes.UtilCompleteNoteAttributes(Model.KAttributesDto, Model.NoteId, newType.NoteTypeId);                
             return await Task.FromResult(true);
         }
         catch (Exception)
@@ -437,7 +437,7 @@ public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>,
 
             newResource.ContentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));
 
-            Service.Notes.ManageResourceContent(newResource);
+            Service.Notes.UtilManageResourceContent(newResource);
 
             Model.Resources.Add(newResource);
             return newResource;

@@ -579,7 +579,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
                     File.WriteAllBytes(fileName, _selectedResource.ContentArrayBytes);
                 else
                 {
-                    string fullPath = _com.Service.Notes.GetResourcePath(_selectedResource);
+                    string fullPath = _com.Service.Notes.UtilGetResourcePath(_selectedResource);
                     File.Copy(fullPath, fileName);
                 }                
             }
@@ -879,7 +879,7 @@ public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
         }
         else
         {
-            _com.Service.Notes.ManageResourceContent(_selectedResource, false);
+            _com.Service.Notes.UtilManageResourceContent(_selectedResource, false);
             webViewResource.Visible = false;
             panelPreview.Visible = true;
             linkViewFile.Visible = true;

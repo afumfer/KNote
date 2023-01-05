@@ -175,7 +175,7 @@ public class KntNotesSaveAsyncCommand : KntCommandServiceBase<NoteDto, Result<No
         else
         {
             if (UpdateStatus)
-                Param.InternalTags = GetNoteStatus((await Service.Notes.GetNoteTasksAsync(Param.NoteId)).Entity, (await Service.Notes.GetMessagesAsync(Param.NoteId)).Entity);
+                Param.InternalTags = Service.Notes.UtilGetNoteStatus((await Service.Notes.GetNoteTasksAsync(Param.NoteId)).Entity, (await Service.Notes.GetMessagesAsync(Param.NoteId)).Entity);
             var res = await Repository.Notes.UpdateAsync(Param);
             return res;
         }
@@ -192,7 +192,7 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandServiceBase<NoteExtend
     {
         var result = new Result<NoteExtendedDto>();
 
-        Param.InternalTags = GetNoteStatus(Param.Tasks, Param.Messages);
+        Param.InternalTags = Service.Notes.UtilGetNoteStatus(Param.Tasks, Param.Messages);
 
         if (Param.IsDirty())
         {
@@ -363,7 +363,7 @@ public class KntNotesGetResourcesAsyncCommand : KntCommandServiceBase<Guid, Resu
         var res = await Repository.Notes.GetResourcesAsync(Param);
         if (res.IsValid)
             foreach (var r in res.Entity)
-                Service.Notes.ManageResourceContent(r);
+                Service.Notes.UtilManageResourceContent(r);
         return res;
     }
 }
@@ -401,7 +401,7 @@ public class KntNotesGetResourceAsyncCommand : KntCommandServiceBase<Guid, Resul
     {
         var res = await Repository.Notes.GetResourceAsync(Param);
         if (res.IsValid)
-            Service.Notes.ManageResourceContent(res.Entity);
+            Service.Notes.UtilManageResourceContent(res.Entity);
         return res;
     }
 }
@@ -418,7 +418,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandServiceBase<ResourceDt
     {
         Result<ResourceDto> result;
 
-        Service.Notes.ManageResourceContent(Param);
+        Service.Notes.UtilManageResourceContent(Param);
 
         var tmpContent = Param.ContentArrayBytes;
 
@@ -441,7 +441,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandServiceBase<ResourceDt
 
                 if (oldResource.Name != Param.Name && oldResource.ContentInDB == false)
                 {
-                    var oldFile = Service.Notes.GetResourcePath(oldResource);
+                    var oldFile = Service.Notes.UtilGetResourcePath(oldResource);
                     try
                     {
                         if (File.Exists(oldFile))
@@ -472,7 +472,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandServiceBase<ResourceDt
         if (!result.Entity.ContentInDB)
             result.Entity.ContentArrayBytes = tmpContent;
 
-        (result.Entity.RelativeUrl, result.Entity.FullUrl) = GetResourceUrls(result.Entity);
+        (result.Entity.RelativeUrl, result.Entity.FullUrl) = Service.Notes.UtilGetResourceUrls(result.Entity);
 
         return result;
     }

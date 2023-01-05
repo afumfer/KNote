@@ -171,7 +171,7 @@ namespace KNote.ClientWin.Components
 
         public void SaveResourceFileAndRefreshDto()
         {
-            Service.Notes.ManageResourceContent(Model);
+            Service.Notes.UtilManageResourceContent(Model);
         }
 
         #endregion 

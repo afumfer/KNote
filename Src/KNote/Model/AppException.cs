@@ -13,12 +13,5 @@ public class AppException : Exception
 
     public AppException(string message) : base(message) { }
 
-    public AppException(string message, Exception inner) : base(message, inner) { }
-    
-    // TODO: eliminate next constructor ??
-    //public AppException(string message, params object[] args)
-    //    : base(String.Format(CultureInfo.CurrentCulture, message, args))
-    //{
-    //}
-
+    public AppException(string message, Exception inner) : base(message, inner) { }    
 }
