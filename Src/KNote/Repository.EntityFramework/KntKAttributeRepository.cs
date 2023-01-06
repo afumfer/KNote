@@ -9,349 +9,361 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 
-namespace KNote.Repository.EntityFramework
+namespace KNote.Repository.EntityFramework;
+
+public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeRepository
 {
-    public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeRepository
+    public KntKAttributeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
+        : base(singletonContext, repositoryRef)
     {
-        public KntKAttributeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
-            : base(singletonContext, repositoryRef)
+    }
+
+    public KntKAttributeRepository(RepositoryRef repositoryRef, bool throwKntException = false)
+        : base(repositoryRef)
+    {
+    }
+
+    public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
+    {
+        var result = new Result<List<KAttributeInfoDto>>();
+
+        try
         {
+            var ctx = GetOpenConnection();
+            var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
+
+            var listAtr = await kattributes.DbSet                    
+                .Include(a => a.NoteType)
+                .OrderBy(a => a.Order).ThenBy(a => a.Name)
+                .ToListAsync();
+
+            List<KAttributeInfoDto> listDto = new List<KAttributeInfoDto>();
+
+            foreach (var a in listAtr)
+            {
+                var dto = a.GetSimpleDto<KAttributeInfoDto>();
+                dto.NoteTypeDto = a.NoteType?.GetSimpleDto<NoteTypeDto>();
+                listDto.Add(dto);
+            }
+
+            result.Entity = listDto;
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public KntKAttributeRepository(RepositoryRef repositoryRef, bool throwKntException = false)
-            : base(repositoryRef)
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
+    {
+        var result = new Result<List<KAttributeInfoDto>>();
+
+        try
         {
+            // TODO: pendiente de poblar la propiedad NoteTypeDto. Coger implementación de GetAllAsync().
+
+            var ctx = GetOpenConnection();
+            var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
+
+            var resRep = await kattributes.GetAllAsync(_ => _.NoteTypeId == typeId);
+
+            result.Entity = resRep.Entity?
+                .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
+                .OrderBy(a => a.Order).ThenBy(a => a.Name)
+                .ToList();
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId)
+    {
+        var result = new Result<List<KAttributeInfoDto>>();
+
+        try
         {
-            var resService = new Result<List<KAttributeInfoDto>>();
-            try
+            // TODO: pendiente de poblar la propiedad NoteTypeDto.  Coger implementación de GetAllAsync().
+
+            var ctx = GetOpenConnection();
+            var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
+
+            var resRep = await kattributes.GetAllAsync(_ => _.NoteTypeId == null || _.NoteTypeId == typeId);
+
+            result.Entity = resRep.Entity?
+                .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
+                .OrderBy(a => a.Order).ThenBy(a => a.Name)
+                .ToList();
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<KAttributeDto>> GetAsync(Guid id)
+    {
+        var result = new Result<KAttributeDto>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
+
+            var resRep = await kattributes.GetAsync((object)id);
+            if (!resRep.IsValid)
+                result.AddListErrorMessage(resRep.ListErrorMessage);
+            resRep = kattributes.LoadCollection(resRep.Entity, tv => tv.KAttributeTabulatedValues);
+            if (!resRep.IsValid)
+                result.AddListErrorMessage(resRep.ListErrorMessage);
+            //
+            result.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
+            result.Entity.KAttributeValues = resRep.Entity?.KAttributeTabulatedValues?
+                .Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity)
+    {
+        var result = new Result<KAttributeDto>();
+
+        try
+        {
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var ctx = GetOpenConnection();
                 var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
-                var listAtr = await kattributes.DbSet                    
-                    .Include(a => a.NoteType)
-                    .OrderBy(a => a.Order).ThenBy(a => a.Name)
-                    .ToListAsync();
+                var newEntity = new KAttribute();
+                newEntity.SetSimpleDto(entity);
 
-                List<KAttributeInfoDto> listDto = new List<KAttributeInfoDto>();
+                var resGenRep = await kattributes.AddAsync(newEntity);
 
-                foreach (var a in listAtr)
+                result.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
+                result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+                foreach (var value in entity.KAttributeValues)
                 {
-                    var dto = a.GetSimpleDto<KAttributeInfoDto>();
-                    dto.NoteTypeDto = a.NoteType?.GetSimpleDto<NoteTypeDto>();
-                    listDto.Add(dto);
+                    var res = await SaveTabulateValueAsync(ctx, result.Entity.KAttributeId, value);
+                    if (!res.IsValid)
+                        result.AddErrorMessage(res.ErrorMessage);
+                    result.Entity.KAttributeValues.Add(res.Entity);
                 }
 
-                resService.Entity = listDto;
+                scope.Complete();
 
                 await CloseIsTempConnection(ctx);
             }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity)
+    {
+        var result = new Result<KAttributeDto>();
+        var resGenRep = new Result<KAttribute>();
+
+        try
         {
-            var resService = new Result<List<KAttributeInfoDto>>();
-            try
-            {
-                // TODO: pendiente de poblar la propiedad NoteTypeDto. Coger implementación de GetAllAsync().
-
-                var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
-
-                var resRep = await kattributes.GetAllAsync(_ => _.NoteTypeId == typeId);
-
-                resService.Entity = resRep.Entity?
-                    .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
-                    .OrderBy(a => a.Order).ThenBy(a => a.Name)
-                    .ToList();
-
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId)
-        {
-            var resService = new Result<List<KAttributeInfoDto>>();
-            try
-            {
-                // TODO: pendiente de poblar la propiedad NoteTypeDto.  Coger implementación de GetAllAsync().
-
-                var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
-
-                var resRep = await kattributes.GetAllAsync(_ => _.NoteTypeId == null || _.NoteTypeId == typeId);
-
-                resService.Entity = resRep.Entity?
-                    .Select(a => a.GetSimpleDto<KAttributeInfoDto>())
-                    .OrderBy(a => a.Order).ThenBy(a => a.Name)
-                    .ToList();
-
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<KAttributeDto>> GetAsync(Guid id)
-        {
-            var resService = new Result<KAttributeDto>();
-            try
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var ctx = GetOpenConnection();
                 var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
-                var resRep = await kattributes.GetAsync((object)id);
-                if (!resRep.IsValid)
-                    resService.AddListErrorMessage(resRep.ListErrorMessage);
-                resRep = kattributes.LoadCollection(resRep.Entity, tv => tv.KAttributeTabulatedValues);
-                if (!resRep.IsValid)
-                    resService.AddListErrorMessage(resRep.ListErrorMessage);
-                //
-                resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
-                resService.Entity.KAttributeValues = resRep.Entity?.KAttributeTabulatedValues?
-                    .Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
+                var resGenRepGet = await kattributes.GetAsync(entity.KAttributeId);
+                KAttribute entityForUpdate;
 
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity)
-        {
-            var response = new Result<KAttributeDto>();
-            try
-            {
-                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                if (resGenRepGet.IsValid)
                 {
-                    var ctx = GetOpenConnection();
-                    var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
-
-                    var newEntity = new KAttribute();
-                    newEntity.SetSimpleDto(entity);
-
-                    var resGenRep = await kattributes.AddAsync(newEntity);
-
-                    response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
-                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-                    foreach (var value in entity.KAttributeValues)
+                    // Check notetype in notes.
+                    if (entity.NoteTypeId != null && resGenRepGet.Entity.NoteTypeId != entity.NoteTypeId)
                     {
-                        var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
-                        if (!res.IsValid)
-                            response.AddErrorMessage(res.ErrorMessage);
-                        response.Entity.KAttributeValues.Add(res.Entity);
+                        var noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(ctx);
+                        var nAttributes = (await noteKAttributes.GetAllAsync(n => n.KAttributeId == entity.KAttributeId)).Entity;
+                        if (nAttributes.Count > 0)
+                        {
+                            result.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
+                            result.Entity = entity;                                
+                        }
                     }
 
-                    scope.Complete();
+                    if (result.IsValid)
+                    {                            
+                        entityForUpdate = resGenRepGet.Entity;
+                        entityForUpdate.SetSimpleDto(entity);
 
-                    await CloseIsTempConnection(ctx);
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-            return ResultDomainAction(response);
-        }
+                        resGenRep = await kattributes.UpdateAsync(entityForUpdate);
 
-        public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity)
-        {
-            var resGenRep = new Result<KAttribute>();
-            var response = new Result<KAttributeDto>();
-
-            try
-            {
-                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                {
-                    var ctx = GetOpenConnection();
-                    var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
-
-                    var resGenRepGet = await kattributes.GetAsync(entity.KAttributeId);
-                    KAttribute entityForUpdate;
-
-                    if (resGenRepGet.IsValid)
-                    {
-                        // Check notetype in notes.
-                        if (entity.NoteTypeId != null && resGenRepGet.Entity.NoteTypeId != entity.NoteTypeId)
+                        result.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
+                        
+                        var guidsUpdated = new List<Guid>();
+                        foreach (var value in entity.KAttributeValues)
                         {
-                            var noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(ctx);
-                            var nAttributes = (await noteKAttributes.GetAllAsync(n => n.KAttributeId == entity.KAttributeId)).Entity;
-                            if (nAttributes.Count > 0)
-                            {
-                                response.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
-                                response.Entity = entity;                                
-                            }
+                            var res = await SaveTabulateValueAsync(ctx, result.Entity.KAttributeId, value);
+                            if (!res.IsValid)
+                                result.AddErrorMessage(res.ErrorMessage);
+                            result.Entity.KAttributeValues.Add(res.Entity);
+                            guidsUpdated.Add(value.KAttributeTabulatedValueId);
                         }
 
-                        if (response.IsValid)
-                        {                            
-                            entityForUpdate = resGenRepGet.Entity;
-                            entityForUpdate.SetSimpleDto(entity);
+                        await DeleteNoContainsTabulateValueAsync(ctx, result.Entity.KAttributeId, guidsUpdated);
 
-                            resGenRep = await kattributes.UpdateAsync(entityForUpdate);
-
-                            response.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
-                            
-                            var guidsUpdated = new List<Guid>();
-                            foreach (var value in entity.KAttributeValues)
-                            {
-                                var res = await SaveTabulateValueAsync(ctx, response.Entity.KAttributeId, value);
-                                if (!res.IsValid)
-                                    response.AddErrorMessage(res.ErrorMessage);
-                                response.Entity.KAttributeValues.Add(res.Entity);
-                                guidsUpdated.Add(value.KAttributeTabulatedValueId);
-                            }
-
-                            await DeleteNoContainsTabulateValueAsync(ctx, response.Entity.KAttributeId, guidsUpdated);
-
-                            response.AddListErrorMessage(resGenRep.ListErrorMessage);
-                        }                      
-                    }
-                    else
-                    {
-                        response.Entity = entity;
-                        response.AddErrorMessage("Can't find entity for update.");
-                    }
-                                                           
-                    scope.Complete();
-
-                    await CloseIsTempConnection(ctx);
-                }
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-
-            return ResultDomainAction(response);
-        }
-
-        public async Task<Result> DeleteAsync(Guid id)
-        {
-            var response = new Result();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
-
-                var resGenRep = await kattributes.DeleteAsync(id);
-                if (!resGenRep.IsValid)
-                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-            return ResultDomainAction(response);
-
-        }
-
-        public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
-        {
-            var result = new Result<List<KAttributeTabulatedValueDto>>();
-            try
-            {
-                var ctx = GetOpenConnection();                
-                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
-                
-                var resRep = await kattributeTabulatedValues.GetAllAsync(tv => tv.KAttributeId == attributeId);
-
-                if (resRep.IsValid)
-                {
-                    result.Entity = resRep.Entity.Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
+                        result.AddListErrorMessage(resGenRep.ListErrorMessage);
+                    }                      
                 }
                 else
-                    result.AddListErrorMessage(resRep.ListErrorMessage);
+                {
+                    result.Entity = entity;
+                    result.AddErrorMessage("Can't find entity for update.");
+                }
+                                                       
+                scope.Complete();
 
                 await CloseIsTempConnection(ctx);
             }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, result);
-            }
-            return ResultDomainAction(result);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        #region Private methods
+        return ResultDomainAction(result);
+    }
 
-        private async Task DeleteNoContainsTabulateValueAsync(KntDbContext ctx, Guid attributeId, List<Guid> guids)
+    public async Task<Result> DeleteAsync(Guid id)
+    {
+        var result = new Result();
+
+        try
         {
+            var ctx = GetOpenConnection();
+            var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
+
+            var resGenRep = await kattributes.DeleteAsync(id);
+            if (!resGenRep.IsValid)
+                result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
+    {
+        var result = new Result<List<KAttributeTabulatedValueDto>>();
+
+        try
+        {
+            var ctx = GetOpenConnection();                
             var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
-            var tabValuesForDelete = (await kattributeTabulatedValues.GetAllAsync(v => (v.KAttributeId == attributeId && !guids.Contains(v.KAttributeTabulatedValueId)))).Entity;            
-            var res = kattributeTabulatedValues.DeleteRange(tabValuesForDelete);
+            
+            var resRep = await kattributeTabulatedValues.GetAllAsync(tv => tv.KAttributeId == attributeId);
+
+            if (resRep.IsValid)
+            {
+                result.Entity = resRep.Entity.Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
+            }
+            else
+                result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        private async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(KntDbContext ctx, Guid attributeId, KAttributeTabulatedValueDto entity) 
-        {
-            Result<KAttributeTabulatedValue> resRep = null;
-            var resService = new Result<KAttributeTabulatedValueDto>();
+        return ResultDomainAction(result);
+    }
 
-            try
-            {                
-                var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
-                             
-                if (entity.KAttributeTabulatedValueId == Guid.Empty)
+    #region Private methods
+
+    private async Task DeleteNoContainsTabulateValueAsync(KntDbContext ctx, Guid attributeId, List<Guid> guids)
+    {
+        var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
+        var tabValuesForDelete = (await kattributeTabulatedValues.GetAllAsync(v => (v.KAttributeId == attributeId && !guids.Contains(v.KAttributeTabulatedValueId)))).Entity;            
+        var res = kattributeTabulatedValues.DeleteRange(tabValuesForDelete);
+    }
+
+    private async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(KntDbContext ctx, Guid attributeId, KAttributeTabulatedValueDto entity) 
+    {
+        var result = new Result<KAttributeTabulatedValueDto>();
+        Result<KAttributeTabulatedValue> resRep = null;
+
+        try
+        {                
+            var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
+                         
+            if (entity.KAttributeTabulatedValueId == Guid.Empty)
+            {
+                entity.KAttributeTabulatedValueId = Guid.NewGuid();
+                var newEntity = new KAttributeTabulatedValue();
+                newEntity.SetSimpleDto(entity);
+                newEntity.KAttributeId = attributeId;
+                resRep = await kattributeTabulatedValues.AddAsync(newEntity);
+            }
+            else
+            {
+                var entityForUpdate = kattributeTabulatedValues.Get(entity.KAttributeTabulatedValueId).Entity;
+                if (entityForUpdate != null)
                 {
-                    entity.KAttributeTabulatedValueId = Guid.NewGuid();
+                    entityForUpdate.SetSimpleDto(entity);
+                    resRep = await kattributeTabulatedValues.UpdateAsync(entityForUpdate);
+                }
+                else
+                {
                     var newEntity = new KAttributeTabulatedValue();
                     newEntity.SetSimpleDto(entity);
                     newEntity.KAttributeId = attributeId;
                     resRep = await kattributeTabulatedValues.AddAsync(newEntity);
                 }
-                else
-                {
-                    var entityForUpdate = kattributeTabulatedValues.Get(entity.KAttributeTabulatedValueId).Entity;
-                    if (entityForUpdate != null)
-                    {
-                        entityForUpdate.SetSimpleDto(entity);
-                        resRep = await kattributeTabulatedValues.UpdateAsync(entityForUpdate);
-                    }
-                    else
-                    {
-                        var newEntity = new KAttributeTabulatedValue();
-                        newEntity.SetSimpleDto(entity);
-                        newEntity.KAttributeId = attributeId;
-                        resRep = await kattributeTabulatedValues.AddAsync(newEntity);
-                    }
-                }             
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-
-            resService.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueDto>();
-            resService.AddListErrorMessage(resRep.ListErrorMessage);
-
-            return ResultDomainAction(resService);
+            }             
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        #endregion 
+        result.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueDto>();
+        result.AddListErrorMessage(resRep.ListErrorMessage);
+
+        return ResultDomainAction(result);
     }
+
+    #endregion 
 }

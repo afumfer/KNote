@@ -1,81 +1,78 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Data.Common;
-using System.ComponentModel;
-using System.Linq.Expressions;
-
 using Microsoft.EntityFrameworkCore;
-
-using KNote.Model;
-using KNote.Repository.EntityFramework.Entities;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using KNote.Model;
 
-namespace KNote.Repository.EntityFramework
+namespace KNote.Repository.EntityFramework;
+
+public abstract class KntRepositoryBase : DomainActionBase, IDisposable
 {
-    public class KntRepositoryBase : DomainActionBase, IDisposable
+    protected internal readonly RepositoryRef _repositoryRef;
+
+    protected readonly KntDbContext SingletonConnection;
+
+    public KntRepositoryBase(KntDbContext singletonConnection, RepositoryRef repositoryRef)            
     {
-        protected internal readonly RepositoryRef _repositoryRef;
+        SingletonConnection = singletonConnection;            
+        _repositoryRef = repositoryRef;
+        _repositoryRef.ConnectionString = singletonConnection.Database.GetConnectionString();
+    }
 
-        protected readonly KntDbContext SingletonConnection;
+    public KntRepositoryBase(RepositoryRef repositoryRef)
+    {            
+        _repositoryRef = repositoryRef;
+    }
 
-        public KntRepositoryBase(KntDbContext singletonConnection, RepositoryRef repositoryRef)            
+    public virtual KntDbContext GetOpenConnection()
+    {
+        if (SingletonConnection != null)
+            return SingletonConnection;
+
+        var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
+
+        if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
+            optionsBuilder.UseSqlServer(_repositoryRef.ConnectionString);
+        else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
         {
-            SingletonConnection = singletonConnection;            
-            _repositoryRef = repositoryRef;
-            _repositoryRef.ConnectionString = singletonConnection.Database.GetConnectionString();
+            optionsBuilder.UseSqlite(_repositoryRef.ConnectionString);
+            // Entity framework core for Sqlite no support AmbientTransaction
+            optionsBuilder.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
         }
+        else
+            throw new Exception("Data provider not suported (KntEx)");
 
-        public KntRepositoryBase(RepositoryRef repositoryRef)
-        {            
-            _repositoryRef = repositoryRef;
-        }
+        return new KntDbContext(optionsBuilder.Options);
+    }
 
-        public virtual KntDbContext GetOpenConnection()
+    public virtual async Task<bool> CloseIsTempConnection(KntDbContext db)
+    {
+        try
         {
-            if (SingletonConnection != null)
-                return SingletonConnection;
-
-            var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
-
-            if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
-                optionsBuilder.UseSqlServer(_repositoryRef.ConnectionString);
-            else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
+            if (SingletonConnection == null)
             {
-                optionsBuilder.UseSqlite(_repositoryRef.ConnectionString);
-                // Entity framework core for Sqlite no support AmbientTransaction
-                optionsBuilder.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+                await db.DisposeAsync();
+                return true;
             }
             else
-                throw new Exception("Data provider not suported (KntEx)");
-
-            return new KntDbContext(optionsBuilder.Options);
-        }
-
-        public virtual async Task<bool> CloseIsTempConnection(KntDbContext db)
-        {
-            try
-            {
-                if (SingletonConnection == null)
-                {
-                    await db.DisposeAsync();
-                    return true;
-                }
-                else
-                    return false;
-            }
-            catch (Exception)
-            {
                 return false;
-            }
         }
-
-        public void Dispose()
+        catch (Exception)
         {
-            if (SingletonConnection != null)
-                SingletonConnection.Dispose();
+            return false;
         }
+    }
+
+    internal void AddDBEntityErrorsToResult(KntEntityValidationException ex, ResultBase result)
+    {
+        foreach (var errEntity in ex.ValidationResults)
+            foreach (var err in errEntity.ValidationResults)
+                result.AddErrorMessage($"{errEntity.ToString()} - {err.ErrorMessage}");
+    }
+
+    public void Dispose()
+    {
+        if (SingletonConnection != null)
+            SingletonConnection.Dispose();
     }
 }

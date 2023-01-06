@@ -3,6 +3,7 @@ using Dapper;
 using KNote.Model;
 using KNote.Model.Dto;
 using System.Transactions;
+using static Dapper.SqlMapper;
 
 namespace KNote.Repository.Dapper;
 
@@ -147,7 +148,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var db = GetOpenConnection();
-
+                
                 // Check notetype in notes.
                 if (entity.NoteTypeId != null)
                 {
@@ -357,6 +358,7 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
 
             result.Entity = tabulatedValues;                
         }
+        
         catch (Exception ex)
         {
             AddExecptionsMessagesToResult(ex, result);

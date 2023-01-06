@@ -8,257 +8,268 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Repository.EntityFramework
+namespace KNote.Repository.EntityFramework;
+
+public class KntUserRepository : KntRepositoryBase, IKntUserRepository
 {
-    public class KntUserRepository : KntRepositoryBase, IKntUserRepository
+    public KntUserRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
+        : base(singletonContext, repositoryRef)
     {
-        public KntUserRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
-            : base(singletonContext, repositoryRef)
-        {
-        }
-
-        public KntUserRepository(RepositoryRef repositoryRef)
-            : base(repositoryRef)
-        {
-        }
-
-        public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
-        {
-            var resService = new Result<List<UserDto>>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                if (pagination != null)
-                {
-                    var query = users.Queryable
-                        .OrderBy(u => u.UserName)
-                        .Pagination(pagination);
-                    resService.Entity = await query
-                        .Select(u => u.GetSimpleDto<UserDto>())
-                        .ToListAsync();
-                }
-                else
-                {
-                    var query = users.Queryable
-                        .OrderBy(u => u.UserName);
-                    resService.Entity = await query
-                        .Select(u => u.GetSimpleDto<UserDto>())
-                        .ToListAsync();
-                }
-
-                resService.TotalCount = (await GetCount()).Entity;
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<long>> GetCount()
-        {
-            var resService = new Result<long>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                resService.Entity = await users.Queryable.CountAsync();
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<UserDto>> GetAsync(Guid userId)
-        {
-            var resService = new Result<UserDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                var resRep = await users.GetAsync((object)userId);
-
-                resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
-        {
-            var resService = new Result<UserDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                var resRep = await users.GetAsync(_ => _.UserName == userName);
-
-                resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
-
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
-        {
-            var resService = new Result<UserInternalDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                var resRep = await users.GetAsync(u => u.UserName == userName);
-
-                resService.Entity = resRep.Entity?.GetSimpleDto<UserInternalDto>();
-
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto entity)
-        {
-            var resService = new Result<UserInternalDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                var newEntity = entity.GetSimpleDto<User>();
-
-                var resRep = await users.AddAsync(newEntity);
-
-                resService.Entity = resRep.Entity?.GetSimpleDto<UserInternalDto>();
-
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
-        }
-
-        public async Task<Result<UserDto>> AddAsync(UserDto entity)
-        {
-            var response = new Result<UserDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                var newEntity = new User();
-                newEntity.SetSimpleDto(entity);
-
-                var resGenRep = await users.AddAsync(newEntity);
-
-                response.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
-                response.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-            return ResultDomainAction(response);
-        }
-
-        public async Task<Result<UserDto>> UpdateAsync(UserDto entity)
-        {
-            var resGenRep = new Result<User>();
-            var response = new Result<UserDto>();
-
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                var resGenRepGet = await users.GetAsync(entity.UserId);
-                User entityForUpdate;
-
-                if (resGenRepGet.IsValid)
-                {
-                    entityForUpdate = resGenRepGet.Entity;
-                    entityForUpdate.SetSimpleDto(entity);
-                    resGenRep = await users.UpdateAsync(entityForUpdate);
-                }
-                else
-                {
-                    resGenRep.Entity = null;
-                    resGenRep.AddErrorMessage("Can't find entity for update.");
-                }
-
-                response.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
-                response.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-
-            return ResultDomainAction(response);
-        }
-
-        public async Task<Result> DeleteAsync(Guid id)
-        {
-            var response = new Result();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
-
-                var resGenRep = await users.DeleteAsync(id);
-                if (!resGenRep.IsValid)
-                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-            return ResultDomainAction(response);
-        }
-
-        public Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
-        {
-            throw new NotImplementedException();
-        }
     }
+
+    public KntUserRepository(RepositoryRef repositoryRef)
+        : base(repositoryRef)
+    {
+    }
+
+    public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
+    {
+        var result = new Result<List<UserDto>>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            if (pagination != null)
+            {
+                var query = users.Queryable
+                    .OrderBy(u => u.UserName)
+                    .Pagination(pagination);
+                result.Entity = await query
+                    .Select(u => u.GetSimpleDto<UserDto>())
+                    .ToListAsync();
+            }
+            else
+            {
+                var query = users.Queryable
+                    .OrderBy(u => u.UserName);
+                result.Entity = await query
+                    .Select(u => u.GetSimpleDto<UserDto>())
+                    .ToListAsync();
+            }
+
+            result.TotalCount = (await GetCount()).Entity;
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<long>> GetCount()
+    {
+        var result = new Result<long>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            result.Entity = await users.Queryable.CountAsync();
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserDto>> GetAsync(Guid userId)
+    {
+        var result = new Result<UserDto>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var resRep = await users.GetAsync((object)userId);
+
+            result.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
+    {
+        var result = new Result<UserDto>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var resRep = await users.GetAsync(_ => _.UserName == userName);
+
+            result.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
+    {
+        var result = new Result<UserInternalDto>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var resRep = await users.GetAsync(u => u.UserName == userName);
+
+            result.Entity = resRep.Entity?.GetSimpleDto<UserInternalDto>();
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto entity)
+    {
+        var result = new Result<UserInternalDto>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var newEntity = entity.GetSimpleDto<User>();
+
+            var resRep = await users.AddAsync(newEntity);
+
+            result.Entity = resRep.Entity?.GetSimpleDto<UserInternalDto>();
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserDto>> AddAsync(UserDto entity)
+    {
+        var result = new Result<UserDto>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var newEntity = new User();
+            newEntity.SetSimpleDto(entity);
+
+            var resGenRep = await users.AddAsync(newEntity);
+
+            result.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
+            result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<UserDto>> UpdateAsync(UserDto entity)
+    {
+        var result = new Result<UserDto>();
+        var resGenRep = new Result<User>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var resGenRepGet = await users.GetAsync(entity.UserId);
+            User entityForUpdate;
+
+            if (resGenRepGet.IsValid)
+            {
+                entityForUpdate = resGenRepGet.Entity;
+                entityForUpdate.SetSimpleDto(entity);
+                resGenRep = await users.UpdateAsync(entityForUpdate);
+            }
+            else
+            {
+                resGenRep.Entity = null;
+                resGenRep.AddErrorMessage("Can't find entity for update.");
+            }
+
+            result.Entity = resGenRep.Entity?.GetSimpleDto<UserDto>();
+            result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result> DeleteAsync(Guid id)
+    {
+        var result = new Result();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var resGenRep = await users.DeleteAsync(id);
+            if (!resGenRep.IsValid)
+                result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
+        }
+
+        return ResultDomainAction(result);
+    }
+
 }

@@ -7,168 +7,176 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Repository.EntityFramework
-{    
-    public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepository
-    {        
+namespace KNote.Repository.EntityFramework;
 
-        public KntSystemValuesRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
-            : base(singletonContext, repositoryRef)
+public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepository
+{        
+
+    public KntSystemValuesRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
+        : base(singletonContext, repositoryRef)
+    {
+    }
+
+    public KntSystemValuesRepository(RepositoryRef repositoryRef)
+        : base(repositoryRef)
+    {
+    }
+
+    public async Task<Result<List<SystemValueDto>>> GetAllAsync()
+    {
+        var result = new Result<List<SystemValueDto>>();
+
+        try
         {
+            var ctx = GetOpenConnection();
+            var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
+
+            var resRep = await systemValues.GetAllAsync();
+            result.Entity = resRep.Entity?.Select(sv => sv.GetSimpleDto<SystemValueDto>()).ToList();
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public KntSystemValuesRepository(RepositoryRef repositoryRef)
-            : base(repositoryRef)
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<SystemValueDto>> GetAsync(string scope, string key)
+    {
+        var result = new Result<SystemValueDto>();
+
+        try
         {
+            var ctx = GetOpenConnection();
+            var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
+
+            var resRep = await systemValues.GetAsync(sv => sv.Scope == scope && sv.Key == key);
+            result.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+            
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public async Task<Result<List<SystemValueDto>>> GetAllAsync()
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<SystemValueDto>> GetAsync(Guid id)
+    {
+        var result = new Result<SystemValueDto>();
+
+        try
         {
-            var resService = new Result<List<SystemValueDto>>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
+            var ctx = GetOpenConnection();
+            var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
-                var resRep = await systemValues.GetAllAsync();
-                resService.Entity = resRep.Entity?.Select(sv => sv.GetSimpleDto<SystemValueDto>()).ToList();
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
+            var resRep = await systemValues.GetAsync((object)id);
+            result.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
+            result.AddListErrorMessage(resRep.ListErrorMessage);
 
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public async Task<Result<SystemValueDto>> GetAsync(string scope, string key)
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<SystemValueDto>> AddAsync(SystemValueDto entity)
+    {
+        var result = new Result<SystemValueDto>();
+
+        try
         {
-            var resService = new Result<SystemValueDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
+            var ctx = GetOpenConnection();
+            var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
-                var resRep = await systemValues.GetAsync(sv => sv.Scope == scope && sv.Key == key);
-                resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
-                
+            var newEntity = new SystemValue();
+            newEntity.SetSimpleDto(entity);
 
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, resService);
-            }
-            return ResultDomainAction(resService);
+            var resGenRep = await systemValues.AddAsync(newEntity);
+
+            result.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
+            result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public async Task<Result<SystemValueDto>> GetAsync(Guid id)
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result<SystemValueDto>> UpdateAsync(SystemValueDto entity)
+    {
+        var result = new Result<SystemValueDto>();
+        var resGenRep = new Result<SystemValue>();
+
+        try
         {
-            var resService = new Result<SystemValueDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
+            var ctx = GetOpenConnection();
+            var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
-                var resRep = await systemValues.GetAsync((object)id);
-                resService.Entity = resRep.Entity?.GetSimpleDto<SystemValueDto>();
-                resService.AddListErrorMessage(resRep.ListErrorMessage);
+            var resGenRepGet = await systemValues.GetAsync(entity.SystemValueId);
+            SystemValue entityForUpdate;
 
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
+            if (resGenRepGet.IsValid)
             {
-                AddExecptionsMessagesToResult(ex, resService);
+                entityForUpdate = resGenRepGet.Entity;
+                entityForUpdate.SetSimpleDto(entity);
+                resGenRep = await systemValues.UpdateAsync(entityForUpdate);
             }
-            return ResultDomainAction(resService);
+            else
+            {
+                resGenRep.Entity = null;
+                resGenRep.AddErrorMessage("Can't find entity for update.");
+            }
+
+            result.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
+            result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public async Task<Result<SystemValueDto>> AddAsync(SystemValueDto entity)
+        return ResultDomainAction(result);
+    }
+
+    public async Task<Result> DeleteAsync(Guid id)
+    {
+        var result = new Result();
+
+        try
         {
-            var response = new Result<SystemValueDto>();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
+            var ctx = GetOpenConnection();
+            var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
 
-                var newEntity = new SystemValue();
-                newEntity.SetSimpleDto(entity);
+            var resGenRep = await systemValues.DeleteAsync(id);
+            if (!resGenRep.IsValid)
+                result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
-                var resGenRep = await systemValues.AddAsync(newEntity);
-
-                response.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
-                response.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-            return ResultDomainAction(response);
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            AddExecptionsMessagesToResult(ex, result);
         }
 
-        public async Task<Result<SystemValueDto>> UpdateAsync(SystemValueDto entity)
-        {
-            var resGenRep = new Result<SystemValue>();
-            var response = new Result<SystemValueDto>();
-
-            try
-            {
-                var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
-
-                var resGenRepGet = await systemValues.GetAsync(entity.SystemValueId);
-                SystemValue entityForUpdate;
-
-                if (resGenRepGet.IsValid)
-                {
-                    entityForUpdate = resGenRepGet.Entity;
-                    entityForUpdate.SetSimpleDto(entity);
-                    resGenRep = await systemValues.UpdateAsync(entityForUpdate);
-                }
-                else
-                {
-                    resGenRep.Entity = null;
-                    resGenRep.AddErrorMessage("Can't find entity for update.");
-                }
-
-                response.Entity = resGenRep.Entity?.GetSimpleDto<SystemValueDto>();
-                response.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-
-            return ResultDomainAction(response);
-        }
-
-        public async Task<Result> DeleteAsync(Guid id)
-        {
-            var response = new Result();
-            try
-            {
-                var ctx = GetOpenConnection();
-                var systemValues = new GenericRepositoryEF<KntDbContext, SystemValue>(ctx);
-
-                var resGenRep = await systemValues.DeleteAsync(id);
-                if (!resGenRep.IsValid)
-                    response.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-                await CloseIsTempConnection(ctx);
-            }
-            catch (Exception ex)
-            {
-                AddExecptionsMessagesToResult(ex, response);
-            }
-            return ResultDomainAction(response);
-
-        }
+        return ResultDomainAction(result);
     }
 }

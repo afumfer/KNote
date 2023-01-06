@@ -28,31 +28,31 @@ public abstract class KntServiceBase : DomainActionBase
 
     public async Task<TResult> ExecuteCommand<TParam, TResult>(KntCommandServiceBase<TParam, TResult> command) where TResult : ResultBase, new() 
     {
-        TResult res;
+        TResult result;
 
         try
         {
             if(command.ValidateParam())
-                res = await ExecuteCommand<TResult>(command);
+                result = await ExecuteCommand<TResult>(command);
             else
             {
-                res = new TResult();
-                res.AddErrorMessage("Invalid param");
-                return res;
+                result = new TResult();
+                result.AddErrorMessage("Invalid param");
+                return result;
             }
         }
         catch (Exception ex)
         {            
-            res = new TResult();
-            AddExecptionsMessagesToResult(ex, res);
-            throw new KntServiceException(res.ErrorMessage, ex);
+            result = new TResult();
+            AddExecptionsMessagesToResult(ex, result);
+            throw new KntServiceException(result.ErrorMessage, ex);
         }
-        return res;
+        return result;
     }
 
     public async Task<TResult> ExecuteCommand<TResult>(KntCommandServiceBase<TResult> command) where TResult : ResultBase, new()
     {
-        TResult res; // = new TResult();
+        TResult result; // = new TResult();
 
         try            
         {
@@ -60,23 +60,23 @@ public abstract class KntServiceBase : DomainActionBase
             {                
                 // TODO: other pre execute methods (log, events, ...)
                 
-                res = await command.Execute();
+                result = await command.Execute();
                 
                 // TODO: other post execute methods (log, events, ...)
             }
             else
             {
-                res = new TResult();
-                res.AddErrorMessage("Not authorized.");                
+                result = new TResult();
+                result.AddErrorMessage("Not authorized.");                
             }           
         }
         catch (Exception ex)
         {            
-            res = new TResult();
-            AddExecptionsMessagesToResult(ex, res);
-            throw new KntServiceException(res.ErrorMessage, ex);
+            result = new TResult();
+            AddExecptionsMessagesToResult(ex, result);
+            throw new KntServiceException(result.ErrorMessage, ex);
         }
         
-        return res;
+        return result;
     }
 }

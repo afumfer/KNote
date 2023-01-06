@@ -14,5 +14,4 @@ public interface IKntUserRepository : IDisposable
     Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto userEntity);
     Task<Result> DeleteAsync(Guid userId);
     Task<Result<long>> GetCount();
-    Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId);
 }

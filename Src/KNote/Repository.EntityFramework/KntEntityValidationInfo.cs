@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Model;
+namespace KNote.Repository.EntityFramework;
 
-public class KntEntityValidationInfo
+internal class KntEntityValidationInfo
 {
     public string EntityDescription { get;  }
     public List<ValidationResult> ValidationResults { get; }

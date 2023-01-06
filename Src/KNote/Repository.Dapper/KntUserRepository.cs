@@ -261,34 +261,5 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         return ResultDomainAction(result);
     }
-
-    public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid userId)
-    {
-        var result = new Result<List<KMessageDto>>();
-        try
-        {
-            var db = GetOpenConnection();
-
-            var sql = @"
-                SELECT                        
-                    KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
-                    KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
-                    KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
-                FROM  KMessages INNER JOIN
-                        Users ON KMessages.UserId = Users.UserId
-                WHERE (KMessages.UserId = @userId)
-                -- ORDER BY [KMessages.AlarmDateTime];";
-
-            var entity = await db.QueryAsync<KMessageDto>(sql.ToString(), new { userId });
-            result.Entity = entity.ToList();
-
-            await CloseIsTempConnection(db);
-        }
-        catch (Exception ex)
-        {
-            AddExecptionsMessagesToResult(ex, result);
-        }
-        return ResultDomainAction(result);
-    }
 }
 

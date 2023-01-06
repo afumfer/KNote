@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KNote.Model;
+namespace KNote.Repository.EntityFramework;
 
-public class KntEntityValidationException :  Exception
+internal class KntEntityValidationException : Exception
 {
-    public List<KntEntityValidationInfo> ValidationResults { get;  }
+    public List<KntEntityValidationInfo> ValidationResults { get; }
 
     public KntEntityValidationException()
         : base()
@@ -25,8 +25,8 @@ public class KntEntityValidationException :  Exception
     {
     }
 
-    public KntEntityValidationException(List<KntEntityValidationInfo> validationResults) 
-        : base ("ValidationException, see ValidationResults property")
+    public KntEntityValidationException(List<KntEntityValidationInfo> validationResults)
+        : base("ValidationException, see ValidationResults property")
     {
         ValidationResults = validationResults;
     }

@@ -10,12 +10,12 @@ public abstract class DomainActionBase
 {
     protected bool ExceptionHasHappened = false;
 
-    protected void AddDBEntityErrorsToResult(KntEntityValidationException ex, ResultBase result)
-    {
-        foreach (var errEntity in ex.ValidationResults)
-            foreach (var err in errEntity.ValidationResults)
-                result.AddErrorMessage($"{errEntity.ToString()} - {err.ErrorMessage}");
-    }
+    //protected void AddDBEntityErrorsToResult(KntEntityValidationException ex, ResultBase result)
+    //{
+    //    foreach (var errEntity in ex.ValidationResults)
+    //        foreach (var err in errEntity.ValidationResults)
+    //            result.AddErrorMessage($"{errEntity.ToString()} - {err.ErrorMessage}");
+    //}
 
     protected void AddExecptionsMessagesToResult(Exception ex, ResultBase result)
     {
@@ -40,7 +40,7 @@ public abstract class DomainActionBase
         if (ExceptionHasHappened)
         {
             ExceptionHasHappened = false;
-            throw new Exception(resultDomainAction.ErrorMessage);
+            throw new KntRepositoryException(resultDomainAction.ErrorMessage);
         }                                                            
         return resultDomainAction;
     }
@@ -50,20 +50,12 @@ public abstract class DomainActionBase
         if (ExceptionHasHappened)
         {
             ExceptionHasHappened = false;
-            throw new Exception(resultDomainAction.ErrorMessage);
+            throw new KntRepositoryException(resultDomainAction.ErrorMessage);
         }
         return resultDomainAction;
     }
 
-    protected ResultBase ResultDomainAction(ResultBase resultDomainAction)
-    {
-        if (ExceptionHasHappened)
-        {
-            ExceptionHasHappened = false;
-            throw new Exception(resultDomainAction.ErrorMessage);
-        }
-        return resultDomainAction;
-    }
+    #region Utils  (Hack. These methods should not be here. TODO: Refactoring pending.)
 
     protected int ExtractNoteNumberSearch(string textSearch)
     {
@@ -155,5 +147,7 @@ public abstract class DomainActionBase
 
         return tokens;
     }
+
+    #endregion
 
 }

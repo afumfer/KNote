@@ -564,7 +564,6 @@ public class KntNoteRepository : KntRepositoryBase, IKntNoteRepository
         return ResultDomainAction(result);
     }
 
-
     public async Task<Result> DeleteAsync(Guid id)
     {
         var result = new Result();

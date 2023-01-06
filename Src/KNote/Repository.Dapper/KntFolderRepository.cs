@@ -79,10 +79,6 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
             result.Entity = treeFolders;
 
         }
-        catch (KntEntityValidationException ex)
-        {
-            AddDBEntityErrorsToResult(ex, result);
-        }
         catch (Exception ex)
         {
             AddExecptionsMessagesToResult(ex, result);
