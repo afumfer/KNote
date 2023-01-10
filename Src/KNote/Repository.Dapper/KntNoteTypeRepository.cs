@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Reflection;
 using Dapper;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -19,9 +20,10 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
 
     public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
     {
-        var result = new Result<List<NoteTypeDto>>();
         try
         {
+            var result = new Result<List<NoteTypeDto>>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM [NoteTypes] ORDER BY Name;";
@@ -29,19 +31,21 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
             result.Entity = entity.ToList();
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<NoteTypeDto>> GetAsync(Guid id)
     {
-        var result = new Result<NoteTypeDto>();
         try
         {
+            var result = new Result<NoteTypeDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT NoteTypeId, Name, Description, ParenNoteTypeId FROM NoteTypes 
@@ -53,19 +57,21 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }            
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<NoteTypeDto>> AddAsync(NoteTypeDto entity)
     {
-        var result = new Result<NoteTypeDto>();
         try
         {
+            var result = new Result<NoteTypeDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"INSERT INTO NoteTypes (NoteTypeId, Name, Description, ParenNoteTypeId)
@@ -78,19 +84,21 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<NoteTypeDto>> UpdateAsync(NoteTypeDto entity)
     {
-        var result = new Result<NoteTypeDto>();
         try
         {
+            var result = new Result<NoteTypeDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"UPDATE NoteTypes SET                     
@@ -105,19 +113,21 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteAsync(Guid id)
     {
-        var result = new Result();
         try
         {
+            var result = new Result();
+
             var db = GetOpenConnection();
 
             var sql = @"DELETE FROM NoteTypes WHERE NoteTypeId = @Id";
@@ -126,12 +136,13 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
                 result.AddErrorMessage("Entity not deleted");
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 }
 

@@ -4,6 +4,7 @@ using KNote.Repository.EntityFramework.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,10 +40,10 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<SystemValueDto>> GetAsync(string scope, string key)
@@ -63,10 +64,10 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<SystemValueDto>> GetAsync(Guid id)
@@ -86,10 +87,10 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<SystemValueDto>> AddAsync(SystemValueDto entity)
@@ -113,10 +114,10 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<SystemValueDto>> UpdateAsync(SystemValueDto entity)
@@ -151,10 +152,10 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result> DeleteAsync(Guid id)
@@ -174,9 +175,9 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 }

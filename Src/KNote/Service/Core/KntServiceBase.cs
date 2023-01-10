@@ -3,6 +3,7 @@ using KNote.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,7 +30,7 @@ public abstract class KntServiceBase : DomainActionBase
     public async Task<TResult> ExecuteCommand<TParam, TResult>(KntCommandServiceBase<TParam, TResult> command) where TResult : ResultBase, new() 
     {
         TResult result;
-
+        
         try
         {
             if(command.ValidateParam())
@@ -42,10 +43,11 @@ public abstract class KntServiceBase : DomainActionBase
             }
         }
         catch (Exception ex)
-        {            
-            result = new TResult();
-            AddExecptionsMessagesToResult(ex, result);
-            throw new KntServiceException(result.ErrorMessage, ex);
+        {
+            //result = new TResult();
+            //AddExecptionsMessagesToResult(ex, result);
+            //throw new KntServiceException(result.ErrorMessage, ex);
+            throw new KntServiceException($"KNote service error.  ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
         return result;
     }
@@ -71,10 +73,11 @@ public abstract class KntServiceBase : DomainActionBase
             }           
         }
         catch (Exception ex)
-        {            
-            result = new TResult();
-            AddExecptionsMessagesToResult(ex, result);
-            throw new KntServiceException(result.ErrorMessage, ex);
+        {
+            //result = new TResult();
+            //AddExecptionsMessagesToResult(ex, result);
+            //throw new KntServiceException(result.ErrorMessage, ex);
+            throw new KntServiceException($"KNote service error.  ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
         
         return result;

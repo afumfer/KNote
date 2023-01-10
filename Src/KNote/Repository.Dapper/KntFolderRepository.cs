@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Reflection;
 using Dapper;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -19,9 +20,10 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
 
     public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
     {            
-        var result = new Result<List<FolderInfoDto>>();
         try
         {
+            var result = new Result<List<FolderInfoDto>>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
@@ -31,19 +33,21 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
             result.Entity = entity.ToList();
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<FolderDto>> GetHomeAsync()
     {
-        var result = new Result<FolderDto>();
         try
         {                
+            var result = new Result<FolderDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
@@ -52,22 +56,23 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
             result.Entity = await db.QueryFirstOrDefaultAsync<FolderDto>(sql.ToString(), new { });
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<FolderDto>>> GetTreeAsync(Guid? partenId = null)
     {            
-        var result = new Result<List<FolderDto>>();
-
-        var treeFolders = new List<FolderDto>();
 
         try
         {
+            var result = new Result<List<FolderDto>>();
+            var treeFolders = new List<FolderDto>();
+
             var allFoldersInfo = (await GetAllAsync()).Entity;
 
             treeFolders = allFoldersInfo.Where(fi => fi.ParentId == partenId).Select( f => f.GetSimpleDto<FolderDto>())
@@ -78,13 +83,14 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
 
             result.Entity = treeFolders;
 
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction<List<FolderDto>>(result);
+        //return ResultDomainAction<List<FolderDto>>(result);
     }
 
     public async Task<Result<FolderDto>> GetAsync(Guid folderId)
@@ -99,9 +105,10 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
 
     private async Task<Result<FolderDto>> GetAsync(Guid? folderId, int? folderNumber)
     {
-        var result = new Result<FolderDto>();
         try
-        {
+        {        
+            var result = new Result<FolderDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, PathFolder, [Order], OrderNotes, Script, ParentId ";
@@ -134,19 +141,21 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
             }
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<FolderDto>> AddAsync(FolderDto entity)
     {
-        var result = new Result<FolderDto>();
         try
         {
+            var result = new Result<FolderDto>();
+
             var db = GetOpenConnection();
 
             entity.CreationDateTime = DateTime.Now;
@@ -179,19 +188,21 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
             result.Entity = entity;
                 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<FolderDto>> UpdateAsync(FolderDto entity)
     {
-        var result = new Result<FolderDto>();
         try
         {
+            var result = new Result<FolderDto>();
+
             var db = GetOpenConnection();
 
             entity.ModificationDateTime = DateTime.Now;
@@ -230,19 +241,21 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteAsync(Guid id)
     {
-        var result = new Result();
         try
         {
+            var result = new Result();
+
             var db = GetOpenConnection();
 
             var sql = @"DELETE FROM Folders WHERE FolderId = @Id";
@@ -253,28 +266,31 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
                 result.AddErrorMessage("Entity not deleted");
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<int>> GetNextFolderNumber()
     {
-        var result = new Result<int>();
         try
-        {
+        {        
+            var result = new Result<int>();
+
             var db = GetOpenConnection();
             result.Entity = GetNextFolderNumber(db);
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     #region Private methods
@@ -287,7 +303,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         return result + 1;
     }
 
-    // TODO: Pendiente de refactorizar (este código está repetido en el repositorio EF)
+    // TODO: !!! Pendiente de refactorizar (este código está repetido en el repositorio EF)
     private void LoadChilds(FolderDto folder, List<FolderInfoDto> allFolders)
     {
         folder.ChildFolders = allFolders.Where(fi => fi.ParentId == folder.FolderId).Select(f => f.GetSimpleDto<FolderDto>())

@@ -4,6 +4,7 @@ using KNote.Model;
 using KNote.Model.Dto;
 using System.Transactions;
 using static Dapper.SqlMapper;
+using System.Reflection;
 
 namespace KNote.Repository.Dapper;
 
@@ -36,9 +37,10 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
 
     public async Task<Result<KAttributeDto>> GetAsync(Guid id)
     {
-        var result = new Result<KAttributeDto>();
         try
         {
+            var result = new Result<KAttributeDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT
@@ -97,19 +99,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
             result.Entity = entity.ToList().FirstOrDefault<KAttributeDto>();
                 
             await CloseIsTempConnection(db);
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity)
     {
-        var result = new Result<KAttributeDto>();
         try
         {
+            var result = new Result<KAttributeDto>();
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var db = GetOpenConnection();
@@ -132,19 +136,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
 
                 await CloseIsTempConnection(db);
             }
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity)
     {
-        var result = new Result<KAttributeDto>();
         try
         {                
+            var result = new Result<KAttributeDto>();
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var db = GetOpenConnection();
@@ -194,19 +200,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
 
                 await CloseIsTempConnection(db);
             }
+
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteAsync(Guid id)
     {
-        var result = new Result();
         try
         {
+            var result = new Result();
+
             var db = GetOpenConnection();
 
             var sql = @"DELETE FROM KAttributes WHERE KAttributeId = @Id";
@@ -215,19 +223,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                 result.AddErrorMessage("Entity not deleted");
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
     {            
-        var result = new Result<List<KAttributeTabulatedValueDto>>();
         try
         {
+            var result = new Result<List<KAttributeTabulatedValueDto>>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order] 
@@ -237,21 +247,23 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
             result.Entity = entity.ToList();
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     #region Private methods
 
     private async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(bool applyFilter, Guid? typeId, bool includeNullType)
     {
-        var result = new Result<List<KAttributeInfoDto>>();
         try
         {
+            var result = new Result<List<KAttributeInfoDto>>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT        
@@ -295,30 +307,32 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
             result.Entity = entity.ToList();
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     private async Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(DbConnection db, Guid kattributeId, List<KAttributeTabulatedValueDto> tabulatedValues)
     {            
-        var result = new Result<List<KAttributeTabulatedValueDto>>();
-        var idsTabValues = "";
-        string sql;
-        string sqlInsert = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
-                                VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
-        string sqlUpdate = @"UPDATE [KAttributeTabulatedValues] SET                                     
-                                    KAttributeId = @KAttributeId, 
-                                    [Value] = @Value, 
-                                    [Description] = @Description, 
-                                    [Order] = @Order  
-                                WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
-        int r = 0;
         try
         {                
+            var result = new Result<List<KAttributeTabulatedValueDto>>();
+            var idsTabValues = "";
+            string sql;
+            string sqlInsert = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
+                                    VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
+            string sqlUpdate = @"UPDATE [KAttributeTabulatedValues] SET                                     
+                                        KAttributeId = @KAttributeId, 
+                                        [Value] = @Value, 
+                                        [Description] = @Description, 
+                                        [Order] = @Order  
+                                    WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
+            int r = 0;
+
             foreach (var tv in tabulatedValues)
             {
                 if (tv != null)
@@ -357,13 +371,13 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
             }
 
             result.Entity = tabulatedValues;                
-        }
-        
+         
+            return result;
+        }        
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     #endregion

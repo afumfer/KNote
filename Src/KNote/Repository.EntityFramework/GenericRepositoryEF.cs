@@ -21,7 +21,9 @@ internal class GenericRepositoryEF<TContext, TEntity> : DomainActionBase, IGener
     private readonly TContext _context;
     
     internal readonly DbSet<TEntity> _dbSet;
-    
+
+    protected bool ExceptionHasHappened = false;
+
     #endregion
 
     #region Constructor
@@ -653,6 +655,44 @@ internal class GenericRepositoryEF<TContext, TEntity> : DomainActionBase, IGener
         foreach (var errEntity in ex.ValidationResults)
             foreach (var err in errEntity.ValidationResults)
                 result.AddErrorMessage($"{errEntity.ToString()} - {err.ErrorMessage}");
+    }
+
+    protected void AddExecptionsMessagesToResult(Exception ex, ResultBase result)
+    {
+        Exception tmpEx = ex;
+        string tmpStr = "";
+
+        ExceptionHasHappened = true;
+
+        while (tmpEx != null)
+        {
+            if (tmpEx.Message != tmpStr)
+            {
+                result.AddErrorMessage(tmpEx.Message);
+                tmpStr = tmpEx.Message;
+            }
+            tmpEx = tmpEx.InnerException;
+        }
+    }
+
+    protected Result<T> ResultDomainAction<T>(Result<T> resultDomainAction)
+    {
+        if (ExceptionHasHappened)
+        {
+            ExceptionHasHappened = false;
+            throw new KntRepositoryException(resultDomainAction.ErrorMessage);
+        }
+        return resultDomainAction;
+    }
+
+    protected Result ResultDomainAction(Result resultDomainAction)
+    {
+        if (ExceptionHasHappened)
+        {
+            ExceptionHasHappened = false;
+            throw new KntRepositoryException(resultDomainAction.ErrorMessage);
+        }
+        return resultDomainAction;
     }
 
     #endregion 

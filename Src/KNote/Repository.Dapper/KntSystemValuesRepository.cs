@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Reflection;
 using Dapper;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -19,9 +20,10 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
 
     public async Task<Result<List<SystemValueDto>>> GetAllAsync()
     {
-        var result = new Result<List<SystemValueDto>>();
         try
         {
+            var result = new Result<List<SystemValueDto>>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT SystemValueId, Scope, [Key], [Value] FROM [SystemValues] ORDER BY Scope, [Key];";
@@ -29,19 +31,21 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
             result.Entity = entity.ToList();
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<SystemValueDto>> GetAsync(string scope, string key)
     {
-        var result = new Result<SystemValueDto>();
         try
         {
+            var result = new Result<SystemValueDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT  SystemValueId, Scope, [Key], [Value] FROM [SystemValues] 
@@ -52,19 +56,21 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<SystemValueDto>> GetAsync(Guid id)
     {
-        var result = new Result<SystemValueDto>();
         try
         {
+            var result = new Result<SystemValueDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT  SystemValueId, Scope, [Key], [Value] FROM [SystemValues] 
@@ -75,19 +81,21 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<SystemValueDto>> AddAsync(SystemValueDto entity)
     {
-        var result = new Result<SystemValueDto>();
         try
         {
+            var result = new Result<SystemValueDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"INSERT INTO SystemValues (SystemValueId, Scope, [Key], [Value])
@@ -99,19 +107,21 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<SystemValueDto>> UpdateAsync(SystemValueDto entity)
     {
-        var result = new Result<SystemValueDto>();
         try
         {
+            var result = new Result<SystemValueDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"UPDATE SystemValues SET                     
@@ -126,19 +136,21 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteAsync(Guid id)
     {
-        var result = new Result();
         try
         {
+            var result = new Result();
+
             var db = GetOpenConnection();
 
             var sql = @"DELETE FROM SystemValues WHERE SystemValueId = @Id";
@@ -147,12 +159,13 @@ public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepo
                 result.AddErrorMessage("Entity not deleted");
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 }
 

@@ -8,6 +8,7 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Repository.EntityFramework.Entities;
 using System.Transactions;
+using System.Reflection;
 
 namespace KNote.Repository.EntityFramework;
 
@@ -31,10 +32,10 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
 
     public async Task<Result<List<NoteInfoDto>>> GetAllAsync()
     {
-        var result = new Result<List<NoteInfoDto>>();
-
         try
         {
+            var result = new Result<List<NoteInfoDto>>();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -46,21 +47,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
     {
-        var result = new Result<List<NoteInfoDto>>();
-
         try
         {
+            var result = new Result<List<NoteInfoDto>>();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
             var folders = new KntFolderRepository(ctx, _repositoryRef);
@@ -76,21 +77,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.Entity = resRep.Select(u => u.GetSimpleDto<NoteInfoDto>()).ToList();
 
             await CloseIsTempConnection(ctx);
+
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
     {
-        var result = new Result<List<NoteInfoDto>>();
-
         try
         {
+            var result = new Result<List<NoteInfoDto>>();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -99,21 +100,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
     {            
-        var result = new Result<List<NoteInfoDto>>();
-
         try
         {
+            var result = new Result<List<NoteInfoDto>>();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -153,22 +154,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
                 .ToListAsync();
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
     {
-        var result = new Result<List<NoteInfoDto>>();
-        int searchNumber;
-
         try
         {
+            var result = new Result<List<NoteInfoDto>>();
+
+            int searchNumber;
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -236,13 +237,13 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
                 .ToListAsync();
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<NoteDto>> GetAsync(Guid noteId)
@@ -258,11 +259,11 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
 
     public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
     {
-        var result = new Result<NoteDto>();
-        NoteDto newNote;
-
         try
         {
+            var result = new Result<NoteDto>();
+            NoteDto newNote;
+
             newNote = new NoteDto();
             if (entity != null)
                 newNote.SetSimpleDto(entity);
@@ -276,22 +277,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             newNote.KAttributesDto = await CompleteNoteAttributes(newNote.KAttributesDto, newNote.NoteId, entity?.NoteTypeId);
 
             result.Entity = newNote;
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<NoteDto>> AddAsync(NoteDto entity)
     {            
-        var result = new Result<NoteDto>();
-        Result<Note> resRep = null;
-
         try
         {
+            var result = new Result<NoteDto>();
+            Result<Note> resRep = null;
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var ctx = GetOpenConnection();
@@ -303,7 +304,9 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             
                 resRep = await notes.AddAsync(newEntity);
                 if (!resRep.IsValid)
-                    ExceptionHasHappened = true;
+                {
+                    throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})");                    
+                }
             
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {
@@ -321,22 +324,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
 
                 await CloseIsTempConnection(ctx);
             }
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
-        }
-        
-        return ResultDomainAction(result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }        
     }
 
     public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity)
     {
-        var result = new Result<NoteDto>();
-        Result<Note> resRep = null;
-
         try
         {
+            var result = new Result<NoteDto>();
+            Result<Note> resRep = null;
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var ctx = GetOpenConnection();
@@ -380,22 +382,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
 
                 await CloseIsTempConnection(ctx);
             }
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, resRep);
-        }
-        
-        result.AddListErrorMessage(resRep.ListErrorMessage);
-        return ResultDomainAction(result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }               
     }
 
     public async Task<Result> DeleteAsync(Guid id)
     {
-        var result = new Result();
-
         try
         {
+            var result = new Result();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -404,21 +405,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
     {
-        var result = new Result<List<ResourceDto>>();
-
         try
         {
+            var result = new Result<List<ResourceDto>>();
+
             var ctx = GetOpenConnection();                
             var resources = new GenericRepositoryEF<KntDbContext, Resource>(ctx);
 
@@ -427,21 +428,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async  Task<Result<ResourceDto>> GetResourceAsync(Guid idNoteResource)
     {            
-        var result = new Result<ResourceDto>();
-
         try
-        {
+        {        
+            var result = new Result<ResourceDto>();
+
             var ctx = GetOpenConnection();
             var resources = new GenericRepositoryEF<KntDbContext, Resource>(ctx);
 
@@ -450,20 +451,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity)
     {
-        var result = new Result<ResourceDto>();
         try
         {
+            var result = new Result<ResourceDto>();
+
             var ctx = GetOpenConnection();
             var resources = new GenericRepositoryEF<KntDbContext, Resource>(ctx);
 
@@ -486,22 +488,23 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
             
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity)
     {
-        var result = new Result<ResourceDto>();
-        var resGenRep = new Result<Resource>();
 
         try
         {
+            var result = new Result<ResourceDto>();
+            var resGenRep = new Result<Resource>();
+
             var ctx = GetOpenConnection();
             var resources = new GenericRepositoryEF<KntDbContext, Resource>(ctx);
 
@@ -533,20 +536,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteResourceAsync(Guid id)
     {
-        var result = new Result();
         try
         {
+            var result = new Result();
+
             var ctx = GetOpenConnection();
             var resources = new GenericRepositoryEF<KntDbContext, Resource>(ctx);
 
@@ -555,21 +559,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid idNote)
     {
-        var result = new Result<List<NoteTaskDto>>();
 
         try
         {
+            var result = new Result<List<NoteTaskDto>>();
+
             var ctx = GetOpenConnection();                
             var noteTasks = new GenericRepositoryEF<KntDbContext, NoteTask>(ctx);
 
@@ -587,13 +592,13 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             }
 
             await CloseIsTempConnection(ctx);
+        
+            return result;            
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);            
     }
 
     public Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
@@ -628,21 +633,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
                 result.AddErrorMessage("Task not found.");
             
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity)
     {
-        var result = new Result<NoteTaskDto>();
-
         try
         {
+            var result = new Result<NoteTaskDto>();
+
             var ctx = GetOpenConnection();
             var noteTasks = new GenericRepositoryEF<KntDbContext, NoteTask>(ctx);
 
@@ -660,22 +665,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity)
     {
-        var result = new Result<NoteTaskDto>();
-        var resGenRep = new Result<NoteTask>();
-
         try
         {
+            var result = new Result<NoteTaskDto>();
+            var resGenRep = new Result<NoteTask>();
+
             var ctx = GetOpenConnection();
             var noteTasks = new GenericRepositoryEF<KntDbContext, NoteTask>(ctx);
 
@@ -700,21 +705,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteNoteTaskAsync(Guid id)
     {
-        var result = new Result();
-
         try
-        {
+        {        
+            var result = new Result();
+
             var ctx = GetOpenConnection();
             var noteTasks = new GenericRepositoryEF<KntDbContext, NoteTask>(ctx);
 
@@ -723,21 +728,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId)
     {
-        var result = new Result<List<KMessageDto>>();
-
         try
         {
+            var result = new Result<List<KMessageDto>>();
+
             var ctx = GetOpenConnection();                
             var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
 
@@ -754,21 +760,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             }
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<KMessageDto>> GetMessageAsync(Guid messageId)
     {
-        var result = new Result<KMessageDto>();
-
         try
         {
+            var result = new Result<KMessageDto>();
+
             var ctx = GetOpenConnection();
             var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
 
@@ -778,21 +784,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity)
     {
-        var result = new Result<KMessageDto>();
-
         try
         {
+            var result = new Result<KMessageDto>();
+
             var ctx = GetOpenConnection();
             var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
 
@@ -805,22 +811,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity)
     {
-        var result = new Result<KMessageDto>();
-        var resGenRep = new Result<KMessage>();
-
         try
         {
+            var result = new Result<KMessageDto>();
+            var resGenRep = new Result<KMessage>();
+
             var ctx = GetOpenConnection();
             var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
 
@@ -843,21 +849,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteMessageAsync(Guid messageId)
     {
-        var result = new Result();
-
         try
         {
+            var result = new Result();
+
             var ctx = GetOpenConnection();
             var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
 
@@ -866,20 +873,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId)
     {            
-        var result = new Result<WindowDto>();
         try
         {
+            var result = new Result<WindowDto>();
+
             var ctx = GetOpenConnection();
             var windows = new GenericRepositoryEF<KntDbContext, Window>(ctx);
 
@@ -889,21 +897,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<WindowDto>> AddWindowAsync(WindowDto entity)
     {            
-        var result = new Result<WindowDto>();
-
         try
         {
+            var result = new Result<WindowDto>();
+
             var ctx = GetOpenConnection();
             var windows = new GenericRepositoryEF<KntDbContext, Window>(ctx);
 
@@ -916,22 +924,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity)
     {
-        var result = new Result<WindowDto>();
-        var resGenRep = new Result<Window>();
-
         try
         {
+            var result = new Result<WindowDto>();
+            var resGenRep = new Result<Window>();
+
             var ctx = GetOpenConnection();
             var window = new GenericRepositoryEF<KntDbContext, Window>(ctx);
 
@@ -954,21 +962,20 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<int>> CountNotesInFolder(Guid folderId)
     {
-        Result<int> result = new Result<int>();
-
         try
         {
+            var result = new Result<int>();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -976,21 +983,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.Entity = count;
 
             await CloseIsTempConnection(ctx);
+
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId)
     {
-        var result = new Result<List<Guid>>();
-
         try
         {
+            var result = new Result<List<Guid>>();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Window>(ctx);
 
@@ -999,21 +1006,21 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId, EnumNotificationType? notificationType = null)
     {
-        var result = new Result<List<Guid>>();
-
         try
         {
+            var result = new Result<List<Guid>>();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
 
@@ -1035,22 +1042,22 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId)
     {
-        var result = new Result<bool>();
-        Result<Note> resRep = null;
-
         try
         {
+            var result = new Result<bool>();
+            Result<Note> resRep = null;
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -1069,30 +1076,30 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             }
 
             await CloseIsTempConnection(ctx);
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, resRep);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        result.AddListErrorMessage(resRep.ListErrorMessage);
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
     {
-        var result = new Result<bool>();
-
-        if (string.IsNullOrEmpty(oldTag) && string.IsNullOrEmpty(newTag))
-        {
-            result.AddErrorMessage("Invalid tags parameters.");
-            return result;
-        }
-
-        Result<Note> resRep = null;
-        
         try
         {
+            var result = new Result<bool>();
+
+            if (string.IsNullOrEmpty(oldTag) && string.IsNullOrEmpty(newTag))
+            {
+                result.AddErrorMessage("Invalid tags parameters.");
+                return result;
+            }
+
+            Result<Note> resRep = null;
+        
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -1119,14 +1126,14 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             }
 
             await CloseIsTempConnection(ctx);
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, resRep);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        result.AddListErrorMessage(resRep.ListErrorMessage);
-        return ResultDomainAction(result);
     }
 
     public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
@@ -1182,9 +1189,10 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
 
     private async Task<Result<NoteDto>> GetAsync(Guid? noteId, int? noteNumber)
     {
-        var result = new Result<NoteDto>();
         try
         {
+            var result = new Result<NoteDto>();
+
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
@@ -1226,12 +1234,13 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
             }
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     // TODO refactor (duplicated code in dapper repository )
@@ -1289,11 +1298,11 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
 
     private async Task<Result<NoteKAttributeDto>> SaveAttrtibuteAsync(KntDbContext ctx, NoteKAttributeDto entity)
     {
-        Result<NoteKAttribute> resRep = null;
-        var resService = new Result<NoteKAttributeDto>();
-
         try
         {                
+            Result<NoteKAttribute> resRep = null;
+            var result = new Result<NoteKAttributeDto>();
+
             var noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(ctx);
             
             var findNoteAttribute = (noteKAttributes.Get(_ => _.NoteKAttributeId == entity.NoteKAttributeId)).Entity;
@@ -1321,18 +1330,17 @@ public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
                     resRep = await noteKAttributes.AddAsync(newEntity);
                 }
             }                
+            result.Entity = entity;
+            Model.ModelExtensions.UtilCopyProperties(result.Entity, resRep.Entity);
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, resService);
-        }
-                    
-        resService.Entity = entity;
-        Model.ModelExtensions.UtilCopyProperties(resService.Entity, resRep.Entity);
-
-        resService.AddListErrorMessage(resRep.ListErrorMessage);
-
-        return ResultDomainAction(resService);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }                    
     }
 
     #endregion

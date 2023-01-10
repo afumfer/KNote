@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -55,10 +56,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<long>> GetCount()
@@ -76,10 +77,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<UserDto>> GetAsync(Guid userId)
@@ -101,10 +102,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
@@ -126,10 +127,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
@@ -151,10 +152,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto entity)
@@ -178,10 +179,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<UserDto>> AddAsync(UserDto entity)
@@ -205,10 +206,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<UserDto>> UpdateAsync(UserDto entity)
@@ -243,10 +244,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result> DeleteAsync(Guid id)
@@ -266,10 +267,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
 }

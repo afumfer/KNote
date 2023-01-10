@@ -4,6 +4,7 @@ using KNote.Repository.EntityFramework.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -41,10 +42,10 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<NoteTypeDto>> GetAsync(Guid id)
@@ -65,10 +66,10 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<NoteTypeDto>> AddAsync(NoteTypeDto entity)
@@ -92,10 +93,10 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result<NoteTypeDto>> UpdateAsync(NoteTypeDto entity)
@@ -130,10 +131,10 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
         
-        return ResultDomainAction(result);
+        return result;
     }
 
     public async Task<Result> DeleteAsync(Guid id)
@@ -153,9 +154,9 @@ public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
 
-        return ResultDomainAction(result);
+        return result;
     }
 }

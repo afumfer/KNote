@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -25,10 +26,10 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
 
     public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
     {
-        var result = new Result<List<KAttributeInfoDto>>();
-
         try
         {
+            var result = new Result<List<KAttributeInfoDto>>();
+
             var ctx = GetOpenConnection();
             var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
@@ -49,21 +50,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
             result.Entity = listDto;
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
     {
-        var result = new Result<List<KAttributeInfoDto>>();
-
         try
-        {
+        {        
+            var result = new Result<List<KAttributeInfoDto>>();
+
             // TODO: pendiente de poblar la propiedad NoteTypeDto. Coger implementación de GetAllAsync().
 
             var ctx = GetOpenConnection();
@@ -79,21 +80,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<KAttributeInfoDto>>> GetAllIncludeNullTypeAsync(Guid? typeId)
     {
-        var result = new Result<List<KAttributeInfoDto>>();
-
         try
         {
+            var result = new Result<List<KAttributeInfoDto>>();
+
             // TODO: pendiente de poblar la propiedad NoteTypeDto.  Coger implementación de GetAllAsync().
 
             var ctx = GetOpenConnection();
@@ -109,21 +110,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<KAttributeDto>> GetAsync(Guid id)
     {
-        var result = new Result<KAttributeDto>();
-
         try
         {
+            var result = new Result<KAttributeDto>();
+
             var ctx = GetOpenConnection();
             var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
@@ -139,21 +140,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                 .Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity)
     {
-        var result = new Result<KAttributeDto>();
-
         try
         {
+            var result = new Result<KAttributeDto>();
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var ctx = GetOpenConnection();
@@ -179,22 +180,23 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
 
                 await CloseIsTempConnection(ctx);
             }
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity)
     {
-        var result = new Result<KAttributeDto>();
-        var resGenRep = new Result<KAttribute>();
 
         try
         {
+            var result = new Result<KAttributeDto>();
+            var resGenRep = new Result<KAttribute>();
+
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var ctx = GetOpenConnection();
@@ -251,21 +253,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
 
                 await CloseIsTempConnection(ctx);
             }
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteAsync(Guid id)
     {
-        var result = new Result();
-
         try
         {
+            var result = new Result();
+
             var ctx = GetOpenConnection();
             var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
@@ -274,21 +276,21 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
     {
-        var result = new Result<List<KAttributeTabulatedValueDto>>();
-
         try
         {
+            var result = new Result<List<KAttributeTabulatedValueDto>>();
+
             var ctx = GetOpenConnection();                
             var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
             
@@ -302,13 +304,13 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                 result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(result);
     }
 
     #region Private methods
@@ -322,11 +324,12 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
 
     private async Task<Result<KAttributeTabulatedValueDto>> SaveTabulateValueAsync(KntDbContext ctx, Guid attributeId, KAttributeTabulatedValueDto entity) 
     {
-        var result = new Result<KAttributeTabulatedValueDto>();
-        Result<KAttributeTabulatedValue> resRep = null;
 
         try
         {                
+            var result = new Result<KAttributeTabulatedValueDto>();
+            Result<KAttributeTabulatedValue> resRep = null;
+
             var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
                          
             if (entity.KAttributeTabulatedValueId == Guid.Empty)
@@ -353,16 +356,16 @@ public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeReposito
                     resRep = await kattributeTabulatedValues.AddAsync(newEntity);
                 }
             }             
+
+            result.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueDto>();
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        result.Entity = resRep.Entity?.GetSimpleDto<KAttributeTabulatedValueDto>();
-        result.AddListErrorMessage(resRep.ListErrorMessage);
-
-        return ResultDomainAction(result);
     }
 
     #endregion 

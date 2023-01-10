@@ -8,7 +8,7 @@ namespace KNote.Model;
 
 public abstract class DomainActionBase
 {
-    protected bool ExceptionHasHappened = false;
+    //protected bool ExceptionHasHappened = false;
 
     //protected void AddDBEntityErrorsToResult(KntEntityValidationException ex, ResultBase result)
     //{
@@ -17,43 +17,43 @@ public abstract class DomainActionBase
     //            result.AddErrorMessage($"{errEntity.ToString()} - {err.ErrorMessage}");
     //}
 
-    protected void AddExecptionsMessagesToResult(Exception ex, ResultBase result)
-    {
-        Exception tmpEx = ex;
-        string tmpStr = "";
+    //protected void AddExecptionsMessagesToResult(Exception ex, ResultBase result)
+    //{
+    //    Exception tmpEx = ex;
+    //    string tmpStr = "";
 
-        ExceptionHasHappened = true;
+    //    ExceptionHasHappened = true;
 
-        while (tmpEx != null)
-        {
-            if (tmpEx.Message != tmpStr)
-            {
-                result.AddErrorMessage(tmpEx.Message);
-                tmpStr = tmpEx.Message;
-            }
-            tmpEx = tmpEx.InnerException;
-        }
-    }
+    //    while (tmpEx != null)
+    //    {
+    //        if (tmpEx.Message != tmpStr)
+    //        {
+    //            result.AddErrorMessage(tmpEx.Message);
+    //            tmpStr = tmpEx.Message;
+    //        }
+    //        tmpEx = tmpEx.InnerException;
+    //    }
+    //}
 
-    protected Result<T> ResultDomainAction<T>(Result<T> resultDomainAction)
-    {
-        if (ExceptionHasHappened)
-        {
-            ExceptionHasHappened = false;
-            throw new KntRepositoryException(resultDomainAction.ErrorMessage);
-        }                                                            
-        return resultDomainAction;
-    }
+    //protected Result<T> ResultDomainAction<T>(Result<T> resultDomainAction)
+    //{
+    //    if (ExceptionHasHappened)
+    //    {
+    //        ExceptionHasHappened = false;
+    //        throw new KntRepositoryException(resultDomainAction.ErrorMessage);
+    //    }
+    //    return resultDomainAction;
+    //}
 
-    protected Result ResultDomainAction(Result resultDomainAction)
-    {
-        if (ExceptionHasHappened)
-        {
-            ExceptionHasHappened = false;
-            throw new KntRepositoryException(resultDomainAction.ErrorMessage);
-        }
-        return resultDomainAction;
-    }
+    //protected Result ResultDomainAction(Result resultDomainAction)
+    //{
+    //    if (ExceptionHasHappened)
+    //    {
+    //        ExceptionHasHappened = false;
+    //        throw new KntRepositoryException(resultDomainAction.ErrorMessage);
+    //    }
+    //    return resultDomainAction;
+    //}
 
     #region Utils  (Hack. These methods should not be here. TODO: Refactoring pending.)
 

@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Reflection;
 using Dapper;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -19,9 +20,10 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
 
     public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
     {
-        var result = new Result<List<UserDto>>();
         try
         {
+            var result = new Result<List<UserDto>>();
+
             var db = GetOpenConnection();
 
             IEnumerable<UserDto> entity;
@@ -46,40 +48,42 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
             result.TotalCount = (await GetCount()).Entity;
 
             await CloseIsTempConnection(db);
+            
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<long>> GetCount()
     {
-        var resService = new Result<long>();
-
         try
         {
+            var result = new Result<long>();
+
             var db = GetOpenConnection();
 
             var sql = "SELECT COUNT(*) FROM Users";
-            resService.Entity = await db.ExecuteScalarAsync<long>(sql);
+            result.Entity = await db.ExecuteScalarAsync<long>(sql);
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, resService);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-
-        return ResultDomainAction(resService);
     }
 
     public async Task<Result<UserDto>> GetAsync(Guid id)
     {            
-        var result = new Result<UserDto>();
         try
         {
+            var result = new Result<UserDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]  
@@ -93,19 +97,21 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<UserDto>> GetByUserNameAsync(string userName)
     {
-        var result = new Result<UserDto>();
         try
         {
+            var result = new Result<UserDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]  
@@ -119,19 +125,21 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
     {            
-        var result = new Result<UserInternalDto>();
         try
         {
+            var result = new Result<UserInternalDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled], [PasswordHash], [PasswordSalt] FROM [Users]  
@@ -145,19 +153,21 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+    
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<UserDto>> AddAsync(UserDto entity)
     {
-        var result = new Result<UserDto>();
         try
         {
+            var result = new Result<UserDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"INSERT INTO Users (UserId, UserName, EMail, FullName, RoleDefinition, Disabled )
@@ -172,19 +182,21 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<UserDto>> UpdateAsync(UserDto entity)
     {
-        var result = new Result<UserDto>();
         try
         {
+            var result = new Result<UserDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"UPDATE Users SET 
@@ -204,19 +216,21 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto entity)
     {
-        var result = new Result<UserInternalDto>();
         try
         {
+            var result = new Result<UserInternalDto>();
+
             var db = GetOpenConnection();
 
             var sql = @"INSERT INTO Users (UserId, UserName, EMail, FullName, RoleDefinition, Disabled, PasswordHash, PasswordSalt )
@@ -231,19 +245,21 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 
     public async Task<Result> DeleteAsync(Guid id)
     {
-        var result = new Result();
         try
         {
+            var result = new Result();
+
             var db = GetOpenConnection();
 
             var sql = @"DELETE FROM Users WHERE UserId = @Id";
@@ -254,12 +270,13 @@ public class KntUserRepository : KntRepositoryBase, IKntUserRepository
                 result.AddErrorMessage("Entity not deleted");
 
             await CloseIsTempConnection(db);
+        
+            return result;
         }
         catch (Exception ex)
         {
-            AddExecptionsMessagesToResult(ex, result);
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
-        return ResultDomainAction(result);
     }
 }
 
