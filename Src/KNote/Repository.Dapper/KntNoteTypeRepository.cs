@@ -6,7 +6,7 @@ using KNote.Model.Dto;
 
 namespace KNote.Repository.Dapper;
 
-public class KntNoteTypeRepository : KntRepositoryBase, IKntNoteTypeRepository
+public class KntNoteTypeRepository : KntRepositoryDapperBase, IKntNoteTypeRepository
 {        
     public KntNoteTypeRepository(DbConnection singletonConnection, RepositoryRef repositoryRef) 
         : base(singletonConnection, repositoryRef)

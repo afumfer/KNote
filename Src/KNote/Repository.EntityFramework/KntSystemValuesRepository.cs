@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework;
 
-public class KntSystemValuesRepository : KntRepositoryBase, IKntSystemValuesRepository
+public class KntSystemValuesRepository : KntRepositoryEFBase, IKntSystemValuesRepository
 {        
 
     public KntSystemValuesRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)

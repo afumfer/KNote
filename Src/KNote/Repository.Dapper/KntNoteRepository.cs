@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace KNote.Repository.Dapper;
 
-public class KntNoteRepository : KntRepositoryBase, IKntNoteRepository
+public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 {
     #region Constructor
 
@@ -29,7 +29,7 @@ public class KntNoteRepository : KntRepositoryBase, IKntNoteRepository
     #region IKntNoteRepository
 
     public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
-    {
+    {        
         using var db = GetOpenConnection();
         var folders = new KntFolderRepository(db, _repositoryRef);
            

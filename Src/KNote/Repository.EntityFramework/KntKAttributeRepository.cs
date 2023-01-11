@@ -12,7 +12,7 @@ using System.Transactions;
 
 namespace KNote.Repository.EntityFramework;
 
-public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeRepository
+public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeRepository
 {
     public KntKAttributeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
         : base(singletonContext, repositoryRef)

@@ -6,28 +6,25 @@ using KNote.Model;
 
 namespace KNote.Repository.EntityFramework;
 
-public abstract class KntRepositoryBase : DomainActionBase, IDisposable
-{
-    protected internal readonly RepositoryRef _repositoryRef;
+public abstract class KntRepositoryEFBase : KntRepositoryBase, IDisposable
+{   
+    protected readonly KntDbContext _singletonConnection;
 
-    protected readonly KntDbContext SingletonConnection;
-
-    public KntRepositoryBase(KntDbContext singletonConnection, RepositoryRef repositoryRef)            
+    public KntRepositoryEFBase(KntDbContext singletonConnection, RepositoryRef repositoryRef) : base (repositoryRef)
     {
-        SingletonConnection = singletonConnection;            
-        _repositoryRef = repositoryRef;
+        _singletonConnection = singletonConnection;        
         _repositoryRef.ConnectionString = singletonConnection.Database.GetConnectionString();
     }
 
-    public KntRepositoryBase(RepositoryRef repositoryRef)
-    {            
-        _repositoryRef = repositoryRef;
+    public KntRepositoryEFBase(RepositoryRef repositoryRef) : base(repositoryRef)
+    {
+        
     }
 
     public virtual KntDbContext GetOpenConnection()
     {
-        if (SingletonConnection != null)
-            return SingletonConnection;
+        if (_singletonConnection != null)
+            return _singletonConnection;
 
         var optionsBuilder = new DbContextOptionsBuilder<KntDbContext>();
 
@@ -49,7 +46,7 @@ public abstract class KntRepositoryBase : DomainActionBase, IDisposable
     {
         try
         {
-            if (SingletonConnection == null)
+            if (_singletonConnection == null)
             {
                 await db.DisposeAsync();
                 return true;
@@ -63,16 +60,9 @@ public abstract class KntRepositoryBase : DomainActionBase, IDisposable
         }
     }
 
-    internal void AddDBEntityErrorsToResult(KntEntityValidationException ex, ResultBase result)
-    {
-        foreach (var errEntity in ex.ValidationResults)
-            foreach (var err in errEntity.ValidationResults)
-                result.AddErrorMessage($"{errEntity.ToString()} - {err.ErrorMessage}");
-    }
-
     public void Dispose()
     {
-        if (SingletonConnection != null)
-            SingletonConnection.Dispose();
+        if (_singletonConnection != null)
+            _singletonConnection.Dispose();
     }
 }

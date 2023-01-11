@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework;
 
-public class KntUserRepository : KntRepositoryBase, IKntUserRepository
+public class KntUserRepository : KntRepositoryEFBase, IKntUserRepository
 {
     public KntUserRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
         : base(singletonContext, repositoryRef)

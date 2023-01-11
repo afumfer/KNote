@@ -6,7 +6,7 @@ using KNote.Model.Dto;
 
 namespace KNote.Repository.Dapper;
 
-public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
+public class KntFolderRepository : KntRepositoryDapperBase, IKntFolderRepository
 {        
     public KntFolderRepository(DbConnection singletonConnection, RepositoryRef repositoryRef) 
         : base(singletonConnection, repositoryRef)
@@ -21,7 +21,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
     public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
     {            
         try
-        {
+        {            
             var result = new Result<List<FolderInfoDto>>();
 
             var db = GetOpenConnection();
@@ -67,13 +67,12 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
 
     public async Task<Result<List<FolderDto>>> GetTreeAsync(Guid? partenId = null)
     {            
-
         try
         {
             var result = new Result<List<FolderDto>>();
             var treeFolders = new List<FolderDto>();
 
-            var allFoldersInfo = (await GetAllAsync()).Entity;
+            var allFoldersInfo = (await GetAllAsync()).Entity.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
 
             treeFolders = allFoldersInfo.Where(fi => fi.ParentId == partenId).Select( f => f.GetSimpleDto<FolderDto>())
                 .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
@@ -88,9 +87,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
         catch (Exception ex)
         {
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
-
-        //return ResultDomainAction<List<FolderDto>>(result);
+        }        
     }
 
     public async Task<Result<FolderDto>> GetAsync(Guid folderId)
@@ -278,7 +275,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
     public async Task<Result<int>> GetNextFolderNumber()
     {
         try
-        {        
+        {            
             var result = new Result<int>();
 
             var db = GetOpenConnection();
@@ -302,17 +299,7 @@ public class KntFolderRepository : KntRepositoryBase, IKntFolderRepository
 
         return result + 1;
     }
-
-    // TODO: !!! Pendiente de refactorizar (este código está repetido en el repositorio EF)
-    private void LoadChilds(FolderDto folder, List<FolderInfoDto> allFolders)
-    {
-        folder.ChildFolders = allFolders.Where(fi => fi.ParentId == folder.FolderId).Select(f => f.GetSimpleDto<FolderDto>())
-            .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
-
-        foreach (FolderDto f in folder.ChildFolders)
-            LoadChilds(f, allFolders);
-    }
-
+    
     #endregion
 }
 

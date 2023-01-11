@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace KNote.Repository.Dapper;
 
-public class KntKAttributeRepository : KntRepositoryBase, IKntKAttributeRepository
+public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRepository
 {        
     public KntKAttributeRepository(DbConnection singletonConnection, RepositoryRef repositoryRef)
         : base(singletonConnection, repositoryRef)

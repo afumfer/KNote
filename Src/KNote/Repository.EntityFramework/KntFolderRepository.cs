@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework;
 
-public class KntFolderRepository: KntRepositoryBase, IKntFolderRepository
+public class KntFolderRepository: KntRepositoryEFBase, IKntFolderRepository
 {
     public KntFolderRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
         : base (singletonContext, repositoryRef)
@@ -26,7 +26,7 @@ public class KntFolderRepository: KntRepositoryBase, IKntFolderRepository
     public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
     {
         try
-        {
+        {            
             var result = new Result<List<FolderInfoDto>>();
 
             var ctx = GetOpenConnection();
@@ -99,14 +99,14 @@ public class KntFolderRepository: KntRepositoryBase, IKntFolderRepository
 
         try
         {
-            var result = new Result<List<FolderDto>>();
+            var result = new Result<List<FolderDto>>();            
             var treeFolders = new List<FolderDto>();
 
             var ctx = GetOpenConnection();
 
             var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
             var allFolders = await folders.DbSet.ToListAsync();
-            var allFoldersInfo = allFolders.Select(f => f.GetSimpleDto<FolderDto>()).ToList();
+            var allFoldersInfo = allFolders.Select(f => f.GetSimpleDto<FolderDto>()).ToList();            
 
             treeFolders = allFoldersInfo.Where(fi => fi.ParentId == parentId)
                 .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
@@ -267,23 +267,13 @@ public class KntFolderRepository: KntRepositoryBase, IKntFolderRepository
     #region Private methods
 
     private int GetNextFolderNumber(GenericRepositoryEF<KntDbContext, Folder> folders)
-    {
-        // Emplear método LastOrDefault() en lugar de FirstOrDafault 
+    {        
         var lastFolder = folders
             .DbSet.OrderByDescending(f => f.FolderNumber).FirstOrDefault();
 
         return lastFolder != null ? lastFolder.FolderNumber + 1 : 1;
     }
-
-    private void LoadChilds(FolderDto folder, List<FolderDto> allFolders)
-    {
-        folder.ChildFolders = allFolders.Where(fi => fi.ParentId == folder.FolderId)
-            .OrderBy(f => f.Order).ThenBy(f => f.Name).ToList();
-
-        foreach (FolderDto f in folder.ChildFolders)
-            LoadChilds(f, allFolders);
-    }
-
+   
     #endregion
 
 }

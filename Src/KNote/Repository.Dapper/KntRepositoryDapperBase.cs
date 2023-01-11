@@ -6,26 +6,25 @@ using KNote.Model;
 
 namespace KNote.Repository.Dapper;
 
-public abstract class KntRepositoryBase : DomainActionBase, IDisposable
-{
-    protected internal readonly RepositoryRef _repositoryRef;
-    protected readonly DbConnection SingletonConnection;
+public abstract class KntRepositoryDapperBase : KntRepositoryBase, IDisposable
+{    
+    protected readonly DbConnection _singletonConnection;
 
-    public KntRepositoryBase(DbConnection singletonConnection, RepositoryRef repositoryRef)
+    public KntRepositoryDapperBase(DbConnection singletonConnection, RepositoryRef repositoryRef) : base(repositoryRef)
     {
-        SingletonConnection = singletonConnection;
-        _repositoryRef = repositoryRef;
+        _singletonConnection = singletonConnection;
+        
     }
 
-    public KntRepositoryBase(RepositoryRef repositoryRef)
+    public KntRepositoryDapperBase(RepositoryRef repositoryRef) : base(repositoryRef)
     {
-        _repositoryRef = repositoryRef;
+        
     }
 
     public virtual DbConnection GetOpenConnection()
     {
-        if (SingletonConnection != null)
-            return SingletonConnection;
+        if (_singletonConnection != null)
+            return _singletonConnection;
 
         if (_repositoryRef.Provider == "Microsoft.Data.SqlClient")
         {
@@ -48,7 +47,7 @@ public abstract class KntRepositoryBase : DomainActionBase, IDisposable
     {
         try
         {
-            if (SingletonConnection == null)
+            if (_singletonConnection == null)
             {
                 await db.DisposeAsync();
                 return true;
@@ -64,8 +63,8 @@ public abstract class KntRepositoryBase : DomainActionBase, IDisposable
 
     public void Dispose()
     {
-        if (SingletonConnection != null)
-            SingletonConnection.Dispose();
+        if (_singletonConnection != null)
+            _singletonConnection.Dispose();
     }
 
 }

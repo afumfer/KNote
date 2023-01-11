@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace KNote.Repository.EntityFramework;
 
-public class KntNoteRepository: KntRepositoryBase, IKntNoteRepository
+public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 {
     #region Constructor
 
