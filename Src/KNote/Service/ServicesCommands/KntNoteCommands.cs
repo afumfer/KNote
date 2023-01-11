@@ -156,7 +156,7 @@ public class KntNotesNewExtendedAsyncCommand : KntCommandServiceBase<NoteInfoDto
     }
 }
 
-public class KntNotesSaveAsyncCommand : KntCommandServiceBase<NoteDto, Result<NoteDto>>
+public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Result<NoteDto>>
 {
     private readonly bool UpdateStatus;
     public KntNotesSaveAsyncCommand(IKntService service, NoteDto entity, bool updateStatus = true) : base(service, entity)
@@ -182,7 +182,7 @@ public class KntNotesSaveAsyncCommand : KntCommandServiceBase<NoteDto, Result<No
     }
 }
 
-public class KntNotesSaveExtendedAsyncCommand : KntCommandServiceBase<NoteExtendedDto, Result<NoteExtendedDto>>
+public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteExtendedDto, Result<NoteExtendedDto>>
 {    
     public KntNotesSaveExtendedAsyncCommand(IKntService service, NoteExtendedDto entity) : base(service, entity)
     {        
@@ -406,7 +406,7 @@ public class KntNotesGetResourceAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
-public class KntNotesSaveResourceAsyncCommand : KntCommandServiceBase<ResourceDto, Result<ResourceDto>>
+public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<ResourceDto, Result<ResourceDto>>
 {
     private readonly bool forceNew;
     public KntNotesSaveResourceAsyncCommand(IKntService service, ResourceDto resource, bool forceNew = false) : base(service, resource)
@@ -478,7 +478,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandServiceBase<ResourceDt
     }
 }
 
-public class KntNotesSaveResourceInfoAsyncCommand : KntCommandServiceBase<ResourceInfoDto, Result<ResourceInfoDto>>
+public class KntNotesSaveResourceInfoAsyncCommand : KntCommandSaveServiceBase<ResourceInfoDto, Result<ResourceInfoDto>>
 {
     private readonly bool forceNew;
     public KntNotesSaveResourceInfoAsyncCommand(IKntService service, ResourceInfoDto resource, bool forceNew = false) : base(service, resource)
@@ -625,7 +625,7 @@ public class KntNotesGetNoteTaskAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
-public class KntNotesSaveNoteTaskAsyncCommand : KntCommandServiceBase<NoteTaskDto, Result<NoteTaskDto>>
+public class KntNotesSaveNoteTaskAsyncCommand : KntCommandSaveServiceBase<NoteTaskDto, Result<NoteTaskDto>>
 {
     private readonly bool forceNew;
     public KntNotesSaveNoteTaskAsyncCommand(IKntService service, NoteTaskDto entity, bool forceNew = false) : base(service, entity)
@@ -713,7 +713,7 @@ public class KntNotesGetMessageAsyncCommand : KntCommandServiceBase<Guid, Result
     }
 }
 
-public class KntNotesSaveMessageAsyncCommand : KntCommandServiceBase<KMessageDto, Result<KMessageDto>>
+public class KntNotesSaveMessageAsyncCommand : KntCommandSaveServiceBase<KMessageDto, Result<KMessageDto>>
 {
     private readonly bool forceNew;
     public KntNotesSaveMessageAsyncCommand(IKntService service, KMessageDto entity, bool forceNew = false) : base(service, entity)
@@ -797,7 +797,7 @@ public class KntNotesGetWindowAsyncCommand : KntCommandServiceBase<Result<Window
     }
 }
 
-public class KntNotesSaveWindowAsyncCommand : KntCommandServiceBase<WindowDto, Result<WindowDto>>
+public class KntNotesSaveWindowAsyncCommand : KntCommandSaveServiceBase<WindowDto, Result<WindowDto>>
 {
     private readonly bool forceNew;
     public KntNotesSaveWindowAsyncCommand(IKntService service, WindowDto entity, bool forceNew = false) : base(service, entity)

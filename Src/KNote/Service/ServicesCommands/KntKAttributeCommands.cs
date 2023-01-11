@@ -49,7 +49,7 @@ public class KntKAttributesGetAsyncCommand : KntCommandServiceBase<Guid, Result<
     }
 }
 
-public class KntKAttributesSaveAsyncCommand : KntCommandServiceBase<KAttributeDto, Result<KAttributeDto>>
+public class KntKAttributesSaveAsyncCommand : KntCommandSaveServiceBase<KAttributeDto, Result<KAttributeDto>>
 {
     public KntKAttributesSaveAsyncCommand(IKntService service, KAttributeDto entity) : base(service, entity)
     {

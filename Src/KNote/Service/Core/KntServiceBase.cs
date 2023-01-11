@@ -28,37 +28,40 @@ public abstract class KntServiceBase : DomainActionBase
     }
 
     public async Task<TResult> ExecuteCommand<TParam, TResult>(KntCommandServiceBase<TParam, TResult> command) where TResult : ResultBase, new() 
-    {
-        TResult result;
-        
+    {        
         try
         {
-            if(command.ValidateParam())
+            TResult result;
+
+            var validParam = command.ValidateParam();
+
+            if (validParam.IsValid)
                 result = await ExecuteCommand<TResult>(command);
             else
             {
                 result = new TResult();
-                result.AddErrorMessage("Invalid param");
+                result.AddErrorMessage("Invalid param. ");
+                result.AddListErrorMessage(validParam.ListErrorMessage);
                 return result;
             }
+            
+            return result;
         }
         catch (Exception ex)
         {
-            //result = new TResult();
-            //AddExecptionsMessagesToResult(ex, result);
-            //throw new KntServiceException(result.ErrorMessage, ex);
-            throw new KntServiceException($"KNote service error.  ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+            throw new KntServiceException($"KNote service error.  ({MethodBase.GetCurrentMethod().DeclaringType}). ", ex);
         }
-        return result;
     }
 
     public async Task<TResult> ExecuteCommand<TResult>(KntCommandServiceBase<TResult> command) where TResult : ResultBase, new()
     {
-        TResult result; // = new TResult();
-
         try            
         {
-            if (command.ValidateAuthorization())
+            TResult result;
+
+            var validAuthorization = command.ValidateAuthorization();
+
+            if (validAuthorization.IsValid)
             {                
                 // TODO: other pre execute methods (log, events, ...)
                 
@@ -69,17 +72,16 @@ public abstract class KntServiceBase : DomainActionBase
             else
             {
                 result = new TResult();
-                result.AddErrorMessage("Not authorized.");                
+                result.AddErrorMessage("Not authorized. ");
+                result.AddListErrorMessage(validAuthorization.ListErrorMessage);
             }           
+        
+            return result;
         }
         catch (Exception ex)
         {
-            //result = new TResult();
-            //AddExecptionsMessagesToResult(ex, result);
-            //throw new KntServiceException(result.ErrorMessage, ex);
-            throw new KntServiceException($"KNote service error.  ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+            throw new KntServiceException($"KNote service error.  ({MethodBase.GetCurrentMethod().DeclaringType}). ", ex);
         }
         
-        return result;
     }
 }

@@ -72,7 +72,7 @@ public class KntFoldersGetHomeAsyncCommand : KntCommandServiceBase<Result<Folder
     }
 }
 
-public class KntFoldersSaveAsyncCommand : KntCommandServiceBase<FolderDto, Result<FolderDto>>
+public class KntFoldersSaveAsyncCommand : KntCommandSaveServiceBase<FolderDto, Result<FolderDto>>
 {
     public KntFoldersSaveAsyncCommand(IKntService service, FolderDto entity) : base(service, entity)
     {

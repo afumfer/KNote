@@ -44,7 +44,7 @@ public class KntSystemValueGetAsyncCommand : KntCommandServiceBase<Guid, Result<
     }
 }
 
-public class KntSystemValueSaveAsyncCommand : KntCommandServiceBase<SystemValueDto, Result<SystemValueDto>>
+public class KntSystemValueSaveAsyncCommand : KntCommandSaveServiceBase<SystemValueDto, Result<SystemValueDto>>
 {
     public KntSystemValueSaveAsyncCommand(IKntService service, SystemValueDto entity) : base(service, entity)
     {

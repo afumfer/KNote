@@ -1,7 +1,22 @@
-﻿using KNote.Repository;
+﻿using KNote.Model;
+using KNote.Repository;
 using System.Threading.Tasks;
 
 namespace KNote.Service.Core;
+public abstract class KntCommandSaveServiceBase<TParam, TResult> : KntCommandServiceBase<TParam, TResult> where TParam : ModelBase
+{    
+    public KntCommandSaveServiceBase(IKntService service, TParam param) : base(service, param)
+    {
+        
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        result.AddErrorMessage(Param.GetErrorMessage());
+        return result;
+    }
+}
 
 public abstract class KntCommandServiceBase<TParam, TResult> : KntCommandServiceBase<TResult>
 {
@@ -12,6 +27,7 @@ public abstract class KntCommandServiceBase<TParam, TResult> : KntCommandService
         Param = param;
     }
 }
+
 
 public abstract class KntCommandServiceBase<TResult> 
 {
@@ -34,18 +50,16 @@ public abstract class KntCommandServiceBase<TResult>
     public KntCommandServiceBase(IKntService service)
     {
         _service = service;
-
     }
 
-    public virtual bool ValidateAuthorization()
-    {
-        // TODO: Check generic authorization for UserIdentityName
-        return true;
+    public virtual Result ValidateAuthorization()
+    {        
+        return new Result();
     }
 
-    public virtual bool ValidateParam()
+    public virtual Result ValidateParam()
     {
-        return true;
+        return new Result();
     }
 
     public abstract Task<TResult> Execute();

@@ -191,6 +191,15 @@ public class FolderInfoDto : SmartModelDtoBase
            new ValidationContext(this, null, null) { MemberName = "PathFolder" },
            results);
 
+        Validator.TryValidateProperty(this.Tags,
+           new ValidationContext(this, null, null) { MemberName = "Tags" },
+           results);
+
+        Validator.TryValidateProperty(this.OrderNotes,
+           new ValidationContext(this, null, null) { MemberName = "OrderNotes" },
+           results);
+
+
         // ---
         // Specific validations
         // ----

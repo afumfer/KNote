@@ -51,7 +51,7 @@ public class KntUsersGetByUserNameAsyncCommand : KntCommandServiceBase<string, R
 }
 
 
-public class KntUsersSaveAsyncCommand : KntCommandServiceBase<UserDto, Result<UserDto>>
+public class KntUsersSaveAsyncCommand : KntCommandSaveServiceBase<UserDto, Result<UserDto>>
 {
     public KntUsersSaveAsyncCommand(IKntService service, UserDto entity) : base(service, entity)
     {
@@ -161,7 +161,7 @@ public class KntUsersAuthenticateAsyncCommand : KntCommandServiceBase<UserCreden
     }
 }
 
-public class KntUsersCreateAsyncCommand : KntCommandServiceBase<UserRegisterDto, Result<UserDto>>
+public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegisterDto, Result<UserDto>>
 {
     public KntUsersCreateAsyncCommand(IKntService service, UserRegisterDto user) : base(service, user)
     {

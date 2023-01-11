@@ -10,24 +10,20 @@ public abstract class ResultBase
 {
     #region Properties
 
-    public string ErrorMessage {
-        get { return string.Join(" ", _errorList); }            
-    }
 
+    private List<string> _listErrorMessage;
     public List<string> ListErrorMessage
     {
-        get { return  _errorList.Select( err => err).ToList(); }            
+        get { return  _listErrorMessage.Select( err => err).ToList(); }            
     }
     
-    private List<string> _errorList;
-    protected List<string> ErrorList
-    {
-        get { return _errorList; }            
+    public string ErrorMessage {
+        get { return string.Join(" ", _listErrorMessage); }            
     }
 
     public virtual bool IsValid
     {
-        get { return (_errorList.Count == 0); }
+        get { return (_listErrorMessage.Count == 0); }
     }
     
     #endregion
@@ -36,7 +32,7 @@ public abstract class ResultBase
 
     public ResultBase()
     {
-        _errorList = new List<string>();            
+        _listErrorMessage = new List<string>();            
     }
 
     #endregion 
@@ -45,13 +41,13 @@ public abstract class ResultBase
 
     public void AddErrorMessage(string errorMessage)
     {
-        _errorList.Add(errorMessage);
+        _listErrorMessage.Add(errorMessage);
     }
 
     public void AddListErrorMessage(IEnumerable<string> listErrorMessage)
     {
         foreach(var errMsg in listErrorMessage)
-            _errorList.Add(errMsg);
+            _listErrorMessage.Add(errMsg);
     }
 
     #endregion

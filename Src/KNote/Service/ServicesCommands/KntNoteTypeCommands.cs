@@ -37,7 +37,7 @@ public class KntNoteTypeGetAsyncCommand : KntCommandServiceBase<Guid, Result<Not
     }
 }
 
-public class KntNoteTypeSaveAsyncCommand : KntCommandServiceBase<NoteTypeDto, Result<NoteTypeDto>>
+public class KntNoteTypeSaveAsyncCommand : KntCommandSaveServiceBase<NoteTypeDto, Result<NoteTypeDto>>
 {
     public KntNoteTypeSaveAsyncCommand(IKntService service, NoteTypeDto entity) : base(service, entity)
     {
