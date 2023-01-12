@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace KNote.Service.Core;
 
-public abstract class KntServiceBase : DomainActionBase
+public abstract class KntServiceBase
 {
     private readonly IKntService _service;
     internal IKntService Service

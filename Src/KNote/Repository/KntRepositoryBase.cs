@@ -3,7 +3,7 @@ using KNote.Model.Dto;
 
 namespace KNote.Repository;
 
-public class KntRepositoryBase : DomainActionBase
+public class KntRepositoryBase
 {    
     protected internal readonly RepositoryRef _repositoryRef;
 

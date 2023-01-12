@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace KNote.Repository.EntityFramework;
 
-internal class GenericRepositoryEF<TContext, TEntity> : DomainActionBase, IGenericRepositoryEF<TContext, TEntity>
+internal class GenericRepositoryEF<TContext, TEntity> : IGenericRepositoryEF<TContext, TEntity>
     where TEntity : EntityModelBase, new()
     where TContext: DbContext, new()
 {
