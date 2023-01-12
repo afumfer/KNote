@@ -13,7 +13,8 @@ public abstract class KntCommandSaveServiceBase<TParam, TResult> : KntCommandSer
     public override Result ValidateParam()
     {
         var result = new Result();
-        result.AddErrorMessage(Param.GetErrorMessage());
+        if(!Param.IsValid())
+            result.AddErrorMessage(Param.GetErrorMessage());
         return result;
     }
 }
