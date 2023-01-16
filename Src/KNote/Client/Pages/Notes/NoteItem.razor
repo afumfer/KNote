@@ -33,6 +33,7 @@
     </div>
     
     <div class="bg-white p-2">
+        @*            
         @if ((Note.Description?.Length > 6000))
         {
             <ViewMarkdown MarkdownContent="@(Note.Description?.Substring(0,6000))" />
@@ -41,7 +42,9 @@
         else
         {
             <ViewMarkdown MarkdownContent="@Note.Description" />
-        }
+        }*@
+
+        <ViewMarkdown MarkdownContent="@Note.Description" />
     </div>
     
 </RadzenCard>
