@@ -188,8 +188,7 @@ namespace KNote.ClientWin.Components
                         ListEntities.Add(note);
                         View.AddItem(note);
                     }
-                }
-                //TODO: !!!Debug this... trash ?
+                }                
                 else
                 {
                     ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
