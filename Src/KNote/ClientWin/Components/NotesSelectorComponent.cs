@@ -189,12 +189,12 @@ namespace KNote.ClientWin.Components
                         View.AddItem(note);
                     }
                 }
-                // TODO: !!! Debug this ... trash?
-                //else
-                //{
-                //    ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
-                //    View.DeleteItem(note);
-                //}
+                //TODO: !!!Debug this... trash ?
+                else
+                {
+                    ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
+                    View.DeleteItem(note);
+                }
             }
         }
 

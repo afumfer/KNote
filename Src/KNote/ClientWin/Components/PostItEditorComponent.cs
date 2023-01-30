@@ -7,7 +7,13 @@ namespace KNote.ClientWin.Components;
 
 public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, NoteDto>
 {
+    #region Private fields
+
     private Guid _userId = Guid.Empty;
+
+    #endregion
+
+    #region Public properties
 
     public WindowDto WindowPostIt { get; set; }
 
@@ -15,11 +21,24 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
 
     public bool ForceAlwaysTop { get; set; }
 
+    #endregion 
+
     #region Constructor
 
     public PostItEditorComponent(Store store): base(store)
     {
-        ComponentName = "PostIt editor";            
+        ComponentName = "PostIt editor";
+        Store.DeletedNote += Store_DeletedNote;
+    }
+
+    #endregion 
+
+    #region Store events 
+
+    private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    {
+        if (e.Entity.NoteId == this.Model.NoteId)
+            this.Finalize();
     }
 
     #endregion 
@@ -381,7 +400,9 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
         View.ActivateView();
     }
 
-    #endregion 
+    #endregion
+
+    #region Private methods
 
     private async Task<WindowDto> GetNewWindowPostIt()
     {            
@@ -431,6 +452,8 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
         //    _userId = userDto.UserId;
         //return _userId;
     }
+
+    #endregion 
 
 }
 

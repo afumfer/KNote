@@ -394,7 +394,7 @@ namespace KNote.ClientWin.Components
                 if(_messagesManagmentComponent == null)
                 {
                     _messagesManagmentComponent = new MessagesManagmentComponent(Store);
-                    _messagesManagmentComponent.PostItVisible += MessagesManagment_PostItVisible;                    
+                    _messagesManagmentComponent.PostItVisible += _messagesManagment_PostItVisible;                    
                     _messagesManagmentComponent.PostItAlarm += _messagesManagment_PostItAlarm;
                     //_messagesManagmentComponent.EMailAlarm += _messagesManagment_EMailAlarm;
                     //_messagesManagmentComponent.AppAlarm += _messagesManagment_AppAlarm;    
@@ -430,7 +430,7 @@ namespace KNote.ClientWin.Components
             await EditNotePostIt(e.Entity.Service, e.Entity.NoteId, true);
         }
 
-        private async void MessagesManagment_PostItVisible(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+        private async void _messagesManagment_PostItVisible(object sender, ComponentEventArgs<ServiceWithNoteId> e)
         {
             if (await Store.CheckPostItIsActive(e.Entity.NoteId))
                 return;

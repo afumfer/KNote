@@ -18,9 +18,20 @@ public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>,
     public NoteEditorComponent(Store store) : base(store)
     {
         ComponentName = "Note editor";
+        Store.DeletedNote += Store_DeletedNote;
     }
 
     #endregion
+
+    #region Store events 
+
+    private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    {
+        if (e.Entity.NoteId == this.Model.NoteId)
+            this.Finalize();
+    }
+
+    #endregion 
 
     #region Componet specific events 
 
@@ -516,6 +527,7 @@ public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>,
         Store.RunScript(Model.Script);
     }
 
-    #endregion 
+    #endregion
+
 }
 
