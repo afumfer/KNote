@@ -1,233 +1,224 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using KNote.ClientWin.Core;
+﻿using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components
+namespace KNote.ClientWin.Components;
+
+public class NotesSelectorComponent : ComponentSelectorBase<ISelectorView<NoteInfoDto>, NoteInfoDto>
 {
-    public class NotesSelectorComponent : ComponentSelectorBase<ISelectorView<NoteInfoDto>, NoteInfoDto>
+    #region Properties
+
+    public FolderInfoDto Folder
     {
-        #region Properties
+        get;
+        private set;
+    }
 
-        public FolderInfoDto Folder
+    public NotesFilterDto NotesFilter
+    {
+        get;
+        private set;
+    }
+
+
+    #endregion
+
+    #region Constructor
+
+    public NotesSelectorComponent(Store store) : base(store)
+    {
+        ComponentName = "Notes selector";
+    }
+
+    #endregion
+
+    #region ISelectorView implementation
+
+    protected override ISelectorView<NoteInfoDto> CreateView()
+    {
+        return Store.FactoryViews.View(this);
+    }
+
+    #endregion 
+
+    #region Component virtual / abstract public members
+
+    public override async Task<bool> LoadEntities(IKntService service, bool refreshView = true)
+    {
+        return await LoadEntities(service, null, refreshView);
+    }
+
+    public async Task<bool> LoadEntities(IKntService service, FolderInfoDto folder, bool refreshView = true)
+    {
+        try
         {
-            get;
-            private set;
-        }
+            Service = service;
+            Folder = folder;
+            NotesFilter = null;
 
-        public NotesFilterDto NotesFilter
-        {
-            get;
-            private set;
-        }
+            Guid f;
+            if (Folder == null)
+                f = Guid.Empty;                     
+            else 
+                f = Folder.FolderId;
 
+            Result<List<NoteInfoDto>> response;
+            if(folder == null)
+                response = await Service.Notes.GetAllAsync();
+            else 
+                response = await Service.Notes.GetByFolderAsync(f);
 
-        #endregion
-
-        #region Constructor
-
-        public NotesSelectorComponent(Store store) : base(store)
-        {
-            ComponentName = "Notes selector";
-        }
-
-        #endregion
-
-        #region ISelectorView implementation
-
-        protected override ISelectorView<NoteInfoDto> CreateView()
-        {
-            return Store.FactoryViews.View(this);
-        }
-
-        #endregion 
-
-        #region Component virtual / abstract public members
-
-        public override async Task<bool> LoadEntities(IKntService service, bool refreshView = true)
-        {
-            return await LoadEntities(service, null, refreshView);
-        }
-
-        public async Task<bool> LoadEntities(IKntService service, FolderInfoDto folder, bool refreshView = true)
-        {
-            try
+            if (response.IsValid)
             {
-                Service = service;
-                Folder = folder;
-                NotesFilter = null;
+                ListEntities = response.Entity;
 
-                Guid f;
-                if (Folder == null)
-                    f = Guid.Empty;                     
-                else 
-                    f = Folder.FolderId;
+                if(refreshView)
+                    View.RefreshView();
 
-                Result<List<NoteInfoDto>> response;
-                if(folder == null)
-                    response = await Service.Notes.GetAllAsync();
-                else 
-                    response = await Service.Notes.GetByFolderAsync(f);
-
-                if (response.IsValid)
-                {
-                    ListEntities = response.Entity;
-
-                    if(refreshView)
-                        View.RefreshView();
-
-                    if (ListEntities?.Count > 0)
-                        SelectedEntity = ListEntities[0];
-                    else
-                        SelectedEntity = null;
-                }
+                if (ListEntities?.Count > 0)
+                    SelectedEntity = ListEntities[0];
                 else
-                {
-                    View.ShowInfo(response.ErrorMessage);
-                    return false;
-                }
+                    SelectedEntity = null;
             }
-            catch (Exception ex)
+            else
             {
-                View.ShowInfo(ex.Message);
+                View.ShowInfo(response.ErrorMessage);
                 return false;
             }
-
-            return true;
+        }
+        catch (Exception ex)
+        {
+            View.ShowInfo(ex.Message);
+            return false;
         }
 
-        public async Task<bool> LoadFilteredEntities(IKntService service, NotesFilterDto notesFilter, bool refreshView = true)
-        {
-            bool resLoad = false;
-            try
-            {
-                // TODO: provisional, hay que buscar una solución más generalista a los estados de espera. 
-                Cursor.Current = Cursors.WaitCursor;
-                
-                Service = service;
-                Folder = null;
+        return true;
+    }
 
-                Result<List<NoteInfoDto>> response;
-                if (string.IsNullOrEmpty(notesFilter?.TextSearch.Trim()) || service == null || notesFilter == null)
-                {
-                    response = new Result<List<NoteInfoDto>>();
-                    response.Entity = new List<NoteInfoDto>();                    
-                }
+    public async Task<bool> LoadFilteredEntities(IKntService service, NotesFilterDto notesFilter, bool refreshView = true)
+    {
+        bool resLoad = false;
+        try
+        {
+            // TODO: provisional, hay que buscar una solución más generalista a los estados de espera. 
+            Cursor.Current = Cursors.WaitCursor;
+            
+            Service = service;
+            Folder = null;
+
+            Result<List<NoteInfoDto>> response;
+            if (string.IsNullOrEmpty(notesFilter?.TextSearch.Trim()) || service == null || notesFilter == null)
+            {
+                response = new Result<List<NoteInfoDto>>();
+                response.Entity = new List<NoteInfoDto>();                    
+            }
+            else
+            {
+                response = await Service.Notes.GetSearch(notesFilter);
+            }
+
+            if (response.IsValid)
+            {
+                ListEntities = response.Entity;
+                NotesFilter = notesFilter;
+
+                if (refreshView)
+                    View.RefreshView();
+
+                if (ListEntities?.Count > 0)
+                    SelectedEntity = ListEntities[0];
                 else
-                {
-                    response = await Service.Notes.GetSearch(notesFilter);
-                }
-
-                if (response.IsValid)
-                {
-                    ListEntities = response.Entity;
-                    NotesFilter = notesFilter;
-
-                    if (refreshView)
-                        View.RefreshView();
-
-                    if (ListEntities?.Count > 0)
-                        SelectedEntity = ListEntities[0];
-                    else
-                        SelectedEntity = null;
-                }
-                else
-                {
-                    View.ShowInfo(response.ErrorMessage);
-                    resLoad = await Task.FromResult<bool>(false); 
-                }
+                    SelectedEntity = null;
             }
-            catch (Exception ex)
+            else
             {
-                View.ShowInfo(ex.Message);
-                resLoad = await Task.FromResult<bool>(false);
+                View.ShowInfo(response.ErrorMessage);
+                resLoad = await Task.FromResult<bool>(false); 
             }
-            finally
-            {
-                Cursor.Current = Cursors.Default;
-            }
-
-            return resLoad;
+        }
+        catch (Exception ex)
+        {
+            View.ShowInfo(ex.Message);
+            resLoad = await Task.FromResult<bool>(false);
+        }
+        finally
+        {
+            Cursor.Current = Cursors.Default;
         }
 
-        public override void SelectItem(NoteInfoDto item)
-        {
-            throw new NotImplementedException();
+        return resLoad;
+    }
+
+    public override void SelectItem(NoteInfoDto item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void RefreshItem(NoteInfoDto note)
+    {
+        var updateNote = ListEntities?.FirstOrDefault(_ => _.NoteId == note.NoteId);
+
+        if (Folder == null)
+        {                
+            if (updateNote != null)
+            {
+                updateNote.SetSimpleDto(note);
+                View.RefreshItem(updateNote);
+            }
         }
-
-        public override void RefreshItem(NoteInfoDto note)
+        else
         {
-            var updateNote = ListEntities?.FirstOrDefault(_ => _.NoteId == note.NoteId);
-
-            if (Folder == null)
-            {                
+            if (Folder.FolderId == note.FolderId)
+            {
                 if (updateNote != null)
                 {
                     updateNote.SetSimpleDto(note);
                     View.RefreshItem(updateNote);
                 }
-            }
-            else
-            {
-                if (Folder.FolderId == note.FolderId)
-                {
-                    if (updateNote != null)
-                    {
-                        updateNote.SetSimpleDto(note);
-                        View.RefreshItem(updateNote);
-                    }
-                    else
-                    {
-                        ListEntities.Add(note);
-                        View.AddItem(note);
-                    }
-                }                
                 else
                 {
-                    ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
-                    View.DeleteItem(note);
+                    ListEntities.Add(note);
+                    View.AddItem(note);
                 }
-            }
-        }
-
-        public override void AddItem(NoteInfoDto note)
-        {
-            RefreshItem(note);
-        }
-
-        public override void DeleteItem(NoteInfoDto note)
-        {
-            var entiesFoud = ListEntities?.Where(_ => _.NoteId == note.NoteId).Select(_ => _.NoteId).ToList();
-            if (entiesFoud?.Count > 0)
+            }                
+            else
             {
                 ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
                 View.DeleteItem(note);
             }
         }
-
-        #endregion
-
-        #region Extra methods
-        
-        public List<NoteInfoDto> GetSelectedListNotesInfo()
-        {
-            return View.GetSelectedListItem();
-        }
-
-        public void CleanView()
-        {
-            ListEntities = new List<NoteInfoDto>();            
-            View.RefreshView();
-        }
-
-        #endregion 
-
     }
+
+    public override void AddItem(NoteInfoDto note)
+    {
+        RefreshItem(note);
+    }
+
+    public override void DeleteItem(NoteInfoDto note)
+    {
+        var entiesFoud = ListEntities?.Where(_ => _.NoteId == note.NoteId).Select(_ => _.NoteId).ToList();
+        if (entiesFoud?.Count > 0)
+        {
+            ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
+            View.DeleteItem(note);
+        }
+    }
+
+    #endregion
+
+    #region Extra methods
+    
+    public List<NoteInfoDto> GetSelectedListNotesInfo()
+    {
+        return View.GetSelectedListItem();
+    }
+
+    public void CleanView()
+    {
+        ListEntities = new List<NoteInfoDto>();            
+        View.RefreshView();
+    }
+
+    #endregion 
 }

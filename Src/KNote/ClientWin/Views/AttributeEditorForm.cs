@@ -2,110 +2,98 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace KNote.ClientWin.Views
+namespace KNote.ClientWin.Views;
+
+public partial class AttributeEditorForm : Form, IEditorView<KAttributeDto>
 {
-    public partial class AttributeEditorForm : Form, IEditorView<KAttributeDto>
+    private readonly AttributeEditorComponent _com;
+    private bool _viewFinalized = false;
+    private bool _formIsDisty = false;
+
+    public AttributeEditorForm(AttributeEditorComponent com)
     {
-        private readonly AttributeEditorComponent _com;
-        private bool _viewFinalized = false;
-        private bool _formIsDisty = false;
+        InitializeComponent();
+        _com = com;
+    }
 
-        public AttributeEditorForm(AttributeEditorComponent com)
+    #region IEditorView implementation
+
+    public Control PanelView()
+    {
+        return panelForm;
+    }
+
+    public void ShowView()
+    {
+        this.Show();
+    }
+
+    public Result<EComponentResult> ShowModalView()
+    {
+        var res = _com.DialogResultToComponentResult(this.ShowDialog());
+        return res;
+    }
+
+    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    {
+        return MessageBox.Show(info, caption, buttons, icon);
+    }
+
+    public void RefreshView()
+    {
+        //ModelToControls();
+    }
+
+    public void RefreshModel()
+    {
+        //ControlsToModel();
+    }
+
+
+    public void CleanView()
+    {
+        //textXxxxx.Text = "";
+    }
+
+    public void ConfigureEmbededMode()
+    {
+        
+    }
+
+    public void ConfigureWindowMode()
+    {
+        
+    }
+
+    public void OnClosingView()
+    {
+        _viewFinalized = true;
+        this.Close();
+    }
+
+    #endregion 
+
+    private void AttributeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (!_viewFinalized)
         {
-            InitializeComponent();
-            _com = com;
+            var confirmExit = OnCandelEdition();
+            if (!confirmExit)
+                e.Cancel = true;
+        }
+    }
+
+    private bool OnCandelEdition()
+    {
+        if (_formIsDisty)
+        {
+            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.No)
+                return false;
         }
 
-        #region IEditorView implementation
-
-        public Control PanelView()
-        {
-            return panelForm;
-        }
-
-        public void ShowView()
-        {
-            this.Show();
-        }
-
-        public Result<EComponentResult> ShowModalView()
-        {
-            var res = _com.DialogResultToComponentResult(this.ShowDialog());
-            return res;
-        }
-
-        public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-        {
-            return MessageBox.Show(info, caption, buttons, icon);
-        }
-
-        public void RefreshView()
-        {
-            //ModelToControls();
-        }
-
-        public void RefreshModel()
-        {
-            //ControlsToModel();
-        }
-
-
-        public void CleanView()
-        {
-            //textXxxxx.Text = "";
-        }
-
-        public void ConfigureEmbededMode()
-        {
-            
-        }
-
-        public void ConfigureWindowMode()
-        {
-            
-        }
-
-        public void OnClosingView()
-        {
-            _viewFinalized = true;
-            this.Close();
-        }
-
-        #endregion 
-
-        private void AttributeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (!_viewFinalized)
-            {
-                var confirmExit = OnCandelEdition();
-                if (!confirmExit)
-                    e.Cancel = true;
-            }
-        }
-
-        private bool OnCandelEdition()
-        {
-            if (_formIsDisty)
-            {
-                if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.No)
-                    return false;
-            }
-
-            this.DialogResult = DialogResult.Cancel;
-            _com.CancelEdition();
-            return true;
-        }
-
-
+        this.DialogResult = DialogResult.Cancel;
+        _com.CancelEdition();
+        return true;
     }
 }

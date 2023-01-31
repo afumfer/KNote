@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Components;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
-using KntScript;
 
 namespace KNote.ClientWin.Core;
 

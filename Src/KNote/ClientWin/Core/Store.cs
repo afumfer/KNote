@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
+using System.Reflection;
+
 using KNote.Model;
 using KNote.ClientWin.Components;
-using KntScript;
 using KNote.ClientWin.Views;
-using System.Threading;
-using System.Windows.Forms;
 using KNote.Model.Dto;
-using System.Reflection;
-using System.Windows.Input;
-using System.Runtime.Loader;
 using KNote.Service.Core;
+using KntScript;
 
 namespace KNote.ClientWin.Core;
 

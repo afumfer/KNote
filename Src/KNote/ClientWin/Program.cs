@@ -5,9 +5,7 @@ using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
 using KNote.Model;
-using KNote.Service;
 using KNote.Service.Core;
-using System.Windows.Forms;
 
 namespace KNote.ClientWin;
 
@@ -27,12 +25,6 @@ static class Program
             return;
         }
 
-        // Old .net versions
-        //Application.SetHighDpiMode(HighDpiMode.SystemAware);
-        //Application.EnableVisualStyles();
-        //Application.SetCompatibleTextRenderingDefault(false);
-
-        // new in .net 6
         ApplicationConfiguration.Initialize();
 
         ApplicationContext applicationContext = new ApplicationContext();
@@ -49,7 +41,7 @@ static class Program
             
         LoadAppStore(appStore);
 
-        #region Demo & lab
+        #region Demo & lab ... for debug
 
         // applicationContext.MainForm = new LabForm(appStore);
 
@@ -138,6 +130,8 @@ static class Program
         store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
     }
 
+    #region Utils
+
     [DllImport("USER32.DLL", CharSet = CharSet.Unicode)]
     public static extern IntPtr FindWindow(String lpClassName, String lpWindowName);
 
@@ -157,5 +151,7 @@ static class Program
         ShowWindow(handle, 1);
         SetForegroundWindow(handle);
     }
+
+    #endregion
 }
 

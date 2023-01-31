@@ -1,88 +1,87 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
-
-using KNote.ClientWin.Core;
-using KNote.Model;
+﻿using KNote.ClientWin.Core;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components
+namespace KNote.ClientWin.Components;
+
+public class NoteTypesSelectorComponent : ComponentSelectorBase<ISelectorView<NoteTypeDto>, NoteTypeDto>
 {
-    public class NoteTypesSelectorComponent : ComponentSelectorBase<ISelectorView<NoteTypeDto>, NoteTypeDto>
+    #region Constructor 
+
+    public NoteTypesSelectorComponent(Store store): base(store)
     {
+        ComponentName = "Note type selector";
+    }
 
-        public NoteTypesSelectorComponent(Store store): base(store)
-        {
-            ComponentName = "Note type selector";
-        }
+    #endregion
 
-        protected override ISelectorView<NoteTypeDto> CreateView()
-        {
-            return Store.FactoryViews.View(this);
-        }
+    #region ISelectorView
 
-        public async override Task<bool> LoadEntities(IKntService service, bool refreshView = true)
+    protected override ISelectorView<NoteTypeDto> CreateView()
+    {
+        return Store.FactoryViews.View(this);
+    }
+
+    #endregion
+
+    #region Componente override
+
+    public async override Task<bool> LoadEntities(IKntService service, bool refreshView = true)
+    {
+        try
         {
-            try
+            Service = service;
+            
+            var response = await Service.NoteTypes.GetAllAsync();
+
+            if (response.IsValid)
             {
-                Service = service;
-                
-                var response = await Service.NoteTypes.GetAllAsync();
+                ListEntities = response.Entity;
 
-                if (response.IsValid)
-                {
-                    ListEntities = response.Entity;
+                if(refreshView)
+                    View.RefreshView();
 
-                    if(refreshView)
-                        View.RefreshView();
-
-                    if (ListEntities?.Count > 0)
-                        SelectedEntity = ListEntities[0];
-                    else
-                        SelectedEntity = null;
-
-                    NotifySelectedEntity();
-                }
+                if (ListEntities?.Count > 0)
+                    SelectedEntity = ListEntities[0];
                 else
-                {
-                    View.ShowInfo(response.ErrorMessage);
-                    return false;
-                }
+                    SelectedEntity = null;
+
+                NotifySelectedEntity();
             }
-            catch (Exception ex)
+            else
             {
-                View.ShowInfo(ex.Message);
+                View.ShowInfo(response.ErrorMessage);
                 return false;
             }
-
-            return true;
         }
-
-
-        public override void AddItem(NoteTypeDto item)
+        catch (Exception ex)
         {
-            throw new NotImplementedException();
+            View.ShowInfo(ex.Message);
+            return false;
         }
 
-        public override void DeleteItem(NoteTypeDto item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void RefreshItem(NoteTypeDto item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SelectItem(NoteTypeDto item)
-        {
-            throw new NotImplementedException();
-        }
-
-
+        return true;
     }
+
+    public override void AddItem(NoteTypeDto item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void DeleteItem(NoteTypeDto item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void RefreshItem(NoteTypeDto item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void SelectItem(NoteTypeDto item)
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
 }

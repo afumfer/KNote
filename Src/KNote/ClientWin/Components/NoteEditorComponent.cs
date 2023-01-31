@@ -13,12 +13,18 @@ public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>,
 
     #endregion
 
-    #region Constructor
+    #region Constructor, Dispose, ...
 
     public NoteEditorComponent(Store store) : base(store)
     {
         ComponentName = "Note editor";
         Store.DeletedNote += Store_DeletedNote;
+    }
+
+    public override void Dispose()
+    {
+        Store.DeletedNote -= Store_DeletedNote;
+        base.Dispose();
     }
 
     #endregion
@@ -528,6 +534,5 @@ public class NoteEditorComponent : ComponentEditor<IEditorView<NoteExtendedDto>,
     }
 
     #endregion
-
 }
 

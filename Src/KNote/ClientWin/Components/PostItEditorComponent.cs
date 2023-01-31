@@ -2,6 +2,7 @@
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.Identity.Client;
 
 namespace KNote.ClientWin.Components;
 
@@ -23,12 +24,18 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
 
     #endregion 
 
-    #region Constructor
+    #region Constructor, Dispose, ...
 
     public PostItEditorComponent(Store store): base(store)
     {
         ComponentName = "PostIt editor";
         Store.DeletedNote += Store_DeletedNote;
+    }
+
+    public override void Dispose()
+    {
+        Store.DeletedNote -= Store_DeletedNote;
+        base.Dispose();
     }
 
     #endregion 
@@ -454,6 +461,5 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
     }
 
     #endregion 
-
 }
 

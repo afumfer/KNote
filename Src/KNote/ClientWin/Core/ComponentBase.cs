@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-using System.Windows.Forms;
+﻿using System.Reflection;
 
 using KNote.Model;
 
@@ -149,7 +143,7 @@ abstract public class ComponentBase : IDisposable
         Store.OnComponentNotification(this, message);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         Finalize();
     }

@@ -1,13 +1,5 @@
-﻿using KNote.ClientWin.Components;
-using KNote.Model;
-using KNote.Model.Dto;
+﻿using KNote.Model;
 using KNote.Service.Core;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace KNote.ClientWin.Core;
 

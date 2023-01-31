@@ -1,250 +1,235 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.InteropServices;
-using System.Threading;
+﻿using System.Runtime.InteropServices;
 
-using KntScript;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.ClientWin.Components;
+using KntScript;
 
-namespace KNote.ClientWin.Views
+namespace KNote.ClientWin.Views;
+
+internal partial class KntScriptConsoleForm : Form, IViewConfigurable
 {
-    internal partial class KntScriptConsoleForm : Form, IViewConfigurable
+    #region Private fields
+    
+    private string _sourceCodeDirWork;
+    private string _sourceCodeFile;
+    private KntSEngine _engine;        
+
+    private const int EM_SETTABSTOPS = 0x00CB; 
+    [DllImport("User32.dll", CharSet = CharSet.Auto)] 
+    private static extern IntPtr SendMessage(IntPtr h, int msg, int wParam, int [] lParam);
+
+    private readonly KntScriptConsoleComponent _com;
+    private bool _viewFinalized = false;
+
+    #endregion
+
+    #region Constructor
+
+    public KntScriptConsoleForm(KntScriptConsoleComponent com) // , KntSEngine engine, string file = null
     {
-        #region Private fields
-        
-        private string _sourceCodeDirWork;
-        private string _sourceCodeFile;
-        private KntSEngine _engine;        
+        InitializeComponent();
+        PersonalizeTabStop();
 
-        private const int EM_SETTABSTOPS = 0x00CB; 
-        [DllImport("User32.dll", CharSet = CharSet.Auto)] 
-        private static extern IntPtr SendMessage(IntPtr h, int msg, int wParam, int [] lParam);
+        _com = com;
 
-        private readonly KntScriptConsoleComponent _com;
-        private bool _viewFinalized = false;
+        _engine = _com.KntSEngine;
+        _sourceCodeFile = _com.CodeFile;            
+    }
 
-        #endregion
+    #endregion
 
-        #region Constructor
+    #region Form events controllers
 
-        public KntScriptConsoleForm(KntScriptConsoleComponent com) // , KntSEngine engine, string file = null
+    private void KntScriptForm_Load(object sender, EventArgs e)
+    {
+        _engine.InOutDevice.SetEmbeddedMode();
+        splitContainer1.Panel2.Controls.Add((Control)_engine.InOutDevice);
+
+        LoadFile(_sourceCodeFile);
+
+        _engine.InOutDevice.Show();            
+    }
+
+    private void KntScriptForm_KeyUp(object sender, KeyEventArgs e)
+    {
+        if (e.KeyData == Keys.F5)
+            buttonRun_Click(this, new EventArgs());
+    }
+
+    private void buttonRun_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
         {
-            InitializeComponent();
-            PersonalizeTabStop();
-
-            _com = com;
-
-            _engine = _com.KntSEngine;
-            _sourceCodeFile = _com.CodeFile;            
+            MessageBox.Show("No code found to run", "KntScript");
+            return;
         }
 
-        #endregion
-
-        #region Form events controllers
-
-        private void KntScriptForm_Load(object sender, EventArgs e)
+        try
         {
-            _engine.InOutDevice.SetEmbeddedMode();
-            splitContainer1.Panel2.Controls.Add((Control)_engine.InOutDevice);
+            toolStripConsole.Enabled = false;
 
-            LoadFile(_sourceCodeFile);
-
-            _engine.InOutDevice.Show();            
+            _engine.InOutDevice.Clear();                
+            _engine.ClearAllVars();
+            _engine.Run(textSourceCode.Text);
         }
-
-        private void KntScriptForm_KeyUp(object sender, KeyEventArgs e)
+        catch (Exception err)
         {
-            if (e.KeyData == Keys.F5)
-                buttonRun_Click(this, new EventArgs());
+            MessageBox.Show(err.Message);
         }
-
-        private void buttonRun_Click(object sender, EventArgs e)
+        finally
         {
-            if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+            toolStripConsole.Enabled = true;
+        }
+    }
+
+    private void buttonNew_Click(object sender, EventArgs e)
+    {
+        _sourceCodeFile = "";
+        textSourceCode.Text = "";
+        statusFileName.Text = "";
+    }
+
+    private void buttonOpen_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(_sourceCodeDirWork))
+            _sourceCodeDirWork = Application.StartupPath;
+        openFileDialogScript.Title = "Open KntScript file";
+        openFileDialogScript.InitialDirectory = _sourceCodeDirWork;
+        openFileDialogScript.Filter = "KntScript file (*.knts)|*.knts";
+        openFileDialogScript.FileName = "";
+        openFileDialogScript.CheckFileExists = true;
+
+        if (openFileDialogScript.ShowDialog() == DialogResult.OK)                            
+            LoadFile(openFileDialogScript.FileName);                                       
+    }
+
+    private void buttonSave_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(_sourceCodeFile))
+        {
+            saveFileDialogScript.Title = "Save KntScript file";
+            saveFileDialogScript.InitialDirectory = _sourceCodeDirWork;
+            saveFileDialogScript.Filter = "KntScript file (*.ants)|*.ants";
+            saveFileDialogScript.FileName = "";
+
+            if (saveFileDialogScript.ShowDialog() == DialogResult.OK)
             {
-                MessageBox.Show("No code found to run", "KntScript");
-                return;
+                if (Path.GetExtension(saveFileDialogScript.FileName) == "")
+                    saveFileDialogScript.FileName += @".ants";                    
+                _sourceCodeFile = saveFileDialogScript.FileName;
+                _sourceCodeDirWork = Path.GetDirectoryName(_sourceCodeFile);
+                SaveFile(_sourceCodeFile);
+                statusFileName.Text = _sourceCodeFile;
             }
-
-            try
-            {
-                toolStripConsole.Enabled = false;
-
-                _engine.InOutDevice.Clear();                
-                _engine.ClearAllVars();
-                _engine.Run(textSourceCode.Text);
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show(err.Message);
-            }
-            finally
-            {
-                toolStripConsole.Enabled = true;
-            }
         }
+        else
+            SaveFile(_sourceCodeFile);
+    }
 
-        private void buttonNew_Click(object sender, EventArgs e)
+    private void KntScriptConsoleForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (!_viewFinalized)
+            _com.Finalize();
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private void PersonalizeTabStop()
+    {
+        // define value of the Tab indent and change the indent
+        int[] stops = { 12 };
+        SendMessage(this.textSourceCode.Handle, EM_SETTABSTOPS, 1, stops);
+    }
+
+    private void LoadFile(string sourceCodeFile)
+    {
+        if (string.IsNullOrEmpty(sourceCodeFile))
+            return;
+
+        if (!string.IsNullOrEmpty(_sourceCodeFile))
         {
-            _sourceCodeFile = "";
-            textSourceCode.Text = "";
-            statusFileName.Text = "";
-        }
-
-        private void buttonOpen_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(_sourceCodeDirWork))
-                _sourceCodeDirWork = Application.StartupPath;
-            openFileDialogScript.Title = "Open KntScript file";
-            openFileDialogScript.InitialDirectory = _sourceCodeDirWork;
-            openFileDialogScript.Filter = "KntScript file (*.knts)|*.knts";
-            openFileDialogScript.FileName = "";
-            openFileDialogScript.CheckFileExists = true;
-
-            if (openFileDialogScript.ShowDialog() == DialogResult.OK)                            
-                LoadFile(openFileDialogScript.FileName);                                       
-        }
-
-        private void buttonSave_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(_sourceCodeFile))
+            if (File.Exists(_sourceCodeFile))
             {
-                saveFileDialogScript.Title = "Save KntScript file";
-                saveFileDialogScript.InitialDirectory = _sourceCodeDirWork;
-                saveFileDialogScript.Filter = "KntScript file (*.ants)|*.ants";
-                saveFileDialogScript.FileName = "";
-
-                if (saveFileDialogScript.ShowDialog() == DialogResult.OK)
+                using (TextReader input = File.OpenText(_sourceCodeFile))
                 {
-                    if (Path.GetExtension(saveFileDialogScript.FileName) == "")
-                        saveFileDialogScript.FileName += @".ants";                    
-                    _sourceCodeFile = saveFileDialogScript.FileName;
-                    _sourceCodeDirWork = Path.GetDirectoryName(_sourceCodeFile);
-                    SaveFile(_sourceCodeFile);
-                    statusFileName.Text = _sourceCodeFile;
+                    textSourceCode.Text = input.ReadToEnd().ToString();
+                    textSourceCode.Select(0, 0);
                 }
             }
             else
-                SaveFile(_sourceCodeFile);
-        }
-
-        private void KntScriptConsoleForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (!_viewFinalized)
-                _com.Finalize();
-        }
-
-        #endregion
-
-        #region Private methods
-
-        private void PersonalizeTabStop()
-        {
-            // define value of the Tab indent and change the indent
-            int[] stops = { 12 };
-            SendMessage(this.textSourceCode.Handle, EM_SETTABSTOPS, 1, stops);
-        }
-
-        private void LoadFile(string sourceCodeFile)
-        {
-            if (string.IsNullOrEmpty(sourceCodeFile))
-                return;
-
-            if (!string.IsNullOrEmpty(_sourceCodeFile))
             {
-                if (File.Exists(_sourceCodeFile))
-                {
-                    using (TextReader input = File.OpenText(_sourceCodeFile))
-                    {
-                        textSourceCode.Text = input.ReadToEnd().ToString();
-                        textSourceCode.Select(0, 0);
-                    }
-                }
-                else
-                {
-                    throw new Exception("Source code file no exist.");
-                }
-
+                throw new Exception("Source code file no exist.");
             }
-            
-            _sourceCodeFile = sourceCodeFile;            
-            statusFileName.Text = sourceCodeFile;
 
-            textSourceCode.Select(0, 0);
-            _sourceCodeDirWork = Path.GetDirectoryName(sourceCodeFile);
         }
+        
+        _sourceCodeFile = sourceCodeFile;            
+        statusFileName.Text = sourceCodeFile;
 
-        private void SaveFile(string sourceCodeFile)
+        textSourceCode.Select(0, 0);
+        _sourceCodeDirWork = Path.GetDirectoryName(sourceCodeFile);
+    }
+
+    private void SaveFile(string sourceCodeFile)
+    {
+        try
         {
-            try
-            {
-                File.WriteAllLines(sourceCodeFile, textSourceCode.Lines);                
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show(err.Message);
-            }
+            File.WriteAllLines(sourceCodeFile, textSourceCode.Lines);                
         }
-
-        #endregion
-
-        #region IViewConfigurable interface 
-
-        public Control PanelView()
+        catch (Exception err)
         {
-            throw new NotImplementedException();
+            MessageBox.Show(err.Message);
         }
+    }
 
-        public void ShowView()
-        {
-            this.Show();
-        }
+    #endregion
 
-        public Result<EComponentResult> ShowModalView()
-        {
-            return _com.DialogResultToComponentResult(this.ShowDialog());
-        }
+    #region IViewConfigurable interface 
 
-        public void OnClosingView()
-        {
-            _viewFinalized = true;
-            this.Close();
-        }
+    public Control PanelView()
+    {
+        throw new NotImplementedException();
+    }
 
-        public void RefreshView()
-        {
-            
-        }
+    public void ShowView()
+    {
+        this.Show();
+    }
 
-        public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-        {
-            return MessageBox.Show("KaNote", caption, buttons, icon);
-        }
+    public Result<EComponentResult> ShowModalView()
+    {
+        return _com.DialogResultToComponentResult(this.ShowDialog());
+    }
 
-        public void ConfigureEmbededMode()
-        {
+    public void OnClosingView()
+    {
+        _viewFinalized = true;
+        this.Close();
+    }
 
-        }
+    public void RefreshView()
+    {
+        
+    }
 
-        public void ConfigureWindowMode()
-        {
+    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    {
+        return MessageBox.Show("KaNote", caption, buttons, icon);
+    }
 
-        }
-
-
-        #endregion
-
+    public void ConfigureEmbededMode()
+    {
 
     }
 
+    public void ConfigureWindowMode()
+    {
+
+    }
+
+
+    #endregion
 }

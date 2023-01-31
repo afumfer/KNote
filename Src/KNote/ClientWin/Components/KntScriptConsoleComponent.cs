@@ -1,29 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using KNote.ClientWin.Core;
-using KNote.Model;
+﻿using KNote.ClientWin.Core;
 using KntScript;
 
-namespace KNote.ClientWin.Components
+namespace KNote.ClientWin.Components;
+
+public class KntScriptConsoleComponent : ComponentViewBase<IViewConfigurable>
 {
-    public class KntScriptConsoleComponent : ComponentViewBase<IViewConfigurable>
+    #region Properties
+
+    public KntSEngine KntSEngine { get; set; }
+        
+    public string CodeFile { get; set; }
+
+    #endregion 
+
+    #region Constructor 
+
+    public KntScriptConsoleComponent(Store store): base(store)
     {
-        public KntScriptConsoleComponent(Store store): base(store)
-        {
-            ComponentName = "KeyNote script console";
-        }
-        protected override IViewConfigurable CreateView()
-        {            
-            return Store.FactoryViews.View(this);
-        }
-
-        public KntSEngine KntSEngine { get; set; }
-            
-        public string CodeFile { get; set; }
-
+        ComponentName = "KeyNote script console";
     }
+
+    #endregion
+
+    #region Component overrid methods
+
+    protected override IViewConfigurable CreateView()
+    {            
+        return Store.FactoryViews.View(this);
+    }
+
+    #endregion 
 }

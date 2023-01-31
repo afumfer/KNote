@@ -312,7 +312,7 @@
             // 
             // buttonPlugin
             // 
-            this.buttonPlugin.Location = new System.Drawing.Point(352, 51);
+            this.buttonPlugin.Location = new System.Drawing.Point(352, 62);
             this.buttonPlugin.Name = "buttonPlugin";
             this.buttonPlugin.Size = new System.Drawing.Size(297, 28);
             this.buttonPlugin.TabIndex = 12;

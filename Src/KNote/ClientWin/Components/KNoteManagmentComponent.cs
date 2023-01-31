@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Serialization;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+
 using KntScript;
 
 namespace KNote.ClientWin.Components
@@ -81,7 +73,7 @@ namespace KNote.ClientWin.Components
 
         #endregion 
 
-        #region Constructor
+        #region Constructor, Dispose, ...
 
         public KNoteManagmentComponent(Store store) : base(store)
         {
@@ -144,6 +136,24 @@ namespace KNote.ClientWin.Components
 
             View.ShowInfo(null);
             NotifyMessage($"Loaded notes filter {notesFilterWithServiceRef?.NotesFilter?.TextSearch}");
+        }
+
+        public override void Dispose()
+        {
+            Store.ChangedActiveFolderWithServiceRef -= Store_ChangedActiveFolderWithServiceRef;
+            Store.ChangedActiveFilterWithServiceRef -= Store_ChangedActiveFilterWithServiceRef;
+
+            Store.AddedPostIt -= PostItEditorComponent_AddedEntity;
+            Store.SavedPostIt -= PostItEditorComponent_SavedEntity;
+            Store.DeletedPostIt -= PostItEditorComponent_DeletedEntity;
+            Store.ExtendedEditPostIt -= PostItEditorComponent_ExtendedEdit;
+
+            Store.AddedNote -= NoteEditorComponent_AddedEntity;
+            Store.SavedNote -= NoteEditorComponent_SavedEntity;
+            Store.DeletedNote -= NoteEditorComponent_DeletedEntity;
+            Store.EditedPostItNote -= NoteEditorComponent_PostItEdit;
+
+            base.Dispose();
         }
 
         #endregion

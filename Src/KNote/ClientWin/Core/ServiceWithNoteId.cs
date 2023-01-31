@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using KNote.Service.Core;
-using KNote.Service.Services;
+﻿using KNote.Service.Core;
 
 namespace KNote.ClientWin.Core;
 

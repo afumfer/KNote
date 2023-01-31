@@ -1,8 +1,6 @@
 ﻿using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
-using SQLitePCL;
-using System.Windows.Forms;
 
 namespace KNote.ClientWin.Views;
 

@@ -1,10 +1,11 @@
-﻿using KNote.ClientWin.Components;
+﻿using System.Data;
+using System.Diagnostics;
+
+using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using Markdig;
-using System.Data;
-using System.Diagnostics;
 
 namespace KNote.ClientWin.Views;
 

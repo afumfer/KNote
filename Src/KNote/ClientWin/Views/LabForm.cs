@@ -3,21 +3,13 @@ using System.Text;
 using System.Xml.Serialization;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Globalization;
-using System.Reflection;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
 using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
-using System.Runtime.Loader;
 using KNote.Service.Core;
-
-//using KntRedmineApi;
-//using Pandoc;
-//using CliWrap;
-
 
 namespace KNote.ClientWin.Views;
 
