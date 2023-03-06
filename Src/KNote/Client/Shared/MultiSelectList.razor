@@ -1,6 +1,4 @@
-﻿@*@inject NotificationService notificationService
-@inject TooltipService tooltipService*@
-@inject DialogService dialogService
+﻿@inject DialogService dialogService
 
 <div class="container-fluid">
     <div class="row">
@@ -15,7 +13,6 @@
                                 <input type="checkbox" id="@item.Key" checked="checked" onclick="return false;" />
                                 @item.Value
                             </label>
-                            @*<RadzenCheckBox @bind-Value="@item.Key"  Name="CheckBox1" TValue="string" />*@
                         </div>
                     }
                 }

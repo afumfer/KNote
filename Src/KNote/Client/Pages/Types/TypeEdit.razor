@@ -17,7 +17,7 @@ else
 @code {
     [Parameter] public string TypeId { get; set; }
 
-    private NoteTypeDto noteType;
+    private NoteTypeDto? noteType;
 
     protected async override Task OnInitializedAsync()
     {
@@ -36,7 +36,7 @@ else
 
     private async Task OnSave()
     {
-        if (!noteType.IsDirty())
+        if (!noteType!.IsDirty())
         {
             dialogService.Close(noteType);
         }
@@ -51,7 +51,6 @@ else
                 }
             }
         }
-
     }
 
     private void OnExit()

@@ -12,7 +12,7 @@ public class AppState
     
     public readonly string AppDescription = "Another keynotes managment";
 
-    public readonly Version AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName()?.Version;
+    public readonly Version? AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName()?.Version;
 
     #endregion
 
@@ -39,7 +39,7 @@ public class AppState
         set { _defaultContentResourcesInDB = value; NotifyStateChanged(); }
     }
 
-    private FolderDto _selectedFolder;
+    private FolderDto? _selectedFolder;
     public FolderDto SelectedFolder
     {
         get
@@ -55,7 +55,7 @@ public class AppState
         }
     }
 
-    private List<FolderDto> _foldersTree;
+    private List<FolderDto>? _foldersTree;
     public List<FolderDto> FoldersTree
     {
         get
@@ -71,7 +71,7 @@ public class AppState
         }
     }
 
-    private Dictionary<Guid, FolderDto> _foldersIndex;
+    private Dictionary<Guid, FolderDto>? _foldersIndex;
     public Dictionary<Guid, FolderDto> FoldersIndex
     {
         get
@@ -86,23 +86,21 @@ public class AppState
 
     #region App event
 
-    public event Action OnChange;
+    public event Action? OnChange;
     private void NotifyStateChanged() => OnChange?.Invoke();
 
-    public event Action<string, string> OnNotifyError;
+    public event Action<string, string>? OnNotifyError;
     public void NotifyError(string summary, string details) 
     {
         OnNotifyError?.Invoke(summary, details); 
     }
 
-    public event Action<string, string> OnNotifySuccess;
+    public event Action<string, string>? OnNotifySuccess;
     public void NotifySuccess(string summary, string details)
     {
         OnNotifySuccess?.Invoke(summary, details);
     }
 
-
     #endregion
-
 }
 

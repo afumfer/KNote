@@ -22,7 +22,7 @@ public class GenericDataService : IGenericDataService
             return new HttpResponseWrapper<T>(response, false, responseHTTP);
         }
         else
-            return new HttpResponseWrapper<T>(default, true, responseHTTP);
+            return new HttpResponseWrapper<T>(default!, true, responseHTTP);
     }
 
     public async Task<HttpResponseWrapper<object>> Post<T>(string url, T enviar)
@@ -30,7 +30,7 @@ public class GenericDataService : IGenericDataService
         var sendJSON = JsonSerializer.Serialize(enviar);
         var sendContent = new StringContent(sendJSON, Encoding.UTF8, "application/json");
         var responseHttp = await httpClient.PostAsync(url, sendContent);
-        return new HttpResponseWrapper<object>(null, !responseHttp.IsSuccessStatusCode, responseHttp);
+        return new HttpResponseWrapper<object>(null!, !responseHttp.IsSuccessStatusCode, responseHttp);
     }
 
     public async Task<HttpResponseWrapper<TResponse>> Post<T, TResponse>(string url, T enviar)
@@ -44,7 +44,7 @@ public class GenericDataService : IGenericDataService
             return new HttpResponseWrapper<TResponse>(response, false, responseHttp);
         }
         else
-            return new HttpResponseWrapper<TResponse>(default, true, responseHttp);
+            return new HttpResponseWrapper<TResponse>(default!, true, responseHttp);
     }
 
     public async Task<HttpResponseWrapper<object>> Put<T>(string url, T enviar)
@@ -52,13 +52,13 @@ public class GenericDataService : IGenericDataService
         var sendJSON = JsonSerializer.Serialize(enviar);
         var sendContent = new StringContent(sendJSON, Encoding.UTF8, "application/json");
         var responseHttp = await httpClient.PutAsync(url, sendContent);
-        return new HttpResponseWrapper<object>(null, !responseHttp.IsSuccessStatusCode, responseHttp);
+        return new HttpResponseWrapper<object>(null!, !responseHttp.IsSuccessStatusCode, responseHttp);
     }
 
     public async Task<HttpResponseWrapper<object>> Delete(string url)
     {
         var responseHTTP = await httpClient.DeleteAsync(url);
-        return new HttpResponseWrapper<object>(null, !responseHTTP.IsSuccessStatusCode, responseHTTP);
+        return new HttpResponseWrapper<object>(null!, !responseHTTP.IsSuccessStatusCode, responseHTTP);
     }
 
     #region Utils

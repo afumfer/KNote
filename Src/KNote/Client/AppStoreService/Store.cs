@@ -28,7 +28,7 @@ public class Store : IStore
 
     public AppState AppState { get; }
 
-    private IUserWebApiService _users;
+    private IUserWebApiService? _users;
     public IUserWebApiService Users
     {
         get
@@ -55,7 +55,7 @@ public class Store : IStore
         return  _navigationManager.GetQueryStrings(url);
     }
 
-    private INoteTypeWebApiService _noteTypes;
+    private INoteTypeWebApiService? _noteTypes;
     public INoteTypeWebApiService NoteTypes
     {
         get
@@ -66,7 +66,7 @@ public class Store : IStore
         }
     }
 
-    private IKAttributeWebApiService _kAttributes;
+    private IKAttributeWebApiService? _kAttributes;
     public IKAttributeWebApiService KAttributes
     {
         get
@@ -77,7 +77,7 @@ public class Store : IStore
         }
     }
 
-    private IFolderWebApiService _folders;
+    private IFolderWebApiService? _folders;
     public IFolderWebApiService Folders
     {
         get
@@ -88,7 +88,7 @@ public class Store : IStore
         }
     }
 
-    private INoteWebApiService _notes;
+    private INoteWebApiService? _notes;
     public INoteWebApiService Notes
     {
         get
