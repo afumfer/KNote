@@ -18,12 +18,12 @@ else
 
 @code {
 
-    [Parameter] public string PageReturn { get; set; }
+    [Parameter] public string? PageReturn { get; set; }
 
-    private NoteDto note;
+    private NoteDto? note;
     private bool showForm = false;
     private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
-    private AppState appState;
+    private AppState appState = null!;
     private string title = "Note new";
 
     #region Initialize and dispose
@@ -105,8 +105,7 @@ else
 
                 title = "Note edit";                
             }
-        }
-        
+        }        
     }
 
     #endregion

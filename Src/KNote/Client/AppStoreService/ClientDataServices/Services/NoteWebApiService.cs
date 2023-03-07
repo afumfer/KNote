@@ -25,7 +25,7 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         return await ProcessResultFromHttpResponse<NoteDto>(httpRes, "Get note");
     }
 
-    public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
+    public async Task<Result<NoteDto>> NewAsync()
     {        
         var httpRes = await httpClient.GetAsync($"api/notes/new");
         return await ProcessResultFromHttpResponse<NoteDto>(httpRes, "New note");

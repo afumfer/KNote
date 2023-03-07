@@ -12,15 +12,14 @@
 
 @code {
 
-    private FolderDto folder;
-    private AppState appState;
+    private FolderDto folder = new FolderDto();
+    private AppState appState = null!;
 
     protected override void OnInitialized()
     {
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
-
-        folder = new FolderDto();
+        
         if (appState != null)
         {
             if(appState.SelectedFolder != null)

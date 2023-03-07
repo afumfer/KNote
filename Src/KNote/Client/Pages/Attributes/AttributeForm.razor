@@ -122,13 +122,12 @@
 </EditForm>
 
 @code {
-
-    [Parameter] public KAttributeDto KAttribute { get; set; }
+    [Parameter] [EditorRequired] public KAttributeDto KAttribute { get; set; } = null!;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
     [Parameter] public List<NoteTypeDto> NoteTypes { get; set; } = new List<NoteTypeDto>();
     
-    List<KAttributeTabulatedValueDto> atributeValues;
+    List<KAttributeTabulatedValueDto>? atributeValues;
 
     protected override void OnInitialized()
     {

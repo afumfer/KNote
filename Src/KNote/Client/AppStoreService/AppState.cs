@@ -56,7 +56,7 @@ public class AppState
     }
 
     private List<FolderDto>? _foldersTree;
-    public List<FolderDto> FoldersTree
+    public List<FolderDto>? FoldersTree
     {
         get
         {

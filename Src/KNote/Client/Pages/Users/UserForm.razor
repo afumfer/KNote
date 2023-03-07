@@ -63,8 +63,8 @@
 </EditForm>
 
 @code {
-    [Parameter] public string Title { get; set; } = "---";
-    [Parameter] public UserDto User { get; set; }
+    [Parameter] [EditorRequired] public UserDto User { get; set; } = null!;
+    [Parameter] public string Title { get; set; } = "...";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
 

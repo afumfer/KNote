@@ -86,7 +86,7 @@
             </RadzenTabsItem>
             
             <RadzenTabsItem Text="&nbsp;Attributes" Icon="fact_check">                
-                <NoteKAttributes @ref="noteKAttributes" Attributes="Note.KAttributesDto"></NoteKAttributes>
+                <NoteKAttributes @ref="noteKAttributes"  Attributes="Note.KAttributesDto"></NoteKAttributes>
             </RadzenTabsItem>
             
             <RadzenTabsItem Text="&nbsp;Resources" Icon="upload_file">                
@@ -125,19 +125,20 @@
 </EditForm>
 
 @code {
-    [Parameter] public string Title { get; set; } = "---";
-    [Parameter] public NoteDto Note { get; set; }
+    [Parameter] [EditorRequired] public NoteDto Note { get; set; } = null!;
+    [Parameter] public List<NoteTypeDto>? NoteTypes { get; set; } 
+    [Parameter] public string Title { get; set; } = "...";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
-    [Parameter] public List<NoteTypeDto> NoteTypes { get; set; } 
 
-    private List<ResourceInfoDto> resources;
-    private List<NoteTaskDto> tasks; // !!! { get; set; }
-    private NoteTaskDto taskEdit; 
-    private List<UserDto> users;
+    private List<ResourceInfoDto>? resources;
+    private List<NoteTaskDto>? tasks; 
+    private NoteTaskDto? taskEdit; 
+    private List<UserDto>? users;
+    private NoteKAttributes noteKAttributes = null!;
+
     private Guid? oldNoteType = null;
-    private NoteKAttributes noteKAttributes;
 
     private int tabsSelectedIndex { get; set; } = 0;
 
@@ -422,8 +423,11 @@
                     a.TagsValues = await noteKAttributes.GetTagsValues(a.KAttributeId, "");
             }
 
-            Note.NoteTypeDto = NoteTypes.Where(_ => _.NoteTypeId == Note.NoteTypeId).FirstOrDefault();
-            oldNoteType = Note.NoteTypeId;
+            if (NoteTypes != null)
+            {
+                Note.NoteTypeDto = NoteTypes.Where(_ => _.NoteTypeId == Note.NoteTypeId).FirstOrDefault();
+                oldNoteType = Note.NoteTypeId;                
+            }
         }
     }
 

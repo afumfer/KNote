@@ -17,11 +17,19 @@ public class BaseService
 
     protected async Task<Result<T>> ProcessResultFromHttpResponse<T>(HttpResponseMessage httpRes, string action, bool emitNotifySucess = false)
     {
-        Result<T> res;
+        Result<T>? res;
 
         if (httpRes.IsSuccessStatusCode)
+        {
             res = await httpRes.Content.ReadFromJsonAsync<Result<T>>();
-        else 
+            if (res == null)
+            {
+                res = new Result<T>();
+                res.AddErrorMessage($"Error. The web server has responded with the following message: StatusCode - {httpRes.StatusCode}. Reason Phrase - {httpRes.ReasonPhrase}");
+            }
+        }
+
+        else
         {
             res = new Result<T>();
             res.AddErrorMessage($"Error. The web server has responded with the following message: StatusCode - {httpRes.StatusCode}. Reason Phrase - {httpRes.ReasonPhrase}");

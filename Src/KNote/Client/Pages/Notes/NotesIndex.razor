@@ -26,7 +26,7 @@
 </EntityList>
 
 @code {
-    [Parameter] public List<NoteInfoDto> Notes { get; set; }
+    [Parameter] public List<NoteInfoDto>? Notes { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteEdit { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteView { get; set; }

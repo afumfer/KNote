@@ -66,9 +66,8 @@
 </EditForm>
 
 @code {
-
-    [Parameter] public string Title { get; set; } = "---";
-    [Parameter] public FolderDto Folder { get; set; }
+    [Parameter] [EditorRequired] public FolderDto Folder { get; set; } = null!;
+    [Parameter] public string Title { get; set; } = "...";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
 

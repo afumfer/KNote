@@ -9,7 +9,7 @@ namespace KNote.Client.AppStoreService.ClientDataServices
 {
     public interface IUserWebApiService
     {
-        Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null);
+        Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier? pagination = null);
         Task<Result<UserDto>> DeleteAsync(Guid userId);
         Task<Result<UserDto>> GetAsync(Guid userId);
         Task<Result<UserDto>> SaveAsync(UserDto user);

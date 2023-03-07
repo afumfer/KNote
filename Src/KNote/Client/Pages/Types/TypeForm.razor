@@ -27,9 +27,9 @@
 
 </EditForm>
 
-@code {
-    [Parameter] public string Title { get; set; } = "---";
-    [Parameter] public NoteTypeDto NoteType { get; set; }
+@code {        
+    [Parameter] [EditorRequired] public NoteTypeDto NoteType { get; set; } = null!;
+    [Parameter] public string Title { get; set; } = "...";    
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
 

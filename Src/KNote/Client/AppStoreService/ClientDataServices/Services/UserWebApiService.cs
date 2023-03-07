@@ -12,7 +12,7 @@ public class UserWebApiService : BaseService, IUserWebApiService
 
     }
 
-    public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null)
+    public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier? pagination = null)
     {
         string urlApi;
         if (pagination == null)
