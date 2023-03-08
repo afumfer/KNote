@@ -4,6 +4,7 @@
 
 @inject IStore store
 @inject NotificationService notificationService
+@inject DialogService dialogService
 
 @attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
 
@@ -17,21 +18,19 @@ else
 }
 
 @code {
+    [Parameter] public string NoteId { get; set; } = string.Empty;
+    [Parameter] public string? PageReturn { get; set; }
 
-    [Parameter] public string NoteId { get; set; }
-    [Parameter] public string PageReturn { get; set; }
+    private NoteDto? note;
+    private List<NoteTypeDto>? noteTypes;
 
-    private NoteDto note;
     private bool showForm = false;
-    private List<NoteTypeDto> noteTypes;
-    private AppState appState;
 
     #region Initialize and Dispose
 
     protected async override Task OnInitializedAsync()
-    {
-        appState = store.AppState;
-        appState.OnChange += StateHasChanged;
+    {        
+        store.AppState.OnChange += StateHasChanged;
 
         var result = await store.NoteTypes.GetAllAsync();
         if (!result.IsValid)
@@ -57,7 +56,7 @@ else
 
     public void Dispose()
     {
-        appState.OnChange -= StateHasChanged;
+        store.AppState.OnChange -= StateHasChanged;
     }
 
     #endregion
@@ -65,8 +64,16 @@ else
     #region Data methods
 
     private async Task GetNote()
-    {
-        var result = await store.Notes.GetAsync(Guid.Parse(NoteId));
+    {        
+        Guid id;
+        var parseOk = Guid.TryParse(NoteId, out id);
+        if (!parseOk)
+        {
+            await dialogService.Alert("Invalid note identifier.");            
+            store.NavigateTo("index");            
+        }
+
+        var result = await store.Notes.GetAsync(id);
         if (!result.IsValid)
         {                        
             store.NavigateTo("index");
@@ -80,11 +87,17 @@ else
 
     private async Task SaveNote()
     {
-        var result = await store.Notes.SaveAsync(note);
+        if (!note!.IsDirty())
+        {
+            return;
+        }
+        else
+        {
+            var result = await store.Notes.SaveAsync(note);
 
-        if(result.IsValid)
-            note = result.Entity;
-
+            if(result.IsValid)
+                note = result.Entity;            
+        }
     }
 
     private async Task GetNewNote()
@@ -94,10 +107,10 @@ else
         if (result.IsValid)
         {
             note = result.Entity;
-            if (appState.SelectedFolder != null)
+            if (store.AppState.SelectedFolder != null)
             {
-                note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
-                note.FolderId = appState.SelectedFolder.FolderId;
+                note.FolderDto = store.AppState.SelectedFolder.GetSimpleDto<FolderDto>();
+                note.FolderId = store.AppState.SelectedFolder.FolderId;
             }
             showForm = true;
         }
@@ -120,7 +133,7 @@ else
 
     private void OnExit()
     {        
-        store.NavigateTo(PageReturn);
+        store.NavigateTo(PageReturn!);
     }
 
     #endregion

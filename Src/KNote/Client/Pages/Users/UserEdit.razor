@@ -16,24 +16,33 @@ else
 
 
 @code {
-    [Parameter] public string UserId { get; set; }
+    [Parameter] public string UserId { get; set; } = string.Empty;
 
-    private UserDto user;
+    private UserDto? user;
 
     protected async override Task OnInitializedAsync()
     {
-        var result = await store.Users.GetAsync(Guid.Parse(UserId));
+        base.OnInitialized();
+
+        Guid id;
+        var parseOk = Guid.TryParse(UserId, out id);
+        if (!parseOk)
+        {
+            await dialogService.Alert("Invalid user identifier.");
+            dialogService.Close(null);
+            return;
+        }
+
+        var result = await store.Users.GetAsync(id);
         if (!result.IsValid)                    
             dialogService.Close(null);        
         else
-            user = result.Entity;
-
-        base.OnInitialized();
+            user = result.Entity;        
     }
 
     private async Task OnSave()
     {
-        if (!user.IsDirty())
+        if (!user!.IsDirty())
         {            
             dialogService.Close(user);
         }

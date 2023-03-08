@@ -43,8 +43,8 @@
 @code {
 
     private List<FolderDto>? foldersTree;
-    private FolderDto selectedFolder;
-    private AppState appState;
+    private FolderDto? selectedFolder;
+    private AppState appState = null!;
 
     protected override async Task OnInitializedAsync()    
     {

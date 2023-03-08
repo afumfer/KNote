@@ -78,17 +78,17 @@
 </RadzenCard>
 
 
-@code {    
-    private List<FolderDto> foldersTree;        
-    private List<NoteInfoDto> notes;
-    private FolderDto folder;
+@code {
+    private List<FolderDto>? foldersTree;
+    private List<NoteInfoDto>? notes;
+    private FolderDto? folder;
     private NotesFilterDto filter = new NotesFilterDto();
     private PaginationContext paginationContext = new PaginationContext();
     private RadzenPager pager;
     private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";    
     private int viewMode = 0;    
     private bool componentInitialized = false;
-    private AppState appState;
+    private AppState appState = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -103,13 +103,18 @@
         if (appState.FoldersTree == null)
         {
             var result = await store.Folders.GetTreeAsync();
-            foldersTree = result.Entity;
+            if (result.IsValid)
+                foldersTree = result.Entity;
+            else
+                foldersTree = new List<FolderDto>();
+
             appState.FoldersTree = foldersTree;
 
             if (foldersTree?.Count > 0)
             {
                 var f = foldersTree.Select(x => x).FirstOrDefault();
-                f.Selected = true;
+                if (f!= null)
+                    f.Selected = true;
             }
         }
         else
@@ -153,9 +158,9 @@
 
     private async Task LoadNotesWithPagination()
     {
-        notes = null;
+        notes = null;        
 
-        filter.FolderId = folder.FolderId;
+        filter.FolderId = folder?.FolderId;
         filter.PageIdentifier = paginationContext.PageIdentifier;
 
         var result = await store.Notes.GetFilter(filter);

@@ -11,27 +11,32 @@
 }
 else
 {
-    <text>Loading ... </text>
+    <text>Loading note type ... </text>
 }
 
 @code {
-    [Parameter] public string TypeId { get; set; }
+    [Parameter] public string TypeId { get; set; } = string.Empty;
 
     private NoteTypeDto? noteType;
 
     protected async override Task OnInitializedAsync()
     {
-        var result = await store.NoteTypes.GetAsync(Guid.Parse(TypeId));
-        if (!result.IsValid)
-        {            
-            dialogService.Close(null);
-        }
-        else
-        {
-            noteType = result.Entity;
-        }
-
         base.OnInitialized();
+        
+        Guid id;
+        var parseOk = Guid.TryParse(TypeId, out id);
+        if (!parseOk)
+        {            
+            await dialogService.Alert("Invalid note type identifier.");
+            dialogService.Close(null);
+            return;
+        }
+        
+        var result = await store.NoteTypes.GetAsync(id);
+        if (!result.IsValid)                    
+            dialogService.Close(null);        
+        else        
+            noteType = result.Entity;                
     }
 
     private async Task OnSave()

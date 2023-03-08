@@ -10,63 +10,75 @@
 
 @if (folder != null)
 {
-    <FolderForm Title="Folder edit" OnValidSubmit="OnEdit" OnExit="OnExit" Folder="folder" />
+    <FolderForm Title="Folder edit" OnValidSubmit="OnSave" OnExit="OnExit" Folder="folder" />
 }
 else
 {
     <text>Loading ... </text>
 }
 
-@code {    
+@code {
 
-    [Parameter] public string FolderId { get; set; }
+    [Parameter] public string FolderId { get; set; } = string.Empty;
 
-    private FolderDto folder;
-    private AppState appState;
+    private FolderDto? folder;    
 
     protected async override Task OnInitializedAsync()
     {
-        appState = store.AppState;
-        appState.OnChange += StateHasChanged;
-
-        var result = await store.Folders.GetAsync(Guid.Parse(FolderId));
-        if (!result.IsValid)
-        {            
-            dialogService.Close(null);
-        }
-        else
-            folder = result.Entity;
-
         base.OnInitialized();
+
+        store.AppState.OnChange += StateHasChanged;
+
+        Guid id;
+        var parseOk = Guid.TryParse(FolderId, out id);
+        if (!parseOk)
+        {
+            await dialogService.Alert("Invalid folder identifier.");
+            dialogService.Close(null);
+            return;
+        }
+
+        var result = await store.Folders.GetAsync(id);
+        if (!result.IsValid)                    
+            dialogService.Close(null);        
+        else
+            folder = result.Entity;        
     }
 
     public void Dispose()
     {
-        appState.OnChange -= StateHasChanged;
+        store.AppState.OnChange -= StateHasChanged;
     }
 
-    private async Task OnEdit()
+    private async Task OnSave()
     {
-        var result = await store.Folders.SaveAsync(folder);
-        if (result.IsValid)
+        if (!folder!.IsDirty())
         {
-            if (appState.FoldersTree != null)
+            dialogService.Close(folder);
+        }
+        else
+        {
+            var result = await store.Folders.SaveAsync(folder!);
+            if (result.IsValid)
             {
-                FolderDto toUpdate;
-                appState.FoldersIndex.TryGetValue(folder.FolderId, out toUpdate);
-                if (toUpdate != null)
+                if (store.AppState.FoldersTree != null)
                 {
-                    if (toUpdate.ParentId == folder.ParentId)
-                        toUpdate.Name = folder.Name;
+                    FolderDto? toUpdate;
+                    store.AppState.FoldersIndex.TryGetValue(folder.FolderId, out toUpdate);
+                    if (toUpdate != null)
+                    {
+                        if (toUpdate.ParentId == folder.ParentId)
+                            toUpdate.Name = folder.Name;
+                        else
+                            store.AppState.FoldersTree = null;
+                    }
                     else
-                        appState.FoldersTree = null;
-                }
-                else
-                {
-                    appState.FoldersTree = null;
-                }
+                    {
+                        store.AppState.FoldersTree = null;
+                    }
+                }            
+                dialogService.Close(result.Entity);
             }            
-            dialogService.Close(result.Entity);
         }
     }
 

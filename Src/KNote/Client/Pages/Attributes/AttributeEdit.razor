@@ -15,16 +15,26 @@ else
 }
 
 @code {
-    [Parameter] public string AttributeId { get; set; }
+    [Parameter] public string AttributeId { get; set; } = string.Empty;
 
-    private KAttributeDto kattribute;
+    private KAttributeDto? kattribute;
     private bool showForm = false;
     private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
 
     protected async override Task OnInitializedAsync()
     {
+        base.OnInitialized();
 
-        var result = await store.KAttributes.GetAsync(Guid.Parse(AttributeId));
+        Guid id;
+        var parseOk = Guid.TryParse(AttributeId, out id);
+        if (!parseOk)
+        {
+            await dialogService.Alert("Invalid attribute identifier.");
+            dialogService.Close(null);
+            return;
+        }
+
+        var result = await store.KAttributes.GetAsync(id);
         if (!result.IsValid)
         {            
             dialogService.Close(null);
@@ -44,14 +54,13 @@ else
         {
             noteTypes = result2.Entity;
             showForm = true;
-        }
-
-        await base.OnInitializedAsync();
+        }        
     }
 
     private async Task OnSave()
     {
-        if (!kattribute.IsDirty())
+
+        if (!kattribute!.IsDirty())
         {            
             dialogService.Close(kattribute);
         }
