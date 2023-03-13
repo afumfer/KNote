@@ -16,7 +16,7 @@ else if (List.Count == 0)
     {
     @if (Loading == null)
     {
-        <p>No records found </p>    
+        <p>No records found.</p>    
     }
     else
     {
@@ -25,19 +25,21 @@ else if (List.Count == 0)
 }
 else
 {
-    if(Items != null)
+    if(Item != null)
     {
         @foreach (var item in List)    
-            @Items(item)    
+            @Item(item)
     }
-    else 
-        @ItemsFull
+    else
+    {
+        @AllItems
+    }
 }
 
 @code {
-    [Parameter] public RenderFragment Loading { get; set; }
-    [Parameter] public RenderFragment NotRecordsFound { get; set; }
-    [Parameter] public RenderFragment<TItem> Items { get; set; }
-    [Parameter] public RenderFragment ItemsFull { get; set; }
-    [Parameter] public List<TItem> List { get; set; }
+    [Parameter] public List<TItem> List { get; set; } = null!;
+    [Parameter] public RenderFragment Loading { get; set; } = null!;
+    [Parameter] public RenderFragment NotRecordsFound { get; set; } = null!;
+    [Parameter] public RenderFragment AllItems { get; set; } = null!;
+    [Parameter] public RenderFragment<TItem> Item { get; set; } = null!;
 }

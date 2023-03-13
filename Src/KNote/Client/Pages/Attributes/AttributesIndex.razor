@@ -21,7 +21,7 @@
 <div class="container-fluid pt-2">
     <div class="row">
         <EntityList List="attributes">
-            <ItemsFull>
+            <AllItems>
                 <RadzenDataGrid Data="@attributes" TItem="KAttributeInfoDto" AllowColumnResize="true" Density="@Density.Compact">
                     <Columns>
                         <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Order" Title="Order" Width="60px"/>
@@ -40,7 +40,7 @@
                         </RadzenDataGridColumn>
                     </Columns> 
                 </RadzenDataGrid>
-            </ItemsFull>
+            </AllItems>
         </EntityList>
     </div>
 </div>

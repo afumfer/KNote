@@ -21,7 +21,7 @@
 <div class="container-fluid pt-2">
     <div class="row">
         <EntityList List="noteTypes">
-            <ItemsFull>
+            <AllItems>
                 <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" Density="@Density.Compact">
                     <Columns>
                         <RadzenDataGridColumn TItem="NoteTypeDto" Property="Name" Title="Name" />
@@ -38,7 +38,7 @@
                         </RadzenDataGridColumn>
                     </Columns> 
                 </RadzenDataGrid>
-            </ItemsFull>
+            </AllItems>
         </EntityList>
     </div>
 </div>

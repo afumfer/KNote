@@ -18,15 +18,15 @@ public class AppState
 
     #region AppSatate properties
 
-    private string _tag = "";
-    public string Tag
+    private string? _tag; // = "";
+    public string? Tag
     {
         get { return _tag; }
         set { _tag = value; NotifyStateChanged(); }
     }
 
-    private string _userName = "";
-    public string UserName
+    private string? _userName; //  = "";
+    public string? UserName
     {
         get { return _userName; }
         set { _userName = value; NotifyStateChanged(); }

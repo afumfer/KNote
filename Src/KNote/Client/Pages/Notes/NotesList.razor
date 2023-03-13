@@ -1,17 +1,17 @@
 ﻿@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
 <EntityList List="Notes">
-    <Items Context="note">
+    <Item Context="note">
         <NoteItem Note="note"
                     OnNoteDelete="@(() => OnNoteDelete.InvokeAsync(note))"
                     OnNoteEdit="@(() => OnNoteEdit.InvokeAsync(note))"
                     OnNoteView="@(() => OnNoteView.InvokeAsync(note))" 
                     @key="note.NoteId" />
-    </Items>
+    </Item>
 </EntityList>
 
 @code {
-    [Parameter] public List<NoteInfoDto> Notes { get; set; }
+    [Parameter] [EditorRequired] public List<NoteInfoDto> Notes { get; set; } = null!;
     [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteEdit { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteView { get; set; }

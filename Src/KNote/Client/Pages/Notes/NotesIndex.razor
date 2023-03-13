@@ -3,7 +3,7 @@
 @attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
 
 <EntityList List="Notes">
-    <ItemsFull>        
+    <AllItems>
         <RadzenDataGrid Data="@Notes" TItem="NoteInfoDto" AllowColumnResize="true" Density="@Density.Compact">
             <Columns>                
                 <RadzenDataGridColumn TItem="NoteInfoDto" Property="NoteNumber" Title="Note #" Width="80px" TextAlign="TextAlign.Center"/>
@@ -22,7 +22,7 @@
                 </RadzenDataGridColumn>
             </Columns> 
         </RadzenDataGrid>
-    </ItemsFull>
+    </AllItems>
 </EntityList>
 
 @code {

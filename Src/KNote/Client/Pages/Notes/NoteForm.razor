@@ -336,7 +336,7 @@
             taskEdit = null;            
 
             var result = await dialogService.OpenAsync<NoteTaskEditor>($"New task",
-                   new Dictionary<string, object>() { { "TaskEdit", null }, { "Users" , users} },
+                   new Dictionary<string, object?>() { { "TaskEdit", null }, { "Users" , users} },
                    new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
 
             if(result != null)
@@ -349,7 +349,7 @@
         taskEdit = task;        
 
         var result = await dialogService.OpenAsync<NoteTaskEditor>($"Edit task",
-               new Dictionary<string, object>() { { "TaskEdit", task }, { "Users" , users} },
+               new Dictionary<string, object?>() { { "TaskEdit", task }, { "Users" , users} },
                new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
 
         if(result != null)

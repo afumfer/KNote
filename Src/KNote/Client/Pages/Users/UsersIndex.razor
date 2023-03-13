@@ -31,7 +31,7 @@
 <div class="col-12">
     <div class="row">
         <EntityList List="users">
-            <ItemsFull>
+            <AllItems>
                 <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" Density="@Density.Compact">
                     <Columns>
                         <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="User name" />
@@ -50,7 +50,7 @@
                         </RadzenDataGridColumn>
                     </Columns> 
                 </RadzenDataGrid>
-            </ItemsFull>
+            </AllItems>
         </EntityList>
     </div>
 </div>

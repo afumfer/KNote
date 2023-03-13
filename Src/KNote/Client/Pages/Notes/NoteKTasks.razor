@@ -6,7 +6,7 @@
 </div>
 
 <EntityList List="Tasks">
-    <ItemsFull>
+    <AllItems>
         <RadzenDataGrid Data="@Tasks" TItem="NoteTaskDto" AllowColumnResize="true" Density="@Density.Compact" >
             <Columns>
                 <RadzenDataGridColumn TItem="NoteTaskDto" Property="UserFullName" Title="User name" />
@@ -27,7 +27,7 @@
                 </RadzenDataGridColumn>
             </Columns> 
         </RadzenDataGrid>
-    </ItemsFull>
+    </AllItems>
 </EntityList>
 
 @code {
