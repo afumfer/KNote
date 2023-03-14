@@ -17,7 +17,7 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
 
         _com.Store.ComponentNotification += Store_ComponentNotification;
 
-        
+
         // TODO: options ... for next version
         menuReports.Visible = false;
         menuToolsS1.Visible = false;
@@ -36,7 +36,7 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
         else
             comName = "";
         statusLabel2.Text = $" {comName} {e?.Entity.ToString()}";
-        statusBarManagment.Refresh();            
+        statusBarManagment.Refresh();
     }
 
     #region IViewBase interface 
@@ -60,7 +60,7 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
 
     public void ActivateView()
     {
-        this.Show();            
+        this.Show();
         this.Select();
         if (this.WindowState == FormWindowState.Minimized)
             this.WindowState = FormWindowState.Normal;
@@ -81,7 +81,7 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
 
     public DialogResult ShowInfo(string info, string caption = "KeyNoteX", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
-        if(info != null)
+        if (info != null)
             return MessageBox.Show(info, caption, buttons, icon);
 
         string msg1;
@@ -102,27 +102,27 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
         if (menuHeaderPanelVisible.Checked)
         {
             labelFolder.Text = msg1;
-            labelFolderDetail.Text = msg2;                
+            labelFolderDetail.Text = msg2;
         }
 
         statusLabel1.Text = $"Notes: {_com.CountNotes.ToString()}";
-        
+
         return DialogResult.OK;
     }
 
     public void ConfigureEmbededMode()
     {
-        
+
     }
 
     public void ConfigureWindowMode()
     {
-        
+
     }
 
     public void RefreshView()
     {
-        
+
     }
 
     #endregion
@@ -156,66 +156,68 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
         ToolStripMenuItem menuSel;
         menuSel = (ToolStripMenuItem)sender;
 
-        if (menuSel == menuKNoteLab) 
+        if (menuSel == menuKNoteLab)
         {
             // For test ...
             var labForm = new LabForm(_com.Store);
-            labForm.Show(); 
+            labForm.Show();
         }
         else if (menuSel == menuNewFolder)
         {
-            _com.NewFolder();            
-        }            
+            _com.NewFolder();
+        }
         else if (menuSel == menuEditFolder)
         {
-            _com.EditFolder();            
+            _com.EditFolder();
         }
         else if (menuSel == menuDeleteFolder)
         {
-            _com.DeleteFolder();           
-        }            
+            _com.DeleteFolder();
+        }
         else if (menuSel == menuRemoveRepositoryLink)
         {
-            _com.RemoveRepositoryLink();            
+            _com.RemoveRepositoryLink();
         }
         else if (menuSel == menuAddRepositoryLink)
         {
-            _com.AddRepositoryLink();            
+            _com.AddRepositoryLink();
         }
         else if (menuSel == menuCreateRepository)
         {
-            _com.CreateRepository();            
+            _com.CreateRepository();
         }
         else if (menuSel == menuManagmentRepository)
         {
-            _com.ManagmentRepository();            
+            _com.ManagmentRepository();
         }
-        else if (menuSel == menuRefreshTreeFolders) {
+        else if (menuSel == menuRefreshTreeFolders)
+        {
             Text = "KaNote Managment";
-            _com.RefreshRepositoryAndFolderTree(); }
+            _com.RefreshRepositoryAndFolderTree();
+        }
         else if (menuSel == menuEditNote)
         {
-            _com.EditNote();            
+            _com.EditNote();
         }
         else if (menuSel == menuEditNoteAsPostIt)
         {
-            _com.EditNotePostIt();            
+            _com.EditNotePostIt();
         }
         else if (menuSel == menuNewNote)
         {
-            _com.AddNote();            
+            _com.AddNote();
         }
         else if (menuSel == menuNewNoteAsPostIt)
         {
-            _com.AddNotePostIt();                        
+            _com.AddNotePostIt();
         }
         else if (menuSel == menuDeleteNote)
         {
-            _com.DeleteNote();                            
+            _com.DeleteNote();
         }
         else if (menuSel == menuKntScriptConsole)
         {
-            _com.ShowKntScriptConsole();            
+            _com.ShowKntScriptConsole();
         }
         else if (menuSel == menuHide)
         {
@@ -231,11 +233,11 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
         }
         else if (menuSel == menuMoveSelectedNotes)
         {
-            _com.MoveSelectedNotes();            
+            _com.MoveSelectedNotes();
         }
         else if (menuSel == menuAddTags)
         {
-            _com.AddTagsSelectedNotes();            
+            _com.AddTagsSelectedNotes();
         }
         else if (menuSel == menuRemoveTags)
         {
@@ -249,47 +251,51 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
         {
             _com.Options();
         }
-        else if (menuSel == menuFoldersExplorer) 
+        else if (menuSel == menuFoldersExplorer)
         {
             if (tabExplorers.SelectedIndex == 0)
                 return;
-            SelectTab(0); 
+            SelectTab(0);
         }
-        else if (menuSel == menuSearchPanel) 
+        else if (menuSel == menuSearchPanel)
         {
             if (tabExplorers.SelectedIndex == 1)
                 return;
-            SelectTab(1); 
+            SelectTab(1);
         }
-        else if (menuSel == menuHeaderPanelVisible) 
+        else if (menuSel == menuHeaderPanelVisible)
         {
-            if(!panelSupManagment.Visible)
+            if (!panelSupManagment.Visible)
                 Text = "KaNote Managment";
-            panelSupManagment.Visible = !panelSupManagment.Visible; 
+            panelSupManagment.Visible = !panelSupManagment.Visible;
         }
-        else if (menuSel == menuMainVisible) 
+        else if (menuSel == menuMainVisible)
         {
             menuMangment.Visible = !menuMangment.Visible;
-            menuMainVisible.Checked = !menuMainVisible.Checked; 
+            menuMainVisible.Checked = !menuMainVisible.Checked;
         }
         else if (menuSel == menuToolbarVisible)
-        {                
+        {
             menuToolbarVisible.Checked = !menuToolbarVisible.Checked;
             toolBarManagment.Visible = menuToolbarVisible.Checked;
         }
-        else if (menuSel == menuVerticalPanelForNotes) 
+        else if (menuSel == menuVerticalPanelForNotes)
         {
-            if(splitContainer2.Orientation == Orientation.Horizontal) {
+            if (splitContainer2.Orientation == Orientation.Horizontal)
+            {
                 splitContainer2.Orientation = Orientation.Vertical;
-                menuVerticalPanelForNotes.Checked = true; }
-            else {
+                menuVerticalPanelForNotes.Checked = true;
+            }
+            else
+            {
                 splitContainer2.Orientation = Orientation.Horizontal;
-                menuVerticalPanelForNotes.Checked = false; } 
-        }            
+                menuVerticalPanelForNotes.Checked = false;
+            }
+        }
         else if (menuSel == menuExit)
         {
             SaveViewSizeAndPosition();
-            await _com.FinalizeApp();            
+            await _com.FinalizeApp();
         }
         else if (menuSel == menuChat)
         {
@@ -297,8 +303,14 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
             var chatForm = new ChatForm(_com.Store);
             chatForm.Show();
         }
+        else if (menuSel == menuChatGPT)
+        {
+            // For test ...
+            var chatFormGPT = new ChatGPTForm(_com.Store);
+            chatFormGPT.Show();
+        }
         else
-            MessageBox.Show("In construction ... ");            
+            MessageBox.Show("In construction ... ");
     }
 
     private void buttonToolBar_Click(object sender, EventArgs e)
@@ -328,7 +340,7 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
 
     private void SelectTab(int tabIndex)
     {
-        if(tabIndex == 0)
+        if (tabIndex == 0)
         {
             tabExplorers.SelectedTab = tabExplorers.TabPages[0];
             menuFoldersExplorer.Checked = true;
@@ -349,7 +361,7 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
         tabTreeFolders.Controls.Add(_com.FoldersSelectorComponent.View.PanelView());
         tabSearch.Controls.Add(_com.FilterParamComponent.View.PanelView());
         splitContainer2.Panel1.Controls.Add(_com.NotesSelectorComponent.View.PanelView());
-        splitContainer2.Panel2.Controls.Add(_com.NoteEditorComponent.View.PanelView());           
+        splitContainer2.Panel2.Controls.Add(_com.NoteEditorComponent.View.PanelView());
     }
 
     private void SaveViewSizeAndPosition()
@@ -384,20 +396,3 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
     #endregion
 
 }
-
-#region Utils
-
-public class WaitCursor : IDisposable
-{
-    public WaitCursor()
-    {
-        Cursor.Current = Cursors.WaitCursor;            
-    }
-
-    public void Dispose()
-    {
-        Cursor.Current = Cursors.Default;            
-    }
-}
-
-#endregion

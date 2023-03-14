@@ -34,7 +34,7 @@ public partial class ChatForm : Form
                            .WithUrl(_store.AppConfig.ChatHubUrl)
                            .Build();
 
-            // Si se desconecta => debe intentar reconectar
+            // Is disconected => must conected
             hubConnection.Closed += async (error) =>
             {
                 Thread.Sleep(5000);

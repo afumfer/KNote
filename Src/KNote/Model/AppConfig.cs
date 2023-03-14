@@ -233,6 +233,34 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    private string _chatGPTOrganization;
+    public string ChatGPTOrganization
+    {
+        get { return _chatGPTOrganization; }
+        set
+        {
+            if (_chatGPTOrganization != value)
+            {
+                _chatGPTOrganization = value;
+                OnPropertyChanged("ChatGPTOrganization");
+            }
+        }
+    }
+
+    private string _chatGPTApiKey;
+    public string ChatGPTApiKey
+    {
+        get { return _chatGPTApiKey; }
+        set
+        {
+            if (_chatGPTApiKey != value)
+            {
+                _chatGPTApiKey = value;
+                OnPropertyChanged("ChatGPTApiKey");
+            }
+        }
+    }
+
     private List<RepositoryRef> _respositoryRef;
     public List<RepositoryRef> RespositoryRefs
     {

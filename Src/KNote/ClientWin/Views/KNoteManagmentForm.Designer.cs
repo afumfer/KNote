@@ -28,817 +28,758 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KNoteManagmentForm));
-            this.menuMangment = new System.Windows.Forms.MenuStrip();
-            this.menuFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuRepositories = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuCreateRepository = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuManagmentRepository = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAddRepositoryLink = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuRemoveRepositoryLink = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolMenuIRepositoryS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuRefreshTreeFolders = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolMenuIRepositoryS2 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuImportData = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuExportData = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFolders = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuNewFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuEditFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuDeleteFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFileS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuHide = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFilesS2 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuEdit = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuNewNote = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuNewNoteAsPostIt = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuEditNote = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuEditNoteAsPostIt = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuDeleteNote = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuEditS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuMoveSelectedNotes = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuEditS2 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuAddTags = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuRemoveTags = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuEditS3 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuMoreOptions = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuExecuteKntScript = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuView = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFoldersExplorer = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuSearchPanel = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuViewS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuVerticalPanelForNotes = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuHeaderPanelVisible = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuToolbarVisible = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuMainVisible = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuTools = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuReports = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuToolsS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuKntScriptConsole = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuKNoteLab = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuToolsS2 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuOptions = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuHelp = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuHelpDoc = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusBarManagment = new System.Windows.Forms.StatusStrip();
-            this.statusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.statusS1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.statusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolBarManagment = new System.Windows.Forms.ToolStrip();
-            this.toolNewNote = new System.Windows.Forms.ToolStripButton();
-            this.toolEditNote = new System.Windows.Forms.ToolStripButton();
-            this.toolDeleteNote = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolPrintReports = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolConfiguration = new System.Windows.Forms.ToolStripButton();
-            this.panelSupManagment = new System.Windows.Forms.Panel();
-            this.labelFolderDetail = new System.Windows.Forms.Label();
-            this.labelFolder = new System.Windows.Forms.Label();
-            this.pictureBoxFolder = new System.Windows.Forms.PictureBox();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.tabExplorers = new System.Windows.Forms.TabControl();
-            this.tabTreeFolders = new System.Windows.Forms.TabPage();
-            this.tabSearch = new System.Windows.Forms.TabPage();
-            this.imageTabExplorer = new System.Windows.Forms.ImageList(this.components);
-            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.menuChat = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuMangment.SuspendLayout();
-            this.statusBarManagment.SuspendLayout();
-            this.toolBarManagment.SuspendLayout();
-            this.panelSupManagment.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFolder)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            this.tabExplorers.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
-            this.splitContainer2.SuspendLayout();
-            this.SuspendLayout();
+            menuMangment = new MenuStrip();
+            menuFile = new ToolStripMenuItem();
+            menuRepositories = new ToolStripMenuItem();
+            menuCreateRepository = new ToolStripMenuItem();
+            menuManagmentRepository = new ToolStripMenuItem();
+            menuAddRepositoryLink = new ToolStripMenuItem();
+            menuRemoveRepositoryLink = new ToolStripMenuItem();
+            toolMenuIRepositoryS1 = new ToolStripSeparator();
+            menuRefreshTreeFolders = new ToolStripMenuItem();
+            toolMenuIRepositoryS2 = new ToolStripSeparator();
+            menuImportData = new ToolStripMenuItem();
+            menuExportData = new ToolStripMenuItem();
+            menuFolders = new ToolStripMenuItem();
+            menuNewFolder = new ToolStripMenuItem();
+            menuEditFolder = new ToolStripMenuItem();
+            menuDeleteFolder = new ToolStripMenuItem();
+            menuFileS1 = new ToolStripSeparator();
+            menuHide = new ToolStripMenuItem();
+            menuFilesS2 = new ToolStripSeparator();
+            menuExit = new ToolStripMenuItem();
+            menuEdit = new ToolStripMenuItem();
+            menuNewNote = new ToolStripMenuItem();
+            menuNewNoteAsPostIt = new ToolStripMenuItem();
+            menuEditNote = new ToolStripMenuItem();
+            menuEditNoteAsPostIt = new ToolStripMenuItem();
+            menuDeleteNote = new ToolStripMenuItem();
+            menuEditS1 = new ToolStripSeparator();
+            menuMoveSelectedNotes = new ToolStripMenuItem();
+            menuEditS2 = new ToolStripSeparator();
+            menuAddTags = new ToolStripMenuItem();
+            menuRemoveTags = new ToolStripMenuItem();
+            menuEditS3 = new ToolStripSeparator();
+            menuMoreOptions = new ToolStripMenuItem();
+            menuExecuteKntScript = new ToolStripMenuItem();
+            menuView = new ToolStripMenuItem();
+            menuFoldersExplorer = new ToolStripMenuItem();
+            menuSearchPanel = new ToolStripMenuItem();
+            menuViewS1 = new ToolStripSeparator();
+            menuVerticalPanelForNotes = new ToolStripMenuItem();
+            menuHeaderPanelVisible = new ToolStripMenuItem();
+            menuToolbarVisible = new ToolStripMenuItem();
+            menuMainVisible = new ToolStripMenuItem();
+            menuTools = new ToolStripMenuItem();
+            menuReports = new ToolStripMenuItem();
+            menuToolsS1 = new ToolStripSeparator();
+            menuKntScriptConsole = new ToolStripMenuItem();
+            menuChat = new ToolStripMenuItem();
+            menuKNoteLab = new ToolStripMenuItem();
+            menuToolsS2 = new ToolStripSeparator();
+            menuOptions = new ToolStripMenuItem();
+            menuHelp = new ToolStripMenuItem();
+            menuHelpDoc = new ToolStripMenuItem();
+            menuAbout = new ToolStripMenuItem();
+            statusBarManagment = new StatusStrip();
+            statusLabel1 = new ToolStripStatusLabel();
+            statusS1 = new ToolStripStatusLabel();
+            statusLabel2 = new ToolStripStatusLabel();
+            toolBarManagment = new ToolStrip();
+            toolNewNote = new ToolStripButton();
+            toolEditNote = new ToolStripButton();
+            toolDeleteNote = new ToolStripButton();
+            toolStripSeparator1 = new ToolStripSeparator();
+            toolPrintReports = new ToolStripButton();
+            toolStripSeparator2 = new ToolStripSeparator();
+            toolConfiguration = new ToolStripButton();
+            panelSupManagment = new Panel();
+            labelFolderDetail = new Label();
+            labelFolder = new Label();
+            pictureBoxFolder = new PictureBox();
+            splitContainer1 = new SplitContainer();
+            tabExplorers = new TabControl();
+            tabTreeFolders = new TabPage();
+            tabSearch = new TabPage();
+            imageTabExplorer = new ImageList(components);
+            splitContainer2 = new SplitContainer();
+            menuChatGPT = new ToolStripMenuItem();
+            menuMangment.SuspendLayout();
+            statusBarManagment.SuspendLayout();
+            toolBarManagment.SuspendLayout();
+            panelSupManagment.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxFolder).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            tabExplorers.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
+            splitContainer2.SuspendLayout();
+            SuspendLayout();
             // 
             // menuMangment
             // 
-            this.menuMangment.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuFile,
-            this.menuEdit,
-            this.menuView,
-            this.menuTools,
-            this.menuHelp});
-            this.menuMangment.Location = new System.Drawing.Point(0, 0);
-            this.menuMangment.Name = "menuMangment";
-            this.menuMangment.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
-            this.menuMangment.Size = new System.Drawing.Size(1014, 24);
-            this.menuMangment.TabIndex = 2;
-            this.menuMangment.Text = "KaNote menu managment";
+            menuMangment.Items.AddRange(new ToolStripItem[] { menuFile, menuEdit, menuView, menuTools, menuHelp });
+            menuMangment.Location = new Point(0, 0);
+            menuMangment.Name = "menuMangment";
+            menuMangment.Padding = new Padding(7, 2, 0, 2);
+            menuMangment.Size = new Size(1014, 24);
+            menuMangment.TabIndex = 2;
+            menuMangment.Text = "KaNote menu managment";
             // 
             // menuFile
             // 
-            this.menuFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuRepositories,
-            this.menuFolders,
-            this.menuFileS1,
-            this.menuHide,
-            this.menuFilesS2,
-            this.menuExit});
-            this.menuFile.Name = "menuFile";
-            this.menuFile.Size = new System.Drawing.Size(37, 20);
-            this.menuFile.Text = "&File";
+            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuHide, menuFilesS2, menuExit });
+            menuFile.Name = "menuFile";
+            menuFile.Size = new Size(37, 20);
+            menuFile.Text = "&File";
             // 
             // menuRepositories
             // 
-            this.menuRepositories.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuCreateRepository,
-            this.menuManagmentRepository,
-            this.menuAddRepositoryLink,
-            this.menuRemoveRepositoryLink,
-            this.toolMenuIRepositoryS1,
-            this.menuRefreshTreeFolders,
-            this.toolMenuIRepositoryS2,
-            this.menuImportData,
-            this.menuExportData});
-            this.menuRepositories.Name = "menuRepositories";
-            this.menuRepositories.Size = new System.Drawing.Size(209, 22);
-            this.menuRepositories.Text = "&Repositories";
+            menuRepositories.DropDownItems.AddRange(new ToolStripItem[] { menuCreateRepository, menuManagmentRepository, menuAddRepositoryLink, menuRemoveRepositoryLink, toolMenuIRepositoryS1, menuRefreshTreeFolders, toolMenuIRepositoryS2, menuImportData, menuExportData });
+            menuRepositories.Name = "menuRepositories";
+            menuRepositories.Size = new Size(209, 22);
+            menuRepositories.Text = "&Repositories";
             // 
             // menuCreateRepository
             // 
-            this.menuCreateRepository.Name = "menuCreateRepository";
-            this.menuCreateRepository.Size = new System.Drawing.Size(282, 22);
-            this.menuCreateRepository.Text = "Create new repository ,,,";
-            this.menuCreateRepository.Click += new System.EventHandler(this.menu_Click);
+            menuCreateRepository.Name = "menuCreateRepository";
+            menuCreateRepository.Size = new Size(282, 22);
+            menuCreateRepository.Text = "Create new repository ,,,";
+            menuCreateRepository.Click += menu_Click;
             // 
             // menuManagmentRepository
             // 
-            this.menuManagmentRepository.Name = "menuManagmentRepository";
-            this.menuManagmentRepository.Size = new System.Drawing.Size(282, 22);
-            this.menuManagmentRepository.Text = "Edit repository properties ...";
-            this.menuManagmentRepository.Click += new System.EventHandler(this.menu_Click);
+            menuManagmentRepository.Name = "menuManagmentRepository";
+            menuManagmentRepository.Size = new Size(282, 22);
+            menuManagmentRepository.Text = "Edit repository properties ...";
+            menuManagmentRepository.Click += menu_Click;
             // 
             // menuAddRepositoryLink
             // 
-            this.menuAddRepositoryLink.Name = "menuAddRepositoryLink";
-            this.menuAddRepositoryLink.Size = new System.Drawing.Size(282, 22);
-            this.menuAddRepositoryLink.Text = "Add link to an existing repository ...";
-            this.menuAddRepositoryLink.Click += new System.EventHandler(this.menu_Click);
+            menuAddRepositoryLink.Name = "menuAddRepositoryLink";
+            menuAddRepositoryLink.Size = new Size(282, 22);
+            menuAddRepositoryLink.Text = "Add link to an existing repository ...";
+            menuAddRepositoryLink.Click += menu_Click;
             // 
             // menuRemoveRepositoryLink
             // 
-            this.menuRemoveRepositoryLink.Name = "menuRemoveRepositoryLink";
-            this.menuRemoveRepositoryLink.Size = new System.Drawing.Size(282, 22);
-            this.menuRemoveRepositoryLink.Text = "Remove link from selected repository ...";
-            this.menuRemoveRepositoryLink.Click += new System.EventHandler(this.menu_Click);
+            menuRemoveRepositoryLink.Name = "menuRemoveRepositoryLink";
+            menuRemoveRepositoryLink.Size = new Size(282, 22);
+            menuRemoveRepositoryLink.Text = "Remove link from selected repository ...";
+            menuRemoveRepositoryLink.Click += menu_Click;
             // 
             // toolMenuIRepositoryS1
             // 
-            this.toolMenuIRepositoryS1.Name = "toolMenuIRepositoryS1";
-            this.toolMenuIRepositoryS1.Size = new System.Drawing.Size(279, 6);
+            toolMenuIRepositoryS1.Name = "toolMenuIRepositoryS1";
+            toolMenuIRepositoryS1.Size = new Size(279, 6);
             // 
             // menuRefreshTreeFolders
             // 
-            this.menuRefreshTreeFolders.Name = "menuRefreshTreeFolders";
-            this.menuRefreshTreeFolders.Size = new System.Drawing.Size(282, 22);
-            this.menuRefreshTreeFolders.Text = "Refresh repositories and folders tree";
-            this.menuRefreshTreeFolders.Click += new System.EventHandler(this.menu_Click);
+            menuRefreshTreeFolders.Name = "menuRefreshTreeFolders";
+            menuRefreshTreeFolders.Size = new Size(282, 22);
+            menuRefreshTreeFolders.Text = "Refresh repositories and folders tree";
+            menuRefreshTreeFolders.Click += menu_Click;
             // 
             // toolMenuIRepositoryS2
             // 
-            this.toolMenuIRepositoryS2.Name = "toolMenuIRepositoryS2";
-            this.toolMenuIRepositoryS2.Size = new System.Drawing.Size(279, 6);
-            this.toolMenuIRepositoryS2.Visible = false;
+            toolMenuIRepositoryS2.Name = "toolMenuIRepositoryS2";
+            toolMenuIRepositoryS2.Size = new Size(279, 6);
+            toolMenuIRepositoryS2.Visible = false;
             // 
             // menuImportData
             // 
-            this.menuImportData.Name = "menuImportData";
-            this.menuImportData.Size = new System.Drawing.Size(282, 22);
-            this.menuImportData.Text = "Import data ...";
-            this.menuImportData.Visible = false;
-            this.menuImportData.Click += new System.EventHandler(this.menu_Click);
+            menuImportData.Name = "menuImportData";
+            menuImportData.Size = new Size(282, 22);
+            menuImportData.Text = "Import data ...";
+            menuImportData.Visible = false;
+            menuImportData.Click += menu_Click;
             // 
             // menuExportData
             // 
-            this.menuExportData.Name = "menuExportData";
-            this.menuExportData.Size = new System.Drawing.Size(282, 22);
-            this.menuExportData.Text = "toolStripMenuItem2";
-            this.menuExportData.Visible = false;
+            menuExportData.Name = "menuExportData";
+            menuExportData.Size = new Size(282, 22);
+            menuExportData.Text = "toolStripMenuItem2";
+            menuExportData.Visible = false;
             // 
             // menuFolders
             // 
-            this.menuFolders.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuNewFolder,
-            this.menuEditFolder,
-            this.menuDeleteFolder});
-            this.menuFolders.Name = "menuFolders";
-            this.menuFolders.Size = new System.Drawing.Size(209, 22);
-            this.menuFolders.Text = "&Folders";
+            menuFolders.DropDownItems.AddRange(new ToolStripItem[] { menuNewFolder, menuEditFolder, menuDeleteFolder });
+            menuFolders.Name = "menuFolders";
+            menuFolders.Size = new Size(209, 22);
+            menuFolders.Text = "&Folders";
             // 
             // menuNewFolder
             // 
-            this.menuNewFolder.Name = "menuNewFolder";
-            this.menuNewFolder.Size = new System.Drawing.Size(179, 22);
-            this.menuNewFolder.Text = "Create new folder ...";
-            this.menuNewFolder.Click += new System.EventHandler(this.menu_Click);
+            menuNewFolder.Name = "menuNewFolder";
+            menuNewFolder.Size = new Size(179, 22);
+            menuNewFolder.Text = "Create new folder ...";
+            menuNewFolder.Click += menu_Click;
             // 
             // menuEditFolder
             // 
-            this.menuEditFolder.Name = "menuEditFolder";
-            this.menuEditFolder.Size = new System.Drawing.Size(179, 22);
-            this.menuEditFolder.Text = "&Edit folder ...";
-            this.menuEditFolder.Click += new System.EventHandler(this.menu_Click);
+            menuEditFolder.Name = "menuEditFolder";
+            menuEditFolder.Size = new Size(179, 22);
+            menuEditFolder.Text = "&Edit folder ...";
+            menuEditFolder.Click += menu_Click;
             // 
             // menuDeleteFolder
             // 
-            this.menuDeleteFolder.Name = "menuDeleteFolder";
-            this.menuDeleteFolder.Size = new System.Drawing.Size(179, 22);
-            this.menuDeleteFolder.Text = "Delete folder ...";
-            this.menuDeleteFolder.Click += new System.EventHandler(this.menu_Click);
+            menuDeleteFolder.Name = "menuDeleteFolder";
+            menuDeleteFolder.Size = new Size(179, 22);
+            menuDeleteFolder.Text = "Delete folder ...";
+            menuDeleteFolder.Click += menu_Click;
             // 
             // menuFileS1
             // 
-            this.menuFileS1.Name = "menuFileS1";
-            this.menuFileS1.Size = new System.Drawing.Size(206, 6);
+            menuFileS1.Name = "menuFileS1";
+            menuFileS1.Size = new Size(206, 6);
             // 
             // menuHide
             // 
-            this.menuHide.Name = "menuHide";
-            this.menuHide.Size = new System.Drawing.Size(209, 22);
-            this.menuHide.Text = "&Hide KaNote managment";
-            this.menuHide.Click += new System.EventHandler(this.menu_Click);
+            menuHide.Name = "menuHide";
+            menuHide.Size = new Size(209, 22);
+            menuHide.Text = "&Hide KaNote managment";
+            menuHide.Click += menu_Click;
             // 
             // menuFilesS2
             // 
-            this.menuFilesS2.Name = "menuFilesS2";
-            this.menuFilesS2.Size = new System.Drawing.Size(206, 6);
+            menuFilesS2.Name = "menuFilesS2";
+            menuFilesS2.Size = new Size(206, 6);
             // 
             // menuExit
             // 
-            this.menuExit.Name = "menuExit";
-            this.menuExit.Size = new System.Drawing.Size(209, 22);
-            this.menuExit.Text = "&Exit";
-            this.menuExit.Click += new System.EventHandler(this.menu_Click);
+            menuExit.Name = "menuExit";
+            menuExit.Size = new Size(209, 22);
+            menuExit.Text = "&Exit";
+            menuExit.Click += menu_Click;
             // 
             // menuEdit
             // 
-            this.menuEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuNewNote,
-            this.menuNewNoteAsPostIt,
-            this.menuEditNote,
-            this.menuEditNoteAsPostIt,
-            this.menuDeleteNote,
-            this.menuEditS1,
-            this.menuMoveSelectedNotes,
-            this.menuEditS2,
-            this.menuAddTags,
-            this.menuRemoveTags,
-            this.menuEditS3,
-            this.menuMoreOptions});
-            this.menuEdit.Name = "menuEdit";
-            this.menuEdit.Size = new System.Drawing.Size(39, 20);
-            this.menuEdit.Text = "&Edit";
+            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuNewNote, menuNewNoteAsPostIt, menuEditNote, menuEditNoteAsPostIt, menuDeleteNote, menuEditS1, menuMoveSelectedNotes, menuEditS2, menuAddTags, menuRemoveTags, menuEditS3, menuMoreOptions });
+            menuEdit.Name = "menuEdit";
+            menuEdit.Size = new Size(39, 20);
+            menuEdit.Text = "&Edit";
             // 
             // menuNewNote
             // 
-            this.menuNewNote.Name = "menuNewNote";
-            this.menuNewNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.menuNewNote.Size = new System.Drawing.Size(261, 22);
-            this.menuNewNote.Text = "&New note";
-            this.menuNewNote.Click += new System.EventHandler(this.menu_Click);
+            menuNewNote.Name = "menuNewNote";
+            menuNewNote.ShortcutKeys = Keys.Control | Keys.N;
+            menuNewNote.Size = new Size(261, 22);
+            menuNewNote.Text = "&New note";
+            menuNewNote.Click += menu_Click;
             // 
             // menuNewNoteAsPostIt
             // 
-            this.menuNewNoteAsPostIt.Name = "menuNewNoteAsPostIt";
-            this.menuNewNoteAsPostIt.Size = new System.Drawing.Size(261, 22);
-            this.menuNewNoteAsPostIt.Text = "New note as &PostIt";
-            this.menuNewNoteAsPostIt.Click += new System.EventHandler(this.menu_Click);
+            menuNewNoteAsPostIt.Name = "menuNewNoteAsPostIt";
+            menuNewNoteAsPostIt.Size = new Size(261, 22);
+            menuNewNoteAsPostIt.Text = "New note as &PostIt";
+            menuNewNoteAsPostIt.Click += menu_Click;
             // 
             // menuEditNote
             // 
-            this.menuEditNote.Name = "menuEditNote";
-            this.menuEditNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.menuEditNote.Size = new System.Drawing.Size(261, 22);
-            this.menuEditNote.Text = "&Edit note";
-            this.menuEditNote.Click += new System.EventHandler(this.menu_Click);
+            menuEditNote.Name = "menuEditNote";
+            menuEditNote.ShortcutKeys = Keys.Control | Keys.E;
+            menuEditNote.Size = new Size(261, 22);
+            menuEditNote.Text = "&Edit note";
+            menuEditNote.Click += menu_Click;
             // 
             // menuEditNoteAsPostIt
             // 
-            this.menuEditNoteAsPostIt.Name = "menuEditNoteAsPostIt";
-            this.menuEditNoteAsPostIt.Size = new System.Drawing.Size(261, 22);
-            this.menuEditNoteAsPostIt.Text = "Edit note as PostI&t";
-            this.menuEditNoteAsPostIt.Click += new System.EventHandler(this.menu_Click);
+            menuEditNoteAsPostIt.Name = "menuEditNoteAsPostIt";
+            menuEditNoteAsPostIt.Size = new Size(261, 22);
+            menuEditNoteAsPostIt.Text = "Edit note as PostI&t";
+            menuEditNoteAsPostIt.Click += menu_Click;
             // 
             // menuDeleteNote
             // 
-            this.menuDeleteNote.Name = "menuDeleteNote";
-            this.menuDeleteNote.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.menuDeleteNote.Size = new System.Drawing.Size(261, 22);
-            this.menuDeleteNote.Text = "&Delete note";
-            this.menuDeleteNote.Click += new System.EventHandler(this.menu_Click);
+            menuDeleteNote.Name = "menuDeleteNote";
+            menuDeleteNote.ShortcutKeys = Keys.Control | Keys.D;
+            menuDeleteNote.Size = new Size(261, 22);
+            menuDeleteNote.Text = "&Delete note";
+            menuDeleteNote.Click += menu_Click;
             // 
             // menuEditS1
             // 
-            this.menuEditS1.Name = "menuEditS1";
-            this.menuEditS1.Size = new System.Drawing.Size(258, 6);
+            menuEditS1.Name = "menuEditS1";
+            menuEditS1.Size = new Size(258, 6);
             // 
             // menuMoveSelectedNotes
             // 
-            this.menuMoveSelectedNotes.Name = "menuMoveSelectedNotes";
-            this.menuMoveSelectedNotes.Size = new System.Drawing.Size(261, 22);
-            this.menuMoveSelectedNotes.Text = "&Move selected notes ...";
-            this.menuMoveSelectedNotes.Click += new System.EventHandler(this.menu_Click);
+            menuMoveSelectedNotes.Name = "menuMoveSelectedNotes";
+            menuMoveSelectedNotes.Size = new Size(261, 22);
+            menuMoveSelectedNotes.Text = "&Move selected notes ...";
+            menuMoveSelectedNotes.Click += menu_Click;
             // 
             // menuEditS2
             // 
-            this.menuEditS2.Name = "menuEditS2";
-            this.menuEditS2.Size = new System.Drawing.Size(258, 6);
+            menuEditS2.Name = "menuEditS2";
+            menuEditS2.Size = new Size(258, 6);
             // 
             // menuAddTags
             // 
-            this.menuAddTags.Name = "menuAddTags";
-            this.menuAddTags.Size = new System.Drawing.Size(261, 22);
-            this.menuAddTags.Text = "Add tags to selected notes ...";
-            this.menuAddTags.Click += new System.EventHandler(this.menu_Click);
+            menuAddTags.Name = "menuAddTags";
+            menuAddTags.Size = new Size(261, 22);
+            menuAddTags.Text = "Add tags to selected notes ...";
+            menuAddTags.Click += menu_Click;
             // 
             // menuRemoveTags
             // 
-            this.menuRemoveTags.Name = "menuRemoveTags";
-            this.menuRemoveTags.Size = new System.Drawing.Size(261, 22);
-            this.menuRemoveTags.Text = "Remove tags from selected notes ...";
-            this.menuRemoveTags.Click += new System.EventHandler(this.menu_Click);
+            menuRemoveTags.Name = "menuRemoveTags";
+            menuRemoveTags.Size = new Size(261, 22);
+            menuRemoveTags.Text = "Remove tags from selected notes ...";
+            menuRemoveTags.Click += menu_Click;
             // 
             // menuEditS3
             // 
-            this.menuEditS3.Name = "menuEditS3";
-            this.menuEditS3.Size = new System.Drawing.Size(258, 6);
+            menuEditS3.Name = "menuEditS3";
+            menuEditS3.Size = new Size(258, 6);
             // 
             // menuMoreOptions
             // 
-            this.menuMoreOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuExecuteKntScript});
-            this.menuMoreOptions.Name = "menuMoreOptions";
-            this.menuMoreOptions.Size = new System.Drawing.Size(261, 22);
-            this.menuMoreOptions.Text = "More note options";
+            menuMoreOptions.DropDownItems.AddRange(new ToolStripItem[] { menuExecuteKntScript });
+            menuMoreOptions.Name = "menuMoreOptions";
+            menuMoreOptions.Size = new Size(261, 22);
+            menuMoreOptions.Text = "More note options";
             // 
             // menuExecuteKntScript
             // 
-            this.menuExecuteKntScript.Name = "menuExecuteKntScript";
-            this.menuExecuteKntScript.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.menuExecuteKntScript.Size = new System.Drawing.Size(313, 22);
-            this.menuExecuteKntScript.Text = "Execute KntScript code for selected  notes";
-            this.menuExecuteKntScript.Click += new System.EventHandler(this.menu_Click);
+            menuExecuteKntScript.Name = "menuExecuteKntScript";
+            menuExecuteKntScript.ShortcutKeys = Keys.F5;
+            menuExecuteKntScript.Size = new Size(313, 22);
+            menuExecuteKntScript.Text = "Execute KntScript code for selected  notes";
+            menuExecuteKntScript.Click += menu_Click;
             // 
             // menuView
             // 
-            this.menuView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuFoldersExplorer,
-            this.menuSearchPanel,
-            this.menuViewS1,
-            this.menuVerticalPanelForNotes,
-            this.menuHeaderPanelVisible,
-            this.menuToolbarVisible,
-            this.menuMainVisible});
-            this.menuView.Name = "menuView";
-            this.menuView.Size = new System.Drawing.Size(44, 20);
-            this.menuView.Text = "&View";
+            menuView.DropDownItems.AddRange(new ToolStripItem[] { menuFoldersExplorer, menuSearchPanel, menuViewS1, menuVerticalPanelForNotes, menuHeaderPanelVisible, menuToolbarVisible, menuMainVisible });
+            menuView.Name = "menuView";
+            menuView.Size = new Size(44, 20);
+            menuView.Text = "&View";
             // 
             // menuFoldersExplorer
             // 
-            this.menuFoldersExplorer.Checked = true;
-            this.menuFoldersExplorer.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.menuFoldersExplorer.Name = "menuFoldersExplorer";
-            this.menuFoldersExplorer.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.menuFoldersExplorer.Size = new System.Drawing.Size(263, 22);
-            this.menuFoldersExplorer.Text = "&Folders explorer";
-            this.menuFoldersExplorer.Click += new System.EventHandler(this.menu_Click);
+            menuFoldersExplorer.Checked = true;
+            menuFoldersExplorer.CheckState = CheckState.Checked;
+            menuFoldersExplorer.Name = "menuFoldersExplorer";
+            menuFoldersExplorer.ShortcutKeys = Keys.F2;
+            menuFoldersExplorer.Size = new Size(263, 22);
+            menuFoldersExplorer.Text = "&Folders explorer";
+            menuFoldersExplorer.Click += menu_Click;
             // 
             // menuSearchPanel
             // 
-            this.menuSearchPanel.Name = "menuSearchPanel";
-            this.menuSearchPanel.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.menuSearchPanel.Size = new System.Drawing.Size(263, 22);
-            this.menuSearchPanel.Text = "Search panel";
-            this.menuSearchPanel.Click += new System.EventHandler(this.menu_Click);
+            menuSearchPanel.Name = "menuSearchPanel";
+            menuSearchPanel.ShortcutKeys = Keys.F3;
+            menuSearchPanel.Size = new Size(263, 22);
+            menuSearchPanel.Text = "Search panel";
+            menuSearchPanel.Click += menu_Click;
             // 
             // menuViewS1
             // 
-            this.menuViewS1.Name = "menuViewS1";
-            this.menuViewS1.Size = new System.Drawing.Size(260, 6);
+            menuViewS1.Name = "menuViewS1";
+            menuViewS1.Size = new Size(260, 6);
             // 
             // menuVerticalPanelForNotes
             // 
-            this.menuVerticalPanelForNotes.Name = "menuVerticalPanelForNotes";
-            this.menuVerticalPanelForNotes.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F9)));
-            this.menuVerticalPanelForNotes.Size = new System.Drawing.Size(263, 22);
-            this.menuVerticalPanelForNotes.Text = "Vertical panel for list notes";
-            this.menuVerticalPanelForNotes.Click += new System.EventHandler(this.menu_Click);
+            menuVerticalPanelForNotes.Name = "menuVerticalPanelForNotes";
+            menuVerticalPanelForNotes.ShortcutKeys = Keys.Shift | Keys.F9;
+            menuVerticalPanelForNotes.Size = new Size(263, 22);
+            menuVerticalPanelForNotes.Text = "Vertical panel for list notes";
+            menuVerticalPanelForNotes.Click += menu_Click;
             // 
             // menuHeaderPanelVisible
             // 
-            this.menuHeaderPanelVisible.Checked = true;
-            this.menuHeaderPanelVisible.CheckOnClick = true;
-            this.menuHeaderPanelVisible.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.menuHeaderPanelVisible.Name = "menuHeaderPanelVisible";
-            this.menuHeaderPanelVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F10)));
-            this.menuHeaderPanelVisible.Size = new System.Drawing.Size(263, 22);
-            this.menuHeaderPanelVisible.Text = "Show header panel";
-            this.menuHeaderPanelVisible.Click += new System.EventHandler(this.menu_Click);
+            menuHeaderPanelVisible.Checked = true;
+            menuHeaderPanelVisible.CheckOnClick = true;
+            menuHeaderPanelVisible.CheckState = CheckState.Checked;
+            menuHeaderPanelVisible.Name = "menuHeaderPanelVisible";
+            menuHeaderPanelVisible.ShortcutKeys = Keys.Shift | Keys.F10;
+            menuHeaderPanelVisible.Size = new Size(263, 22);
+            menuHeaderPanelVisible.Text = "Show header panel";
+            menuHeaderPanelVisible.Click += menu_Click;
             // 
             // menuToolbarVisible
             // 
-            this.menuToolbarVisible.Checked = true;
-            this.menuToolbarVisible.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.menuToolbarVisible.Name = "menuToolbarVisible";
-            this.menuToolbarVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F11)));
-            this.menuToolbarVisible.Size = new System.Drawing.Size(263, 22);
-            this.menuToolbarVisible.Text = "Show toolbar";
-            this.menuToolbarVisible.Click += new System.EventHandler(this.menu_Click);
+            menuToolbarVisible.Checked = true;
+            menuToolbarVisible.CheckState = CheckState.Checked;
+            menuToolbarVisible.Name = "menuToolbarVisible";
+            menuToolbarVisible.ShortcutKeys = Keys.Shift | Keys.F11;
+            menuToolbarVisible.Size = new Size(263, 22);
+            menuToolbarVisible.Text = "Show toolbar";
+            menuToolbarVisible.Click += menu_Click;
             // 
             // menuMainVisible
             // 
-            this.menuMainVisible.Checked = true;
-            this.menuMainVisible.CheckOnClick = true;
-            this.menuMainVisible.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.menuMainVisible.Name = "menuMainVisible";
-            this.menuMainVisible.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F12)));
-            this.menuMainVisible.Size = new System.Drawing.Size(263, 22);
-            this.menuMainVisible.Text = "Show main menu";
-            this.menuMainVisible.Click += new System.EventHandler(this.menu_Click);
+            menuMainVisible.Checked = true;
+            menuMainVisible.CheckOnClick = true;
+            menuMainVisible.CheckState = CheckState.Checked;
+            menuMainVisible.Name = "menuMainVisible";
+            menuMainVisible.ShortcutKeys = Keys.Shift | Keys.F12;
+            menuMainVisible.Size = new Size(263, 22);
+            menuMainVisible.Text = "Show main menu";
+            menuMainVisible.Click += menu_Click;
             // 
             // menuTools
             // 
-            this.menuTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuReports,
-            this.menuToolsS1,
-            this.menuKntScriptConsole,
-            this.menuChat,
-            this.menuKNoteLab,
-            this.menuToolsS2,
-            this.menuOptions});
-            this.menuTools.Name = "menuTools";
-            this.menuTools.Size = new System.Drawing.Size(46, 20);
-            this.menuTools.Text = "&Tools";
+            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuChatGPT, menuKNoteLab, menuToolsS2, menuOptions });
+            menuTools.Name = "menuTools";
+            menuTools.Size = new Size(46, 20);
+            menuTools.Text = "&Tools";
             // 
             // menuReports
             // 
-            this.menuReports.Name = "menuReports";
-            this.menuReports.Size = new System.Drawing.Size(185, 22);
-            this.menuReports.Text = "&Reports ...";
-            this.menuReports.Click += new System.EventHandler(this.menu_Click);
+            menuReports.Name = "menuReports";
+            menuReports.Size = new Size(185, 22);
+            menuReports.Text = "&Reports ...";
+            menuReports.Click += menu_Click;
             // 
             // menuToolsS1
             // 
-            this.menuToolsS1.Name = "menuToolsS1";
-            this.menuToolsS1.Size = new System.Drawing.Size(182, 6);
+            menuToolsS1.Name = "menuToolsS1";
+            menuToolsS1.Size = new Size(182, 6);
             // 
             // menuKntScriptConsole
             // 
-            this.menuKntScriptConsole.Name = "menuKntScriptConsole";
-            this.menuKntScriptConsole.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.menuKntScriptConsole.Size = new System.Drawing.Size(185, 22);
-            this.menuKntScriptConsole.Text = "Knt&Script console";
-            this.menuKntScriptConsole.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuKNoteLab
-            // 
-            this.menuKNoteLab.Name = "menuKNoteLab";
-            this.menuKNoteLab.ShortcutKeys = System.Windows.Forms.Keys.F10;
-            this.menuKNoteLab.Size = new System.Drawing.Size(185, 22);
-            this.menuKNoteLab.Text = "Knote &lab ...";
-            this.menuKNoteLab.Visible = false;
-            this.menuKNoteLab.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuToolsS2
-            // 
-            this.menuToolsS2.Name = "menuToolsS2";
-            this.menuToolsS2.Size = new System.Drawing.Size(182, 6);
-            // 
-            // menuOptions
-            // 
-            this.menuOptions.Name = "menuOptions";
-            this.menuOptions.Size = new System.Drawing.Size(185, 22);
-            this.menuOptions.Text = "&Options ...";
-            this.menuOptions.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuHelp
-            // 
-            this.menuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuHelpDoc,
-            this.menuAbout});
-            this.menuHelp.Name = "menuHelp";
-            this.menuHelp.Size = new System.Drawing.Size(24, 20);
-            this.menuHelp.Text = "&?";
-            // 
-            // menuHelpDoc
-            // 
-            this.menuHelpDoc.Name = "menuHelpDoc";
-            this.menuHelpDoc.Size = new System.Drawing.Size(119, 22);
-            this.menuHelpDoc.Text = "&Help ...";
-            this.menuHelpDoc.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // menuAbout
-            // 
-            this.menuAbout.Name = "menuAbout";
-            this.menuAbout.Size = new System.Drawing.Size(119, 22);
-            this.menuAbout.Text = "&About ...";
-            this.menuAbout.Click += new System.EventHandler(this.menu_Click);
-            // 
-            // statusBarManagment
-            // 
-            this.statusBarManagment.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.statusLabel1,
-            this.statusS1,
-            this.statusLabel2});
-            this.statusBarManagment.Location = new System.Drawing.Point(0, 668);
-            this.statusBarManagment.Name = "statusBarManagment";
-            this.statusBarManagment.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
-            this.statusBarManagment.Size = new System.Drawing.Size(1014, 22);
-            this.statusBarManagment.TabIndex = 3;
-            this.statusBarManagment.Text = "statusStrip1";
-            // 
-            // statusLabel1
-            // 
-            this.statusLabel1.AutoSize = false;
-            this.statusLabel1.BorderStyle = System.Windows.Forms.Border3DStyle.RaisedOuter;
-            this.statusLabel1.Name = "statusLabel1";
-            this.statusLabel1.Size = new System.Drawing.Size(200, 17);
-            this.statusLabel1.Text = "....";
-            this.statusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // statusS1
-            // 
-            this.statusS1.Name = "statusS1";
-            this.statusS1.Size = new System.Drawing.Size(10, 17);
-            this.statusS1.Text = "|";
-            // 
-            // statusLabel2
-            // 
-            this.statusLabel2.Name = "statusLabel2";
-            this.statusLabel2.Size = new System.Drawing.Size(19, 17);
-            this.statusLabel2.Text = "....";
-            this.statusLabel2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // toolBarManagment
-            // 
-            this.toolBarManagment.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolNewNote,
-            this.toolEditNote,
-            this.toolDeleteNote,
-            this.toolStripSeparator1,
-            this.toolPrintReports,
-            this.toolStripSeparator2,
-            this.toolConfiguration});
-            this.toolBarManagment.Location = new System.Drawing.Point(0, 24);
-            this.toolBarManagment.Name = "toolBarManagment";
-            this.toolBarManagment.Size = new System.Drawing.Size(1014, 25);
-            this.toolBarManagment.TabIndex = 4;
-            this.toolBarManagment.Text = "toolStrip1";
-            // 
-            // toolNewNote
-            // 
-            this.toolNewNote.Image = ((System.Drawing.Image)(resources.GetObject("toolNewNote.Image")));
-            this.toolNewNote.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.toolNewNote.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolNewNote.Name = "toolNewNote";
-            this.toolNewNote.Size = new System.Drawing.Size(57, 22);
-            this.toolNewNote.Text = "New  ";
-            this.toolNewNote.ToolTipText = "New note";
-            this.toolNewNote.Click += new System.EventHandler(this.buttonToolBar_Click);
-            // 
-            // toolEditNote
-            // 
-            this.toolEditNote.Image = ((System.Drawing.Image)(resources.GetObject("toolEditNote.Image")));
-            this.toolEditNote.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolEditNote.Name = "toolEditNote";
-            this.toolEditNote.Size = new System.Drawing.Size(53, 22);
-            this.toolEditNote.Text = "Edit  ";
-            this.toolEditNote.ToolTipText = "Edit note";
-            this.toolEditNote.Click += new System.EventHandler(this.buttonToolBar_Click);
-            // 
-            // toolDeleteNote
-            // 
-            this.toolDeleteNote.Image = ((System.Drawing.Image)(resources.GetObject("toolDeleteNote.Image")));
-            this.toolDeleteNote.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDeleteNote.Name = "toolDeleteNote";
-            this.toolDeleteNote.Size = new System.Drawing.Size(66, 22);
-            this.toolDeleteNote.Text = "Delete  ";
-            this.toolDeleteNote.ToolTipText = "Delete note";
-            this.toolDeleteNote.Click += new System.EventHandler(this.buttonToolBar_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolPrintReports
-            // 
-            this.toolPrintReports.Image = ((System.Drawing.Image)(resources.GetObject("toolPrintReports.Image")));
-            this.toolPrintReports.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolPrintReports.Name = "toolPrintReports";
-            this.toolPrintReports.Size = new System.Drawing.Size(58, 22);
-            this.toolPrintReports.Text = "Print  ";
-            this.toolPrintReports.ToolTipText = "Print reports";
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolConfiguration
-            // 
-            this.toolConfiguration.Image = ((System.Drawing.Image)(resources.GetObject("toolConfiguration.Image")));
-            this.toolConfiguration.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolConfiguration.Name = "toolConfiguration";
-            this.toolConfiguration.Size = new System.Drawing.Size(107, 22);
-            this.toolConfiguration.Text = "Configuration  ";
-            this.toolConfiguration.ToolTipText = "Repository configuration";
-            this.toolConfiguration.Click += new System.EventHandler(this.buttonToolBar_Click);
-            // 
-            // panelSupManagment
-            // 
-            this.panelSupManagment.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.panelSupManagment.Controls.Add(this.labelFolderDetail);
-            this.panelSupManagment.Controls.Add(this.labelFolder);
-            this.panelSupManagment.Controls.Add(this.pictureBoxFolder);
-            this.panelSupManagment.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelSupManagment.Location = new System.Drawing.Point(0, 49);
-            this.panelSupManagment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.panelSupManagment.Name = "panelSupManagment";
-            this.panelSupManagment.Size = new System.Drawing.Size(1014, 50);
-            this.panelSupManagment.TabIndex = 5;
-            // 
-            // labelFolderDetail
-            // 
-            this.labelFolderDetail.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelFolderDetail.ForeColor = System.Drawing.Color.White;
-            this.labelFolderDetail.Location = new System.Drawing.Point(58, 26);
-            this.labelFolderDetail.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelFolderDetail.Name = "labelFolderDetail";
-            this.labelFolderDetail.Size = new System.Drawing.Size(920, 22);
-            this.labelFolderDetail.TabIndex = 2;
-            this.labelFolderDetail.Text = "Uncatalog notes folder";
-            this.labelFolderDetail.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labelFolder
-            // 
-            this.labelFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelFolder.ForeColor = System.Drawing.Color.White;
-            this.labelFolder.Location = new System.Drawing.Point(55, 3);
-            this.labelFolder.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelFolder.Name = "labelFolder";
-            this.labelFolder.Size = new System.Drawing.Size(920, 28);
-            this.labelFolder.TabIndex = 1;
-            this.labelFolder.Text = "[ - Not Catalogued ]";
-            this.labelFolder.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // pictureBoxFolder
-            // 
-            this.pictureBoxFolder.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxFolder.Image")));
-            this.pictureBoxFolder.Location = new System.Drawing.Point(8, 5);
-            this.pictureBoxFolder.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.pictureBoxFolder.Name = "pictureBoxFolder";
-            this.pictureBoxFolder.Size = new System.Drawing.Size(42, 39);
-            this.pictureBoxFolder.TabIndex = 0;
-            this.pictureBoxFolder.TabStop = false;
-            // 
-            // splitContainer1
-            // 
-            this.splitContainer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 99);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.splitContainer1.Name = "splitContainer1";
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.BackColor = System.Drawing.SystemColors.Control;
-            this.splitContainer1.Panel1.Controls.Add(this.tabExplorers);
-            this.splitContainer1.Panel1MinSize = 20;
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1014, 569);
-            this.splitContainer1.SplitterDistance = 294;
-            this.splitContainer1.SplitterWidth = 6;
-            this.splitContainer1.TabIndex = 6;
-            // 
-            // tabExplorers
-            // 
-            this.tabExplorers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabExplorers.Controls.Add(this.tabTreeFolders);
-            this.tabExplorers.Controls.Add(this.tabSearch);
-            this.tabExplorers.ImageList = this.imageTabExplorer;
-            this.tabExplorers.Location = new System.Drawing.Point(4, 4);
-            this.tabExplorers.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabExplorers.Name = "tabExplorers";
-            this.tabExplorers.Padding = new System.Drawing.Point(6, 6);
-            this.tabExplorers.SelectedIndex = 0;
-            this.tabExplorers.Size = new System.Drawing.Size(286, 560);
-            this.tabExplorers.TabIndex = 0;
-            this.tabExplorers.SelectedIndexChanged += new System.EventHandler(this.tabExplorers_SelectedIndexChanged);
-            // 
-            // tabTreeFolders
-            // 
-            this.tabTreeFolders.ImageIndex = 0;
-            this.tabTreeFolders.Location = new System.Drawing.Point(4, 30);
-            this.tabTreeFolders.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabTreeFolders.Name = "tabTreeFolders";
-            this.tabTreeFolders.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabTreeFolders.Size = new System.Drawing.Size(278, 526);
-            this.tabTreeFolders.TabIndex = 0;
-            this.tabTreeFolders.Text = "Tree folders  ";
-            this.tabTreeFolders.ToolTipText = "Tree folders view";
-            this.tabTreeFolders.UseVisualStyleBackColor = true;
-            // 
-            // tabSearch
-            // 
-            this.tabSearch.ImageIndex = 1;
-            this.tabSearch.Location = new System.Drawing.Point(4, 30);
-            this.tabSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabSearch.Name = "tabSearch";
-            this.tabSearch.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabSearch.Size = new System.Drawing.Size(278, 526);
-            this.tabSearch.TabIndex = 1;
-            this.tabSearch.Text = "Search  ";
-            this.tabSearch.ToolTipText = "Search panel";
-            this.tabSearch.UseVisualStyleBackColor = true;
-            // 
-            // imageTabExplorer
-            // 
-            this.imageTabExplorer.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageTabExplorer.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageTabExplorer.ImageStream")));
-            this.imageTabExplorer.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageTabExplorer.Images.SetKeyName(0, "folderOpene_16.png");
-            this.imageTabExplorer.Images.SetKeyName(1, "search_16.png");
-            // 
-            // splitContainer2
-            // 
-            this.splitContainer2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.splitContainer2.Name = "splitContainer2";
-            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer2.Panel1
-            // 
-            this.splitContainer2.Panel1.BackColor = System.Drawing.SystemColors.Control;
-            // 
-            // splitContainer2.Panel2
-            // 
-            this.splitContainer2.Panel2.BackColor = System.Drawing.SystemColors.Control;
-            this.splitContainer2.Size = new System.Drawing.Size(714, 569);
-            this.splitContainer2.SplitterDistance = 192;
-            this.splitContainer2.SplitterWidth = 7;
-            this.splitContainer2.TabIndex = 0;
+            menuKntScriptConsole.Name = "menuKntScriptConsole";
+            menuKntScriptConsole.ShortcutKeys = Keys.F6;
+            menuKntScriptConsole.Size = new Size(185, 22);
+            menuKntScriptConsole.Text = "Knt&Script console";
+            menuKntScriptConsole.Click += menu_Click;
             // 
             // menuChat
             // 
-            this.menuChat.Name = "menuChat";
-            this.menuChat.Size = new System.Drawing.Size(185, 22);
-            this.menuChat.Text = "Chat ...";
-            this.menuChat.Click += new System.EventHandler(this.menu_Click);
+            menuChat.Name = "menuChat";
+            menuChat.Size = new Size(185, 22);
+            menuChat.Text = "Chat ...";
+            menuChat.Click += menu_Click;
+            // 
+            // menuKNoteLab
+            // 
+            menuKNoteLab.Name = "menuKNoteLab";
+            menuKNoteLab.ShortcutKeys = Keys.F10;
+            menuKNoteLab.Size = new Size(185, 22);
+            menuKNoteLab.Text = "KaNote &lab ...";
+            menuKNoteLab.Visible = false;
+            menuKNoteLab.Click += menu_Click;
+            // 
+            // menuToolsS2
+            // 
+            menuToolsS2.Name = "menuToolsS2";
+            menuToolsS2.Size = new Size(182, 6);
+            // 
+            // menuOptions
+            // 
+            menuOptions.Name = "menuOptions";
+            menuOptions.Size = new Size(185, 22);
+            menuOptions.Text = "&Options ...";
+            menuOptions.Click += menu_Click;
+            // 
+            // menuHelp
+            // 
+            menuHelp.DropDownItems.AddRange(new ToolStripItem[] { menuHelpDoc, menuAbout });
+            menuHelp.Name = "menuHelp";
+            menuHelp.Size = new Size(24, 20);
+            menuHelp.Text = "&?";
+            // 
+            // menuHelpDoc
+            // 
+            menuHelpDoc.Name = "menuHelpDoc";
+            menuHelpDoc.Size = new Size(119, 22);
+            menuHelpDoc.Text = "&Help ...";
+            menuHelpDoc.Click += menu_Click;
+            // 
+            // menuAbout
+            // 
+            menuAbout.Name = "menuAbout";
+            menuAbout.Size = new Size(119, 22);
+            menuAbout.Text = "&About ...";
+            menuAbout.Click += menu_Click;
+            // 
+            // statusBarManagment
+            // 
+            statusBarManagment.Items.AddRange(new ToolStripItem[] { statusLabel1, statusS1, statusLabel2 });
+            statusBarManagment.Location = new Point(0, 668);
+            statusBarManagment.Name = "statusBarManagment";
+            statusBarManagment.Padding = new Padding(1, 0, 16, 0);
+            statusBarManagment.Size = new Size(1014, 22);
+            statusBarManagment.TabIndex = 3;
+            statusBarManagment.Text = "statusStrip1";
+            // 
+            // statusLabel1
+            // 
+            statusLabel1.AutoSize = false;
+            statusLabel1.BorderStyle = Border3DStyle.RaisedOuter;
+            statusLabel1.Name = "statusLabel1";
+            statusLabel1.Size = new Size(200, 17);
+            statusLabel1.Text = "....";
+            statusLabel1.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // statusS1
+            // 
+            statusS1.Name = "statusS1";
+            statusS1.Size = new Size(10, 17);
+            statusS1.Text = "|";
+            // 
+            // statusLabel2
+            // 
+            statusLabel2.Name = "statusLabel2";
+            statusLabel2.Size = new Size(19, 17);
+            statusLabel2.Text = "....";
+            statusLabel2.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // toolBarManagment
+            // 
+            toolBarManagment.Items.AddRange(new ToolStripItem[] { toolNewNote, toolEditNote, toolDeleteNote, toolStripSeparator1, toolPrintReports, toolStripSeparator2, toolConfiguration });
+            toolBarManagment.Location = new Point(0, 24);
+            toolBarManagment.Name = "toolBarManagment";
+            toolBarManagment.Size = new Size(1014, 25);
+            toolBarManagment.TabIndex = 4;
+            toolBarManagment.Text = "toolStrip1";
+            // 
+            // toolNewNote
+            // 
+            toolNewNote.Image = (Image)resources.GetObject("toolNewNote.Image");
+            toolNewNote.ImageAlign = ContentAlignment.MiddleLeft;
+            toolNewNote.ImageTransparentColor = Color.Magenta;
+            toolNewNote.Name = "toolNewNote";
+            toolNewNote.Size = new Size(57, 22);
+            toolNewNote.Text = "New  ";
+            toolNewNote.ToolTipText = "New note";
+            toolNewNote.Click += buttonToolBar_Click;
+            // 
+            // toolEditNote
+            // 
+            toolEditNote.Image = (Image)resources.GetObject("toolEditNote.Image");
+            toolEditNote.ImageTransparentColor = Color.Magenta;
+            toolEditNote.Name = "toolEditNote";
+            toolEditNote.Size = new Size(53, 22);
+            toolEditNote.Text = "Edit  ";
+            toolEditNote.ToolTipText = "Edit note";
+            toolEditNote.Click += buttonToolBar_Click;
+            // 
+            // toolDeleteNote
+            // 
+            toolDeleteNote.Image = (Image)resources.GetObject("toolDeleteNote.Image");
+            toolDeleteNote.ImageTransparentColor = Color.Magenta;
+            toolDeleteNote.Name = "toolDeleteNote";
+            toolDeleteNote.Size = new Size(66, 22);
+            toolDeleteNote.Text = "Delete  ";
+            toolDeleteNote.ToolTipText = "Delete note";
+            toolDeleteNote.Click += buttonToolBar_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(6, 25);
+            // 
+            // toolPrintReports
+            // 
+            toolPrintReports.Image = (Image)resources.GetObject("toolPrintReports.Image");
+            toolPrintReports.ImageTransparentColor = Color.Magenta;
+            toolPrintReports.Name = "toolPrintReports";
+            toolPrintReports.Size = new Size(58, 22);
+            toolPrintReports.Text = "Print  ";
+            toolPrintReports.ToolTipText = "Print reports";
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(6, 25);
+            // 
+            // toolConfiguration
+            // 
+            toolConfiguration.Image = (Image)resources.GetObject("toolConfiguration.Image");
+            toolConfiguration.ImageTransparentColor = Color.Magenta;
+            toolConfiguration.Name = "toolConfiguration";
+            toolConfiguration.Size = new Size(107, 22);
+            toolConfiguration.Text = "Configuration  ";
+            toolConfiguration.ToolTipText = "Repository configuration";
+            toolConfiguration.Click += buttonToolBar_Click;
+            // 
+            // panelSupManagment
+            // 
+            panelSupManagment.BackColor = SystemColors.ControlDarkDark;
+            panelSupManagment.Controls.Add(labelFolderDetail);
+            panelSupManagment.Controls.Add(labelFolder);
+            panelSupManagment.Controls.Add(pictureBoxFolder);
+            panelSupManagment.Dock = DockStyle.Top;
+            panelSupManagment.Location = new Point(0, 49);
+            panelSupManagment.Margin = new Padding(4, 3, 4, 3);
+            panelSupManagment.Name = "panelSupManagment";
+            panelSupManagment.Size = new Size(1014, 50);
+            panelSupManagment.TabIndex = 5;
+            // 
+            // labelFolderDetail
+            // 
+            labelFolderDetail.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelFolderDetail.ForeColor = Color.White;
+            labelFolderDetail.Location = new Point(58, 26);
+            labelFolderDetail.Margin = new Padding(4, 0, 4, 0);
+            labelFolderDetail.Name = "labelFolderDetail";
+            labelFolderDetail.Size = new Size(920, 22);
+            labelFolderDetail.TabIndex = 2;
+            labelFolderDetail.Text = "Uncatalog notes folder";
+            labelFolderDetail.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // labelFolder
+            // 
+            labelFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelFolder.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            labelFolder.ForeColor = Color.White;
+            labelFolder.Location = new Point(55, 3);
+            labelFolder.Margin = new Padding(4, 0, 4, 0);
+            labelFolder.Name = "labelFolder";
+            labelFolder.Size = new Size(920, 28);
+            labelFolder.TabIndex = 1;
+            labelFolder.Text = "[ - Not Catalogued ]";
+            labelFolder.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // pictureBoxFolder
+            // 
+            pictureBoxFolder.Image = (Image)resources.GetObject("pictureBoxFolder.Image");
+            pictureBoxFolder.Location = new Point(8, 5);
+            pictureBoxFolder.Margin = new Padding(4, 3, 4, 3);
+            pictureBoxFolder.Name = "pictureBoxFolder";
+            pictureBoxFolder.Size = new Size(42, 39);
+            pictureBoxFolder.TabIndex = 0;
+            pictureBoxFolder.TabStop = false;
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.BorderStyle = BorderStyle.FixedSingle;
+            splitContainer1.Dock = DockStyle.Fill;
+            splitContainer1.Location = new Point(0, 99);
+            splitContainer1.Margin = new Padding(4, 3, 4, 3);
+            splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.BackColor = SystemColors.Control;
+            splitContainer1.Panel1.Controls.Add(tabExplorers);
+            splitContainer1.Panel1MinSize = 20;
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(splitContainer2);
+            splitContainer1.Size = new Size(1014, 569);
+            splitContainer1.SplitterDistance = 294;
+            splitContainer1.SplitterWidth = 6;
+            splitContainer1.TabIndex = 6;
+            // 
+            // tabExplorers
+            // 
+            tabExplorers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabExplorers.Controls.Add(tabTreeFolders);
+            tabExplorers.Controls.Add(tabSearch);
+            tabExplorers.ImageList = imageTabExplorer;
+            tabExplorers.Location = new Point(4, 4);
+            tabExplorers.Margin = new Padding(4, 3, 4, 3);
+            tabExplorers.Name = "tabExplorers";
+            tabExplorers.Padding = new Point(6, 6);
+            tabExplorers.SelectedIndex = 0;
+            tabExplorers.Size = new Size(286, 560);
+            tabExplorers.TabIndex = 0;
+            tabExplorers.SelectedIndexChanged += tabExplorers_SelectedIndexChanged;
+            // 
+            // tabTreeFolders
+            // 
+            tabTreeFolders.ImageIndex = 0;
+            tabTreeFolders.Location = new Point(4, 30);
+            tabTreeFolders.Margin = new Padding(4, 3, 4, 3);
+            tabTreeFolders.Name = "tabTreeFolders";
+            tabTreeFolders.Padding = new Padding(4, 3, 4, 3);
+            tabTreeFolders.Size = new Size(278, 526);
+            tabTreeFolders.TabIndex = 0;
+            tabTreeFolders.Text = "Tree folders  ";
+            tabTreeFolders.ToolTipText = "Tree folders view";
+            tabTreeFolders.UseVisualStyleBackColor = true;
+            // 
+            // tabSearch
+            // 
+            tabSearch.ImageIndex = 1;
+            tabSearch.Location = new Point(4, 30);
+            tabSearch.Margin = new Padding(4, 3, 4, 3);
+            tabSearch.Name = "tabSearch";
+            tabSearch.Padding = new Padding(4, 3, 4, 3);
+            tabSearch.Size = new Size(278, 526);
+            tabSearch.TabIndex = 1;
+            tabSearch.Text = "Search  ";
+            tabSearch.ToolTipText = "Search panel";
+            tabSearch.UseVisualStyleBackColor = true;
+            // 
+            // imageTabExplorer
+            // 
+            imageTabExplorer.ColorDepth = ColorDepth.Depth8Bit;
+            imageTabExplorer.ImageStream = (ImageListStreamer)resources.GetObject("imageTabExplorer.ImageStream");
+            imageTabExplorer.TransparentColor = Color.Transparent;
+            imageTabExplorer.Images.SetKeyName(0, "folderOpene_16.png");
+            imageTabExplorer.Images.SetKeyName(1, "search_16.png");
+            // 
+            // splitContainer2
+            // 
+            splitContainer2.BorderStyle = BorderStyle.FixedSingle;
+            splitContainer2.Dock = DockStyle.Fill;
+            splitContainer2.Location = new Point(0, 0);
+            splitContainer2.Margin = new Padding(4, 3, 4, 3);
+            splitContainer2.Name = "splitContainer2";
+            splitContainer2.Orientation = Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            splitContainer2.Panel1.BackColor = SystemColors.Control;
+            // 
+            // splitContainer2.Panel2
+            // 
+            splitContainer2.Panel2.BackColor = SystemColors.Control;
+            splitContainer2.Size = new Size(714, 569);
+            splitContainer2.SplitterDistance = 192;
+            splitContainer2.SplitterWidth = 7;
+            splitContainer2.TabIndex = 0;
+            // 
+            // menuChatGPT
+            // 
+            menuChatGPT.Name = "menuChatGPT";
+            menuChatGPT.Size = new Size(185, 22);
+            menuChatGPT.Text = "ChatGPT ...";
+            menuChatGPT.Click += menu_Click;
             // 
             // KNoteManagmentForm
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
-            this.ClientSize = new System.Drawing.Size(1014, 690);
-            this.Controls.Add(this.splitContainer1);
-            this.Controls.Add(this.panelSupManagment);
-            this.Controls.Add(this.toolBarManagment);
-            this.Controls.Add(this.statusBarManagment);
-            this.Controls.Add(this.menuMangment);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.Name = "KNoteManagmentForm";
-            this.Text = "KaNote Managment";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KNoteManagmentForm_FormClosing);
-            this.Load += new System.EventHandler(this.KNoteManagmentForm_Load);
-            this.menuMangment.ResumeLayout(false);
-            this.menuMangment.PerformLayout();
-            this.statusBarManagment.ResumeLayout(false);
-            this.statusBarManagment.PerformLayout();
-            this.toolBarManagment.ResumeLayout(false);
-            this.toolBarManagment.PerformLayout();
-            this.panelSupManagment.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFolder)).EndInit();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.tabExplorers.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
-            this.splitContainer2.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleMode = AutoScaleMode.Inherit;
+            ClientSize = new Size(1014, 690);
+            Controls.Add(splitContainer1);
+            Controls.Add(panelSupManagment);
+            Controls.Add(toolBarManagment);
+            Controls.Add(statusBarManagment);
+            Controls.Add(menuMangment);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            KeyPreview = true;
+            Margin = new Padding(4, 3, 4, 3);
+            Name = "KNoteManagmentForm";
+            Text = "KaNote Managment";
+            FormClosing += KNoteManagmentForm_FormClosing;
+            Load += KNoteManagmentForm_Load;
+            menuMangment.ResumeLayout(false);
+            menuMangment.PerformLayout();
+            statusBarManagment.ResumeLayout(false);
+            statusBarManagment.PerformLayout();
+            toolBarManagment.ResumeLayout(false);
+            toolBarManagment.PerformLayout();
+            panelSupManagment.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pictureBoxFolder).EndInit();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            tabExplorers.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
+            splitContainer2.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private System.Windows.Forms.MenuStrip menuMangment;
@@ -918,5 +859,6 @@
         private System.Windows.Forms.ToolStripSeparator menuViewS1;
         private ToolStripMenuItem menuToolbarVisible;
         private ToolStripMenuItem menuChat;
+        private ToolStripMenuItem menuChatGPT;
     }
 }
