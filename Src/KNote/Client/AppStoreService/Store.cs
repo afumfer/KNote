@@ -1,4 +1,6 @@
 ﻿using KNote.Client.AppStoreService.ClientDataServices;
+using KNote.Client.AppStoreService.ClientDataServices.Interfaces;
+using KNote.Client.AppStoreService.ClientDataServices.Services;
 using KNote.Client.Helpers;
 using Microsoft.AspNetCore.Components;
 
@@ -28,17 +30,6 @@ public class Store : IStore
 
     public AppState AppState { get; }
 
-    private IUserWebApiService? _users;
-    public IUserWebApiService Users
-    {
-        get
-        {
-            if (_users == null)
-                _users = new UserWebApiService(AppState, _httpClient);
-            return _users;
-        }
-    }
-
     public void NavigateTo(string uri)
     {
         _navigationManager.NavigateTo(uri);
@@ -53,6 +44,17 @@ public class Store : IStore
     public Dictionary<string, string> GetQueryStrings(string url)
     {                
         return  _navigationManager.GetQueryStrings(url);
+    }
+
+    private IUserWebApiService? _users;
+    public IUserWebApiService Users
+    {
+        get
+        {
+            if (_users == null)
+                _users = new UserWebApiService(AppState, _httpClient);
+            return _users;
+        }
     }
 
     private INoteTypeWebApiService? _noteTypes;
@@ -98,6 +100,18 @@ public class Store : IStore
             return _notes;
         }
     }
+
+    private IChatGPTService? _chatGPT;
+    public IChatGPTService ChatGPT
+    {
+        get
+        {
+            if (_chatGPT == null)
+                _chatGPT = new ChatGPTService(AppState, _httpClient);
+            return _chatGPT;
+        }
+    }
+
 
     #endregion
 

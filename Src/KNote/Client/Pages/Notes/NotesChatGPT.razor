@@ -1,0 +1,203 @@
+﻿@page "/chatGPT"
+
+@inject IStore store
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+
+@implements IDisposable
+
+@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]
+
+<div class="container-fluid border">
+    <div class="row">
+        <KntIndexHeader TextHead="ChatGPT room">
+            <IndexMenu>
+            </IndexMenu>
+        </KntIndexHeader>
+    </div>
+</div>
+
+
+<style>
+    /* improved CSS for speech bubbles */
+    .assistant, .user {
+        position: relative;
+        font-family: arial;
+        font-size: 1.1em;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .assistant:after, .user:after {
+        content: '';
+        border: 20px solid transparent;
+        position: absolute;
+        margin-top: -30px;
+    }
+
+    .user {
+        margin-left: 20%;
+        margin-right: 100px;
+        top: 30%;
+        text-align: right;
+    }
+
+    .assistant {
+        margin-left: 100px;
+        margin-right: 20%;
+    }
+
+    .user:after {
+        border-left-color: lightgray; /*#D3D3D3;*/
+        border-right: 0;
+        right: -20px;
+    }
+
+    .assistant:after {
+        border-right-color: dimgray; /*#808080;*/
+        border-left: 0;
+        left: -20px;
+    }
+
+    .msg {
+        font-size: medium;
+    }
+</style>
+
+@*<p style="font-size:small"><b>Total Tokens:</b> @TotalTokens</p>*@
+<div class="mt-3" id="chatcontainer" style="height:85%; width:100%; overflow: scroll;">
+    @foreach (var item in messages)
+    {
+        <div>
+            @if (item.Role == "user")
+            {
+                <div style="float: right; margin-right: 20px; margin-top: 10px">
+                    <b>Human</b>
+                </div>
+                <div class="@item.Role rz-background-color-base-300 rz-color-base-900">
+                    <div class="msg">
+                        <ViewMarkdown MarkdownContent="@item.Prompt" />
+@*                        <br /><br />
+                        <div style="font-size:xx-small;"><i><b>(@item.Tokens)</b> Tokens</i></div>*@
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div style="float: left; margin-left: 20px; margin-top: 10px">
+                    <b>ChatGPT&nbsp;&nbsp;</b>
+                </div>
+                <div class="@item.Role rz-background-color-base-700 rz-color-base-100">
+                    <div class="msg">
+                        <ViewMarkdown MarkdownContent="@item.Prompt" />
+@*                        <br /><br />
+                        <div style="font-size:xx-small;"><i><b>(@item.Tokens)</b> Tokens</i></div>*@
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+@if (!processing)
+{
+    <div class="row pt-2">
+        <div class="col-9 mb-2">
+            <input type="text" class="form-control" @bind-value="promptInput" @bind-value:event="oninput"
+               @onkeypress="@((KeyboardEventArgs e) => PromptKeyPress(e))"
+                   placeholder="Prompt  ..." />
+        </div>
+        <div class="col-3 mb-2">
+            <RadzenButton Text="Call ChatGPT" Click="() => CallChatGPT()" ButtonStyle="ButtonStyle.Primary" Class="mr-1" />
+            <RadzenButton Text="Restart" Click="() => RestartChatGPT()" ButtonStyle="ButtonStyle.Secondary" Class="mr-0" />
+        </div>
+    </div>
+}
+else
+{
+    <br>
+    <h4>Processing...</h4>
+}
+<br /><p style="color:red">@errorMessage</p>
+
+
+
+@code
+{
+    private List<ChatMessage> messages = new List<ChatMessage>();
+    private string? userInput;
+    private string? promptInput;
+    string errorMessage = "";
+    bool processing = false;
+    int totalTokens = 0;
+
+    protected override void OnInitialized()
+    {
+        store.AppState.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            await jsRuntime.InvokeAsync<string>("ScrollToBottom", "chatcontainer");
+        }
+        catch
+        {
+            // do nothing if this fails
+        }
+    }
+
+    public void Dispose()
+    {
+        store.AppState.OnChange -= StateHasChanged;
+    }
+
+    protected async Task CallChatGPT()
+    {
+        processing = true;
+        StateHasChanged();
+
+        var result = await store.ChatGPT.PostAsync(promptInput);
+
+        if (result.IsValid)
+        {
+            messages.Add(
+                new ChatMessage
+                    {
+                        Prompt = promptInput,
+                        Role = "user",
+                        Tokens = 0
+                    });
+            messages.Add(
+                new ChatMessage
+                {
+                    Prompt = result.Entity,
+                    Role = "assistant",
+                    Tokens = 0
+                });
+        }
+
+        promptInput = "";
+        processing = false;
+        StateHasChanged();
+    }
+
+    private async Task PromptKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await CallChatGPT();
+        }
+    }
+
+    void RestartChatGPT()
+    {
+        promptInput = "";
+        messages = new List<ChatMessage>();
+        totalTokens = 0;
+        errorMessage = "";
+        StateHasChanged();
+    }
+
+}

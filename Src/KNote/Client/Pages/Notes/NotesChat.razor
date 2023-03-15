@@ -2,7 +2,7 @@
 
 @using Microsoft.AspNetCore.SignalR.Client
 
-@inject NavigationManager NavigationManager
+@inject NavigationManager navigationManager
 
 @implements IDisposable
 
@@ -23,7 +23,7 @@
             <Authorized>
                 <RadzenCard>
                     <div class="form-group text-right">
-                        <label>@(userInput = context.User.Identity.Name)</label>
+                        <label>@(userInput = context?.User?.Identity?.Name)</label>
                     </div>
 
                     <div class="form-group">
@@ -51,15 +51,15 @@
 
 @code
 {
-    private HubConnection hubConnection;
+    private HubConnection hubConnection = null!;
     private List<string> Messages = new List<string>();
-    private string userInput;
-    private string messageInput;
+    private string? userInput;
+    private string? messageInput;
 
     protected override async Task OnInitializedAsync()
     {        
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("chathub"))
+            .WithUrl(navigationManager.ToAbsoluteUri("chathub"))
             .Build();
 
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
