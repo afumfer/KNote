@@ -3,6 +3,7 @@
 @inject IStore store
 @inject NavigationManager navigationManager
 @inject IJSRuntime jsRuntime
+@inject TooltipService tooltipService
 
 @implements IDisposable
 
@@ -65,8 +66,8 @@
     }
 </style>
 
-@*<p style="font-size:small"><b>Total Tokens:</b> @TotalTokens</p>*@
-<div class="mt-3" id="chatcontainer" style="height:85%; width:100%; overflow: scroll;">
+<p class="mt-2 ml-2" style="font-size:small"><b>Total Tokens:</b> @totalTokens</p>
+<div class="mt-3" id="chatcontainer" style="height:82%; width:100%; overflow: scroll;">
     @foreach (var item in messages)
     {
         <div>
@@ -78,8 +79,15 @@
                 <div class="@item.Role rz-background-color-base-300 rz-color-base-900">
                     <div class="msg">
                         <ViewMarkdown MarkdownContent="@item.Prompt" />
-@*                        <br /><br />
-                        <div style="font-size:xx-small;"><i><b>(@item.Tokens)</b> Tokens</i></div>*@
+                        <br />
+                        @if (item.Tokens == 0)
+                        {
+                            <div style="font-size:xx-small;"><i>... </i></div>                            
+                        }
+                        else
+                        {
+                            <div style="font-size:xx-small;"><i><b>(@item.Tokens)</b> Tokens</i></div>                            
+                        }
                     </div>
                 </div>
             }
@@ -91,8 +99,8 @@
                 <div class="@item.Role rz-background-color-base-700 rz-color-base-100">
                     <div class="msg">
                         <ViewMarkdown MarkdownContent="@item.Prompt" />
-@*                        <br /><br />
-                        <div style="font-size:xx-small;"><i><b>(@item.Tokens)</b> Tokens</i></div>*@
+                        <br />
+                        <div style="font-size:xx-small;"><i><b>(@item.Tokens)</b> Tokens</i></div>
                     </div>
                 </div>
             }
@@ -102,14 +110,16 @@
 @if (!processing)
 {
     <div class="row pt-2">
-        <div class="col-9 mb-2">
+        <div class="col-10 mb-2">
             <input type="text" class="form-control" @bind-value="promptInput" @bind-value:event="oninput"
                @onkeypress="@((KeyboardEventArgs e) => PromptKeyPress(e))"
                    placeholder="Prompt  ..." />
         </div>
-        <div class="col-3 mb-2">
-            <RadzenButton Text="Call ChatGPT" Click="() => CallChatGPT()" ButtonStyle="ButtonStyle.Primary" Class="mr-1" />
-            <RadzenButton Text="Restart" Click="() => RestartChatGPT()" ButtonStyle="ButtonStyle.Secondary" Class="mr-0" />
+        <div class="col-2 mb-2">
+            <RadzenButton Icon="send" Click="() => CallChatGPT()" ButtonStyle="ButtonStyle.Primary" Class="mr-1"
+                      MouseEnter="@(args => tooltipService.Open(args, "Call ChatGPT", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+            <RadzenButton Icon="cleaning_services" Click="() => RestartChatGPT()" ButtonStyle="ButtonStyle.Secondary" Class="mr-0"
+                      MouseEnter="@(args => tooltipService.Open(args, "Restart", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
         </div>
     </div>
 }
@@ -118,7 +128,8 @@ else
     <br>
     <h4>Processing...</h4>
 }
-<br /><p style="color:red">@errorMessage</p>
+<br />
+<p style="color:red">@errorMessage</p>
 
 
 
@@ -158,26 +169,22 @@ else
         processing = true;
         StateHasChanged();
 
-        var result = await store.ChatGPT.PostAsync(promptInput);
+        if (string.IsNullOrEmpty(promptInput))
+            return;
+
+        var result = await store.ChatGPT.PostAsync(messages, promptInput);
 
         if (result.IsValid)
         {
             messages.Add(
                 new ChatMessage
-                    {
-                        Prompt = promptInput,
-                        Role = "user",
-                        Tokens = 0
-                    });
-            messages.Add(
-                new ChatMessage
                 {
-                    Prompt = result.Entity,
-                    Role = "assistant",
-                    Tokens = 0
+                    Prompt = result.Entity.Prompt,
+                    Role = result.Entity.Role,
+                    Tokens = result.Entity.CompletionTokens
                 });
+            totalTokens = totalTokens + result.Entity.TotalTokens;
         }
-
         promptInput = "";
         processing = false;
         StateHasChanged();

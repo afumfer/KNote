@@ -5,5 +5,5 @@ namespace KNote.Client.AppStoreService.ClientDataServices.Interfaces;
 
 public interface IChatGPTService
 {
-    Task<Result<string>> PostAsync(string? prompt);
+    Task<Result<ChatMessageOutput>> PostAsync(List<ChatMessage> context, string prompt);
 }

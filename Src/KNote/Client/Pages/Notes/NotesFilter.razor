@@ -60,10 +60,10 @@
 </RadzenCard>
 
 @code {        
-    private List<NoteInfoDto> notes = new List<NoteInfoDto>();
+    private List<NoteInfoDto>? notes = new List<NoteInfoDto>();
     private NotesFilterDto filter = new NotesFilterDto();
     private PaginationContext paginationContext = new PaginationContext();
-    private RadzenPager pager;
+    private RadzenPager? pager;
     private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";    
     private int viewMode = 0;
     private bool componentInitialized = false;
@@ -85,7 +85,8 @@
         filter = f;
         await SelectedPage(1);
         if(componentInitialized)
-            await pager.GoToPage(0);
+            if (pager != null)
+                await pager.GoToPage(0);
     }
 
     private async Task PageChanged(PagerEventArgs args)

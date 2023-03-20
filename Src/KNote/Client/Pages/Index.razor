@@ -12,7 +12,7 @@
 @*@attribute [Authorize(Roles = "Public, Staff, ProjecManager, Admin")]*@
 
 <div>
-    <h3>@appState.AppName home page</h3>
+    <h3>@store.AppState.AppName home page</h3>
     <p><i>@appInfo</i></p>
     
 </div>
@@ -28,22 +28,21 @@
 
 @code {    
 
-    private List<NoteInfoDto> notes;    
-    private string appInfo;
-    private AppState appState;
+    private List<NoteInfoDto>? notes;    
+    private string? appInfo;
+   
 
     protected override async Task OnInitializedAsync()
-    {
-        appState = store.AppState;
-        appState.OnChange += StateHasChanged;
+    {        
+        store.AppState.OnChange += StateHasChanged;
 
-        appInfo = $"{appState.AppDescription} ({appState.AppVersion})";
+        appInfo = $"{store.AppState.AppDescription} ({store.AppState.AppVersion})";
         await LoadNotes();
     }
 
     public void Dispose()
     {
-        appState.OnChange -= StateHasChanged;
+        store.AppState.OnChange -= StateHasChanged;
     }
 
     private async Task LoadNotes()

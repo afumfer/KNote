@@ -66,13 +66,13 @@
 
 
 @code {
-    private List<NoteInfoDto> notes;        
+    private List<NoteInfoDto>? notes;        
     private int viewMode = 0;
     private string textSearch = "";
     private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
     private PaginationContext paginationContext = new PaginationContext();
     private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
-    private RadzenPager pager;
+    private RadzenPager? pager;
     private bool componentInitialized = false;
 
     protected override async Task OnInitializedAsync()
@@ -119,7 +119,7 @@
     private string BuildQueryStrings()
     {
         if (queryStringsDict == null) { queryStringsDict = new Dictionary<string, string>(); }
-        queryStringsDict["textSearch"] = textSearch?.ToString();
+        queryStringsDict["textSearch"] = textSearch.ToString();
         queryStringsDict["pageNumber"] = paginationContext.CurrentPage.ToString();
         queryStringsDict["pageSize"] = paginationContext.PageSize.ToString();
 
@@ -141,7 +141,8 @@
     {
         paginationContext.CurrentPage = 1;
         if(componentInitialized)
-            await pager.GoToPage(0);        
+            if(pager != null)
+                await pager.GoToPage(0);        
         await LoadListNotes();
     }
 

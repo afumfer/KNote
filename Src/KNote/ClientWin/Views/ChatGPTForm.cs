@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using KNote.Model;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace KNote.ClientWin.Views
 {
@@ -23,13 +24,14 @@ namespace KNote.ClientWin.Views
         private Store _store;
         private OpenAIClient _openAIClient;
 
-        string Organization = "";
-        string ApiKey = "";
-        List<ChatMessage> messages = new List<ChatMessage>();
-        string prompt = "";
-        string ErrorMessage = "";
-        bool Processing = false;
-        int TotalTokens = 0;
+        private string Organization = "";
+        private string ApiKey = "";
+        private List<ChatMessage> chatMessages = new List<ChatMessage>();
+        private string prompt = "";
+        private StringBuilder chatTextMessasges = new StringBuilder();
+        //private string ErrorMessage = "";
+        //private bool Processing = false;
+        private int TotalTokens = 0;
 
         public ChatGPTForm()
         {
@@ -61,36 +63,30 @@ namespace KNote.ClientWin.Views
 
         private async void buttonSend_Click(object sender, EventArgs e)
         {
+            //Processing = true;
+            //ErrorMessage = "";
 
             try
             {
-                Processing = true;
-                ErrorMessage = "";
-
                 prompt = textPrompt.Text;
-                textResult.Text = "";
 
                 var chatPrompts = new List<ChatPrompt>();
 
                 // -------------
                 chatPrompts.Add(new ChatPrompt("system", "You are helpful Assistant"));
                 // Add all existing messages to chatPrompts
-                foreach (var item in messages)
+                foreach (var item in chatMessages)
                 {
                     chatPrompts.Add(new ChatPrompt(item.Role, item.Prompt));
                 }
                 // ---------------
 
-                // Add the new message to chatPrompts
                 chatPrompts.Add(new ChatPrompt("user", prompt));
-                // Call ChatGPT
-                // Create a new ChatRequest object with the chat prompts and pass
-                // it to the API's GetCompletionAsync method
-                var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT3_5_Turbo);
+                var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
+
                 var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
-                // Create a new Message object with the user's prompt and other
-                // details and add it to the messages list
-                messages.Add(new ChatMessage
+
+                chatMessages.Add(new ChatMessage
                 {
                     Prompt = prompt,
                     Role = "user",
@@ -98,7 +94,7 @@ namespace KNote.ClientWin.Views
                 });
                 // Create a new Message object with the response and other details
                 // and add it to the messages list
-                messages.Add(new ChatMessage
+                chatMessages.Add(new ChatMessage
                 {
                     Prompt = result.FirstChoice.Message,
                     Role = "assistant",
@@ -107,13 +103,30 @@ namespace KNote.ClientWin.Views
                 // Update the total number of tokens used by the API
                 TotalTokens = TotalTokens + result.Usage.TotalTokens;
 
-                textResult.Text = result.FirstChoice.Message;
+                chatTextMessasges.Append($"\r\n");
+                chatTextMessasges.Append($">> User:\r\n");
+                chatTextMessasges.Append($"{prompt}\r\n");
+                chatTextMessasges.Append($"\r\n");
+                chatTextMessasges.Append($">> Assistant:\r\n");
+                chatTextMessasges.Append(result.FirstChoice.Message.ToString().Replace("\n", "\r\n"));
+                chatTextMessasges.Append($"\r\n");
+                chatTextMessasges.Append($"\r\n");
+                textResult.Text = chatTextMessasges.ToString();                
+                textResult.SelectionStart = textResult.Text.Length;
+                textResult.ScrollToCaret();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                //throw;
+                //throw;                
+                // ErrorMessage = "ex.Message";
+
             }
+            //finally 
+            //{
+            //    Processing = true;             
+            //}
+
         }
 
         private void buttonRestart_Click(object sender, EventArgs e)
@@ -123,10 +136,13 @@ namespace KNote.ClientWin.Views
 
         private void RestartChatGPT()
         {
-            prompt = "Write a 10 word description of OpenAI ChatGPT";
-            messages = new List<ChatMessage>();
+            prompt = "";
+            chatMessages = new List<ChatMessage>();
             TotalTokens = 0;
-            ErrorMessage = "";
+            chatTextMessasges.Clear();
+            textResult.Text = chatTextMessasges.ToString();
+            textPrompt.Text = "";
+            //ErrorMessage = "";
         }
 
     }

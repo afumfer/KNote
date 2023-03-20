@@ -40,7 +40,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(6, 55);
+            label3.Location = new Point(10, 9);
             label3.Name = "label3";
             label3.Size = new Size(42, 15);
             label3.TabIndex = 19;
@@ -48,8 +48,9 @@
             // 
             // label2
             // 
+            label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             label2.AutoSize = true;
-            label2.Location = new Point(6, 15);
+            label2.Location = new Point(10, 488);
             label2.Name = "label2";
             label2.Size = new Size(50, 15);
             label2.TabIndex = 18;
@@ -57,16 +58,16 @@
             // 
             // textPrompt
             // 
-            textPrompt.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textPrompt.Location = new Point(68, 15);
+            textPrompt.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textPrompt.Location = new Point(72, 484);
             textPrompt.Name = "textPrompt";
             textPrompt.Size = new Size(607, 23);
             textPrompt.TabIndex = 16;
             // 
             // buttonSend
             // 
-            buttonSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSend.Location = new Point(681, 11);
+            buttonSend.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonSend.Location = new Point(685, 480);
             buttonSend.Name = "buttonSend";
             buttonSend.Size = new Size(61, 29);
             buttonSend.TabIndex = 17;
@@ -77,18 +78,19 @@
             // textResult
             // 
             textResult.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textResult.Location = new Point(12, 73);
+            textResult.Location = new Point(10, 27);
             textResult.Multiline = true;
             textResult.Name = "textResult";
-            textResult.Size = new Size(797, 436);
+            textResult.ScrollBars = ScrollBars.Vertical;
+            textResult.Size = new Size(803, 436);
             textResult.TabIndex = 20;
             // 
             // buttonRestart
             // 
-            buttonRestart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonRestart.Location = new Point(748, 12);
+            buttonRestart.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonRestart.Location = new Point(752, 480);
             buttonRestart.Name = "buttonRestart";
-            buttonRestart.Size = new Size(61, 29);
+            buttonRestart.Size = new Size(61, 27);
             buttonRestart.TabIndex = 21;
             buttonRestart.Text = "Restart";
             buttonRestart.UseVisualStyleBackColor = true;

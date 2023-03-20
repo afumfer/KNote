@@ -1,7 +1,6 @@
-﻿@using System.IO
+﻿@page "/testpage"
 
-@page "/testpage"
-
+@using System.IO
 @using KNote.Model
 
 @implements IDisposable
@@ -155,18 +154,18 @@
 
 
 @code {
-    private WeatherForecast[] forecasts;
+    private WeatherForecast[]? forecasts;
     private List<FolderInfoDto> folders = new List<FolderInfoDto>();
     private List<FolderDto> foldersFull = new List<FolderDto>();
-    private string[] settings;
+    private string[]? settings;
     private int selectedPanel = 1;
     private string message = "";
     private AppState appState;
 
     IEnumerable<FolderInfoDto> entries2 = new List<FolderInfoDto>();
 
-    object selectedNode = null;    
-    IEnumerable<string> entries;
+    object selectedNode = null!;    
+    IEnumerable<string>? entries;
 
     protected override async Task OnInitializedAsync()
     {

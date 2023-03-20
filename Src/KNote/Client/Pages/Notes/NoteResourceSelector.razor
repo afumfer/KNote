@@ -35,14 +35,14 @@
 </div>
 
 @code {
-    private ResourceInfoDto resource;
-    private string resourceFlowControl = "0";
+    private ResourceInfoDto resource = new ResourceInfoDto();
+    private string? resourceFlowControl = "0";
 
-    protected override Task OnInitializedAsync()
-    {
-        resource = new ResourceInfoDto();
-        return base.OnInitializedAsync();
-    }
+    //protected override Task OnInitializedAsync()
+    //{
+    //    resource = new ResourceInfoDto();
+    //    return base.OnInitializedAsync();
+    //}
 
     private void OnFileSelected(KntFileInfo file)
     {
