@@ -29,49 +29,55 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChatGPTForm));
-            label3 = new Label();
-            label2 = new Label();
+            labelResult = new Label();
+            labelPrompt = new Label();
             textPrompt = new TextBox();
             buttonSend = new Button();
             textResult = new TextBox();
             buttonRestart = new Button();
+            statusStripChat = new StatusStrip();
+            toolStripStatusLabelTokens = new ToolStripStatusLabel();
+            toolStripStatusLabelProcessingTime = new ToolStripStatusLabel();
+            toolStripStatusLabelProcessing = new ToolStripStatusLabel();
+            toolStripStatusLabel1 = new ToolStripStatusLabel();
+            statusStripChat.SuspendLayout();
             SuspendLayout();
             // 
-            // label3
+            // labelResult
             // 
-            label3.AutoSize = true;
-            label3.Location = new Point(10, 9);
-            label3.Name = "label3";
-            label3.Size = new Size(42, 15);
-            label3.TabIndex = 19;
-            label3.Text = "Result:";
+            labelResult.AutoSize = true;
+            labelResult.Location = new Point(10, 9);
+            labelResult.Name = "labelResult";
+            labelResult.Size = new Size(42, 15);
+            labelResult.TabIndex = 19;
+            labelResult.Text = "Result:";
             // 
-            // label2
+            // labelPrompt
             // 
-            label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            label2.AutoSize = true;
-            label2.Location = new Point(10, 488);
-            label2.Name = "label2";
-            label2.Size = new Size(50, 15);
-            label2.TabIndex = 18;
-            label2.Text = "Prompt:";
+            labelPrompt.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            labelPrompt.AutoSize = true;
+            labelPrompt.Location = new Point(6, 477);
+            labelPrompt.Name = "labelPrompt";
+            labelPrompt.Size = new Size(50, 15);
+            labelPrompt.TabIndex = 18;
+            labelPrompt.Text = "Prompt:";
             // 
             // textPrompt
             // 
             textPrompt.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textPrompt.Location = new Point(72, 484);
+            textPrompt.Location = new Point(68, 473);
             textPrompt.Name = "textPrompt";
-            textPrompt.Size = new Size(607, 23);
+            textPrompt.Size = new Size(625, 23);
             textPrompt.TabIndex = 16;
             // 
             // buttonSend
             // 
             buttonSend.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonSend.Location = new Point(685, 480);
+            buttonSend.Location = new Point(699, 469);
             buttonSend.Name = "buttonSend";
-            buttonSend.Size = new Size(61, 29);
+            buttonSend.Size = new Size(53, 27);
             buttonSend.TabIndex = 17;
-            buttonSend.Text = "Send";
+            buttonSend.Text = "&Send";
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;
             // 
@@ -88,40 +94,81 @@
             // buttonRestart
             // 
             buttonRestart.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonRestart.Location = new Point(752, 480);
+            buttonRestart.Location = new Point(758, 469);
             buttonRestart.Name = "buttonRestart";
-            buttonRestart.Size = new Size(61, 27);
+            buttonRestart.Size = new Size(55, 27);
             buttonRestart.TabIndex = 21;
-            buttonRestart.Text = "Restart";
+            buttonRestart.Text = "&Restart";
             buttonRestart.UseVisualStyleBackColor = true;
             buttonRestart.Click += buttonRestart_Click;
+            // 
+            // statusStripChat
+            // 
+            statusStripChat.Items.AddRange(new ToolStripItem[] { toolStripStatusLabelTokens, toolStripStatusLabelProcessingTime, toolStripStatusLabel1, toolStripStatusLabelProcessing });
+            statusStripChat.Location = new Point(0, 499);
+            statusStripChat.Name = "statusStripChat";
+            statusStripChat.Size = new Size(821, 22);
+            statusStripChat.TabIndex = 22;
+            // 
+            // toolStripStatusLabelTokens
+            // 
+            toolStripStatusLabelTokens.BorderStyle = Border3DStyle.Raised;
+            toolStripStatusLabelTokens.Name = "toolStripStatusLabelTokens";
+            toolStripStatusLabelTokens.Size = new Size(55, 17);
+            toolStripStatusLabelTokens.Text = "Tokens: 0";
+            // 
+            // toolStripStatusLabelProcessingTime
+            // 
+            toolStripStatusLabelProcessingTime.Name = "toolStripStatusLabelProcessingTime";
+            toolStripStatusLabelProcessingTime.Size = new Size(10, 17);
+            toolStripStatusLabelProcessingTime.Text = " ";
+            // 
+            // toolStripStatusLabelProcessing
+            // 
+            toolStripStatusLabelProcessing.BorderStyle = Border3DStyle.Raised;
+            toolStripStatusLabelProcessing.Name = "toolStripStatusLabelProcessing";
+            toolStripStatusLabelProcessing.Size = new Size(0, 17);
+            // 
+            // toolStripStatusLabel1
+            // 
+            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            toolStripStatusLabel1.Size = new Size(10, 17);
+            toolStripStatusLabel1.Text = "|";
             // 
             // ChatGPTForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(821, 521);
+            Controls.Add(statusStripChat);
             Controls.Add(buttonRestart);
             Controls.Add(textResult);
-            Controls.Add(label3);
-            Controls.Add(label2);
+            Controls.Add(labelResult);
+            Controls.Add(labelPrompt);
             Controls.Add(textPrompt);
             Controls.Add(buttonSend);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "ChatGPTForm";
             Text = "Simple ChatGPT";
             Load += ChatGPTForm_Load;
+            statusStripChat.ResumeLayout(false);
+            statusStripChat.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private Label label3;
-        private Label label2;
+        private Label labelResult;
+        private Label labelPrompt;
         private TextBox textPrompt;
         private Button buttonSend;
         private TextBox textResult;
         private Button buttonRestart;
+        private StatusStrip statusStripChat;
+        private ToolStripStatusLabel toolStripStatusLabelTokens;
+        private ToolStripStatusLabel toolStripStatusLabelProcessing;
+        private ToolStripStatusLabel toolStripStatusLabelProcessingTime;
+        private ToolStripStatusLabel toolStripStatusLabel1;
     }
 }

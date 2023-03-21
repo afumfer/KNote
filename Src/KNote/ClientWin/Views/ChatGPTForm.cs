@@ -1,149 +1,154 @@
 ﻿using KNote.ClientWin.Core;
+using KNote.Model;
 using OpenAI;
 using OpenAI.Chat;
 using OpenAI.Models;
-
-using System.Net.NetworkInformation;
-using System;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using KNote.Model;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace KNote.ClientWin.Views
+namespace KNote.ClientWin.Views;
+
+public partial class ChatGPTForm : Form
 {
-    public partial class ChatGPTForm : Form
+    private Store _store;
+    private OpenAIClient _openAIClient;
+
+    private string Organization = "";
+    private string ApiKey = "";
+    private List<ChatMessage> chatMessages = new List<ChatMessage>();
+    private string prompt = "";
+    private StringBuilder chatTextMessasges = new StringBuilder();
+    private int TotalTokens = 0;
+    //private TimeSpan TotalProcessingTime = TimeSpan.Zero;
+
+    public ChatGPTForm()
     {
-        private Store _store;
-        private OpenAIClient _openAIClient;
+        InitializeComponent();
+    }
 
-        private string Organization = "";
-        private string ApiKey = "";
-        private List<ChatMessage> chatMessages = new List<ChatMessage>();
-        private string prompt = "";
-        private StringBuilder chatTextMessasges = new StringBuilder();
-        //private string ErrorMessage = "";
-        //private bool Processing = false;
-        private int TotalTokens = 0;
+    public ChatGPTForm(Store store) : this()
+    {
+        _store = store;
 
-        public ChatGPTForm()
+        Organization = _store.AppConfig.ChatGPTOrganization;
+        ApiKey = _store.AppConfig.ChatGPTApiKey;
+    }
+
+    private void ChatGPTForm_Load(object sender, EventArgs e)
+    {
+        try
         {
-            InitializeComponent();
+            _openAIClient = new OpenAIClient(new OpenAIAuthentication(ApiKey, Organization));
+            StatusProcessing(false);
         }
-
-        public ChatGPTForm(Store store) : this()
+        catch (Exception ex)
         {
-            _store = store;
-
-            Organization = _store.AppConfig.ChatGPTOrganization;
-            ApiKey = _store.AppConfig.ChatGPTApiKey;
+            MessageBox.Show(ex.Message);
         }
+    }
 
-        private void ChatGPTForm_Load(object sender, EventArgs e)
+    private async void buttonSend_Click(object sender, EventArgs e)
+    {
+        try
         {
+            StatusProcessing(true);
 
-            try
+            prompt = textPrompt.Text;
+
+            var chatPrompts = new List<ChatPrompt>();
+
+            // Add all existing messages to chatPrompts
+            chatPrompts.Add(new ChatPrompt("system", "You are helpful Assistant"));
+            foreach (var item in chatMessages)
             {
-                _openAIClient = new OpenAIClient(new OpenAIAuthentication(ApiKey, Organization));
-
+                chatPrompts.Add(new ChatPrompt(item.Role, item.Prompt));
             }
-            catch (Exception ex)
+
+            chatPrompts.Add(new ChatPrompt("user", prompt));
+            var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
+
+            var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
+
+            // Create new messages objects with the response and other details
+            // and add it to the messages list
+            chatMessages.Add(new ChatMessage
             {
-                MessageBox.Show(ex.Message);
-                //throw;
-            }
-        }
-
-        private async void buttonSend_Click(object sender, EventArgs e)
-        {
-            //Processing = true;
-            //ErrorMessage = "";
-
-            try
+                Prompt = prompt,
+                Role = "user",
+                Tokens = result.Usage.PromptTokens
+            });
+            chatMessages.Add(new ChatMessage
             {
-                prompt = textPrompt.Text;
+                Prompt = result.FirstChoice.Message,
+                Role = "assistant",
+                Tokens = result.Usage.CompletionTokens
+            });
 
-                var chatPrompts = new List<ChatPrompt>();
+            TotalTokens += result.Usage.TotalTokens;
+            //TotalProcessingTime += result.ProcessingTime;
 
-                // -------------
-                chatPrompts.Add(new ChatPrompt("system", "You are helpful Assistant"));
-                // Add all existing messages to chatPrompts
-                foreach (var item in chatMessages)
-                {
-                    chatPrompts.Add(new ChatPrompt(item.Role, item.Prompt));
-                }
-                // ---------------
-
-                chatPrompts.Add(new ChatPrompt("user", prompt));
-                var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
-
-                var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
-
-                chatMessages.Add(new ChatMessage
-                {
-                    Prompt = prompt,
-                    Role = "user",
-                    Tokens = result.Usage.PromptTokens
-                });
-                // Create a new Message object with the response and other details
-                // and add it to the messages list
-                chatMessages.Add(new ChatMessage
-                {
-                    Prompt = result.FirstChoice.Message,
-                    Role = "assistant",
-                    Tokens = result.Usage.CompletionTokens
-                });
-                // Update the total number of tokens used by the API
-                TotalTokens = TotalTokens + result.Usage.TotalTokens;
-
-                chatTextMessasges.Append($"\r\n");
-                chatTextMessasges.Append($">> User:\r\n");
-                chatTextMessasges.Append($"{prompt}\r\n");
-                chatTextMessasges.Append($"\r\n");
-                chatTextMessasges.Append($">> Assistant:\r\n");
-                chatTextMessasges.Append(result.FirstChoice.Message.ToString().Replace("\n", "\r\n"));
-                chatTextMessasges.Append($"\r\n");
-                chatTextMessasges.Append($"\r\n");
-                textResult.Text = chatTextMessasges.ToString();                
-                textResult.SelectionStart = textResult.Text.Length;
-                textResult.ScrollToCaret();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                //throw;                
-                // ErrorMessage = "ex.Message";
-
-            }
-            //finally 
-            //{
-            //    Processing = true;             
-            //}
-
-        }
-
-        private void buttonRestart_Click(object sender, EventArgs e)
-        {
-            RestartChatGPT();
-        }
-
-        private void RestartChatGPT()
-        {
-            prompt = "";
-            chatMessages = new List<ChatMessage>();
-            TotalTokens = 0;
-            chatTextMessasges.Clear();
+            chatTextMessasges.Append($"\r\n");
+            chatTextMessasges.Append($">> User:\r\n");
+            chatTextMessasges.Append($"{prompt}\r\n");
+            chatTextMessasges.Append($"(Tokens: {result.Usage.PromptTokens})\r\n");
+            chatTextMessasges.Append($"\r\n");
+            chatTextMessasges.Append($">> Assistant:\r\n");
+            chatTextMessasges.Append(result.FirstChoice.Message.ToString().Replace("\n", "\r\n"));
+            chatTextMessasges.Append($"\r\n");
+            chatTextMessasges.Append($"(Tokens: {result.Usage.CompletionTokens} tokens. Processing time: {result.ProcessingTime})\r\n");
+            chatTextMessasges.Append($"\r\n");
+            chatTextMessasges.Append($"\r\n");
             textResult.Text = chatTextMessasges.ToString();
+            textResult.SelectionStart = textResult.Text.Length;
+            textResult.ScrollToCaret();
             textPrompt.Text = "";
-            //ErrorMessage = "";
+            toolStripStatusLabelTokens.Text = $"Tokens: {TotalTokens}";
+            //toolStripStatusLabelProcessingTime.Text = $". Processing time: {TotalProcessingTime}";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message);
+        }
+        finally
+        {
+            StatusProcessing(false);
         }
 
     }
+
+    private void buttonRestart_Click(object sender, EventArgs e)
+    {
+        RestartChatGPT();
+    }
+
+    private void RestartChatGPT()
+    {
+        prompt = "";
+        chatMessages = new List<ChatMessage>();
+        TotalTokens = 0;
+        toolStripStatusLabelTokens.Text = $"Tokens: {TotalTokens}";
+        //TotalProcessingTime = TimeSpan.Zero;
+        //toolStripStatusLabelProcessingTime.Text = $". Processing time: {TotalProcessingTime}";
+        chatTextMessasges.Clear();
+        textResult.Text = chatTextMessasges.ToString();
+        textPrompt.Text = "";
+    }
+
+    private void StatusProcessing(bool processing = false)
+    {
+        if (processing)
+        {
+            toolStripStatusLabelProcessing.Text = " Processing ...";
+            textPrompt.Enabled = false;
+            buttonSend.Enabled = false;
+            buttonRestart.Enabled = false;
+        }
+        else
+        {
+            toolStripStatusLabelProcessing.Text = " ";
+            textPrompt.Enabled = true;
+            buttonSend.Enabled = true;
+            buttonRestart.Enabled = true;
+        }
+    }
+
 }
