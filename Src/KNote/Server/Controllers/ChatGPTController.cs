@@ -29,55 +29,6 @@ namespace KNote.Server.Controllers
             _configuration = configuration;
         }
 
-        #region Old version
-        //[HttpPost]   // POST api/chatgpt
-        //public async Task<IActionResult> Post([FromBody] string prompt)
-        //{            
-        //    try
-        //    {
-        //        var Organization = _configuration["OpenAIServiceOptions:Organization"] ?? "";
-        //        var ApiKey = _configuration["OpenAIServiceOptions:ApiKey"] ?? "";
-
-        //        var api = new OpenAIClient(new OpenAIAuthentication(ApiKey, Organization));
-
-        //        var chatPrompts = new List<ChatPrompt>();
-
-        //        // -------------
-        //        //chatPrompts.Add(new ChatPrompt("system", "You are helpful Assistant"));
-        //        //// Add all existing messages to chatPrompts
-        //        //foreach (var item in messages)
-        //        //{
-        //        //    chatPrompts.Add(new ChatPrompt(item.Role, item.Prompt));
-        //        //}
-        //        // ---------------
-
-        //        chatPrompts.Add(new ChatPrompt("user", prompt));
-
-        //        var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
-        //        var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
-
-        //        // TODO: return result with Entity = 
-        //        //  new ChatMessage
-        //        //{
-        //        //    Prompt = result.FirstChoice.Message,
-        //        //    Role = "assistant",
-        //        //    Tokens = result.Usage.CompletionTokens
-        //        //};
-
-        //        var kresApi = new Result<string>();
-        //        kresApi.Entity = result.FirstChoice.Message;                
-        //        return Ok(kresApi);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var kresApi = new Result<string>();
-        //        kresApi.AddErrorMessage("Generic error: " + ex.Message);
-        //        return BadRequest(kresApi);
-        //    }
-        //}
-        #endregion
-
         [HttpPost]   // POST api/chatgpt
         public async Task<IActionResult> Post([FromBody] List<ChatMessage> chatMessages)
         {

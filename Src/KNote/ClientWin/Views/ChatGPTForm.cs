@@ -66,43 +66,11 @@ public partial class ChatGPTForm : Form
             chatPrompts.Add(new ChatPrompt("user", prompt));
             var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
 
-            var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
 
-            // Create new messages objects with the response and other details
-            // and add it to the messages list
-            chatMessages.Add(new ChatMessage
-            {
-                Prompt = prompt,
-                Role = "user",
-                Tokens = result.Usage.PromptTokens
-            });
-            chatMessages.Add(new ChatMessage
-            {
-                Prompt = result.FirstChoice.Message,
-                Role = "assistant",
-                Tokens = result.Usage.CompletionTokens
-            });
+            await GoGetCompletion(chatRequest);
 
-            TotalTokens += result.Usage.TotalTokens;
-            //TotalProcessingTime += result.ProcessingTime;
+            // await GoStreamCompletion(chatRequest);
 
-            chatTextMessasges.Append($"\r\n");
-            chatTextMessasges.Append($">> User:\r\n");
-            chatTextMessasges.Append($"{prompt}\r\n");
-            chatTextMessasges.Append($"(Tokens: {result.Usage.PromptTokens})\r\n");
-            chatTextMessasges.Append($"\r\n");
-            chatTextMessasges.Append($">> Assistant:\r\n");
-            chatTextMessasges.Append(result.FirstChoice.Message.ToString().Replace("\n", "\r\n"));
-            chatTextMessasges.Append($"\r\n");
-            chatTextMessasges.Append($"(Tokens: {result.Usage.CompletionTokens} tokens. Processing time: {result.ProcessingTime})\r\n");
-            chatTextMessasges.Append($"\r\n");
-            chatTextMessasges.Append($"\r\n");
-            textResult.Text = chatTextMessasges.ToString();
-            textResult.SelectionStart = textResult.Text.Length;
-            textResult.ScrollToCaret();
-            textPrompt.Text = "";
-            toolStripStatusLabelTokens.Text = $"Tokens: {TotalTokens}";
-            //toolStripStatusLabelProcessingTime.Text = $". Processing time: {TotalProcessingTime}";
         }
         catch (Exception ex)
         {
@@ -148,7 +116,78 @@ public partial class ChatGPTForm : Form
             textPrompt.Enabled = true;
             buttonSend.Enabled = true;
             buttonRestart.Enabled = true;
+            textResult.SelectionStart = textResult.Text.Length;
+            textResult.ScrollToCaret();
+            textPrompt.Focus();
         }
+    }
+
+    private async Task GoGetCompletion(ChatRequest chatRequest) 
+    {
+        var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
+
+        // Create new messages objects with the response and other details
+        // and add it to the messages list
+        chatMessages.Add(new ChatMessage
+        {
+            Prompt = prompt,
+            Role = "user",
+            Tokens = result.Usage.PromptTokens
+        });
+        chatMessages.Add(new ChatMessage
+        {
+            Prompt = result.FirstChoice.Message,
+            Role = "assistant",
+            Tokens = result.Usage.CompletionTokens
+        });
+
+        TotalTokens += result.Usage.TotalTokens;
+        //TotalProcessingTime += result.ProcessingTime;
+
+        chatTextMessasges.Append($"\r\n");
+        chatTextMessasges.Append($">> User:\r\n");
+        chatTextMessasges.Append($"{prompt}\r\n");
+        chatTextMessasges.Append($"(Tokens: {result.Usage.PromptTokens})\r\n");
+        chatTextMessasges.Append($"\r\n");
+        chatTextMessasges.Append($">> Assistant:\r\n");
+        chatTextMessasges.Append(result.FirstChoice.Message.ToString().Replace("\n", "\r\n"));
+        chatTextMessasges.Append($"\r\n");
+        chatTextMessasges.Append($"(Tokens: {result.Usage.CompletionTokens} tokens. Processing time: {result.ProcessingTime})\r\n");
+        chatTextMessasges.Append($"\r\n");
+        chatTextMessasges.Append($"\r\n");
+        textResult.Text = chatTextMessasges.ToString();
+        textResult.SelectionStart = textResult.Text.Length;
+        textResult.ScrollToCaret();
+        textPrompt.Text = "";
+        toolStripStatusLabelTokens.Text = $"Tokens: {TotalTokens}";
+        //toolStripStatusLabelProcessingTime.Text = $". Processing time: {TotalProcessingTime}";    
+    }
+
+    private async Task GoStreamCompletion(ChatRequest chatRequest)
+    {        
+        textResult.Text += $">> User:\r\n{prompt}\r\n\r\n";
+        textResult.Text += $">> Assistant:\r\n";
+
+        // v1
+        //await foreach (var result in _openAIClient.ChatEndpoint.StreamCompletionEnumerableAsync(chatRequest))
+        //{
+        //    textResult.Text += result.FirstChoice.ToString()?.Replace("\n", "\r\n");
+        //    textResult.SelectionStart = textResult.Text.Length;
+        //    textResult.ScrollToCaret();
+        //    textResult.Update();
+        //}
+
+        // or v2
+        await _openAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
+        {
+            textResult.Text += result.FirstChoice.ToString()?.Replace("\n", "\r\n");
+            textResult.SelectionStart = textResult.Text.Length;
+            textResult.ScrollToCaret();
+            textResult.Update();
+        });
+
+        textResult.Text += $"\r\n\r\n";
+        textPrompt.Text = "";        
     }
 
 }
