@@ -43,7 +43,7 @@ public partial class ChatGPTForm : Form
             _apiKey = _store.AppConfig.ChatGPTApiKey;
 
             _openAIClient = new OpenAIClient(new OpenAIAuthentication(_apiKey, _organization));
-            
+
             StatusProcessing(false);
         }
         catch (Exception ex)
@@ -158,7 +158,7 @@ public partial class ChatGPTForm : Form
     private async Task GoStreamCompletion(ChatRequest chatRequest)
     {
         StringBuilder tempResult = new();
-        Stopwatch stopwatch = new ();
+        Stopwatch stopwatch = new();
 
         textResult.Text += $">> User:\r\n{_prompt}\r\n\r\n";
         textResult.Text += $">> Assistant:\r\n";
@@ -186,7 +186,7 @@ public partial class ChatGPTForm : Form
         });
 
         stopwatch.Stop();
-        
+
         _totalProcessingTime += stopwatch.Elapsed;
 
         // Create new messages objects with the response and other details
@@ -210,7 +210,7 @@ public partial class ChatGPTForm : Form
 
         textResult.Text += $"\r\n\r\n";
         textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_totalTokens}";        
+        toolStripStatusLabelTokens.Text = $"Tokens: {_totalTokens}";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_totalProcessingTime}";
     }
 

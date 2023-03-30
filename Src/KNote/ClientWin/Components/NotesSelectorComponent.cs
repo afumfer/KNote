@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class NotesSelectorComponent : ComponentSelectorBase<ISelectorView<NoteInfoDto>, NoteInfoDto>
+public class NotesSelectorComponent : ComponentSelectorBase<IViewSelector<NoteInfoDto>, NoteInfoDto>
 {
     #region Properties
 
@@ -35,7 +35,7 @@ public class NotesSelectorComponent : ComponentSelectorBase<ISelectorView<NoteIn
 
     #region ISelectorView implementation
 
-    protected override ISelectorView<NoteInfoDto> CreateView()
+    protected override IViewSelector<NoteInfoDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

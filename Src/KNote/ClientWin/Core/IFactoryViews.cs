@@ -6,24 +6,24 @@ namespace KNote.ClientWin.Core;
 
 public interface IFactoryViews
 {
-    IViewConfigurable View(MonitorComponent component);
-    IViewConfigurable View(KntScriptConsoleComponent component);
-    ISelectorView<FolderWithServiceRef> View(FoldersSelectorComponent component);
-    ISelectorView<NoteInfoDto> View(NotesSelectorComponent component);
-    IViewConfigurableExt View(KNoteManagmentComponent component);
-    IEditorView<NoteExtendedDto> View(NoteEditorComponent component);
-    IEditorViewExt<NoteDto> View(PostItEditorComponent component);
-    IEditorView<WindowDto> View(PostItPropertiesComponent component);
-    IEditorView<FolderDto> View(FolderEditorComponent component);        
-    IEditorView<KMessageDto> View(MessageEditorComponent component);        
-    IEditorView<ResourceDto> View(ResourceEditorComponent component);        
-    IEditorView<NoteTaskDto> View(TaskEditorComponent component);
-    ISelectorView<NoteTypeDto> View(NoteTypesSelectorComponent component);
-    IEditorView<NoteKAttributeDto> View(NoteAttributeEditorComponent component);
+    IViewBase View(MonitorComponent component);
+    IViewBase View(KntScriptConsoleComponent component);
+    IViewSelector<FolderWithServiceRef> View(FoldersSelectorComponent component);
+    IViewSelector<NoteInfoDto> View(NotesSelectorComponent component);
+    IViewKNoteManagment View(KNoteManagmentComponent component);
+    IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorComponent component);
+    IViewPostIt<NoteDto> View(PostItEditorComponent component);
+    IViewPostIt<WindowDto> View(PostItPropertiesComponent component);
+    IViewEditor<FolderDto> View(FolderEditorComponent component);        
+    IViewEditor<KMessageDto> View(MessageEditorComponent component);        
+    IViewEditor<ResourceDto> View(ResourceEditorComponent component);        
+    IViewEditor<NoteTaskDto> View(TaskEditorComponent component);
+    IViewSelector<NoteTypeDto> View(NoteTypesSelectorComponent component);
+    IViewEditor<NoteKAttributeDto> View(NoteAttributeEditorComponent component);
     IViewBase NotifyView(KNoteManagmentComponent component);
     IViewBase AboutView(KNoteManagmentComponent component);
-    IEditorView<KAttributeDto> View(AttributeEditorComponent component);
-    ISelectorView<NotesFilterWithServiceRef> View(FiltersSelectorComponent component);
-    IEditorView<RepositoryRef> View(RepositoryEditorComponent component);
-    IEditorView<AppConfig> View(OptionsEditorComponent component);
+    IViewEditor<KAttributeDto> View(AttributeEditorComponent component);
+    IViewSelector<NotesFilterWithServiceRef> View(FiltersSelectorComponent component);
+    IViewEditor<RepositoryRef> View(RepositoryEditorComponent component);
+    IViewEditor<AppConfig> View(OptionsEditorComponent component);
 }

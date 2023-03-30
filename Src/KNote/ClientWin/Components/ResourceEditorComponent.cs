@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class ResourceEditorComponent : ComponentEditorBase<IEditorView<ResourceDto>, ResourceDto>
+public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceDto>, ResourceDto>
 {
     #region Constructor 
 
@@ -18,7 +18,7 @@ public class ResourceEditorComponent : ComponentEditorBase<IEditorView<ResourceD
 
     #region Abstract members implementations
 
-    protected override IEditorView<ResourceDto> CreateView()
+    protected override IViewEditor<ResourceDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

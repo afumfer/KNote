@@ -18,7 +18,7 @@ public partial class NotifyForm : Form, IViewBase
 
     public void ShowView()
     {
-        this.Show();            
+        this.Show();
     }
 
     Result<EComponentResult> IViewBase.ShowModalView()
@@ -33,7 +33,6 @@ public partial class NotifyForm : Form, IViewBase
 
     public void OnClosingView()
     {
-        
     }
 
     #endregion
@@ -64,7 +63,7 @@ public partial class NotifyForm : Form, IViewBase
     }
 
     private void menuKNoteOptions_Click(object sender, EventArgs e)
-    {            
+    {
         _com.Options();
     }
 
@@ -79,8 +78,13 @@ public partial class NotifyForm : Form, IViewBase
     }
 
     private void menuExit_Click(object sender, EventArgs e)
-    {            
+    {
         _com?.FinalizeApp();
+    }
+
+    public void RefreshView()
+    {
+        throw new NotImplementedException();
     }
 
     #endregion

@@ -9,7 +9,7 @@ using Markdig;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteEditorForm : Form, IEditorView<NoteExtendedDto>
+public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDto>
 {
     #region Private fields
 

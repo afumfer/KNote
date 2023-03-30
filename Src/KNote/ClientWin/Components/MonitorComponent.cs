@@ -4,7 +4,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class MonitorComponent : ComponentViewBase<IViewConfigurable>
+public class MonitorComponent : ComponentViewBase<IViewBase>
 {
     #region Constructor 
 
@@ -17,7 +17,7 @@ public class MonitorComponent : ComponentViewBase<IViewConfigurable>
 
     #region View 
 
-    protected override IViewConfigurable CreateView()
+    protected override IViewBase CreateView()
     {
         return Store.FactoryViews.View(this);
     }

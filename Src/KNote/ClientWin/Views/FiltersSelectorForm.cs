@@ -6,7 +6,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views;
 
-public partial class FiltersSelectorForm : Form, ISelectorView<NotesFilterWithServiceRef>
+public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithServiceRef>
 {
     private FiltersSelectorComponent _com;
     private bool _viewFinalized = false;

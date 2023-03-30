@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class FolderEditorComponent : ComponentEditor<IEditorView<FolderDto>, FolderDto>
+public class FolderEditorComponent : ComponentEditorBase<IViewEditor<FolderDto>, FolderDto>
 {
     #region Constructor 
 
@@ -18,7 +18,7 @@ public class FolderEditorComponent : ComponentEditor<IEditorView<FolderDto>, Fol
 
     #region IEditorView
 
-    protected override IEditorView<FolderDto> CreateView()
+    protected override IViewEditor<FolderDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

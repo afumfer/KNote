@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class TaskEditorForm : Form, IEditorView<NoteTaskDto>
+public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 {
     #region Private fields
 
@@ -26,11 +26,6 @@ public partial class TaskEditorForm : Form, IEditorView<NoteTaskDto>
     #endregion
 
     #region IEditorView implementation 
-
-    public Control PanelView()
-    {
-        return panelForm;
-    }
 
     public void ShowView()
     {
@@ -80,16 +75,6 @@ public partial class TaskEditorForm : Form, IEditorView<NoteTaskDto>
         textDescription.Text = "";
     }
 
-    public void ConfigureEmbededMode()
-    {
-        
-    }
-
-    public void ConfigureWindowMode()
-    {
-        
-    }
-
     #endregion
 
     #region Form event handelrs
@@ -102,11 +87,6 @@ public partial class TaskEditorForm : Form, IEditorView<NoteTaskDto>
             if (!confirmExit)
                 e.Cancel = true;
         }
-    }
-
-    private void TaskEditorForm_Load(object sender, EventArgs e)
-    {
-
     }
 
     private async void buttonAccept_Click(object sender, EventArgs e)

@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class FolderEditorForm : Form, IEditorView<FolderDto>
+public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 {
     #region Private fields
 
@@ -27,13 +27,8 @@ public partial class FolderEditorForm : Form, IEditorView<FolderDto>
 
     #endregion
 
-    #region IEditorView implementation 
+    #region IView implementation 
     
-    public Control PanelView()
-    {
-        return panelForm;
-    }
-
     public void ShowView()
     {
         this.Show();
@@ -74,16 +69,6 @@ public partial class FolderEditorForm : Form, IEditorView<FolderDto>
     {
         _viewFinalized = true;
         this.Close();
-    }
-
-    public void ConfigureEmbededMode()
-    {
-
-    }
-
-    public void ConfigureWindowMode()
-    {
-
     }
 
     #endregion

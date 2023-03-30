@@ -3,7 +3,7 @@ using KntScript;
 
 namespace KNote.ClientWin.Components;
 
-public class KntScriptConsoleComponent : ComponentViewBase<IViewConfigurable>
+public class KntScriptConsoleComponent : ComponentViewBase<IViewBase>
 {
     #region Properties
 
@@ -24,7 +24,7 @@ public class KntScriptConsoleComponent : ComponentViewBase<IViewConfigurable>
 
     #region Component overrid methods
 
-    protected override IViewConfigurable CreateView()
+    protected override IViewBase CreateView()
     {            
         return Store.FactoryViews.View(this);
     }

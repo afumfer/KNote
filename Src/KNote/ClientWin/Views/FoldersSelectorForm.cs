@@ -6,7 +6,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views;
 
-public partial class FoldersSelectorForm : Form, ISelectorView<FolderWithServiceRef>
+public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithServiceRef>
 {
     #region Private fields
 

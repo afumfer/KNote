@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
+public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 {
     #region Private fields
 
@@ -31,12 +31,7 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
 
     #endregion 
 
-    #region IEditorView interface
-
-    public Control PanelView()
-    {
-        return panelForm;
-    }
+    #region IView interface
 
     public void ShowView()
     {
@@ -82,16 +77,6 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
     {
         _viewFinalized = true;
         this.Close();
-    }
-
-    public void ConfigureEmbededMode()
-    {
-            
-    }
-
-    public void ConfigureWindowMode()
-    {
-            
     }
 
     #endregion
@@ -253,8 +238,6 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
                     break;
             }
         }
-        //else if (e.KeyCode == Keys.F5)
-        //    menuExecKntScript_Click(this, null);
     }
 
     private void labelCaption_MouseDown(object sender, MouseEventArgs e)
@@ -334,14 +317,9 @@ public partial class PostItEditorForm : Form, IEditorViewExt<NoteDto>
         TopMost = tmpTopMost;
     }
 
-    private void WebView2_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
-    {
-            
-    }
-
     #endregion
 
-    #region private Methods
+    #region Private Methods
 
     private async void ModelToControls()
     {

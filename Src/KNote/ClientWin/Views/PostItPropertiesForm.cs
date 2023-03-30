@@ -5,11 +5,17 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
+public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
 {
+    #region Private fields
+
     private readonly PostItPropertiesComponent _com;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
+
+    #endregion
+
+    #region Constructor
 
     public PostItPropertiesForm(PostItPropertiesComponent com)
     {
@@ -17,10 +23,10 @@ public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
         _com = com;
     }
 
-    public Control PanelView()
-    {
-        return panelForm;
-    }
+    #endregion
+
+    #region IView
+
     public void ShowView()
     {
         this.Show();
@@ -45,27 +51,30 @@ public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
         ControlsToModel();
     }
 
-
-    public void CleanView()
-    {
-        // txt = "";            
-    }
-
     public void OnClosingView()
     {
         _viewFinalized = true;
         this.Close();
     }
 
-    public void ConfigureEmbededMode()
+    public void HideView()
     {
-            
+        throw new NotImplementedException();
     }
 
-    public void ConfigureWindowMode()
+    public void ActivateView()
     {
-            
+        throw new NotImplementedException();
     }
+
+    public void CleanView()
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion 
+
+    #region Form events handlers
 
     private async void PostItPropertiesForm_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -80,8 +89,32 @@ public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
         }
     }
 
-    private async Task<bool> SaveModel()
+    private async void buttonAccept_Click(object sender, EventArgs e)
     {            
+        var res = await _com.SaveModel();
+        if (res)
+        {
+            _formIsDisty = false;
+            this.DialogResult = DialogResult.OK;
+        }
+    }
+
+    private void buttonCancel_Click(object sender, EventArgs e)
+    {
+        OnCancelEdition();
+    }
+    
+    private void PostItPropertiesForm_Load(object sender, EventArgs e)
+    {            
+        _formIsDisty = false;
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task<bool> SaveModel()
+    {
         return await _com.SaveModel();
     }
 
@@ -102,7 +135,7 @@ public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
 
         labelCaption.BackColor = ColorTranslator.FromHtml(_com.Model.TitleColor);
         labelCaption.ForeColor = ColorTranslator.FromHtml(_com.Model.TextTitleColor);
-        labelNote.BackColor = ColorTranslator.FromHtml(_com.Model.NoteColor);            
+        labelNote.BackColor = ColorTranslator.FromHtml(_com.Model.NoteColor);
         labelNote.ForeColor = ColorTranslator.FromHtml(_com.Model.TextNoteColor);
         labelText.BackColor = ColorTranslator.FromHtml(_com.Model.NoteColor);
         labelText.ForeColor = ColorTranslator.FromHtml(_com.Model.TextNoteColor);
@@ -122,22 +155,7 @@ public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
         _com.Model.FontItalic = labelText.Font.Italic;
         _com.Model.FontUnderline = labelText.Font.Underline;
         _com.Model.FontStrikethru = labelText.Font.Strikeout;
-        _com.Model.ForeColor = ColorTranslator.ToHtml(labelText.ForeColor);            
-    }
-
-    private async void buttonAccept_Click(object sender, EventArgs e)
-    {            
-        var res = await _com.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
-    }
-
-    private void buttonCancel_Click(object sender, EventArgs e)
-    {
-        OnCancelEdition();
+        _com.Model.ForeColor = ColorTranslator.ToHtml(labelText.ForeColor);
     }
 
     private bool OnCancelEdition()
@@ -151,11 +169,6 @@ public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
         this.DialogResult = DialogResult.Cancel;
         _com.CancelEdition();
         return true;
-    }
-
-    private void PostItPropertiesForm_Load(object sender, EventArgs e)
-    {            
-        _formIsDisty = false;
     }
 
     private void buttonStyle_Click(object sender, EventArgs e)
@@ -196,7 +209,6 @@ public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
             _formIsDisty = true;
         }
     }
-
 
     private void ChangeNoteColor() 
     {
@@ -270,5 +282,5 @@ public partial class PostItPropertiesForm : Form, IEditorView<WindowDto>
         _formIsDisty = true;
     }
 
+    #endregion
 }
-

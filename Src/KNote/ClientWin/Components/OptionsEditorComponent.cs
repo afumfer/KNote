@@ -4,7 +4,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class OptionsEditorComponent : ComponentEditor<IEditorView<AppConfig>, AppConfig>
+public class OptionsEditorComponent : ComponentEditorBase<IViewEditor<AppConfig>, AppConfig>
 {
     #region Constructor 
 
@@ -17,7 +17,7 @@ public class OptionsEditorComponent : ComponentEditor<IEditorView<AppConfig>, Ap
 
     #region ComponentEditor implementation 
 
-    protected override IEditorView<AppConfig> CreateView()
+    protected override IViewEditor<AppConfig> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

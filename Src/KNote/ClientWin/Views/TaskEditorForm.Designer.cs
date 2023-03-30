@@ -394,8 +394,7 @@ namespace KNote.ClientWin.Views
             this.Name = "TaskEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Task editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TaskEditorForm_FormClosing);
-            this.Load += new System.EventHandler(this.TaskEditorForm_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TaskEditorForm_FormClosing);            
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TaskEditorForm_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TaskEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);

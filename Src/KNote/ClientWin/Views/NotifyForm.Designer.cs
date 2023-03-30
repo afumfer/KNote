@@ -28,124 +28,114 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NotifyForm));
-            this.notifyKNote = new System.Windows.Forms.NotifyIcon(this.components);
-            this.contextKNoteMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.menuNewNote = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuShowKNoteManagment = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuPostItsVisibles = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuKNoteOptions = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuHelp = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.contextKNoteMenu.SuspendLayout();
-            this.SuspendLayout();
+            notifyKNote = new NotifyIcon(components);
+            contextKNoteMenu = new ContextMenuStrip(components);
+            menuNewNote = new ToolStripMenuItem();
+            menuShowKNoteManagment = new ToolStripMenuItem();
+            menuPostItsVisibles = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripSeparator();
+            menuKNoteOptions = new ToolStripMenuItem();
+            menuHelp = new ToolStripMenuItem();
+            menuAbout = new ToolStripMenuItem();
+            toolStripMenuItem2 = new ToolStripSeparator();
+            menuExit = new ToolStripMenuItem();
+            contextKNoteMenu.SuspendLayout();
+            SuspendLayout();
             // 
             // notifyKNote
             // 
-            this.notifyKNote.BalloonTipText = "KeyNotex notify";
-            this.notifyKNote.BalloonTipTitle = "KeyNotex";
-            this.notifyKNote.ContextMenuStrip = this.contextKNoteMenu;
-            this.notifyKNote.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyKNote.Icon")));
-            this.notifyKNote.Text = "KaNote";
-            this.notifyKNote.Visible = true;
-            this.notifyKNote.DoubleClick += new System.EventHandler(this.notifyKNote_DoubleClick);
+            notifyKNote.BalloonTipText = "KeyNotex notify";
+            notifyKNote.BalloonTipTitle = "KeyNotex";
+            notifyKNote.ContextMenuStrip = contextKNoteMenu;
+            notifyKNote.Icon = (Icon)resources.GetObject("notifyKNote.Icon");
+            notifyKNote.Text = "KaNote";
+            notifyKNote.Visible = true;
+            notifyKNote.DoubleClick += notifyKNote_DoubleClick;
             // 
             // contextKNoteMenu
             // 
-            this.contextKNoteMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuNewNote,
-            this.menuShowKNoteManagment,
-            this.menuPostItsVisibles,
-            this.toolStripMenuItem1,
-            this.menuKNoteOptions,
-            this.menuHelp,
-            this.menuAbout,
-            this.toolStripMenuItem2,
-            this.menuExit});
-            this.contextKNoteMenu.Name = "contextMenuStrip1";
-            this.contextKNoteMenu.Size = new System.Drawing.Size(226, 170);
+            contextKNoteMenu.Items.AddRange(new ToolStripItem[] { menuNewNote, menuShowKNoteManagment, menuPostItsVisibles, toolStripMenuItem1, menuKNoteOptions, menuHelp, menuAbout, toolStripMenuItem2, menuExit });
+            contextKNoteMenu.Name = "contextMenuStrip1";
+            contextKNoteMenu.Size = new Size(226, 170);
             // 
             // menuNewNote
             // 
-            this.menuNewNote.Name = "menuNewNote";
-            this.menuNewNote.Size = new System.Drawing.Size(225, 22);
-            this.menuNewNote.Text = "New note";
-            this.menuNewNote.Click += new System.EventHandler(this.menuNewNote_Click);
+            menuNewNote.Name = "menuNewNote";
+            menuNewNote.Size = new Size(225, 22);
+            menuNewNote.Text = "New note";
+            menuNewNote.Click += menuNewNote_Click;
             // 
             // menuShowKNoteManagment
             // 
-            this.menuShowKNoteManagment.Name = "menuShowKNoteManagment";
-            this.menuShowKNoteManagment.Size = new System.Drawing.Size(225, 22);
-            this.menuShowKNoteManagment.Text = "Show KaNote managment ...";
-            this.menuShowKNoteManagment.Click += new System.EventHandler(this.menuShowKNoteManagment_Click);
+            menuShowKNoteManagment.Name = "menuShowKNoteManagment";
+            menuShowKNoteManagment.Size = new Size(225, 22);
+            menuShowKNoteManagment.Text = "Show KaNote managment ...";
+            menuShowKNoteManagment.Click += menuShowKNoteManagment_Click;
             // 
             // menuPostItsVisibles
             // 
-            this.menuPostItsVisibles.Checked = true;
-            this.menuPostItsVisibles.CheckOnClick = true;
-            this.menuPostItsVisibles.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.menuPostItsVisibles.Name = "menuPostItsVisibles";
-            this.menuPostItsVisibles.Size = new System.Drawing.Size(225, 22);
-            this.menuPostItsVisibles.Text = "Post-Its visibles";
-            this.menuPostItsVisibles.Click += new System.EventHandler(this.menuPostItsVisibles_Click);
+            menuPostItsVisibles.Checked = true;
+            menuPostItsVisibles.CheckOnClick = true;
+            menuPostItsVisibles.CheckState = CheckState.Checked;
+            menuPostItsVisibles.Name = "menuPostItsVisibles";
+            menuPostItsVisibles.Size = new Size(225, 22);
+            menuPostItsVisibles.Text = "Post-Its visibles";
+            menuPostItsVisibles.Click += menuPostItsVisibles_Click;
             // 
             // toolStripMenuItem1
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(222, 6);
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(222, 6);
             // 
             // menuKNoteOptions
             // 
-            this.menuKNoteOptions.Name = "menuKNoteOptions";
-            this.menuKNoteOptions.Size = new System.Drawing.Size(225, 22);
-            this.menuKNoteOptions.Text = "Options";
-            this.menuKNoteOptions.Click += new System.EventHandler(this.menuKNoteOptions_Click);
+            menuKNoteOptions.Name = "menuKNoteOptions";
+            menuKNoteOptions.Size = new Size(225, 22);
+            menuKNoteOptions.Text = "Options";
+            menuKNoteOptions.Click += menuKNoteOptions_Click;
             // 
             // menuHelp
             // 
-            this.menuHelp.Name = "menuHelp";
-            this.menuHelp.Size = new System.Drawing.Size(225, 22);
-            this.menuHelp.Text = "Help";
-            this.menuHelp.Click += new System.EventHandler(this.menuHelp_Click);
+            menuHelp.Name = "menuHelp";
+            menuHelp.Size = new Size(225, 22);
+            menuHelp.Text = "Help";
+            menuHelp.Click += menuHelp_Click;
             // 
             // menuAbout
             // 
-            this.menuAbout.Name = "menuAbout";
-            this.menuAbout.Size = new System.Drawing.Size(225, 22);
-            this.menuAbout.Text = "About KNote ...";
-            this.menuAbout.Click += new System.EventHandler(this.menuAbout_Click);
+            menuAbout.Name = "menuAbout";
+            menuAbout.Size = new Size(225, 22);
+            menuAbout.Text = "About KNote ...";
+            menuAbout.Click += menuAbout_Click;
             // 
             // toolStripMenuItem2
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(222, 6);
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(222, 6);
             // 
             // menuExit
             // 
-            this.menuExit.Name = "menuExit";
-            this.menuExit.Size = new System.Drawing.Size(225, 22);
-            this.menuExit.Text = "Exit";
-            this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
+            menuExit.Name = "menuExit";
+            menuExit.Size = new Size(225, 22);
+            menuExit.Text = "Exit";
+            menuExit.Click += menuExit_Click;
             // 
             // NotifyForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(33, 33);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.Name = "NotifyForm";
-            this.ShowInTaskbar = false;
-            this.Text = "KaNote";
-            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
-            this.contextKNoteMenu.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(33, 33);
+            FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(4, 3, 4, 3);
+            Name = "NotifyForm";
+            ShowInTaskbar = false;
+            Text = "KaNote";
+            WindowState = FormWindowState.Minimized;            
+            contextKNoteMenu.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion

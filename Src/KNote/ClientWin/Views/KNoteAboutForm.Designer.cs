@@ -30,111 +30,108 @@ namespace KNote.ClientWin.Views
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KNoteAboutForm));
-            this.labelVersion = new System.Windows.Forms.Label();
-            this.labelANotas = new System.Windows.Forms.Label();
-            this.iconoANotas = new System.Windows.Forms.PictureBox();
-            this.buttonAccept = new System.Windows.Forms.Button();
-            this.labelInfo = new System.Windows.Forms.Label();
-            this.labelRepository = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.iconoANotas)).BeginInit();
-            this.SuspendLayout();
+            labelVersion = new Label();
+            labelANotas = new Label();
+            iconoANotas = new PictureBox();
+            buttonAccept = new Button();
+            labelInfo = new Label();
+            labelRepository = new Label();
+            ((System.ComponentModel.ISupportInitialize)iconoANotas).BeginInit();
+            SuspendLayout();
             // 
             // labelVersion
             // 
-            this.labelVersion.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelVersion.ForeColor = System.Drawing.Color.Black;
-            this.labelVersion.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelVersion.Location = new System.Drawing.Point(115, 45);
-            this.labelVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelVersion.Name = "labelVersion";
-            this.labelVersion.Size = new System.Drawing.Size(300, 17);
-            this.labelVersion.TabIndex = 17;
-            this.labelVersion.Text = "Versión: ";
-            this.labelVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            labelVersion.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelVersion.ForeColor = Color.Black;
+            labelVersion.ImeMode = ImeMode.NoControl;
+            labelVersion.Location = new Point(115, 45);
+            labelVersion.Margin = new Padding(4, 0, 4, 0);
+            labelVersion.Name = "labelVersion";
+            labelVersion.Size = new Size(300, 17);
+            labelVersion.TabIndex = 17;
+            labelVersion.Text = "Versión: ";
+            labelVersion.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // labelANotas
             // 
-            this.labelANotas.Font = new System.Drawing.Font("Courier New", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelANotas.ForeColor = System.Drawing.Color.Black;
-            this.labelANotas.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelANotas.Location = new System.Drawing.Point(112, 17);
-            this.labelANotas.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelANotas.Name = "labelANotas";
-            this.labelANotas.Size = new System.Drawing.Size(190, 28);
-            this.labelANotas.TabIndex = 16;
-            this.labelANotas.Text = "KaNote";
+            labelANotas.Font = new Font("Courier New", 18F, FontStyle.Bold, GraphicsUnit.Point);
+            labelANotas.ForeColor = Color.Black;
+            labelANotas.ImeMode = ImeMode.NoControl;
+            labelANotas.Location = new Point(112, 17);
+            labelANotas.Margin = new Padding(4, 0, 4, 0);
+            labelANotas.Name = "labelANotas";
+            labelANotas.Size = new Size(190, 28);
+            labelANotas.TabIndex = 16;
+            labelANotas.Text = "KaNote";
             // 
             // iconoANotas
             // 
-            this.iconoANotas.ErrorImage = ((System.Drawing.Image)(resources.GetObject("iconoANotas.ErrorImage")));
-            this.iconoANotas.Image = ((System.Drawing.Image)(resources.GetObject("iconoANotas.Image")));
-            this.iconoANotas.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.iconoANotas.Location = new System.Drawing.Point(30, 17);
-            this.iconoANotas.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.iconoANotas.Name = "iconoANotas";
-            this.iconoANotas.Size = new System.Drawing.Size(74, 79);
-            this.iconoANotas.TabIndex = 15;
-            this.iconoANotas.TabStop = false;
+            iconoANotas.ErrorImage = (Image)resources.GetObject("iconoANotas.ErrorImage");
+            iconoANotas.Image = (Image)resources.GetObject("iconoANotas.Image");
+            iconoANotas.ImeMode = ImeMode.NoControl;
+            iconoANotas.Location = new Point(30, 17);
+            iconoANotas.Margin = new Padding(4, 3, 4, 3);
+            iconoANotas.Name = "iconoANotas";
+            iconoANotas.Size = new Size(74, 79);
+            iconoANotas.TabIndex = 15;
+            iconoANotas.TabStop = false;
             // 
             // buttonAccept
             // 
-            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(441, 355);
-            this.buttonAccept.Name = "buttonAccept";
-            this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 18;
-            this.buttonAccept.Text = "&Accept";
-            this.buttonAccept.UseVisualStyleBackColor = true;
-            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
+            buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonAccept.Location = new Point(441, 355);
+            buttonAccept.Name = "buttonAccept";
+            buttonAccept.Size = new Size(81, 29);
+            buttonAccept.TabIndex = 18;
+            buttonAccept.Text = "&Accept";
+            buttonAccept.UseVisualStyleBackColor = true;
+            buttonAccept.Click += buttonAccept_Click;
             // 
             // labelInfo
             // 
-            this.labelInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelInfo.ForeColor = System.Drawing.Color.Black;
-            this.labelInfo.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelInfo.Location = new System.Drawing.Point(116, 103);
-            this.labelInfo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelInfo.Name = "labelInfo";
-            this.labelInfo.Size = new System.Drawing.Size(405, 238);
-            this.labelInfo.TabIndex = 19;
-            this.labelInfo.Text = "Info ...";
+            labelInfo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            labelInfo.ForeColor = Color.Black;
+            labelInfo.ImeMode = ImeMode.NoControl;
+            labelInfo.Location = new Point(116, 103);
+            labelInfo.Margin = new Padding(4, 0, 4, 0);
+            labelInfo.Name = "labelInfo";
+            labelInfo.Size = new Size(405, 238);
+            labelInfo.TabIndex = 19;
+            labelInfo.Text = "Info ...";
             // 
             // labelRepository
             // 
-            this.labelRepository.ForeColor = System.Drawing.Color.Black;
-            this.labelRepository.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelRepository.Location = new System.Drawing.Point(116, 62);
-            this.labelRepository.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelRepository.Name = "labelRepository";
-            this.labelRepository.Size = new System.Drawing.Size(299, 24);
-            this.labelRepository.TabIndex = 20;
-            this.labelRepository.Text = "Repository: ";
-            this.labelRepository.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            labelRepository.ForeColor = Color.Black;
+            labelRepository.ImeMode = ImeMode.NoControl;
+            labelRepository.Location = new Point(116, 62);
+            labelRepository.Margin = new Padding(4, 0, 4, 0);
+            labelRepository.Name = "labelRepository";
+            labelRepository.Size = new Size(299, 24);
+            labelRepository.TabIndex = 20;
+            labelRepository.Text = "Repository: ";
+            labelRepository.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // KNoteAboutForm
             // 
-            this.AcceptButton = this.buttonAccept;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(534, 396);
-            this.Controls.Add(this.labelRepository);
-            this.Controls.Add(this.labelInfo);
-            this.Controls.Add(this.buttonAccept);
-            this.Controls.Add(this.labelVersion);
-            this.Controls.Add(this.labelANotas);
-            this.Controls.Add(this.iconoANotas);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "KNoteAboutForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "About KaNote";
-            this.Load += new System.EventHandler(this.KNoteAboutForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.iconoANotas)).EndInit();
-            this.ResumeLayout(false);
-
+            AcceptButton = buttonAccept;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(534, 396);
+            Controls.Add(labelRepository);
+            Controls.Add(labelInfo);
+            Controls.Add(buttonAccept);
+            Controls.Add(labelVersion);
+            Controls.Add(labelANotas);
+            Controls.Add(iconoANotas);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "KNoteAboutForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "About KaNote";            
+            Load += KNoteAboutForm_Load;
+            ((System.ComponentModel.ISupportInitialize)iconoANotas).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion

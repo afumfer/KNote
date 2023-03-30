@@ -6,7 +6,7 @@ namespace KNote.ClientWin.Views;
 
 public partial class KNoteAboutForm : Form, IViewBase
 {
-    private readonly KNoteManagmentComponent _com;
+    private readonly KNoteManagmentComponent _com;   
 
     public KNoteAboutForm(KNoteManagmentComponent com)
     {
@@ -44,7 +44,7 @@ public partial class KNoteAboutForm : Form, IViewBase
     {
         var info = @"Permission is hereby granted, free of charge, to any person obtaining a copy of this ";
         info += "software and associated documentation files (the 'Software'), to deal in the Software without ";
-        info += "restriction, including without limitation the rights to use and copy."; 
+        info += "restriction, including without limitation the rights to use and copy.";
         info += Environment.NewLine + Environment.NewLine;
         info += "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, ";
         info += "INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR ";
@@ -57,10 +57,16 @@ public partial class KNoteAboutForm : Form, IViewBase
         labelInfo.Text = info;
     }
 
-    #endregion
-
     private void buttonAccept_Click(object sender, EventArgs e)
     {
         this.DialogResult = DialogResult.OK;
     }
+
+    public void RefreshView()
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
+
 }

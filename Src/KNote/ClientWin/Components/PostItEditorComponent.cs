@@ -6,7 +6,7 @@ using Microsoft.Identity.Client;
 
 namespace KNote.ClientWin.Components;
 
-public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, NoteDto>
+public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, NoteDto>
 {
     #region Private fields
 
@@ -62,7 +62,7 @@ public class PostItEditorComponent : ComponentEditor<IEditorViewExt<NoteDto>, No
 
     #region IEditorView implementation
 
-    protected override IEditorViewExt<NoteDto> CreateView()
+    protected override IViewPostIt<NoteDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

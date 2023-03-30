@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class MessageEditorComponent : ComponentEditorBase<IEditorView<KMessageDto>, KMessageDto>
+public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDto>, KMessageDto>
 {
     #region Constructor 
 
@@ -18,7 +18,7 @@ public class MessageEditorComponent : ComponentEditorBase<IEditorView<KMessageDt
 
     #region Abstract member implementations 
 
-    protected override IEditorView<KMessageDto> CreateView()
+    protected override IViewEditor<KMessageDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

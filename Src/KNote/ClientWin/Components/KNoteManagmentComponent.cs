@@ -11,7 +11,7 @@ using KntScript;
 
 namespace KNote.ClientWin.Components
 {
-    public class KNoteManagmentComponent : ComponentViewBase<IViewConfigurableExt>
+    public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     {
         #region Properties
 
@@ -160,7 +160,7 @@ namespace KNote.ClientWin.Components
 
         #region Views
 
-        protected override IViewConfigurableExt CreateView()
+        protected override IViewKNoteManagment CreateView()
         {
             return Store.FactoryViews.View(this);
         }
@@ -502,6 +502,20 @@ namespace KNote.ClientWin.Components
             kntScriptCom.KntSEngine = kntEngine;
 
             kntScriptCom.Run();
+        }
+
+        public void ShowKntChatConsole()
+        {
+            // For test ...
+            var chatForm = new ChatForm(Store);
+            chatForm.Show();
+        }
+
+        public void ShowKntChatGPTConsole()
+        {
+            // For test ...
+            var chatFormGPT = new ChatGPTForm(Store);
+            chatFormGPT.Show();
         }
 
         public async void EditNote()

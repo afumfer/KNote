@@ -4,7 +4,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KNoteManagmentForm : Form, IViewConfigurableExt
+public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 {
     private readonly KNoteManagmentComponent _com;
     private bool _viewFinalized = false;
@@ -40,11 +40,6 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
     }
 
     #region IViewBase interface 
-
-    public Control PanelView()
-    {
-        throw new NotImplementedException();
-    }
 
     public void ShowView()
     {
@@ -108,21 +103,6 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
         statusLabel1.Text = $"Notes: {_com.CountNotes.ToString()}";
 
         return DialogResult.OK;
-    }
-
-    public void ConfigureEmbededMode()
-    {
-
-    }
-
-    public void ConfigureWindowMode()
-    {
-
-    }
-
-    public void RefreshView()
-    {
-
     }
 
     #endregion
@@ -299,15 +279,11 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
         }
         else if (menuSel == menuChat)
         {
-            // For test ...
-            var chatForm = new ChatForm(_com.Store);
-            chatForm.Show();
+            _com.ShowKntChatConsole();
         }
         else if (menuSel == menuChatGPT)
         {
-            // For test ...
-            var chatFormGPT = new ChatGPTForm(_com.Store);
-            chatFormGPT.Show();
+            _com.ShowKntChatGPTConsole();
         }
         else
             MessageBox.Show("In construction ... ");
@@ -390,6 +366,11 @@ public partial class KNoteManagmentForm : Form, IViewConfigurableExt
             Width = _com.Store.AppConfig.ManagmentWidth;
         if (_com.Store.AppConfig.ManagmentHeight > 0)
             Height = _com.Store.AppConfig.ManagmentHeight;
+    }
+
+    public void RefreshView()
+    {
+        throw new NotImplementedException();
     }
 
 

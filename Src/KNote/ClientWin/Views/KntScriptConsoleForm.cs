@@ -7,7 +7,7 @@ using KntScript;
 
 namespace KNote.ClientWin.Views;
 
-internal partial class KntScriptConsoleForm : Form, IViewConfigurable
+internal partial class KntScriptConsoleForm : Form, IViewBase
 {
     #region Private fields
     
@@ -187,12 +187,7 @@ internal partial class KntScriptConsoleForm : Form, IViewConfigurable
 
     #endregion
 
-    #region IViewConfigurable interface 
-
-    public Control PanelView()
-    {
-        throw new NotImplementedException();
-    }
+    #region IView interface 
 
     public void ShowView()
     {
@@ -210,26 +205,15 @@ internal partial class KntScriptConsoleForm : Form, IViewConfigurable
         this.Close();
     }
 
-    public void RefreshView()
-    {
-        
-    }
-
     public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show("KaNote", caption, buttons, icon);
     }
 
-    public void ConfigureEmbededMode()
+    public void RefreshView()
     {
-
+        throw new NotImplementedException();
     }
-
-    public void ConfigureWindowMode()
-    {
-
-    }
-
 
     #endregion
 }

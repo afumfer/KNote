@@ -4,7 +4,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class PostItPropertiesComponent : ComponentEditor<IEditorView<WindowDto>, WindowDto>
+public class PostItPropertiesComponent : ComponentEditorBase<IViewPostIt<WindowDto>, WindowDto>
 {
     #region Constructor 
 
@@ -17,7 +17,7 @@ public class PostItPropertiesComponent : ComponentEditor<IEditorView<WindowDto>,
 
     #region IEditorView implementation
 
-    protected override IEditorView<WindowDto> CreateView()
+    protected override IViewPostIt<WindowDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }        

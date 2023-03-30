@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class NoteAttributeEditorComponent : ComponentEditorBase<IEditorView<NoteKAttributeDto>, NoteKAttributeDto>
+public class NoteAttributeEditorComponent : ComponentEditorBase<IViewEditor<NoteKAttributeDto>, NoteKAttributeDto>
 {
     #region Constructor 
 
@@ -18,7 +18,7 @@ public class NoteAttributeEditorComponent : ComponentEditorBase<IEditorView<Note
 
     #region IEditorView
 
-    protected override IEditorView<NoteKAttributeDto> CreateView()
+    protected override IViewEditor<NoteKAttributeDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

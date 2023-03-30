@@ -7,7 +7,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NotesSelectorForm : Form, ISelectorView<NoteInfoDto>
+public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 {
     private readonly NotesSelectorComponent _com;
     private bool _viewFinalized = false;        

@@ -4,7 +4,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
-public partial class MonitorForm : Form, IViewConfigurable
+public partial class MonitorForm : Form, IViewBase
 {
     private readonly MonitorComponent _com;
     private bool _viewFinalized = false;

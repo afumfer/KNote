@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class ResourceEditorForm : Form, IEditorView<ResourceDto>
+public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
 {
     #region Private fields
 
@@ -31,11 +31,6 @@ public partial class ResourceEditorForm : Form, IEditorView<ResourceDto>
     #endregion
 
     #region IEditorView implementation
-
-    public Control PanelView()
-    {
-        return panelForm;
-    }
 
     public void ShowView()
     {
@@ -69,16 +64,6 @@ public partial class ResourceEditorForm : Form, IEditorView<ResourceDto>
         textOrder.Text = "";            
         await htmlPreview.NavigateToString(" ");
         textFileName.Text = "";
-    }
-
-    public void ConfigureEmbededMode()
-    {
-        
-    }
-
-    public void ConfigureWindowMode()
-    {
-        
     }
 
     public void OnClosingView()

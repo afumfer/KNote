@@ -7,7 +7,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteTypesSelectorForm : Form, ISelectorView<NoteTypeDto>
+public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
 {
     private readonly NoteTypesSelectorComponent _com;
     private bool _viewFinalized = false;
@@ -19,11 +19,6 @@ public partial class NoteTypesSelectorForm : Form, ISelectorView<NoteTypeDto>
     }
 
     #region ISelectorView interface 
-
-    public Control PanelView()
-    {
-        return panelForm;
-    }
 
     public void ShowView()
     {
@@ -70,6 +65,11 @@ public partial class NoteTypesSelectorForm : Form, ISelectorView<NoteTypeDto>
     public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);
+    }
+
+    public Control PanelView()
+    {
+        return panelForm;
     }
 
     public void ConfigureEmbededMode()

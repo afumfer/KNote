@@ -11,7 +11,7 @@ public enum EnumRepositoryEditorMode
     Managment
 }
 
-public class RepositoryEditorComponent : ComponentEditor<IEditorView<RepositoryRef>, RepositoryRef>
+public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<RepositoryRef>, RepositoryRef>
 {
     #region Properties 
 
@@ -30,7 +30,7 @@ public class RepositoryEditorComponent : ComponentEditor<IEditorView<RepositoryR
 
     #region ComponentEditor implementation 
 
-    protected override IEditorView<RepositoryRef> CreateView()
+    protected override IViewEditor<RepositoryRef> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

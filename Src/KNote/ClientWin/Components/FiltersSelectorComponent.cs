@@ -3,7 +3,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class FiltersSelectorComponent : ComponentSelectorBase<ISelectorView<NotesFilterWithServiceRef>, NotesFilterWithServiceRef>
+public class FiltersSelectorComponent : ComponentSelectorBase<IViewSelector<NotesFilterWithServiceRef>, NotesFilterWithServiceRef>
 {
     #region Properties
 
@@ -37,7 +37,7 @@ public class FiltersSelectorComponent : ComponentSelectorBase<ISelectorView<Note
 
     #region ComponentEditorBase implementation 
 
-    protected override ISelectorView<NotesFilterWithServiceRef> CreateView()
+    protected override IViewSelector<NotesFilterWithServiceRef> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

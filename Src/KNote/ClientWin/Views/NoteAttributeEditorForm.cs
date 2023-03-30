@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteAttributeEditorForm : Form, IEditorView<NoteKAttributeDto>
+public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeDto>
 {
     #region Private fields
 
@@ -27,11 +27,6 @@ public partial class NoteAttributeEditorForm : Form, IEditorView<NoteKAttributeD
 
     #region IEditorView implementation 
 
-    public Control PanelView()
-    {
-        return panelForm;
-    }
-
     public void ShowView()
     {
         this.Show();
@@ -48,11 +43,6 @@ public partial class NoteAttributeEditorForm : Form, IEditorView<NoteKAttributeD
         return MessageBox.Show(info, caption, buttons, icon);
     }
 
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
     public void RefreshModel()
     {
         ControlsToModel();
@@ -65,6 +55,11 @@ public partial class NoteAttributeEditorForm : Form, IEditorView<NoteKAttributeD
         labelAttribute.Text = "";
     }
 
+    public void RefreshView()
+    {
+        ModelToControls();
+    }
+
     public void ConfigureEmbededMode()
     {
         
@@ -73,6 +68,11 @@ public partial class NoteAttributeEditorForm : Form, IEditorView<NoteKAttributeD
     public void ConfigureWindowMode()
     {
         
+    }
+
+    public Control PanelView()
+    {
+        return panelForm;
     }
 
     public void OnClosingView()

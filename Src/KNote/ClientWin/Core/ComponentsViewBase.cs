@@ -1,10 +1,12 @@
-﻿using KNote.Model;
+﻿using KNote.ClientWin.Components;
+using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Service.Core;
 
 namespace KNote.ClientWin.Core;
 
 abstract public class ComponentViewBase<TView> : ComponentBase
-    where TView : IViewConfigurable
+    where TView : IViewBase
 {
     #region Properties
 
@@ -36,29 +38,13 @@ abstract public class ComponentViewBase<TView> : ComponentBase
 
     protected abstract TView CreateView();
 
-    protected override Result<EComponentResult> OnInitialized()
-    {
-        var result = base.OnInitialized();
-
-        // TODO: pending check result correctrly
-
-        View.RefreshView();
-
-        if (!EmbededMode)
-            View.ConfigureWindowMode();
-        else
-            View.ConfigureEmbededMode();
-
-        return result;
-    }
-
     public override Result<EComponentResult> Run()
     {
         Result<EComponentResult> result;
 
         try
         {
-            result = base.Run();                
+            result = base.Run();
             View.ShowView();
         }
         catch (Exception ex)
@@ -102,7 +88,33 @@ abstract public class ComponentViewBase<TView> : ComponentBase
     #endregion 
 }
 
-abstract public class ComponentSelectorBase<TView, TEntity> : ComponentViewBase<TView>
+abstract public class ComponentViewEmbeddableBase<TView> : ComponentViewBase<TView>
+    where TView : IViewConfigurable
+{
+    public ComponentViewEmbeddableBase(Store store) : base(store)
+    {
+
+    }
+   
+    protected override Result<EComponentResult> OnInitialized()
+    {
+        var result = base.OnInitialized();
+
+        // TODO: pending check result correctrly
+
+        View.RefreshView();
+
+        if (!EmbededMode)
+            View.ConfigureWindowMode();
+        else
+            View.ConfigureEmbededMode();
+
+        return result;
+    }
+
+}
+
+abstract public class ComponentSelectorBase<TView, TEntity> : ComponentViewEmbeddableBase<TView>
     where TView : IViewConfigurable
 {
     #region Properties
@@ -195,10 +207,10 @@ abstract public class ComponentSelectorBase<TView, TEntity> : ComponentViewBase<
 }
 
 abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TView>
-    where TView : IViewConfigurable
+    where TView : IViewBase
     where TEntity : SmartModelDtoBase, new()        
 {
-    #region Prperties
+    #region Properties
 
     private TEntity _model;
     public TEntity Model
@@ -275,6 +287,15 @@ abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TV
         Finalize();
     }
 
+    protected override Result<EComponentResult> OnInitialized()
+    {
+        var result = base.OnInitialized();
+        
+        View.RefreshView();
+
+        return result;                  
+    }
+
     #endregion 
 
     #region Component events
@@ -303,6 +324,46 @@ abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TV
         EditionCanceled?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
     }
 
-
     #endregion 
+
+    public virtual FolderInfoDto GetFolder()
+    {
+        var folderSelector = new FoldersSelectorComponent(Store);
+        var services = new List<ServiceRef>();
+        services.Add(Store.GetServiceRef(Service.IdServiceRef));
+        folderSelector.ServicesRef = services;
+        var res = folderSelector.RunModal();
+        if (res.Entity == EComponentResult.Executed)
+            return folderSelector.SelectedEntity.FolderInfo;
+
+        return null;
+    }
+
+}
+
+public abstract class ComponentEditorEmbeddableBase<TView, TEntity> : ComponentEditorBase<TView, TEntity>
+    where TView : IViewConfigurable
+    where TEntity : SmartModelDtoBase, new()
+{
+    public ComponentEditorEmbeddableBase(Store store) : base(store)
+    {
+
+    }
+
+    protected override Result<EComponentResult> OnInitialized()
+    {
+        var result = base.OnInitialized();
+
+        // TODO: pending check result correctrly
+
+        View.RefreshView();
+
+        if (!EmbededMode)
+            View.ConfigureWindowMode();
+        else
+            View.ConfigureEmbededMode();
+
+        return result;
+    }
+
 }

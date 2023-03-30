@@ -4,7 +4,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
-public partial class RepositoryEditorForm : Form, IEditorView<RepositoryRef>
+public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 {
     #region Fields
 
@@ -25,11 +25,6 @@ public partial class RepositoryEditorForm : Form, IEditorView<RepositoryRef>
     #endregion 
 
     #region IEditorView implementation 
-
-    public Control PanelView()
-    {
-        return panelForm;
-    }
 
     public void ShowView()
     {
@@ -65,16 +60,6 @@ public partial class RepositoryEditorForm : Form, IEditorView<RepositoryRef>
     {
         _viewFinalized = true;
         this.Close();
-    }
-
-    public void ConfigureEmbededMode()
-    {
-        
-    }
-
-    public void ConfigureWindowMode()
-    {
-        
     }
 
     #endregion

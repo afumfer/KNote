@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class TaskEditorComponent : ComponentEditorBase<IEditorView<NoteTaskDto>, NoteTaskDto>
+public class TaskEditorComponent : ComponentEditorBase<IViewEditor<NoteTaskDto>, NoteTaskDto>
 {
     #region Constructor 
 
@@ -18,7 +18,7 @@ public class TaskEditorComponent : ComponentEditorBase<IEditorView<NoteTaskDto>,
 
     #region Abstract member implementations 
 
-    protected override IEditorView<NoteTaskDto> CreateView()
+    protected override IViewEditor<NoteTaskDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

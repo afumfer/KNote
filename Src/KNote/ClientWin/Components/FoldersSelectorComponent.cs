@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public class FoldersSelectorComponent : ComponentSelectorBase<ISelectorView<FolderWithServiceRef>, FolderWithServiceRef>
+public class FoldersSelectorComponent : ComponentSelectorBase<IViewSelector<FolderWithServiceRef>, FolderWithServiceRef>
 {
     #region Properties
 
@@ -42,7 +42,7 @@ public class FoldersSelectorComponent : ComponentSelectorBase<ISelectorView<Fold
 
     #region Component override methods 
 
-    protected override ISelectorView<FolderWithServiceRef> CreateView()
+    protected override IViewSelector<FolderWithServiceRef> CreateView()
     {
         return Store.FactoryViews.View(this);
     }

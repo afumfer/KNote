@@ -7,52 +7,52 @@ namespace KNote.ClientWin.Core;
 
 public class FactoryViewsWinForms : IFactoryViews
 {
-    public IViewConfigurable View(MonitorComponent component)
+    public IViewBase View(MonitorComponent component)
     {
         return new MonitorForm(component);
     }
 
-    public IViewConfigurable View(KntScriptConsoleComponent component)
+    public IViewBase View(KntScriptConsoleComponent component)
     {
         return new KntScriptConsoleForm(component);
     }
     
-    public ISelectorView<FolderWithServiceRef> View(FoldersSelectorComponent component)
+    public IViewSelector<FolderWithServiceRef> View(FoldersSelectorComponent component)
     {
         return new FoldersSelectorForm(component);
     }
 
-    public ISelectorView<NoteInfoDto> View(NotesSelectorComponent component)
+    public IViewSelector<NoteInfoDto> View(NotesSelectorComponent component)
     {
         return new NotesSelectorForm(component);
     }
 
-    public IViewConfigurableExt View(KNoteManagmentComponent component)
+    public IViewKNoteManagment View(KNoteManagmentComponent component)
     {
         return new KNoteManagmentForm(component);
     }
 
-    public IEditorView<NoteExtendedDto> View(NoteEditorComponent component)
+    public IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorComponent component)
     {
         return new NoteEditorForm(component);
     }
 
-    public IEditorViewExt<NoteDto> View(PostItEditorComponent component)
+    public IViewPostIt<NoteDto> View(PostItEditorComponent component)
     {
         return new PostItEditorForm(component);
     }
 
-    public IEditorView<WindowDto> View(PostItPropertiesComponent component)
+    public IViewPostIt<WindowDto> View(PostItPropertiesComponent component)
     {
         return new PostItPropertiesForm(component);
     }
 
-    public IEditorView<FolderDto> View(FolderEditorComponent component)
+    public IViewEditor<FolderDto> View(FolderEditorComponent component)
     {
         return new FolderEditorForm(component);
     }
 
-    public IEditorView<RepositoryRef> View(RepositoryEditorComponent component)
+    public IViewEditor<RepositoryRef> View(RepositoryEditorComponent component)
     {
         return new RepositoryEditorForm(component);
     }
@@ -67,42 +67,42 @@ public class FactoryViewsWinForms : IFactoryViews
         return new KNoteAboutForm(component);
     }
 
-    public IEditorView<KMessageDto> View(MessageEditorComponent component)
+    public IViewEditor<KMessageDto> View(MessageEditorComponent component)
     {
         return new MessageEditorForm(component);
     }
 
-    public IEditorView<ResourceDto> View(ResourceEditorComponent component)
+    public IViewEditor<ResourceDto> View(ResourceEditorComponent component)
     {
         return new ResourceEditorForm(component);
     }
 
-    public IEditorView<KAttributeDto> View(AttributeEditorComponent component)
+    public IViewEditor<KAttributeDto> View(AttributeEditorComponent component)
     {
         return new AttributeEditorForm(component);
     }
 
-    public IEditorView<NoteTaskDto> View(TaskEditorComponent component)
+    public IViewEditor<NoteTaskDto> View(TaskEditorComponent component)
     {
         return new TaskEditorForm(component);
     }
 
-    public ISelectorView<NoteTypeDto> View(NoteTypesSelectorComponent component)
+    public IViewSelector<NoteTypeDto> View(NoteTypesSelectorComponent component)
     {
         return new NoteTypesSelectorForm(component);
     }
 
-    public IEditorView<NoteKAttributeDto> View(NoteAttributeEditorComponent component)
+    public IViewEditor<NoteKAttributeDto> View(NoteAttributeEditorComponent component)
     {
         return new NoteAttributeEditorForm(component);
     }
 
-    public ISelectorView<NotesFilterWithServiceRef> View(FiltersSelectorComponent component)
+    public IViewSelector<NotesFilterWithServiceRef> View(FiltersSelectorComponent component)
     {
         return new FiltersSelectorForm(component);
     }
 
-    public IEditorView<AppConfig> View(OptionsEditorComponent component)
+    public IViewEditor<AppConfig> View(OptionsEditorComponent component)
     {
         return new OptionsEditorForm(component);
     }

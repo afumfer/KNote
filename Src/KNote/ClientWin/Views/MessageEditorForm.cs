@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class MessageEditorForm : Form, IEditorView<KMessageDto>
+public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 {
     #region Private fields
 
@@ -28,11 +28,6 @@ public partial class MessageEditorForm : Form, IEditorView<KMessageDto>
 
     #region IEditorView implementation 
 
-    public Control PanelView()
-    {
-        return panelForm;
-    }
-
     public void ShowView()
     {
         this.Show();
@@ -54,11 +49,6 @@ public partial class MessageEditorForm : Form, IEditorView<KMessageDto>
         ModelToControls();
     }
 
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
     public void CleanView()
     {
         textUserFullName.Text = "";
@@ -69,14 +59,9 @@ public partial class MessageEditorForm : Form, IEditorView<KMessageDto>
         checkAlarmActivated.Checked = true;
     }
 
-    public void ConfigureEmbededMode()
+    public void RefreshModel()
     {
-        
-    }
-
-    public void ConfigureWindowMode()
-    {
-        
+        ControlsToModel();
     }
 
     public void OnClosingView()
@@ -95,7 +80,7 @@ public partial class MessageEditorForm : Form, IEditorView<KMessageDto>
         {
             var confirmExit = OnCandelEdition();
             if (!confirmExit)
-                e.Cancel = true;
+                e.Cancel = true;            
         }
     }
 

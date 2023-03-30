@@ -5,11 +5,17 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class AttributeEditorForm : Form, IEditorView<KAttributeDto>
+public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
 {
+    #region Private fields
+
     private readonly AttributeEditorComponent _com;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
+
+    #endregion
+
+    #region Constructor 
 
     public AttributeEditorForm(AttributeEditorComponent com)
     {
@@ -17,12 +23,9 @@ public partial class AttributeEditorForm : Form, IEditorView<KAttributeDto>
         _com = com;
     }
 
-    #region IEditorView implementation
+    #endregion
 
-    public Control PanelView()
-    {
-        return panelForm;
-    }
+    #region IEditorView implementation
 
     public void ShowView()
     {
@@ -43,27 +46,20 @@ public partial class AttributeEditorForm : Form, IEditorView<KAttributeDto>
     public void RefreshView()
     {
         //ModelToControls();
+        throw new NotImplementedException();
     }
 
     public void RefreshModel()
     {
         //ControlsToModel();
+        throw new NotImplementedException();
     }
 
 
     public void CleanView()
     {
         //textXxxxx.Text = "";
-    }
-
-    public void ConfigureEmbededMode()
-    {
-        
-    }
-
-    public void ConfigureWindowMode()
-    {
-        
+        throw new NotImplementedException();
     }
 
     public void OnClosingView()
@@ -72,7 +68,9 @@ public partial class AttributeEditorForm : Form, IEditorView<KAttributeDto>
         this.Close();
     }
 
-    #endregion 
+    #endregion
+
+    #region Form events handlers
 
     private void AttributeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -83,6 +81,10 @@ public partial class AttributeEditorForm : Form, IEditorView<KAttributeDto>
                 e.Cancel = true;
         }
     }
+
+    #endregion
+
+    #region Private methods
 
     private bool OnCandelEdition()
     {
@@ -96,4 +98,6 @@ public partial class AttributeEditorForm : Form, IEditorView<KAttributeDto>
         _com.CancelEdition();
         return true;
     }
+
+    #endregion 
 }
