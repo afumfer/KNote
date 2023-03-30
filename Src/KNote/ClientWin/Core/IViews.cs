@@ -15,14 +15,14 @@ public interface IViewBase
     DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);
 }
 
-public interface IViewConfigurable: IViewBase
+public interface IViewEmbeddable : IViewBase
 {
     Control PanelView();
     void ConfigureEmbededMode();
     void ConfigureWindowMode();   
 }
 
-public interface IViewConfigurableExt : IViewConfigurable
+public interface IViewIViewEmbeddableExt : IViewEmbeddable
 {
     void HideView();
     void ActivateView();
@@ -39,19 +39,19 @@ public interface IViewEditor<T> : IViewBase
     void RefreshModel();
 }
 
-public interface IViewEditorEmbeddable<T> : IViewConfigurable
+public interface IViewEditorEmbeddable<T> : IViewEmbeddable
 {
     void CleanView();
     void RefreshModel();                
 }
 
-public interface IViewEditorEmbeddableExt<T> : IViewConfigurableExt
+public interface IViewEditorEmbeddableExt<T> : IViewIViewEmbeddableExt
 {
     void CleanView();
     void RefreshModel();
 }
 
-public interface IViewSelector<TItem> : IViewConfigurable
+public interface IViewSelector<TItem> : IViewEmbeddable
 {                
     void RefreshItem(TItem item);
     void DeleteItem(TItem item);

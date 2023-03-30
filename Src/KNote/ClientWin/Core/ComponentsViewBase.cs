@@ -89,7 +89,7 @@ abstract public class ComponentViewBase<TView> : ComponentBase
 }
 
 abstract public class ComponentViewEmbeddableBase<TView> : ComponentViewBase<TView>
-    where TView : IViewConfigurable
+    where TView : IViewEmbeddable
 {
     public ComponentViewEmbeddableBase(Store store) : base(store)
     {
@@ -115,7 +115,7 @@ abstract public class ComponentViewEmbeddableBase<TView> : ComponentViewBase<TVi
 }
 
 abstract public class ComponentSelectorBase<TView, TEntity> : ComponentViewEmbeddableBase<TView>
-    where TView : IViewConfigurable
+    where TView : IViewEmbeddable
 {
     #region Properties
 
@@ -342,7 +342,7 @@ abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TV
 }
 
 public abstract class ComponentEditorEmbeddableBase<TView, TEntity> : ComponentEditorBase<TView, TEntity>
-    where TView : IViewConfigurable
+    where TView : IViewEmbeddable
     where TEntity : SmartModelDtoBase, new()
 {
     public ComponentEditorEmbeddableBase(Store store) : base(store)
