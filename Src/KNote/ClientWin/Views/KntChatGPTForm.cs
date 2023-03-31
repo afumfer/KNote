@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Model.Dto;
 using OpenAI;
 using OpenAI.Chat;
 using System.Diagnostics;
@@ -70,15 +71,47 @@ public partial class KntChatGPTForm : Form, IViewBase
         RestartChatGPT();
     }
 
-    private void KntChatGPTForm_FormClosing(object sender, FormClosingEventArgs e)
+    private async void KntChatGPTForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+        {
+            if (_com.AutoSaveChatMessagesOnViewExit)
+            {
+                await SaveChatMessages();
+            }
+            if(_com.AutoCloseComponentOnViewExit)
+                _com.Finalize();
+        }
     }
 
     #endregion 
 
     #region Private methods
+
+    private async Task SaveChatMessages()
+    {
+        try
+        {
+            var service = _com.Store.GetFirstServiceRef().Service;
+            var notes = service.Notes;
+            var folderId = await service.Folders.GetAsync(1);    // TODO:  Fix this magic number (1 = default folder).
+
+            var note = new Model.Dto.NoteExtendedDto
+            {
+                Topic = $"Chat: {DateTime.Now.ToString()}",
+                Description = _com.ChatTextMessasges.ToString(),
+                FolderId = folderId.Entity.FolderId
+            };
+
+            await notes.SaveExtendedAsync(note);
+
+            _com.Store.Store_SavedNote(this, new ComponentEventArgs<NoteExtendedDto>(note);            
+        }
+        catch (Exception ex)
+        {
+            ShowInfo(ex.Message.ToString());            
+        }
+    }
 
     private void RestartChatGPT()
     {
@@ -121,12 +154,8 @@ public partial class KntChatGPTForm : Form, IViewBase
     {
         _com.StreamToken += _com_StreamToken;
 
-        textResult.Text += $">> User:\r\n{prompt}\r\n\r\n";
-        textResult.Text += $">> Assistant:\r\n";
-
         await _com.StreamCompletionAsync(prompt);
-
-        textResult.Text += $"\r\n\r\n";
+        
         textPrompt.Text = "";
         toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens}";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_com.TotalProcessingTime}";
@@ -141,7 +170,6 @@ public partial class KntChatGPTForm : Form, IViewBase
         textResult.ScrollToCaret();
         textResult.Update();
     }
-
 
     #endregion
 

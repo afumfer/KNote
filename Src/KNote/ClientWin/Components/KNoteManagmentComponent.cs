@@ -507,14 +507,14 @@ namespace KNote.ClientWin.Components
         public void ShowKntChatConsole()
         {
             var kntChatComponent = new KntChatComponent(Store);
-            kntChatComponent.Run();
+            kntChatComponent.Run();            
             kntChatComponent.ShowChatView();
         }
 
         public void ShowKntChatGPTConsole()
         {
             var kntChatGPTComponent = new KntChatGPTComponent(Store);
-            kntChatGPTComponent.Run();
+            kntChatGPTComponent.Run();            
             kntChatGPTComponent.ShowChatGPTView();
         }
 

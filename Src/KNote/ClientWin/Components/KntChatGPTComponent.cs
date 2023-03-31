@@ -61,6 +61,10 @@ public class KntChatGPTComponent : ComponentBase
         get { return _totalProcessingTime; }
     }
 
+    public bool AutoCloseComponentOnViewExit { get; set; } = false;
+
+    public bool AutoSaveChatMessagesOnViewExit { get; set; } = false;
+
     #endregion
 
     #region Constructor
@@ -108,8 +112,10 @@ public class KntChatGPTComponent : ComponentBase
         }
     }
 
-    public void ShowChatGPTView()
+    public void ShowChatGPTView(bool autoCloseComponentOnViewExit = true, bool autoSaveChatMessagesOnViewExit = true)
     {
+        AutoCloseComponentOnViewExit = autoCloseComponentOnViewExit;
+        AutoSaveChatMessagesOnViewExit = autoSaveChatMessagesOnViewExit;
         ChatGPTView.ShowView();
     }
 
@@ -164,10 +170,15 @@ public class KntChatGPTComponent : ComponentBase
     public event EventHandler<ComponentEventArgs<string>> StreamToken;
     public async Task StreamCompletionAsync(string prompt)
     {
-        StringBuilder tempResult = new();
+        StringBuilder tempResult = new();        
         Stopwatch stopwatch = new();
 
         stopwatch.Start();
+
+        _chatTextMessasges.Append($">> User:\r\n{prompt}\r\n\r\n");
+        StreamToken?.Invoke(this, new ComponentEventArgs<string>($">> User:\r\n{prompt}\r\n\r\n"));
+        _chatTextMessasges.Append($">> Assistant:\r\n");
+        StreamToken?.Invoke(this, new ComponentEventArgs<string>($">> Assistant:\r\n"));        
 
         await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
         {
@@ -197,7 +208,9 @@ public class KntChatGPTComponent : ComponentBase
         _totalTokens += (_prompt.Length + tempResult.Length) / 4;    // TODO: hack, refactor this
         
         _chatTextMessasges.Append(tempResult);
+        
         _chatTextMessasges.Append($"\r\n\r\n");
+        StreamToken?.Invoke(this, new ComponentEventArgs<string>($"\r\n\r\n"));
     }
 
     #endregion
