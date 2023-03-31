@@ -16,7 +16,7 @@ public class MessagesManagmentComponent : ComponentBase
 
     public MessagesManagmentComponent(Store store): base(store)
     {
-
+        ComponentName = "Messages Managment Component";
     }
 
     #endregion
@@ -70,7 +70,7 @@ public class MessagesManagmentComponent : ComponentBase
         kntTimerAutoSave.Enabled = true;
     }
 
-    private void kntTimerAlarms_Tick(object sender, EventArgs e)        
+    private void kntTimerAlarms_Tick(object sender, EventArgs e)
     {
         if (!Store.AppConfig.AlarmActivated)
             return;

@@ -64,25 +64,15 @@ abstract public class ComponentBase : IDisposable
     protected virtual Result<EComponentResult> OnInitialized()
     {
         return new Result<EComponentResult>(EComponentResult.Executed);
-
     } 
-
-    protected virtual Result<EComponentResult> OnAfterRenderView()
-    {
-        return new Result<EComponentResult>(EComponentResult.Executed);
-    }
 
     protected virtual Result<EComponentResult> CheckPreconditions()
     {
-        // TODO: En el futuro se implementarán reglas genéricas
-        //       para todas las controladoras.
-        //       Estas reglas se podrán sobreescibir o complementar en mis  
-        //       clases derivadas. 
-        //       Por ahora las precondiciones de la clase base 
-        //       siempre se superan             
-
-        var res = new Result<EComponentResult>(EComponentResult.Executed);
-        return res;
+        // TODO: In the future, generic rules will be implemented for all controllers.
+        //       These rules can be overwritten or supplemented in derived classes.
+        //       For now, the base class preconditions always return success.
+                
+        return new Result<EComponentResult>(EComponentResult.Executed); 
     }
 
     protected virtual Result<EComponentResult> OnFinalized() 
@@ -143,6 +133,16 @@ abstract public class ComponentBase : IDisposable
         Store.OnComponentNotification(this, message);
     }
 
+    public virtual Result<EComponentResult> DialogResultToComponentResult(DialogResult dialogResult)
+    {
+        var result = new Result<EComponentResult>();
+        if (dialogResult == DialogResult.OK || dialogResult == DialogResult.Yes)
+            result.Entity = EComponentResult.Executed;
+        else
+            result.Entity = EComponentResult.Canceled;
+        return result;
+    }
+
     public virtual void Dispose()
     {
         Finalize();
@@ -164,16 +164,7 @@ abstract public class ComponentBase : IDisposable
         foreach (FieldInfo field in Fields)
         {
             object v = field.GetValue(this);
-            if (v != null && v is ComponentBase)
-            {
-                field.SetValue(this, null);
-            }
-            // TODO: pensar mejor esto, dejar el resto de campos del objeto intacto.
-            //else if (v != null && v is ModelBase)
-            //{
-            //    field.SetValue(this, null);
-            //}
-            else if (v != null && v is IViewBase)
+            if ((v != null && v is ComponentBase) || ((v != null && v is IViewBase)))
             {
                 field.SetValue(this, null);
             }

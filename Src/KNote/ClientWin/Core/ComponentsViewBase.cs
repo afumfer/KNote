@@ -75,16 +75,6 @@ abstract public class ComponentViewBase<TView> : ComponentBase
         return result;
     }
 
-    public Result<EComponentResult> DialogResultToComponentResult(DialogResult dialogResult)
-    {
-        var result = new Result<EComponentResult>();
-        if (dialogResult == DialogResult.OK || dialogResult == DialogResult.Yes)
-            result.Entity = EComponentResult.Executed;
-        else
-            result.Entity = EComponentResult.Canceled;
-        return result;
-    }
-
     #endregion 
 }
 

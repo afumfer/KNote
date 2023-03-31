@@ -12,7 +12,7 @@ public partial class KntChatForm : Form, IViewBase
     private readonly KntChatComponent _com;
     private bool _viewFinalized = false;
 
-    private HubConnection hubConnection;    
+    private HubConnection _hubConnection;
 
     #endregion
 
@@ -40,18 +40,18 @@ public partial class KntChatForm : Form, IViewBase
 
         try
         {
-            hubConnection = new HubConnectionBuilder()
+            _hubConnection = new HubConnectionBuilder()
                            .WithUrl(_com.Store.AppConfig.ChatHubUrl)
                            .Build();
 
             // Is disconected => must conected
-            hubConnection.Closed += async (error) =>
+            _hubConnection.Closed += async (error) =>
             {
                 Thread.Sleep(5000);
-                await hubConnection.StartAsync();
+                await _hubConnection.StartAsync();
             };
 
-            hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+            _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
             {
                 var encodeMessage = $"{user}: {message}";
                 listMessages.Items.Add(encodeMessage);
@@ -61,7 +61,7 @@ public partial class KntChatForm : Form, IViewBase
             Text += $" [{_com.Store.AppUserName}]";
             labelServer.Text = _com.Store.AppConfig.ChatHubUrl;
 
-            await hubConnection.StartAsync();
+            await _hubConnection.StartAsync();
         }
         catch (Exception)
         {
@@ -74,11 +74,11 @@ public partial class KntChatForm : Form, IViewBase
         try
         {
             UseWaitCursor = true;
-            if (hubConnection.State == HubConnectionState.Disconnected)
-                await hubConnection.StartAsync();
+            if (_hubConnection.State == HubConnectionState.Disconnected)
+                await _hubConnection.StartAsync();
 
-            if (hubConnection.State == HubConnectionState.Connected)
-                await hubConnection.SendAsync("SendMessage", _com.Store.AppUserName, textMessage.Text);
+            if (_hubConnection.State == HubConnectionState.Connected)
+                await _hubConnection.SendAsync("SendMessage", _com.Store.AppUserName, textMessage.Text);
 
             textMessage.Text = "";
         }
@@ -105,12 +105,12 @@ public partial class KntChatForm : Form, IViewBase
 
     public void ShowView()
     {
-        this.Show();
+        Show();
     }
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _com.DialogResultToComponentResult(ShowDialog());
     }
 
     public void OnClosingView()

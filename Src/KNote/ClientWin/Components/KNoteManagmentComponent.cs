@@ -508,12 +508,14 @@ namespace KNote.ClientWin.Components
         {
             var kntChatComponent = new KntChatComponent(Store);
             kntChatComponent.Run();
+            kntChatComponent.ShowChatView();
         }
 
         public void ShowKntChatGPTConsole()
         {
             var kntChatGPTComponent = new KntChatGPTComponent(Store);
             kntChatGPTComponent.Run();
+            kntChatGPTComponent.ShowChatGPTView();
         }
 
         public async void EditNote()

@@ -49,7 +49,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     #endregion
 
-    #region IEditorView implementation
+    #region IViewEditorEmbeddable implementation
 
     protected override IViewEditorEmbeddable<NoteExtendedDto> CreateView()
     {
