@@ -56,7 +56,7 @@ public class KntChatGPTComponent : ComponentBase
     }
 
     private TimeSpan _totalProcessingTime = TimeSpan.Zero;
-    public TimeSpan TotalaProccesingTime
+    public TimeSpan TotalProcessingTime
     {
         get { return _totalProcessingTime; }
     }

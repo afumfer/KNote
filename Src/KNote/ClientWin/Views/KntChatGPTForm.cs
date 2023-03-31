@@ -15,20 +15,6 @@ public partial class KntChatGPTForm : Form, IViewBase
     private readonly KntChatGPTComponent _com;
     private bool _viewFinalized = false;
 
-    private OpenAIClient _openAIClient;
-
-    private string _organization = "";
-    private string _apiKey = "";
-
-    private List<ChatMessage> _chatMessages = new List<ChatMessage>();
-    private StringBuilder _chatTextMessasges = new StringBuilder();
-
-    private string _prompt = "";
-    private string _result = "";
-
-    private int _totalTokens = 0;
-    private TimeSpan _totalProcessingTime = TimeSpan.Zero;
-
     #endregion
 
     #region Constructor
@@ -48,11 +34,6 @@ public partial class KntChatGPTForm : Form, IViewBase
     {
         try
         {
-            _organization = _com.Store.AppConfig.ChatGPTOrganization;
-            _apiKey = _com.Store.AppConfig.ChatGPTApiKey;
-
-            _openAIClient = new OpenAIClient(new OpenAIAuthentication(_apiKey, _organization));
-
             StatusProcessing(false);
         }
         catch (Exception ex)
@@ -101,16 +82,11 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private void RestartChatGPT()
     {
-        _prompt = "";
-        _result = "";
-        _chatMessages = new List<ChatMessage>();
-        _totalTokens = 0;
-        _totalProcessingTime = TimeSpan.Zero;
-        _chatTextMessasges.Clear();
+        _com.RestartChatGPT();
 
-        toolStripStatusLabelTokens.Text = $"Tokens: {_totalTokens} ";
+        toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens} ";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";
-        textResult.Text = _chatTextMessasges.ToString();
+        textResult.Text = _com.ChatTextMessasges.ToString();
         textPrompt.Text = "";
     }
 
@@ -137,122 +113,35 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private async Task GoGetCompletion(string prompt)
     {
-        var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(GetChatRequest(prompt));
-
-        // Create new messages objects with the response and other details
-        // and add it to the messages list
-        _chatMessages.Add(new ChatMessage
-        {
-            Prompt = _prompt,
-            Role = "user",
-            Tokens = result.Usage.PromptTokens
-        });
-        _chatMessages.Add(new ChatMessage
-        {
-            Prompt = result.FirstChoice.Message,
-            Role = "assistant",
-            Tokens = result.Usage.CompletionTokens
-        });
-
-        _result = result.FirstChoice.Message;
-        _totalTokens += result.Usage.TotalTokens;
-        _totalProcessingTime += result.ProcessingTime;
-
-        _chatTextMessasges.Append($"\r\n");
-        _chatTextMessasges.Append($">> User:\r\n");
-        _chatTextMessasges.Append($"{_prompt}\r\n");
-        _chatTextMessasges.Append($"(Tokens: {result.Usage.PromptTokens})\r\n");
-        _chatTextMessasges.Append($"\r\n");
-        _chatTextMessasges.Append($">> Assistant:\r\n");
-        _chatTextMessasges.Append(result.FirstChoice.Message.ToString().Replace("\n", "\r\n"));
-        _chatTextMessasges.Append($"\r\n");
-        _chatTextMessasges.Append($"(Tokens: {result.Usage.CompletionTokens} tokens. Processing time: {result.ProcessingTime})\r\n");
-        _chatTextMessasges.Append($"\r\n");
-        _chatTextMessasges.Append($"\r\n");
-
+        await _com.GetCompletionAsync(prompt);      
         RefreshView();
     }
 
     private async Task GoStreamCompletion(string prompt)
     {
-        StringBuilder tempResult = new();
-        Stopwatch stopwatch = new();
+        _com.StreamToken += _com_StreamToken;
 
         textResult.Text += $">> User:\r\n{prompt}\r\n\r\n";
         textResult.Text += $">> Assistant:\r\n";
-        stopwatch.Start();
 
-        await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
-        {
-            var res = result.FirstChoice.ToString()?.Replace("\n", "\r\n");
-            tempResult.Append(res);
-            textResult.Text += res;
-            textResult.SelectionStart = textResult.Text.Length;
-            textResult.ScrollToCaret();
-            textResult.Update();
-        });
-
-        stopwatch.Stop();
-
-        _totalProcessingTime += stopwatch.Elapsed;
-
-        // Create new messages objects with the response and other details
-        // and add it to the messages list
-        _chatMessages.Add(new ChatMessage
-        {
-            Prompt = _prompt,
-            Role = "user",
-            Tokens = _prompt.Length / 4    // TODO: hack, refactor this
-        });
-        _chatMessages.Add(new ChatMessage
-        {
-            Prompt = tempResult.ToString(),
-            Role = "assistant",
-            Tokens = tempResult.Length / 4    // TODO: hack, refactor this
-        });
-
-        _result = tempResult.ToString();
-        _totalTokens += (_prompt.Length + tempResult.Length) / 4;    // TODO: hack, refactor this
-
-        _chatTextMessasges.Append(tempResult);
-        _chatTextMessasges.Append($"\r\n\r\n");
+        await _com.StreamCompletionAsync(prompt);
 
         textResult.Text += $"\r\n\r\n";
         textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_totalTokens}";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_totalProcessingTime}";
+        toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens}";
+        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_com.TotalProcessingTime}";
+
+        _com.StreamToken -= _com_StreamToken;
     }
 
-    private ChatRequest GetChatRequest(string prompt)
+    private void _com_StreamToken(object sender, ComponentEventArgs<string> e)
     {
-        _prompt = prompt;
-
-        var chatPrompts = new List<ChatPrompt>();
-
-        // Add all existing messages to chatPrompts
-        chatPrompts.Add(new ChatPrompt("system", "You are helpful Assistant"));
-        foreach (var item in _chatMessages)
-        {
-            chatPrompts.Add(new ChatPrompt(item.Role, item.Prompt));
-        }
-
-        chatPrompts.Add(new ChatPrompt("user", _prompt));
-
-        //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
-
-        return new ChatRequest(
-            messages: chatPrompts,
-            model: OpenAI.Models.Model.GPT4,
-            temperature: null,
-            topP: null,
-            number: null,
-            stops: null,
-            maxTokens: null,
-            presencePenalty: null,
-            frequencyPenalty: null,
-            logitBias: null,
-            user: null);
+        textResult.Text += e.Entity?.ToString();
+        textResult.SelectionStart = textResult.Text.Length;
+        textResult.ScrollToCaret();
+        textResult.Update();
     }
+
 
     #endregion
 
@@ -281,12 +170,12 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public void RefreshView()
     {
-        textResult.Text = _chatTextMessasges.ToString();
+        textResult.Text = _com.ChatTextMessasges.ToString();
         textResult.SelectionStart = textResult.Text.Length;
         textResult.ScrollToCaret();
         textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_totalTokens} ";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_totalProcessingTime}";
+        toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens} ";
+        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_com.TotalProcessingTime}";
     }
 
     #endregion
