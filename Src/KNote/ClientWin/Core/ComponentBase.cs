@@ -124,9 +124,9 @@ abstract public class ComponentBase : IDisposable
         try
         {
             result = OnFinalized();
-            Store.RemoveComponent(this);
-            FinalizeViewsComponent();                                               
             OnStateComponentChanged(EComponentState.Finalized);
+            FinalizeViewsComponent();
+            Store.RemoveComponent(this);
         }
         catch (Exception ex)
         {

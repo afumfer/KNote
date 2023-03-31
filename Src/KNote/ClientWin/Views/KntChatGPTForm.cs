@@ -1,4 +1,5 @@
-﻿using KNote.ClientWin.Core;
+﻿using KNote.ClientWin.Components;
+using KNote.ClientWin.Core;
 using KNote.Model;
 using Microsoft.Identity.Client;
 using OpenAI;
@@ -9,9 +10,13 @@ using System.Text;
 
 namespace KNote.ClientWin.Views;
 
-public partial class ChatGPTForm : Form
+public partial class KntChatGPTForm : Form, IViewBase
 {
-    private Store _store;
+    #region Private fields
+
+    private readonly KntChatGPTComponent _com;
+    private bool _viewFinalized = false;
+
     private OpenAIClient _openAIClient;
 
     private string _organization = "";
@@ -24,23 +29,27 @@ public partial class ChatGPTForm : Form
     private int _totalTokens = 0;
     private TimeSpan _totalProcessingTime = TimeSpan.Zero;
 
-    public ChatGPTForm()
+    #endregion
+
+    #region Constructor
+
+    public KntChatGPTForm(KntChatGPTComponent com)
     {
         InitializeComponent();
+
+        _com = com;
     }
 
-    public ChatGPTForm(Store store) : this()
-    {
-        _store = store;
+    #endregion
 
-    }
+    #region Form events handlers
 
     private void ChatGPTForm_Load(object sender, EventArgs e)
     {
         try
         {
-            _organization = _store.AppConfig.ChatGPTOrganization;
-            _apiKey = _store.AppConfig.ChatGPTApiKey;
+            _organization = _com.Store.AppConfig.ChatGPTOrganization;
+            _apiKey = _com.Store.AppConfig.ChatGPTApiKey;
 
             _openAIClient = new OpenAIClient(new OpenAIAuthentication(_apiKey, _organization));
 
@@ -79,6 +88,16 @@ public partial class ChatGPTForm : Form
     {
         RestartChatGPT();
     }
+
+    private void KntChatGPTForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (!_viewFinalized)
+            _com.Finalize();
+    }
+
+    #endregion 
+
+    #region Private methods
 
     private void RestartChatGPT()
     {
@@ -168,7 +187,9 @@ public partial class ChatGPTForm : Form
         // v1
         //await foreach (var result in _openAIClient.ChatEndpoint.StreamCompletionEnumerableAsync(chatRequest))
         //{
-        //    textResult.Text += result.FirstChoice.ToString()?.Replace("\n", "\r\n");
+        //    var res = result.FirstChoice.ToString()?.Replace("\n", "\r\n");
+        //    tempResult.Append(res);
+        //    textResult.Text += res;
         //    textResult.SelectionStart = textResult.Text.Length;
         //    textResult.ScrollToCaret();
         //    textResult.Update();
@@ -244,5 +265,37 @@ public partial class ChatGPTForm : Form
             logitBias: null,
             user: null);
     }
+
+    #endregion
+
+    #region IView interface
+
+    public void ShowView()
+    {
+        this.Show();
+    }
+
+    public Result<EComponentResult> ShowModalView()
+    {
+        return _com.DialogResultToComponentResult(this.ShowDialog());
+    }
+
+    public void OnClosingView()
+    {
+        _viewFinalized = true;
+        this.Close();
+    }
+
+    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    {
+        return MessageBox.Show("KaNote", caption, buttons, icon);
+    }
+
+    public void RefreshView()
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
 
 }

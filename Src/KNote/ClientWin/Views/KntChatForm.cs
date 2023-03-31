@@ -1,27 +1,37 @@
-﻿using KNote.ClientWin.Core;
+﻿using KNote.ClientWin.Components;
+using KNote.ClientWin.Core;
+using KNote.Model;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace KNote.ClientWin.Views;
 
-public partial class ChatForm : Form
-{    
-    private HubConnection hubConnection;
-    private Store _store;
+public partial class KntChatForm : Form, IViewBase
+{
+    #region Private fields
 
-    public ChatForm()
+    private readonly KntChatComponent _com;
+    private bool _viewFinalized = false;
+
+    private HubConnection hubConnection;    
+
+    #endregion
+
+    #region Constructor
+
+    public KntChatForm(KntChatComponent com)
     {
         InitializeComponent();
+
+        _com = com;
     }
 
-    public ChatForm(Store store) : this()
-    {
-        _store = store;
+    #endregion
 
-    }
+    #region Form events handlers
 
     private async void ChatForm_Load(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(_store.AppConfig.ChatHubUrl))
+        if (string.IsNullOrEmpty(_com.Store.AppConfig.ChatHubUrl))
         {
             MessageBox.Show("Chat hub url is not defined. Set the chat hub url y Options menú.", "KaNote");
             this.Close();
@@ -31,7 +41,7 @@ public partial class ChatForm : Form
         try
         {
             hubConnection = new HubConnectionBuilder()
-                           .WithUrl(_store.AppConfig.ChatHubUrl)
+                           .WithUrl(_com.Store.AppConfig.ChatHubUrl)
                            .Build();
 
             // Is disconected => must conected
@@ -48,8 +58,8 @@ public partial class ChatForm : Form
                 listMessages.Refresh();
             });
 
-            Text += $" [{_store.AppUserName}]";
-            labelServer.Text = _store.AppConfig.ChatHubUrl;
+            Text += $" [{_com.Store.AppUserName}]";
+            labelServer.Text = _com.Store.AppConfig.ChatHubUrl;
 
             await hubConnection.StartAsync();
         }
@@ -68,7 +78,7 @@ public partial class ChatForm : Form
                 await hubConnection.StartAsync();
 
             if (hubConnection.State == HubConnectionState.Connected)
-                await hubConnection.SendAsync("SendMessage", _store.AppUserName, textMessage.Text);
+                await hubConnection.SendAsync("SendMessage", _com.Store.AppUserName, textMessage.Text);
 
             textMessage.Text = "";
         }
@@ -82,4 +92,43 @@ public partial class ChatForm : Form
             UseWaitCursor = false;
         }
     }
+
+    private void KntChatForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (!_viewFinalized)
+            _com.Finalize();
+    }
+
+    #endregion
+
+    #region IView implementation
+
+    public void ShowView()
+    {
+        this.Show();
+    }
+
+    public Result<EComponentResult> ShowModalView()
+    {
+        return _com.DialogResultToComponentResult(this.ShowDialog());
+    }
+
+    public void OnClosingView()
+    {
+        _viewFinalized = true;
+        this.Close();
+    }
+
+    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    {
+        return MessageBox.Show("KaNote", caption, buttons, icon);
+    }
+
+    public void RefreshView()
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
+
 }

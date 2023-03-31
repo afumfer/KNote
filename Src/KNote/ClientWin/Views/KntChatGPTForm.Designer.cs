@@ -1,6 +1,6 @@
 ﻿namespace KNote.ClientWin.Views
 {
-    partial class ChatGPTForm
+    partial class KntChatGPTForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChatGPTForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntChatGPTForm));
             statusStripChat = new StatusStrip();
             toolStripStatusLabelTokens = new ToolStripStatusLabel();
             toolStripStatusLabelProcessingTime = new ToolStripStatusLabel();
@@ -53,9 +53,9 @@
             // statusStripChat
             // 
             statusStripChat.Items.AddRange(new ToolStripItem[] { toolStripStatusLabelTokens, toolStripStatusLabelProcessingTime, toolStripStatusLabel1, toolStripStatusLabelProcessing });
-            statusStripChat.Location = new Point(0, 480);
+            statusStripChat.Location = new Point(0, 489);
             statusStripChat.Name = "statusStripChat";
-            statusStripChat.Size = new Size(702, 22);
+            statusStripChat.Size = new Size(684, 22);
             statusStripChat.TabIndex = 22;
             // 
             // toolStripStatusLabelTokens
@@ -105,8 +105,8 @@
             splitChat.Panel2.Controls.Add(textPrompt);
             splitChat.Panel2.Controls.Add(buttonSend);
             splitChat.Panel2MinSize = 50;
-            splitChat.Size = new Size(702, 480);
-            splitChat.SplitterDistance = 387;
+            splitChat.Size = new Size(684, 489);
+            splitChat.SplitterDistance = 394;
             splitChat.SplitterWidth = 6;
             splitChat.TabIndex = 25;
             // 
@@ -115,7 +115,7 @@
             radioGetStream.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetStream.AutoSize = true;
             radioGetStream.Checked = true;
-            radioGetStream.Location = new Point(500, 7);
+            radioGetStream.Location = new Point(482, 7);
             radioGetStream.Name = "radioGetStream";
             radioGetStream.Size = new Size(83, 19);
             radioGetStream.TabIndex = 5;
@@ -127,7 +127,7 @@
             // 
             radioGetCompletion.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetCompletion.AutoSize = true;
-            radioGetCompletion.Location = new Point(590, 7);
+            radioGetCompletion.Location = new Point(572, 7);
             radioGetCompletion.Name = "radioGetCompletion";
             radioGetCompletion.Size = new Size(109, 19);
             radioGetCompletion.TabIndex = 6;
@@ -142,7 +142,7 @@
             textResult.Multiline = true;
             textResult.Name = "textResult";
             textResult.ScrollBars = ScrollBars.Vertical;
-            textResult.Size = new Size(690, 354);
+            textResult.Size = new Size(672, 361);
             textResult.TabIndex = 4;
             // 
             // labelResult
@@ -157,7 +157,7 @@
             // buttonRestart
             // 
             buttonRestart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonRestart.Location = new Point(641, 39);
+            buttonRestart.Location = new Point(623, 39);
             buttonRestart.Name = "buttonRestart";
             buttonRestart.Size = new Size(55, 27);
             buttonRestart.TabIndex = 3;
@@ -182,13 +182,13 @@
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(573, 70);
+            textPrompt.Size = new Size(555, 68);
             textPrompt.TabIndex = 1;
             // 
             // buttonSend
             // 
             buttonSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSend.Location = new Point(641, 6);
+            buttonSend.Location = new Point(623, 6);
             buttonSend.Name = "buttonSend";
             buttonSend.Size = new Size(55, 27);
             buttonSend.TabIndex = 2;
@@ -196,16 +196,17 @@
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;
             // 
-            // ChatGPTForm
+            // KntChatGPTForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(702, 502);
+            ClientSize = new Size(684, 511);
             Controls.Add(splitChat);
             Controls.Add(statusStripChat);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Name = "ChatGPTForm";
+            Name = "KntChatGPTForm";
             Text = "Simple ChatGPT";
+            FormClosing += KntChatGPTForm_FormClosing;
             Load += ChatGPTForm_Load;
             statusStripChat.ResumeLayout(false);
             statusStripChat.PerformLayout();

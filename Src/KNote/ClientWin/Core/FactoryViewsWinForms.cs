@@ -106,4 +106,14 @@ public class FactoryViewsWinForms : IFactoryViews
     {
         return new OptionsEditorForm(component);
     }
+
+    public IViewBase View(KntChatGPTComponent component)
+    {
+        return new KntChatGPTForm(component);
+    }
+
+    public IViewBase View(KntChatComponent component)
+    {
+        return new KntChatForm(component);
+    }
 }

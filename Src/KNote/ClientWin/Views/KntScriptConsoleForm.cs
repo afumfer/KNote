@@ -10,7 +10,10 @@ namespace KNote.ClientWin.Views;
 internal partial class KntScriptConsoleForm : Form, IViewBase
 {
     #region Private fields
-    
+
+    private readonly KntScriptConsoleComponent _com;
+    private bool _viewFinalized = false;
+
     private string _sourceCodeDirWork;
     private string _sourceCodeFile;
     private KntSEngine _engine;        
@@ -19,14 +22,11 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     [DllImport("User32.dll", CharSet = CharSet.Auto)] 
     private static extern IntPtr SendMessage(IntPtr h, int msg, int wParam, int [] lParam);
 
-    private readonly KntScriptConsoleComponent _com;
-    private bool _viewFinalized = false;
-
     #endregion
 
     #region Constructor
 
-    public KntScriptConsoleForm(KntScriptConsoleComponent com) // , KntSEngine engine, string file = null
+    public KntScriptConsoleForm(KntScriptConsoleComponent com)
     {
         InitializeComponent();
         PersonalizeTabStop();

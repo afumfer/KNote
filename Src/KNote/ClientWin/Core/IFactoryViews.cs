@@ -26,4 +26,6 @@ public interface IFactoryViews
     IViewSelector<NotesFilterWithServiceRef> View(FiltersSelectorComponent component);
     IViewEditor<RepositoryRef> View(RepositoryEditorComponent component);
     IViewEditor<AppConfig> View(OptionsEditorComponent component);
+    IViewBase View(KntChatGPTComponent component);
+    IViewBase View(KntChatComponent component);
 }
