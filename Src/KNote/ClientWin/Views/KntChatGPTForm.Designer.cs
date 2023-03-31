@@ -182,8 +182,8 @@
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(555, 68);
-            textPrompt.TabIndex = 1;
+            textPrompt.Size = new Size(555, 66);
+            textPrompt.TabIndex = 0;
             // 
             // buttonSend
             // 

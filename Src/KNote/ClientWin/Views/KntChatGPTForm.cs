@@ -1,10 +1,8 @@
 ﻿using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
-using Microsoft.Identity.Client;
 using OpenAI;
 using OpenAI.Chat;
-using OpenAI.Models;
 using System.Diagnostics;
 using System.Text;
 
@@ -26,6 +24,8 @@ public partial class KntChatGPTForm : Form, IViewBase
     private StringBuilder _chatTextMessasges = new StringBuilder();
 
     private string _prompt = "";
+    private string _result = "";
+
     private int _totalTokens = 0;
     private TimeSpan _totalProcessingTime = TimeSpan.Zero;
 
@@ -68,9 +68,9 @@ public partial class KntChatGPTForm : Form, IViewBase
             StatusProcessing(true);
 
             if (radioGetCompletion.Checked)
-                await GoGetCompletion(GetChatRequest(textPrompt.Text));
+                await GoGetCompletion(textPrompt.Text);
             else
-                await GoStreamCompletion(GetChatRequest(textPrompt.Text));
+                await GoStreamCompletion(textPrompt.Text);
 
         }
         catch (Exception ex)
@@ -102,6 +102,7 @@ public partial class KntChatGPTForm : Form, IViewBase
     private void RestartChatGPT()
     {
         _prompt = "";
+        _result = "";
         _chatMessages = new List<ChatMessage>();
         _totalTokens = 0;
         _totalProcessingTime = TimeSpan.Zero;
@@ -130,13 +131,13 @@ public partial class KntChatGPTForm : Form, IViewBase
             buttonRestart.Enabled = true;
             textResult.SelectionStart = textResult.Text.Length;
             textResult.ScrollToCaret();
-            textPrompt.Focus();
+            ActiveControl = textPrompt;
         }
     }
 
-    private async Task GoGetCompletion(ChatRequest chatRequest)
+    private async Task GoGetCompletion(string prompt)
     {
-        var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
+        var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(GetChatRequest(prompt));
 
         // Create new messages objects with the response and other details
         // and add it to the messages list
@@ -152,8 +153,11 @@ public partial class KntChatGPTForm : Form, IViewBase
             Role = "assistant",
             Tokens = result.Usage.CompletionTokens
         });
+
+        _result = result.FirstChoice.Message;
         _totalTokens += result.Usage.TotalTokens;
         _totalProcessingTime += result.ProcessingTime;
+
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($">> User:\r\n");
         _chatTextMessasges.Append($"{_prompt}\r\n");
@@ -166,37 +170,19 @@ public partial class KntChatGPTForm : Form, IViewBase
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"\r\n");
 
-        textResult.Text = _chatTextMessasges.ToString();
-        textResult.SelectionStart = textResult.Text.Length;
-        textResult.ScrollToCaret();
-        textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_totalTokens} ";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_totalProcessingTime}";
+        RefreshView();
     }
 
-    private async Task GoStreamCompletion(ChatRequest chatRequest)
+    private async Task GoStreamCompletion(string prompt)
     {
         StringBuilder tempResult = new();
         Stopwatch stopwatch = new();
 
-        textResult.Text += $">> User:\r\n{_prompt}\r\n\r\n";
+        textResult.Text += $">> User:\r\n{prompt}\r\n\r\n";
         textResult.Text += $">> Assistant:\r\n";
-
         stopwatch.Start();
 
-        // v1
-        //await foreach (var result in _openAIClient.ChatEndpoint.StreamCompletionEnumerableAsync(chatRequest))
-        //{
-        //    var res = result.FirstChoice.ToString()?.Replace("\n", "\r\n");
-        //    tempResult.Append(res);
-        //    textResult.Text += res;
-        //    textResult.SelectionStart = textResult.Text.Length;
-        //    textResult.ScrollToCaret();
-        //    textResult.Update();
-        //}
-
-        // or v2
-        await _openAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
+        await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
         {
             var res = result.FirstChoice.ToString()?.Replace("\n", "\r\n");
             tempResult.Append(res);
@@ -225,7 +211,9 @@ public partial class KntChatGPTForm : Form, IViewBase
             Tokens = tempResult.Length / 4    // TODO: hack, refactor this
         });
 
+        _result = tempResult.ToString();
         _totalTokens += (_prompt.Length + tempResult.Length) / 4;    // TODO: hack, refactor this
+
         _chatTextMessasges.Append(tempResult);
         _chatTextMessasges.Append($"\r\n\r\n");
 
@@ -237,7 +225,7 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private ChatRequest GetChatRequest(string prompt)
     {
-        _prompt = textPrompt.Text;
+        _prompt = prompt;
 
         var chatPrompts = new List<ChatPrompt>();
 
@@ -293,7 +281,12 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public void RefreshView()
     {
-        throw new NotImplementedException();
+        textResult.Text = _chatTextMessasges.ToString();
+        textResult.SelectionStart = textResult.Text.Length;
+        textResult.ScrollToCaret();
+        textPrompt.Text = "";
+        toolStripStatusLabelTokens.Text = $"Tokens: {_totalTokens} ";
+        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_totalProcessingTime}";
     }
 
     #endregion

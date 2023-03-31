@@ -86,7 +86,7 @@ public class MessagesManagmentComponent : ComponentBase
             var service = store.Service;
             var res = await service.Notes.GetVisibleNotesIdAsync(Store.AppUserName);
             foreach(var id in res.Entity)                                    
-                PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));                
+                PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
         }
     }
 
