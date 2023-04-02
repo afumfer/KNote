@@ -1,0 +1,18 @@
+﻿' Example 2, use chat component, a chat conversation
+var chat = GetKntChatGPTComponent();
+chat.Run();
+
+chat.GetCompletion("Hola.");
+printline chat.Result;
+chat.GetCompletion("¿Que es el seno?");
+printline chat.Result;
+chat.GetCompletion("¿Que es el coseno?");
+printline chat.Result;
+chat.GetCompletion("¿Que es la tangente?");
+printline chat.Result;
+chat.GetCompletion("¿Que es la cotangente?");
+printline chat.Result;
+
+printline "-- All conversation --";
+printline chat.ChatTextMessasges.ToString();
+printline "-- END --";

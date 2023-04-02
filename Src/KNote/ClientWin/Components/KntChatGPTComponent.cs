@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,6 +66,8 @@ public class KntChatGPTComponent : ComponentBase
 
     public bool AutoSaveChatMessagesOnViewExit { get; set; } = false;
 
+    public string Tag { get; set; } = "KntChatGPTComponent v 0.1";
+
     #endregion
 
     #region Constructor
@@ -112,10 +115,17 @@ public class KntChatGPTComponent : ComponentBase
         }
     }
 
-    public void ShowChatGPTView(bool autoCloseComponentOnViewExit = true, bool autoSaveChatMessagesOnViewExit = true)
+    public void ShowChatGPTView(bool autoCloseComponentOnViewExit, bool autoSaveChatMessagesOnViewExit)
     {
         AutoCloseComponentOnViewExit = autoCloseComponentOnViewExit;
         AutoSaveChatMessagesOnViewExit = autoSaveChatMessagesOnViewExit;
+        ChatGPTView.ShowView();
+    }
+
+    public void ShowChatGPTView()
+    {
+        AutoCloseComponentOnViewExit = true;
+        AutoSaveChatMessagesOnViewExit = true;
         ChatGPTView.ShowView();
     }
 
@@ -134,7 +144,7 @@ public class KntChatGPTComponent : ComponentBase
     }
 
     public async Task GetCompletionAsync(string prompt)
-    {
+    {        
         var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(GetChatRequest(prompt));
 
         _chatMessages.Add(new ChatMessage
@@ -150,7 +160,7 @@ public class KntChatGPTComponent : ComponentBase
             Tokens = result.Usage.CompletionTokens
         });
         
-        _result = result.FirstChoice.Message;
+        _result = result.FirstChoice.Message.ToString().Replace("\n", "\r\n");
         _totalTokens += result.Usage.TotalTokens;
         _totalProcessingTime += result.ProcessingTime;
         
@@ -165,6 +175,14 @@ public class KntChatGPTComponent : ComponentBase
         _chatTextMessasges.Append($"(Tokens: {result.Usage.CompletionTokens} tokens. Processing time: {result.ProcessingTime})\r\n");
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"\r\n");
+    }
+
+    // Warning: his method can cause a deadlock in single-threaded environments
+    // (for example, Windows Forms or WPF applications) or ASP.NET applications.
+    // It is recommended to use the asynchronous version of this method.
+    public void GetCompletion(string prompt)
+    {
+        Task.Run(() => GetCompletionAsync(prompt)).Wait();
     }
 
     public event EventHandler<ComponentEventArgs<string>> StreamToken;

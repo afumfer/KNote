@@ -13,9 +13,12 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views;
 
-public partial class LabForm : Form
+public partial class KntLabForm : Form, IViewBase
 {
     #region Private fields
+
+    private readonly KntLabComponent _com;
+    private bool _viewFinalized = false;
 
     private string _pathSampleScripts = @"..\..\..\AutoKntScripts\";
     private string _selectedFile;
@@ -26,15 +29,47 @@ public partial class LabForm : Form
 
     #region Constructors and FormLoad
 
-    public LabForm()
+    public KntLabForm(KntLabComponent com)
     {
         InitializeComponent();
+        _com = com;
+        _store = _com.Store;
     }
 
-    public LabForm(Store store) : this()
+    #endregion
+
+    #region IViewBase interface
+
+    public void ShowView()
     {
-        _store = store;
+        Show();
     }
+
+    public Result<EComponentResult> ShowModalView()
+    {
+        return _com.DialogResultToComponentResult(ShowDialog());
+    }
+
+    public void RefreshView()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnClosingView()
+    {
+        _viewFinalized = true;
+        this.Close();
+    }
+
+    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
+    {
+        return MessageBox.Show("KaNote", caption, buttons, icon);
+    }
+
+    #endregion
+
+    #region Form events handlers (KntScript)
+
     private async void LabForm_Load(object sender, EventArgs e)
     {
         // KntScript
@@ -52,13 +87,13 @@ public partial class LabForm : Form
         {
             textStatusWebView2.Text = "webView2 not ready";
         }
-
     }
 
-    #endregion
-
-    #region Form events handlers (KntScript)
-
+    private void KntLabForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (!_viewFinalized)
+            _com.Finalize();
+    }
 
     private void buttonRunScript_Click(object sender, EventArgs e)
     {
@@ -981,7 +1016,7 @@ public partial class LabForm : Form
         //};
 
         //c.Execute();
-        
+
         Process.Start(@"D:\KaNote\Plugins\KntRedmine\KntRedmineApi.exe");
     }
 
@@ -1003,10 +1038,11 @@ public partial class LabForm : Form
             textPlugin.Text = c.Description;
             break;
         }
-        return; 
+        return;
 
     }
 
     #endregion
+
 
 }

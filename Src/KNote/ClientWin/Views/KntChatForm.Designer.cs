@@ -42,7 +42,7 @@
             // 
             labelServer.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             labelServer.AutoSize = true;
-            labelServer.Location = new Point(89, 459);
+            labelServer.Location = new Point(89, 430);
             labelServer.Name = "labelServer";
             labelServer.Size = new Size(16, 15);
             labelServer.TabIndex = 17;
@@ -52,7 +52,7 @@
             // 
             label4.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label4.AutoSize = true;
-            label4.Location = new Point(5, 459);
+            label4.Location = new Point(5, 430);
             label4.Name = "label4";
             label4.Size = new Size(85, 15);
             label4.TabIndex = 16;
@@ -83,7 +83,7 @@
             listMessages.ItemHeight = 15;
             listMessages.Location = new Point(5, 74);
             listMessages.Name = "listMessages";
-            listMessages.Size = new Size(789, 379);
+            listMessages.Size = new Size(580, 349);
             listMessages.TabIndex = 2;
             // 
             // textMessage
@@ -91,13 +91,13 @@
             textMessage.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textMessage.Location = new Point(68, 13);
             textMessage.Name = "textMessage";
-            textMessage.Size = new Size(636, 23);
+            textMessage.Size = new Size(427, 23);
             textMessage.TabIndex = 0;
             // 
             // buttonSend
             // 
             buttonSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSend.Location = new Point(710, 11);
+            buttonSend.Location = new Point(501, 11);
             buttonSend.Name = "buttonSend";
             buttonSend.Size = new Size(84, 29);
             buttonSend.TabIndex = 1;
@@ -110,7 +110,7 @@
             AcceptButton = buttonSend;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 483);
+            ClientSize = new Size(591, 454);
             Controls.Add(labelServer);
             Controls.Add(label4);
             Controls.Add(label3);

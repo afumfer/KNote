@@ -97,8 +97,18 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
             Model.ContentType = "markdown";
 
             // Context default values
-            Model.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
-            Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+            if(Store.ActiveFolderWithServiceRef != null)
+            {
+                Model.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
+                Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+            }
+            else
+            {
+                // TODO:  Fix this magic number (1 = default folder).
+                var folder = (await Service.Folders.GetAsync(1)).Entity;
+                Model.FolderId = folder.FolderId;
+                Model.FolderDto = folder;
+            }
 
             Model.SetIsDirty(false);
 

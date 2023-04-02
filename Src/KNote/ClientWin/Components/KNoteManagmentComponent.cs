@@ -895,6 +895,15 @@ namespace KNote.ClientWin.Components
             }
         }
 
+        public void Lab()
+        {
+            var kntLabComponent = new KntLabComponent(Store);
+            kntLabComponent.Run();
+            kntLabComponent.ShowLabView();
+            //var labForm = new KntLabForm(_com.Store);
+            //labForm.Show();
+        }
+
         #endregion
 
         #region Events handlers for extension components 

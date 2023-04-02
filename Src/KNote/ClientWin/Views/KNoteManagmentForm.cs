@@ -138,9 +138,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
         if (menuSel == menuKNoteLab)
         {
-            // For test ...
-            var labForm = new LabForm(_com.Store);
-            labForm.Show();
+            _com.Lab();
         }
         else if (menuSel == menuNewFolder)
         {

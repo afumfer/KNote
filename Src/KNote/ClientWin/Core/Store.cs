@@ -471,19 +471,19 @@ public class Store
     }
 
     public event EventHandler<ComponentEventArgs<NoteExtendedDto>> DeletedNote;
-    public void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)      // TODO: Public provisional
+    private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
     {
         DeletedNote?.Invoke(sender, e);
     }
 
     public event EventHandler<ComponentEventArgs<NoteExtendedDto>> SavedNote;
-    public void Store_SavedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)    // TODO: Public provisional
+    private void Store_SavedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
     {
         SavedNote?.Invoke(sender, e);
     }
 
     public event EventHandler<ComponentEventArgs<NoteExtendedDto>> AddedNote;
-    public void Store_AddedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)   // TODO: Public provisional
+    private void Store_AddedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
     {
         AddedNote?.Invoke(sender, e);
     }

@@ -2,6 +2,7 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Repository.EntityFramework.Entities;
 using OpenAI;
 using OpenAI.Chat;
 using System.Diagnostics;
@@ -93,19 +94,29 @@ public partial class KntChatGPTForm : Form, IViewBase
         try
         {
             var service = _com.Store.GetFirstServiceRef().Service;
-            var notes = service.Notes;
-            var folderId = await service.Folders.GetAsync(1);    // TODO:  Fix this magic number (1 = default folder).
 
-            var note = new Model.Dto.NoteExtendedDto
+            // TODO:  Fix this magic number (1 = default folder).
+            var folder = await service.Folders.GetAsync(1);    
+
+            var note = new NoteExtendedDto
             {
-                Topic = $"Chat: {DateTime.Now.ToString()}",
+                Topic = $"ChatGPT: {DateTime.Now.ToString()}",
                 Description = _com.ChatTextMessasges.ToString(),
-                FolderId = folderId.Entity.FolderId
+                FolderId = folder.Entity.FolderId
             };
 
-            await notes.SaveExtendedAsync(note);
+            // Option 1
+            //await service.Notes.SaveExtendedAsync(note);
+            //_com.Store.Store_AddedNote(this, new ComponentEventArgs<NoteExtendedDto>(note));   // Hack, Store_AddedNote not is public
 
-            _com.Store.Store_SavedNote(this, new ComponentEventArgs<NoteExtendedDto>(note);            
+            // Option 2
+            var noteEditor = new NoteEditorComponent(_com.Store);
+            await noteEditor.NewModel(service);
+            noteEditor.Model.Topic = $"ChatGPT: {DateTime.Now.ToString()}";
+            noteEditor.Model.Description = _com.ChatTextMessasges.ToString();
+            noteEditor.Model.FolderId = folder.Entity.FolderId;
+            noteEditor.Model.FolderDto = folder.Entity;
+            noteEditor.Run();            
         }
         catch (Exception ex)
         {

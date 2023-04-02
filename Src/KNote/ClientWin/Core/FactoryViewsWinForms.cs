@@ -116,4 +116,9 @@ public class FactoryViewsWinForms : IFactoryViews
     {
         return new KntChatForm(component);
     }
+
+    public IViewBase View(KntLabComponent component)
+    {
+        return new KntLabForm(component);
+    }
 }

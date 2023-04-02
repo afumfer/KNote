@@ -56,6 +56,19 @@ public class KNoteScriptLibrary: Library
         return new KntScriptConsoleComponent(_store);
     }
 
+    public KntChatGPTComponent GetKntChatGPTComponent()
+    {
+        return new KntChatGPTComponent(_store);
+    }
+
+    public string GetKntChatGPTMessage(string prompt)
+    {
+        var chatGPT =  new KntChatGPTComponent(_store);
+        chatGPT.Run();
+        Task.Run(() => chatGPT.GetCompletionAsync(prompt)).Wait();        
+        return chatGPT.ChatTextMessasges.ToString();
+    }
+
     #endregion
 
     #region Utils methods
