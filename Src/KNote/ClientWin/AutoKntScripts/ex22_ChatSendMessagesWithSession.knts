@@ -1,0 +1,14 @@
+﻿' Chat SingalR example 2, send messages with chat component
+
+var i = 0;
+
+var chat = GetChatGPTComponent();
+chat.Run();
+chat.StartHubConnection();
+
+for i = 1 to 10
+	chat.SendMessage("Hello " + i);
+	printline "Hello " + i;
+end for;
+
+printline "-- END --";

@@ -1,4 +1,5 @@
-﻿' Example 2, use chat component, a chat conversation
+﻿' ChatGPT example 2, use component with chat conversation
+
 var chat = GetKntChatGPTComponent();
 chat.Run();
 

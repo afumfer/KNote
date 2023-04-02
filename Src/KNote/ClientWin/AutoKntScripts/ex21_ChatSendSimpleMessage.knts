@@ -1,0 +1,5 @@
+﻿' Chat SingalR example 1, send simple messages
+
+printline SendChatMessage("Hello world");
+
+printline "-- END --";

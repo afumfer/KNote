@@ -30,6 +30,41 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     #endregion
 
+    #region IViewBase interface
+
+    public void ShowView()
+    {
+        this.Show();
+    }
+
+    public Result<EComponentResult> ShowModalView()
+    {
+        return _com.DialogResultToComponentResult(this.ShowDialog());
+    }
+
+    public void OnClosingView()
+    {
+        _viewFinalized = true;
+        this.Close();
+    }
+
+    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    {
+        return MessageBox.Show("KaNote", caption, buttons, icon);
+    }
+
+    public void RefreshView()
+    {
+        textResult.Text = _com.ChatTextMessasges.ToString();
+        textResult.SelectionStart = textResult.Text.Length;
+        textResult.ScrollToCaret();
+        textPrompt.Text = "";
+        toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens} ";
+        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_com.TotalProcessingTime}";
+    }
+
+    #endregion
+
     #region Form events handlers
 
     private void ChatGPTForm_Load(object sender, EventArgs e)
@@ -183,40 +218,4 @@ public partial class KntChatGPTForm : Form, IViewBase
     }
 
     #endregion
-
-    #region IView interface
-
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EComponentResult> ShowModalView()
-    {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show("KaNote", caption, buttons, icon);
-    }
-
-    public void RefreshView()
-    {
-        textResult.Text = _com.ChatTextMessasges.ToString();
-        textResult.SelectionStart = textResult.Text.Length;
-        textResult.ScrollToCaret();
-        textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens} ";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_com.TotalProcessingTime}";
-    }
-
-    #endregion
-
 }

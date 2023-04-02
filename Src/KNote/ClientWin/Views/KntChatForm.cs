@@ -27,80 +27,6 @@ public partial class KntChatForm : Form, IViewBase
 
     #endregion
 
-    #region Form events handlers
-
-    private async void ChatForm_Load(object sender, EventArgs e)
-    {
-        if (string.IsNullOrEmpty(_com.Store.AppConfig.ChatHubUrl))
-        {
-            MessageBox.Show("Chat hub url is not defined. Set the chat hub url y Options menú.", "KaNote");
-            this.Close();
-            return;
-        }
-
-        try
-        {
-            _hubConnection = new HubConnectionBuilder()
-                           .WithUrl(_com.Store.AppConfig.ChatHubUrl)
-                           .Build();
-
-            // Is disconected => must conected
-            _hubConnection.Closed += async (error) =>
-            {
-                Thread.Sleep(5000);
-                await _hubConnection.StartAsync();
-            };
-
-            _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
-            {
-                var encodeMessage = $"{user}: {message}";
-                listMessages.Items.Add(encodeMessage);
-                listMessages.Refresh();
-            });
-
-            Text += $" [{_com.Store.AppUserName}]";
-            labelServer.Text = _com.Store.AppConfig.ChatHubUrl;
-
-            await _hubConnection.StartAsync();
-        }
-        catch (Exception)
-        {
-            listMessages.Items.Add($"The connection could not be started.");
-        }
-    }
-
-    private async void buttonSend_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            UseWaitCursor = true;
-            if (_hubConnection.State == HubConnectionState.Disconnected)
-                await _hubConnection.StartAsync();
-
-            if (_hubConnection.State == HubConnectionState.Connected)
-                await _hubConnection.SendAsync("SendMessage", _com.Store.AppUserName, textMessage.Text);
-
-            textMessage.Text = "";
-        }
-        catch (Exception ex)
-        {
-            listMessages.Items.Add($"The message coundn't be sent. Error: {ex.Message}");
-            UseWaitCursor = false;
-        }
-        finally
-        {
-            UseWaitCursor = false;
-        }
-    }
-
-    private void KntChatForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!_viewFinalized)
-            _com.Finalize();
-    }
-
-    #endregion
-
     #region IView implementation
 
     public void ShowView()
@@ -131,4 +57,37 @@ public partial class KntChatForm : Form, IViewBase
 
     #endregion
 
+    #region Form events handlers
+
+    private void ChatForm_Load(object sender, EventArgs e)
+    {
+        _com.ReceiveMessage += _com_ReceiveMessage;
+
+        Text += $" [{_com.Store.AppUserName}]";
+        labelServer.Text = _com.Store.AppConfig.ChatHubUrl;
+    }
+
+    private async void buttonSend_Click(object sender, EventArgs e)
+    {
+        await _com.SendMessageAsync(textMessage.Text);        
+        textMessage.Text = "";
+    }
+
+    private void KntChatForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (!_viewFinalized)
+            _com.Finalize();
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private void _com_ReceiveMessage(object sender, ComponentEventArgs<string> e)
+    {
+        listMessages.Items.Add(e.Entity.ToString());
+        listMessages.Refresh();
+    }
+
+    #endregion 
 }

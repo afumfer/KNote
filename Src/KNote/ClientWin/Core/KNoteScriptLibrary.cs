@@ -69,6 +69,20 @@ public class KNoteScriptLibrary: Library
         return chatGPT.ChatTextMessasges.ToString();
     }
 
+    public KntChatComponent GetChatGPTComponent()
+    {
+        return new KntChatComponent(_store);
+    }
+
+    public void SendChatMessage(string message)
+    {
+        var chat = new KntChatComponent(_store);
+        var res = chat.Run();
+        if(res.IsValid)
+            chat.StartHubConnection();
+        Task.Run(() => chat.SendMessage(message)).Wait();        
+    }
+
     #endregion
 
     #region Utils methods

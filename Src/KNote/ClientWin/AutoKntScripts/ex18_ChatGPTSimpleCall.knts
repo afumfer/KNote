@@ -1,2 +1,3 @@
-﻿' Example 1 simple call
+﻿' ChatGPT example 1, simple call
+
 printline GetKntChatGPTMessage("Hello");

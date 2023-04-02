@@ -504,10 +504,11 @@ namespace KNote.ClientWin.Components
             kntScriptCom.Run();
         }
 
-        public void ShowKntChatConsole()
+        public async Task ShowKntChatConsole()
         {
             var kntChatComponent = new KntChatComponent(Store);
-            kntChatComponent.Run();            
+            kntChatComponent.Run();
+            await kntChatComponent.StartHubConnectionAsync();
             kntChatComponent.ShowChatView();
         }
 

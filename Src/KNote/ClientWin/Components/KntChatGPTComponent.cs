@@ -177,13 +177,16 @@ public class KntChatGPTComponent : ComponentBase
         _chatTextMessasges.Append($"\r\n");
     }
 
-    // Warning: his method can cause a deadlock in single-threaded environments
+    // --------------------------------------------------------------------------
+    // Warning: this method can cause a deadlock in single-threaded environments
     // (for example, Windows Forms or WPF applications) or ASP.NET applications.
     // It is recommended to use the asynchronous version of this method.
+    // Use only in KntScript
     public void GetCompletion(string prompt)
     {
         Task.Run(() => GetCompletionAsync(prompt)).Wait();
     }
+    // --------------------------------------------------------------------------
 
     public event EventHandler<ComponentEventArgs<string>> StreamToken;
     public async Task StreamCompletionAsync(string prompt)
@@ -267,5 +270,4 @@ public class KntChatGPTComponent : ComponentBase
     }
 
     #endregion 
-
 }

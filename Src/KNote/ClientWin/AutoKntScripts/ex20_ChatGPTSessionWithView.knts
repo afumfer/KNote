@@ -1,4 +1,5 @@
-﻿' Example 3, use chat component view
+﻿' ChatGPT example 3, use chat component view
+
 var chat = GetKntChatGPTComponent();
 chat.Run();
 chat.ShowChatGPTView();
