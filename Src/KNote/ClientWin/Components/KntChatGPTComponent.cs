@@ -19,8 +19,8 @@ public class KntChatGPTComponent : ComponentBase
 
     private OpenAIClient _openAIClient;
 
-    private string _organization = "";
-    private string _apiKey = "";
+    //private string _organization = "";
+    //private string _apiKey = "";
 
     #endregion
 
@@ -85,17 +85,26 @@ public class KntChatGPTComponent : ComponentBase
     {
         try
         {
-            _organization = Store.AppConfig.ChatGPTOrganization;
-            _apiKey = Store.AppConfig.ChatGPTApiKey;
+            var organization = Store.AppConfig.ChatGPTOrganization;
+            var apiKey = Store.AppConfig.ChatGPTApiKey;
 
-            _openAIClient = new OpenAIClient(new OpenAIAuthentication(_apiKey, _organization));
+            if (string.IsNullOrEmpty(organization) || string.IsNullOrEmpty(apiKey))
+            {
+                var message = "It does not have an ApiKey or an IdOrganización of the OpenAI API defined. You must configure these values (ChatGPTApiKey and ChatGPTOrganization) in the program settings.";
+                throw new Exception(message);
+            }
+
+            _openAIClient = new OpenAIClient(new OpenAIAuthentication(apiKey, organization));
 
             return new Result<EComponentResult>(EComponentResult.Executed);
         }
         catch (Exception ex)
         {
-            ChatGPTView.ShowInfo($"OnInitialized KntChatGPTComponent error: {ex.Message}");
-            return new Result<EComponentResult>(EComponentResult.Error);
+            var res = new Result<EComponentResult>(EComponentResult.Error);
+            var resMessage = $"OnInitialized KntChatGPTComponent error: {ex.Message}";
+            res.AddErrorMessage(resMessage);
+            ChatGPTView.ShowInfo(resMessage);
+            return res;
         }
     }
 
@@ -124,9 +133,16 @@ public class KntChatGPTComponent : ComponentBase
 
     public void ShowChatGPTView()
     {
-        AutoCloseComponentOnViewExit = true;
-        AutoSaveChatMessagesOnViewExit = true;
-        ChatGPTView.ShowView();
+        if(ComponentState == EComponentState.Started)
+        {
+            AutoCloseComponentOnViewExit = true;
+            AutoSaveChatMessagesOnViewExit = true;
+            ChatGPTView.ShowView();
+        }
+        else
+        {
+            ChatGPTView.ShowInfo("KntChatGPT component is no started.");
+        }
     }
 
     #endregion

@@ -81,19 +81,24 @@ abstract public class ComponentBase : IDisposable
     }
 
     public virtual Result<EComponentResult> Run() 
-    {
-        Result<EComponentResult> result;
-        var preconditionResult = CheckPreconditions();
-        if (preconditionResult.IsValid) 
+    {        
+        var result = CheckPreconditions();
+        if (result.IsValid) 
         {
             OnStateComponentChanged(EComponentState.PreconditionsOvercome);
             result = OnInitialized();
-            OnStateComponentChanged(EComponentState.Initialized);                
+            if(result.IsValid)
+                OnStateComponentChanged(EComponentState.Initialized);
+            else
+            {
+                OnStateComponentChanged(EComponentState.Error);
+                return result;
+            }
         }
         else
         {                
             OnStateComponentChanged(EComponentState.Error);
-            result = preconditionResult;
+            return result;
         }
 
         OnStateComponentChanged(EComponentState.Started);

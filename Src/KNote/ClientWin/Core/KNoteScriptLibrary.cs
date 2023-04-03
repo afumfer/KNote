@@ -78,9 +78,10 @@ public class KNoteScriptLibrary: Library
     {
         var chat = new KntChatComponent(_store);
         var res = chat.Run();
+        //if(res.IsValid)
+        //    chat.StartHubConnection();
         if(res.IsValid)
-            chat.StartHubConnection();
-        Task.Run(() => chat.SendMessage(message)).Wait();        
+            Task.Run(() => chat.SendMessage(message)).Wait();        
     }
 
     #endregion

@@ -50,7 +50,7 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
-        return MessageBox.Show("KaNote", caption, buttons, icon);
+        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()
@@ -111,7 +111,7 @@ public partial class KntChatGPTForm : Form, IViewBase
     {
         if (!_viewFinalized)
         {
-            if (_com.AutoSaveChatMessagesOnViewExit)
+            if (_com.AutoSaveChatMessagesOnViewExit && !string.IsNullOrEmpty(textResult.Text))
             {
                 await SaveChatMessages();
             }

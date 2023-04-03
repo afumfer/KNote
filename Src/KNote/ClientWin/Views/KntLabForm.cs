@@ -63,7 +63,7 @@ public partial class KntLabForm : Form, IViewBase
 
     public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
     {
-        return MessageBox.Show("KaNote", caption, buttons, icon);
+        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     #endregion

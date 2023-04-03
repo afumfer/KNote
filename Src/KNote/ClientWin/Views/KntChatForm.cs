@@ -47,7 +47,7 @@ public partial class KntChatForm : Form, IViewBase
 
     public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
-        return MessageBox.Show("KaNote", caption, buttons, icon);
+        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()

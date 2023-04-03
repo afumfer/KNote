@@ -7,13 +7,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace KNote.ClientWin.Components;
 
 public class KntChatComponent : ComponentBase
 {
+    #region Private fields
+
     private HubConnection _hubConnection;
-    private bool _firstStartHubConnection = false;
+
+    #endregion 
 
     #region Constructor
 
@@ -29,14 +33,14 @@ public class KntChatComponent : ComponentBase
     public event EventHandler<ComponentEventArgs<string>> ReceiveMessage;
     protected override Result<EComponentResult> OnInitialized()
     {
-        if (string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
-        {
-            ChatView.ShowInfo("Chat hub url is not defined. Set the chat hub url y Options menú.", "KaNote");
-            return new Result<EComponentResult>(EComponentResult.Error);
-        }
-
         try
         {
+            if (string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
+            {
+                var message = "Chat hub url is not defined. Set the chat hub url y Options menú.";
+                throw new Exception(message);
+            }
+
             _hubConnection = new HubConnectionBuilder()
                            .WithUrl(Store.AppConfig.ChatHubUrl)
                            .Build();
@@ -46,13 +50,18 @@ public class KntChatComponent : ComponentBase
                 var encodeMessage = $"{user}: {message}";
                 ReceiveMessage?.Invoke(this, new ComponentEventArgs<string>(encodeMessage));
             });
-        
+
+            StartHubConnection();
+
             return new Result<EComponentResult>(EComponentResult.Executed);
         }
         catch (Exception ex)
-        {            
-            ChatView.ShowInfo($"The connection could not be started. Error: {ex.Message}", "KaNote");
-            return new Result<EComponentResult>(EComponentResult.Error);
+        {
+            var res = new Result<EComponentResult>(EComponentResult.Error);
+            var resMessage = $"The connection could not be started. Error: {ex.Message}.";
+            res.AddErrorMessage(resMessage);
+            ChatView.ShowInfo(resMessage, "KaNote");
+            return res;
         }
     }
 
@@ -60,35 +69,19 @@ public class KntChatComponent : ComponentBase
 
     #region Public Methods
 
-    public async Task StartHubConnectionAsync()
-    {
-        // Is disconected => must conected
-        if (!_firstStartHubConnection)
-        {
-            _hubConnection.Closed += async (error) =>
-            {
-                Thread.Sleep(5000);
-                await _hubConnection.StartAsync();            
-            };
-
-        }
-        _firstStartHubConnection = true;
-        await _hubConnection.StartAsync();
-    }
-
     public async Task SendMessageAsync(string message)
     {
         try
-        {            
+        {
             if (_hubConnection.State == HubConnectionState.Disconnected)
                 await _hubConnection.StartAsync();
 
             if (_hubConnection.State == HubConnectionState.Connected)
                 await _hubConnection.SendAsync("SendMessage", Store.AppUserName, message);
-            
+
         }
         catch (Exception ex)
-        {            
+        {
             ChatView.ShowInfo($"The connection could not be started. Error: {ex.Message}", "KaNote");
         }
     }
@@ -98,15 +91,36 @@ public class KntChatComponent : ComponentBase
     // (for example, Windows Forms or WPF applications) or ASP.NET applications.
     // It is recommended to use the asynchronous version of this method.
     // Use only in KntScript
-    public void StartHubConnection()
-    {
-        Task.Run(() => StartHubConnectionAsync()).Wait();
-    }
-
     public void SendMessage(string message)
     {
         Task.Run(() => SendMessageAsync(message)).Wait();
     }
+    // --------------------------------------------------------------------------
+
+    #endregion
+
+    #region Private methods
+
+    private async Task StartHubConnectionAsync()
+    {
+        _hubConnection.Closed += async (error) =>
+        {
+            Thread.Sleep(5000);
+            await _hubConnection.StartAsync();
+        };
+
+        await _hubConnection.StartAsync();
+    }
+
+    // --------------------------------------------------------------------------
+    // Warning: this method can cause a deadlock in single-threaded environments
+    // (for example, Windows Forms or WPF applications) or ASP.NET applications.
+    // It is recommended to use the asynchronous version of this method.
+    // Use only in KntScript
+    private void StartHubConnection()
+    {
+        Task.Run(() => StartHubConnectionAsync()).Wait();
+    }  
     // --------------------------------------------------------------------------
 
     #endregion 
@@ -126,10 +140,16 @@ public class KntChatComponent : ComponentBase
 
     public void ShowChatView()
     {
-        ChatView.ShowView();
+        
+        if (ComponentState == EComponentState.Started)
+        {
+            ChatView.ShowView();
+        }
+        else
+        {
+            ChatView.ShowInfo("KntChat component is no started.");
+        }
     }
 
     #endregion 
-
-
 }

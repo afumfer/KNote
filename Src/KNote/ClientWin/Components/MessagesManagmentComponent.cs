@@ -51,9 +51,11 @@ public class MessagesManagmentComponent : ComponentBase
 
             return new Result<EComponentResult>(EComponentResult.Executed);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new Result<EComponentResult>(EComponentResult.Error);
+            var res = new Result<EComponentResult>(EComponentResult.Error);            
+            res.AddErrorMessage(ex.Message);            
+            return res;            
         }
     }
 
