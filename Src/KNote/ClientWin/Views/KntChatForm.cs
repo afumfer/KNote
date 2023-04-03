@@ -10,9 +10,7 @@ public partial class KntChatForm : Form, IViewBase
     #region Private fields
 
     private readonly KntChatComponent _com;
-    private bool _viewFinalized = false;
-
-    private HubConnection _hubConnection;
+    private bool _viewFinalized = false;    
 
     #endregion
 

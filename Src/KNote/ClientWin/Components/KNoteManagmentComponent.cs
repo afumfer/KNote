@@ -212,9 +212,9 @@ namespace KNote.ClientWin.Components
                     FoldersSelectorComponent.Run();
                     FilterParamComponent.Run();
                     NoteEditorComponent.Run();
-                    MessagesManagmentComponent.Run();
+                    MessagesManagmentComponent.Run();                    
 
-                    NotifyView.ShowView();
+                    NotifyView.ShowView();                    
                 }
             }
             catch (Exception ex)
@@ -508,8 +508,6 @@ namespace KNote.ClientWin.Components
         {
             var kntChatComponent = new KntChatComponent(Store);
             kntChatComponent.Run();
-            //await kntChatComponent.StartHubConnectionAsync();
-            //kntChatComponent.StartHubConnection();
             kntChatComponent.ShowChatView();
         }
 
