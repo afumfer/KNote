@@ -112,7 +112,7 @@ public class FactoryViewsWinForms : IFactoryViews
         return new KntChatGPTForm(component);
     }
 
-    public IViewBase View(KntChatComponent component)
+    public IViewChat View(KntChatComponent component)
     {
         return new KntChatForm(component);
     }

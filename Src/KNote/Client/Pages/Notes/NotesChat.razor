@@ -2,6 +2,7 @@
 
 @using Microsoft.AspNetCore.SignalR.Client
 
+@inject IStore store
 @inject NavigationManager navigationManager
 
 @implements IDisposable
@@ -52,12 +53,16 @@
 @code
 {
     private HubConnection hubConnection = null!;
-    private List<string> Messages = new List<string>();
+    private List<string> Messages = null!;
     private string? userInput;
     private string? messageInput;
 
     protected override async Task OnInitializedAsync()
     {        
+        store.AppState.OnChange += StateHasChanged;
+
+        Messages = store.Messages;
+
         hubConnection = new HubConnectionBuilder()
             .WithUrl(navigationManager.ToAbsoluteUri("chathub"))
             .Build();
@@ -90,6 +95,7 @@
 
     public void Dispose()
     {
+        store.AppState.OnChange -= StateHasChanged;
         _ = hubConnection.DisposeAsync();
     }
 }

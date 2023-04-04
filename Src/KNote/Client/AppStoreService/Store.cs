@@ -112,6 +112,8 @@ public class Store : IStore
         }
     }
 
+    public List<string> Messages { get; } = new List<string>();
+
 
     #endregion
 

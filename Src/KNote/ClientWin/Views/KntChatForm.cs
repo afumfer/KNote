@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KntChatForm : Form, IViewBase
+public partial class KntChatForm : Form, IViewChat
 {
     #region Private fields
 
     private readonly KntChatComponent _com;
-    private bool _viewFinalized = false;    
+    private bool _viewFinalized = false;
 
     #endregion
 
@@ -53,6 +53,19 @@ public partial class KntChatForm : Form, IViewBase
         throw new NotImplementedException();
     }
 
+    public void VisibleView(bool visible)
+    {
+        if (visible)
+        {
+            Show();
+        }
+        else
+        {
+            Hide();
+        }
+        // Visible = visible;   
+    }
+
     #endregion
 
     #region Form events handlers
@@ -67,14 +80,22 @@ public partial class KntChatForm : Form, IViewBase
 
     private async void buttonSend_Click(object sender, EventArgs e)
     {
-        await _com.SendMessageAsync(textMessage.Text);        
+        await _com.SendMessageAsync(textMessage.Text);
         textMessage.Text = "";
     }
 
     private void KntChatForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+        {
+            if (_com.AutoCloseComponentOnViewExit)
+                _com.Finalize();
+            else
+            {
+                Hide();
+                e.Cancel = true;
+            }
+        }
     }
 
     #endregion

@@ -19,9 +19,6 @@ public class KntChatGPTComponent : ComponentBase
 
     private OpenAIClient _openAIClient;
 
-    //private string _organization = "";
-    //private string _apiKey = "";
-
     #endregion
 
     #region Properties
@@ -135,8 +132,6 @@ public class KntChatGPTComponent : ComponentBase
     {
         if(ComponentState == EComponentState.Started)
         {
-            AutoCloseComponentOnViewExit = true;
-            AutoSaveChatMessagesOnViewExit = true;
             ChatGPTView.ShowView();
         }
         else

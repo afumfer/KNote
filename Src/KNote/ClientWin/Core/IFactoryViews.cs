@@ -27,6 +27,6 @@ public interface IFactoryViews
     IViewEditor<RepositoryRef> View(RepositoryEditorComponent component);
     IViewEditor<AppConfig> View(OptionsEditorComponent component);
     IViewBase View(KntChatGPTComponent component);
-    IViewBase View(KntChatComponent component);
+    IViewChat View(KntChatComponent component);
     IViewBase View(KntLabComponent component);
 }

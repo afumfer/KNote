@@ -17,7 +17,15 @@ public class KntChatComponent : ComponentBase
 
     private HubConnection _hubConnection;
 
-    #endregion 
+    #endregion
+
+    #region Properties 
+
+    public bool AutoCloseComponentOnViewExit { get; set; } = false;    
+
+    public string Tag { get; set; } = "KntChatComponent v 0.1";
+
+    #endregion
 
     #region Constructor
 
@@ -127,8 +135,8 @@ public class KntChatComponent : ComponentBase
 
     #region IViewBase
 
-    IViewBase _chatView;
-    protected IViewBase ChatView
+    IViewChat _chatView;
+    protected IViewChat ChatView
     {
         get
         {
@@ -136,6 +144,12 @@ public class KntChatComponent : ComponentBase
                 _chatView = Store.FactoryViews.View(this);
             return _chatView;
         }
+    }
+
+    public void ShowChatView(bool autoCloseComponentOnViewExit)
+    {
+        AutoCloseComponentOnViewExit = autoCloseComponentOnViewExit;        
+        ChatView.ShowView();
     }
 
     public void ShowChatView()
@@ -149,6 +163,11 @@ public class KntChatComponent : ComponentBase
         {
             ChatView.ShowInfo("KntChat component is no started.");
         }
+    }
+
+    public void VisibleView (bool visible)
+    {
+        ChatView.VisibleView(visible);
     }
 
     #endregion 

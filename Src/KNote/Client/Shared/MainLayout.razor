@@ -42,24 +42,22 @@
 
 @code {
 
-    private bool sidebar;
-    private AppState appState;
+    private bool sidebar;    
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
-        appState = store.AppState;
-        appState.OnChange += StateHasChanged;
-        appState.OnNotifyError += NotifyError;
-        appState.OnNotifySuccess += NotifySuccess;
+        
+        store.AppState.OnChange += StateHasChanged;
+        store.AppState.OnNotifyError += NotifyError;
+        store.AppState.OnNotifySuccess += NotifySuccess;
     }
 
     public void Dispose()
     {
-        appState.OnChange -= StateHasChanged;
-        appState.OnNotifyError -= NotifyError;
-        appState.OnNotifySuccess -= NotifySuccess;
+        store.AppState.OnChange -= StateHasChanged;
+        store.AppState.OnNotifyError -= NotifyError;
+        store.AppState.OnNotifySuccess -= NotifySuccess;
     }
 
     private void NotifyError(string summary, string details)

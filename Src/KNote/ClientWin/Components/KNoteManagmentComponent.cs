@@ -212,9 +212,18 @@ namespace KNote.ClientWin.Components
                     FoldersSelectorComponent.Run();
                     FilterParamComponent.Run();
                     NoteEditorComponent.Run();
-                    MessagesManagmentComponent.Run();                    
+                    MessagesManagmentComponent.Run();
 
-                    NotifyView.ShowView();                    
+                    NotifyView.ShowView();
+
+                    // TODO: Experimental ---------------------------------
+                    if (!string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
+                    {
+                        KntChatComponent.Run();
+                        KntChatComponent.ShowChatView(false);
+                        KntChatComponent.VisibleView(false);
+                    }
+                    //-----------------------------------------------------
                 }
             }
             catch (Exception ex)
@@ -473,6 +482,30 @@ namespace KNote.ClientWin.Components
 
         #endregion
 
+        #region KntChat component 
+        // TODO: -- Experimental -------------------------------------------------------------
+        private KntChatComponent _kntChatComponent;
+        public KntChatComponent KntChatComponent
+        {
+            get
+            {
+                if (_kntChatComponent == null)
+                {
+                    _kntChatComponent = new KntChatComponent(Store);
+                    _kntChatComponent.ReceiveMessage += _kntChatComponent_ReceiveMessage;
+                }
+                return _kntChatComponent;
+            }
+        }
+
+        private void _kntChatComponent_ReceiveMessage(object sender, ComponentEventArgs<string> e)
+        {
+            KntChatComponent.VisibleView(true);
+        }
+        // -----------------------------------------------------------------------------------
+        #endregion
+
+
         #endregion
 
         #region Component public methods
@@ -506,9 +539,15 @@ namespace KNote.ClientWin.Components
 
         public void ShowKntChatConsole()
         {
-            var kntChatComponent = new KntChatComponent(Store);
-            kntChatComponent.Run();
-            kntChatComponent.ShowChatView();
+            // Use _kntChatComponent field here
+            if (_kntChatComponent != null)  
+                KntChatComponent.VisibleView(true);
+            else
+            {
+                var kntChatComponent = new KntChatComponent(Store);
+                kntChatComponent.Run();
+                kntChatComponent.ShowChatView();
+            }
         }
 
         public void ShowKntChatGPTConsole()

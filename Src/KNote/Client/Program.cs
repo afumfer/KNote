@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components.Web;
 using KNote.Client.AppStoreService;
 using KNote.Client.Helpers;
 using KNote.Client.Auth;
-using KNote.Client.AppStoreService.ClientDataServices;
+// using KNote.Client.AppStoreService.ClientDataServices;  // deprecated
 using Radzen;
 
 
@@ -18,7 +18,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddOptions();
 
 // TODO: will be deprecated ....
-builder.Services.AddScoped<IGenericDataService, GenericDataService>();  
+//builder.Services.AddScoped<IGenericDataService, GenericDataService>();
 //......................
 
 builder.Services.AddScoped<IStore, Store>();

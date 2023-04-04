@@ -7,6 +7,7 @@ namespace KNote.Client.AppStoreService;
 public interface IStore
 {
     AppState AppState { get; }
+    List<string> Messages { get; }
     void NavigateTo(string uri);
     string GetUri();
     Dictionary<string, string> GetQueryStrings(string url);

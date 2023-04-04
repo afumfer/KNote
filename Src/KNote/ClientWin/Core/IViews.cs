@@ -71,12 +71,16 @@ public interface IViewKNoteManagment : IViewBase
 }
 
 public interface IViewPostIt<T> : IViewBase
-{
-    //void RefreshView();
+{    
     void CleanView();
     void RefreshModel();
     void HideView();
     void ActivateView();
+}
+
+public interface IViewChat : IViewBase
+{
+    void VisibleView(bool visible);
 }
 
 #endregion 
