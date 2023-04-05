@@ -147,8 +147,9 @@ public partial class KntChatGPTForm : Form, IViewBase
             // Option 2
             var noteEditor = new NoteEditorComponent(_com.Store);
             await noteEditor.NewModel(service);
-            noteEditor.Model.Topic = $"ChatGPT: {DateTime.Now.ToString()}";
+            noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
             noteEditor.Model.Description = _com.ChatTextMessasges.ToString();
+            noteEditor.Model.Tags = "[ChatGPT]";
             noteEditor.Model.FolderId = folder.Entity.FolderId;
             noteEditor.Model.FolderDto = folder.Entity;
             noteEditor.Run();            

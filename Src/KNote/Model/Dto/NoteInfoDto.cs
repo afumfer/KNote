@@ -144,7 +144,7 @@ public class NoteInfoDto : SmartModelDtoBase
         }
     }
 
-    private string _contentType;
+    private string _contentType = "markdown";
     [MaxLength(1024)]
     public string ContentType
     {

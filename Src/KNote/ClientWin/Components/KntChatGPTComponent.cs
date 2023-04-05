@@ -176,11 +176,11 @@ public class KntChatGPTComponent : ComponentBase
         _totalProcessingTime += result.ProcessingTime;
         
         _chatTextMessasges.Append($"\r\n");
-        _chatTextMessasges.Append($">> User:\r\n");
+        _chatTextMessasges.Append($"**User:** \r\n");
         _chatTextMessasges.Append($"{_prompt}\r\n");
         _chatTextMessasges.Append($"(Tokens: {result.Usage.PromptTokens})\r\n");
         _chatTextMessasges.Append($"\r\n");
-        _chatTextMessasges.Append($">> Assistant:\r\n");
+        _chatTextMessasges.Append($"**Assistant:** \r\n");
         _chatTextMessasges.Append(result.FirstChoice.Message.ToString().Replace("\n", "\r\n"));
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"(Tokens: {result.Usage.CompletionTokens} tokens. Processing time: {result.ProcessingTime})\r\n");
@@ -207,10 +207,10 @@ public class KntChatGPTComponent : ComponentBase
 
         stopwatch.Start();
 
-        _chatTextMessasges.Append($">> User:\r\n{prompt}\r\n\r\n");
-        StreamToken?.Invoke(this, new ComponentEventArgs<string>($">> User:\r\n{prompt}\r\n\r\n"));
-        _chatTextMessasges.Append($">> Assistant:\r\n");
-        StreamToken?.Invoke(this, new ComponentEventArgs<string>($">> Assistant:\r\n"));        
+        _chatTextMessasges.Append($"**User:** \r\n{prompt}\r\n\r\n");
+        StreamToken?.Invoke(this, new ComponentEventArgs<string>($"**User:** \r\n{prompt}\r\n\r\n"));
+        _chatTextMessasges.Append($"**Assistant:** \r\n");
+        StreamToken?.Invoke(this, new ComponentEventArgs<string>($"**Assistant:** \r\n"));        
 
         await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
         {
