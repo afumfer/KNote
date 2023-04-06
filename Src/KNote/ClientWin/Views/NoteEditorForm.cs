@@ -16,7 +16,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private readonly NoteEditorComponent _com;
     private bool _viewFinalized = false;
 
-    private Guid _selectedFolderId;        
+    private Guid _selectedFolderId;
     private ResourceDto _selectedResource;
 
     #endregion 
@@ -25,7 +25,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     public NoteEditorForm(NoteEditorComponent com)
     {
+        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
         InitializeComponent();
+
         _com = com;
 
         // TODO: options for new versión
@@ -34,7 +36,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         toolStripS3.Visible = false;
         toolStripS4.Visible = false;
         buttonInsertTemplate.Visible = false;
-        toolStripToolS1.Visible = false;                        
+        toolStripToolS1.Visible = false;
     }
 
     #endregion
@@ -109,7 +111,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         TopLevel = false;
         Dock = DockStyle.Fill;
         FormBorderStyle = FormBorderStyle.None;
-        toolBarNoteEditor.Visible = false;        
+        toolBarNoteEditor.Visible = false;
         _com.EditMode = false;
     }
 
@@ -118,7 +120,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         TopLevel = true;
         Dock = DockStyle.None;
         FormBorderStyle = FormBorderStyle.Sizable;
-        toolBarNoteEditor.Visible = true;            
+        toolBarNoteEditor.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
         _com.EditMode = true;
     }
@@ -171,7 +173,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else if (menuSel == buttonDelete)
         {
             DeleteModel();
-        }    
+        }
         else if (menuSel == buttonUndo)
         {
             UndoChanges();
@@ -210,7 +212,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     GithubFlavored = true, // generate GitHub flavoured markdown, supported for BR, PRE and table tags
                     RemoveComments = false, // will ignore all comments
                     SmartHrefHandling = true // remove markdown output for links where appropriate
-                };       
+                };
                 var converter = new ReverseMarkdown.Converter(config);
                 string html = htmlDescription.BodyHtml;
                 string result = converter.Convert(html);
@@ -232,7 +234,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     private void buttonViewHtml_Click(object sender, EventArgs e)
-    {        
+    {
         try
         {
             var MarkdownContent = textDescription.Text;
@@ -319,7 +321,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             htmlDescription.HtmlContentsEdit();
             htmlDescription.Focus();
-        }            
+        }
     }
 
     private void toolDescriptionMarkdown_Click(object sender, EventArgs e)
@@ -388,9 +390,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         var changed = await _com.RequestChangeNoteType(_com.Model.NoteTypeId);
 
-        if(changed)
+        if (changed)
         {
-            textNoteType.Text = _com.Model.NoteTypeDto?.Name;                
+            textNoteType.Text = _com.Model.NoteTypeDto?.Name;
             ModelToControlsAttributes();
         }
     }
@@ -432,7 +434,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             MessageBox.Show("There is no selected alert.", "KaNote");
             return;
         }
-        var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);            
+        var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
         var res = await _com.DeleteMessage(messageId);
         if (res)
         {
@@ -442,7 +444,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void listViewAlarms_DoubleClick(object sender, EventArgs e)
     {
-        if(_com.EditMode)
+        if (_com.EditMode)
             EditAlarm();
     }
 
@@ -456,7 +458,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (task != null)
         {
             listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
-            listViewTasks.Items[listViewTasks.Items.Count-1].Selected = true;
+            listViewTasks.Items[listViewTasks.Items.Count - 1].Selected = true;
             textTaskDescription.Text = task.Description;
             textTaskTags.Text = task.Tags;
         }
@@ -498,7 +500,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         await AddResource();
     }
-       
+
     private void buttonResourceEdit_Click(object sender, EventArgs e)
     {
         EditResource();
@@ -506,23 +508,23 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void buttonResourceDelete_Click(object sender, EventArgs e)
     {
-        if (listViewResources.SelectedItems.Count == 0)            
+        if (listViewResources.SelectedItems.Count == 0)
         {
             MessageBox.Show("There is no task selected .", "KaNote");
             return;
-        }            
-        var delRes = listViewResources.SelectedItems[0].Name;            
-        var res = await _com.DeleteResource(Guid.Parse(delRes));            
+        }
+        var delRes = listViewResources.SelectedItems[0].Name;
+        var res = await _com.DeleteResource(Guid.Parse(delRes));
         if (res)
         {
-            listViewResources.Items[delRes].Remove();      
+            listViewResources.Items[delRes].Remove();
             _selectedResource = null;
             await webViewResource.NavigateToString(" ");
             webViewResource.Visible = false;
             panelPreview.Visible = true;
             textDescriptionResource.Text = "";
             if (listViewResources.Items.Count > 0)
-                listViewResources.Items[0].Selected = true;                
+                listViewResources.Items[0].Selected = true;
         }
     }
 
@@ -533,13 +535,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     private void linkViewFile_Click(object sender, EventArgs e)
-    {            
+    {
 
         if (_selectedResource.FullUrl == null)
             return;
 
         try
-        {                
+        {
             ProcessStartInfo startInfo = new ProcessStartInfo(_selectedResource.FullUrl) { UseShellExecute = true };
             Process.Start(startInfo);
         }
@@ -557,17 +559,17 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
 
-        InsertLinkSelectedResource();             
+        InsertLinkSelectedResource();
     }
 
     private void buttonSaveResource_Click(object sender, EventArgs e)
-    {           
+    {
         if (_selectedResource == null)
         {
             ShowInfo("There is no selected resource.");
             return;
         }
-           
+
         saveFileDialog.Title = "Save resource file as ...";
         saveFileDialog.InitialDirectory = Path.GetTempPath();
         saveFileDialog.FileName = _selectedResource.NameOut;
@@ -576,13 +578,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             try
             {
                 string fileName = saveFileDialog.FileName;
-                if(_selectedResource.ContentInDB)
+                if (_selectedResource.ContentInDB)
                     File.WriteAllBytes(fileName, _selectedResource.ContentArrayBytes);
                 else
                 {
                     string fullPath = _com.Service.Notes.UtilGetResourcePath(_selectedResource);
                     File.Copy(fullPath, fileName);
-                }                
+                }
             }
             catch (Exception ex)
             {
@@ -636,7 +638,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     #region Private methods
 
     private void PersonalizeControls()
-    {        
+    {
         textDescription.Dock = DockStyle.Fill;
         htmlDescription.Dock = DockStyle.Fill;
         webView2.Dock = DockStyle.Fill;
@@ -694,7 +696,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         PersonalizeListView(listViewAlarms);
 
         // TODO: remove in this version
-        tabNoteData.TabPages.Remove(tabTraceNotes);        
+        tabNoteData.TabPages.Remove(tabTraceNotes);
     }
 
     private async void ModelToControls()
@@ -704,11 +706,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // Basic data            
         Text = $"Note editor [{_com.ServiceRef?.Alias}]";
-        textTopic.Text = _com.Model.Topic;                
+        textTopic.Text = _com.Model.Topic;
         textNoteNumber.Text = "#" + _com.Model.NoteNumber.ToString();
         textFolder.Text = _com.Model.FolderDto?.Name;
         textFolderNumber.Text = "#" + _com.Model.FolderDto.FolderNumber.ToString();
-        _selectedFolderId = _com.Model.FolderId;                    
+        _selectedFolderId = _com.Model.FolderId;
         textTags.Text = _com.Model.Tags;
         textStatus.Text = _com.Model.InternalTags;
         textPriority.Text = _com.Model.Priority.ToString();
@@ -729,8 +731,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             textDescription.Visible = false;
             htmlDescription.Visible = false;
-            webView2.Visible = true;            
-            webView2.TextUrl = _com.Model.Description;            
+            webView2.Visible = true;
+            webView2.TextUrl = _com.Model.Description;
             if (!string.IsNullOrEmpty(_com.Model.Description))
             {
                 await webView2.Navigate();
@@ -741,26 +743,26 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             htmlDescription.Visible = false;
             webView2.Visible = false;
             textDescription.Text = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
-            textDescription.Visible = true;                
+            textDescription.Visible = true;
         }
 
         // KAttributes           
-        textNoteType.Text = _com.Model.NoteTypeDto.Name;            
+        textNoteType.Text = _com.Model.NoteTypeDto.Name;
         ModelToControlsAttributes();
 
         // Resources 
         ModelToControlsResources();
-        if (_com.Model.Resources.Count > 0)            
-            listViewResources.Items[0].Selected = true;                                            
-        else            
-            UpdatePreviewResource(null);                
-            
+        if (_com.Model.Resources.Count > 0)
+            listViewResources.Items[0].Selected = true;
+        else
+            UpdatePreviewResource(null);
+
         // Tasks
         ModelToControlsTasks();
         if (_com.Model.Tasks.Count > 0)
             listViewTasks.Items[0].Selected = true;
         else
-        {                
+        {
             textTaskDescription.Text = "";
             textTaskTags.Text = "";
         }
@@ -770,19 +772,19 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // Script             
         textScriptCode.Text = _com.Model.Script;
-            
+
         // TODO: Trace notes
         //From = new List<TraceNote>(),
         //To = new List<TraceNote>()
 
         //this.Cursor = Cursors.Default;
     }
-        
+
     private void ModelToControlsAttributes()
     {
         listViewAttributes.Clear();
 
-        foreach(var atr in _com.Model.KAttributesDto)
+        foreach (var atr in _com.Model.KAttributesDto)
         {
             var itemList = new ListViewItem(atr.Name);
             itemList.Name = atr.NoteKAttributeId.ToString();
@@ -807,13 +809,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         foreach (var res in _com.Model.Resources)
         {
-            if(!res.IsDeleted())
+            if (!res.IsDeleted())
                 listViewResources.Items.Add(ResourceDtoToListViewItem(res));
         }
 
         listViewResources.Columns.Add("Name", 200, HorizontalAlignment.Left);
         listViewResources.Columns.Add("File type", 100, HorizontalAlignment.Left);
-        listViewResources.Columns.Add("Order", 70, HorizontalAlignment.Left);            
+        listViewResources.Columns.Add("Order", 70, HorizontalAlignment.Left);
     }
 
     private void ModelToControlsTasks()
@@ -822,12 +824,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         foreach (var task in _com.Model.Tasks)
         {
-            if(!task.IsDeleted())
+            if (!task.IsDeleted())
                 listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
         }
 
         // Width of -2 indicates auto-size.
-        listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);            
+        listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Resolved", 60, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
@@ -845,7 +847,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         foreach (var msg in _com.Model.Messages)
         {
-            if(!msg.IsDeleted())
+            if (!msg.IsDeleted())
                 listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
         }
 
@@ -856,14 +858,14 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listViewAlarms.Columns.Add("Alarm periodicity", 120, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Min", 50, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Notification type", 120, HorizontalAlignment.Left);
-        listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);            
+        listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);
     }
 
     private async void UpdatePreviewResource(ResourceDto resource)
     {
         _selectedResource = resource;
 
-        if(webViewResource.Visible)
+        if (webViewResource.Visible)
             await webViewResource.NavigateToString(" ");
         textDescriptionResource.Text = "";
 
@@ -871,7 +873,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
 
         textDescriptionResource.Text = _selectedResource.Description;
-                                                               
+
         if (_com.Store.IsSupportedFileTypeForPreview(_selectedResource.FileType))
         {
             webViewResource.Visible = true;
@@ -888,10 +890,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     private void ControlsToModel()
-    {            
+    {
         // Basic data
         _com.Model.Topic = textTopic.Text;
-        _com.Model.FolderId = _selectedFolderId;            
+        _com.Model.FolderId = _selectedFolderId;
         _com.Model.FolderDto.FolderId = _selectedFolderId;
         _com.Model.FolderDto.Name = textFolder.Text;
         _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
@@ -913,13 +915,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     private async Task<bool> SaveModel()
-    {            
+    {
         buttonUndo.Enabled = false;
         return await _com.SaveModel();
     }
 
     private async void DeleteModel()
-    {            
+    {
         var res = await _com.DeleteModel();
         if (res)
             _com.Finalize();
@@ -928,15 +930,15 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private void UndoChanges()
     {
         var res = MessageBox.Show("Are you sure you want to undo changes?", "KaNote", MessageBoxButtons.YesNo);
-        if(res == DialogResult.Yes)
+        if (res == DialogResult.Yes)
         {
             ModelToControls();
             buttonUndo.Enabled = false;
         }
     }
-        
+
     private async Task<bool> PostItEdit()
-    {            
+    {
         var res = await SaveModel();
         _com.FinalizeAndPostItEdit();
         return res;
@@ -981,7 +983,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             foreach (Control conTmp in tb.Controls)
             {
                 BlockControl(conTmp);
-            }                
+            }
             return;
         }
     }
@@ -996,7 +998,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listView.GridLines = true;
         listView.Sorting = SortOrder.None;
     }
-       
+
     private ListViewItem MessageDtoToListViewItem(KMessageDto message)
     {
         var itemList = new ListViewItem(message.UserFullName);
@@ -1013,7 +1015,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private ListViewItem NoteTaskDtoToListViewItem(NoteTaskDto task)
     {
         var itemList = new ListViewItem(task.UserFullName);
-        itemList.Name = task.NoteTaskId.ToString();            
+        itemList.Name = task.NoteTaskId.ToString();
         itemList.SubItems.Add(task.Priority.ToString());
         itemList.SubItems.Add(task.Resolved.ToString());
         itemList.SubItems.Add(task.StartDate.ToString());
@@ -1022,7 +1024,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         itemList.SubItems.Add(task.SpentTime.ToString());
         itemList.SubItems.Add(task.DifficultyLevel.ToString());
         itemList.SubItems.Add(task.ExpectedStartDate.ToString());
-        itemList.SubItems.Add(task.ExpectedEndDate.ToString());            
+        itemList.SubItems.Add(task.ExpectedEndDate.ToString());
         return itemList;
     }
 
@@ -1031,7 +1033,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         var itemList = new ListViewItem(resource.NameOut);
         itemList.Name = resource.ResourceId.ToString();
         itemList.SubItems.Add(resource.FileType);
-        itemList.SubItems.Add(resource.Order.ToString());            
+        itemList.SubItems.Add(resource.Order.ToString());
         return itemList;
     }
 
@@ -1047,11 +1049,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
     }
 
-    private void EnableHtmlView ()
+    private void EnableHtmlView()
     {
         textDescription.Visible = false;
         webView2.Visible = false;
-        htmlDescription.Visible = true;            
+        htmlDescription.Visible = true;
         buttonEditMarkdown.Enabled = true;
         buttonViewHtml.Enabled = false;
         buttonNavigate.Enabled = true;
@@ -1126,7 +1128,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void UpdateTask(NoteTaskDto task)
     {
-        var item = listViewTasks.Items[task.NoteTaskId.ToString()];            
+        var item = listViewTasks.Items[task.NoteTaskId.ToString()];
         item.SubItems[1].Text = task.Priority.ToString();
         item.SubItems[2].Text = task.Resolved.ToString();
         item.SubItems[3].Text = task.StartDate.ToString();
@@ -1140,14 +1142,14 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textTaskDescription.Text = task.Description;
         textTaskTags.Text = task.Tags;
     }
-        
+
     private async void EditResource()
-    {            
+    {
         if (_selectedResource == null)
         {
             MessageBox.Show("There is no resource selected.", "KaNote");
             return;
-        }            
+        }
         var idResource = _selectedResource.ResourceId;
         var resource = await _com.EditResource(idResource);
         if (resource != null)
@@ -1176,7 +1178,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
     }
 
-    private async Task<ResourceDto> AddResource() 
+    private async Task<ResourceDto> AddResource()
     {
         var resource = await _com.NewResource();
         if (resource != null)

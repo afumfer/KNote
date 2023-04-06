@@ -23,7 +23,10 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public KntChatGPTForm(KntChatGPTComponent com)
     {
+        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
         InitializeComponent();
+
+
 
         _com = com;
     }
@@ -115,7 +118,7 @@ public partial class KntChatGPTForm : Form, IViewBase
             {
                 await SaveChatMessages();
             }
-            if(_com.AutoCloseComponentOnViewExit)
+            if (_com.AutoCloseComponentOnViewExit)
                 _com.Finalize();
         }
     }
@@ -131,7 +134,7 @@ public partial class KntChatGPTForm : Form, IViewBase
             var service = _com.Store.GetFirstServiceRef().Service;
 
             // TODO:  Fix this magic number (1 = default folder).
-            var folder = await service.Folders.GetAsync(1);    
+            var folder = await service.Folders.GetAsync(1);
 
             var note = new NoteExtendedDto
             {
@@ -152,11 +155,11 @@ public partial class KntChatGPTForm : Form, IViewBase
             noteEditor.Model.Tags = "[ChatGPT]";
             noteEditor.Model.FolderId = folder.Entity.FolderId;
             noteEditor.Model.FolderDto = folder.Entity;
-            noteEditor.Run();            
+            noteEditor.Run();
         }
         catch (Exception ex)
         {
-            ShowInfo(ex.Message.ToString());            
+            ShowInfo(ex.Message.ToString());
         }
     }
 
@@ -193,7 +196,7 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private async Task GoGetCompletion(string prompt)
     {
-        await _com.GetCompletionAsync(prompt);      
+        await _com.GetCompletionAsync(prompt);
         RefreshView();
     }
 
@@ -202,7 +205,7 @@ public partial class KntChatGPTForm : Form, IViewBase
         _com.StreamToken += _com_StreamToken;
 
         await _com.StreamCompletionAsync(prompt);
-        
+
         textPrompt.Text = "";
         toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens}";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_com.TotalProcessingTime}";

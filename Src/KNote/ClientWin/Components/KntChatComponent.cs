@@ -66,7 +66,7 @@ public class KntChatComponent : ComponentBase
         catch (Exception ex)
         {
             var res = new Result<EComponentResult>(EComponentResult.Error);
-            var resMessage = $"The connection could not be started. Error: {ex.Message}.";
+            var resMessage = $"KntChat component. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(resMessage);
             ChatView.ShowInfo(resMessage, "KaNote");
             return res;

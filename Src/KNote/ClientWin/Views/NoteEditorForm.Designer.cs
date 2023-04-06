@@ -28,1546 +28,1479 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NoteEditorForm));
-            this.toolBarNoteEditor = new System.Windows.Forms.ToolStrip();
-            this.buttonSave = new System.Windows.Forms.ToolStripButton();
-            this.buttonDelete = new System.Windows.Forms.ToolStripButton();
-            this.buttonUndo = new System.Windows.Forms.ToolStripButton();
-            this.toolStripS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.buttonPostIt = new System.Windows.Forms.ToolStripButton();
-            this.toolStripS2 = new System.Windows.Forms.ToolStripSeparator();
-            this.buttonCheck = new System.Windows.Forms.ToolStripButton();
-            this.toolStripS3 = new System.Windows.Forms.ToolStripSeparator();
-            this.buttonPrint = new System.Windows.Forms.ToolStripButton();
-            this.toolStripS4 = new System.Windows.Forms.ToolStripSeparator();
-            this.buttonTools = new System.Windows.Forms.ToolStripDropDownButton();
-            this.buttonInsertTemplate = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripToolS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.buttonExecuteKntScript = new System.Windows.Forms.ToolStripMenuItem();
-            this.imageListTabNoteData = new System.Windows.Forms.ImageList(this.components);
-            this.panelForm = new System.Windows.Forms.Panel();
-            this.tabNoteData = new System.Windows.Forms.TabControl();
-            this.tabBasicData = new System.Windows.Forms.TabPage();
-            this.buttonNavigate = new System.Windows.Forms.Button();
-            this.textStatus = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.panelDescription = new System.Windows.Forms.Panel();
-            this.webView2 = new KntWebView.KWebView();
-            this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
-            this.textDescription = new System.Windows.Forms.TextBox();
-            this.toolDescription = new System.Windows.Forms.ToolStrip();
-            this.toolDescriptionHtml = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolDescriptionHtmlTitle1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionHtmlTitle2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionHtmlTitle3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionHtmlTitle4 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionHtmlS3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolDescriptionHtmlEdit = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdown = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolDescriptionMarkdownH1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownH2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownH3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownH4 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolDescriptionMarkdownBold = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownStrikethrough = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownItalic = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownS2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolDescriptionMarkdownList = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownListOrdered = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownLine = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownLink = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownImage = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownTable = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionMarkdownCode = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolDescriptionS3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolDescriptionUploadResource = new System.Windows.Forms.ToolStripButton();
-            this.toolDescriptionUploadResourceFromClipboard = new System.Windows.Forms.ToolStripButton();
-            this.labelLoadingHtml = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.buttonEditMarkdown = new System.Windows.Forms.Button();
-            this.buttonViewHtml = new System.Windows.Forms.Button();
-            this.textPriority = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.textTags = new System.Windows.Forms.TextBox();
-            this.textFolder = new System.Windows.Forms.TextBox();
-            this.textTopic = new System.Windows.Forms.TextBox();
-            this.buttonFolderSearch = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.textNoteNumber = new System.Windows.Forms.TextBox();
-            this.textFolderNumber = new System.Windows.Forms.TextBox();
-            this.tabAttributes = new System.Windows.Forms.TabPage();
-            this.buttonDeleteType = new System.Windows.Forms.Button();
-            this.listViewAttributes = new System.Windows.Forms.ListView();
-            this.textNoteType = new System.Windows.Forms.TextBox();
-            this.buttonNoteType = new System.Windows.Forms.Button();
-            this.label15 = new System.Windows.Forms.Label();
-            this.buttonAttributeEdit = new System.Windows.Forms.Button();
-            this.label10 = new System.Windows.Forms.Label();
-            this.tabResources = new System.Windows.Forms.TabPage();
-            this.labelPreview = new System.Windows.Forms.Label();
-            this.textDescriptionResource = new System.Windows.Forms.TextBox();
-            this.webViewResource = new KntWebView.KWebView();
-            this.buttonSaveResource = new System.Windows.Forms.Button();
-            this.buttonInsertLink = new System.Windows.Forms.Button();
-            this.panelPreview = new System.Windows.Forms.Panel();
-            this.linkViewFile = new System.Windows.Forms.LinkLabel();
-            this.listViewResources = new System.Windows.Forms.ListView();
-            this.buttonResourceEdit = new System.Windows.Forms.Button();
-            this.buttonResourceDelete = new System.Windows.Forms.Button();
-            this.buttonResourceAdd = new System.Windows.Forms.Button();
-            this.label12 = new System.Windows.Forms.Label();
-            this.tabTasks = new System.Windows.Forms.TabPage();
-            this.textTaskTags = new System.Windows.Forms.TextBox();
-            this.label17 = new System.Windows.Forms.Label();
-            this.textTaskDescription = new System.Windows.Forms.TextBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.listViewTasks = new System.Windows.Forms.ListView();
-            this.buttonTaskEdit = new System.Windows.Forms.Button();
-            this.buttonTaskDelete = new System.Windows.Forms.Button();
-            this.buttonTaskAdd = new System.Windows.Forms.Button();
-            this.label11 = new System.Windows.Forms.Label();
-            this.tabAlarms = new System.Windows.Forms.TabPage();
-            this.listViewAlarms = new System.Windows.Forms.ListView();
-            this.buttonEditAlarm = new System.Windows.Forms.Button();
-            this.buttonDeleteAlarm = new System.Windows.Forms.Button();
-            this.buttonAddAlarm = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.tabCode = new System.Windows.Forms.TabPage();
-            this.textScriptCode = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.tabTraceNotes = new System.Windows.Forms.TabPage();
-            this.listViewTraceNoteTo = new System.Windows.Forms.ListView();
-            this.listViewTraceNoteFrom = new System.Windows.Forms.ListView();
-            this.textTraceNodeType = new System.Windows.Forms.TextBox();
-            this.buttonTraceNodeTypes = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.buttonTraceToEdit = new System.Windows.Forms.Button();
-            this.buttonTraceToRemove = new System.Windows.Forms.Button();
-            this.buttonTraceToAdd = new System.Windows.Forms.Button();
-            this.buttonTraceFromEdit = new System.Windows.Forms.Button();
-            this.buttonTraceFromRemove = new System.Windows.Forms.Button();
-            this.buttonTraceFromAdd = new System.Windows.Forms.Button();
-            this.label13 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
-            this.toolTipHelps = new System.Windows.Forms.ToolTip(this.components);
-            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.toolBarNoteEditor.SuspendLayout();
-            this.panelForm.SuspendLayout();
-            this.tabNoteData.SuspendLayout();
-            this.tabBasicData.SuspendLayout();
-            this.panelDescription.SuspendLayout();
-            this.toolDescription.SuspendLayout();
-            this.tabAttributes.SuspendLayout();
-            this.tabResources.SuspendLayout();
-            this.panelPreview.SuspendLayout();
-            this.tabTasks.SuspendLayout();
-            this.tabAlarms.SuspendLayout();
-            this.tabCode.SuspendLayout();
-            this.tabTraceNotes.SuspendLayout();
-            this.SuspendLayout();
+            toolBarNoteEditor = new ToolStrip();
+            buttonSave = new ToolStripButton();
+            buttonDelete = new ToolStripButton();
+            buttonUndo = new ToolStripButton();
+            toolStripS1 = new ToolStripSeparator();
+            buttonPostIt = new ToolStripButton();
+            toolStripS2 = new ToolStripSeparator();
+            buttonCheck = new ToolStripButton();
+            toolStripS3 = new ToolStripSeparator();
+            buttonPrint = new ToolStripButton();
+            toolStripS4 = new ToolStripSeparator();
+            buttonTools = new ToolStripDropDownButton();
+            buttonInsertTemplate = new ToolStripMenuItem();
+            toolStripToolS1 = new ToolStripSeparator();
+            buttonExecuteKntScript = new ToolStripMenuItem();
+            imageListTabNoteData = new ImageList(components);
+            panelForm = new Panel();
+            tabNoteData = new TabControl();
+            tabBasicData = new TabPage();
+            buttonNavigate = new Button();
+            textStatus = new TextBox();
+            label8 = new Label();
+            panelDescription = new Panel();
+            webView2 = new KntWebView.KWebView();
+            htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
+            textDescription = new TextBox();
+            toolDescription = new ToolStrip();
+            toolDescriptionHtml = new ToolStripDropDownButton();
+            toolDescriptionHtmlTitle1 = new ToolStripMenuItem();
+            toolDescriptionHtmlTitle2 = new ToolStripMenuItem();
+            toolDescriptionHtmlTitle3 = new ToolStripMenuItem();
+            toolDescriptionHtmlTitle4 = new ToolStripMenuItem();
+            toolDescriptionHtmlS3 = new ToolStripSeparator();
+            toolDescriptionHtmlEdit = new ToolStripMenuItem();
+            toolDescriptionMarkdown = new ToolStripDropDownButton();
+            toolDescriptionMarkdownH1 = new ToolStripMenuItem();
+            toolDescriptionMarkdownH2 = new ToolStripMenuItem();
+            toolDescriptionMarkdownH3 = new ToolStripMenuItem();
+            toolDescriptionMarkdownH4 = new ToolStripMenuItem();
+            toolDescriptionMarkdownS1 = new ToolStripSeparator();
+            toolDescriptionMarkdownBold = new ToolStripMenuItem();
+            toolDescriptionMarkdownStrikethrough = new ToolStripMenuItem();
+            toolDescriptionMarkdownItalic = new ToolStripMenuItem();
+            toolDescriptionMarkdownS2 = new ToolStripSeparator();
+            toolDescriptionMarkdownList = new ToolStripMenuItem();
+            toolDescriptionMarkdownListOrdered = new ToolStripMenuItem();
+            toolDescriptionMarkdownLine = new ToolStripMenuItem();
+            toolDescriptionMarkdownLink = new ToolStripMenuItem();
+            toolDescriptionMarkdownImage = new ToolStripMenuItem();
+            toolDescriptionMarkdownTable = new ToolStripMenuItem();
+            toolDescriptionMarkdownCode = new ToolStripMenuItem();
+            toolDescriptionS3 = new ToolStripSeparator();
+            toolDescriptionUploadResource = new ToolStripButton();
+            toolDescriptionUploadResourceFromClipboard = new ToolStripButton();
+            labelLoadingHtml = new Label();
+            label7 = new Label();
+            buttonEditMarkdown = new Button();
+            buttonViewHtml = new Button();
+            textPriority = new TextBox();
+            label6 = new Label();
+            textTags = new TextBox();
+            textFolder = new TextBox();
+            textTopic = new TextBox();
+            buttonFolderSearch = new Button();
+            label3 = new Label();
+            label2 = new Label();
+            label1 = new Label();
+            textNoteNumber = new TextBox();
+            textFolderNumber = new TextBox();
+            tabAttributes = new TabPage();
+            buttonDeleteType = new Button();
+            listViewAttributes = new ListView();
+            textNoteType = new TextBox();
+            buttonNoteType = new Button();
+            label15 = new Label();
+            buttonAttributeEdit = new Button();
+            label10 = new Label();
+            tabResources = new TabPage();
+            labelPreview = new Label();
+            textDescriptionResource = new TextBox();
+            webViewResource = new KntWebView.KWebView();
+            buttonSaveResource = new Button();
+            buttonInsertLink = new Button();
+            panelPreview = new Panel();
+            linkViewFile = new LinkLabel();
+            listViewResources = new ListView();
+            buttonResourceEdit = new Button();
+            buttonResourceDelete = new Button();
+            buttonResourceAdd = new Button();
+            label12 = new Label();
+            tabTasks = new TabPage();
+            textTaskTags = new TextBox();
+            label17 = new Label();
+            textTaskDescription = new TextBox();
+            label16 = new Label();
+            listViewTasks = new ListView();
+            buttonTaskEdit = new Button();
+            buttonTaskDelete = new Button();
+            buttonTaskAdd = new Button();
+            label11 = new Label();
+            tabAlarms = new TabPage();
+            listViewAlarms = new ListView();
+            buttonEditAlarm = new Button();
+            buttonDeleteAlarm = new Button();
+            buttonAddAlarm = new Button();
+            label4 = new Label();
+            tabCode = new TabPage();
+            textScriptCode = new TextBox();
+            label9 = new Label();
+            tabTraceNotes = new TabPage();
+            listViewTraceNoteTo = new ListView();
+            listViewTraceNoteFrom = new ListView();
+            textTraceNodeType = new TextBox();
+            buttonTraceNodeTypes = new Button();
+            label5 = new Label();
+            buttonTraceToEdit = new Button();
+            buttonTraceToRemove = new Button();
+            buttonTraceToAdd = new Button();
+            buttonTraceFromEdit = new Button();
+            buttonTraceFromRemove = new Button();
+            buttonTraceFromAdd = new Button();
+            label13 = new Label();
+            label14 = new Label();
+            toolTipHelps = new ToolTip(components);
+            saveFileDialog = new SaveFileDialog();
+            toolBarNoteEditor.SuspendLayout();
+            panelForm.SuspendLayout();
+            tabNoteData.SuspendLayout();
+            tabBasicData.SuspendLayout();
+            panelDescription.SuspendLayout();
+            toolDescription.SuspendLayout();
+            tabAttributes.SuspendLayout();
+            tabResources.SuspendLayout();
+            panelPreview.SuspendLayout();
+            tabTasks.SuspendLayout();
+            tabAlarms.SuspendLayout();
+            tabCode.SuspendLayout();
+            tabTraceNotes.SuspendLayout();
+            SuspendLayout();
             // 
             // toolBarNoteEditor
             // 
-            this.toolBarNoteEditor.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.toolBarNoteEditor.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.buttonSave,
-            this.buttonDelete,
-            this.buttonUndo,
-            this.toolStripS1,
-            this.buttonPostIt,
-            this.toolStripS2,
-            this.buttonCheck,
-            this.toolStripS3,
-            this.buttonPrint,
-            this.toolStripS4,
-            this.buttonTools});
-            this.toolBarNoteEditor.Location = new System.Drawing.Point(0, 0);
-            this.toolBarNoteEditor.Name = "toolBarNoteEditor";
-            this.toolBarNoteEditor.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.toolBarNoteEditor.Size = new System.Drawing.Size(808, 25);
-            this.toolBarNoteEditor.TabIndex = 6;
-            this.toolBarNoteEditor.Text = "Toolbar KeyNotes";
+            toolBarNoteEditor.BackColor = SystemColors.ControlLightLight;
+            toolBarNoteEditor.ImageScalingSize = new Size(20, 20);
+            toolBarNoteEditor.Items.AddRange(new ToolStripItem[] { buttonSave, buttonDelete, buttonUndo, toolStripS1, buttonPostIt, toolStripS2, buttonCheck, toolStripS3, buttonPrint, toolStripS4, buttonTools });
+            toolBarNoteEditor.Location = new Point(0, 0);
+            toolBarNoteEditor.Name = "toolBarNoteEditor";
+            toolBarNoteEditor.RenderMode = ToolStripRenderMode.Professional;
+            toolBarNoteEditor.Size = new Size(808, 27);
+            toolBarNoteEditor.TabIndex = 6;
+            toolBarNoteEditor.Text = "Toolbar KeyNotes";
             // 
             // buttonSave
             // 
-            this.buttonSave.Image = ((System.Drawing.Image)(resources.GetObject("buttonSave.Image")));
-            this.buttonSave.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.buttonSave.Name = "buttonSave";
-            this.buttonSave.Size = new System.Drawing.Size(57, 22);
-            this.buttonSave.Text = "Save  ";
-            this.buttonSave.Click += new System.EventHandler(this.buttonToolBar_Click);
+            buttonSave.Image = (Image)resources.GetObject("buttonSave.Image");
+            buttonSave.ImageTransparentColor = Color.Magenta;
+            buttonSave.Name = "buttonSave";
+            buttonSave.Size = new Size(72, 24);
+            buttonSave.Text = "Save  ";
+            buttonSave.Click += buttonToolBar_Click;
             // 
             // buttonDelete
             // 
-            this.buttonDelete.Image = ((System.Drawing.Image)(resources.GetObject("buttonDelete.Image")));
-            this.buttonDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.buttonDelete.Name = "buttonDelete";
-            this.buttonDelete.Size = new System.Drawing.Size(66, 22);
-            this.buttonDelete.Text = "Delete  ";
-            this.buttonDelete.Click += new System.EventHandler(this.buttonToolBar_Click);
+            buttonDelete.Image = (Image)resources.GetObject("buttonDelete.Image");
+            buttonDelete.ImageTransparentColor = Color.Magenta;
+            buttonDelete.Name = "buttonDelete";
+            buttonDelete.Size = new Size(85, 24);
+            buttonDelete.Text = "Delete  ";
+            buttonDelete.Click += buttonToolBar_Click;
             // 
             // buttonUndo
             // 
-            this.buttonUndo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.buttonUndo.Enabled = false;
-            this.buttonUndo.Image = ((System.Drawing.Image)(resources.GetObject("buttonUndo.Image")));
-            this.buttonUndo.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.buttonUndo.Name = "buttonUndo";
-            this.buttonUndo.Size = new System.Drawing.Size(23, 22);
-            this.buttonUndo.Text = "Undo  ";
-            this.buttonUndo.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
-            this.buttonUndo.ToolTipText = "Undo changes";
-            this.buttonUndo.Click += new System.EventHandler(this.buttonToolBar_Click);
+            buttonUndo.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonUndo.Enabled = false;
+            buttonUndo.Image = (Image)resources.GetObject("buttonUndo.Image");
+            buttonUndo.ImageTransparentColor = Color.Magenta;
+            buttonUndo.Name = "buttonUndo";
+            buttonUndo.Size = new Size(29, 24);
+            buttonUndo.Text = "Undo  ";
+            buttonUndo.TextImageRelation = TextImageRelation.TextBeforeImage;
+            buttonUndo.ToolTipText = "Undo changes";
+            buttonUndo.Click += buttonToolBar_Click;
             // 
             // toolStripS1
             // 
-            this.toolStripS1.Name = "toolStripS1";
-            this.toolStripS1.Size = new System.Drawing.Size(6, 25);
+            toolStripS1.Name = "toolStripS1";
+            toolStripS1.Size = new Size(6, 27);
             // 
             // buttonPostIt
             // 
-            this.buttonPostIt.Image = ((System.Drawing.Image)(resources.GetObject("buttonPostIt.Image")));
-            this.buttonPostIt.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.buttonPostIt.Name = "buttonPostIt";
-            this.buttonPostIt.Size = new System.Drawing.Size(104, 22);
-            this.buttonPostIt.Text = "View as Post-It";
-            this.buttonPostIt.Click += new System.EventHandler(this.buttonToolBar_Click);
+            buttonPostIt.Image = (Image)resources.GetObject("buttonPostIt.Image");
+            buttonPostIt.ImageTransparentColor = Color.Magenta;
+            buttonPostIt.Name = "buttonPostIt";
+            buttonPostIt.Size = new Size(129, 24);
+            buttonPostIt.Text = "View as Post-It";
+            buttonPostIt.Click += buttonToolBar_Click;
             // 
             // toolStripS2
             // 
-            this.toolStripS2.Name = "toolStripS2";
-            this.toolStripS2.Size = new System.Drawing.Size(6, 25);
+            toolStripS2.Name = "toolStripS2";
+            toolStripS2.Size = new Size(6, 27);
             // 
             // buttonCheck
             // 
-            this.buttonCheck.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.buttonCheck.Image = ((System.Drawing.Image)(resources.GetObject("buttonCheck.Image")));
-            this.buttonCheck.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.buttonCheck.Name = "buttonCheck";
-            this.buttonCheck.Size = new System.Drawing.Size(23, 22);
-            this.buttonCheck.Text = "Check";
+            buttonCheck.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonCheck.Image = (Image)resources.GetObject("buttonCheck.Image");
+            buttonCheck.ImageTransparentColor = Color.Magenta;
+            buttonCheck.Name = "buttonCheck";
+            buttonCheck.Size = new Size(29, 24);
+            buttonCheck.Text = "Check";
             // 
             // toolStripS3
             // 
-            this.toolStripS3.Name = "toolStripS3";
-            this.toolStripS3.Size = new System.Drawing.Size(6, 25);
+            toolStripS3.Name = "toolStripS3";
+            toolStripS3.Size = new Size(6, 27);
             // 
             // buttonPrint
             // 
-            this.buttonPrint.Image = ((System.Drawing.Image)(resources.GetObject("buttonPrint.Image")));
-            this.buttonPrint.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.buttonPrint.Name = "buttonPrint";
-            this.buttonPrint.Size = new System.Drawing.Size(58, 22);
-            this.buttonPrint.Text = "Print  ";
-            this.buttonPrint.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            buttonPrint.Image = (Image)resources.GetObject("buttonPrint.Image");
+            buttonPrint.ImageTransparentColor = Color.Magenta;
+            buttonPrint.Name = "buttonPrint";
+            buttonPrint.Size = new Size(71, 24);
+            buttonPrint.Text = "Print  ";
+            buttonPrint.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // toolStripS4
             // 
-            this.toolStripS4.Name = "toolStripS4";
-            this.toolStripS4.Size = new System.Drawing.Size(6, 25);
+            toolStripS4.Name = "toolStripS4";
+            toolStripS4.Size = new Size(6, 27);
             // 
             // buttonTools
             // 
-            this.buttonTools.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.buttonTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.buttonInsertTemplate,
-            this.toolStripToolS1,
-            this.buttonExecuteKntScript});
-            this.buttonTools.Image = ((System.Drawing.Image)(resources.GetObject("buttonTools.Image")));
-            this.buttonTools.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.buttonTools.Name = "buttonTools";
-            this.buttonTools.Size = new System.Drawing.Size(29, 22);
-            this.buttonTools.Text = "toolStripDropDownTools";
+            buttonTools.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonInsertTemplate, toolStripToolS1, buttonExecuteKntScript });
+            buttonTools.Image = (Image)resources.GetObject("buttonTools.Image");
+            buttonTools.ImageTransparentColor = Color.Magenta;
+            buttonTools.Name = "buttonTools";
+            buttonTools.Size = new Size(34, 24);
+            buttonTools.Text = "toolStripDropDownTools";
             // 
             // buttonInsertTemplate
             // 
-            this.buttonInsertTemplate.Name = "buttonInsertTemplate";
-            this.buttonInsertTemplate.ShortcutKeys = System.Windows.Forms.Keys.F9;
-            this.buttonInsertTemplate.Size = new System.Drawing.Size(217, 22);
-            this.buttonInsertTemplate.Text = "Insertar template text ...";
+            buttonInsertTemplate.Name = "buttonInsertTemplate";
+            buttonInsertTemplate.ShortcutKeys = Keys.F9;
+            buttonInsertTemplate.Size = new Size(271, 26);
+            buttonInsertTemplate.Text = "Insertar template text ...";
             // 
             // toolStripToolS1
             // 
-            this.toolStripToolS1.Name = "toolStripToolS1";
-            this.toolStripToolS1.Size = new System.Drawing.Size(214, 6);
+            toolStripToolS1.Name = "toolStripToolS1";
+            toolStripToolS1.Size = new Size(268, 6);
             // 
             // buttonExecuteKntScript
             // 
-            this.buttonExecuteKntScript.Image = ((System.Drawing.Image)(resources.GetObject("buttonExecuteKntScript.Image")));
-            this.buttonExecuteKntScript.Name = "buttonExecuteKntScript";
-            this.buttonExecuteKntScript.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.buttonExecuteKntScript.Size = new System.Drawing.Size(217, 22);
-            this.buttonExecuteKntScript.Text = "Execute AntScript code";
-            this.buttonExecuteKntScript.Click += new System.EventHandler(this.buttonToolBar_Click);
+            buttonExecuteKntScript.Image = (Image)resources.GetObject("buttonExecuteKntScript.Image");
+            buttonExecuteKntScript.Name = "buttonExecuteKntScript";
+            buttonExecuteKntScript.ShortcutKeys = Keys.F5;
+            buttonExecuteKntScript.Size = new Size(271, 26);
+            buttonExecuteKntScript.Text = "Execute AntScript code";
+            buttonExecuteKntScript.Click += buttonToolBar_Click;
             // 
             // imageListTabNoteData
             // 
-            this.imageListTabNoteData.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageListTabNoteData.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageListTabNoteData.ImageStream")));
-            this.imageListTabNoteData.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageListTabNoteData.Images.SetKeyName(0, "alarm_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(1, "fileTestLight_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(2, "bookmarkLight_24.png");
-            this.imageListTabNoteData.Images.SetKeyName(3, "books_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(4, "code_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(5, "libraryBooks_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(6, "tasks_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(7, "checkbox_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(8, "codgs_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(9, "code_16.png");
-            this.imageListTabNoteData.Images.SetKeyName(10, "upload_16.png");
+            imageListTabNoteData.ColorDepth = ColorDepth.Depth8Bit;
+            imageListTabNoteData.ImageStream = (ImageListStreamer)resources.GetObject("imageListTabNoteData.ImageStream");
+            imageListTabNoteData.TransparentColor = Color.Transparent;
+            imageListTabNoteData.Images.SetKeyName(0, "alarm_16.png");
+            imageListTabNoteData.Images.SetKeyName(1, "fileTestLight_16.png");
+            imageListTabNoteData.Images.SetKeyName(2, "bookmarkLight_24.png");
+            imageListTabNoteData.Images.SetKeyName(3, "books_16.png");
+            imageListTabNoteData.Images.SetKeyName(4, "code_16.png");
+            imageListTabNoteData.Images.SetKeyName(5, "libraryBooks_16.png");
+            imageListTabNoteData.Images.SetKeyName(6, "tasks_16.png");
+            imageListTabNoteData.Images.SetKeyName(7, "checkbox_16.png");
+            imageListTabNoteData.Images.SetKeyName(8, "codgs_16.png");
+            imageListTabNoteData.Images.SetKeyName(9, "code_16.png");
+            imageListTabNoteData.Images.SetKeyName(10, "upload_16.png");
             // 
             // panelForm
             // 
-            this.panelForm.Controls.Add(this.tabNoteData);
-            this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelForm.Location = new System.Drawing.Point(0, 25);
-            this.panelForm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(808, 612);
-            this.panelForm.TabIndex = 39;
+            panelForm.Controls.Add(tabNoteData);
+            panelForm.Dock = DockStyle.Fill;
+            panelForm.Location = new Point(0, 27);
+            panelForm.Margin = new Padding(4, 3, 4, 3);
+            panelForm.Name = "panelForm";
+            panelForm.Size = new Size(808, 610);
+            panelForm.TabIndex = 39;
             // 
             // tabNoteData
             // 
-            this.tabNoteData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabNoteData.Controls.Add(this.tabBasicData);
-            this.tabNoteData.Controls.Add(this.tabAttributes);
-            this.tabNoteData.Controls.Add(this.tabResources);
-            this.tabNoteData.Controls.Add(this.tabTasks);
-            this.tabNoteData.Controls.Add(this.tabAlarms);
-            this.tabNoteData.Controls.Add(this.tabCode);
-            this.tabNoteData.Controls.Add(this.tabTraceNotes);
-            this.tabNoteData.ImageList = this.imageListTabNoteData;
-            this.tabNoteData.Location = new System.Drawing.Point(4, 4);
-            this.tabNoteData.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabNoteData.Name = "tabNoteData";
-            this.tabNoteData.Padding = new System.Drawing.Point(4, 6);
-            this.tabNoteData.SelectedIndex = 0;
-            this.tabNoteData.Size = new System.Drawing.Size(802, 603);
-            this.tabNoteData.TabIndex = 8;
+            tabNoteData.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabNoteData.Controls.Add(tabBasicData);
+            tabNoteData.Controls.Add(tabAttributes);
+            tabNoteData.Controls.Add(tabResources);
+            tabNoteData.Controls.Add(tabTasks);
+            tabNoteData.Controls.Add(tabAlarms);
+            tabNoteData.Controls.Add(tabCode);
+            tabNoteData.Controls.Add(tabTraceNotes);
+            tabNoteData.ImageList = imageListTabNoteData;
+            tabNoteData.Location = new Point(4, 4);
+            tabNoteData.Margin = new Padding(4, 3, 4, 3);
+            tabNoteData.Name = "tabNoteData";
+            tabNoteData.Padding = new Point(4, 6);
+            tabNoteData.SelectedIndex = 0;
+            tabNoteData.Size = new Size(802, 601);
+            tabNoteData.TabIndex = 8;
             // 
             // tabBasicData
             // 
-            this.tabBasicData.Controls.Add(this.buttonNavigate);
-            this.tabBasicData.Controls.Add(this.textStatus);
-            this.tabBasicData.Controls.Add(this.label8);
-            this.tabBasicData.Controls.Add(this.panelDescription);
-            this.tabBasicData.Controls.Add(this.labelLoadingHtml);
-            this.tabBasicData.Controls.Add(this.label7);
-            this.tabBasicData.Controls.Add(this.buttonEditMarkdown);
-            this.tabBasicData.Controls.Add(this.buttonViewHtml);
-            this.tabBasicData.Controls.Add(this.textPriority);
-            this.tabBasicData.Controls.Add(this.label6);
-            this.tabBasicData.Controls.Add(this.textTags);
-            this.tabBasicData.Controls.Add(this.textFolder);
-            this.tabBasicData.Controls.Add(this.textTopic);
-            this.tabBasicData.Controls.Add(this.buttonFolderSearch);
-            this.tabBasicData.Controls.Add(this.label3);
-            this.tabBasicData.Controls.Add(this.label2);
-            this.tabBasicData.Controls.Add(this.label1);
-            this.tabBasicData.Controls.Add(this.textNoteNumber);
-            this.tabBasicData.Controls.Add(this.textFolderNumber);
-            this.tabBasicData.ImageIndex = 1;
-            this.tabBasicData.Location = new System.Drawing.Point(4, 30);
-            this.tabBasicData.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabBasicData.Name = "tabBasicData";
-            this.tabBasicData.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabBasicData.Size = new System.Drawing.Size(794, 569);
-            this.tabBasicData.TabIndex = 0;
-            this.tabBasicData.Text = "Basic data  ";
-            this.tabBasicData.UseVisualStyleBackColor = true;
+            tabBasicData.Controls.Add(buttonNavigate);
+            tabBasicData.Controls.Add(textStatus);
+            tabBasicData.Controls.Add(label8);
+            tabBasicData.Controls.Add(panelDescription);
+            tabBasicData.Controls.Add(labelLoadingHtml);
+            tabBasicData.Controls.Add(label7);
+            tabBasicData.Controls.Add(buttonEditMarkdown);
+            tabBasicData.Controls.Add(buttonViewHtml);
+            tabBasicData.Controls.Add(textPriority);
+            tabBasicData.Controls.Add(label6);
+            tabBasicData.Controls.Add(textTags);
+            tabBasicData.Controls.Add(textFolder);
+            tabBasicData.Controls.Add(textTopic);
+            tabBasicData.Controls.Add(buttonFolderSearch);
+            tabBasicData.Controls.Add(label3);
+            tabBasicData.Controls.Add(label2);
+            tabBasicData.Controls.Add(label1);
+            tabBasicData.Controls.Add(textNoteNumber);
+            tabBasicData.Controls.Add(textFolderNumber);
+            tabBasicData.ImageIndex = 1;
+            tabBasicData.Location = new Point(4, 35);
+            tabBasicData.Margin = new Padding(4, 3, 4, 3);
+            tabBasicData.Name = "tabBasicData";
+            tabBasicData.Padding = new Padding(4, 3, 4, 3);
+            tabBasicData.Size = new Size(794, 562);
+            tabBasicData.TabIndex = 0;
+            tabBasicData.Text = "Basic data  ";
+            tabBasicData.UseVisualStyleBackColor = true;
             // 
             // buttonNavigate
             // 
-            this.buttonNavigate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonNavigate.Location = new System.Drawing.Point(706, 105);
-            this.buttonNavigate.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonNavigate.Name = "buttonNavigate";
-            this.buttonNavigate.Size = new System.Drawing.Size(80, 24);
-            this.buttonNavigate.TabIndex = 57;
-            this.buttonNavigate.Text = "Navigate";
-            this.buttonNavigate.UseVisualStyleBackColor = true;
-            this.buttonNavigate.Click += new System.EventHandler(this.buttonNavigate_Click);
+            buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonNavigate.Location = new Point(706, 105);
+            buttonNavigate.Margin = new Padding(4, 3, 4, 3);
+            buttonNavigate.Name = "buttonNavigate";
+            buttonNavigate.Size = new Size(80, 24);
+            buttonNavigate.TabIndex = 57;
+            buttonNavigate.Text = "Navigate";
+            buttonNavigate.UseVisualStyleBackColor = true;
+            buttonNavigate.Click += buttonNavigate_Click;
             // 
             // textStatus
             // 
-            this.textStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.textStatus.BackColor = System.Drawing.SystemColors.Control;
-            this.textStatus.Enabled = false;
-            this.textStatus.Location = new System.Drawing.Point(593, 68);
-            this.textStatus.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textStatus.Name = "textStatus";
-            this.textStatus.Size = new System.Drawing.Size(193, 23);
-            this.textStatus.TabIndex = 4;
+            textStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            textStatus.BackColor = SystemColors.Control;
+            textStatus.Enabled = false;
+            textStatus.Location = new Point(593, 68);
+            textStatus.Margin = new Padding(4, 3, 4, 3);
+            textStatus.Name = "textStatus";
+            textStatus.Size = new Size(193, 27);
+            textStatus.TabIndex = 4;
             // 
             // label8
             // 
-            this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label8.Location = new System.Drawing.Point(544, 68);
-            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(45, 18);
-            this.label8.TabIndex = 56;
-            this.label8.Text = "Status:";
-            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            label8.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label8.Location = new Point(544, 68);
+            label8.Margin = new Padding(4, 0, 4, 0);
+            label8.Name = "label8";
+            label8.Size = new Size(45, 18);
+            label8.TabIndex = 56;
+            label8.Text = "Status:";
+            label8.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // panelDescription
             // 
-            this.panelDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelDescription.Controls.Add(this.webView2);
-            this.panelDescription.Controls.Add(this.htmlDescription);
-            this.panelDescription.Controls.Add(this.textDescription);
-            this.panelDescription.Controls.Add(this.toolDescription);
-            this.panelDescription.Location = new System.Drawing.Point(4, 132);
-            this.panelDescription.Name = "panelDescription";
-            this.panelDescription.Size = new System.Drawing.Size(782, 434);
-            this.panelDescription.TabIndex = 55;
-            this.panelDescription.Visible = false;
+            panelDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelDescription.Controls.Add(webView2);
+            panelDescription.Controls.Add(htmlDescription);
+            panelDescription.Controls.Add(textDescription);
+            panelDescription.Controls.Add(toolDescription);
+            panelDescription.Location = new Point(4, 132);
+            panelDescription.Name = "panelDescription";
+            panelDescription.Size = new Size(782, 427);
+            panelDescription.TabIndex = 55;
+            panelDescription.Visible = false;
             // 
             // webView2
             // 
-            this.webView2.EnableUrlBox = true;
-            this.webView2.ForceHttps = false;
-            this.webView2.IsInitialized = false;
-            this.webView2.Location = new System.Drawing.Point(40, 127);
-            this.webView2.Name = "webView2";
-            this.webView2.ShowNavigationTools = false;
-            this.webView2.ShowStatusInfo = false;
-            this.webView2.Size = new System.Drawing.Size(277, 166);
-            this.webView2.TabIndex = 11;
-            this.webView2.TextUrl = "";
-            this.webView2.Visible = false;
+            webView2.EnableUrlBox = true;
+            webView2.ForceHttps = false;
+            webView2.IsInitialized = false;
+            webView2.Location = new Point(40, 127);
+            webView2.Margin = new Padding(3, 4, 3, 4);
+            webView2.Name = "webView2";
+            webView2.ShowNavigationTools = false;
+            webView2.ShowStatusInfo = false;
+            webView2.Size = new Size(277, 166);
+            webView2.TabIndex = 11;
+            webView2.TextUrl = "";
+            webView2.Visible = false;
             // 
             // htmlDescription
             // 
-            this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(324, 14);
-            this.htmlDescription.Name = "htmlDescription";
-            this.htmlDescription.Size = new System.Drawing.Size(277, 88);
-            this.htmlDescription.TabIndex = 8;
+            htmlDescription.InnerText = null;
+            htmlDescription.Location = new Point(324, 14);
+            htmlDescription.Name = "htmlDescription";
+            htmlDescription.Size = new Size(277, 88);
+            htmlDescription.TabIndex = 8;
             // 
             // textDescription
             // 
-            this.textDescription.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textDescription.Location = new System.Drawing.Point(40, 14);
-            this.textDescription.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textDescription.MaxLength = 0;
-            this.textDescription.Multiline = true;
-            this.textDescription.Name = "textDescription";
-            this.textDescription.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textDescription.Size = new System.Drawing.Size(277, 88);
-            this.textDescription.TabIndex = 7;
+            textDescription.Font = new Font("Courier New", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            textDescription.Location = new Point(40, 14);
+            textDescription.Margin = new Padding(4, 3, 4, 3);
+            textDescription.MaxLength = 0;
+            textDescription.Multiline = true;
+            textDescription.Name = "textDescription";
+            textDescription.ScrollBars = ScrollBars.Both;
+            textDescription.Size = new Size(277, 88);
+            textDescription.TabIndex = 7;
             // 
             // toolDescription
             // 
-            this.toolDescription.Dock = System.Windows.Forms.DockStyle.Left;
-            this.toolDescription.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolDescriptionHtml,
-            this.toolDescriptionMarkdown,
-            this.toolDescriptionS3,
-            this.toolDescriptionUploadResource,
-            this.toolDescriptionUploadResourceFromClipboard});
-            this.toolDescription.Location = new System.Drawing.Point(0, 0);
-            this.toolDescription.Name = "toolDescription";
-            this.toolDescription.Size = new System.Drawing.Size(30, 434);
-            this.toolDescription.TabIndex = 0;
-            this.toolDescription.Text = "Tool description editor";
+            toolDescription.Dock = DockStyle.Left;
+            toolDescription.ImageScalingSize = new Size(20, 20);
+            toolDescription.Items.AddRange(new ToolStripItem[] { toolDescriptionHtml, toolDescriptionMarkdown, toolDescriptionS3, toolDescriptionUploadResource, toolDescriptionUploadResourceFromClipboard });
+            toolDescription.Location = new Point(0, 0);
+            toolDescription.Name = "toolDescription";
+            toolDescription.Size = new Size(35, 427);
+            toolDescription.TabIndex = 0;
+            toolDescription.Text = "Tool description editor";
             // 
             // toolDescriptionHtml
             // 
-            this.toolDescriptionHtml.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolDescriptionHtml.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolDescriptionHtmlTitle1,
-            this.toolDescriptionHtmlTitle2,
-            this.toolDescriptionHtmlTitle3,
-            this.toolDescriptionHtmlTitle4,
-            this.toolDescriptionHtmlS3,
-            this.toolDescriptionHtmlEdit});
-            this.toolDescriptionHtml.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionHtml.Image")));
-            this.toolDescriptionHtml.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDescriptionHtml.Name = "toolDescriptionHtml";
-            this.toolDescriptionHtml.Size = new System.Drawing.Size(27, 20);
-            this.toolDescriptionHtml.Text = "H";
+            toolDescriptionHtml.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolDescriptionHtml.DropDownItems.AddRange(new ToolStripItem[] { toolDescriptionHtmlTitle1, toolDescriptionHtmlTitle2, toolDescriptionHtmlTitle3, toolDescriptionHtmlTitle4, toolDescriptionHtmlS3, toolDescriptionHtmlEdit });
+            toolDescriptionHtml.Image = (Image)resources.GetObject("toolDescriptionHtml.Image");
+            toolDescriptionHtml.ImageTransparentColor = Color.Magenta;
+            toolDescriptionHtml.Name = "toolDescriptionHtml";
+            toolDescriptionHtml.Size = new Size(32, 24);
+            toolDescriptionHtml.Text = "H";
             // 
             // toolDescriptionHtmlTitle1
             // 
-            this.toolDescriptionHtmlTitle1.Name = "toolDescriptionHtmlTitle1";
-            this.toolDescriptionHtmlTitle1.Size = new System.Drawing.Size(163, 22);
-            this.toolDescriptionHtmlTitle1.Text = "Title 1";
-            this.toolDescriptionHtmlTitle1.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
+            toolDescriptionHtmlTitle1.Name = "toolDescriptionHtmlTitle1";
+            toolDescriptionHtmlTitle1.Size = new Size(202, 26);
+            toolDescriptionHtmlTitle1.Text = "Title 1";
+            toolDescriptionHtmlTitle1.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle2
             // 
-            this.toolDescriptionHtmlTitle2.Name = "toolDescriptionHtmlTitle2";
-            this.toolDescriptionHtmlTitle2.Size = new System.Drawing.Size(163, 22);
-            this.toolDescriptionHtmlTitle2.Text = "Title 2";
-            this.toolDescriptionHtmlTitle2.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
+            toolDescriptionHtmlTitle2.Name = "toolDescriptionHtmlTitle2";
+            toolDescriptionHtmlTitle2.Size = new Size(202, 26);
+            toolDescriptionHtmlTitle2.Text = "Title 2";
+            toolDescriptionHtmlTitle2.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle3
             // 
-            this.toolDescriptionHtmlTitle3.Name = "toolDescriptionHtmlTitle3";
-            this.toolDescriptionHtmlTitle3.Size = new System.Drawing.Size(163, 22);
-            this.toolDescriptionHtmlTitle3.Text = "Title 3";
-            this.toolDescriptionHtmlTitle3.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
+            toolDescriptionHtmlTitle3.Name = "toolDescriptionHtmlTitle3";
+            toolDescriptionHtmlTitle3.Size = new Size(202, 26);
+            toolDescriptionHtmlTitle3.Text = "Title 3";
+            toolDescriptionHtmlTitle3.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle4
             // 
-            this.toolDescriptionHtmlTitle4.Name = "toolDescriptionHtmlTitle4";
-            this.toolDescriptionHtmlTitle4.Size = new System.Drawing.Size(163, 22);
-            this.toolDescriptionHtmlTitle4.Text = "Title 4";
-            this.toolDescriptionHtmlTitle4.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
+            toolDescriptionHtmlTitle4.Name = "toolDescriptionHtmlTitle4";
+            toolDescriptionHtmlTitle4.Size = new Size(202, 26);
+            toolDescriptionHtmlTitle4.Text = "Title 4";
+            toolDescriptionHtmlTitle4.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlS3
             // 
-            this.toolDescriptionHtmlS3.Name = "toolDescriptionHtmlS3";
-            this.toolDescriptionHtmlS3.Size = new System.Drawing.Size(160, 6);
+            toolDescriptionHtmlS3.Name = "toolDescriptionHtmlS3";
+            toolDescriptionHtmlS3.Size = new Size(199, 6);
             // 
             // toolDescriptionHtmlEdit
             // 
-            this.toolDescriptionHtmlEdit.Name = "toolDescriptionHtmlEdit";
-            this.toolDescriptionHtmlEdit.Size = new System.Drawing.Size(163, 22);
-            this.toolDescriptionHtmlEdit.Text = "Edit html code ...";
-            this.toolDescriptionHtmlEdit.Click += new System.EventHandler(this.toolDescriptionHtml_Click);
+            toolDescriptionHtmlEdit.Name = "toolDescriptionHtmlEdit";
+            toolDescriptionHtmlEdit.Size = new Size(202, 26);
+            toolDescriptionHtmlEdit.Text = "Edit html code ...";
+            toolDescriptionHtmlEdit.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionMarkdown
             // 
-            this.toolDescriptionMarkdown.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolDescriptionMarkdown.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolDescriptionMarkdownH1,
-            this.toolDescriptionMarkdownH2,
-            this.toolDescriptionMarkdownH3,
-            this.toolDescriptionMarkdownH4,
-            this.toolDescriptionMarkdownS1,
-            this.toolDescriptionMarkdownBold,
-            this.toolDescriptionMarkdownStrikethrough,
-            this.toolDescriptionMarkdownItalic,
-            this.toolDescriptionMarkdownS2,
-            this.toolDescriptionMarkdownList,
-            this.toolDescriptionMarkdownListOrdered,
-            this.toolDescriptionMarkdownLine,
-            this.toolDescriptionMarkdownLink,
-            this.toolDescriptionMarkdownImage,
-            this.toolDescriptionMarkdownTable,
-            this.toolDescriptionMarkdownCode});
-            this.toolDescriptionMarkdown.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionMarkdown.Image")));
-            this.toolDescriptionMarkdown.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDescriptionMarkdown.Name = "toolDescriptionMarkdown";
-            this.toolDescriptionMarkdown.Size = new System.Drawing.Size(27, 20);
-            this.toolDescriptionMarkdown.Text = "Markdown";
+            toolDescriptionMarkdown.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolDescriptionMarkdown.DropDownItems.AddRange(new ToolStripItem[] { toolDescriptionMarkdownH1, toolDescriptionMarkdownH2, toolDescriptionMarkdownH3, toolDescriptionMarkdownH4, toolDescriptionMarkdownS1, toolDescriptionMarkdownBold, toolDescriptionMarkdownStrikethrough, toolDescriptionMarkdownItalic, toolDescriptionMarkdownS2, toolDescriptionMarkdownList, toolDescriptionMarkdownListOrdered, toolDescriptionMarkdownLine, toolDescriptionMarkdownLink, toolDescriptionMarkdownImage, toolDescriptionMarkdownTable, toolDescriptionMarkdownCode });
+            toolDescriptionMarkdown.Image = (Image)resources.GetObject("toolDescriptionMarkdown.Image");
+            toolDescriptionMarkdown.ImageTransparentColor = Color.Magenta;
+            toolDescriptionMarkdown.Name = "toolDescriptionMarkdown";
+            toolDescriptionMarkdown.Size = new Size(32, 24);
+            toolDescriptionMarkdown.Text = "Markdown";
             // 
             // toolDescriptionMarkdownH1
             // 
-            this.toolDescriptionMarkdownH1.Name = "toolDescriptionMarkdownH1";
-            this.toolDescriptionMarkdownH1.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownH1.Text = "Title 1";
-            this.toolDescriptionMarkdownH1.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownH1.Name = "toolDescriptionMarkdownH1";
+            toolDescriptionMarkdownH1.Size = new Size(181, 26);
+            toolDescriptionMarkdownH1.Text = "Title 1";
+            toolDescriptionMarkdownH1.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH2
             // 
-            this.toolDescriptionMarkdownH2.Name = "toolDescriptionMarkdownH2";
-            this.toolDescriptionMarkdownH2.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownH2.Text = "Title 2";
-            this.toolDescriptionMarkdownH2.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownH2.Name = "toolDescriptionMarkdownH2";
+            toolDescriptionMarkdownH2.Size = new Size(181, 26);
+            toolDescriptionMarkdownH2.Text = "Title 2";
+            toolDescriptionMarkdownH2.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH3
             // 
-            this.toolDescriptionMarkdownH3.Name = "toolDescriptionMarkdownH3";
-            this.toolDescriptionMarkdownH3.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownH3.Text = "Title 3";
-            this.toolDescriptionMarkdownH3.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownH3.Name = "toolDescriptionMarkdownH3";
+            toolDescriptionMarkdownH3.Size = new Size(181, 26);
+            toolDescriptionMarkdownH3.Text = "Title 3";
+            toolDescriptionMarkdownH3.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH4
             // 
-            this.toolDescriptionMarkdownH4.Name = "toolDescriptionMarkdownH4";
-            this.toolDescriptionMarkdownH4.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownH4.Text = "Title 4";
-            this.toolDescriptionMarkdownH4.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownH4.Name = "toolDescriptionMarkdownH4";
+            toolDescriptionMarkdownH4.Size = new Size(181, 26);
+            toolDescriptionMarkdownH4.Text = "Title 4";
+            toolDescriptionMarkdownH4.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownS1
             // 
-            this.toolDescriptionMarkdownS1.Name = "toolDescriptionMarkdownS1";
-            this.toolDescriptionMarkdownS1.Size = new System.Drawing.Size(143, 6);
+            toolDescriptionMarkdownS1.Name = "toolDescriptionMarkdownS1";
+            toolDescriptionMarkdownS1.Size = new Size(178, 6);
             // 
             // toolDescriptionMarkdownBold
             // 
-            this.toolDescriptionMarkdownBold.Name = "toolDescriptionMarkdownBold";
-            this.toolDescriptionMarkdownBold.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownBold.Text = "Bold";
-            this.toolDescriptionMarkdownBold.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownBold.Name = "toolDescriptionMarkdownBold";
+            toolDescriptionMarkdownBold.Size = new Size(181, 26);
+            toolDescriptionMarkdownBold.Text = "Bold";
+            toolDescriptionMarkdownBold.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownStrikethrough
             // 
-            this.toolDescriptionMarkdownStrikethrough.Name = "toolDescriptionMarkdownStrikethrough";
-            this.toolDescriptionMarkdownStrikethrough.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownStrikethrough.Text = "Strikethrough";
-            this.toolDescriptionMarkdownStrikethrough.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownStrikethrough.Name = "toolDescriptionMarkdownStrikethrough";
+            toolDescriptionMarkdownStrikethrough.Size = new Size(181, 26);
+            toolDescriptionMarkdownStrikethrough.Text = "Strikethrough";
+            toolDescriptionMarkdownStrikethrough.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownItalic
             // 
-            this.toolDescriptionMarkdownItalic.Name = "toolDescriptionMarkdownItalic";
-            this.toolDescriptionMarkdownItalic.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownItalic.Text = "Italic";
-            this.toolDescriptionMarkdownItalic.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownItalic.Name = "toolDescriptionMarkdownItalic";
+            toolDescriptionMarkdownItalic.Size = new Size(181, 26);
+            toolDescriptionMarkdownItalic.Text = "Italic";
+            toolDescriptionMarkdownItalic.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownS2
             // 
-            this.toolDescriptionMarkdownS2.Name = "toolDescriptionMarkdownS2";
-            this.toolDescriptionMarkdownS2.Size = new System.Drawing.Size(143, 6);
+            toolDescriptionMarkdownS2.Name = "toolDescriptionMarkdownS2";
+            toolDescriptionMarkdownS2.Size = new Size(178, 6);
             // 
             // toolDescriptionMarkdownList
             // 
-            this.toolDescriptionMarkdownList.Name = "toolDescriptionMarkdownList";
-            this.toolDescriptionMarkdownList.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownList.Text = "List";
-            this.toolDescriptionMarkdownList.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownList.Name = "toolDescriptionMarkdownList";
+            toolDescriptionMarkdownList.Size = new Size(181, 26);
+            toolDescriptionMarkdownList.Text = "List";
+            toolDescriptionMarkdownList.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownListOrdered
             // 
-            this.toolDescriptionMarkdownListOrdered.Name = "toolDescriptionMarkdownListOrdered";
-            this.toolDescriptionMarkdownListOrdered.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownListOrdered.Text = "ListOrdered";
-            this.toolDescriptionMarkdownListOrdered.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownListOrdered.Name = "toolDescriptionMarkdownListOrdered";
+            toolDescriptionMarkdownListOrdered.Size = new Size(181, 26);
+            toolDescriptionMarkdownListOrdered.Text = "ListOrdered";
+            toolDescriptionMarkdownListOrdered.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownLine
             // 
-            this.toolDescriptionMarkdownLine.Name = "toolDescriptionMarkdownLine";
-            this.toolDescriptionMarkdownLine.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownLine.Text = "Line";
-            this.toolDescriptionMarkdownLine.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownLine.Name = "toolDescriptionMarkdownLine";
+            toolDescriptionMarkdownLine.Size = new Size(181, 26);
+            toolDescriptionMarkdownLine.Text = "Line";
+            toolDescriptionMarkdownLine.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownLink
             // 
-            this.toolDescriptionMarkdownLink.Name = "toolDescriptionMarkdownLink";
-            this.toolDescriptionMarkdownLink.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownLink.Text = "Link";
-            this.toolDescriptionMarkdownLink.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownLink.Name = "toolDescriptionMarkdownLink";
+            toolDescriptionMarkdownLink.Size = new Size(181, 26);
+            toolDescriptionMarkdownLink.Text = "Link";
+            toolDescriptionMarkdownLink.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownImage
             // 
-            this.toolDescriptionMarkdownImage.Name = "toolDescriptionMarkdownImage";
-            this.toolDescriptionMarkdownImage.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownImage.Text = "Image";
-            this.toolDescriptionMarkdownImage.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownImage.Name = "toolDescriptionMarkdownImage";
+            toolDescriptionMarkdownImage.Size = new Size(181, 26);
+            toolDescriptionMarkdownImage.Text = "Image";
+            toolDescriptionMarkdownImage.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownTable
             // 
-            this.toolDescriptionMarkdownTable.Name = "toolDescriptionMarkdownTable";
-            this.toolDescriptionMarkdownTable.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownTable.Text = "Table";
-            this.toolDescriptionMarkdownTable.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownTable.Name = "toolDescriptionMarkdownTable";
+            toolDescriptionMarkdownTable.Size = new Size(181, 26);
+            toolDescriptionMarkdownTable.Text = "Table";
+            toolDescriptionMarkdownTable.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownCode
             // 
-            this.toolDescriptionMarkdownCode.Name = "toolDescriptionMarkdownCode";
-            this.toolDescriptionMarkdownCode.Size = new System.Drawing.Size(146, 22);
-            this.toolDescriptionMarkdownCode.Text = "Code";
-            this.toolDescriptionMarkdownCode.Click += new System.EventHandler(this.toolDescriptionMarkdown_Click);
+            toolDescriptionMarkdownCode.Name = "toolDescriptionMarkdownCode";
+            toolDescriptionMarkdownCode.Size = new Size(181, 26);
+            toolDescriptionMarkdownCode.Text = "Code";
+            toolDescriptionMarkdownCode.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionS3
             // 
-            this.toolDescriptionS3.Name = "toolDescriptionS3";
-            this.toolDescriptionS3.Size = new System.Drawing.Size(27, 6);
+            toolDescriptionS3.Name = "toolDescriptionS3";
+            toolDescriptionS3.Size = new Size(32, 6);
             // 
             // toolDescriptionUploadResource
             // 
-            this.toolDescriptionUploadResource.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolDescriptionUploadResource.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploadResource.Image")));
-            this.toolDescriptionUploadResource.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDescriptionUploadResource.Name = "toolDescriptionUploadResource";
-            this.toolDescriptionUploadResource.Size = new System.Drawing.Size(27, 20);
-            this.toolDescriptionUploadResource.Text = "Upload resource";
-            this.toolDescriptionUploadResource.Click += new System.EventHandler(this.toolDescriptionUploadResource_Click);
+            toolDescriptionUploadResource.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolDescriptionUploadResource.Image = (Image)resources.GetObject("toolDescriptionUploadResource.Image");
+            toolDescriptionUploadResource.ImageTransparentColor = Color.Magenta;
+            toolDescriptionUploadResource.Name = "toolDescriptionUploadResource";
+            toolDescriptionUploadResource.Size = new Size(32, 24);
+            toolDescriptionUploadResource.Text = "Upload resource";
+            toolDescriptionUploadResource.Click += toolDescriptionUploadResource_Click;
             // 
             // toolDescriptionUploadResourceFromClipboard
             // 
-            this.toolDescriptionUploadResourceFromClipboard.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolDescriptionUploadResourceFromClipboard.Image = ((System.Drawing.Image)(resources.GetObject("toolDescriptionUploadResourceFromClipboard.Image")));
-            this.toolDescriptionUploadResourceFromClipboard.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolDescriptionUploadResourceFromClipboard.Name = "toolDescriptionUploadResourceFromClipboard";
-            this.toolDescriptionUploadResourceFromClipboard.Size = new System.Drawing.Size(27, 20);
-            this.toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
-            this.toolDescriptionUploadResourceFromClipboard.Click += new System.EventHandler(this.toolDescriptionUploadResourceFromClipboard_Click);
+            toolDescriptionUploadResourceFromClipboard.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolDescriptionUploadResourceFromClipboard.Image = (Image)resources.GetObject("toolDescriptionUploadResourceFromClipboard.Image");
+            toolDescriptionUploadResourceFromClipboard.ImageTransparentColor = Color.Magenta;
+            toolDescriptionUploadResourceFromClipboard.Name = "toolDescriptionUploadResourceFromClipboard";
+            toolDescriptionUploadResourceFromClipboard.Size = new Size(32, 24);
+            toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
+            toolDescriptionUploadResourceFromClipboard.Click += toolDescriptionUploadResourceFromClipboard_Click;
             // 
             // labelLoadingHtml
             // 
-            this.labelLoadingHtml.AutoSize = true;
-            this.labelLoadingHtml.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelLoadingHtml.Location = new System.Drawing.Point(136, 112);
-            this.labelLoadingHtml.Name = "labelLoadingHtml";
-            this.labelLoadingHtml.Size = new System.Drawing.Size(138, 15);
-            this.labelLoadingHtml.TabIndex = 54;
-            this.labelLoadingHtml.Text = "Loading html content ...";
-            this.labelLoadingHtml.Visible = false;
+            labelLoadingHtml.AutoSize = true;
+            labelLoadingHtml.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelLoadingHtml.Location = new Point(136, 112);
+            labelLoadingHtml.Name = "labelLoadingHtml";
+            labelLoadingHtml.Size = new Size(176, 20);
+            labelLoadingHtml.TabIndex = 54;
+            labelLoadingHtml.Text = "Loading html content ...";
+            labelLoadingHtml.Visible = false;
             // 
             // label7
             // 
-            this.label7.Location = new System.Drawing.Point(9, 68);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(64, 18);
-            this.label7.TabIndex = 50;
-            this.label7.Text = "Priority:";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            label7.Location = new Point(9, 68);
+            label7.Margin = new Padding(4, 0, 4, 0);
+            label7.Name = "label7";
+            label7.Size = new Size(64, 18);
+            label7.TabIndex = 50;
+            label7.Text = "Priority:";
+            label7.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // buttonEditMarkdown
             // 
-            this.buttonEditMarkdown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonEditMarkdown.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonEditMarkdown.ImageList = this.imageListTabNoteData;
-            this.buttonEditMarkdown.Location = new System.Drawing.Point(542, 105);
-            this.buttonEditMarkdown.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonEditMarkdown.Name = "buttonEditMarkdown";
-            this.buttonEditMarkdown.Size = new System.Drawing.Size(79, 24);
-            this.buttonEditMarkdown.TabIndex = 5;
-            this.buttonEditMarkdown.Text = "Markdown";
-            this.buttonEditMarkdown.UseVisualStyleBackColor = true;
-            this.buttonEditMarkdown.Click += new System.EventHandler(this.buttonEditMarkdown_Click);
+            buttonEditMarkdown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonEditMarkdown.ImageAlign = ContentAlignment.MiddleLeft;
+            buttonEditMarkdown.ImageList = imageListTabNoteData;
+            buttonEditMarkdown.Location = new Point(542, 105);
+            buttonEditMarkdown.Margin = new Padding(4, 3, 4, 3);
+            buttonEditMarkdown.Name = "buttonEditMarkdown";
+            buttonEditMarkdown.Size = new Size(79, 24);
+            buttonEditMarkdown.TabIndex = 5;
+            buttonEditMarkdown.Text = "Markdown";
+            buttonEditMarkdown.UseVisualStyleBackColor = true;
+            buttonEditMarkdown.Click += buttonEditMarkdown_Click;
             // 
             // buttonViewHtml
             // 
-            this.buttonViewHtml.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonViewHtml.Location = new System.Drawing.Point(624, 105);
-            this.buttonViewHtml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonViewHtml.Name = "buttonViewHtml";
-            this.buttonViewHtml.Size = new System.Drawing.Size(80, 24);
-            this.buttonViewHtml.TabIndex = 6;
-            this.buttonViewHtml.Text = "Html editor";
-            this.buttonViewHtml.UseVisualStyleBackColor = true;
-            this.buttonViewHtml.Click += new System.EventHandler(this.buttonViewHtml_Click);
+            buttonViewHtml.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonViewHtml.Location = new Point(624, 105);
+            buttonViewHtml.Margin = new Padding(4, 3, 4, 3);
+            buttonViewHtml.Name = "buttonViewHtml";
+            buttonViewHtml.Size = new Size(80, 24);
+            buttonViewHtml.TabIndex = 6;
+            buttonViewHtml.Text = "Html editor";
+            buttonViewHtml.UseVisualStyleBackColor = true;
+            buttonViewHtml.Click += buttonViewHtml_Click;
             // 
             // textPriority
             // 
-            this.textPriority.Location = new System.Drawing.Point(81, 68);
-            this.textPriority.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textPriority.Name = "textPriority";
-            this.textPriority.Size = new System.Drawing.Size(75, 23);
-            this.textPriority.TabIndex = 3;
+            textPriority.Location = new Point(81, 68);
+            textPriority.Margin = new Padding(4, 3, 4, 3);
+            textPriority.Name = "textPriority";
+            textPriority.Size = new Size(75, 27);
+            textPriority.TabIndex = 3;
             // 
             // label6
             // 
-            this.label6.Location = new System.Drawing.Point(9, 112);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(103, 18);
-            this.label6.TabIndex = 44;
-            this.label6.Text = "Content:";
+            label6.Location = new Point(9, 112);
+            label6.Margin = new Padding(4, 0, 4, 0);
+            label6.Name = "label6";
+            label6.Size = new Size(103, 18);
+            label6.TabIndex = 44;
+            label6.Text = "Content:";
             // 
             // textTags
             // 
-            this.textTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTags.Location = new System.Drawing.Point(211, 68);
-            this.textTags.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textTags.MaxLength = 255;
-            this.textTags.Name = "textTags";
-            this.textTags.Size = new System.Drawing.Size(315, 23);
-            this.textTags.TabIndex = 4;
+            textTags.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textTags.Location = new Point(211, 68);
+            textTags.Margin = new Padding(4, 3, 4, 3);
+            textTags.MaxLength = 255;
+            textTags.Name = "textTags";
+            textTags.Size = new Size(315, 27);
+            textTags.TabIndex = 4;
             // 
             // textFolder
             // 
-            this.textFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFolder.Enabled = false;
-            this.textFolder.Location = new System.Drawing.Point(81, 38);
-            this.textFolder.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textFolder.MaxLength = 255;
-            this.textFolder.Name = "textFolder";
-            this.textFolder.Size = new System.Drawing.Size(625, 23);
-            this.textFolder.TabIndex = 1;
+            textFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textFolder.Enabled = false;
+            textFolder.Location = new Point(81, 38);
+            textFolder.Margin = new Padding(4, 3, 4, 3);
+            textFolder.MaxLength = 255;
+            textFolder.Name = "textFolder";
+            textFolder.Size = new Size(625, 27);
+            textFolder.TabIndex = 1;
             // 
             // textTopic
             // 
-            this.textTopic.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTopic.Location = new System.Drawing.Point(81, 8);
-            this.textTopic.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textTopic.MaxLength = 255;
-            this.textTopic.Name = "textTopic";
-            this.textTopic.Size = new System.Drawing.Size(625, 23);
-            this.textTopic.TabIndex = 0;
+            textTopic.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textTopic.Location = new Point(81, 8);
+            textTopic.Margin = new Padding(4, 3, 4, 3);
+            textTopic.MaxLength = 255;
+            textTopic.Name = "textTopic";
+            textTopic.Size = new Size(625, 27);
+            textTopic.TabIndex = 0;
             // 
             // buttonFolderSearch
             // 
-            this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonFolderSearch.Location = new System.Drawing.Point(760, 38);
-            this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonFolderSearch.Name = "buttonFolderSearch";
-            this.buttonFolderSearch.Size = new System.Drawing.Size(27, 23);
-            this.buttonFolderSearch.TabIndex = 2;
-            this.buttonFolderSearch.Text = "...";
-            this.buttonFolderSearch.UseVisualStyleBackColor = false;
-            this.buttonFolderSearch.Click += new System.EventHandler(this.buttonFolderSearch_Click);
+            buttonFolderSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonFolderSearch.BackColor = SystemColors.Control;
+            buttonFolderSearch.FlatStyle = FlatStyle.System;
+            buttonFolderSearch.Location = new Point(760, 38);
+            buttonFolderSearch.Margin = new Padding(4, 3, 4, 3);
+            buttonFolderSearch.Name = "buttonFolderSearch";
+            buttonFolderSearch.Size = new Size(27, 23);
+            buttonFolderSearch.TabIndex = 2;
+            buttonFolderSearch.Text = "...";
+            buttonFolderSearch.UseVisualStyleBackColor = false;
+            buttonFolderSearch.Click += buttonFolderSearch_Click;
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(172, 68);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(35, 18);
-            this.label3.TabIndex = 36;
-            this.label3.Text = "Tags:";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            label3.Location = new Point(172, 68);
+            label3.Margin = new Padding(4, 0, 4, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(35, 18);
+            label3.TabIndex = 36;
+            label3.Text = "Tags:";
+            label3.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(9, 38);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(64, 18);
-            this.label2.TabIndex = 34;
-            this.label2.Text = "Folder:";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            label2.Location = new Point(9, 38);
+            label2.Margin = new Padding(4, 0, 4, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(64, 18);
+            label2.TabIndex = 34;
+            label2.Text = "Folder:";
+            label2.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(9, 8);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 18);
-            this.label1.TabIndex = 33;
-            this.label1.Text = "Topic:";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            label1.Location = new Point(9, 8);
+            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(64, 18);
+            label1.TabIndex = 33;
+            label1.Text = "Topic:";
+            label1.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // textNoteNumber
             // 
-            this.textNoteNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.textNoteNumber.BackColor = System.Drawing.SystemColors.Control;
-            this.textNoteNumber.Enabled = false;
-            this.textNoteNumber.Location = new System.Drawing.Point(702, 8);
-            this.textNoteNumber.Name = "textNoteNumber";
-            this.textNoteNumber.Size = new System.Drawing.Size(84, 23);
-            this.textNoteNumber.TabIndex = 51;
-            this.textNoteNumber.TabStop = false;
-            this.textNoteNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            textNoteNumber.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            textNoteNumber.BackColor = SystemColors.Control;
+            textNoteNumber.Enabled = false;
+            textNoteNumber.Location = new Point(702, 8);
+            textNoteNumber.Name = "textNoteNumber";
+            textNoteNumber.Size = new Size(84, 27);
+            textNoteNumber.TabIndex = 51;
+            textNoteNumber.TabStop = false;
+            textNoteNumber.TextAlign = HorizontalAlignment.Right;
             // 
             // textFolderNumber
             // 
-            this.textFolderNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFolderNumber.BackColor = System.Drawing.SystemColors.Control;
-            this.textFolderNumber.Enabled = false;
-            this.textFolderNumber.Location = new System.Drawing.Point(702, 38);
-            this.textFolderNumber.Name = "textFolderNumber";
-            this.textFolderNumber.Size = new System.Drawing.Size(54, 23);
-            this.textFolderNumber.TabIndex = 52;
-            this.textFolderNumber.TabStop = false;
-            this.textFolderNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            textFolderNumber.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            textFolderNumber.BackColor = SystemColors.Control;
+            textFolderNumber.Enabled = false;
+            textFolderNumber.Location = new Point(702, 38);
+            textFolderNumber.Name = "textFolderNumber";
+            textFolderNumber.Size = new Size(54, 27);
+            textFolderNumber.TabIndex = 52;
+            textFolderNumber.TabStop = false;
+            textFolderNumber.TextAlign = HorizontalAlignment.Right;
             // 
             // tabAttributes
             // 
-            this.tabAttributes.Controls.Add(this.buttonDeleteType);
-            this.tabAttributes.Controls.Add(this.listViewAttributes);
-            this.tabAttributes.Controls.Add(this.textNoteType);
-            this.tabAttributes.Controls.Add(this.buttonNoteType);
-            this.tabAttributes.Controls.Add(this.label15);
-            this.tabAttributes.Controls.Add(this.buttonAttributeEdit);
-            this.tabAttributes.Controls.Add(this.label10);
-            this.tabAttributes.ImageIndex = 5;
-            this.tabAttributes.Location = new System.Drawing.Point(4, 30);
-            this.tabAttributes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabAttributes.Name = "tabAttributes";
-            this.tabAttributes.Size = new System.Drawing.Size(794, 569);
-            this.tabAttributes.TabIndex = 3;
-            this.tabAttributes.Text = "Attributes  ";
-            this.tabAttributes.UseVisualStyleBackColor = true;
+            tabAttributes.Controls.Add(buttonDeleteType);
+            tabAttributes.Controls.Add(listViewAttributes);
+            tabAttributes.Controls.Add(textNoteType);
+            tabAttributes.Controls.Add(buttonNoteType);
+            tabAttributes.Controls.Add(label15);
+            tabAttributes.Controls.Add(buttonAttributeEdit);
+            tabAttributes.Controls.Add(label10);
+            tabAttributes.ImageIndex = 5;
+            tabAttributes.Location = new Point(4, 35);
+            tabAttributes.Margin = new Padding(4, 3, 4, 3);
+            tabAttributes.Name = "tabAttributes";
+            tabAttributes.Size = new Size(794, 564);
+            tabAttributes.TabIndex = 3;
+            tabAttributes.Text = "Attributes  ";
+            tabAttributes.UseVisualStyleBackColor = true;
             // 
             // buttonDeleteType
             // 
-            this.buttonDeleteType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonDeleteType.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonDeleteType.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonDeleteType.Location = new System.Drawing.Point(730, 16);
-            this.buttonDeleteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonDeleteType.Name = "buttonDeleteType";
-            this.buttonDeleteType.Size = new System.Drawing.Size(27, 23);
-            this.buttonDeleteType.TabIndex = 47;
-            this.buttonDeleteType.Text = "X";
-            this.toolTipHelps.SetToolTip(this.buttonDeleteType, "Delete type");
-            this.buttonDeleteType.UseVisualStyleBackColor = false;
-            this.buttonDeleteType.Click += new System.EventHandler(this.buttonDeleteType_Click);
+            buttonDeleteType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonDeleteType.BackColor = SystemColors.Control;
+            buttonDeleteType.FlatStyle = FlatStyle.System;
+            buttonDeleteType.Location = new Point(730, 16);
+            buttonDeleteType.Margin = new Padding(4, 3, 4, 3);
+            buttonDeleteType.Name = "buttonDeleteType";
+            buttonDeleteType.Size = new Size(27, 23);
+            buttonDeleteType.TabIndex = 47;
+            buttonDeleteType.Text = "X";
+            toolTipHelps.SetToolTip(buttonDeleteType, "Delete type");
+            buttonDeleteType.UseVisualStyleBackColor = false;
+            buttonDeleteType.Click += buttonDeleteType_Click;
             // 
             // listViewAttributes
             // 
-            this.listViewAttributes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewAttributes.Location = new System.Drawing.Point(10, 79);
-            this.listViewAttributes.MultiSelect = false;
-            this.listViewAttributes.Name = "listViewAttributes";
-            this.listViewAttributes.Size = new System.Drawing.Size(774, 478);
-            this.listViewAttributes.TabIndex = 46;
-            this.listViewAttributes.UseCompatibleStateImageBehavior = false;
-            this.listViewAttributes.DoubleClick += new System.EventHandler(this.listViewAttributes_DoubleClick);
-            this.listViewAttributes.Resize += new System.EventHandler(this.listView_Resize);
+            listViewAttributes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listViewAttributes.Location = new Point(10, 79);
+            listViewAttributes.MultiSelect = false;
+            listViewAttributes.Name = "listViewAttributes";
+            listViewAttributes.Size = new Size(774, 473);
+            listViewAttributes.TabIndex = 46;
+            listViewAttributes.UseCompatibleStateImageBehavior = false;
+            listViewAttributes.DoubleClick += listViewAttributes_DoubleClick;
+            listViewAttributes.Resize += listView_Resize;
             // 
             // textNoteType
             // 
-            this.textNoteType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textNoteType.Enabled = false;
-            this.textNoteType.Location = new System.Drawing.Point(103, 16);
-            this.textNoteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textNoteType.MaxLength = 255;
-            this.textNoteType.Name = "textNoteType";
-            this.textNoteType.ShortcutsEnabled = false;
-            this.textNoteType.Size = new System.Drawing.Size(624, 23);
-            this.textNoteType.TabIndex = 44;
+            textNoteType.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textNoteType.Enabled = false;
+            textNoteType.Location = new Point(103, 16);
+            textNoteType.Margin = new Padding(4, 3, 4, 3);
+            textNoteType.MaxLength = 255;
+            textNoteType.Name = "textNoteType";
+            textNoteType.ShortcutsEnabled = false;
+            textNoteType.Size = new Size(624, 27);
+            textNoteType.TabIndex = 44;
             // 
             // buttonNoteType
             // 
-            this.buttonNoteType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonNoteType.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonNoteType.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonNoteType.Location = new System.Drawing.Point(758, 16);
-            this.buttonNoteType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonNoteType.Name = "buttonNoteType";
-            this.buttonNoteType.Size = new System.Drawing.Size(27, 23);
-            this.buttonNoteType.TabIndex = 45;
-            this.buttonNoteType.Text = "...";
-            this.toolTipHelps.SetToolTip(this.buttonNoteType, "Select new type");
-            this.buttonNoteType.UseVisualStyleBackColor = false;
-            this.buttonNoteType.Click += new System.EventHandler(this.buttonNoteType_Click);
+            buttonNoteType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonNoteType.BackColor = SystemColors.Control;
+            buttonNoteType.FlatStyle = FlatStyle.System;
+            buttonNoteType.Location = new Point(758, 16);
+            buttonNoteType.Margin = new Padding(4, 3, 4, 3);
+            buttonNoteType.Name = "buttonNoteType";
+            buttonNoteType.Size = new Size(27, 23);
+            buttonNoteType.TabIndex = 45;
+            buttonNoteType.Text = "...";
+            toolTipHelps.SetToolTip(buttonNoteType, "Select new type");
+            buttonNoteType.UseVisualStyleBackColor = false;
+            buttonNoteType.Click += buttonNoteType_Click;
             // 
             // label15
             // 
-            this.label15.Location = new System.Drawing.Point(10, 16);
-            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(85, 18);
-            this.label15.TabIndex = 43;
-            this.label15.Text = "Node type:";
-            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            label15.Location = new Point(10, 16);
+            label15.Margin = new Padding(4, 0, 4, 0);
+            label15.Name = "label15";
+            label15.Size = new Size(85, 18);
+            label15.TabIndex = 43;
+            label15.Text = "Node type:";
+            label15.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // buttonAttributeEdit
             // 
-            this.buttonAttributeEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAttributeEdit.Location = new System.Drawing.Point(758, 54);
-            this.buttonAttributeEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonAttributeEdit.Name = "buttonAttributeEdit";
-            this.buttonAttributeEdit.Size = new System.Drawing.Size(27, 23);
-            this.buttonAttributeEdit.TabIndex = 12;
-            this.buttonAttributeEdit.Text = "...";
-            this.buttonAttributeEdit.UseVisualStyleBackColor = true;
-            this.buttonAttributeEdit.Click += new System.EventHandler(this.buttonAttributeEdit_Click);
+            buttonAttributeEdit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonAttributeEdit.Location = new Point(758, 54);
+            buttonAttributeEdit.Margin = new Padding(4, 3, 4, 3);
+            buttonAttributeEdit.Name = "buttonAttributeEdit";
+            buttonAttributeEdit.Size = new Size(27, 23);
+            buttonAttributeEdit.TabIndex = 12;
+            buttonAttributeEdit.Text = "...";
+            buttonAttributeEdit.UseVisualStyleBackColor = true;
+            buttonAttributeEdit.Click += buttonAttributeEdit_Click;
             // 
             // label10
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(10, 61);
-            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(62, 15);
-            this.label10.TabIndex = 3;
-            this.label10.Text = "Attributes:";
+            label10.AutoSize = true;
+            label10.Location = new Point(10, 61);
+            label10.Margin = new Padding(4, 0, 4, 0);
+            label10.Name = "label10";
+            label10.Size = new Size(77, 20);
+            label10.TabIndex = 3;
+            label10.Text = "Attributes:";
             // 
             // tabResources
             // 
-            this.tabResources.Controls.Add(this.labelPreview);
-            this.tabResources.Controls.Add(this.textDescriptionResource);
-            this.tabResources.Controls.Add(this.webViewResource);
-            this.tabResources.Controls.Add(this.buttonSaveResource);
-            this.tabResources.Controls.Add(this.buttonInsertLink);
-            this.tabResources.Controls.Add(this.panelPreview);
-            this.tabResources.Controls.Add(this.listViewResources);
-            this.tabResources.Controls.Add(this.buttonResourceEdit);
-            this.tabResources.Controls.Add(this.buttonResourceDelete);
-            this.tabResources.Controls.Add(this.buttonResourceAdd);
-            this.tabResources.Controls.Add(this.label12);
-            this.tabResources.ImageIndex = 3;
-            this.tabResources.Location = new System.Drawing.Point(4, 30);
-            this.tabResources.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabResources.Name = "tabResources";
-            this.tabResources.Size = new System.Drawing.Size(794, 569);
-            this.tabResources.TabIndex = 4;
-            this.tabResources.Text = "Resources  ";
-            this.tabResources.ToolTipText = "Save resource file";
-            this.tabResources.UseVisualStyleBackColor = true;
+            tabResources.Controls.Add(labelPreview);
+            tabResources.Controls.Add(textDescriptionResource);
+            tabResources.Controls.Add(webViewResource);
+            tabResources.Controls.Add(buttonSaveResource);
+            tabResources.Controls.Add(buttonInsertLink);
+            tabResources.Controls.Add(panelPreview);
+            tabResources.Controls.Add(listViewResources);
+            tabResources.Controls.Add(buttonResourceEdit);
+            tabResources.Controls.Add(buttonResourceDelete);
+            tabResources.Controls.Add(buttonResourceAdd);
+            tabResources.Controls.Add(label12);
+            tabResources.ImageIndex = 3;
+            tabResources.Location = new Point(4, 35);
+            tabResources.Margin = new Padding(4, 3, 4, 3);
+            tabResources.Name = "tabResources";
+            tabResources.Size = new Size(794, 564);
+            tabResources.TabIndex = 4;
+            tabResources.Text = "Resources  ";
+            tabResources.ToolTipText = "Save resource file";
+            tabResources.UseVisualStyleBackColor = true;
             // 
             // labelPreview
             // 
-            this.labelPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelPreview.AutoSize = true;
-            this.labelPreview.Location = new System.Drawing.Point(685, 18);
-            this.labelPreview.Name = "labelPreview";
-            this.labelPreview.Size = new System.Drawing.Size(99, 15);
-            this.labelPreview.TabIndex = 24;
-            this.labelPreview.Text = "Preview resource:";
+            labelPreview.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            labelPreview.AutoSize = true;
+            labelPreview.Location = new Point(685, 18);
+            labelPreview.Name = "labelPreview";
+            labelPreview.Size = new Size(123, 20);
+            labelPreview.TabIndex = 24;
+            labelPreview.Text = "Preview resource:";
             // 
             // textDescriptionResource
             // 
-            this.textDescriptionResource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textDescriptionResource.Location = new System.Drawing.Point(396, 513);
-            this.textDescriptionResource.Multiline = true;
-            this.textDescriptionResource.Name = "textDescriptionResource";
-            this.textDescriptionResource.Size = new System.Drawing.Size(392, 52);
-            this.textDescriptionResource.TabIndex = 19;
+            textDescriptionResource.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textDescriptionResource.Location = new Point(396, 508);
+            textDescriptionResource.Multiline = true;
+            textDescriptionResource.Name = "textDescriptionResource";
+            textDescriptionResource.Size = new Size(392, 52);
+            textDescriptionResource.TabIndex = 19;
             // 
             // webViewResource
             // 
-            this.webViewResource.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.webViewResource.EnableUrlBox = true;
-            this.webViewResource.ForceHttps = false;
-            this.webViewResource.IsInitialized = false;
-            this.webViewResource.Location = new System.Drawing.Point(392, 39);
-            this.webViewResource.Name = "webViewResource";
-            this.webViewResource.ShowNavigationTools = false;
-            this.webViewResource.ShowStatusInfo = false;
-            this.webViewResource.Size = new System.Drawing.Size(392, 157);
-            this.webViewResource.TabIndex = 21;
-            this.webViewResource.TextUrl = "";
-            this.webViewResource.Visible = false;
+            webViewResource.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            webViewResource.EnableUrlBox = true;
+            webViewResource.ForceHttps = false;
+            webViewResource.IsInitialized = false;
+            webViewResource.Location = new Point(392, 39);
+            webViewResource.Margin = new Padding(3, 4, 3, 4);
+            webViewResource.Name = "webViewResource";
+            webViewResource.ShowNavigationTools = false;
+            webViewResource.ShowStatusInfo = false;
+            webViewResource.Size = new Size(392, 152);
+            webViewResource.TabIndex = 21;
+            webViewResource.TextUrl = "";
+            webViewResource.Visible = false;
             // 
             // buttonSaveResource
             // 
-            this.buttonSaveResource.Location = new System.Drawing.Point(434, 10);
-            this.buttonSaveResource.Name = "buttonSaveResource";
-            this.buttonSaveResource.Size = new System.Drawing.Size(32, 23);
-            this.buttonSaveResource.TabIndex = 20;
-            this.buttonSaveResource.Text = "S";
-            this.toolTipHelps.SetToolTip(this.buttonSaveResource, "Save resource");
-            this.buttonSaveResource.UseVisualStyleBackColor = true;
-            this.buttonSaveResource.Click += new System.EventHandler(this.buttonSaveResource_Click);
+            buttonSaveResource.Location = new Point(434, 10);
+            buttonSaveResource.Name = "buttonSaveResource";
+            buttonSaveResource.Size = new Size(32, 23);
+            buttonSaveResource.TabIndex = 20;
+            buttonSaveResource.Text = "S";
+            toolTipHelps.SetToolTip(buttonSaveResource, "Save resource");
+            buttonSaveResource.UseVisualStyleBackColor = true;
+            buttonSaveResource.Click += buttonSaveResource_Click;
             // 
             // buttonInsertLink
             // 
-            this.buttonInsertLink.Location = new System.Drawing.Point(396, 10);
-            this.buttonInsertLink.Name = "buttonInsertLink";
-            this.buttonInsertLink.Size = new System.Drawing.Size(32, 23);
-            this.buttonInsertLink.TabIndex = 19;
-            this.buttonInsertLink.Text = "<>";
-            this.toolTipHelps.SetToolTip(this.buttonInsertLink, "Insert resouce link in note description ");
-            this.buttonInsertLink.UseVisualStyleBackColor = true;
-            this.buttonInsertLink.Click += new System.EventHandler(this.buttonInsertLink_Click);
+            buttonInsertLink.Location = new Point(396, 10);
+            buttonInsertLink.Name = "buttonInsertLink";
+            buttonInsertLink.Size = new Size(32, 23);
+            buttonInsertLink.TabIndex = 19;
+            buttonInsertLink.Text = "<>";
+            toolTipHelps.SetToolTip(buttonInsertLink, "Insert resouce link in note description ");
+            buttonInsertLink.UseVisualStyleBackColor = true;
+            buttonInsertLink.Click += buttonInsertLink_Click;
             // 
             // panelPreview
             // 
-            this.panelPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelPreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelPreview.Controls.Add(this.linkViewFile);
-            this.panelPreview.Location = new System.Drawing.Point(392, 202);
-            this.panelPreview.Name = "panelPreview";
-            this.panelPreview.Size = new System.Drawing.Size(392, 84);
-            this.panelPreview.TabIndex = 18;
-            this.panelPreview.Visible = false;
+            panelPreview.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelPreview.BorderStyle = BorderStyle.FixedSingle;
+            panelPreview.Controls.Add(linkViewFile);
+            panelPreview.Location = new Point(392, 202);
+            panelPreview.Name = "panelPreview";
+            panelPreview.Size = new Size(392, 79);
+            panelPreview.TabIndex = 18;
+            panelPreview.Visible = false;
             // 
             // linkViewFile
             // 
-            this.linkViewFile.AutoSize = true;
-            this.linkViewFile.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.linkViewFile.Location = new System.Drawing.Point(13, 14);
-            this.linkViewFile.Name = "linkViewFile";
-            this.linkViewFile.Size = new System.Drawing.Size(128, 19);
-            this.linkViewFile.TabIndex = 1;
-            this.linkViewFile.TabStop = true;
-            this.linkViewFile.Text = "View resource file ...";
-            this.linkViewFile.Click += new System.EventHandler(this.linkViewFile_Click);
+            linkViewFile.AutoSize = true;
+            linkViewFile.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            linkViewFile.Location = new Point(13, 14);
+            linkViewFile.Name = "linkViewFile";
+            linkViewFile.Size = new Size(160, 23);
+            linkViewFile.TabIndex = 1;
+            linkViewFile.TabStop = true;
+            linkViewFile.Text = "View resource file ...";
+            linkViewFile.Click += linkViewFile_Click;
             // 
             // listViewResources
             // 
-            this.listViewResources.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.listViewResources.Location = new System.Drawing.Point(5, 36);
-            this.listViewResources.MultiSelect = false;
-            this.listViewResources.Name = "listViewResources";
-            this.listViewResources.Size = new System.Drawing.Size(381, 529);
-            this.listViewResources.TabIndex = 14;
-            this.listViewResources.UseCompatibleStateImageBehavior = false;
-            this.listViewResources.SelectedIndexChanged += new System.EventHandler(this.listViewResources_SelectedIndexChanged);
-            this.listViewResources.DoubleClick += new System.EventHandler(this.listViewResources_DoubleClick);
+            listViewResources.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            listViewResources.Location = new Point(5, 36);
+            listViewResources.MultiSelect = false;
+            listViewResources.Name = "listViewResources";
+            listViewResources.Size = new Size(381, 524);
+            listViewResources.TabIndex = 14;
+            listViewResources.UseCompatibleStateImageBehavior = false;
+            listViewResources.SelectedIndexChanged += listViewResources_SelectedIndexChanged;
+            listViewResources.DoubleClick += listViewResources_DoubleClick;
             // 
             // buttonResourceEdit
             // 
-            this.buttonResourceEdit.Location = new System.Drawing.Point(360, 10);
-            this.buttonResourceEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonResourceEdit.Name = "buttonResourceEdit";
-            this.buttonResourceEdit.Size = new System.Drawing.Size(27, 23);
-            this.buttonResourceEdit.TabIndex = 12;
-            this.buttonResourceEdit.Text = "...";
-            this.buttonResourceEdit.UseVisualStyleBackColor = true;
-            this.buttonResourceEdit.Click += new System.EventHandler(this.buttonResourceEdit_Click);
+            buttonResourceEdit.Location = new Point(360, 10);
+            buttonResourceEdit.Margin = new Padding(4, 3, 4, 3);
+            buttonResourceEdit.Name = "buttonResourceEdit";
+            buttonResourceEdit.Size = new Size(27, 23);
+            buttonResourceEdit.TabIndex = 12;
+            buttonResourceEdit.Text = "...";
+            buttonResourceEdit.UseVisualStyleBackColor = true;
+            buttonResourceEdit.Click += buttonResourceEdit_Click;
             // 
             // buttonResourceDelete
             // 
-            this.buttonResourceDelete.Location = new System.Drawing.Point(330, 10);
-            this.buttonResourceDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonResourceDelete.Name = "buttonResourceDelete";
-            this.buttonResourceDelete.Size = new System.Drawing.Size(27, 23);
-            this.buttonResourceDelete.TabIndex = 11;
-            this.buttonResourceDelete.Text = "-";
-            this.buttonResourceDelete.UseVisualStyleBackColor = true;
-            this.buttonResourceDelete.Click += new System.EventHandler(this.buttonResourceDelete_Click);
+            buttonResourceDelete.Location = new Point(330, 10);
+            buttonResourceDelete.Margin = new Padding(4, 3, 4, 3);
+            buttonResourceDelete.Name = "buttonResourceDelete";
+            buttonResourceDelete.Size = new Size(27, 23);
+            buttonResourceDelete.TabIndex = 11;
+            buttonResourceDelete.Text = "-";
+            buttonResourceDelete.UseVisualStyleBackColor = true;
+            buttonResourceDelete.Click += buttonResourceDelete_Click;
             // 
             // buttonResourceAdd
             // 
-            this.buttonResourceAdd.Location = new System.Drawing.Point(300, 10);
-            this.buttonResourceAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonResourceAdd.Name = "buttonResourceAdd";
-            this.buttonResourceAdd.Size = new System.Drawing.Size(27, 23);
-            this.buttonResourceAdd.TabIndex = 10;
-            this.buttonResourceAdd.Text = "+";
-            this.toolTipHelps.SetToolTip(this.buttonResourceAdd, "Add resource");
-            this.buttonResourceAdd.UseVisualStyleBackColor = true;
-            this.buttonResourceAdd.Click += new System.EventHandler(this.buttonResourceAdd_Click);
+            buttonResourceAdd.Location = new Point(300, 10);
+            buttonResourceAdd.Margin = new Padding(4, 3, 4, 3);
+            buttonResourceAdd.Name = "buttonResourceAdd";
+            buttonResourceAdd.Size = new Size(27, 23);
+            buttonResourceAdd.TabIndex = 10;
+            buttonResourceAdd.Text = "+";
+            toolTipHelps.SetToolTip(buttonResourceAdd, "Add resource");
+            buttonResourceAdd.UseVisualStyleBackColor = true;
+            buttonResourceAdd.Click += buttonResourceAdd_Click;
             // 
             // label12
             // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(6, 14);
-            this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(63, 15);
-            this.label12.TabIndex = 5;
-            this.label12.Text = "Resources:";
+            label12.AutoSize = true;
+            label12.Location = new Point(6, 14);
+            label12.Margin = new Padding(4, 0, 4, 0);
+            label12.Name = "label12";
+            label12.Size = new Size(78, 20);
+            label12.TabIndex = 5;
+            label12.Text = "Resources:";
             // 
             // tabTasks
             // 
-            this.tabTasks.Controls.Add(this.textTaskTags);
-            this.tabTasks.Controls.Add(this.label17);
-            this.tabTasks.Controls.Add(this.textTaskDescription);
-            this.tabTasks.Controls.Add(this.label16);
-            this.tabTasks.Controls.Add(this.listViewTasks);
-            this.tabTasks.Controls.Add(this.buttonTaskEdit);
-            this.tabTasks.Controls.Add(this.buttonTaskDelete);
-            this.tabTasks.Controls.Add(this.buttonTaskAdd);
-            this.tabTasks.Controls.Add(this.label11);
-            this.tabTasks.ImageIndex = 6;
-            this.tabTasks.Location = new System.Drawing.Point(4, 30);
-            this.tabTasks.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabTasks.Name = "tabTasks";
-            this.tabTasks.Size = new System.Drawing.Size(794, 569);
-            this.tabTasks.TabIndex = 2;
-            this.tabTasks.Text = "Tasks  ";
-            this.tabTasks.UseVisualStyleBackColor = true;
+            tabTasks.Controls.Add(textTaskTags);
+            tabTasks.Controls.Add(label17);
+            tabTasks.Controls.Add(textTaskDescription);
+            tabTasks.Controls.Add(label16);
+            tabTasks.Controls.Add(listViewTasks);
+            tabTasks.Controls.Add(buttonTaskEdit);
+            tabTasks.Controls.Add(buttonTaskDelete);
+            tabTasks.Controls.Add(buttonTaskAdd);
+            tabTasks.Controls.Add(label11);
+            tabTasks.ImageIndex = 6;
+            tabTasks.Location = new Point(4, 35);
+            tabTasks.Margin = new Padding(4, 3, 4, 3);
+            tabTasks.Name = "tabTasks";
+            tabTasks.Size = new Size(794, 562);
+            tabTasks.TabIndex = 2;
+            tabTasks.Text = "Tasks  ";
+            tabTasks.UseVisualStyleBackColor = true;
             // 
             // textTaskTags
             // 
-            this.textTaskTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTaskTags.Location = new System.Drawing.Point(400, 543);
-            this.textTaskTags.Name = "textTaskTags";
-            this.textTaskTags.Size = new System.Drawing.Size(389, 23);
-            this.textTaskTags.TabIndex = 16;
+            textTaskTags.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textTaskTags.Location = new Point(400, 520);
+            textTaskTags.Name = "textTaskTags";
+            textTaskTags.Size = new Size(389, 27);
+            textTaskTags.TabIndex = 16;
             // 
             // label17
             // 
-            this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(398, 525);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(33, 15);
-            this.label17.TabIndex = 16;
-            this.label17.Text = "Tags:";
+            label17.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            label17.AutoSize = true;
+            label17.Location = new Point(400, 497);
+            label17.Name = "label17";
+            label17.Size = new Size(41, 20);
+            label17.TabIndex = 16;
+            label17.Text = "Tags:";
             // 
             // textTaskDescription
             // 
-            this.textTaskDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTaskDescription.Location = new System.Drawing.Point(400, 36);
-            this.textTaskDescription.Multiline = true;
-            this.textTaskDescription.Name = "textTaskDescription";
-            this.textTaskDescription.Size = new System.Drawing.Size(388, 486);
-            this.textTaskDescription.TabIndex = 15;
+            textTaskDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textTaskDescription.Location = new Point(400, 36);
+            textTaskDescription.Multiline = true;
+            textTaskDescription.Name = "textTaskDescription";
+            textTaskDescription.Size = new Size(388, 458);
+            textTaskDescription.TabIndex = 15;
             // 
             // label16
             // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(400, 16);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(94, 15);
-            this.label16.TabIndex = 14;
-            this.label16.Text = "Task description:";
+            label16.AutoSize = true;
+            label16.Location = new Point(400, 16);
+            label16.Name = "label16";
+            label16.Size = new Size(117, 20);
+            label16.TabIndex = 14;
+            label16.Text = "Task description:";
             // 
             // listViewTasks
             // 
-            this.listViewTasks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.listViewTasks.Location = new System.Drawing.Point(5, 36);
-            this.listViewTasks.MultiSelect = false;
-            this.listViewTasks.Name = "listViewTasks";
-            this.listViewTasks.Size = new System.Drawing.Size(387, 530);
-            this.listViewTasks.TabIndex = 13;
-            this.listViewTasks.UseCompatibleStateImageBehavior = false;
-            this.listViewTasks.SelectedIndexChanged += new System.EventHandler(this.listViewTasks_SelectedIndexChanged);
-            this.listViewTasks.DoubleClick += new System.EventHandler(this.listViewTasks_DoubleClick);
-            this.listViewTasks.Resize += new System.EventHandler(this.listView_Resize);
+            listViewTasks.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            listViewTasks.Location = new Point(5, 36);
+            listViewTasks.MultiSelect = false;
+            listViewTasks.Name = "listViewTasks";
+            listViewTasks.Size = new Size(387, 523);
+            listViewTasks.TabIndex = 13;
+            listViewTasks.UseCompatibleStateImageBehavior = false;
+            listViewTasks.SelectedIndexChanged += listViewTasks_SelectedIndexChanged;
+            listViewTasks.DoubleClick += listViewTasks_DoubleClick;
+            listViewTasks.Resize += listView_Resize;
             // 
             // buttonTaskEdit
             // 
-            this.buttonTaskEdit.Location = new System.Drawing.Point(360, 10);
-            this.buttonTaskEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTaskEdit.Name = "buttonTaskEdit";
-            this.buttonTaskEdit.Size = new System.Drawing.Size(27, 23);
-            this.buttonTaskEdit.TabIndex = 12;
-            this.buttonTaskEdit.Text = "...";
-            this.buttonTaskEdit.UseVisualStyleBackColor = true;
-            this.buttonTaskEdit.Click += new System.EventHandler(this.buttonTaskEdit_Click);
+            buttonTaskEdit.Location = new Point(360, 10);
+            buttonTaskEdit.Margin = new Padding(4, 3, 4, 3);
+            buttonTaskEdit.Name = "buttonTaskEdit";
+            buttonTaskEdit.Size = new Size(27, 23);
+            buttonTaskEdit.TabIndex = 12;
+            buttonTaskEdit.Text = "...";
+            buttonTaskEdit.UseVisualStyleBackColor = true;
+            buttonTaskEdit.Click += buttonTaskEdit_Click;
             // 
             // buttonTaskDelete
             // 
-            this.buttonTaskDelete.Location = new System.Drawing.Point(330, 10);
-            this.buttonTaskDelete.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTaskDelete.Name = "buttonTaskDelete";
-            this.buttonTaskDelete.Size = new System.Drawing.Size(27, 23);
-            this.buttonTaskDelete.TabIndex = 11;
-            this.buttonTaskDelete.Text = "-";
-            this.buttonTaskDelete.UseVisualStyleBackColor = true;
-            this.buttonTaskDelete.Click += new System.EventHandler(this.buttonTaskDelete_Click);
+            buttonTaskDelete.Location = new Point(330, 10);
+            buttonTaskDelete.Margin = new Padding(4, 3, 4, 3);
+            buttonTaskDelete.Name = "buttonTaskDelete";
+            buttonTaskDelete.Size = new Size(27, 23);
+            buttonTaskDelete.TabIndex = 11;
+            buttonTaskDelete.Text = "-";
+            buttonTaskDelete.UseVisualStyleBackColor = true;
+            buttonTaskDelete.Click += buttonTaskDelete_Click;
             // 
             // buttonTaskAdd
             // 
-            this.buttonTaskAdd.Location = new System.Drawing.Point(300, 10);
-            this.buttonTaskAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTaskAdd.Name = "buttonTaskAdd";
-            this.buttonTaskAdd.Size = new System.Drawing.Size(27, 23);
-            this.buttonTaskAdd.TabIndex = 10;
-            this.buttonTaskAdd.Text = "+";
-            this.buttonTaskAdd.UseVisualStyleBackColor = true;
-            this.buttonTaskAdd.Click += new System.EventHandler(this.buttonTaskAdd_Click);
+            buttonTaskAdd.Location = new Point(300, 10);
+            buttonTaskAdd.Margin = new Padding(4, 3, 4, 3);
+            buttonTaskAdd.Name = "buttonTaskAdd";
+            buttonTaskAdd.Size = new Size(27, 23);
+            buttonTaskAdd.TabIndex = 10;
+            buttonTaskAdd.Text = "+";
+            buttonTaskAdd.UseVisualStyleBackColor = true;
+            buttonTaskAdd.Click += buttonTaskAdd_Click;
             // 
             // label11
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(6, 16);
-            this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(37, 15);
-            this.label11.TabIndex = 5;
-            this.label11.Text = "Tasks:";
+            label11.AutoSize = true;
+            label11.Location = new Point(6, 16);
+            label11.Margin = new Padding(4, 0, 4, 0);
+            label11.Name = "label11";
+            label11.Size = new Size(45, 20);
+            label11.TabIndex = 5;
+            label11.Text = "Tasks:";
             // 
             // tabAlarms
             // 
-            this.tabAlarms.Controls.Add(this.listViewAlarms);
-            this.tabAlarms.Controls.Add(this.buttonEditAlarm);
-            this.tabAlarms.Controls.Add(this.buttonDeleteAlarm);
-            this.tabAlarms.Controls.Add(this.buttonAddAlarm);
-            this.tabAlarms.Controls.Add(this.label4);
-            this.tabAlarms.ImageIndex = 0;
-            this.tabAlarms.Location = new System.Drawing.Point(4, 30);
-            this.tabAlarms.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabAlarms.Name = "tabAlarms";
-            this.tabAlarms.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabAlarms.Size = new System.Drawing.Size(794, 569);
-            this.tabAlarms.TabIndex = 1;
-            this.tabAlarms.Text = "Alarms  ";
-            this.tabAlarms.UseVisualStyleBackColor = true;
+            tabAlarms.Controls.Add(listViewAlarms);
+            tabAlarms.Controls.Add(buttonEditAlarm);
+            tabAlarms.Controls.Add(buttonDeleteAlarm);
+            tabAlarms.Controls.Add(buttonAddAlarm);
+            tabAlarms.Controls.Add(label4);
+            tabAlarms.ImageIndex = 0;
+            tabAlarms.Location = new Point(4, 35);
+            tabAlarms.Margin = new Padding(4, 3, 4, 3);
+            tabAlarms.Name = "tabAlarms";
+            tabAlarms.Padding = new Padding(4, 3, 4, 3);
+            tabAlarms.Size = new Size(794, 564);
+            tabAlarms.TabIndex = 1;
+            tabAlarms.Text = "Alarms  ";
+            tabAlarms.UseVisualStyleBackColor = true;
             // 
             // listViewAlarms
             // 
-            this.listViewAlarms.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewAlarms.Location = new System.Drawing.Point(6, 34);
-            this.listViewAlarms.MultiSelect = false;
-            this.listViewAlarms.Name = "listViewAlarms";
-            this.listViewAlarms.Size = new System.Drawing.Size(781, 532);
-            this.listViewAlarms.TabIndex = 11;
-            this.listViewAlarms.UseCompatibleStateImageBehavior = false;
-            this.listViewAlarms.DoubleClick += new System.EventHandler(this.listViewAlarms_DoubleClick);
-            this.listViewAlarms.Resize += new System.EventHandler(this.listView_Resize);
+            listViewAlarms.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listViewAlarms.Location = new Point(6, 34);
+            listViewAlarms.MultiSelect = false;
+            listViewAlarms.Name = "listViewAlarms";
+            listViewAlarms.Size = new Size(781, 527);
+            listViewAlarms.TabIndex = 11;
+            listViewAlarms.UseCompatibleStateImageBehavior = false;
+            listViewAlarms.DoubleClick += listViewAlarms_DoubleClick;
+            listViewAlarms.Resize += listView_Resize;
             // 
             // buttonEditAlarm
             // 
-            this.buttonEditAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonEditAlarm.Location = new System.Drawing.Point(760, 10);
-            this.buttonEditAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonEditAlarm.Name = "buttonEditAlarm";
-            this.buttonEditAlarm.Size = new System.Drawing.Size(27, 23);
-            this.buttonEditAlarm.TabIndex = 11;
-            this.buttonEditAlarm.Text = "...";
-            this.buttonEditAlarm.UseVisualStyleBackColor = true;
-            this.buttonEditAlarm.Click += new System.EventHandler(this.buttonEditAlarm_Click);
+            buttonEditAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonEditAlarm.Location = new Point(760, 10);
+            buttonEditAlarm.Margin = new Padding(4, 3, 4, 3);
+            buttonEditAlarm.Name = "buttonEditAlarm";
+            buttonEditAlarm.Size = new Size(27, 23);
+            buttonEditAlarm.TabIndex = 11;
+            buttonEditAlarm.Text = "...";
+            buttonEditAlarm.UseVisualStyleBackColor = true;
+            buttonEditAlarm.Click += buttonEditAlarm_Click;
             // 
             // buttonDeleteAlarm
             // 
-            this.buttonDeleteAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonDeleteAlarm.Location = new System.Drawing.Point(725, 10);
-            this.buttonDeleteAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonDeleteAlarm.Name = "buttonDeleteAlarm";
-            this.buttonDeleteAlarm.Size = new System.Drawing.Size(27, 23);
-            this.buttonDeleteAlarm.TabIndex = 10;
-            this.buttonDeleteAlarm.Text = "-";
-            this.buttonDeleteAlarm.UseVisualStyleBackColor = true;
-            this.buttonDeleteAlarm.Click += new System.EventHandler(this.buttonDeleteAlarm_Click);
+            buttonDeleteAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonDeleteAlarm.Location = new Point(725, 10);
+            buttonDeleteAlarm.Margin = new Padding(4, 3, 4, 3);
+            buttonDeleteAlarm.Name = "buttonDeleteAlarm";
+            buttonDeleteAlarm.Size = new Size(27, 23);
+            buttonDeleteAlarm.TabIndex = 10;
+            buttonDeleteAlarm.Text = "-";
+            buttonDeleteAlarm.UseVisualStyleBackColor = true;
+            buttonDeleteAlarm.Click += buttonDeleteAlarm_Click;
             // 
             // buttonAddAlarm
             // 
-            this.buttonAddAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAlarm.Location = new System.Drawing.Point(690, 10);
-            this.buttonAddAlarm.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonAddAlarm.Name = "buttonAddAlarm";
-            this.buttonAddAlarm.Size = new System.Drawing.Size(27, 23);
-            this.buttonAddAlarm.TabIndex = 9;
-            this.buttonAddAlarm.Text = "+";
-            this.buttonAddAlarm.UseVisualStyleBackColor = true;
-            this.buttonAddAlarm.Click += new System.EventHandler(this.buttonAddAlarm_Click);
+            buttonAddAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonAddAlarm.Location = new Point(690, 10);
+            buttonAddAlarm.Margin = new Padding(4, 3, 4, 3);
+            buttonAddAlarm.Name = "buttonAddAlarm";
+            buttonAddAlarm.Size = new Size(27, 23);
+            buttonAddAlarm.TabIndex = 9;
+            buttonAddAlarm.Text = "+";
+            buttonAddAlarm.UseVisualStyleBackColor = true;
+            buttonAddAlarm.Click += buttonAddAlarm_Click;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 16);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(47, 15);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Alarms:";
+            label4.AutoSize = true;
+            label4.Location = new Point(6, 16);
+            label4.Margin = new Padding(4, 0, 4, 0);
+            label4.Name = "label4";
+            label4.Size = new Size(58, 20);
+            label4.TabIndex = 0;
+            label4.Text = "Alarms:";
             // 
             // tabCode
             // 
-            this.tabCode.Controls.Add(this.textScriptCode);
-            this.tabCode.Controls.Add(this.label9);
-            this.tabCode.ImageIndex = 8;
-            this.tabCode.Location = new System.Drawing.Point(4, 30);
-            this.tabCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabCode.Name = "tabCode";
-            this.tabCode.Size = new System.Drawing.Size(794, 569);
-            this.tabCode.TabIndex = 6;
-            this.tabCode.Text = "Code   ";
-            this.tabCode.UseVisualStyleBackColor = true;
+            tabCode.Controls.Add(textScriptCode);
+            tabCode.Controls.Add(label9);
+            tabCode.ImageIndex = 8;
+            tabCode.Location = new Point(4, 35);
+            tabCode.Margin = new Padding(4, 3, 4, 3);
+            tabCode.Name = "tabCode";
+            tabCode.Size = new Size(794, 564);
+            tabCode.TabIndex = 6;
+            tabCode.Text = "Code   ";
+            tabCode.UseVisualStyleBackColor = true;
             // 
             // textScriptCode
             // 
-            this.textScriptCode.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textScriptCode.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textScriptCode.Location = new System.Drawing.Point(7, 34);
-            this.textScriptCode.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textScriptCode.Multiline = true;
-            this.textScriptCode.Name = "textScriptCode";
-            this.textScriptCode.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textScriptCode.Size = new System.Drawing.Size(780, 532);
-            this.textScriptCode.TabIndex = 6;
-            this.textScriptCode.WordWrap = false;
+            textScriptCode.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textScriptCode.Font = new Font("Courier New", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            textScriptCode.Location = new Point(7, 34);
+            textScriptCode.Margin = new Padding(4, 3, 4, 3);
+            textScriptCode.Multiline = true;
+            textScriptCode.Name = "textScriptCode";
+            textScriptCode.ScrollBars = ScrollBars.Both;
+            textScriptCode.Size = new Size(780, 527);
+            textScriptCode.TabIndex = 6;
+            textScriptCode.WordWrap = false;
             // 
             // label9
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(6, 16);
-            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(69, 15);
-            this.label9.TabIndex = 4;
-            this.label9.Text = "Script code:";
+            label9.AutoSize = true;
+            label9.Location = new Point(6, 16);
+            label9.Margin = new Padding(4, 0, 4, 0);
+            label9.Name = "label9";
+            label9.Size = new Size(87, 20);
+            label9.TabIndex = 4;
+            label9.Text = "Script code:";
             // 
             // tabTraceNotes
             // 
-            this.tabTraceNotes.Controls.Add(this.listViewTraceNoteTo);
-            this.tabTraceNotes.Controls.Add(this.listViewTraceNoteFrom);
-            this.tabTraceNotes.Controls.Add(this.textTraceNodeType);
-            this.tabTraceNotes.Controls.Add(this.buttonTraceNodeTypes);
-            this.tabTraceNotes.Controls.Add(this.label5);
-            this.tabTraceNotes.Controls.Add(this.buttonTraceToEdit);
-            this.tabTraceNotes.Controls.Add(this.buttonTraceToRemove);
-            this.tabTraceNotes.Controls.Add(this.buttonTraceToAdd);
-            this.tabTraceNotes.Controls.Add(this.buttonTraceFromEdit);
-            this.tabTraceNotes.Controls.Add(this.buttonTraceFromRemove);
-            this.tabTraceNotes.Controls.Add(this.buttonTraceFromAdd);
-            this.tabTraceNotes.Controls.Add(this.label13);
-            this.tabTraceNotes.Controls.Add(this.label14);
-            this.tabTraceNotes.ImageIndex = 2;
-            this.tabTraceNotes.Location = new System.Drawing.Point(4, 30);
-            this.tabTraceNotes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabTraceNotes.Name = "tabTraceNotes";
-            this.tabTraceNotes.Size = new System.Drawing.Size(794, 569);
-            this.tabTraceNotes.TabIndex = 5;
-            this.tabTraceNotes.Text = "Trace notes  ";
-            this.tabTraceNotes.UseVisualStyleBackColor = true;
+            tabTraceNotes.Controls.Add(listViewTraceNoteTo);
+            tabTraceNotes.Controls.Add(listViewTraceNoteFrom);
+            tabTraceNotes.Controls.Add(textTraceNodeType);
+            tabTraceNotes.Controls.Add(buttonTraceNodeTypes);
+            tabTraceNotes.Controls.Add(label5);
+            tabTraceNotes.Controls.Add(buttonTraceToEdit);
+            tabTraceNotes.Controls.Add(buttonTraceToRemove);
+            tabTraceNotes.Controls.Add(buttonTraceToAdd);
+            tabTraceNotes.Controls.Add(buttonTraceFromEdit);
+            tabTraceNotes.Controls.Add(buttonTraceFromRemove);
+            tabTraceNotes.Controls.Add(buttonTraceFromAdd);
+            tabTraceNotes.Controls.Add(label13);
+            tabTraceNotes.Controls.Add(label14);
+            tabTraceNotes.ImageIndex = 2;
+            tabTraceNotes.Location = new Point(4, 35);
+            tabTraceNotes.Margin = new Padding(4, 3, 4, 3);
+            tabTraceNotes.Name = "tabTraceNotes";
+            tabTraceNotes.Size = new Size(794, 564);
+            tabTraceNotes.TabIndex = 5;
+            tabTraceNotes.Text = "Trace notes  ";
+            tabTraceNotes.UseVisualStyleBackColor = true;
             // 
             // listViewTraceNoteTo
             // 
-            this.listViewTraceNoteTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewTraceNoteTo.Location = new System.Drawing.Point(395, 89);
-            this.listViewTraceNoteTo.Name = "listViewTraceNoteTo";
-            this.listViewTraceNoteTo.Size = new System.Drawing.Size(393, 477);
-            this.listViewTraceNoteTo.TabIndex = 44;
-            this.listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
+            listViewTraceNoteTo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listViewTraceNoteTo.Location = new Point(395, 89);
+            listViewTraceNoteTo.Name = "listViewTraceNoteTo";
+            listViewTraceNoteTo.Size = new Size(393, 472);
+            listViewTraceNoteTo.TabIndex = 44;
+            listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
             // 
             // listViewTraceNoteFrom
             // 
-            this.listViewTraceNoteFrom.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.listViewTraceNoteFrom.Location = new System.Drawing.Point(11, 89);
-            this.listViewTraceNoteFrom.MultiSelect = false;
-            this.listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
-            this.listViewTraceNoteFrom.Size = new System.Drawing.Size(378, 477);
-            this.listViewTraceNoteFrom.TabIndex = 43;
-            this.listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
+            listViewTraceNoteFrom.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            listViewTraceNoteFrom.Location = new Point(11, 89);
+            listViewTraceNoteFrom.MultiSelect = false;
+            listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
+            listViewTraceNoteFrom.Size = new Size(378, 472);
+            listViewTraceNoteFrom.TabIndex = 43;
+            listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
             // 
             // textTraceNodeType
             // 
-            this.textTraceNodeType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTraceNodeType.Enabled = false;
-            this.textTraceNodeType.Location = new System.Drawing.Point(135, 22);
-            this.textTraceNodeType.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textTraceNodeType.MaxLength = 255;
-            this.textTraceNodeType.Name = "textTraceNodeType";
-            this.textTraceNodeType.Size = new System.Drawing.Size(617, 23);
-            this.textTraceNodeType.TabIndex = 41;
+            textTraceNodeType.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textTraceNodeType.Enabled = false;
+            textTraceNodeType.Location = new Point(135, 22);
+            textTraceNodeType.Margin = new Padding(4, 3, 4, 3);
+            textTraceNodeType.MaxLength = 255;
+            textTraceNodeType.Name = "textTraceNodeType";
+            textTraceNodeType.Size = new Size(617, 27);
+            textTraceNodeType.TabIndex = 41;
             // 
             // buttonTraceNodeTypes
             // 
-            this.buttonTraceNodeTypes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonTraceNodeTypes.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonTraceNodeTypes.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonTraceNodeTypes.Location = new System.Drawing.Point(760, 22);
-            this.buttonTraceNodeTypes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTraceNodeTypes.Name = "buttonTraceNodeTypes";
-            this.buttonTraceNodeTypes.Size = new System.Drawing.Size(24, 23);
-            this.buttonTraceNodeTypes.TabIndex = 42;
-            this.buttonTraceNodeTypes.Text = "...";
-            this.buttonTraceNodeTypes.UseVisualStyleBackColor = false;
+            buttonTraceNodeTypes.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonTraceNodeTypes.BackColor = SystemColors.Control;
+            buttonTraceNodeTypes.FlatStyle = FlatStyle.System;
+            buttonTraceNodeTypes.Location = new Point(760, 22);
+            buttonTraceNodeTypes.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceNodeTypes.Name = "buttonTraceNodeTypes";
+            buttonTraceNodeTypes.Size = new Size(24, 23);
+            buttonTraceNodeTypes.TabIndex = 42;
+            buttonTraceNodeTypes.Text = "...";
+            buttonTraceNodeTypes.UseVisualStyleBackColor = false;
             // 
             // label5
             // 
-            this.label5.Location = new System.Drawing.Point(9, 22);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(131, 18);
-            this.label5.TabIndex = 40;
-            this.label5.Text = "Trace node types:";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            label5.Location = new Point(9, 22);
+            label5.Margin = new Padding(4, 0, 4, 0);
+            label5.Name = "label5";
+            label5.Size = new Size(131, 18);
+            label5.TabIndex = 40;
+            label5.Text = "Trace node types:";
+            label5.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // buttonTraceToEdit
             // 
-            this.buttonTraceToEdit.Location = new System.Drawing.Point(566, 60);
-            this.buttonTraceToEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTraceToEdit.Name = "buttonTraceToEdit";
-            this.buttonTraceToEdit.Size = new System.Drawing.Size(27, 23);
-            this.buttonTraceToEdit.TabIndex = 15;
-            this.buttonTraceToEdit.Text = "...";
-            this.buttonTraceToEdit.UseVisualStyleBackColor = true;
+            buttonTraceToEdit.Location = new Point(566, 60);
+            buttonTraceToEdit.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceToEdit.Name = "buttonTraceToEdit";
+            buttonTraceToEdit.Size = new Size(27, 23);
+            buttonTraceToEdit.TabIndex = 15;
+            buttonTraceToEdit.Text = "...";
+            buttonTraceToEdit.UseVisualStyleBackColor = true;
             // 
             // buttonTraceToRemove
             // 
-            this.buttonTraceToRemove.Location = new System.Drawing.Point(531, 60);
-            this.buttonTraceToRemove.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTraceToRemove.Name = "buttonTraceToRemove";
-            this.buttonTraceToRemove.Size = new System.Drawing.Size(27, 23);
-            this.buttonTraceToRemove.TabIndex = 14;
-            this.buttonTraceToRemove.Text = "-";
-            this.buttonTraceToRemove.UseVisualStyleBackColor = true;
+            buttonTraceToRemove.Location = new Point(531, 60);
+            buttonTraceToRemove.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceToRemove.Name = "buttonTraceToRemove";
+            buttonTraceToRemove.Size = new Size(27, 23);
+            buttonTraceToRemove.TabIndex = 14;
+            buttonTraceToRemove.Text = "-";
+            buttonTraceToRemove.UseVisualStyleBackColor = true;
             // 
             // buttonTraceToAdd
             // 
-            this.buttonTraceToAdd.Location = new System.Drawing.Point(498, 60);
-            this.buttonTraceToAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTraceToAdd.Name = "buttonTraceToAdd";
-            this.buttonTraceToAdd.Size = new System.Drawing.Size(27, 23);
-            this.buttonTraceToAdd.TabIndex = 13;
-            this.buttonTraceToAdd.Text = "+";
-            this.buttonTraceToAdd.UseVisualStyleBackColor = true;
+            buttonTraceToAdd.Location = new Point(498, 60);
+            buttonTraceToAdd.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceToAdd.Name = "buttonTraceToAdd";
+            buttonTraceToAdd.Size = new Size(27, 23);
+            buttonTraceToAdd.TabIndex = 13;
+            buttonTraceToAdd.Text = "+";
+            buttonTraceToAdd.UseVisualStyleBackColor = true;
             // 
             // buttonTraceFromEdit
             // 
-            this.buttonTraceFromEdit.Location = new System.Drawing.Point(196, 60);
-            this.buttonTraceFromEdit.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTraceFromEdit.Name = "buttonTraceFromEdit";
-            this.buttonTraceFromEdit.Size = new System.Drawing.Size(27, 23);
-            this.buttonTraceFromEdit.TabIndex = 12;
-            this.buttonTraceFromEdit.Text = "...";
-            this.buttonTraceFromEdit.UseVisualStyleBackColor = true;
+            buttonTraceFromEdit.Location = new Point(196, 60);
+            buttonTraceFromEdit.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceFromEdit.Name = "buttonTraceFromEdit";
+            buttonTraceFromEdit.Size = new Size(27, 23);
+            buttonTraceFromEdit.TabIndex = 12;
+            buttonTraceFromEdit.Text = "...";
+            buttonTraceFromEdit.UseVisualStyleBackColor = true;
             // 
             // buttonTraceFromRemove
             // 
-            this.buttonTraceFromRemove.Location = new System.Drawing.Point(162, 60);
-            this.buttonTraceFromRemove.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTraceFromRemove.Name = "buttonTraceFromRemove";
-            this.buttonTraceFromRemove.Size = new System.Drawing.Size(27, 23);
-            this.buttonTraceFromRemove.TabIndex = 11;
-            this.buttonTraceFromRemove.Text = "-";
-            this.buttonTraceFromRemove.UseVisualStyleBackColor = true;
+            buttonTraceFromRemove.Location = new Point(162, 60);
+            buttonTraceFromRemove.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceFromRemove.Name = "buttonTraceFromRemove";
+            buttonTraceFromRemove.Size = new Size(27, 23);
+            buttonTraceFromRemove.TabIndex = 11;
+            buttonTraceFromRemove.Text = "-";
+            buttonTraceFromRemove.UseVisualStyleBackColor = true;
             // 
             // buttonTraceFromAdd
             // 
-            this.buttonTraceFromAdd.Location = new System.Drawing.Point(128, 60);
-            this.buttonTraceFromAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonTraceFromAdd.Name = "buttonTraceFromAdd";
-            this.buttonTraceFromAdd.Size = new System.Drawing.Size(27, 23);
-            this.buttonTraceFromAdd.TabIndex = 10;
-            this.buttonTraceFromAdd.Text = "+";
-            this.buttonTraceFromAdd.UseVisualStyleBackColor = true;
+            buttonTraceFromAdd.Location = new Point(128, 60);
+            buttonTraceFromAdd.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceFromAdd.Name = "buttonTraceFromAdd";
+            buttonTraceFromAdd.Size = new Size(27, 23);
+            buttonTraceFromAdd.TabIndex = 10;
+            buttonTraceFromAdd.Text = "+";
+            buttonTraceFromAdd.UseVisualStyleBackColor = true;
             // 
             // label13
             // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(397, 64);
-            this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(81, 15);
-            this.label13.TabIndex = 5;
-            this.label13.Text = "Trace node to:";
+            label13.AutoSize = true;
+            label13.Location = new Point(397, 64);
+            label13.Margin = new Padding(4, 0, 4, 0);
+            label13.Name = "label13";
+            label13.Size = new Size(103, 20);
+            label13.TabIndex = 5;
+            label13.Text = "Trace node to:";
             // 
             // label14
             // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(13, 64);
-            this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(99, 15);
-            this.label14.TabIndex = 4;
-            this.label14.Text = "Trace node from :";
+            label14.AutoSize = true;
+            label14.Location = new Point(13, 64);
+            label14.Margin = new Padding(4, 0, 4, 0);
+            label14.Name = "label14";
+            label14.Size = new Size(125, 20);
+            label14.TabIndex = 4;
+            label14.Text = "Trace node from :";
             // 
             // NoteEditorForm
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
-            this.ClientSize = new System.Drawing.Size(808, 637);
-            this.Controls.Add(this.panelForm);
-            this.Controls.Add(this.toolBarNoteEditor);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.Name = "NoteEditorForm";
-            this.Text = "Note Editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NoteEditorForm_FormClosing);
-            this.Load += new System.EventHandler(this.NoteEditorForm_Load);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.NoteEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.NoteEditorForm_KeyUp);
-            this.toolBarNoteEditor.ResumeLayout(false);
-            this.toolBarNoteEditor.PerformLayout();
-            this.panelForm.ResumeLayout(false);
-            this.tabNoteData.ResumeLayout(false);
-            this.tabBasicData.ResumeLayout(false);
-            this.tabBasicData.PerformLayout();
-            this.panelDescription.ResumeLayout(false);
-            this.panelDescription.PerformLayout();
-            this.toolDescription.ResumeLayout(false);
-            this.toolDescription.PerformLayout();
-            this.tabAttributes.ResumeLayout(false);
-            this.tabAttributes.PerformLayout();
-            this.tabResources.ResumeLayout(false);
-            this.tabResources.PerformLayout();
-            this.panelPreview.ResumeLayout(false);
-            this.panelPreview.PerformLayout();
-            this.tabTasks.ResumeLayout(false);
-            this.tabTasks.PerformLayout();
-            this.tabAlarms.ResumeLayout(false);
-            this.tabAlarms.PerformLayout();
-            this.tabCode.ResumeLayout(false);
-            this.tabCode.PerformLayout();
-            this.tabTraceNotes.ResumeLayout(false);
-            this.tabTraceNotes.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleMode = AutoScaleMode.Inherit;
+            ClientSize = new Size(808, 637);
+            Controls.Add(panelForm);
+            Controls.Add(toolBarNoteEditor);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            KeyPreview = true;
+            Margin = new Padding(4, 3, 4, 3);
+            Name = "NoteEditorForm";
+            Text = "Note Editor";
+            FormClosing += NoteEditorForm_FormClosing;
+            Load += NoteEditorForm_Load;
+            KeyPress += NoteEditorForm_KeyPress;
+            KeyUp += NoteEditorForm_KeyUp;
+            toolBarNoteEditor.ResumeLayout(false);
+            toolBarNoteEditor.PerformLayout();
+            panelForm.ResumeLayout(false);
+            tabNoteData.ResumeLayout(false);
+            tabBasicData.ResumeLayout(false);
+            tabBasicData.PerformLayout();
+            panelDescription.ResumeLayout(false);
+            panelDescription.PerformLayout();
+            toolDescription.ResumeLayout(false);
+            toolDescription.PerformLayout();
+            tabAttributes.ResumeLayout(false);
+            tabAttributes.PerformLayout();
+            tabResources.ResumeLayout(false);
+            tabResources.PerformLayout();
+            panelPreview.ResumeLayout(false);
+            panelPreview.PerformLayout();
+            tabTasks.ResumeLayout(false);
+            tabTasks.PerformLayout();
+            tabAlarms.ResumeLayout(false);
+            tabAlarms.PerformLayout();
+            tabCode.ResumeLayout(false);
+            tabCode.PerformLayout();
+            tabTraceNotes.ResumeLayout(false);
+            tabTraceNotes.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

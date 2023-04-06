@@ -55,7 +55,12 @@ static class Program
 
         #endregion
 
-        splashForm.Close(); 
+        splashForm.Close();
+
+        if (Environment.OSVersion.Version.Major >= 6)
+        {
+            SetProcessDPIAware();
+        }
 
         Application.Run(applicationContext);            
     }
@@ -152,6 +157,8 @@ static class Program
         SetForegroundWindow(handle);
     }
 
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetProcessDPIAware();
     #endregion
 }
 
