@@ -18,7 +18,7 @@ public class KntChatGPTComponent : ComponentBase
     #region Private fields
 
     private OpenAIClient _openAIClient;
-
+    
     #endregion
 
     #region Properties
@@ -71,7 +71,7 @@ public class KntChatGPTComponent : ComponentBase
 
     public KntChatGPTComponent(Store store) : base(store)
     {
-        ComponentName = "KntChatGPT Component";
+        ComponentName = "KntChatGPT Component";        
     }
 
     #endregion
@@ -280,5 +280,5 @@ public class KntChatGPTComponent : ComponentBase
             user: null);
     }
 
-    #endregion 
+    #endregion
 }

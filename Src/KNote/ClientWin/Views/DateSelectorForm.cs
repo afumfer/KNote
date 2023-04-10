@@ -2,10 +2,34 @@
 
 public partial class DateSelectorForm : Form
 {
+    #region Public properties 
+
+    public DateTime Date
+    {
+        get { return monthCalendar.SelectionStart; }
+        set
+        {
+            if ((DateTime)value < new DateTime(1900, 1, 3))
+                monthCalendar.SelectionStart = DateTime.Now;
+            else
+                monthCalendar.SelectionStart = (DateTime)value;
+        }
+    }
+
+    #endregion
+
+    #region Constructor
+
     public DateSelectorForm()
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
     }
+
+    #endregion
+
+    #region Form events handlers
 
     private void DateSelectorForm_Load(object sender, EventArgs e)
     {
@@ -33,16 +57,5 @@ public partial class DateSelectorForm : Form
             this.DialogResult = DialogResult.OK;
     }
 
-    public DateTime Date
-    {
-        get { return monthCalendar.SelectionStart; }
-        set
-        {
-            if ((DateTime)value < new DateTime(1900, 1, 3))
-                monthCalendar.SelectionStart = DateTime.Now;
-            else
-                monthCalendar.SelectionStart = (DateTime)value;
-        }
-    }
-
+    #endregion 
 }

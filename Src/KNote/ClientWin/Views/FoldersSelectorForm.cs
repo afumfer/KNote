@@ -19,6 +19,8 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
 
     public FoldersSelectorForm(FoldersSelectorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
 
         _com = com;

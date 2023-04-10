@@ -6,7 +6,7 @@ namespace KNote.ClientWin.Views;
 
 public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
 {
-    #region Fields
+    #region Privage Fields
 
     private readonly OptionsEditorComponent _com;
     private bool _viewFinalized = false;
@@ -18,7 +18,10 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
 
     public OptionsEditorForm(OptionsEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 

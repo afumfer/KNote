@@ -25,7 +25,10 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     public PostItEditorForm(PostItEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 

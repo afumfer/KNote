@@ -24,7 +24,10 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
 
     public ResourceEditorForm(ResourceEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 

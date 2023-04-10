@@ -19,7 +19,10 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     public NoteAttributeEditorForm(NoteAttributeEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 
@@ -334,5 +337,4 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
     }
 
     #endregion
-
 }

@@ -21,7 +21,10 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 
     public FolderEditorForm(FolderEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 

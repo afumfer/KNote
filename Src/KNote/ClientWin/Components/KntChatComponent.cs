@@ -11,7 +11,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace KNote.ClientWin.Components;
 
-public class KntChatComponent : ComponentBase
+public class KntChatComponent : ComponentBase, IDisposable
 {
     #region Private fields
 
@@ -171,4 +171,17 @@ public class KntChatComponent : ComponentBase
     }
 
     #endregion 
+
+    #region IDisposable
+
+    public override async void Dispose()
+    {
+        if (_hubConnection != null)
+            await _hubConnection.DisposeAsync();
+
+        base.Dispose();
+    }
+
+    #endregion 
+
 }

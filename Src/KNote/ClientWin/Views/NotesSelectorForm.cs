@@ -9,13 +9,18 @@ namespace KNote.ClientWin.Views;
 
 public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 {
+    #region Private fields 
+
     private readonly NotesSelectorComponent _com;
     private bool _viewFinalized = false;        
     private UInt32 _countRepetition = 0;
     private bool _skipSelectionChanged = false;        
-    private BindingSource _source = new BindingSource();
-    //private int OrderColNumber = 0;
+    private BindingSource _source = new BindingSource();   
     private SortOrder _sortOrder;
+
+    #endregion
+
+    #region Protected properties
 
     protected int OrderColNumber
     {
@@ -29,12 +34,20 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         set { _com.Store.AppConfig.AscendigOrderNotes = value; }
     }
 
+    #endregion
+
+    #region Constructor
+
     public NotesSelectorForm(NotesSelectorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
 
         _com = com;
     }
+
+    #endregion 
 
     #region ISelectorView interface 
 
@@ -426,5 +439,4 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
     }
 
     #endregion
-
 }

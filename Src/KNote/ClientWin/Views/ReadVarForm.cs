@@ -24,6 +24,8 @@ public partial class ReadVarForm : Form
 
     public ReadVarForm(List<ReadVarItem> readVarItems)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
         
         _readVarItems = readVarItems;
@@ -114,5 +116,4 @@ public partial class ReadVarForm : Form
     }
 
     #endregion
-
 }

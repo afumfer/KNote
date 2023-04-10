@@ -19,7 +19,10 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 
     public TaskEditorForm(TaskEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 

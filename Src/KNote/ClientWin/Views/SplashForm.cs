@@ -5,15 +5,27 @@ namespace KNote.ClientWin.Views;
 
 public partial class SplashForm : Form
 {
+    #region Private fields 
+
     Store _appContext;
+
+    #endregion
+
+    #region Constructor
 
     public SplashForm(Store appContext)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
 
         appContext.AddedServiceRef += AppContext_AddedServiceRef;
         _appContext = appContext;
     }
+
+    #endregion
+
+    #region Form events handlers
 
     private void AppContext_AddedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
     {
@@ -26,4 +38,6 @@ public partial class SplashForm : Form
     {
         labelVersion.Text = $"Version: {_appContext.AppVersion}";
     }
+
+    #endregion 
 }

@@ -18,7 +18,10 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     public RepositoryEditorForm(RepositoryEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 

@@ -9,14 +9,25 @@ namespace KNote.ClientWin.Views;
 
 public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
 {
+    #region Private fields
+
     private readonly NoteTypesSelectorComponent _com;
     private bool _viewFinalized = false;
 
+    #endregion
+
+    #region Constructor
+
     public NoteTypesSelectorForm(NoteTypesSelectorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
+
+    #endregion 
 
     #region ISelectorView interface 
 
@@ -127,22 +138,25 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
         _com.Cancel();
     }
 
-    private void listViewNoteTypes_DoubleClick(object sender, EventArgs e)
-    {
-
-    }
-
     private void listViewNoteTypes_SelectedIndexChanged(object sender, EventArgs e)
     {
         OnSelectedItemChanged();
     }
 
-    #endregion
-
     private void listViewNoteTypes_Resize(object sender, EventArgs e)
     {
         SizeLastColumn((ListView)sender);
     }
+
+    private void NoteTypesSelectorForm_Load(object sender, EventArgs e)
+    {
+        PersonalizeListView(listViewNoteTypes);
+    }
+
+    #endregion
+
+    #region Private methods
+
     private void SizeLastColumn(ListView lv)
     {
         // Hack for control undeterminated error
@@ -192,8 +206,5 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
         listView.Sorting = SortOrder.None;
     }
 
-    private void NoteTypesSelectorForm_Load(object sender, EventArgs e)
-    {
-        PersonalizeListView(listViewNoteTypes);
-    }
+    #endregion 
 }

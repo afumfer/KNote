@@ -8,15 +8,26 @@ namespace KNote.ClientWin.Views;
 
 public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithServiceRef>
 {
+    #region Private fields
+
     private FiltersSelectorComponent _com;
     private bool _viewFinalized = false;
     //private bool _formIsDisty = false;
 
+    #endregion
+
+    #region Constructor
+
     public FiltersSelectorForm(FiltersSelectorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;            
     }
+
+    #endregion 
 
     #region ISelectorView implementation
 
@@ -98,6 +109,8 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
 
     #endregion
 
+    #region Form events handlers
+
     private void FilterParamForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
@@ -136,6 +149,10 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
         _com.Cancel();
     }
 
+    #endregion
+
+    #region Private methods
+
     private void PersonalizeControls()
     {
         foreach (var serviceRef in _com.Store.GetAllServiceRef())
@@ -170,4 +187,6 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
                 break;
         }            
     }
+
+    #endregion 
 }

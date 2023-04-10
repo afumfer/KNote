@@ -2,11 +2,6 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Repository.EntityFramework.Entities;
-using OpenAI;
-using OpenAI.Chat;
-using System.Diagnostics;
-using System.Text;
 
 namespace KNote.ClientWin.Views;
 
@@ -23,10 +18,9 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public KntChatGPTForm(KntChatGPTComponent com)
     {
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
-
-
 
         _com = com;
     }

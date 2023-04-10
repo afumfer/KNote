@@ -4,12 +4,22 @@ namespace KNote.ClientWin.Views;
 
 public partial class InOutDeviceForm : Form, IInOutDevice
 {
+    #region Private methods
+
     private bool FlagClose = false;
+
+    #endregion
+
+    #region Constructor
 
     public InOutDeviceForm()
     {
-        InitializeComponent();
+        AutoScaleMode = AutoScaleMode.Dpi;
+
+        InitializeComponent();       
     }
+
+    #endregion 
 
     #region IInOutDevice members
 
@@ -57,6 +67,8 @@ public partial class InOutDeviceForm : Form, IInOutDevice
 
     #endregion
 
+    #region Form events handlers
+
     private void InOutDefaultDeviceForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (FlagClose)
@@ -65,4 +77,6 @@ public partial class InOutDeviceForm : Form, IInOutDevice
             e.Cancel = true;
         }
     }
+
+    #endregion 
 }

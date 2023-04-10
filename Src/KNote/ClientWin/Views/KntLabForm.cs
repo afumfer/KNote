@@ -31,7 +31,10 @@ public partial class KntLabForm : Form, IViewBase
 
     public KntLabForm(KntLabComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
         _store = _com.Store;
     }
@@ -1043,6 +1046,4 @@ public partial class KntLabForm : Form, IViewBase
     }
 
     #endregion
-
-
 }

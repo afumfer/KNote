@@ -18,6 +18,8 @@ public partial class KntChatForm : Form, IViewChat
 
     public KntChatForm(KntChatComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
 
         _com = com;
@@ -98,15 +100,11 @@ public partial class KntChatForm : Form, IViewChat
         }
     }
 
-    #endregion
-
-    #region Private methods
-
     private void _com_ReceiveMessage(object sender, ComponentEventArgs<string> e)
     {
         listMessages.Items.Add(e.Entity.ToString());
         listMessages.Refresh();
     }
 
-    #endregion 
+    #endregion
 }

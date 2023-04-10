@@ -93,8 +93,7 @@ namespace KNote.ClientWin.Views
             this.listViewNoteTypes.Size = new System.Drawing.Size(396, 372);
             this.listViewNoteTypes.TabIndex = 0;
             this.listViewNoteTypes.UseCompatibleStateImageBehavior = false;
-            this.listViewNoteTypes.SelectedIndexChanged += new System.EventHandler(this.listViewNoteTypes_SelectedIndexChanged);
-            this.listViewNoteTypes.DoubleClick += new System.EventHandler(this.listViewNoteTypes_DoubleClick);
+            this.listViewNoteTypes.SelectedIndexChanged += new System.EventHandler(this.listViewNoteTypes_SelectedIndexChanged);            
             this.listViewNoteTypes.Resize += new System.EventHandler(this.listViewNoteTypes_Resize);
             // 
             // NoteTypesSelectorForm

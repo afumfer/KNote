@@ -17,6 +17,8 @@ static class Program
     [STAThread]
     static void Main()        
     {
+
+#if RELEASE
         Process[] instancias = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
 
         if (instancias.Length > 1)
@@ -24,6 +26,7 @@ static class Program
             BringToFront();
             return;
         }
+#endif
 
         ApplicationConfiguration.Initialize();
 
@@ -37,7 +40,7 @@ static class Program
         splashForm.Show();
         Application.DoEvents();
 
-        #endregion 
+        #endregion
             
         LoadAppStore(appStore);
 

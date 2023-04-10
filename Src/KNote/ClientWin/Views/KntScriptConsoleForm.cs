@@ -28,11 +28,12 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     public KntScriptConsoleForm(KntScriptConsoleComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
         PersonalizeTabStop();
 
         _com = com;
-
         _engine = _com.KntSEngine;
         _sourceCodeFile = _com.CodeFile;            
     }

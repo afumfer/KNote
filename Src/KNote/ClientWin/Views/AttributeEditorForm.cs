@@ -19,7 +19,10 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
 
     public AttributeEditorForm(AttributeEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 

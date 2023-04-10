@@ -25,7 +25,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     public NoteEditorForm(NoteEditorComponent com)
     {
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
 
         _com = com;
@@ -1252,6 +1253,5 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     #endregion
-
 }
 

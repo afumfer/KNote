@@ -19,7 +19,10 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
 
     public PostItPropertiesForm(PostItPropertiesComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
 

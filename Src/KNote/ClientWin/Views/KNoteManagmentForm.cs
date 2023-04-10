@@ -6,17 +6,24 @@ namespace KNote.ClientWin.Views;
 
 public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 {
+    #region Private methods 
+
     private readonly KNoteManagmentComponent _com;
     private bool _viewFinalized = false;
 
+    #endregion
+
+    #region Constructor
+
     public KNoteManagmentForm(KNoteManagmentComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
 
         _com = com;
 
         _com.Store.ComponentNotification += Store_ComponentNotification;
-
 
         // TODO: options ... for next version
         menuReports.Visible = false;
@@ -28,16 +35,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 #endif
     }
 
-    private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
-    {
-        string comName;
-        if (!string.IsNullOrEmpty(e?.Entity.ToString()))
-            comName = ((ComponentBase)sender)?.ComponentName + ": ";
-        else
-            comName = "";
-        statusLabel2.Text = $" {comName} {e?.Entity.ToString()}";
-        statusBarManagment.Refresh();
-    }
+    #endregion 
 
     #region IViewBase interface 
 
@@ -308,6 +306,17 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         SelectTab(tabExplorers.SelectedIndex);
     }
 
+    private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
+    {
+        string comName;
+        if (!string.IsNullOrEmpty(e?.Entity.ToString()))
+            comName = ((ComponentBase)sender)?.ComponentName + ": ";
+        else
+            comName = "";
+        statusLabel2.Text = $" {comName} {e?.Entity.ToString()}";
+        statusBarManagment.Refresh();
+    }
+
     #endregion
 
     #region Private methods
@@ -373,5 +382,4 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
 
     #endregion
-
 }

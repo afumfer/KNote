@@ -6,13 +6,23 @@ namespace KNote.ClientWin.Views;
 
 public partial class KNoteAboutForm : Form, IViewBase
 {
-    private readonly KNoteManagmentComponent _com;   
+    #region Private fields 
+
+    private readonly KNoteManagmentComponent _com;
+
+    #endregion
+
+    #region Constructor
 
     public KNoteAboutForm(KNoteManagmentComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
         _com = com;
     }
+
+    #endregion 
 
     #region IViewBase implementation
 
@@ -68,5 +78,4 @@ public partial class KNoteAboutForm : Form, IViewBase
     }
 
     #endregion
-
 }

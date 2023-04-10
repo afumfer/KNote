@@ -6,14 +6,27 @@ namespace KNote.ClientWin.Views;
 
 public partial class MonitorForm : Form, IViewBase
 {
+    #region Private fields 
+
     private readonly MonitorComponent _com;
     private bool _viewFinalized = false;
 
+    #endregion
+
+    #region Constructor
+
     public MonitorForm(MonitorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
+
         _com = com;
     }
+
+    #endregion
+
+    #region IViewBase implementation
 
     public void OnClosingView()
     {
@@ -50,24 +63,10 @@ public partial class MonitorForm : Form, IViewBase
         listBoxMessages.Items.Clear();
     }
 
-    public void ConfigureEmbededMode()
-    {
-
-    }
-
-    public void ConfigureWindowMode()
-    {
-
-    }
-
-    public Control PanelView()
-    {
-        return null;
-    }
-
     public void RefreshView()
     {
         //
     }
 
+    #endregion 
 }

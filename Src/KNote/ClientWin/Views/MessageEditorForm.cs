@@ -19,8 +19,11 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 
     public MessageEditorForm(MessageEditorComponent com)
     {
+        AutoScaleMode = AutoScaleMode.Dpi;
+
         InitializeComponent();
         PersonalizeControls();
+
         _com = com;
     }
 
