@@ -1,13 +1,6 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
 using Microsoft.AspNetCore.SignalR.Client;
-using OpenAI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace KNote.ClientWin.Components;
 
@@ -183,5 +176,4 @@ public class KntChatComponent : ComponentBase, IDisposable
     }
 
     #endregion 
-
 }

@@ -1,7 +1,6 @@
 ﻿using System.Data.Common;
 using System.Data.SqlClient;
 using System.Diagnostics;
-using System.Net;
 using System.Net.Mail;
 using System.Runtime.InteropServices;
 
@@ -78,11 +77,37 @@ public class KNoteScriptLibrary: Library
     {
         var chat = new KntChatComponent(_store);
         var res = chat.Run();
-        //if(res.IsValid)
-        //    chat.StartHubConnection();
         if(res.IsValid)
             Task.Run(() => chat.SendMessage(message)).Wait();        
     }
+
+    public KntHttpClientComponent GetHttpClientComponent()
+    {
+        return new KntHttpClientComponent(_store);
+    }
+
+    public bool CheckHttpRequest(string url, int timeOut)
+    {
+        try
+        {
+            var httpClient = new KntHttpClientComponent(_store);
+            httpClient.TimeOut = timeOut;
+            httpClient.Run();
+            var res = httpClient.Get(url);
+            httpClient.Dispose();
+            return res;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public bool CheckHttpRequest(string url)
+    {
+        return CheckHttpRequest(url, 30000);
+    }
+
 
     #endregion
 
@@ -176,32 +201,6 @@ public class KNoteScriptLibrary: Library
                 throw;
         }
     }
-
-    // .......
-
-    public bool CheckWebRequest(string url, int timeOut)
-    {
-        try
-        {
-            WebRequest webRequest = WebRequest.Create(url);
-            webRequest.Timeout = timeOut;
-            WebResponse webResponse;
-            webResponse = webRequest.GetResponse();
-            webResponse.Close();
-        }
-        catch //If exception thrown then couldn't get response from address
-        {
-            return false;
-        }
-        return true;
-    }
-
-    public bool CheckWebRequest(string url)
-    {
-        return CheckWebRequest(url, 30000);
-    }
-
-    // .......
 
     public bool SendGMailMessage(string fromEmail, string fromName, string fromPwd,
         List<object> toUsers, string subject, string body)
