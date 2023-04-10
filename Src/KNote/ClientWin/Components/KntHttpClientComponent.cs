@@ -21,10 +21,10 @@ namespace KNote.ClientWin.Components
 
         #region Public properties
         public int TimeOut { get; set; } = 60000;
+        public HttpResponseMessage HttpResponseMessage { get; private set; }
         public string Content { get; private set; }
         public int StatusCode { get; private set; }
-        public string ReasonPhrase { get; private set; }        
-
+        public string ReasonPhrase { get; private set; }
         #endregion
 
 
@@ -39,7 +39,7 @@ namespace KNote.ClientWin.Components
 
         #region Protected override methods 
 
-        public event EventHandler<ComponentEventArgs<string>> ReceiveMessage;
+        public event EventHandler<ComponentEventArgs<HttpResponseMessage>> ReceiveResponse;
         protected override Result<EComponentResult> OnInitialized()
         {
             try
@@ -71,9 +71,9 @@ namespace KNote.ClientWin.Components
 
                 HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(url);
 
+                HttpResponseMessage = httpResponseMessage;
                 StatusCode = (int)httpResponseMessage.StatusCode;
                 ReasonPhrase = httpResponseMessage.ReasonPhrase;
-
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {                    
                     Content = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -83,6 +83,7 @@ namespace KNote.ClientWin.Components
                 {
                     res = false;
                 }
+                ReceiveResponse?.Invoke(this, new ComponentEventArgs<HttpResponseMessage>(httpResponseMessage));
             }
             //catch (TaskCanceledException ex)
             //{
@@ -118,9 +119,10 @@ namespace KNote.ClientWin.Components
         }
         // --------------------------------------------------------------------------
 
+        #region Experimental (in construction ...)
+        
+        // TODO: Check null references. Use component properties.
 
-        // Experimental -------------------------------------------------------------
-        // TODO: Check null references.
         public async Task<string> PostAsync(string url, string jsonContent)
         {
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -141,7 +143,9 @@ namespace KNote.ClientWin.Components
             HttpResponseMessage response = await _httpClient.DeleteAsync(url);
             response.EnsureSuccessStatusCode();
         }
-        // --------------------------------------------------------------------------
+        
+        #endregion 
+
         #endregion
 
         #region Private methods
