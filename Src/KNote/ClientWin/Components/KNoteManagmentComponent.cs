@@ -219,7 +219,7 @@ namespace KNote.ClientWin.Components
                     // TODO: Experimental ---------------------------------
                     if (!string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
                     {
-                        RunKntChatComponent();
+                        RunKntChatComponent(false);
                     }
                     //-----------------------------------------------------
                 }
@@ -1106,13 +1106,13 @@ namespace KNote.ClientWin.Components
             postItEditorComponent.Run();
         }
 
-        private void RunKntChatComponent()
+        private void RunKntChatComponent(bool visibleView = true)
         {
             var chatCanRun = KntChatComponent.Run();
             if (chatCanRun.Entity == EComponentResult.Executed)
             {
                 KntChatComponent.ShowChatView(false);
-                KntChatComponent.VisibleView(false);
+                KntChatComponent.VisibleView(visibleView);
             }
             else
             {
