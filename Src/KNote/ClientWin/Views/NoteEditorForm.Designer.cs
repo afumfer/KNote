@@ -178,25 +178,27 @@
             toolBarNoteEditor.Location = new Point(0, 0);
             toolBarNoteEditor.Name = "toolBarNoteEditor";
             toolBarNoteEditor.RenderMode = ToolStripRenderMode.Professional;
-            toolBarNoteEditor.Size = new Size(808, 27);
+            toolBarNoteEditor.Size = new Size(808, 25);
             toolBarNoteEditor.TabIndex = 6;
             toolBarNoteEditor.Text = "Toolbar KeyNotes";
             // 
             // buttonSave
             // 
             buttonSave.Image = (Image)resources.GetObject("buttonSave.Image");
+            buttonSave.ImageScaling = ToolStripItemImageScaling.None;
             buttonSave.ImageTransparentColor = Color.Magenta;
             buttonSave.Name = "buttonSave";
-            buttonSave.Size = new Size(72, 24);
+            buttonSave.Size = new Size(57, 22);
             buttonSave.Text = "Save  ";
             buttonSave.Click += buttonToolBar_Click;
             // 
             // buttonDelete
             // 
             buttonDelete.Image = (Image)resources.GetObject("buttonDelete.Image");
+            buttonDelete.ImageScaling = ToolStripItemImageScaling.None;
             buttonDelete.ImageTransparentColor = Color.Magenta;
             buttonDelete.Name = "buttonDelete";
-            buttonDelete.Size = new Size(85, 24);
+            buttonDelete.Size = new Size(66, 22);
             buttonDelete.Text = "Delete  ";
             buttonDelete.Click += buttonToolBar_Click;
             // 
@@ -205,9 +207,10 @@
             buttonUndo.DisplayStyle = ToolStripItemDisplayStyle.Image;
             buttonUndo.Enabled = false;
             buttonUndo.Image = (Image)resources.GetObject("buttonUndo.Image");
+            buttonUndo.ImageScaling = ToolStripItemImageScaling.None;
             buttonUndo.ImageTransparentColor = Color.Magenta;
             buttonUndo.Name = "buttonUndo";
-            buttonUndo.Size = new Size(29, 24);
+            buttonUndo.Size = new Size(23, 22);
             buttonUndo.Text = "Undo  ";
             buttonUndo.TextImageRelation = TextImageRelation.TextBeforeImage;
             buttonUndo.ToolTipText = "Undo changes";
@@ -216,78 +219,82 @@
             // toolStripS1
             // 
             toolStripS1.Name = "toolStripS1";
-            toolStripS1.Size = new Size(6, 27);
+            toolStripS1.Size = new Size(6, 25);
             // 
             // buttonPostIt
             // 
             buttonPostIt.Image = (Image)resources.GetObject("buttonPostIt.Image");
+            buttonPostIt.ImageScaling = ToolStripItemImageScaling.None;
             buttonPostIt.ImageTransparentColor = Color.Magenta;
             buttonPostIt.Name = "buttonPostIt";
-            buttonPostIt.Size = new Size(129, 24);
+            buttonPostIt.Size = new Size(104, 22);
             buttonPostIt.Text = "View as Post-It";
             buttonPostIt.Click += buttonToolBar_Click;
             // 
             // toolStripS2
             // 
             toolStripS2.Name = "toolStripS2";
-            toolStripS2.Size = new Size(6, 27);
+            toolStripS2.Size = new Size(6, 25);
             // 
             // buttonCheck
             // 
             buttonCheck.DisplayStyle = ToolStripItemDisplayStyle.Image;
             buttonCheck.Image = (Image)resources.GetObject("buttonCheck.Image");
+            buttonCheck.ImageScaling = ToolStripItemImageScaling.None;
             buttonCheck.ImageTransparentColor = Color.Magenta;
             buttonCheck.Name = "buttonCheck";
-            buttonCheck.Size = new Size(29, 24);
+            buttonCheck.Size = new Size(23, 22);
             buttonCheck.Text = "Check";
             // 
             // toolStripS3
             // 
             toolStripS3.Name = "toolStripS3";
-            toolStripS3.Size = new Size(6, 27);
+            toolStripS3.Size = new Size(6, 25);
             // 
             // buttonPrint
             // 
             buttonPrint.Image = (Image)resources.GetObject("buttonPrint.Image");
+            buttonPrint.ImageScaling = ToolStripItemImageScaling.None;
             buttonPrint.ImageTransparentColor = Color.Magenta;
             buttonPrint.Name = "buttonPrint";
-            buttonPrint.Size = new Size(71, 24);
+            buttonPrint.Size = new Size(58, 22);
             buttonPrint.Text = "Print  ";
             buttonPrint.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // toolStripS4
             // 
             toolStripS4.Name = "toolStripS4";
-            toolStripS4.Size = new Size(6, 27);
+            toolStripS4.Size = new Size(6, 25);
             // 
             // buttonTools
             // 
             buttonTools.DisplayStyle = ToolStripItemDisplayStyle.Image;
             buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonInsertTemplate, toolStripToolS1, buttonExecuteKntScript });
             buttonTools.Image = (Image)resources.GetObject("buttonTools.Image");
+            buttonTools.ImageScaling = ToolStripItemImageScaling.None;
             buttonTools.ImageTransparentColor = Color.Magenta;
             buttonTools.Name = "buttonTools";
-            buttonTools.Size = new Size(34, 24);
+            buttonTools.Size = new Size(29, 22);
             buttonTools.Text = "toolStripDropDownTools";
             // 
             // buttonInsertTemplate
             // 
             buttonInsertTemplate.Name = "buttonInsertTemplate";
             buttonInsertTemplate.ShortcutKeys = Keys.F9;
-            buttonInsertTemplate.Size = new Size(271, 26);
+            buttonInsertTemplate.Size = new Size(217, 22);
             buttonInsertTemplate.Text = "Insertar template text ...";
             // 
             // toolStripToolS1
             // 
             toolStripToolS1.Name = "toolStripToolS1";
-            toolStripToolS1.Size = new Size(268, 6);
+            toolStripToolS1.Size = new Size(214, 6);
             // 
             // buttonExecuteKntScript
             // 
             buttonExecuteKntScript.Image = (Image)resources.GetObject("buttonExecuteKntScript.Image");
             buttonExecuteKntScript.Name = "buttonExecuteKntScript";
             buttonExecuteKntScript.ShortcutKeys = Keys.F5;
-            buttonExecuteKntScript.Size = new Size(271, 26);
+            buttonExecuteKntScript.Size = new Size(217, 22);
             buttonExecuteKntScript.Text = "Execute AntScript code";
             buttonExecuteKntScript.Click += buttonToolBar_Click;
             // 
@@ -312,10 +319,10 @@
             // 
             panelForm.Controls.Add(tabNoteData);
             panelForm.Dock = DockStyle.Fill;
-            panelForm.Location = new Point(0, 27);
+            panelForm.Location = new Point(0, 25);
             panelForm.Margin = new Padding(4, 3, 4, 3);
             panelForm.Name = "panelForm";
-            panelForm.Size = new Size(808, 610);
+            panelForm.Size = new Size(808, 612);
             panelForm.TabIndex = 39;
             // 
             // tabNoteData
@@ -334,7 +341,7 @@
             tabNoteData.Name = "tabNoteData";
             tabNoteData.Padding = new Point(4, 6);
             tabNoteData.SelectedIndex = 0;
-            tabNoteData.Size = new Size(802, 601);
+            tabNoteData.Size = new Size(802, 603);
             tabNoteData.TabIndex = 8;
             // 
             // tabBasicData
@@ -359,11 +366,11 @@
             tabBasicData.Controls.Add(textNoteNumber);
             tabBasicData.Controls.Add(textFolderNumber);
             tabBasicData.ImageIndex = 1;
-            tabBasicData.Location = new Point(4, 35);
+            tabBasicData.Location = new Point(4, 30);
             tabBasicData.Margin = new Padding(4, 3, 4, 3);
             tabBasicData.Name = "tabBasicData";
             tabBasicData.Padding = new Padding(4, 3, 4, 3);
-            tabBasicData.Size = new Size(794, 562);
+            tabBasicData.Size = new Size(794, 569);
             tabBasicData.TabIndex = 0;
             tabBasicData.Text = "Basic data  ";
             tabBasicData.UseVisualStyleBackColor = true;
@@ -388,7 +395,7 @@
             textStatus.Location = new Point(593, 68);
             textStatus.Margin = new Padding(4, 3, 4, 3);
             textStatus.Name = "textStatus";
-            textStatus.Size = new Size(193, 27);
+            textStatus.Size = new Size(193, 23);
             textStatus.TabIndex = 4;
             // 
             // label8
@@ -411,7 +418,7 @@
             panelDescription.Controls.Add(toolDescription);
             panelDescription.Location = new Point(4, 132);
             panelDescription.Name = "panelDescription";
-            panelDescription.Size = new Size(782, 427);
+            panelDescription.Size = new Size(782, 434);
             panelDescription.TabIndex = 55;
             panelDescription.Visible = false;
             // 
@@ -457,7 +464,7 @@
             toolDescription.Items.AddRange(new ToolStripItem[] { toolDescriptionHtml, toolDescriptionMarkdown, toolDescriptionS3, toolDescriptionUploadResource, toolDescriptionUploadResourceFromClipboard });
             toolDescription.Location = new Point(0, 0);
             toolDescription.Name = "toolDescription";
-            toolDescription.Size = new Size(35, 427);
+            toolDescription.Size = new Size(34, 434);
             toolDescription.TabIndex = 0;
             toolDescription.Text = "Tool description editor";
             // 
@@ -468,46 +475,46 @@
             toolDescriptionHtml.Image = (Image)resources.GetObject("toolDescriptionHtml.Image");
             toolDescriptionHtml.ImageTransparentColor = Color.Magenta;
             toolDescriptionHtml.Name = "toolDescriptionHtml";
-            toolDescriptionHtml.Size = new Size(32, 24);
+            toolDescriptionHtml.Size = new Size(31, 24);
             toolDescriptionHtml.Text = "H";
             // 
             // toolDescriptionHtmlTitle1
             // 
             toolDescriptionHtmlTitle1.Name = "toolDescriptionHtmlTitle1";
-            toolDescriptionHtmlTitle1.Size = new Size(202, 26);
+            toolDescriptionHtmlTitle1.Size = new Size(163, 22);
             toolDescriptionHtmlTitle1.Text = "Title 1";
             toolDescriptionHtmlTitle1.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle2
             // 
             toolDescriptionHtmlTitle2.Name = "toolDescriptionHtmlTitle2";
-            toolDescriptionHtmlTitle2.Size = new Size(202, 26);
+            toolDescriptionHtmlTitle2.Size = new Size(163, 22);
             toolDescriptionHtmlTitle2.Text = "Title 2";
             toolDescriptionHtmlTitle2.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle3
             // 
             toolDescriptionHtmlTitle3.Name = "toolDescriptionHtmlTitle3";
-            toolDescriptionHtmlTitle3.Size = new Size(202, 26);
+            toolDescriptionHtmlTitle3.Size = new Size(163, 22);
             toolDescriptionHtmlTitle3.Text = "Title 3";
             toolDescriptionHtmlTitle3.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle4
             // 
             toolDescriptionHtmlTitle4.Name = "toolDescriptionHtmlTitle4";
-            toolDescriptionHtmlTitle4.Size = new Size(202, 26);
+            toolDescriptionHtmlTitle4.Size = new Size(163, 22);
             toolDescriptionHtmlTitle4.Text = "Title 4";
             toolDescriptionHtmlTitle4.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlS3
             // 
             toolDescriptionHtmlS3.Name = "toolDescriptionHtmlS3";
-            toolDescriptionHtmlS3.Size = new Size(199, 6);
+            toolDescriptionHtmlS3.Size = new Size(160, 6);
             // 
             // toolDescriptionHtmlEdit
             // 
             toolDescriptionHtmlEdit.Name = "toolDescriptionHtmlEdit";
-            toolDescriptionHtmlEdit.Size = new Size(202, 26);
+            toolDescriptionHtmlEdit.Size = new Size(163, 22);
             toolDescriptionHtmlEdit.Text = "Edit html code ...";
             toolDescriptionHtmlEdit.Click += toolDescriptionHtml_Click;
             // 
@@ -518,121 +525,121 @@
             toolDescriptionMarkdown.Image = (Image)resources.GetObject("toolDescriptionMarkdown.Image");
             toolDescriptionMarkdown.ImageTransparentColor = Color.Magenta;
             toolDescriptionMarkdown.Name = "toolDescriptionMarkdown";
-            toolDescriptionMarkdown.Size = new Size(32, 24);
+            toolDescriptionMarkdown.Size = new Size(31, 24);
             toolDescriptionMarkdown.Text = "Markdown";
             // 
             // toolDescriptionMarkdownH1
             // 
             toolDescriptionMarkdownH1.Name = "toolDescriptionMarkdownH1";
-            toolDescriptionMarkdownH1.Size = new Size(181, 26);
+            toolDescriptionMarkdownH1.Size = new Size(146, 22);
             toolDescriptionMarkdownH1.Text = "Title 1";
             toolDescriptionMarkdownH1.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH2
             // 
             toolDescriptionMarkdownH2.Name = "toolDescriptionMarkdownH2";
-            toolDescriptionMarkdownH2.Size = new Size(181, 26);
+            toolDescriptionMarkdownH2.Size = new Size(146, 22);
             toolDescriptionMarkdownH2.Text = "Title 2";
             toolDescriptionMarkdownH2.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH3
             // 
             toolDescriptionMarkdownH3.Name = "toolDescriptionMarkdownH3";
-            toolDescriptionMarkdownH3.Size = new Size(181, 26);
+            toolDescriptionMarkdownH3.Size = new Size(146, 22);
             toolDescriptionMarkdownH3.Text = "Title 3";
             toolDescriptionMarkdownH3.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH4
             // 
             toolDescriptionMarkdownH4.Name = "toolDescriptionMarkdownH4";
-            toolDescriptionMarkdownH4.Size = new Size(181, 26);
+            toolDescriptionMarkdownH4.Size = new Size(146, 22);
             toolDescriptionMarkdownH4.Text = "Title 4";
             toolDescriptionMarkdownH4.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownS1
             // 
             toolDescriptionMarkdownS1.Name = "toolDescriptionMarkdownS1";
-            toolDescriptionMarkdownS1.Size = new Size(178, 6);
+            toolDescriptionMarkdownS1.Size = new Size(143, 6);
             // 
             // toolDescriptionMarkdownBold
             // 
             toolDescriptionMarkdownBold.Name = "toolDescriptionMarkdownBold";
-            toolDescriptionMarkdownBold.Size = new Size(181, 26);
+            toolDescriptionMarkdownBold.Size = new Size(146, 22);
             toolDescriptionMarkdownBold.Text = "Bold";
             toolDescriptionMarkdownBold.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownStrikethrough
             // 
             toolDescriptionMarkdownStrikethrough.Name = "toolDescriptionMarkdownStrikethrough";
-            toolDescriptionMarkdownStrikethrough.Size = new Size(181, 26);
+            toolDescriptionMarkdownStrikethrough.Size = new Size(146, 22);
             toolDescriptionMarkdownStrikethrough.Text = "Strikethrough";
             toolDescriptionMarkdownStrikethrough.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownItalic
             // 
             toolDescriptionMarkdownItalic.Name = "toolDescriptionMarkdownItalic";
-            toolDescriptionMarkdownItalic.Size = new Size(181, 26);
+            toolDescriptionMarkdownItalic.Size = new Size(146, 22);
             toolDescriptionMarkdownItalic.Text = "Italic";
             toolDescriptionMarkdownItalic.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownS2
             // 
             toolDescriptionMarkdownS2.Name = "toolDescriptionMarkdownS2";
-            toolDescriptionMarkdownS2.Size = new Size(178, 6);
+            toolDescriptionMarkdownS2.Size = new Size(143, 6);
             // 
             // toolDescriptionMarkdownList
             // 
             toolDescriptionMarkdownList.Name = "toolDescriptionMarkdownList";
-            toolDescriptionMarkdownList.Size = new Size(181, 26);
+            toolDescriptionMarkdownList.Size = new Size(146, 22);
             toolDescriptionMarkdownList.Text = "List";
             toolDescriptionMarkdownList.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownListOrdered
             // 
             toolDescriptionMarkdownListOrdered.Name = "toolDescriptionMarkdownListOrdered";
-            toolDescriptionMarkdownListOrdered.Size = new Size(181, 26);
+            toolDescriptionMarkdownListOrdered.Size = new Size(146, 22);
             toolDescriptionMarkdownListOrdered.Text = "ListOrdered";
             toolDescriptionMarkdownListOrdered.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownLine
             // 
             toolDescriptionMarkdownLine.Name = "toolDescriptionMarkdownLine";
-            toolDescriptionMarkdownLine.Size = new Size(181, 26);
+            toolDescriptionMarkdownLine.Size = new Size(146, 22);
             toolDescriptionMarkdownLine.Text = "Line";
             toolDescriptionMarkdownLine.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownLink
             // 
             toolDescriptionMarkdownLink.Name = "toolDescriptionMarkdownLink";
-            toolDescriptionMarkdownLink.Size = new Size(181, 26);
+            toolDescriptionMarkdownLink.Size = new Size(146, 22);
             toolDescriptionMarkdownLink.Text = "Link";
             toolDescriptionMarkdownLink.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownImage
             // 
             toolDescriptionMarkdownImage.Name = "toolDescriptionMarkdownImage";
-            toolDescriptionMarkdownImage.Size = new Size(181, 26);
+            toolDescriptionMarkdownImage.Size = new Size(146, 22);
             toolDescriptionMarkdownImage.Text = "Image";
             toolDescriptionMarkdownImage.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownTable
             // 
             toolDescriptionMarkdownTable.Name = "toolDescriptionMarkdownTable";
-            toolDescriptionMarkdownTable.Size = new Size(181, 26);
+            toolDescriptionMarkdownTable.Size = new Size(146, 22);
             toolDescriptionMarkdownTable.Text = "Table";
             toolDescriptionMarkdownTable.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownCode
             // 
             toolDescriptionMarkdownCode.Name = "toolDescriptionMarkdownCode";
-            toolDescriptionMarkdownCode.Size = new Size(181, 26);
+            toolDescriptionMarkdownCode.Size = new Size(146, 22);
             toolDescriptionMarkdownCode.Text = "Code";
             toolDescriptionMarkdownCode.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionS3
             // 
             toolDescriptionS3.Name = "toolDescriptionS3";
-            toolDescriptionS3.Size = new Size(32, 6);
+            toolDescriptionS3.Size = new Size(31, 6);
             // 
             // toolDescriptionUploadResource
             // 
@@ -640,7 +647,7 @@
             toolDescriptionUploadResource.Image = (Image)resources.GetObject("toolDescriptionUploadResource.Image");
             toolDescriptionUploadResource.ImageTransparentColor = Color.Magenta;
             toolDescriptionUploadResource.Name = "toolDescriptionUploadResource";
-            toolDescriptionUploadResource.Size = new Size(32, 24);
+            toolDescriptionUploadResource.Size = new Size(31, 24);
             toolDescriptionUploadResource.Text = "Upload resource";
             toolDescriptionUploadResource.Click += toolDescriptionUploadResource_Click;
             // 
@@ -650,7 +657,7 @@
             toolDescriptionUploadResourceFromClipboard.Image = (Image)resources.GetObject("toolDescriptionUploadResourceFromClipboard.Image");
             toolDescriptionUploadResourceFromClipboard.ImageTransparentColor = Color.Magenta;
             toolDescriptionUploadResourceFromClipboard.Name = "toolDescriptionUploadResourceFromClipboard";
-            toolDescriptionUploadResourceFromClipboard.Size = new Size(32, 24);
+            toolDescriptionUploadResourceFromClipboard.Size = new Size(31, 24);
             toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
             toolDescriptionUploadResourceFromClipboard.Click += toolDescriptionUploadResourceFromClipboard_Click;
             // 
@@ -660,7 +667,7 @@
             labelLoadingHtml.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             labelLoadingHtml.Location = new Point(136, 112);
             labelLoadingHtml.Name = "labelLoadingHtml";
-            labelLoadingHtml.Size = new Size(176, 20);
+            labelLoadingHtml.Size = new Size(138, 15);
             labelLoadingHtml.TabIndex = 54;
             labelLoadingHtml.Text = "Loading html content ...";
             labelLoadingHtml.Visible = false;
@@ -706,7 +713,7 @@
             textPriority.Location = new Point(81, 68);
             textPriority.Margin = new Padding(4, 3, 4, 3);
             textPriority.Name = "textPriority";
-            textPriority.Size = new Size(75, 27);
+            textPriority.Size = new Size(75, 23);
             textPriority.TabIndex = 3;
             // 
             // label6
@@ -725,7 +732,7 @@
             textTags.Margin = new Padding(4, 3, 4, 3);
             textTags.MaxLength = 255;
             textTags.Name = "textTags";
-            textTags.Size = new Size(315, 27);
+            textTags.Size = new Size(315, 23);
             textTags.TabIndex = 4;
             // 
             // textFolder
@@ -736,7 +743,7 @@
             textFolder.Margin = new Padding(4, 3, 4, 3);
             textFolder.MaxLength = 255;
             textFolder.Name = "textFolder";
-            textFolder.Size = new Size(625, 27);
+            textFolder.Size = new Size(625, 23);
             textFolder.TabIndex = 1;
             // 
             // textTopic
@@ -746,7 +753,7 @@
             textTopic.Margin = new Padding(4, 3, 4, 3);
             textTopic.MaxLength = 255;
             textTopic.Name = "textTopic";
-            textTopic.Size = new Size(625, 27);
+            textTopic.Size = new Size(625, 23);
             textTopic.TabIndex = 0;
             // 
             // buttonFolderSearch
@@ -800,7 +807,7 @@
             textNoteNumber.Enabled = false;
             textNoteNumber.Location = new Point(702, 8);
             textNoteNumber.Name = "textNoteNumber";
-            textNoteNumber.Size = new Size(84, 27);
+            textNoteNumber.Size = new Size(84, 23);
             textNoteNumber.TabIndex = 51;
             textNoteNumber.TabStop = false;
             textNoteNumber.TextAlign = HorizontalAlignment.Right;
@@ -812,7 +819,7 @@
             textFolderNumber.Enabled = false;
             textFolderNumber.Location = new Point(702, 38);
             textFolderNumber.Name = "textFolderNumber";
-            textFolderNumber.Size = new Size(54, 27);
+            textFolderNumber.Size = new Size(54, 23);
             textFolderNumber.TabIndex = 52;
             textFolderNumber.TabStop = false;
             textFolderNumber.TextAlign = HorizontalAlignment.Right;
@@ -827,10 +834,10 @@
             tabAttributes.Controls.Add(buttonAttributeEdit);
             tabAttributes.Controls.Add(label10);
             tabAttributes.ImageIndex = 5;
-            tabAttributes.Location = new Point(4, 35);
+            tabAttributes.Location = new Point(4, 30);
             tabAttributes.Margin = new Padding(4, 3, 4, 3);
             tabAttributes.Name = "tabAttributes";
-            tabAttributes.Size = new Size(794, 564);
+            tabAttributes.Size = new Size(794, 567);
             tabAttributes.TabIndex = 3;
             tabAttributes.Text = "Attributes  ";
             tabAttributes.UseVisualStyleBackColor = true;
@@ -856,7 +863,7 @@
             listViewAttributes.Location = new Point(10, 79);
             listViewAttributes.MultiSelect = false;
             listViewAttributes.Name = "listViewAttributes";
-            listViewAttributes.Size = new Size(774, 473);
+            listViewAttributes.Size = new Size(774, 476);
             listViewAttributes.TabIndex = 46;
             listViewAttributes.UseCompatibleStateImageBehavior = false;
             listViewAttributes.DoubleClick += listViewAttributes_DoubleClick;
@@ -871,7 +878,7 @@
             textNoteType.MaxLength = 255;
             textNoteType.Name = "textNoteType";
             textNoteType.ShortcutsEnabled = false;
-            textNoteType.Size = new Size(624, 27);
+            textNoteType.Size = new Size(624, 23);
             textNoteType.TabIndex = 44;
             // 
             // buttonNoteType
@@ -917,7 +924,7 @@
             label10.Location = new Point(10, 61);
             label10.Margin = new Padding(4, 0, 4, 0);
             label10.Name = "label10";
-            label10.Size = new Size(77, 20);
+            label10.Size = new Size(62, 15);
             label10.TabIndex = 3;
             label10.Text = "Attributes:";
             // 
@@ -935,10 +942,10 @@
             tabResources.Controls.Add(buttonResourceAdd);
             tabResources.Controls.Add(label12);
             tabResources.ImageIndex = 3;
-            tabResources.Location = new Point(4, 35);
+            tabResources.Location = new Point(4, 30);
             tabResources.Margin = new Padding(4, 3, 4, 3);
             tabResources.Name = "tabResources";
-            tabResources.Size = new Size(794, 564);
+            tabResources.Size = new Size(794, 567);
             tabResources.TabIndex = 4;
             tabResources.Text = "Resources  ";
             tabResources.ToolTipText = "Save resource file";
@@ -950,14 +957,14 @@
             labelPreview.AutoSize = true;
             labelPreview.Location = new Point(685, 18);
             labelPreview.Name = "labelPreview";
-            labelPreview.Size = new Size(123, 20);
+            labelPreview.Size = new Size(99, 15);
             labelPreview.TabIndex = 24;
             labelPreview.Text = "Preview resource:";
             // 
             // textDescriptionResource
             // 
             textDescriptionResource.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textDescriptionResource.Location = new Point(396, 508);
+            textDescriptionResource.Location = new Point(396, 511);
             textDescriptionResource.Multiline = true;
             textDescriptionResource.Name = "textDescriptionResource";
             textDescriptionResource.Size = new Size(392, 52);
@@ -974,7 +981,7 @@
             webViewResource.Name = "webViewResource";
             webViewResource.ShowNavigationTools = false;
             webViewResource.ShowStatusInfo = false;
-            webViewResource.Size = new Size(392, 152);
+            webViewResource.Size = new Size(392, 155);
             webViewResource.TabIndex = 21;
             webViewResource.TextUrl = "";
             webViewResource.Visible = false;
@@ -1008,7 +1015,7 @@
             panelPreview.Controls.Add(linkViewFile);
             panelPreview.Location = new Point(392, 202);
             panelPreview.Name = "panelPreview";
-            panelPreview.Size = new Size(392, 79);
+            panelPreview.Size = new Size(392, 82);
             panelPreview.TabIndex = 18;
             panelPreview.Visible = false;
             // 
@@ -1018,7 +1025,7 @@
             linkViewFile.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             linkViewFile.Location = new Point(13, 14);
             linkViewFile.Name = "linkViewFile";
-            linkViewFile.Size = new Size(160, 23);
+            linkViewFile.Size = new Size(128, 19);
             linkViewFile.TabIndex = 1;
             linkViewFile.TabStop = true;
             linkViewFile.Text = "View resource file ...";
@@ -1030,7 +1037,7 @@
             listViewResources.Location = new Point(5, 36);
             listViewResources.MultiSelect = false;
             listViewResources.Name = "listViewResources";
-            listViewResources.Size = new Size(381, 524);
+            listViewResources.Size = new Size(381, 527);
             listViewResources.TabIndex = 14;
             listViewResources.UseCompatibleStateImageBehavior = false;
             listViewResources.SelectedIndexChanged += listViewResources_SelectedIndexChanged;
@@ -1076,7 +1083,7 @@
             label12.Location = new Point(6, 14);
             label12.Margin = new Padding(4, 0, 4, 0);
             label12.Name = "label12";
-            label12.Size = new Size(78, 20);
+            label12.Size = new Size(63, 15);
             label12.TabIndex = 5;
             label12.Text = "Resources:";
             // 
@@ -1092,10 +1099,10 @@
             tabTasks.Controls.Add(buttonTaskAdd);
             tabTasks.Controls.Add(label11);
             tabTasks.ImageIndex = 6;
-            tabTasks.Location = new Point(4, 35);
+            tabTasks.Location = new Point(4, 30);
             tabTasks.Margin = new Padding(4, 3, 4, 3);
             tabTasks.Name = "tabTasks";
-            tabTasks.Size = new Size(794, 562);
+            tabTasks.Size = new Size(794, 567);
             tabTasks.TabIndex = 2;
             tabTasks.Text = "Tasks  ";
             tabTasks.UseVisualStyleBackColor = true;
@@ -1103,18 +1110,18 @@
             // textTaskTags
             // 
             textTaskTags.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textTaskTags.Location = new Point(400, 520);
+            textTaskTags.Location = new Point(400, 525);
             textTaskTags.Name = "textTaskTags";
-            textTaskTags.Size = new Size(389, 27);
+            textTaskTags.Size = new Size(389, 23);
             textTaskTags.TabIndex = 16;
             // 
             // label17
             // 
             label17.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             label17.AutoSize = true;
-            label17.Location = new Point(400, 497);
+            label17.Location = new Point(400, 502);
             label17.Name = "label17";
-            label17.Size = new Size(41, 20);
+            label17.Size = new Size(33, 15);
             label17.TabIndex = 16;
             label17.Text = "Tags:";
             // 
@@ -1124,7 +1131,7 @@
             textTaskDescription.Location = new Point(400, 36);
             textTaskDescription.Multiline = true;
             textTaskDescription.Name = "textTaskDescription";
-            textTaskDescription.Size = new Size(388, 458);
+            textTaskDescription.Size = new Size(388, 463);
             textTaskDescription.TabIndex = 15;
             // 
             // label16
@@ -1132,7 +1139,7 @@
             label16.AutoSize = true;
             label16.Location = new Point(400, 16);
             label16.Name = "label16";
-            label16.Size = new Size(117, 20);
+            label16.Size = new Size(94, 15);
             label16.TabIndex = 14;
             label16.Text = "Task description:";
             // 
@@ -1142,7 +1149,7 @@
             listViewTasks.Location = new Point(5, 36);
             listViewTasks.MultiSelect = false;
             listViewTasks.Name = "listViewTasks";
-            listViewTasks.Size = new Size(387, 523);
+            listViewTasks.Size = new Size(387, 528);
             listViewTasks.TabIndex = 13;
             listViewTasks.UseCompatibleStateImageBehavior = false;
             listViewTasks.SelectedIndexChanged += listViewTasks_SelectedIndexChanged;
@@ -1188,7 +1195,7 @@
             label11.Location = new Point(6, 16);
             label11.Margin = new Padding(4, 0, 4, 0);
             label11.Name = "label11";
-            label11.Size = new Size(45, 20);
+            label11.Size = new Size(37, 15);
             label11.TabIndex = 5;
             label11.Text = "Tasks:";
             // 
@@ -1200,11 +1207,11 @@
             tabAlarms.Controls.Add(buttonAddAlarm);
             tabAlarms.Controls.Add(label4);
             tabAlarms.ImageIndex = 0;
-            tabAlarms.Location = new Point(4, 35);
+            tabAlarms.Location = new Point(4, 30);
             tabAlarms.Margin = new Padding(4, 3, 4, 3);
             tabAlarms.Name = "tabAlarms";
             tabAlarms.Padding = new Padding(4, 3, 4, 3);
-            tabAlarms.Size = new Size(794, 564);
+            tabAlarms.Size = new Size(794, 567);
             tabAlarms.TabIndex = 1;
             tabAlarms.Text = "Alarms  ";
             tabAlarms.UseVisualStyleBackColor = true;
@@ -1215,7 +1222,7 @@
             listViewAlarms.Location = new Point(6, 34);
             listViewAlarms.MultiSelect = false;
             listViewAlarms.Name = "listViewAlarms";
-            listViewAlarms.Size = new Size(781, 527);
+            listViewAlarms.Size = new Size(781, 530);
             listViewAlarms.TabIndex = 11;
             listViewAlarms.UseCompatibleStateImageBehavior = false;
             listViewAlarms.DoubleClick += listViewAlarms_DoubleClick;
@@ -1263,7 +1270,7 @@
             label4.Location = new Point(6, 16);
             label4.Margin = new Padding(4, 0, 4, 0);
             label4.Name = "label4";
-            label4.Size = new Size(58, 20);
+            label4.Size = new Size(47, 15);
             label4.TabIndex = 0;
             label4.Text = "Alarms:";
             // 
@@ -1272,10 +1279,10 @@
             tabCode.Controls.Add(textScriptCode);
             tabCode.Controls.Add(label9);
             tabCode.ImageIndex = 8;
-            tabCode.Location = new Point(4, 35);
+            tabCode.Location = new Point(4, 30);
             tabCode.Margin = new Padding(4, 3, 4, 3);
             tabCode.Name = "tabCode";
-            tabCode.Size = new Size(794, 564);
+            tabCode.Size = new Size(794, 567);
             tabCode.TabIndex = 6;
             tabCode.Text = "Code   ";
             tabCode.UseVisualStyleBackColor = true;
@@ -1289,7 +1296,7 @@
             textScriptCode.Multiline = true;
             textScriptCode.Name = "textScriptCode";
             textScriptCode.ScrollBars = ScrollBars.Both;
-            textScriptCode.Size = new Size(780, 527);
+            textScriptCode.Size = new Size(780, 530);
             textScriptCode.TabIndex = 6;
             textScriptCode.WordWrap = false;
             // 
@@ -1299,7 +1306,7 @@
             label9.Location = new Point(6, 16);
             label9.Margin = new Padding(4, 0, 4, 0);
             label9.Name = "label9";
-            label9.Size = new Size(87, 20);
+            label9.Size = new Size(69, 15);
             label9.TabIndex = 4;
             label9.Text = "Script code:";
             // 
@@ -1319,10 +1326,10 @@
             tabTraceNotes.Controls.Add(label13);
             tabTraceNotes.Controls.Add(label14);
             tabTraceNotes.ImageIndex = 2;
-            tabTraceNotes.Location = new Point(4, 35);
+            tabTraceNotes.Location = new Point(4, 30);
             tabTraceNotes.Margin = new Padding(4, 3, 4, 3);
             tabTraceNotes.Name = "tabTraceNotes";
-            tabTraceNotes.Size = new Size(794, 564);
+            tabTraceNotes.Size = new Size(794, 567);
             tabTraceNotes.TabIndex = 5;
             tabTraceNotes.Text = "Trace notes  ";
             tabTraceNotes.UseVisualStyleBackColor = true;
@@ -1332,7 +1339,7 @@
             listViewTraceNoteTo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listViewTraceNoteTo.Location = new Point(395, 89);
             listViewTraceNoteTo.Name = "listViewTraceNoteTo";
-            listViewTraceNoteTo.Size = new Size(393, 472);
+            listViewTraceNoteTo.Size = new Size(393, 475);
             listViewTraceNoteTo.TabIndex = 44;
             listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
             // 
@@ -1342,7 +1349,7 @@
             listViewTraceNoteFrom.Location = new Point(11, 89);
             listViewTraceNoteFrom.MultiSelect = false;
             listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
-            listViewTraceNoteFrom.Size = new Size(378, 472);
+            listViewTraceNoteFrom.Size = new Size(378, 475);
             listViewTraceNoteFrom.TabIndex = 43;
             listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
             // 
@@ -1354,7 +1361,7 @@
             textTraceNodeType.Margin = new Padding(4, 3, 4, 3);
             textTraceNodeType.MaxLength = 255;
             textTraceNodeType.Name = "textTraceNodeType";
-            textTraceNodeType.Size = new Size(617, 27);
+            textTraceNodeType.Size = new Size(617, 23);
             textTraceNodeType.TabIndex = 41;
             // 
             // buttonTraceNodeTypes
@@ -1446,7 +1453,7 @@
             label13.Location = new Point(397, 64);
             label13.Margin = new Padding(4, 0, 4, 0);
             label13.Name = "label13";
-            label13.Size = new Size(103, 20);
+            label13.Size = new Size(81, 15);
             label13.TabIndex = 5;
             label13.Text = "Trace node to:";
             // 
@@ -1456,7 +1463,7 @@
             label14.Location = new Point(13, 64);
             label14.Margin = new Padding(4, 0, 4, 0);
             label14.Name = "label14";
-            label14.Size = new Size(125, 20);
+            label14.Size = new Size(99, 15);
             label14.TabIndex = 4;
             label14.Text = "Trace node from :";
             // 
