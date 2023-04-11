@@ -235,16 +235,13 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
     }
 
     private void OnSelectedNoteItemChanged()
-    {
-        // TODO: WaitCursor
+    {        
         if (_skipSelectionChanged || _countRepetition > 5)
             return;
         try
         {
             if (_com.ListEntities == null)
-                return;
-                
-            //this.Cursor = Cursors.WaitCursor;
+                return;            
             if (dataGridNotes.SelectedRows.Count > 0)                                    
                 ActiveCurrentRow();
                 
@@ -253,10 +250,6 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         {
             MessageBox.Show($"OnSelectedNoteItemChanged error: {ex.Message}");
         }
-        //finally
-        //{
-        //    this.Cursor = Cursors.Default;
-        //}
     }
 
     private void ActiveCurrentRow()

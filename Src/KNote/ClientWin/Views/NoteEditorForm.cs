@@ -275,8 +275,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         try
         {
             if (listViewResources.SelectedItems.Count > 0)
-            {
-                // Cursor = Cursors.WaitCursor;
+            {                
                 var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
                 var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();
                 UpdatePreviewResource(selRes);
@@ -702,9 +701,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void ModelToControls()
     {
-        //TODO: WaitCursor
-        //this.Cursor = Cursors.WaitCursor;
-
         // Basic data            
         Text = $"Note editor [{_com.ServiceRef?.Alias}]";
         textTopic.Text = _com.Model.Topic;
@@ -773,12 +769,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // Script             
         textScriptCode.Text = _com.Model.Script;
-
-        // TODO: Trace notes
-        //From = new List<TraceNote>(),
-        //To = new List<TraceNote>()
-
-        //this.Cursor = Cursors.Default;
     }
 
     private void ModelToControlsAttributes()

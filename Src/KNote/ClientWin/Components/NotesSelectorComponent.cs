@@ -100,8 +100,7 @@ public class NotesSelectorComponent : ComponentSelectorBase<IViewSelector<NoteIn
     {
         bool resLoad = false;
         try
-        {
-            // TODO: provisional, hay que buscar una solución más generalista a los estados de espera. 
+        {            
             Cursor.Current = Cursors.WaitCursor;
             
             Service = service;

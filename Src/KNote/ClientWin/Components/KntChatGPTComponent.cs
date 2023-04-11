@@ -280,5 +280,36 @@ public class KntChatGPTComponent : ComponentBase
             user: null);
     }
 
+    //private ChatRequest GetChatRequest(string prompt)
+    //{
+    //    _prompt = prompt;
+
+    //    var chatPrompts = new List<OpenAI.Chat.Message>();
+
+    //    // Add all existing messages to chatPrompts
+    //    chatPrompts.Add(new OpenAI.Chat.Message(Role.System, "You are helpful Assistant"));
+    //    foreach (var item in _chatMessages)
+    //    {
+    //        chatPrompts.Add(new OpenAI.Chat.Message(item.Role, item.Prompt));
+    //    }
+
+    //    chatPrompts.Add(new ChatPrompt("user", _prompt));
+
+    //    //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
+
+    //    return new ChatRequest(
+    //        messages: chatPrompts,
+    //        model: OpenAI.Models.Model.GPT4,
+    //        temperature: null,
+    //        topP: null,
+    //        number: null,
+    //        stops: null,
+    //        maxTokens: null,
+    //        presencePenalty: null,
+    //        frequencyPenalty: null,
+    //        logitBias: null,
+    //        user: null);
+    //}
+
     #endregion
 }

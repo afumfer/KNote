@@ -50,9 +50,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
         using (new WaitCursor())
         {               
             TreeNode rootRepNode;
-            
-            //treeViewFolders.Visible = false;
-            
+                                   
             treeViewFolders.Nodes.Clear();
             _com.ListEntities.Clear();                
 
@@ -69,9 +67,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
                 treeViewFolders.Refresh();
                 
             }
-            _com.NotifyMessage("");
-
-            //treeViewFolders.Visible = true;                
+            _com.NotifyMessage("");            
         }
     }
 
@@ -212,10 +208,6 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
 
     private void treeViewFolders_AfterSelect(object sender, TreeViewEventArgs e)
     {
-        // TODO: WaitCursor
-        //if (sender != null)
-        //    this.Cursor = Cursors.WaitCursor;
-
         try
         {
             FolderWithServiceRef v = null;
@@ -232,15 +224,9 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
             _com.NotifySelectedEntity();                
         }
         catch (Exception)
-        {
-            // TODO: ... investigar excepciones en este punto
+        {            
             throw;
         }
-        //finally
-        //{
-        //    if (sender != null)
-        //        this.Cursor = Cursors.Default;
-        //}
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)

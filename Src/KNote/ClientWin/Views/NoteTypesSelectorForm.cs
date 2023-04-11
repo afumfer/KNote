@@ -164,22 +164,18 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
         {
             lv.Columns[lv.Columns.Count - 1].Width = -2;
         }
-        catch (Exception)
-        {
-        }
+        catch (Exception) { }
     }
 
     private void OnSelectedItemChanged()
-    {      
-        // TODO: !!! WaitCursor
+    {              
         try
         {
             if (_com.ListEntities == null)
                 return;
 
             if (listViewNoteTypes.SelectedItems.Count > 0)
-            {
-                //this.Cursor = Cursors.WaitCursor;                    
+            {                
                 var selectedItem = Guid.Parse(listViewNoteTypes.SelectedItems[0].Name);
                 _com.SelectedEntity = _com.ListEntities.Where(_ => _.NoteTypeId == selectedItem).SingleOrDefault();
                 _com.NotifySelectedEntity();
@@ -189,10 +185,6 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
         {
             MessageBox.Show($"OnSelectedItemChanged error: {ex.Message}");
         }
-        //finally
-        //{
-        //    this.Cursor = Cursors.Default;
-        //}
     }
 
     private void PersonalizeListView(ListView listView)
