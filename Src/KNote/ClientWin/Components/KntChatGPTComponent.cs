@@ -215,7 +215,7 @@ public class KntChatGPTComponent : ComponentBase
         await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
         {
             var res = result.FirstChoice.ToString()?.Replace("\n", "\r\n");
-            tempResult.Append(res);
+            tempResult.Append(res);            
             StreamToken?.Invoke(this, new ComponentEventArgs<string>(res));
         });
 

@@ -102,8 +102,19 @@ public partial class KntChatForm : Form, IViewChat
 
     private void _com_ReceiveMessage(object sender, ComponentEventArgs<string> e)
     {
-        listMessages.Items.Add(e.Entity.ToString());
-        listMessages.Refresh();
+        if (listMessages.InvokeRequired)
+        {
+            listMessages.Invoke(new MethodInvoker(delegate
+            {
+                listMessages.Items.Add(e.Entity.ToString());
+                listMessages.Refresh();
+            }));
+        }
+        else
+        {
+            listMessages.Items.Add(e.Entity.ToString());
+            listMessages.Refresh();
+        }
     }
 
     #endregion

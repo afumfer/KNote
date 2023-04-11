@@ -2,6 +2,7 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using System.Windows.Forms;
 
 namespace KNote.ClientWin.Views;
 
@@ -209,7 +210,22 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private void _com_StreamToken(object sender, ComponentEventArgs<string> e)
     {
-        textResult.Text += e.Entity?.ToString();
+        if (textResult.InvokeRequired)
+        {
+            textResult.Invoke(new MethodInvoker(delegate
+            {
+                UpdateTextResult(e.Entity?.ToString());
+            }));
+        }
+        else
+        {
+            UpdateTextResult(e.Entity?.ToString());
+        }
+    }
+
+    private void UpdateTextResult(string text)
+    {        
+        textResult.Text += text;
         textResult.SelectionStart = textResult.Text.Length;
         textResult.ScrollToCaret();
         textResult.Update();

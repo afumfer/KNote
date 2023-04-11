@@ -275,7 +275,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         try
         {
             if (listViewResources.SelectedItems.Count > 0)
-            {                
+            {
                 var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
                 var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();
                 UpdatePreviewResource(selRes);
