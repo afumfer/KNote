@@ -249,48 +249,18 @@ public class KntChatGPTComponent : ComponentBase
 
     #region Private Methods
 
-    private ChatRequest GetChatRequest(string prompt)
-    {
-        _prompt = prompt;
-
-        var chatPrompts = new List<ChatPrompt>();
-
-        // Add all existing messages to chatPrompts
-        chatPrompts.Add(new ChatPrompt("system", "You are helpful Assistant"));
-        foreach (var item in _chatMessages)
-        {
-            chatPrompts.Add(new ChatPrompt(item.Role, item.Prompt));
-        }
-
-        chatPrompts.Add(new ChatPrompt("user", _prompt));
-
-        //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
-
-        return new ChatRequest(
-            messages: chatPrompts,
-            model: OpenAI.Models.Model.GPT4,
-            temperature: null,
-            topP: null,
-            number: null,
-            stops: null,
-            maxTokens: null,
-            presencePenalty: null,
-            frequencyPenalty: null,
-            logitBias: null,
-            user: null);
-    }
-
+    #region OpenAI .net old verion (6.5.3)
     //private ChatRequest GetChatRequest(string prompt)
     //{
     //    _prompt = prompt;
 
-    //    var chatPrompts = new List<OpenAI.Chat.Message>();
+    //    var chatPrompts = new List<ChatPrompt>();
 
     //    // Add all existing messages to chatPrompts
-    //    chatPrompts.Add(new OpenAI.Chat.Message(Role.System, "You are helpful Assistant"));
+    //    chatPrompts.Add(new ChatPrompt("system", "You are helpful Assistant"));
     //    foreach (var item in _chatMessages)
     //    {
-    //        chatPrompts.Add(new OpenAI.Chat.Message(item.Role, item.Prompt));
+    //        chatPrompts.Add(new ChatPrompt(item.Role, item.Prompt));
     //    }
 
     //    chatPrompts.Add(new ChatPrompt("user", _prompt));
@@ -310,6 +280,54 @@ public class KntChatGPTComponent : ComponentBase
     //        logitBias: null,
     //        user: null);
     //}
+    #endregion
+
+    private ChatRequest GetChatRequest(string prompt)
+    {
+        _prompt = prompt;
+
+        var chatPrompts = new List<OpenAI.Chat.Message>();
+
+        // Add all existing messages to chatPrompts
+        chatPrompts.Add(new OpenAI.Chat.Message(Role.System, "You are helpful Assistant"));
+        foreach (var item in _chatMessages)
+        {
+            chatPrompts.Add(new OpenAI.Chat.Message(GetOpenAIRole(item.Role), item.Prompt));
+        }
+
+        chatPrompts.Add(new OpenAI.Chat.Message(GetOpenAIRole("user"), _prompt));
+
+        //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
+
+        return new ChatRequest(
+            messages: chatPrompts,
+            model: OpenAI.Models.Model.GPT4,
+            temperature: null,
+            topP: null,
+            number: null,
+            stops: null,
+            maxTokens: null,
+            presencePenalty: null,
+            frequencyPenalty: null,
+            logitBias: null,
+            user: null);
+    }
+
+    // TODO: Pending refactoring.
+    private Role GetOpenAIRole(string role)
+    {
+        switch (role)
+        {
+            case "user":
+                return Role.User;
+            case "system":
+                return Role.System;
+            case "assistant":
+                return Role.Assistant;
+            default:
+                return Role.User;
+        }        
+    }
 
     #endregion
 }
