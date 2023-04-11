@@ -219,9 +219,7 @@ namespace KNote.ClientWin.Components
                     // TODO: Experimental ---------------------------------
                     if (!string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
                     {
-                        KntChatComponent.Run();
-                        KntChatComponent.ShowChatView(false);
-                        KntChatComponent.VisibleView(false);
+                        RunKntChatComponent();
                     }
                     //-----------------------------------------------------
                 }
@@ -496,6 +494,7 @@ namespace KNote.ClientWin.Components
                 }
                 return _kntChatComponent;
             }
+            protected set { _kntChatComponent = value; }
         }
 
         private void _kntChatComponent_ReceiveMessage(object sender, ComponentEventArgs<string> e)
@@ -544,9 +543,8 @@ namespace KNote.ClientWin.Components
                 KntChatComponent.VisibleView(true);
             else
             {
-                var kntChatComponent = new KntChatComponent(Store);
-                kntChatComponent.Run();
-                kntChatComponent.ShowChatView();
+                KntChatComponent.ShowErrorMessagesOnInitialize = true;
+                RunKntChatComponent();
             }
         }
 
@@ -1106,6 +1104,21 @@ namespace KNote.ClientWin.Components
             postItEditorComponent.FolderWithServiceRef = folderWithServiceRef;
             await postItEditorComponent.NewModel(folderWithServiceRef.ServiceRef.Service);
             postItEditorComponent.Run();
+        }
+
+        private void RunKntChatComponent()
+        {
+            var chatCanRun = KntChatComponent.Run();
+            if (chatCanRun.Entity == EComponentResult.Executed)
+            {
+                KntChatComponent.ShowChatView(false);
+                KntChatComponent.VisibleView(false);
+            }
+            else
+            {
+                KntChatComponent.Finalize();
+                KntChatComponent = null;
+            }
         }
 
         #endregion

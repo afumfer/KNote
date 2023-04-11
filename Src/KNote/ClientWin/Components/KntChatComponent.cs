@@ -14,8 +14,8 @@ public class KntChatComponent : ComponentBase, IDisposable
 
     #region Properties 
 
-    public bool AutoCloseComponentOnViewExit { get; set; } = false;    
-
+    public bool AutoCloseComponentOnViewExit { get; set; } = false;
+    public bool ShowErrorMessagesOnInitialize { get; set; } = false;
     public string Tag { get; set; } = "KntChatComponent v 0.1";
 
     #endregion
@@ -38,8 +38,10 @@ public class KntChatComponent : ComponentBase, IDisposable
         {
             if (string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
             {
+                var res = new Result<EComponentResult>(EComponentResult.Error);
                 var message = "Chat hub url is not defined. Set the chat hub url y Options menú.";
-                throw new Exception(message);
+                res.AddErrorMessage(message);
+                return res;
             }
 
             _hubConnection = new HubConnectionBuilder()
@@ -61,7 +63,8 @@ public class KntChatComponent : ComponentBase, IDisposable
             var res = new Result<EComponentResult>(EComponentResult.Error);
             var resMessage = $"KntChat component. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(resMessage);
-            ChatView.ShowInfo(resMessage, "KaNote");
+            if(ShowErrorMessagesOnInitialize)
+                ChatView.ShowInfo(resMessage, "KaNote");
             return res;
         }
     }
