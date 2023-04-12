@@ -37,8 +37,7 @@ public class Store : IStore
 
     public string GetUri()
     {
-        return _navigationManager.Uri;
-        
+        return _navigationManager.Uri;        
     }
 
     public Dictionary<string, string> GetQueryStrings(string url)

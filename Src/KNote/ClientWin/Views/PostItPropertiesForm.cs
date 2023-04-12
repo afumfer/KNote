@@ -39,7 +39,7 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
     {
         return _com.DialogResultToComponentResult(this.ShowDialog());
     }
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);
     }
@@ -165,7 +165,7 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
     {
         if (_formIsDisty)
         {
-            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.No)
+            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
                 return false;
         }
 

@@ -128,7 +128,7 @@
             menuMangment.Padding = new Padding(7, 2, 0, 2);
             menuMangment.Size = new Size(1014, 24);
             menuMangment.TabIndex = 2;
-            menuMangment.Text = "KaNote menu managment";
+            menuMangment.Text = "KNote menu managment";
             // 
             // menuFile
             // 
@@ -242,7 +242,7 @@
             // 
             menuHide.Name = "menuHide";
             menuHide.Size = new Size(209, 22);
-            menuHide.Text = "&Hide KaNote managment";
+            menuHide.Text = "&Hide KNote managment";
             menuHide.Click += menu_Click;
             // 
             // menuFilesS2
@@ -462,7 +462,7 @@
             menuKNoteLab.Name = "menuKNoteLab";
             menuKNoteLab.ShortcutKeys = Keys.F10;
             menuKNoteLab.Size = new Size(185, 22);
-            menuKNoteLab.Text = "KaNote &lab ...";
+            menuKNoteLab.Text = "KNote &lab ...";
             menuKNoteLab.Visible = false;
             menuKNoteLab.Click += menu_Click;
             // 
@@ -760,7 +760,7 @@
             KeyPreview = true;
             Margin = new Padding(4, 3, 4, 3);
             Name = "KNoteManagmentForm";
-            Text = "KaNote Managment";
+            Text = "KNote Managment";
             FormClosing += KNoteManagmentForm_FormClosing;
             Load += KNoteManagmentForm_Load;
             menuMangment.ResumeLayout(false);

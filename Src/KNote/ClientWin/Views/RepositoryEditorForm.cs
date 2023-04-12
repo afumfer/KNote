@@ -54,7 +54,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         //textAlias.Text = "";
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
     {
         return MessageBox.Show(info, caption, buttons, icon);
     }
@@ -237,7 +237,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
     {
         if (_formIsDisty)
         {
-            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.No)
+            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
                 return false;
         }
 

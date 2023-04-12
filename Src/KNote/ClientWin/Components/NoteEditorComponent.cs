@@ -445,7 +445,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
         {
             if (!Clipboard.GetDataObject().GetDataPresent(DataFormats.Bitmap))
             {
-                View.ShowInfo("You do not have any images on the Clipboard to insert into this note.", "KaNote");
+                View.ShowInfo("You do not have any images on the Clipboard to insert into this note.", KntConst.AppName);
                 return null;
             }
             var bm = (Bitmap)Clipboard.GetDataObject().GetData(DataFormats.Bitmap);

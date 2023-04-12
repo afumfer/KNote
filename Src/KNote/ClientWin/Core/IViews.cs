@@ -12,7 +12,7 @@ public interface IViewBase
     Result<EComponentResult> ShowModalView();
     void RefreshView();
     void OnClosingView();        
-    DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);
+    DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);
 }
 
 public interface IViewEmbeddable : IViewBase

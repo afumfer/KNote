@@ -46,7 +46,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         return res;
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);
     }
@@ -140,7 +140,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     {
         if (_formIsDisty)
         {
-            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.No)
+            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KNote", MessageBoxButtons.YesNo) == DialogResult.No)
                 return false;
         }
 
@@ -201,7 +201,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
             }
             catch (Exception ex)
             {
-                ShowInfo(ex.Message, "KaNote");
+                ShowInfo(ex.Message, KntConst.AppName);
             }
         }
         else

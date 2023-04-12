@@ -77,7 +77,7 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
     }
 
 
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
     {
         return MessageBox.Show(info, caption, buttons, icon);
     }

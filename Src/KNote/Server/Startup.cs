@@ -55,7 +55,7 @@ public class Startup
         
         var repositoryRef = new RepositoryRef
         {
-            Alias = "KaNote",
+            Alias = KntConst.AppName,
             ConnectionString = conn,
             Provider = prov,
             Orm = orm,

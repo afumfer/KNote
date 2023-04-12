@@ -419,7 +419,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(113, 15);
             this.label2.TabIndex = 39;
-            this.label2.Text = "KaNote import user:";
+            this.label2.Text = "KNote import user:";
             // 
             // textToolsPath
             // 
@@ -483,7 +483,7 @@
             this.Controls.Add(this.tabRedmineUtils);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "KntRedmineForm";
-            this.Text = "KaNote Redmine utils";
+            this.Text = "KNote Redmine utils";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KntRedmineForm_FormClosing);
             this.Load += new System.EventHandler(this.KntRedmineForm_Load);
             this.tabRedmineUtils.ResumeLayout(false);

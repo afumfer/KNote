@@ -1,4 +1,5 @@
 ﻿using KNote.ClientWin.Core;
+using KNote.Model;
 using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views;
@@ -18,6 +19,7 @@ public partial class SplashForm : Form
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
+        this.labelANotas.Text = KntConst.AppName;
 
         appContext.AddedServiceRef += AppContext_AddedServiceRef;
         _appContext = appContext;

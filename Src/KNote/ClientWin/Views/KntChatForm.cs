@@ -45,7 +45,7 @@ public partial class KntChatForm : Form, IViewChat
         this.Close();
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);
     }

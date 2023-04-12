@@ -50,7 +50,7 @@
             notifyKNote.BalloonTipTitle = "KeyNotex";
             notifyKNote.ContextMenuStrip = contextKNoteMenu;
             notifyKNote.Icon = (Icon)resources.GetObject("notifyKNote.Icon");
-            notifyKNote.Text = "KaNote";
+            notifyKNote.Text = "KNote";
             notifyKNote.Visible = true;
             notifyKNote.DoubleClick += notifyKNote_DoubleClick;
             // 
@@ -71,7 +71,7 @@
             // 
             menuShowKNoteManagment.Name = "menuShowKNoteManagment";
             menuShowKNoteManagment.Size = new Size(225, 22);
-            menuShowKNoteManagment.Text = "Show KaNote managment ...";
+            menuShowKNoteManagment.Text = "Show KNote managment ...";
             menuShowKNoteManagment.Click += menuShowKNoteManagment_Click;
             // 
             // menuPostItsVisibles
@@ -132,7 +132,7 @@
             Margin = new Padding(4, 3, 4, 3);
             Name = "NotifyForm";
             ShowInTaskbar = false;
-            Text = "KaNote";
+            Text = "KNote";
             WindowState = FormWindowState.Minimized;            
             contextKNoteMenu.ResumeLayout(false);
             ResumeLayout(false);

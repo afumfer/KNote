@@ -266,7 +266,7 @@ public class KNoteScriptLibrary: Library
         catch (Exception ex)
         {
             if (showError == true)
-                MessageBox.Show("The following error has occurred: " + ex.Message, "KaNote");
+                MessageBox.Show("The following error has occurred: " + ex.Message, KntConst.AppName);
             else
                 throw;
         }

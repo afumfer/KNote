@@ -64,7 +64,7 @@ public class KntChatComponent : ComponentBase, IDisposable
             var resMessage = $"KntChat component. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(resMessage);
             if(ShowErrorMessagesOnInitialize)
-                ChatView.ShowInfo(resMessage, "KaNote");
+                ChatView.ShowInfo(resMessage, KntConst.AppName);
             return res;
         }
     }
@@ -86,7 +86,7 @@ public class KntChatComponent : ComponentBase, IDisposable
         }
         catch (Exception ex)
         {
-            ChatView.ShowInfo($"The connection could not be started. Error: {ex.Message}", "KaNote");
+            ChatView.ShowInfo($"The connection could not be started. Error: {ex.Message}", KntConst.AppName);
         }
     }
 

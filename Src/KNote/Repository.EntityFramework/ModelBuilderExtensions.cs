@@ -1,4 +1,5 @@
-﻿using KNote.Repository.EntityFramework.Entities;
+﻿using KNote.Model;
+using KNote.Repository.EntityFramework.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -175,7 +176,7 @@ public static class ModelBuilderExtensions
                 FolderNumber = 2,
                 CreationDateTime = DateTime.Now,
                 ModificationDateTime = DateTime.Now,
-                Name = "KaNote Documentation",
+                Name = $"{KntConst.AppName} Documentation",
                 //ParentId = idFolder1
             },
             new Folder
@@ -206,10 +207,10 @@ public static class ModelBuilderExtensions
             {
                 NoteId = Guid.NewGuid(),
                 NoteNumber = 2,
-                Topic = "KaNote documentation",
+                Topic = $"{KntConst.AppName} documentation",
                 CreationDateTime = DateTime.Now,
                 ModificationDateTime = DateTime.Now,
-                Description = "KaNote documentation .... TODO: ....",
+                Description = $"{KntConst.AppName} documentation .... TODO: ....",
                 ContentType = "markdown",
                 FolderId = idFolder1,
                 Priority = 90

@@ -20,6 +20,10 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
+        menuMangment.Text = $"{KntConst.AppName} menu managment";
+        menuHide.Text = $"&Hide {KntConst.AppName} managment";
+        menuKNoteLab.Text = $"{KntConst.AppName} &lab ...";
+        Text = $"{KntConst.AppName} Managment";
 
         _com = com;
 
@@ -168,7 +172,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         }
         else if (menuSel == menuRefreshTreeFolders)
         {
-            Text = "KaNote Managment";
+            Text = $"{KntConst.AppName} Managment";
             _com.RefreshRepositoryAndFolderTree();
         }
         else if (menuSel == menuEditNote)
@@ -242,7 +246,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         else if (menuSel == menuHeaderPanelVisible)
         {
             if (!panelSupManagment.Visible)
-                Text = "KaNote Managment";
+                Text = $"{KntConst.AppName} Managment";
             panelSupManagment.Visible = !panelSupManagment.Visible;
         }
         else if (menuSel == menuMainVisible)

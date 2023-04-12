@@ -177,7 +177,7 @@ namespace KNote.Server.Controllers
                 new Claim(ClaimTypes.Name, userDto.UserName),
                 new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
                                 
-                //new Claim("KaNoteApp", "KaNoteWeb"),
+                //new Claim("KNoteApp", "KNoteWeb"),
 
                 // Jti es un identificador del toquen, podría ser útil para llevar un registro y en algún 
                 // momento poder invalidar dicho token. (Podría servir también como un id de sesión). 

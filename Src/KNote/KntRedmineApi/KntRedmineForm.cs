@@ -1,4 +1,5 @@
-﻿using KNote.Model.Dto;
+﻿using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Service.Core;
 using System.Xml.Serialization;
 
@@ -46,7 +47,7 @@ public partial class KntRedmineForm : Form
         var isValidService = await _manager.IsValidService();
         if (!isValidService)
         {
-            MessageBox.Show("This database not support KaNote Redmine utils.");
+            MessageBox.Show($"This database not support {KntConst.AppName} Redmine utils.");
             this.Close();
             return;
         }
@@ -99,7 +100,7 @@ public partial class KntRedmineForm : Form
 
             if (_manager == null || _pluginCommand == null)
             {
-                MessageBox.Show("There is no correct context selected.", "KaNote");
+                MessageBox.Show("There is no correct context selected.", KntConst.AppName);
                 return;
             }
 
@@ -159,12 +160,12 @@ public partial class KntRedmineForm : Form
             await _manager.SaveSystemPlugInVariable("ROOTFOLDERFORIMPORT", textFolderNumForImportIssues.Text);
 
             UseWaitCursor = false;
-            MessageBox.Show("End import", "KaNote");
+            MessageBox.Show("End import", KntConst.AppName);
         }
         catch (Exception ex)
         {
             UseWaitCursor = false;
-            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");                
+            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);                
         }
         finally
         {
@@ -186,7 +187,7 @@ public partial class KntRedmineForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
+            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
         }            
     }
 
@@ -217,7 +218,7 @@ public partial class KntRedmineForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
+            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
         }
         finally
         {
@@ -236,7 +237,7 @@ public partial class KntRedmineForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
+            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
         }
         finally
         {
@@ -255,7 +256,7 @@ public partial class KntRedmineForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"The following error has occurred: {ex.Message}", "KaNote");
+            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
         }
         finally
         {

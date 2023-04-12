@@ -70,7 +70,7 @@
             this.labelANotas.Name = "labelANotas";
             this.labelANotas.Size = new System.Drawing.Size(190, 28);
             this.labelANotas.TabIndex = 12;
-            this.labelANotas.Text = "KaNote";
+            this.labelANotas.Text = "KNote";
             // 
             // iconoANotas
             // 

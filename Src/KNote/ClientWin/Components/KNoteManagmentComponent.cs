@@ -198,7 +198,7 @@ namespace KNote.ClientWin.Components
 
         protected override Result<EComponentResult> OnInitialized()
         {
-            ComponentName = "KaNote managment";
+            ComponentName = $"{KntConst.AppName} managment";
 
             var result = base.OnInitialized();
 
@@ -511,7 +511,7 @@ namespace KNote.ClientWin.Components
 
         public async Task<bool> FinalizeApp()
         {
-            if (View.ShowInfo("Are you sure exit KaNote?", "KaNote", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (View.ShowInfo($"Are you sure exit {KntConst.AppName}?", KntConst.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 return await FinalizeAppForce();
             }                

@@ -108,7 +108,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
             return null;
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);
     }
@@ -132,7 +132,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
             treeViewFolders.SelectedNode = newNode;
         }
         else
-            _com.ShowMessage("KMSG: The parent node of the new node is not correct.", "KaNote");
+            _com.ShowMessage("KMSG: The parent node of the new node is not correct.", KntConst.AppName);
     }
 
     public void DeleteItem(FolderWithServiceRef item)

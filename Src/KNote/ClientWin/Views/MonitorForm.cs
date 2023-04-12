@@ -34,7 +34,7 @@ public partial class MonitorForm : Form, IViewBase
         this.Close();
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         listBoxMessages.Items.Add(info);
         int visibleItems = listBoxMessages.ClientSize.Height / listBoxMessages.ItemHeight;

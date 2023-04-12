@@ -59,7 +59,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         return _com.DialogResultToComponentResult(this.ShowDialog());
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);
     }
@@ -147,7 +147,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             var savedOk = await SaveModel();
             if (!savedOk)
             {
-                if (MessageBox.Show("Do yo want exit?", "KaNote", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show("Do yo want exit?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     _com.Finalize();
                     return;
@@ -431,7 +431,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         if (listViewAlarms.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no selected alert.", "KaNote");
+            MessageBox.Show("There is no selected alert.", KntConst.AppName);
             return;
         }
         var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
@@ -473,7 +473,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         if (listViewTasks.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no task selected .", "KaNote");
+            MessageBox.Show("There is no task selected .", KntConst.AppName);
             return;
         }
         string delTsk = listViewTasks.SelectedItems[0].Name;
@@ -510,7 +510,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         if (listViewResources.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no task selected .", "KaNote");
+            MessageBox.Show("There is no task selected .", KntConst.AppName);
             return;
         }
         var delRes = listViewResources.SelectedItems[0].Name;
@@ -555,7 +555,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         if (listViewResources.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no resource selected.", "KaNote");
+            MessageBox.Show("There is no resource selected.", KntConst.AppName);
             return;
         }
 
@@ -920,7 +920,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void UndoChanges()
     {
-        var res = MessageBox.Show("Are you sure you want to undo changes?", "KaNote", MessageBoxButtons.YesNo);
+        var res = MessageBox.Show("Are you sure you want to undo changes?", KntConst.AppName, MessageBoxButtons.YesNo);
         if (res == DialogResult.Yes)
         {
             ModelToControls();
@@ -1084,7 +1084,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         if (listViewAlarms.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no alert selected.", "KaNote");
+            MessageBox.Show("There is no alert selected.", KntConst.AppName);
             return;
         }
         var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
@@ -1108,7 +1108,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         if (listViewTasks.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no task selected.", "KaNote");
+            MessageBox.Show("There is no task selected.", KntConst.AppName);
             return;
         }
         var idTask = Guid.Parse(listViewTasks.SelectedItems[0].Name);
@@ -1138,7 +1138,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         if (_selectedResource == null)
         {
-            MessageBox.Show("There is no resource selected.", "KaNote");
+            MessageBox.Show("There is no resource selected.", KntConst.AppName);
             return;
         }
         var idResource = _selectedResource.ResourceId;
@@ -1155,7 +1155,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         if (listViewAttributes.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no attribute selected.", "KaNote");
+            MessageBox.Show("There is no attribute selected.", KntConst.AppName);
             return;
         }
         var idAttribute = Guid.Parse(listViewAttributes.SelectedItems[0].Name);

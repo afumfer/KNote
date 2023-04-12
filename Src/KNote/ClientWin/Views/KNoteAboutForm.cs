@@ -19,6 +19,8 @@ public partial class KNoteAboutForm : Form, IViewBase
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
+        Text = KntConst.AppName;
+
         _com = com;
     }
 
@@ -36,7 +38,7 @@ public partial class KNoteAboutForm : Form, IViewBase
         return _com.DialogResultToComponentResult(this.ShowDialog());
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KaNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
+    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
     {
         return MessageBox.Show(info, caption, buttons, icon);
     }

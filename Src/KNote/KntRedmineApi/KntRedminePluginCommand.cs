@@ -19,7 +19,7 @@ public class KntRedminePluginCommand : IPluginCommand
     {
         get
         {
-            return "Redmine Plugin for KaNote";
+            return $"Redmine Plugin for {KntConst.AppName}";
         }
     }
 

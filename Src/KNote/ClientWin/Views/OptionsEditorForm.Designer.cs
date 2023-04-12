@@ -241,7 +241,7 @@ namespace KNote.ClientWin.Views
             this.MinimizeBox = false;
             this.Name = "OptionsEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "KaNote options";
+            this.Text = "KNote options";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OptionsEditorForm_FormClosing);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OptionsEditorForm_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OptionsEditorForm_KeyUp);

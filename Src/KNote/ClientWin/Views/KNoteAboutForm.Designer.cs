@@ -1,4 +1,6 @@
 ﻿
+using KNote.Model;
+
 namespace KNote.ClientWin.Views
 {
     partial class KNoteAboutForm
@@ -62,7 +64,7 @@ namespace KNote.ClientWin.Views
             labelANotas.Name = "labelANotas";
             labelANotas.Size = new Size(190, 28);
             labelANotas.TabIndex = 16;
-            labelANotas.Text = "KaNote";
+            labelANotas.Text = KntConst.AppName;
             // 
             // iconoANotas
             // 
@@ -128,7 +130,7 @@ namespace KNote.ClientWin.Views
             MinimizeBox = false;
             Name = "KNoteAboutForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "About KaNote";            
+            Text = "About KNote";            
             Load += KNoteAboutForm_Load;
             ((System.ComponentModel.ISupportInitialize)iconoANotas).EndInit();
             ResumeLayout(false);

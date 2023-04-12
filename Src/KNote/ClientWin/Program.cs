@@ -151,7 +151,7 @@ static class Program
 
     public static void BringToFront()
     {
-        IntPtr handle = FindWindow(null, "KaNote Managment");
+        IntPtr handle = FindWindow(null, $"{KntConst.AppName} Managment");
 
         if (handle == IntPtr.Zero)
             return;
