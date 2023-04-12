@@ -29,476 +29,458 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntRedmineForm));
-            this.tabRedmineUtils = new System.Windows.Forms.TabControl();
-            this.tabImport = new System.Windows.Forms.TabPage();
-            this.label8 = new System.Windows.Forms.Label();
-            this.buttonIssuesImportFile = new System.Windows.Forms.Button();
-            this.textIssuesImportFile = new System.Windows.Forms.TextBox();
-            this.textFolderNumForImportIssues = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.listInfoRedmine = new System.Windows.Forms.ListBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.textIssuesId = new System.Windows.Forms.TextBox();
-            this.buttonImportRedmineIssues = new System.Windows.Forms.Button();
-            this.tabPredict = new System.Windows.Forms.TabPage();
-            this.label12 = new System.Windows.Forms.Label();
-            this.textPredictCategory = new System.Windows.Forms.TextBox();
-            this.buttonFindIssue = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.buttonPredictPH = new System.Windows.Forms.Button();
-            this.textPredictionPH = new System.Windows.Forms.TextBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.buttonPredictGestion = new System.Windows.Forms.Button();
-            this.textPredictionGestion = new System.Windows.Forms.TextBox();
-            this.textPredictDescription = new System.Windows.Forms.TextBox();
-            this.textPredictSubject = new System.Windows.Forms.TextBox();
-            this.textPredictFindIssue = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.tabOptions = new System.Windows.Forms.TabPage();
-            this.buttonSaveParameters = new System.Windows.Forms.Button();
-            this.textKaNoteImportUser = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textToolsPath = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.textApiKey = new System.Windows.Forms.TextBox();
-            this.textHost = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.tabRedmineUtils.SuspendLayout();
-            this.tabImport.SuspendLayout();
-            this.tabPredict.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.tabOptions.SuspendLayout();
-            this.SuspendLayout();
+            tabRedmineUtils = new TabControl();
+            tabImport = new TabPage();
+            label8 = new Label();
+            buttonIssuesImportFile = new Button();
+            textIssuesImportFile = new TextBox();
+            textFolderNumForImportIssues = new TextBox();
+            label7 = new Label();
+            label6 = new Label();
+            listInfoRedmine = new ListBox();
+            label5 = new Label();
+            textIssuesId = new TextBox();
+            buttonImportRedmineIssues = new Button();
+            tabPredict = new TabPage();
+            label12 = new Label();
+            textPredictCategory = new TextBox();
+            buttonFindIssue = new Button();
+            groupBox2 = new GroupBox();
+            buttonPredictPH = new Button();
+            textPredictionPH = new TextBox();
+            groupBox1 = new GroupBox();
+            buttonPredictGestion = new Button();
+            textPredictionGestion = new TextBox();
+            textPredictDescription = new TextBox();
+            textPredictSubject = new TextBox();
+            textPredictFindIssue = new TextBox();
+            label11 = new Label();
+            label10 = new Label();
+            label9 = new Label();
+            tabOptions = new TabPage();
+            buttonSaveParameters = new Button();
+            textKNoteImportUser = new TextBox();
+            label2 = new Label();
+            textToolsPath = new TextBox();
+            label1 = new Label();
+            textApiKey = new TextBox();
+            textHost = new TextBox();
+            label4 = new Label();
+            label3 = new Label();
+            openFileDialog = new OpenFileDialog();
+            tabRedmineUtils.SuspendLayout();
+            tabImport.SuspendLayout();
+            tabPredict.SuspendLayout();
+            groupBox2.SuspendLayout();
+            groupBox1.SuspendLayout();
+            tabOptions.SuspendLayout();
+            SuspendLayout();
             // 
             // tabRedmineUtils
             // 
-            this.tabRedmineUtils.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabRedmineUtils.Controls.Add(this.tabImport);
-            this.tabRedmineUtils.Controls.Add(this.tabPredict);
-            this.tabRedmineUtils.Controls.Add(this.tabOptions);
-            this.tabRedmineUtils.Location = new System.Drawing.Point(6, 6);
-            this.tabRedmineUtils.Name = "tabRedmineUtils";
-            this.tabRedmineUtils.SelectedIndex = 0;
-            this.tabRedmineUtils.Size = new System.Drawing.Size(684, 594);
-            this.tabRedmineUtils.TabIndex = 0;
+            tabRedmineUtils.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabRedmineUtils.Controls.Add(tabImport);
+            tabRedmineUtils.Controls.Add(tabPredict);
+            tabRedmineUtils.Controls.Add(tabOptions);
+            tabRedmineUtils.Location = new Point(6, 6);
+            tabRedmineUtils.Name = "tabRedmineUtils";
+            tabRedmineUtils.SelectedIndex = 0;
+            tabRedmineUtils.Size = new Size(684, 594);
+            tabRedmineUtils.TabIndex = 0;
             // 
             // tabImport
             // 
-            this.tabImport.Controls.Add(this.label8);
-            this.tabImport.Controls.Add(this.buttonIssuesImportFile);
-            this.tabImport.Controls.Add(this.textIssuesImportFile);
-            this.tabImport.Controls.Add(this.textFolderNumForImportIssues);
-            this.tabImport.Controls.Add(this.label7);
-            this.tabImport.Controls.Add(this.label6);
-            this.tabImport.Controls.Add(this.listInfoRedmine);
-            this.tabImport.Controls.Add(this.label5);
-            this.tabImport.Controls.Add(this.textIssuesId);
-            this.tabImport.Controls.Add(this.buttonImportRedmineIssues);
-            this.tabImport.Location = new System.Drawing.Point(4, 24);
-            this.tabImport.Name = "tabImport";
-            this.tabImport.Padding = new System.Windows.Forms.Padding(3);
-            this.tabImport.Size = new System.Drawing.Size(676, 566);
-            this.tabImport.TabIndex = 0;
-            this.tabImport.Text = "Import";
-            this.tabImport.UseVisualStyleBackColor = true;
+            tabImport.Controls.Add(label8);
+            tabImport.Controls.Add(buttonIssuesImportFile);
+            tabImport.Controls.Add(textIssuesImportFile);
+            tabImport.Controls.Add(textFolderNumForImportIssues);
+            tabImport.Controls.Add(label7);
+            tabImport.Controls.Add(label6);
+            tabImport.Controls.Add(listInfoRedmine);
+            tabImport.Controls.Add(label5);
+            tabImport.Controls.Add(textIssuesId);
+            tabImport.Controls.Add(buttonImportRedmineIssues);
+            tabImport.Location = new Point(4, 24);
+            tabImport.Name = "tabImport";
+            tabImport.Padding = new Padding(3);
+            tabImport.Size = new Size(676, 566);
+            tabImport.TabIndex = 0;
+            tabImport.Text = "Import";
+            tabImport.UseVisualStyleBackColor = true;
             // 
             // label8
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 6);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(109, 15);
-            this.label8.TabIndex = 41;
-            this.label8.Text = "Issues # import file:";
+            label8.AutoSize = true;
+            label8.Location = new Point(9, 6);
+            label8.Name = "label8";
+            label8.Size = new Size(109, 15);
+            label8.TabIndex = 41;
+            label8.Text = "Issues # import file:";
             // 
             // buttonIssuesImportFile
             // 
-            this.buttonIssuesImportFile.Location = new System.Drawing.Point(451, 24);
-            this.buttonIssuesImportFile.Name = "buttonIssuesImportFile";
-            this.buttonIssuesImportFile.Size = new System.Drawing.Size(24, 24);
-            this.buttonIssuesImportFile.TabIndex = 40;
-            this.buttonIssuesImportFile.Text = "...";
-            this.buttonIssuesImportFile.UseVisualStyleBackColor = true;
-            this.buttonIssuesImportFile.Click += new System.EventHandler(this.buttonIssuesImportFile_Click);
+            buttonIssuesImportFile.Location = new Point(451, 24);
+            buttonIssuesImportFile.Name = "buttonIssuesImportFile";
+            buttonIssuesImportFile.Size = new Size(24, 24);
+            buttonIssuesImportFile.TabIndex = 40;
+            buttonIssuesImportFile.Text = "...";
+            buttonIssuesImportFile.UseVisualStyleBackColor = true;
+            buttonIssuesImportFile.Click += buttonIssuesImportFile_Click;
             // 
             // textIssuesImportFile
             // 
-            this.textIssuesImportFile.Location = new System.Drawing.Point(9, 24);
-            this.textIssuesImportFile.Name = "textIssuesImportFile";
-            this.textIssuesImportFile.Size = new System.Drawing.Size(436, 23);
-            this.textIssuesImportFile.TabIndex = 39;
+            textIssuesImportFile.Location = new Point(9, 24);
+            textIssuesImportFile.Name = "textIssuesImportFile";
+            textIssuesImportFile.Size = new Size(436, 23);
+            textIssuesImportFile.TabIndex = 39;
             // 
             // textFolderNumForImportIssues
             // 
-            this.textFolderNumForImportIssues.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFolderNumForImportIssues.Location = new System.Drawing.Point(9, 76);
-            this.textFolderNumForImportIssues.Name = "textFolderNumForImportIssues";
-            this.textFolderNumForImportIssues.Size = new System.Drawing.Size(174, 23);
-            this.textFolderNumForImportIssues.TabIndex = 38;
-            this.textFolderNumForImportIssues.Text = "1";
+            textFolderNumForImportIssues.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textFolderNumForImportIssues.Location = new Point(9, 76);
+            textFolderNumForImportIssues.Name = "textFolderNumForImportIssues";
+            textFolderNumForImportIssues.Size = new Size(174, 23);
+            textFolderNumForImportIssues.TabIndex = 38;
+            textFolderNumForImportIssues.Text = "1";
             // 
             // label7
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(9, 58);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(170, 15);
-            this.label7.TabIndex = 37;
-            this.label7.Text = "Root folder # for import issues:";
+            label7.AutoSize = true;
+            label7.Location = new Point(9, 58);
+            label7.Name = "label7";
+            label7.Size = new Size(170, 15);
+            label7.TabIndex = 37;
+            label7.Text = "Root folder # for import issues:";
             // 
             // label6
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(189, 116);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(51, 15);
-            this.label6.TabIndex = 36;
-            this.label6.Text = "Info log:";
+            label6.AutoSize = true;
+            label6.Location = new Point(189, 116);
+            label6.Name = "label6";
+            label6.Size = new Size(51, 15);
+            label6.TabIndex = 36;
+            label6.Text = "Info log:";
             // 
             // listInfoRedmine
             // 
-            this.listInfoRedmine.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listInfoRedmine.FormattingEnabled = true;
-            this.listInfoRedmine.ItemHeight = 15;
-            this.listInfoRedmine.Location = new System.Drawing.Point(189, 135);
-            this.listInfoRedmine.Name = "listInfoRedmine";
-            this.listInfoRedmine.Size = new System.Drawing.Size(478, 424);
-            this.listInfoRedmine.TabIndex = 35;
+            listInfoRedmine.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listInfoRedmine.FormattingEnabled = true;
+            listInfoRedmine.ItemHeight = 15;
+            listInfoRedmine.Location = new Point(189, 135);
+            listInfoRedmine.Name = "listInfoRedmine";
+            listInfoRedmine.Size = new Size(478, 424);
+            listInfoRedmine.TabIndex = 35;
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 116);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(103, 15);
-            this.label5.TabIndex = 34;
-            this.label5.Text = "HU IDs for import:";
+            label5.AutoSize = true;
+            label5.Location = new Point(9, 116);
+            label5.Name = "label5";
+            label5.Size = new Size(103, 15);
+            label5.TabIndex = 34;
+            label5.Text = "HU IDs for import:";
             // 
             // textIssuesId
             // 
-            this.textIssuesId.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.textIssuesId.Location = new System.Drawing.Point(9, 134);
-            this.textIssuesId.Multiline = true;
-            this.textIssuesId.Name = "textIssuesId";
-            this.textIssuesId.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textIssuesId.Size = new System.Drawing.Size(174, 425);
-            this.textIssuesId.TabIndex = 33;
+            textIssuesId.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            textIssuesId.Location = new Point(9, 134);
+            textIssuesId.Multiline = true;
+            textIssuesId.Name = "textIssuesId";
+            textIssuesId.ScrollBars = ScrollBars.Vertical;
+            textIssuesId.Size = new Size(174, 425);
+            textIssuesId.TabIndex = 33;
             // 
             // buttonImportRedmineIssues
             // 
-            this.buttonImportRedmineIssues.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonImportRedmineIssues.Location = new System.Drawing.Point(499, 24);
-            this.buttonImportRedmineIssues.Name = "buttonImportRedmineIssues";
-            this.buttonImportRedmineIssues.Size = new System.Drawing.Size(168, 27);
-            this.buttonImportRedmineIssues.TabIndex = 28;
-            this.buttonImportRedmineIssues.Text = "Import RedMine Issues";
-            this.buttonImportRedmineIssues.UseVisualStyleBackColor = true;
-            this.buttonImportRedmineIssues.Click += new System.EventHandler(this.buttonImportRedmineIssues_Click);
+            buttonImportRedmineIssues.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonImportRedmineIssues.Location = new Point(499, 24);
+            buttonImportRedmineIssues.Name = "buttonImportRedmineIssues";
+            buttonImportRedmineIssues.Size = new Size(168, 27);
+            buttonImportRedmineIssues.TabIndex = 28;
+            buttonImportRedmineIssues.Text = "Import RedMine Issues";
+            buttonImportRedmineIssues.UseVisualStyleBackColor = true;
+            buttonImportRedmineIssues.Click += buttonImportRedmineIssues_Click;
             // 
             // tabPredict
             // 
-            this.tabPredict.Controls.Add(this.label12);
-            this.tabPredict.Controls.Add(this.textPredictCategory);
-            this.tabPredict.Controls.Add(this.buttonFindIssue);
-            this.tabPredict.Controls.Add(this.groupBox2);
-            this.tabPredict.Controls.Add(this.groupBox1);
-            this.tabPredict.Controls.Add(this.textPredictDescription);
-            this.tabPredict.Controls.Add(this.textPredictSubject);
-            this.tabPredict.Controls.Add(this.textPredictFindIssue);
-            this.tabPredict.Controls.Add(this.label11);
-            this.tabPredict.Controls.Add(this.label10);
-            this.tabPredict.Controls.Add(this.label9);
-            this.tabPredict.Location = new System.Drawing.Point(4, 24);
-            this.tabPredict.Name = "tabPredict";
-            this.tabPredict.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPredict.Size = new System.Drawing.Size(676, 566);
-            this.tabPredict.TabIndex = 1;
-            this.tabPredict.Text = "Predict";
-            this.tabPredict.UseVisualStyleBackColor = true;
+            tabPredict.Controls.Add(label12);
+            tabPredict.Controls.Add(textPredictCategory);
+            tabPredict.Controls.Add(buttonFindIssue);
+            tabPredict.Controls.Add(groupBox2);
+            tabPredict.Controls.Add(groupBox1);
+            tabPredict.Controls.Add(textPredictDescription);
+            tabPredict.Controls.Add(textPredictSubject);
+            tabPredict.Controls.Add(textPredictFindIssue);
+            tabPredict.Controls.Add(label11);
+            tabPredict.Controls.Add(label10);
+            tabPredict.Controls.Add(label9);
+            tabPredict.Location = new Point(4, 24);
+            tabPredict.Name = "tabPredict";
+            tabPredict.Padding = new Padding(3);
+            tabPredict.Size = new Size(676, 566);
+            tabPredict.TabIndex = 1;
+            tabPredict.Text = "Predict";
+            tabPredict.UseVisualStyleBackColor = true;
             // 
             // label12
             // 
-            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(15, 307);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(58, 15);
-            this.label12.TabIndex = 32;
-            this.label12.Text = "Category:";
+            label12.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            label12.AutoSize = true;
+            label12.Location = new Point(15, 307);
+            label12.Name = "label12";
+            label12.Size = new Size(58, 15);
+            label12.TabIndex = 32;
+            label12.Text = "Category:";
             // 
             // textPredictCategory
             // 
-            this.textPredictCategory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textPredictCategory.Location = new System.Drawing.Point(94, 307);
-            this.textPredictCategory.Name = "textPredictCategory";
-            this.textPredictCategory.Size = new System.Drawing.Size(566, 23);
-            this.textPredictCategory.TabIndex = 31;
+            textPredictCategory.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textPredictCategory.Location = new Point(94, 307);
+            textPredictCategory.Name = "textPredictCategory";
+            textPredictCategory.Size = new Size(566, 23);
+            textPredictCategory.TabIndex = 31;
             // 
             // buttonFindIssue
             // 
-            this.buttonFindIssue.Location = new System.Drawing.Point(187, 18);
-            this.buttonFindIssue.Name = "buttonFindIssue";
-            this.buttonFindIssue.Size = new System.Drawing.Size(119, 23);
-            this.buttonFindIssue.TabIndex = 30;
-            this.buttonFindIssue.Text = "Find Issue";
-            this.buttonFindIssue.UseVisualStyleBackColor = true;
-            this.buttonFindIssue.Click += new System.EventHandler(this.buttonFindIssue_Click);
+            buttonFindIssue.Location = new Point(187, 18);
+            buttonFindIssue.Name = "buttonFindIssue";
+            buttonFindIssue.Size = new Size(119, 23);
+            buttonFindIssue.TabIndex = 30;
+            buttonFindIssue.Text = "Find Issue";
+            buttonFindIssue.UseVisualStyleBackColor = true;
+            buttonFindIssue.Click += buttonFindIssue_Click;
             // 
             // groupBox2
             // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox2.Controls.Add(this.buttonPredictPH);
-            this.groupBox2.Controls.Add(this.textPredictionPH);
-            this.groupBox2.Location = new System.Drawing.Point(9, 439);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(651, 98);
-            this.groupBox2.TabIndex = 29;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Predict -> PH";
+            groupBox2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox2.Controls.Add(buttonPredictPH);
+            groupBox2.Controls.Add(textPredictionPH);
+            groupBox2.Location = new Point(9, 439);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(651, 98);
+            groupBox2.TabIndex = 29;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Predict -> PH";
             // 
             // buttonPredictPH
             // 
-            this.buttonPredictPH.Location = new System.Drawing.Point(6, 23);
-            this.buttonPredictPH.Name = "buttonPredictPH";
-            this.buttonPredictPH.Size = new System.Drawing.Size(122, 22);
-            this.buttonPredictPH.TabIndex = 2;
-            this.buttonPredictPH.Text = "Predict";
-            this.buttonPredictPH.UseVisualStyleBackColor = true;
-            this.buttonPredictPH.Click += new System.EventHandler(this.buttonPredictPH_Click);
+            buttonPredictPH.Location = new Point(6, 23);
+            buttonPredictPH.Name = "buttonPredictPH";
+            buttonPredictPH.Size = new Size(122, 22);
+            buttonPredictPH.TabIndex = 2;
+            buttonPredictPH.Text = "Predict";
+            buttonPredictPH.UseVisualStyleBackColor = true;
+            buttonPredictPH.Click += buttonPredictPH_Click;
             // 
             // textPredictionPH
             // 
-            this.textPredictionPH.Location = new System.Drawing.Point(134, 22);
-            this.textPredictionPH.Name = "textPredictionPH";
-            this.textPredictionPH.Size = new System.Drawing.Size(163, 23);
-            this.textPredictionPH.TabIndex = 0;
+            textPredictionPH.Location = new Point(134, 22);
+            textPredictionPH.Name = "textPredictionPH";
+            textPredictionPH.Size = new Size(163, 23);
+            textPredictionPH.TabIndex = 0;
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.buttonPredictGestion);
-            this.groupBox1.Controls.Add(this.textPredictionGestion);
-            this.groupBox1.Location = new System.Drawing.Point(9, 335);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(651, 98);
-            this.groupBox1.TabIndex = 28;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Predict -> Gestión";
+            groupBox1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox1.Controls.Add(buttonPredictGestion);
+            groupBox1.Controls.Add(textPredictionGestion);
+            groupBox1.Location = new Point(9, 335);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(651, 98);
+            groupBox1.TabIndex = 28;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Predict -> Gestión";
             // 
             // buttonPredictGestion
             // 
-            this.buttonPredictGestion.Location = new System.Drawing.Point(6, 21);
-            this.buttonPredictGestion.Name = "buttonPredictGestion";
-            this.buttonPredictGestion.Size = new System.Drawing.Size(122, 22);
-            this.buttonPredictGestion.TabIndex = 1;
-            this.buttonPredictGestion.Text = "Predict";
-            this.buttonPredictGestion.UseVisualStyleBackColor = true;
-            this.buttonPredictGestion.Click += new System.EventHandler(this.buttonPredictGestion_Click);
+            buttonPredictGestion.Location = new Point(6, 21);
+            buttonPredictGestion.Name = "buttonPredictGestion";
+            buttonPredictGestion.Size = new Size(122, 22);
+            buttonPredictGestion.TabIndex = 1;
+            buttonPredictGestion.Text = "Predict";
+            buttonPredictGestion.UseVisualStyleBackColor = true;
+            buttonPredictGestion.Click += buttonPredictGestion_Click;
             // 
             // textPredictionGestion
             // 
-            this.textPredictionGestion.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textPredictionGestion.Location = new System.Drawing.Point(134, 22);
-            this.textPredictionGestion.Name = "textPredictionGestion";
-            this.textPredictionGestion.Size = new System.Drawing.Size(511, 23);
-            this.textPredictionGestion.TabIndex = 0;
+            textPredictionGestion.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textPredictionGestion.Location = new Point(134, 22);
+            textPredictionGestion.Name = "textPredictionGestion";
+            textPredictionGestion.Size = new Size(511, 23);
+            textPredictionGestion.TabIndex = 0;
             // 
             // textPredictDescription
             // 
-            this.textPredictDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textPredictDescription.Location = new System.Drawing.Point(94, 74);
-            this.textPredictDescription.Multiline = true;
-            this.textPredictDescription.Name = "textPredictDescription";
-            this.textPredictDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textPredictDescription.Size = new System.Drawing.Size(566, 227);
-            this.textPredictDescription.TabIndex = 27;
+            textPredictDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textPredictDescription.Location = new Point(94, 74);
+            textPredictDescription.Multiline = true;
+            textPredictDescription.Name = "textPredictDescription";
+            textPredictDescription.ScrollBars = ScrollBars.Vertical;
+            textPredictDescription.Size = new Size(566, 227);
+            textPredictDescription.TabIndex = 27;
             // 
             // textPredictSubject
             // 
-            this.textPredictSubject.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textPredictSubject.Location = new System.Drawing.Point(94, 45);
-            this.textPredictSubject.Name = "textPredictSubject";
-            this.textPredictSubject.Size = new System.Drawing.Size(566, 23);
-            this.textPredictSubject.TabIndex = 26;
+            textPredictSubject.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textPredictSubject.Location = new Point(94, 45);
+            textPredictSubject.Name = "textPredictSubject";
+            textPredictSubject.Size = new Size(566, 23);
+            textPredictSubject.TabIndex = 26;
             // 
             // textPredictFindIssue
             // 
-            this.textPredictFindIssue.Location = new System.Drawing.Point(94, 18);
-            this.textPredictFindIssue.Name = "textPredictFindIssue";
-            this.textPredictFindIssue.Size = new System.Drawing.Size(81, 23);
-            this.textPredictFindIssue.TabIndex = 25;
+            textPredictFindIssue.Location = new Point(94, 18);
+            textPredictFindIssue.Name = "textPredictFindIssue";
+            textPredictFindIssue.Size = new Size(81, 23);
+            textPredictFindIssue.TabIndex = 25;
             // 
             // label11
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(11, 74);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(70, 15);
-            this.label11.TabIndex = 24;
-            this.label11.Text = "Description:";
+            label11.AutoSize = true;
+            label11.Location = new Point(11, 74);
+            label11.Name = "label11";
+            label11.Size = new Size(70, 15);
+            label11.TabIndex = 24;
+            label11.Text = "Description:";
             // 
             // label10
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(11, 48);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(49, 15);
-            this.label10.TabIndex = 23;
-            this.label10.Text = "Subject:";
+            label10.AutoSize = true;
+            label10.Location = new Point(11, 48);
+            label10.Name = "label10";
+            label10.Size = new Size(49, 15);
+            label10.TabIndex = 23;
+            label10.Text = "Subject:";
             // 
             // label9
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(11, 21);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(46, 15);
-            this.label9.TabIndex = 22;
-            this.label9.Text = "Issue #:";
+            label9.AutoSize = true;
+            label9.Location = new Point(11, 21);
+            label9.Name = "label9";
+            label9.Size = new Size(46, 15);
+            label9.TabIndex = 22;
+            label9.Text = "Issue #:";
             // 
             // tabOptions
             // 
-            this.tabOptions.Controls.Add(this.buttonSaveParameters);
-            this.tabOptions.Controls.Add(this.textKaNoteImportUser);
-            this.tabOptions.Controls.Add(this.label2);
-            this.tabOptions.Controls.Add(this.textToolsPath);
-            this.tabOptions.Controls.Add(this.label1);
-            this.tabOptions.Controls.Add(this.textApiKey);
-            this.tabOptions.Controls.Add(this.textHost);
-            this.tabOptions.Controls.Add(this.label4);
-            this.tabOptions.Controls.Add(this.label3);
-            this.tabOptions.Location = new System.Drawing.Point(4, 24);
-            this.tabOptions.Name = "tabOptions";
-            this.tabOptions.Size = new System.Drawing.Size(676, 566);
-            this.tabOptions.TabIndex = 2;
-            this.tabOptions.Text = "Configuration options";
-            this.tabOptions.UseVisualStyleBackColor = true;
+            tabOptions.Controls.Add(buttonSaveParameters);
+            tabOptions.Controls.Add(textKNoteImportUser);
+            tabOptions.Controls.Add(label2);
+            tabOptions.Controls.Add(textToolsPath);
+            tabOptions.Controls.Add(label1);
+            tabOptions.Controls.Add(textApiKey);
+            tabOptions.Controls.Add(textHost);
+            tabOptions.Controls.Add(label4);
+            tabOptions.Controls.Add(label3);
+            tabOptions.Location = new Point(4, 24);
+            tabOptions.Name = "tabOptions";
+            tabOptions.Size = new Size(676, 566);
+            tabOptions.TabIndex = 2;
+            tabOptions.Text = "Configuration options";
+            tabOptions.UseVisualStyleBackColor = true;
             // 
             // buttonSaveParameters
             // 
-            this.buttonSaveParameters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSaveParameters.Location = new System.Drawing.Point(557, 531);
-            this.buttonSaveParameters.Name = "buttonSaveParameters";
-            this.buttonSaveParameters.Size = new System.Drawing.Size(103, 23);
-            this.buttonSaveParameters.TabIndex = 41;
-            this.buttonSaveParameters.Text = "Save parameters";
-            this.buttonSaveParameters.UseVisualStyleBackColor = true;
-            this.buttonSaveParameters.Click += new System.EventHandler(this.buttonSaveParameters_Click);
+            buttonSaveParameters.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonSaveParameters.Location = new Point(557, 531);
+            buttonSaveParameters.Name = "buttonSaveParameters";
+            buttonSaveParameters.Size = new Size(103, 23);
+            buttonSaveParameters.TabIndex = 41;
+            buttonSaveParameters.Text = "Save parameters";
+            buttonSaveParameters.UseVisualStyleBackColor = true;
+            buttonSaveParameters.Click += buttonSaveParameters_Click;
             // 
-            // textKaNoteImportUser
+            // textKNoteImportUser
             // 
-            this.textKaNoteImportUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textKaNoteImportUser.Location = new System.Drawing.Point(15, 185);
-            this.textKaNoteImportUser.Name = "textKaNoteImportUser";
-            this.textKaNoteImportUser.Size = new System.Drawing.Size(127, 23);
-            this.textKaNoteImportUser.TabIndex = 40;
+            textKNoteImportUser.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textKNoteImportUser.Location = new Point(15, 185);
+            textKNoteImportUser.Name = "textKNoteImportUser";
+            textKNoteImportUser.Size = new Size(127, 23);
+            textKNoteImportUser.TabIndex = 40;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(15, 167);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(113, 15);
-            this.label2.TabIndex = 39;
-            this.label2.Text = "KNote import user:";
+            label2.AutoSize = true;
+            label2.Location = new Point(15, 167);
+            label2.Name = "label2";
+            label2.Size = new Size(107, 15);
+            label2.TabIndex = 39;
+            label2.Text = "KNote import user:";
             // 
             // textToolsPath
             // 
-            this.textToolsPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textToolsPath.Location = new System.Drawing.Point(15, 132);
-            this.textToolsPath.Name = "textToolsPath";
-            this.textToolsPath.Size = new System.Drawing.Size(645, 23);
-            this.textToolsPath.TabIndex = 38;
+            textToolsPath.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textToolsPath.Location = new Point(15, 132);
+            textToolsPath.Name = "textToolsPath";
+            textToolsPath.Size = new Size(645, 23);
+            textToolsPath.TabIndex = 38;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 114);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 15);
-            this.label1.TabIndex = 37;
-            this.label1.Text = "Tools path:";
+            label1.AutoSize = true;
+            label1.Location = new Point(13, 114);
+            label1.Name = "label1";
+            label1.Size = new Size(64, 15);
+            label1.TabIndex = 37;
+            label1.Text = "Tools path:";
             // 
             // textApiKey
             // 
-            this.textApiKey.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textApiKey.Location = new System.Drawing.Point(15, 80);
-            this.textApiKey.Name = "textApiKey";
-            this.textApiKey.Size = new System.Drawing.Size(645, 23);
-            this.textApiKey.TabIndex = 36;
+            textApiKey.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textApiKey.Location = new Point(15, 80);
+            textApiKey.Name = "textApiKey";
+            textApiKey.Size = new Size(645, 23);
+            textApiKey.TabIndex = 36;
             // 
             // textHost
             // 
-            this.textHost.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textHost.Location = new System.Drawing.Point(15, 30);
-            this.textHost.Name = "textHost";
-            this.textHost.Size = new System.Drawing.Size(645, 23);
-            this.textHost.TabIndex = 35;
+            textHost.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textHost.Location = new Point(15, 30);
+            textHost.Name = "textHost";
+            textHost.Size = new Size(645, 23);
+            textHost.TabIndex = 35;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(15, 62);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(97, 15);
-            this.label4.TabIndex = 34;
-            this.label4.Text = "Redmine ApiKey:";
+            label4.AutoSize = true;
+            label4.Location = new Point(15, 62);
+            label4.Name = "label4";
+            label4.Size = new Size(97, 15);
+            label4.TabIndex = 34;
+            label4.Text = "Redmine ApiKey:";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(13, 13);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(106, 15);
-            this.label3.TabIndex = 33;
-            this.label3.Text = "Redmine API Host:";
+            label3.AutoSize = true;
+            label3.Location = new Point(13, 13);
+            label3.Name = "label3";
+            label3.Size = new Size(106, 15);
+            label3.TabIndex = 33;
+            label3.Text = "Redmine API Host:";
             // 
             // KntRedmineForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(694, 605);
-            this.Controls.Add(this.tabRedmineUtils);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "KntRedmineForm";
-            this.Text = "KNote Redmine utils";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KntRedmineForm_FormClosing);
-            this.Load += new System.EventHandler(this.KntRedmineForm_Load);
-            this.tabRedmineUtils.ResumeLayout(false);
-            this.tabImport.ResumeLayout(false);
-            this.tabImport.PerformLayout();
-            this.tabPredict.ResumeLayout(false);
-            this.tabPredict.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.tabOptions.ResumeLayout(false);
-            this.tabOptions.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(694, 605);
+            Controls.Add(tabRedmineUtils);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Name = "KntRedmineForm";
+            Text = "KNote Redmine utils";
+            FormClosing += KntRedmineForm_FormClosing;
+            Load += KntRedmineForm_Load;
+            tabRedmineUtils.ResumeLayout(false);
+            tabImport.ResumeLayout(false);
+            tabImport.PerformLayout();
+            tabPredict.ResumeLayout(false);
+            tabPredict.PerformLayout();
+            groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
+            tabOptions.ResumeLayout(false);
+            tabOptions.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -539,7 +521,7 @@
         private TextBox textHost;
         private Label label4;
         private Label label3;
-        private TextBox textKaNoteImportUser;
+        private TextBox textKNoteImportUser;
         private Label label2;
         private Button buttonSaveParameters;
     }

@@ -9,7 +9,7 @@ public partial class KntRedmineForm : Form
 {
     #region Fields
 
-    private IPluginCommand _pluginCommand;    
+    private IPluginCommand _pluginCommand;
     private KntRedmineManager _manager;
 
     #endregion
@@ -25,8 +25,8 @@ public partial class KntRedmineForm : Form
     {
         if (pluginCommand == null)
             throw new Exception("Invalid KntRedmine plugin command.");
-        
-        _pluginCommand = pluginCommand;        
+
+        _pluginCommand = pluginCommand;
 
         _manager = new KntRedmineManager(pluginCommand.Service);
     }
@@ -37,7 +37,7 @@ public partial class KntRedmineForm : Form
 
     private async void KntRedmineForm_Load(object sender, EventArgs e)
     {
-        if(_pluginCommand == null || _manager == null)
+        if (_pluginCommand == null || _manager == null)
         {
             MessageBox.Show("Configuration context is invalid.");
             this.Close();
@@ -59,12 +59,12 @@ public partial class KntRedmineForm : Form
         textToolsPath.Text = _manager.ToolsPath;
         textIssuesImportFile.Text = _manager.ImportFile;
         textFolderNumForImportIssues.Text = _manager.RootFolderForImport?.ToString();
-        textKaNoteImportUser.Text = _manager.AppUserName;
+        textKNoteImportUser.Text = _manager.AppUserName;
 
 
         try
         {
-            if(!string.IsNullOrEmpty(textIssuesImportFile.Text))
+            if (!string.IsNullOrEmpty(textIssuesImportFile.Text))
                 textIssuesId.Text = File.ReadAllText(textIssuesImportFile.Text);
         }
         catch { }
@@ -88,7 +88,7 @@ public partial class KntRedmineForm : Form
         }
         catch (Exception)
         {
-            
+
         }
     }
 
@@ -120,7 +120,7 @@ public partial class KntRedmineForm : Form
                 MessageBox.Show("Issues ID not selected.");
                 return;
             }
-                        
+
             var filter = new NotesFilterDto();
 
             var hhuu = GetHUs(textIssuesId.Text);
@@ -128,7 +128,7 @@ public partial class KntRedmineForm : Form
             listInfoRedmine.Items.Clear();
 
             foreach (var hu in hhuu)
-            {              
+            {
                 NoteExtendedDto note = (await _manager.Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
 
                 filter.Tags = $"HU#{hu}";
@@ -142,7 +142,7 @@ public partial class KntRedmineForm : Form
                 }
 
                 var res = await _manager.IssueToNoteDto(hu, note);
-                
+
                 if (res)
                 {
                     var resSaveNote = await _manager.Service.Notes.SaveExtendedAsync(note);
@@ -165,14 +165,14 @@ public partial class KntRedmineForm : Form
         catch (Exception ex)
         {
             UseWaitCursor = false;
-            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);                
+            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
         }
         finally
         {
             UseWaitCursor = false;
         }
     }
-    
+
     private void buttonIssuesImportFile_Click(object sender, EventArgs e)
     {
         try
@@ -188,7 +188,7 @@ public partial class KntRedmineForm : Form
         catch (Exception ex)
         {
             MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
-        }            
+        }
     }
 
     private async void buttonFindIssue_Click(object sender, EventArgs e)
@@ -232,7 +232,7 @@ public partial class KntRedmineForm : Form
         {
             UseWaitCursor = true;
             Application.DoEvents();
-            textPredictionGestion.Text = "";            
+            textPredictionGestion.Text = "";
             textPredictionGestion.Text = _manager?.PredictGestion(textPredictSubject.Text, textPredictDescription.Text);
         }
         catch (Exception ex)
@@ -251,7 +251,7 @@ public partial class KntRedmineForm : Form
         {
             UseWaitCursor = true;
             Application.DoEvents();
-            textPredictionPH.Text = "";            
+            textPredictionPH.Text = "";
             textPredictionPH.Text = _manager?.PredictPH(textPredictCategory.Text, textPredictSubject.Text, textPredictDescription.Text);
         }
         catch (Exception ex)
@@ -265,7 +265,7 @@ public partial class KntRedmineForm : Form
     }
     private async void buttonSaveParameters_Click(object sender, EventArgs e)
     {
-        if(_manager == null)
+        if (_manager == null)
         {
             MessageBox.Show("Manager is null, cann't save values.");
             return;
@@ -273,7 +273,7 @@ public partial class KntRedmineForm : Form
         await _manager.SaveSystemPlugInVariable("HOST", textHost.Text);
         await _manager.SaveSystemPlugInVariable("APIKEY", textApiKey.Text);
         await _manager.SaveSystemPlugInVariable("TOOLSPATH", textToolsPath.Text);
-        await _manager.SaveSystemPlugInVariable("APPUSERNAME", textKaNoteImportUser.Text);
+        await _manager.SaveSystemPlugInVariable("APPUSERNAME", textKNoteImportUser.Text);
         await _manager.SaveSystemPlugInVariable("IMPORTFILE", textIssuesImportFile.Text);
         await _manager.SaveSystemPlugInVariable("ROOTFOLDERFORIMPORT", textFolderNumForImportIssues.Text);
     }
