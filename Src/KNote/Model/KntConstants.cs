@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using static System.Net.WebRequestMethods;
 
 namespace KNote.Model;
 
 public static class KntConst
 {       
-    public static Dictionary<EnumKAttributeDataType, string> KAttributes { get; set; }
- 
-    public static Dictionary<EnumAlarmType, string> AlarmType { get; set; }
-    
-    public static Dictionary<EnumNotificationType, string> NotificationType { get; set; }
-    
-    public static Dictionary<EnumActionType, string> ActionType { get; set; }
-
-    public static Dictionary<EnumRoles, string> Roles { get; set; }
-
-    public static Dictionary<EnumStatus, string> Status { get; set; }
+    public static Dictionary<EnumKAttributeDataType, string> KAttributes { get; private set; }
+    public static Dictionary<EnumAlarmType, string> AlarmType { get; private set; }   
+    public static Dictionary<EnumNotificationType, string> NotificationType { get; private set; }    
+    public static Dictionary<EnumActionType, string> ActionType { get; private set; }
+    public static Dictionary<EnumRoles, string> Roles { get; private set; }
+    public static Dictionary<EnumStatus, string> Status { get; private set; }
+    public static int DefaultFolderNumber { get; } = 1;
+    public static string HelpUrl { get; } = @"https://github.com/afumfer/KNote/blob/master/Docs/Manual.md";
+    public static string GithubProject { get; } = @"https://github.com/afumfer/KNote";
+    public static string License { get; private set; }
 
     static KntConst()
     {
@@ -72,6 +72,18 @@ public static class KntConst
             { EnumActionType.NoteMessage, "Note Message" },
             { EnumActionType.ScriptExecution, "Script Execution" }
         };
+
+        StringBuilder info = new();
+        info.Append(@"Permission is hereby granted, free of charge, to any person obtaining a copy of this ");
+        info.Append("software and associated documentation files (the 'Software'), to deal in the Software without ");
+        info.Append("restriction, including without limitation the rights to use and copy.");
+        info.Append(Environment.NewLine + Environment.NewLine);
+        info.Append("THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, ");
+        info.Append("INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR ");
+        info.Append("PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE ");
+        info.Append("FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ");
+        info.Append("ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
+        License = info.ToString();
     }
 }
 

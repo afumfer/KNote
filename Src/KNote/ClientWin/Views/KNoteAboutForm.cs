@@ -52,19 +52,9 @@ public partial class KNoteAboutForm : Form, IViewBase
 
     private void KNoteAboutForm_Load(object sender, EventArgs e)
     {
-        var info = @"Permission is hereby granted, free of charge, to any person obtaining a copy of this ";
-        info += "software and associated documentation files (the 'Software'), to deal in the Software without ";
-        info += "restriction, including without limitation the rights to use and copy.";
-        info += Environment.NewLine + Environment.NewLine;
-        info += "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, ";
-        info += "INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR ";
-        info += "PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE ";
-        info += "FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ";
-        info += "ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.";
-
-        labelRepository.Text = @"https://github.com/afumfer/knote";
+        labelRepository.Text = KntConst.GithubProject;
         labelVersion.Text = $"Version: {_com.Store.AppVersion}";
-        labelInfo.Text = info;
+        labelInfo.Text = KntConst.License;
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)

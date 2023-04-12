@@ -102,12 +102,12 @@
         foreach (var r in rolesCole)
         {
             Enum.TryParse(r, out EnumRoles myRol);
-            var z = KntConst.Roles.Where(_ => _.Key == myRol).Select(_ => _.Value).FirstOrDefault();
-            if (z != null)
+            var rol = KntConst.Roles.Where(_ => _.Key == myRol).Select(_ => _.Value).FirstOrDefault();
+            if (rol != null)
             {
                 if (rolesDes != "")
                     rolesDes += ", ";
-                rolesDes += z;
+                rolesDes += rol;
             }
         }
         return rolesDes;

@@ -903,15 +903,14 @@ namespace KNote.ClientWin.Components
 
         public void Help()
         {
-            string url = @"https://github.com/afumfer/KNote/blob/master/Docs/Manual.md";
+            string url = KntConst.HelpUrl;
 
             try
             {
                 Process.Start(url);
             }
             catch
-            {
-                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+            {                
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     url = url.Replace("&", "^&");
@@ -937,8 +936,6 @@ namespace KNote.ClientWin.Components
             var kntLabComponent = new KntLabComponent(Store);
             kntLabComponent.Run();
             kntLabComponent.ShowLabView();
-            //var labForm = new KntLabForm(_com.Store);
-            //labForm.Show();
         }
 
         #endregion

@@ -103,9 +103,8 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
                 Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
             }
             else
-            {
-                // TODO:  Fix this magic number (1 = default folder).
-                var folder = (await Service.Folders.GetAsync(1)).Entity;
+            {                
+                var folder = (await Service.Folders.GetAsync(KntConst.DefaultFolderNumber)).Entity;
                 Model.FolderId = folder.FolderId;
                 Model.FolderDto = folder;
             }

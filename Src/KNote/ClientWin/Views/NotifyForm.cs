@@ -80,7 +80,7 @@ public partial class NotifyForm : Form, IViewBase
 
     private void menuHelp_Click(object sender, EventArgs e)
     {
-        MessageBox.Show("TODO: ....");
+        _com.Help();
     }
 
     private void menuAbout_Click(object sender, EventArgs e)
@@ -95,7 +95,7 @@ public partial class NotifyForm : Form, IViewBase
 
     public void RefreshView()
     {
-        throw new NotImplementedException();
+        this.Refresh();        
     }
 
     #endregion

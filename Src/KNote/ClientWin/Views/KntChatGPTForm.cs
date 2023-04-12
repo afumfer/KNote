@@ -127,9 +127,8 @@ public partial class KntChatGPTForm : Form, IViewBase
         try
         {
             var service = _com.Store.GetFirstServiceRef().Service;
-
-            // TODO:  Fix this magic number (1 = default folder).
-            var folder = await service.Folders.GetAsync(1);
+            
+            var folder = await service.Folders.GetAsync(KntConst.DefaultFolderNumber);
 
             var note = new NoteExtendedDto
             {
