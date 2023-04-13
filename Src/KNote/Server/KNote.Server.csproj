@@ -19,7 +19,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenAI-DotNet" Version="6.7.0" />
+    <PackageReference Include="OpenAI-DotNet" Version="6.7.1" />
   </ItemGroup>
 
   <ItemGroup>
