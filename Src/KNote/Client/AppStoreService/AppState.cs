@@ -14,14 +14,14 @@ public class AppState
 
     #region AppSatate properties
 
-    private string? _tag; // = "";
+    private string? _tag;
     public string? Tag
     {
         get { return _tag; }
         set { _tag = value; NotifyStateChanged(); }
     }
 
-    private string? _userName; //  = "";
+    private string? _userName;
     public string? UserName
     {
         get { return _userName; }
@@ -76,6 +76,16 @@ public class AppState
                 _foldersIndex = new Dictionary<Guid, FolderDto>();
             return _foldersIndex;
         }
+    }
+
+    public List<string> ChatMessages { get; } = new List<string>();
+
+    public void AddChatMessage(string message)
+    {
+        ChatMessages.Add(message);
+        NotifyStateChanged();
+        if(!message.StartsWith(UserName!))
+            NotifySuccess("Chat message input", message);
     }
 
     #endregion 

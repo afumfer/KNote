@@ -3,15 +3,18 @@ using KNote.Client.AppStoreService.ClientDataServices.Interfaces;
 using KNote.Client.AppStoreService.ClientDataServices.Services;
 using KNote.Client.Helpers;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace KNote.Client.AppStoreService;
 
-public class Store : IStore
+public class Store : IStore, IDisposable
 {
     #region Private members
 
     private readonly HttpClient _httpClient;
     private readonly NavigationManager _navigationManager;
+    private HubConnection _hubConnection;
+    private AppState _appState;
 
     #endregion
 
@@ -21,14 +24,28 @@ public class Store : IStore
     {
         _httpClient = httpClient;
         _navigationManager = navigationManager;
-        AppState = new AppState();
+        
+        _appState = new AppState();
+        
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(navigationManager.ToAbsoluteUri("chathub"))
+            .Build();
+
+        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodeMessage = $"{user}: {message}";
+            AppState.AddChatMessage(encodeMessage);
+        });                
     }
 
     #endregion 
 
     #region IStore members
 
-    public AppState AppState { get; }
+    public AppState AppState 
+    { 
+        get { return _appState; } 
+    }
 
     public void NavigateTo(string uri)
     {
@@ -111,10 +128,27 @@ public class Store : IStore
         }
     }
 
-    public List<string> Messages { get; } = new List<string>();
+    public async Task ChatSendMessageAsync(string messageType, string? userInput, string? messageInput)
+    {
+        await _hubConnection.SendAsync("SendMessage", userInput, messageInput);
+    }
 
+    public bool ChatIsConnected => _hubConnection.State == HubConnectionState.Connected;
+
+    public async Task ChatStartAsync()
+    {
+        await _hubConnection.StartAsync();
+    }
 
     #endregion
 
+    #region IDisposable 
+
+    public void Dispose()
+    {
+        _ = _hubConnection.DisposeAsync();
+    }
+
+    #endregion
 }
 

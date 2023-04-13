@@ -6,8 +6,7 @@ namespace KNote.Client.AppStoreService;
 
 public interface IStore
 {
-    AppState AppState { get; }
-    List<string> Messages { get; }
+    AppState AppState { get; }    
     void NavigateTo(string uri);
     string GetUri();
     Dictionary<string, string> GetQueryStrings(string url);
@@ -18,6 +17,9 @@ public interface IStore
     IFolderWebApiService Folders { get; }
     INoteWebApiService Notes { get; }
     IChatGPTService ChatGPT { get; }
-
+    
+    Task ChatStartAsync();
+    Task ChatSendMessageAsync(string messageType, string? userInput, string? messageInput);
+    bool ChatIsConnected { get; }
 }
 

@@ -43,13 +43,15 @@
 
     private bool sidebar;    
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
-        
+
         store.AppState.OnChange += StateHasChanged;
         store.AppState.OnNotifyError += NotifyError;
         store.AppState.OnNotifySuccess += NotifySuccess;
+
+        await store.ChatStartAsync();
     }
 
     public void Dispose()

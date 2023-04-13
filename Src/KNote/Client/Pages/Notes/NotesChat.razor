@@ -34,7 +34,7 @@
                 </RadzenCard>
         
                 <div class="col-md-12 text-center mt-3">
-                    <RadzenButton Text="Send" Click="() => Send()" ButtonStyle="ButtonStyle.Primary" Class="mr-1" Disabled="@(!IsConnected)" />
+                    <RadzenButton Text="Send" Click="() => Send()" ButtonStyle="ButtonStyle.Primary" Class="mr-1" Disabled="@(!store.ChatIsConnected)" />
                 </div>
             </Authorized>
         </AuthorizeView>
@@ -44,44 +44,27 @@
 <hr />
 
 <ul>
-    @foreach (var message in Messages)
+    @foreach (var message in messages)
     {
         <li>@message</li>
     }
 </ul>
 
 @code
-{
-    private HubConnection hubConnection = null!;
-    private List<string> Messages = null!;
+{    
+    private List<string> messages = null!;
     private string? userInput;
     private string? messageInput;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {        
         store.AppState.OnChange += StateHasChanged;
-
-        Messages = store.Messages;
-
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(navigationManager.ToAbsoluteUri("chathub"))
-            .Build();
-
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
-        {
-            var encodeMessage = $"{user}: {message}";
-            Messages.Add(encodeMessage);
-            StateHasChanged();
-        });
-
-        await hubConnection.StartAsync();
+        messages = store.AppState.ChatMessages;
     }
-
-    public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
-
+    
     protected async Task Send()
-    {
-        await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+    {    
+        await store.ChatSendMessageAsync("SendMessage", userInput, messageInput);
         messageInput = "";
     }
 
@@ -95,7 +78,6 @@
 
     public void Dispose()
     {
-        store.AppState.OnChange -= StateHasChanged;
-        _ = hubConnection.DisposeAsync();
+        store.AppState.OnChange -= StateHasChanged;     
     }
 }
