@@ -712,7 +712,9 @@ namespace KNote.ClientWin.Components
                 if (result == DialogResult.Yes || result == DialogResult.Yes)
                 {
                     try
-                    {                        
+                    {
+                        // There is a problem here, the note is not deleted if it is
+                        // in edit mode in another instance of the component.
                         await SelectedServiceRef.Service.Notes.DeleteAsync(SelectedNoteInfo.NoteId);
                         RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
                     }
