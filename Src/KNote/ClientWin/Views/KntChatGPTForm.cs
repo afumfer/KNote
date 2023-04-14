@@ -2,6 +2,7 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Service.Core;
 using System.Windows.Forms;
 
 namespace KNote.ClientWin.Views;
@@ -126,29 +127,18 @@ public partial class KntChatGPTForm : Form, IViewBase
     {
         try
         {
-            var service = _com.Store.GetFirstServiceRef().Service;
-            
-            var folder = await service.Folders.GetAsync(KntConst.DefaultFolderNumber);
+            IKntService service;
 
-            var note = new NoteExtendedDto
-            {
-                Topic = $"ChatGPT: {DateTime.Now.ToString()}",
-                Description = _com.ChatTextMessasges.ToString(),
-                FolderId = folder.Entity.FolderId
-            };
+            if (_com.Store.ActiveFolderWithServiceRef != null)
+                service = _com.Store.ActiveFolderWithServiceRef.ServiceRef.Service;
+            else 
+                service = _com.Store.GetFirstServiceRef().Service;
 
-            // Option 1
-            //await service.Notes.SaveExtendedAsync(note);
-            //_com.Store.Store_AddedNote(this, new ComponentEventArgs<NoteExtendedDto>(note));   // Hack, Store_AddedNote not is public
-
-            // Option 2
             var noteEditor = new NoteEditorComponent(_com.Store);
             await noteEditor.NewModel(service);
             noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
             noteEditor.Model.Description = _com.ChatTextMessasges.ToString();
             noteEditor.Model.Tags = "[ChatGPT]";
-            noteEditor.Model.FolderId = folder.Entity.FolderId;
-            noteEditor.Model.FolderDto = folder.Entity;
             noteEditor.Run();
         }
         catch (Exception ex)

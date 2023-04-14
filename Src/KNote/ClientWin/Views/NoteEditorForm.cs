@@ -25,7 +25,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     public NoteEditorForm(NoteEditorComponent com)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
+        //AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
@@ -769,6 +769,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // Script             
         textScriptCode.Text = _com.Model.Script;
+
+        this.Update();
+        this.Refresh();
     }
 
     private void ModelToControlsAttributes()

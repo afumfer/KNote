@@ -97,7 +97,8 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
             Model.ContentType = "markdown";
 
             // Context default values
-            if(Store.ActiveFolderWithServiceRef != null)
+            if((Store.ActiveFolderWithServiceRef?.FolderInfo != null) 
+                && (Store.ActiveFolderWithServiceRef.ServiceRef.IdServiceRef == Service.IdServiceRef) )
             {
                 Model.FolderId = Store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
                 Model.FolderDto = Store.ActiveFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();

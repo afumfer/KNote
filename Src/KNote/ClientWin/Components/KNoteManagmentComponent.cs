@@ -1,13 +1,18 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.InteropServices;
 
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
 
 using KntScript;
+using ReverseMarkdown.Converters;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KNote.ClientWin.Components
 {
@@ -691,9 +696,33 @@ namespace KNote.ClientWin.Components
                 return;
             }
 
-            var noteEditorComponent = new NoteEditorComponent(Store);
-            noteEditorComponent.DeletedEntity += NoteEditorComponent_DeletedEntity;
-            await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
+            // TODO: Investigate this
+            //   I don't have explanation for this.
+            //   This is how it should work for all database providers.
+            if (SelectedServiceRef.RepositoryRef.Provider != "Microsoft.Data.SqlClient")
+            {
+                var noteEditorComponent = new NoteEditorComponent(Store);                
+                await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
+            }
+            //   This implementation is a hack to avoid errors in SQL Server.
+            //      (not refreshing graphical components when the provider is SQL Server ???).
+            else
+            {
+                var result = View.ShowInfo("Are you sure you want to delete this note?", "Delete note", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes || result == DialogResult.Yes)
+                {
+                    try
+                    {                        
+                        await SelectedServiceRef.Service.Notes.DeleteAsync(SelectedNoteInfo.NoteId);
+                        RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
+                    }
+                    catch (Exception ex)
+                    {
+                        View.ShowInfo(ex.Message);
+                    }
+                }
+            }
+            // ------------------------------------------------------------------------
         }
 
         public async void NewFolder()

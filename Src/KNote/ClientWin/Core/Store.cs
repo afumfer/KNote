@@ -471,7 +471,7 @@ public class Store
     }
 
     public event EventHandler<ComponentEventArgs<NoteExtendedDto>> DeletedNote;
-    private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)  
     {
         DeletedNote?.Invoke(sender, e);
     }
