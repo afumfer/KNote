@@ -185,10 +185,11 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
             try
             {
                 var response = await service.Notes.DeleteExtendedAsync(noteId);
-                    
-                if (response.IsValid)                    
-                    OnDeletedEntity(response.Entity);                        
-                    
+
+                if (response.IsValid)
+                    if(service.RepositoryRef.Provider != "Microsoft.Data.SqlClient")   // !!! Hack, I don't have explanation for this. This line is a hack to avoid errors in SQL Server.
+                        OnDeletedEntity(response.Entity);
+
                 return await Task.FromResult<bool>(true);
             }
             catch (Exception ex)

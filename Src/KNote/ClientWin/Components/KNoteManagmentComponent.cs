@@ -106,7 +106,7 @@ namespace KNote.ClientWin.Components
             RefreshActiveFilterWithServiceRef(e.Entity);
         }
 
-        private async void RefreshActiveFolderWithServiceRef(FolderWithServiceRef folderWithServideRef)
+        private async Task RefreshActiveFolderWithServiceRef(FolderWithServiceRef folderWithServideRef)
         {
             if (folderWithServideRef == null)
                 return;
@@ -509,7 +509,6 @@ namespace KNote.ClientWin.Components
         // -----------------------------------------------------------------------------------
         #endregion
 
-
         #endregion
 
         #region Component public methods
@@ -696,35 +695,36 @@ namespace KNote.ClientWin.Components
                 return;
             }
 
-            // TODO: Investigate this
-            //   I don't have explanation for this.
-            //   This is how it should work for all database providers.
-            if (SelectedServiceRef.RepositoryRef.Provider != "Microsoft.Data.SqlClient")
-            {
-                var noteEditorComponent = new NoteEditorComponent(Store);                
+            //// TODO: Investigate this
+            ////   I don't have explanation for this.
+            ////   This is how it should work for all database providers.
+            //if (SelectedServiceRef.RepositoryRef.Provider != "Microsoft.Data.SqlClient")
+            //{
+                var noteEditorComponent = new NoteEditorComponent(Store);
                 await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
-            }
-            //   This implementation is a hack to avoid errors in SQL Server.
-            //      (not refreshing graphical components when the provider is SQL Server ???).
-            else
-            {
-                var result = View.ShowInfo("Are you sure you want to delete this note?", "Delete note", MessageBoxButtons.YesNo);
-                if (result == DialogResult.Yes || result == DialogResult.Yes)
-                {
-                    try
-                    {
-                        // There is a problem here, the note is not deleted if it is
-                        // in edit mode in another instance of the component.
-                        await SelectedServiceRef.Service.Notes.DeleteAsync(SelectedNoteInfo.NoteId);
-                        RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
-                    }
-                    catch (Exception ex)
-                    {
-                        View.ShowInfo(ex.Message);
-                    }
-                }
-            }
-            // ------------------------------------------------------------------------
+                await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
+            //}
+            ////   This implementation is a hack to avoid errors in SQL Server.
+            ////      (not refreshing graphical components when the provider is SQL Server ???).
+            //else
+            //{
+            //    var result = View.ShowInfo("Are you sure you want to delete this note?", "Delete note", MessageBoxButtons.YesNo);
+            //    if (result == DialogResult.Yes || result == DialogResult.Yes)
+            //    {
+            //        try
+            //        {
+            //            // There is a problem here, the note is not deleted if it is
+            //            // in edit mode in another instance of the component.
+            //            await SelectedServiceRef.Service.Notes.DeleteAsync(SelectedNoteInfo.NoteId);
+            //            RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            View.ShowInfo(ex.Message);
+            //        }
+            //    }
+            //}
+            //// ------------------------------------------------------------------------
         }
 
         public async void NewFolder()
@@ -1042,13 +1042,17 @@ namespace KNote.ClientWin.Components
 
         private void OnNoteEditorDeleted(NoteInfoDto noteInfo)
         {
+            //Option 1
             NotesSelectorComponent.DeleteItem(noteInfo);
-
             if (NotesSelectorComponent.ListEntities?.Count == 0)
             {
                 NoteEditorComponent.View.CleanView();
                 _selectedNoteInfo = null;
             }
+
+            // Option 2 
+            //if (NotesSelectorComponent.ListEntities.Select(n => n.NoteId == noteInfo.NoteId).ToList().Count > 0)
+            //    await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
         }
 
         #endregion
