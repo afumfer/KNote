@@ -695,36 +695,9 @@ namespace KNote.ClientWin.Components
                 return;
             }
 
-            //// TODO: Investigate this
-            ////   I don't have explanation for this.
-            ////   This is how it should work for all database providers.
-            //if (SelectedServiceRef.RepositoryRef.Provider != "Microsoft.Data.SqlClient")
-            //{
-                var noteEditorComponent = new NoteEditorComponent(Store);
-                await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
-                await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
-            //}
-            ////   This implementation is a hack to avoid errors in SQL Server.
-            ////      (not refreshing graphical components when the provider is SQL Server ???).
-            //else
-            //{
-            //    var result = View.ShowInfo("Are you sure you want to delete this note?", "Delete note", MessageBoxButtons.YesNo);
-            //    if (result == DialogResult.Yes || result == DialogResult.Yes)
-            //    {
-            //        try
-            //        {
-            //            // There is a problem here, the note is not deleted if it is
-            //            // in edit mode in another instance of the component.
-            //            await SelectedServiceRef.Service.Notes.DeleteAsync(SelectedNoteInfo.NoteId);
-            //            RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            View.ShowInfo(ex.Message);
-            //        }
-            //    }
-            //}
-            //// ------------------------------------------------------------------------
+            var noteEditorComponent = new NoteEditorComponent(Store);
+            await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
+            //await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
         }
 
         public async void NewFolder()
