@@ -11,6 +11,7 @@ using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
 
 using KntScript;
+using Microsoft.Identity.Client;
 using ReverseMarkdown.Converters;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -96,14 +97,14 @@ namespace KNote.ClientWin.Components
             Store.EditedPostItNote += NoteEditorComponent_PostItEdit;
         }
 
-        private void Store_ChangedActiveFolderWithServiceRef(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+        private async void Store_ChangedActiveFolderWithServiceRef(object sender, ComponentEventArgs<FolderWithServiceRef> e)
         {
-            RefreshActiveFolderWithServiceRef(e.Entity);
+            await RefreshActiveFolderWithServiceRef(e.Entity);            
         }
 
-        private void Store_ChangedActiveFilterWithServiceRef(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
+        private async void Store_ChangedActiveFilterWithServiceRef(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
         {
-            RefreshActiveFilterWithServiceRef(e.Entity);
+            await RefreshActiveFilterWithServiceRef(e.Entity);
         }
 
         private async Task RefreshActiveFolderWithServiceRef(FolderWithServiceRef folderWithServideRef)
@@ -126,7 +127,7 @@ namespace KNote.ClientWin.Components
             NotifyMessage($"Loaded notes list for folder {folderWithServideRef.FolderInfo?.FolderNumber}");
         }
 
-        private async void RefreshActiveFilterWithServiceRef(NotesFilterWithServiceRef notesFilterWithServiceRef)
+        private async Task RefreshActiveFilterWithServiceRef(NotesFilterWithServiceRef notesFilterWithServiceRef)
         {
             SelectMode = EnumSelectMode.Filters;
 
