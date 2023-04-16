@@ -12,12 +12,6 @@ namespace KNote.ClientWin.Core;
 
 public class Store
 {
-    #region Constants
-
-    const string SUPORTED_MIME_TYPES = @"image/jpeg;image/png;application/pdf;video/mp4;audio/mp3;text/plain";
-
-    #endregion
-
     #region Private fields
 
     private readonly List<ServiceRef> _servicesRefs;
@@ -139,6 +133,15 @@ public class Store
     {
         return _servicesRefs.FirstOrDefault();
     }
+
+    public IKntService GetActiveOrDefaultServide()
+    {
+        if (ActiveFolderWithServiceRef != null)
+            return ActiveFolderWithServiceRef.ServiceRef.Service;
+        else
+            return GetFirstServiceRef().Service;
+    }
+
 
     public event EventHandler<ComponentEventArgs<ComponentBase>> AddedComponent;
     public event EventHandler<ComponentEventArgs<EComponentState>> ComponentsStateChanged;
@@ -400,7 +403,7 @@ public class Store
         if (string.IsNullOrEmpty(fileType))
             return false;
 
-        return SUPORTED_MIME_TYPES.Contains(fileType);            
+        return KntConst.SupportedMimeTypes.Contains(fileType);            
     }
 
     public async Task<Guid?> GetUserId(IKntService service)

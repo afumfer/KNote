@@ -127,18 +127,11 @@ public partial class KntChatGPTForm : Form, IViewBase
     {
         try
         {
-            IKntService service;
-
-            if (_com.Store.ActiveFolderWithServiceRef != null)
-                service = _com.Store.ActiveFolderWithServiceRef.ServiceRef.Service;
-            else 
-                service = _com.Store.GetFirstServiceRef().Service;
-
             var noteEditor = new NoteEditorComponent(_com.Store);
-            await noteEditor.NewModel(service);
+            await noteEditor.NewModel(_com.Store.GetActiveOrDefaultServide());
             noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
             noteEditor.Model.Description = _com.ChatTextMessasges.ToString();
-            noteEditor.Model.Tags = "[ChatGPT]";
+            noteEditor.Model.Tags = "[ChatGPT]";            
             noteEditor.Run();
         }
         catch (Exception ex)

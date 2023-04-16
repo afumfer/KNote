@@ -9,6 +9,7 @@ using KNote.Model.Dto;
 using KNote.Model;
 using KntScript;
 using KNote.Service.Core;
+using Microsoft.Identity.Client;
 
 namespace KNote.ClientWin.Core;
 
@@ -24,6 +25,11 @@ public class KNoteScriptLibrary: Library
     }
 
     #region Factory methods for KntScript 
+
+    public Store GetStore()
+    {
+        return _store;
+    }
 
     public FoldersSelectorComponent GetFoldersSelectorComponent()
     {
@@ -45,10 +51,31 @@ public class KNoteScriptLibrary: Library
         return new MonitorComponent(_store);
     }
 
-    public NoteEditorComponent GetNoteEditorComponent()
+    public NoteEditorComponent GetNewNoteEditorComponent()
     {
-        return new NoteEditorComponent(_store);
+        var noteEditor = new NoteEditorComponent(_store);        
+        Task.Run(() => noteEditor.NewModel(_store.GetActiveOrDefaultServide()).Wait());
+        return noteEditor;
     }
+
+    public NoteEditorComponent GetNoteEditorComponent(int noteNumber)
+    {
+        var service = _store.GetActiveOrDefaultServide();
+        NoteExtendedDto resNoteExt = null;
+        var resNoteInfo = Task.Run(() => service.Notes.GetAsync(noteNumber)).Result;
+        if (resNoteInfo.IsValid)
+        {
+            resNoteExt = Task.Run(() => service.Notes.GetExtendedAsync(resNoteInfo.Entity.NoteId)).Result.Entity;
+        }                
+        var noteEditor = new NoteEditorComponent(_store);
+
+        if(resNoteExt != null)
+            noteEditor.LoadModel(service, resNoteExt);
+        else
+            Task.Run(() => noteEditor.NewModel(_store.GetActiveOrDefaultServide()).Wait());
+        return noteEditor;
+    }
+
 
     public KntScriptConsoleComponent GetKntScriptConsoleComponent()
     {

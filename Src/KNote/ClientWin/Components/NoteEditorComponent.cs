@@ -33,7 +33,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
     {
-        if (!EditMode)
+        if (EmbededMode)
             return;
         if (e.Entity.NoteId == this.Model.NoteId)
             this.Finalize();
@@ -189,8 +189,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
                 var response = await service.Notes.DeleteExtendedAsync(noteId);
 
                 if (response.IsValid)
-                    // if(service.RepositoryRef.Provider != "Microsoft.Data.SqlClient")   // !!! Hack, I don't have explanation for this. This line is a hack to avoid errors in SQL Server.
-                        OnDeletedEntity(response.Entity);
+                    OnDeletedEntity(response.Entity);
 
                 return await Task.FromResult<bool>(true);
             }

@@ -1,0 +1,5 @@
+﻿' Get note editor with existing note. If the note is not found, a new one will be created.
+
+var myNoteNumber = 6447;
+var note = GetNoteEditorComponent(myNoteNumber);
+note.Run();

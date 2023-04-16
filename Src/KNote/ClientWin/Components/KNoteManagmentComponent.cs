@@ -696,8 +696,7 @@ namespace KNote.ClientWin.Components
             }
 
             var noteEditorComponent = new NoteEditorComponent(Store);
-            await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
-            //await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
+            await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
         }
 
         public async void NewFolder()
@@ -1014,18 +1013,13 @@ namespace KNote.ClientWin.Components
         }
 
         private void OnNoteEditorDeleted(NoteInfoDto noteInfo)
-        {
-            //Option 1
+        {            
             NotesSelectorComponent.DeleteItem(noteInfo);
             if (NotesSelectorComponent.ListEntities?.Count == 0)
             {
                 NoteEditorComponent.View.CleanView();
                 _selectedNoteInfo = null;
             }
-
-            // Option 2 
-            //if (NotesSelectorComponent.ListEntities.Select(n => n.NoteId == noteInfo.NoteId).ToList().Count > 0)
-            //    await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
         }
 
         #endregion

@@ -10,6 +10,7 @@ public static class KntConst
     public static string AppName { get; } = "KaNote";
     public static string AppDescription { get; } = "Another keynotes managment";
     public static int DefaultFolderNumber { get; } = 1;
+    public static string SupportedMimeTypes { get; } = @"image/jpeg;image/png;application/pdf;video/mp4;audio/mp3;text/plain";
     public static string HelpUrl { get; } = @"https://github.com/afumfer/KNote/blob/master/Docs/Manual.md";
     public static string GithubProject { get; } = @"https://github.com/afumfer/KNote";
     public static string License { get; private set; }
@@ -19,7 +20,7 @@ public static class KntConst
     public static Dictionary<EnumActionType, string> ActionType { get; private set; }
     public static Dictionary<EnumRoles, string> Roles { get; private set; }
     public static Dictionary<EnumStatus, string> Status { get; private set; }
-
+    
     static KntConst()
     {
         KAttributes = new Dictionary<EnumKAttributeDataType, string>
