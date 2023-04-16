@@ -1,19 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics;
-using System.Drawing;
 using System.Runtime.InteropServices;
-
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
 
 using KntScript;
-using Microsoft.Identity.Client;
-using ReverseMarkdown.Converters;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KNote.ClientWin.Components
 {
