@@ -25,6 +25,8 @@ public partial class KntLabForm : Form, IViewBase
 
     private Store _store;
 
+    private IKntService _service;
+
     #endregion
 
     #region Constructors and FormLoad
@@ -37,6 +39,7 @@ public partial class KntLabForm : Form, IViewBase
 
         _com = com;
         _store = _com.Store;
+        _service = _store.ActiveFolderWithServiceRef?.ServiceRef?.Service;
     }
 
     #endregion
@@ -1046,4 +1049,41 @@ public partial class KntLabForm : Form, IViewBase
     }
 
     #endregion
+
+    #region MessageBroker
+
+    private void buttonConfigureMessageBroker_Click(object sender, EventArgs e)
+    {
+        if (_service is null)
+        {
+            MessageBox.Show("_service is null here.");
+            return;
+        }
+
+        _service.MessageBroker.ConsumerReceived += MessageBroker_ConsumerReceived;
+        _service.MessageBroker.BasicConsume("cola.Armando3");
+    }
+
+    private void MessageBroker_ConsumerReceived(object sender, MessageBroker.MessageBusEventArgs<string> e)
+    {        
+        if (listMessages.InvokeRequired)
+        {
+            listMessages.Invoke(new MethodInvoker(delegate
+            {
+                listMessages.Items.Add(e.Entity.ToString());
+            }));
+        }
+        else
+        {
+            listMessages.Items.Add(e.Entity.ToString());
+        }
+    }
+
+    private void buttonMessageBrokerSendMessage_Click(object sender, EventArgs e)
+    {
+        _service.MessageBroker.BasicPublish("ex.FanoutArmando1", "", "KntTest Message Broker");
+    }
+
+    #endregion
+
 }

@@ -1,4 +1,5 @@
-﻿using KNote.Model;
+﻿using KNote.MessageBroker;
+using KNote.Model;
 using KNote.Repository;
 using KNote.Service.Interfaces;
 using System;
@@ -12,16 +13,21 @@ namespace KNote.Service.Core
     public interface IKntService : IDisposable
     {
         Guid IdServiceRef { get; }
+        RepositoryRef RepositoryRef { get; }
+        Task<bool> TestDbConnection();
+        Task<bool> CreateDataBase(string newOwner = null);
+        string UserIdentityName { get; set; }
+
         IKntRepository Repository { get; }
+
         IKntUserService Users { get; }
         IKntKAttributeService KAttributes { get; }
         IKntSystemValuesService SystemValues { get; }
         IKntFolderService Folders { get; }
         IKntNoteService Notes { get; }
         IKntNoteTypeService NoteTypes { get; }
-        Task<bool> TestDbConnection();
-        Task<bool> CreateDataBase(string newOwner = null);
-        RepositoryRef RepositoryRef { get; }
-        string UserIdentityName { get; set; }
+        IKntMessageBroker MessageBroker { get; }
+
+        string GetSystemVariable(string scope, string variable);
     }
 }

@@ -61,6 +61,8 @@
             buttonImportAnotasXML = new Button();
             buttonRunMonitor = new Button();
             tabControlLab = new TabControl();
+            buttonConfigureMessageBroker = new Button();
+            buttonMessageBrokerSendMessage = new Button();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
             tabRichEditor.SuspendLayout();
@@ -266,6 +268,8 @@
             // 
             // tabAppLab
             // 
+            tabAppLab.Controls.Add(buttonMessageBrokerSendMessage);
+            tabAppLab.Controls.Add(buttonConfigureMessageBroker);
             tabAppLab.Controls.Add(buttonGetPluginFile);
             tabAppLab.Controls.Add(textPlugin);
             tabAppLab.Controls.Add(buttonPlugin);
@@ -403,6 +407,26 @@
             tabControlLab.Size = new Size(670, 577);
             tabControlLab.TabIndex = 4;
             // 
+            // buttonConfigureMessageBroker
+            // 
+            buttonConfigureMessageBroker.Location = new Point(349, 133);
+            buttonConfigureMessageBroker.Name = "buttonConfigureMessageBroker";
+            buttonConfigureMessageBroker.Size = new Size(297, 28);
+            buttonConfigureMessageBroker.TabIndex = 15;
+            buttonConfigureMessageBroker.Text = "Configure Message Broker";
+            buttonConfigureMessageBroker.UseVisualStyleBackColor = true;
+            buttonConfigureMessageBroker.Click += buttonConfigureMessageBroker_Click;
+            // 
+            // buttonMessageBrokerSendMessage
+            // 
+            buttonMessageBrokerSendMessage.Location = new Point(519, 167);
+            buttonMessageBrokerSendMessage.Name = "buttonMessageBrokerSendMessage";
+            buttonMessageBrokerSendMessage.Size = new Size(127, 28);
+            buttonMessageBrokerSendMessage.TabIndex = 16;
+            buttonMessageBrokerSendMessage.Text = "Send Message";
+            buttonMessageBrokerSendMessage.UseVisualStyleBackColor = true;
+            buttonMessageBrokerSendMessage.Click += buttonMessageBrokerSendMessage_Click;
+            // 
             // KntLabForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -459,5 +483,7 @@
         private Button buttonPlugin;
         private TextBox textPlugin;
         private Button buttonGetPluginFile;
+        private Button buttonMessageBrokerSendMessage;
+        private Button buttonConfigureMessageBroker;
     }
 }

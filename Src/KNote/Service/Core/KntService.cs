@@ -14,154 +14,206 @@ using KNote.Model;
 using KNote.Service.Interfaces;
 using KNote.Service.Services;
 using System.Threading;
+using KNote.MessageBroker;
+using KNote.MessageBroker.RabbitMQ;
+using System.Collections;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Threading.Channels;
+using Microsoft.Identity.Client;
+using static System.Formats.Asn1.AsnWriter;
 
-namespace KNote.Service.Core
+namespace KNote.Service.Core;
+
+public class KntService : IKntService, IDisposable
 {
-    public class KntService : IKntService, IDisposable
+    #region Properties
+
+    public Guid IdServiceRef { get; }
+
+    private readonly IKntRepository _repository;
+    public IKntRepository Repository
     {
-        #region Properties
+        get { return _repository; }
+    }
 
-        public Guid IdServiceRef { get; }
+    #endregion 
 
-        private readonly IKntRepository _repository;
-        public IKntRepository Repository
+    #region Constructors
+
+    public KntService(IKntRepository repository)
+    {
+        _repository = repository;
+        IdServiceRef = Guid.NewGuid();            
+    }
+
+    #endregion
+
+    #region IKntService members
+
+    private IKntUserService _users;
+    public IKntUserService Users
+    {
+        get
         {
-            get { return _repository; }
+            if (_users == null)
+                _users = new KntUserService(this);
+            return _users;
         }
+    }
 
-        #endregion 
-
-        #region Constructors
-
-        public KntService(IKntRepository repository)
+    private IKntKAttributeService _kattributes;
+    public IKntKAttributeService KAttributes
+    {
+        get
         {
-            _repository = repository;
-            IdServiceRef = Guid.NewGuid();            
+            if (_kattributes == null)
+                _kattributes = new KntKAttributeService(this);
+            return _kattributes;
         }
+    }
 
-        #endregion
-
-        #region IKntService members
-
-        private IKntUserService _users;
-        public IKntUserService Users
+    private IKntSystemValuesService _systemValues;
+    public IKntSystemValuesService SystemValues
+    {
+        get
         {
-            get
+            if (_systemValues == null)
+                _systemValues = new KntSystemValuesService(this);
+            return _systemValues;
+        }
+    }
+
+    private IKntFolderService _folders;
+    public IKntFolderService Folders
+    {
+        get
+        {
+            if (_folders == null)
+                _folders = new KntFolderService(this);
+            return _folders;
+        }
+    }
+
+    private IKntNoteService _notes;
+    public IKntNoteService Notes
+    {
+        get
+        {
+            if (_notes == null)
+                _notes = new KntNoteService(this);
+            return _notes;
+        }
+    }
+
+    private IKntNoteTypeService _noteTypes;
+    public IKntNoteTypeService NoteTypes
+    {
+        get
+        {
+            if (_noteTypes == null)                    
+                _noteTypes = new KntNoteTypeService(this);
+            return _noteTypes;
+        }
+    }
+
+    public RepositoryRef RepositoryRef
+    {
+        get { return _repository.RespositoryRef; }
+    }
+
+    public string UserIdentityName { get; set; }
+    
+    public async Task<bool> TestDbConnection()
+    {
+        return await _repository.TestDbConnection();
+    }
+
+    public async Task<bool> CreateDataBase(string newOwner = null)
+    {
+        try
+        {
+            var res = await SystemValues.GetAllAsync();
+            if (!res.IsValid)
+                return await Task.FromResult(false);
+
+            if (!string.IsNullOrEmpty(newOwner))
             {
-                if (_users == null)
-                    _users = new KntUserService(this);
-                return _users;
-            }
-        }
-
-        private IKntKAttributeService _kattributes;
-        public IKntKAttributeService KAttributes
-        {
-            get
-            {
-                if (_kattributes == null)
-                    _kattributes = new KntKAttributeService(this);
-                return _kattributes;
-            }
-        }
-
-        private IKntSystemValuesService _systemValues;
-        public IKntSystemValuesService SystemValues
-        {
-            get
-            {
-                if (_systemValues == null)
-                    _systemValues = new KntSystemValuesService(this);
-                return _systemValues;
-            }
-        }
-
-        private IKntFolderService _folders;
-        public IKntFolderService Folders
-        {
-            get
-            {
-                if (_folders == null)
-                    _folders = new KntFolderService(this);
-                return _folders;
-            }
-        }
-
-        private IKntNoteService _notes;
-        public IKntNoteService Notes
-        {
-            get
-            {
-                if (_notes == null)
-                    _notes = new KntNoteService(this);
-                return _notes;
-            }
-        }
-
-        private IKntNoteTypeService _noteTypes;
-        public IKntNoteTypeService NoteTypes
-        {
-            get
-            {
-                if (_noteTypes == null)                    
-                    _noteTypes = new KntNoteTypeService(this);
-                return _noteTypes;
-            }
-        }
-
-        public RepositoryRef RepositoryRef
-        {
-            get { return _repository.RespositoryRef; }
-        }
-
-        public string UserIdentityName { get; set; }
-
-        public async Task<bool> TestDbConnection()
-        {
-            return await _repository.TestDbConnection();
-        }
-
-        public async Task<bool> CreateDataBase(string newOwner = null)
-        {
-            try
-            {
-                var res = await SystemValues.GetAllAsync();
-                if (!res.IsValid)
-                    return await Task.FromResult(false);
-
-                if (!string.IsNullOrEmpty(newOwner))
+                var resGetU = await Users.GetByUserNameAsync("owner");
+                if (resGetU.IsValid)
                 {
-                    var resGetU = await Users.GetByUserNameAsync("owner");
-                    if (resGetU.IsValid)
-                    {
-                        resGetU.Entity.UserName = newOwner;
-                        var resUpdateU = await Users.SaveAsync(resGetU.Entity);
-                        if (!resUpdateU.IsValid)
-                            return await Task.FromResult(false);
-                    }
-                    else
+                    resGetU.Entity.UserName = newOwner;
+                    var resUpdateU = await Users.SaveAsync(resGetU.Entity);
+                    if (!resUpdateU.IsValid)
                         return await Task.FromResult(false);
                 }
+                else
+                    return await Task.FromResult(false);
             }
-            catch (Exception)
-            {
-                return await Task.FromResult(false);
-            }
-            return await Task.FromResult(true);
         }
-
-        #endregion
-
-        #region IDisposable member
-
-        public void Dispose()
+        catch (Exception)
         {
-            // TODO: call dispose all properties
-
-            if (_repository != null)
-                _repository.Dispose();
+            return await Task.FromResult(false);
         }
-
-        #endregion
+        return await Task.FromResult(true);
     }
+
+
+    private IKntMessageBroker _messageBroker;
+    public IKntMessageBroker MessageBroker
+    {
+        get
+        {
+            if (_messageBroker == null)
+            {
+                // TODO: !!!
+
+                // Get params from database system variables
+
+                // Connection
+                string hostName = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "HOST_NAME");
+                string virtualHost = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "VIRTUAL_HOST");
+                int port = int.Parse(GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PORT"));
+                string userName = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "USER_NAME"); 
+                string password = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PASSWORD");
+                _messageBroker = new KntMessageBroker(hostName, virtualHost, port, userName, password);                
+
+                // ExchangeDeclare
+                //_messageBrokerExchangeDeclare(exchange, type);
+                _messageBroker.ExchangeDeclare("ex.FanoutArmando1", "fanout");  // Test
+
+                // QueueDeclare
+                //_messageBroker.QueueDeclare(queue);
+                _messageBroker.QueueDeclare("cola.Armando1");  // Test
+
+                // QueueBind
+                //_messageBroker.QueueBind(queue, exchange, routingKey);
+                _messageBroker.QueueBind("cola.Armando1", "ex.FanoutArmando1", "");   // Test
+            }
+            return _messageBroker;            
+        }
+    }
+
+    #endregion
+
+    public string GetSystemVariable(string scope, string variable)
+    {
+        var valueDto = Task.Run(() => SystemValues.GetAsync(new KeyValuePair<string, string>(scope, variable))).Result;
+        if (valueDto.IsValid)
+            return valueDto.Entity.Value;
+        else
+            return "";
+    }
+
+
+    #region IDisposable member
+
+    public void Dispose()
+    {
+        // TODO: call dispose all properties
+
+        if (_repository != null)
+            _repository.Dispose();
+    }
+
+    #endregion
 }
