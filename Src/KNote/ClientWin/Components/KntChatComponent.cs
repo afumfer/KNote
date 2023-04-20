@@ -29,9 +29,14 @@ public class KntChatComponent : ComponentBase, IDisposable
 
     #endregion
 
-    #region Protected methods 
+    #region Events 
 
     public event EventHandler<ComponentEventArgs<string>> ReceiveMessage;
+
+    #endregion 
+
+    #region Protected methods 
+
     protected override Result<EComponentResult> OnInitialized()
     {
         try
@@ -148,6 +153,7 @@ public class KntChatComponent : ComponentBase, IDisposable
         ChatView.ShowView();
     }
 
+    // For use in KntScript
     public void ShowChatView()
     {
         

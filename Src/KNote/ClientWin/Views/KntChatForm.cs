@@ -52,20 +52,16 @@ public partial class KntChatForm : Form, IViewChat
 
     public void RefreshView()
     {
-        throw new NotImplementedException();
+        this.Refresh();
     }
 
     public void VisibleView(bool visible)
     {
-        if (visible)
-        {
-            Show();
-        }
-        else
-        {
+        if (visible)        
+            Show();        
+        else        
             Hide();
-        }
-        // Visible = visible;   
+                
     }
 
     #endregion

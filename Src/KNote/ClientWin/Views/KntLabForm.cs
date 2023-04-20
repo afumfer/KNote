@@ -42,6 +42,31 @@ public partial class KntLabForm : Form, IViewBase
         _service = _store.ActiveFolderWithServiceRef?.ServiceRef?.Service;
     }
 
+    private async void LabForm_Load(object sender, EventArgs e)
+    {
+        // KntScript
+        if (Directory.Exists(_pathSampleScripts))
+            LoadListScripts(_pathSampleScripts);
+
+        // WebView2
+        webView2.CoreWebView2InitializationCompleted += WebView2_CoreWebView2InitializationCompleted;
+        webView2.NavigationStarting += WebView2_NavigationStarting;
+        webView2.NavigationCompleted += WebView2_NavigationCompleted;
+
+        await webView2.EnsureCoreWebView2Async(null);
+
+        if ((webView2 == null) || (webView2.CoreWebView2 == null))
+        {
+            textStatusWebView2.Text = "webView2 not ready";
+        }
+    }
+
+    private void KntLabForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (!_viewFinalized)
+            _com.Finalize();
+    }
+
     #endregion
 
     #region IViewBase interface
@@ -75,31 +100,6 @@ public partial class KntLabForm : Form, IViewBase
     #endregion
 
     #region Form events handlers (KntScript)
-
-    private async void LabForm_Load(object sender, EventArgs e)
-    {
-        // KntScript
-        if (Directory.Exists(_pathSampleScripts))
-            LoadListScripts(_pathSampleScripts);
-
-        // WebView2
-        webView2.CoreWebView2InitializationCompleted += WebView2_CoreWebView2InitializationCompleted;
-        webView2.NavigationStarting += WebView2_NavigationStarting;
-        webView2.NavigationCompleted += WebView2_NavigationCompleted;
-
-        await webView2.EnsureCoreWebView2Async(null);
-
-        if ((webView2 == null) || (webView2.CoreWebView2 == null))
-        {
-            textStatusWebView2.Text = "webView2 not ready";
-        }
-    }
-
-    private void KntLabForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!_viewFinalized)
-            _com.Finalize();
-    }
 
     private void buttonRunScript_Click(object sender, EventArgs e)
     {
@@ -1054,8 +1054,12 @@ public partial class KntLabForm : Form, IViewBase
 
     private void buttonServerCOMForm_Click(object sender, EventArgs e)
     {
-        var qserver = new ServerCOMForm();
-        qserver.Show();
+        //var qserver = new KntServerCOMForm(new KntServerCOMComponent(_com.Store));
+        //qserver.Show();
+
+        var kntServerCOMComponent = new KntServerCOMComponent(_com.Store);
+        kntServerCOMComponent.Run();
+        kntServerCOMComponent.ShowServerCOMView(true);
     }
 
     #endregion 

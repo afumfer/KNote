@@ -1,6 +1,6 @@
 ﻿namespace KNote.ClientWin.Views
 {
-    partial class ServerCOMForm
+    partial class KntServerCOMForm
     {
         /// <summary>
         /// Required designer variable.
@@ -154,8 +154,7 @@
             this.Controls.Add(this.textBoxSend);
             this.Name = "ServerCOMForm";
             this.Text = "KNote ServerCOM";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ServerCOMForm_FormClosing);
-            this.Load += new System.EventHandler(this.ServerCOMForm_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KntServerCOMForm_FormClosing);            
             this.statusInfo.ResumeLayout(false);
             this.statusInfo.PerformLayout();
             this.ResumeLayout(false);

@@ -76,6 +76,12 @@ public class KntChatGPTComponent : ComponentBase
 
     #endregion
 
+    #region Events
+
+    public event EventHandler<ComponentEventArgs<string>> StreamToken;
+
+    #endregion 
+
     #region Protected methods 
 
     protected override Result<EComponentResult> OnInitialized()
@@ -128,6 +134,7 @@ public class KntChatGPTComponent : ComponentBase
         ChatGPTView.ShowView();
     }
 
+    // For use in KntScript
     public void ShowChatGPTView()
     {
         if(ComponentState == EComponentState.Started)
@@ -157,7 +164,7 @@ public class KntChatGPTComponent : ComponentBase
     public async Task GetCompletionAsync(string prompt)
     {        
         var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(GetChatRequest(prompt));
-       
+               
         _chatMessages.Add(new ChatMessage
         {
             Prompt = _prompt,
@@ -198,8 +205,7 @@ public class KntChatGPTComponent : ComponentBase
         Task.Run(() => GetCompletionAsync(prompt)).Wait();
     }
     // --------------------------------------------------------------------------
-
-    public event EventHandler<ComponentEventArgs<string>> StreamToken;
+   
     public async Task StreamCompletionAsync(string prompt)
     {
         StringBuilder tempResult = new();        
