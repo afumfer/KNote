@@ -1050,6 +1050,16 @@ public partial class KntLabForm : Form, IViewBase
 
     #endregion
 
+    #region QServerCOM
+
+    private void buttonServerCOMForm_Click(object sender, EventArgs e)
+    {
+        var qserver = new ServerCOMForm();
+        qserver.Show();
+    }
+
+    #endregion 
+
     #region MessageBroker
 
     private void buttonConfigureMessageBroker_Click(object sender, EventArgs e)
@@ -1065,7 +1075,7 @@ public partial class KntLabForm : Form, IViewBase
     }
 
     private void MessageBroker_ConsumerReceived(object sender, MessageBroker.MessageBusEventArgs<string> e)
-    {        
+    {
         if (listMessages.InvokeRequired)
         {
             listMessages.Invoke(new MethodInvoker(delegate

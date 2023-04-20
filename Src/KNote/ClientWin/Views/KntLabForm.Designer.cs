@@ -49,6 +49,8 @@
             buttonShowConsole = new Button();
             buttonRunScript = new Button();
             tabAppLab = new TabPage();
+            buttonMessageBrokerSendMessage = new Button();
+            buttonConfigureMessageBroker = new Button();
             buttonGetPluginFile = new Button();
             textPlugin = new TextBox();
             buttonPlugin = new Button();
@@ -61,8 +63,7 @@
             buttonImportAnotasXML = new Button();
             buttonRunMonitor = new Button();
             tabControlLab = new TabControl();
-            buttonConfigureMessageBroker = new Button();
-            buttonMessageBrokerSendMessage = new Button();
+            buttonServerCOMForm = new Button();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
             tabRichEditor.SuspendLayout();
@@ -268,6 +269,7 @@
             // 
             // tabAppLab
             // 
+            tabAppLab.Controls.Add(buttonServerCOMForm);
             tabAppLab.Controls.Add(buttonMessageBrokerSendMessage);
             tabAppLab.Controls.Add(buttonConfigureMessageBroker);
             tabAppLab.Controls.Add(buttonGetPluginFile);
@@ -289,6 +291,26 @@
             tabAppLab.Text = "Lab app components";
             tabAppLab.UseVisualStyleBackColor = true;
             // 
+            // buttonMessageBrokerSendMessage
+            // 
+            buttonMessageBrokerSendMessage.Location = new Point(519, 167);
+            buttonMessageBrokerSendMessage.Name = "buttonMessageBrokerSendMessage";
+            buttonMessageBrokerSendMessage.Size = new Size(127, 28);
+            buttonMessageBrokerSendMessage.TabIndex = 16;
+            buttonMessageBrokerSendMessage.Text = "Send Message";
+            buttonMessageBrokerSendMessage.UseVisualStyleBackColor = true;
+            buttonMessageBrokerSendMessage.Click += buttonMessageBrokerSendMessage_Click;
+            // 
+            // buttonConfigureMessageBroker
+            // 
+            buttonConfigureMessageBroker.Location = new Point(349, 133);
+            buttonConfigureMessageBroker.Name = "buttonConfigureMessageBroker";
+            buttonConfigureMessageBroker.Size = new Size(297, 28);
+            buttonConfigureMessageBroker.TabIndex = 15;
+            buttonConfigureMessageBroker.Text = "Configure Message Broker";
+            buttonConfigureMessageBroker.UseVisualStyleBackColor = true;
+            buttonConfigureMessageBroker.Click += buttonConfigureMessageBroker_Click;
+            // 
             // buttonGetPluginFile
             // 
             buttonGetPluginFile.Location = new Point(607, 15);
@@ -308,7 +330,7 @@
             // 
             // buttonPlugin
             // 
-            buttonPlugin.Location = new Point(352, 62);
+            buttonPlugin.Location = new Point(352, 51);
             buttonPlugin.Name = "buttonPlugin";
             buttonPlugin.Size = new Size(297, 28);
             buttonPlugin.TabIndex = 12;
@@ -407,25 +429,15 @@
             tabControlLab.Size = new Size(670, 577);
             tabControlLab.TabIndex = 4;
             // 
-            // buttonConfigureMessageBroker
+            // buttonServerCOMForm
             // 
-            buttonConfigureMessageBroker.Location = new Point(349, 133);
-            buttonConfigureMessageBroker.Name = "buttonConfigureMessageBroker";
-            buttonConfigureMessageBroker.Size = new Size(297, 28);
-            buttonConfigureMessageBroker.TabIndex = 15;
-            buttonConfigureMessageBroker.Text = "Configure Message Broker";
-            buttonConfigureMessageBroker.UseVisualStyleBackColor = true;
-            buttonConfigureMessageBroker.Click += buttonConfigureMessageBroker_Click;
-            // 
-            // buttonMessageBrokerSendMessage
-            // 
-            buttonMessageBrokerSendMessage.Location = new Point(519, 167);
-            buttonMessageBrokerSendMessage.Name = "buttonMessageBrokerSendMessage";
-            buttonMessageBrokerSendMessage.Size = new Size(127, 28);
-            buttonMessageBrokerSendMessage.TabIndex = 16;
-            buttonMessageBrokerSendMessage.Text = "Send Message";
-            buttonMessageBrokerSendMessage.UseVisualStyleBackColor = true;
-            buttonMessageBrokerSendMessage.Click += buttonMessageBrokerSendMessage_Click;
+            buttonServerCOMForm.Location = new Point(349, 85);
+            buttonServerCOMForm.Name = "buttonServerCOMForm";
+            buttonServerCOMForm.Size = new Size(297, 28);
+            buttonServerCOMForm.TabIndex = 17;
+            buttonServerCOMForm.Text = "ServerCOM";
+            buttonServerCOMForm.UseVisualStyleBackColor = true;
+            buttonServerCOMForm.Click += buttonServerCOMForm_Click;
             // 
             // KntLabForm
             // 
@@ -485,5 +497,6 @@
         private Button buttonGetPluginFile;
         private Button buttonMessageBrokerSendMessage;
         private Button buttonConfigureMessageBroker;
+        private Button buttonServerCOMForm;
     }
 }

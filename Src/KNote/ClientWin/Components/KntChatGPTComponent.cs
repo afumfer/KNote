@@ -157,7 +157,7 @@ public class KntChatGPTComponent : ComponentBase
     public async Task GetCompletionAsync(string prompt)
     {        
         var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(GetChatRequest(prompt));
-
+       
         _chatMessages.Add(new ChatMessage
         {
             Prompt = _prompt,
@@ -243,6 +243,18 @@ public class KntChatGPTComponent : ComponentBase
         
         _chatTextMessasges.Append($"\r\n\r\n");
         StreamToken?.Invoke(this, new ComponentEventArgs<string>($"\r\n\r\n"));
+    }
+
+    public async Task<IReadOnlyList<double>> CreateEmbeddingAsync(string text)
+    {
+        var res = await _openAIClient.EmbeddingsEndpoint.CreateEmbeddingAsync(text);
+        //var x0 = res.Usage;
+        return res?.Data[0]?.Embedding;
+        //var x1a = res.Data[0].Embedding.GetType;
+        //var x2 = res.Organization;
+        //var x3 = res.Object;
+        //var x4 = res.RequestId;
+        //var x5 = res.Model;        
     }
 
     #endregion

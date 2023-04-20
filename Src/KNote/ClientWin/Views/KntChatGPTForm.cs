@@ -1,9 +1,8 @@
-﻿using KNote.ClientWin.Components;
+﻿using System.Text.Json;
+
+using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
-using KNote.Model.Dto;
-using KNote.Service.Core;
-using System.Windows.Forms;
 
 namespace KNote.ClientWin.Views;
 
@@ -25,9 +24,17 @@ public partial class KntChatGPTForm : Form, IViewBase
         InitializeComponent();
 
         _com = com;
+
+
+#if RELEASE
+
+        // Button for debug. Ocult in release mode.
+        buttonTest.Visible = false;
+        
+#endif
     }
 
-    #endregion
+#endregion
 
     #region IViewBase interface
 
@@ -119,7 +126,7 @@ public partial class KntChatGPTForm : Form, IViewBase
         }
     }
 
-    #endregion 
+    #endregion
 
     #region Private methods
 
@@ -131,7 +138,7 @@ public partial class KntChatGPTForm : Form, IViewBase
             await noteEditor.NewModel(_com.Store.GetActiveOrDefaultServide());
             noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
             noteEditor.Model.Description = _com.ChatTextMessasges.ToString();
-            noteEditor.Model.Tags = "[ChatGPT]";            
+            noteEditor.Model.Tags = "[ChatGPT]";
             noteEditor.Run();
         }
         catch (Exception ex)
@@ -206,7 +213,7 @@ public partial class KntChatGPTForm : Form, IViewBase
     }
 
     private void UpdateTextResult(string text)
-    {        
+    {
         textResult.Text += text;
         textResult.SelectionStart = textResult.Text.Length;
         textResult.ScrollToCaret();
@@ -214,4 +221,20 @@ public partial class KntChatGPTForm : Form, IViewBase
     }
 
     #endregion
+
+    #region Test an debug code
+
+    private async void buttonTest_Click(object sender, EventArgs e)
+    {
+        var result = await _com.CreateEmbeddingAsync(textPrompt.Text);
+        
+        if(result!= null)
+        {
+            //textResult.Text = string.Join('|', result);
+            textResult.Text = JsonSerializer.Serialize(result);
+        }
+
+    }
+
+    #endregion 
 }

@@ -50,13 +50,15 @@ namespace KNote.ClientWin.Views
         private void buttonStart_Click(object sender, EventArgs e)
         {
             // TODO: Personalise params COM
+
+            // For QL
             //_serialPort = new SerialPort("COM1", 19200, Parity.None, 8, StopBits.Two);
             //_serialPort.Handshake = Handshake.RequestToSendXOnXOff;
             //// Set the read/write timeouts
             //_serialPort.ReadTimeout = 5000;
             //_serialPort.WriteTimeout = 5000;
 
-            // For Q68   (ojo ... no funcioa .... se han probado varias configuraciones
+            // For Q68   
             _serialPort = new SerialPort("COM1", 115200, Parity.None, 8);            
             _serialPort.Handshake = Handshake.None;
             //_serialPort.Handshake = Handshake.RequestToSendXOnXOff;
@@ -76,7 +78,6 @@ namespace KNote.ClientWin.Views
             Task.Factory.StartNew(() => Server(), TaskCreationOptions.LongRunning);
             
             statusLabelInfo.Text = "Com started, press Stop button to cancel.";
-
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
@@ -147,7 +148,9 @@ namespace KNote.ClientWin.Views
                         listBoxEcho.Items.Add("Recived: " + messageIn);
                     });
                     
-                    output = ExecuteScript(messageIn);
+                    //output = ExecuteScript(messageIn);
+
+                    output = ExecuteRequest(messageIn);
 
                     if (output != null)
                     {
@@ -165,75 +168,89 @@ namespace KNote.ClientWin.Views
             }
         }
 
-        private List<string> ExecuteScript(string script)
+
+        private List<string> ExecuteRequest(string request)
         {
-            //object xoutput;   
+            // TODO: Demo 
             var outputClient = new List<string>();
-            int antErrorCode = 0;
-            string antErrorDescription = "";
-            bool flagExpresion = true;
 
-            if (String.IsNullOrEmpty(script))
-                return null;
+            outputClient.Add($"Response: xxxxx");
+            outputClient.Add($" -- (for request{request}");
 
-            if (script[0] == '$')
-            {
-                flagExpresion = false;
-                script = script.Substring(1);
-            }
-            else
-                flagExpresion = true;
-
-
-
-            if (flagExpresion)
-            {
-                script = @"_ANTERRORTRAP = true; _output = " + script;
-            }
-            else
-            {
-                script = @"_ANTERRORTRAP = true; " + script;
-                script += @" _consoleOutput = GetOutContent();";
-                //script += @" HideOutWindow();";
-            }
-
-            var engine = new KntScript.KntSEngine(new InOutDeviceForm());
-
-            if (flagExpresion)
-                engine.AddVar("_output", null);
-            else
-                engine.AddVar("_consoleOutput", null);
-
-
-            engine.AddVar("_ANTERRORCODE", -1);
-            engine.AddVar("_ANTERRORDESCRIPTION", "Not executed.");
-
-            //engine.VisibleInOutDevice = false;
-            //engine.FunctionLibrary = new KntTestServiceLibrary();
-            //engine.Run();
-            antErrorCode = (int)engine.GetVar("_ANTERRORCODE");
-            antErrorDescription = (string)engine.GetVar("_ANTERRORDESCRIPTION");
-
-            //engine.InOutDevice.Close();
-
-            //if(flagExpresion)
-            //    xoutput = engine.GetVar("_output") ?? "";
-            //else
-            //    xoutput = (string)engine.GetVar("_consoleOutput");
-
-
-            //if(xoutput.GetType() == typeof(string))
-            //    outputClient.Add(xoutput.ToString() + '\n');
-            //else if ( xoutput.GetType().GetInterface(nameof(IEnumerable)) != null)
-            //    foreach (var x in (IEnumerable)xoutput)
-            //    {           
-            //        outputClient.Add(x.ToString() + '\n'); 
-            //    }
-            //else
-            //    outputClient.Add(xoutput.ToString() + '\n');
-
-            return outputClient;            
+            return outputClient;
         }
+
+        #region  Old, deprecated  
+        //private List<string> ExecuteScript(string script)
+        //{
+        //    //object xoutput;   
+        //    var outputClient = new List<string>();
+        //    int antErrorCode = 0;
+        //    string antErrorDescription = "";
+        //    bool flagExpresion = true;
+
+        //    if (String.IsNullOrEmpty(script))
+        //        return null;
+
+        //    if (script[0] == '$')
+        //    {
+        //        flagExpresion = false;
+        //        script = script.Substring(1);
+        //    }
+        //    else
+        //        flagExpresion = true;
+
+
+
+        //    if (flagExpresion)
+        //    {
+        //        script = @"_ANTERRORTRAP = true; _output = " + script;
+        //    }
+        //    else
+        //    {
+        //        script = @"_ANTERRORTRAP = true; " + script;
+        //        script += @" _consoleOutput = GetOutContent();";
+        //        //script += @" HideOutWindow();";
+        //    }
+
+        //    var engine = new KntScript.KntSEngine(new InOutDeviceForm());
+
+        //    if (flagExpresion)
+        //        engine.AddVar("_output", null);
+        //    else
+        //        engine.AddVar("_consoleOutput", null);
+
+
+        //    engine.AddVar("_ANTERRORCODE", -1);
+        //    engine.AddVar("_ANTERRORDESCRIPTION", "Not executed.");
+
+        //    //engine.VisibleInOutDevice = false;
+        //    //engine.FunctionLibrary = new KntTestServiceLibrary();
+        //    //engine.Run();
+        //    antErrorCode = (int)engine.GetVar("_ANTERRORCODE");
+        //    antErrorDescription = (string)engine.GetVar("_ANTERRORDESCRIPTION");
+
+        //    //engine.InOutDevice.Close();
+
+        //    //if(flagExpresion)
+        //    //    xoutput = engine.GetVar("_output") ?? "";
+        //    //else
+        //    //    xoutput = (string)engine.GetVar("_consoleOutput");
+
+
+        //    //if(xoutput.GetType() == typeof(string))
+        //    //    outputClient.Add(xoutput.ToString() + '\n');
+        //    //else if ( xoutput.GetType().GetInterface(nameof(IEnumerable)) != null)
+        //    //    foreach (var x in (IEnumerable)xoutput)
+        //    //    {           
+        //    //        outputClient.Add(x.ToString() + '\n'); 
+        //    //    }
+        //    //else
+        //    //    outputClient.Add(xoutput.ToString() + '\n');
+
+        //    return outputClient;            
+        //}
+        #endregion 
 
         public void SendMessage(string messageSource)
         {
@@ -242,9 +259,8 @@ namespace KNote.ClientWin.Views
 
             byte[] bMessage = ConverTextToQDOSBytes(messageSource);
 
-            byte[] eos = new byte[1];
-            eos[0] = 0;
-
+            //byte[] eos = new byte[1];
+            //eos[0] = 0;
 
             try
             {
