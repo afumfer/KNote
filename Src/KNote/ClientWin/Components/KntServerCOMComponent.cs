@@ -1,6 +1,10 @@
-﻿using KNote.ClientWin.Core;
+﻿using Azure.Core;
+using KNote.ClientWin.Core;
 using KNote.Model;
+using Microsoft.Identity.Client;
+using mshtml;
 using System.Collections;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Text;
 
@@ -10,30 +14,39 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 {
     #region Private fields
 
-    private bool _runningService;
-    private bool _messageSending = false;
     private SerialPort _serialPort;
     private Queue _messageQueue;
 
-    StringComparer _stringComparer = StringComparer.OrdinalIgnoreCase;
-
+    KntChatGPTComponent _chatGPT;
+  
     #endregion
 
     #region Properties 
 
+    private bool _runningService;
+    public bool RunningService
+    {
+        get { return _runningService; }
+    }
+
+    private bool _messageSending = false;
+    public bool MessageSending
+    {
+        get { return _messageSending; }
+    }
+
     private string _error;
     public string Error
     {
-        get { return _error; }  
-        private set { _error = value; }
+        get { return _error; }          
     }
 
     private string _statusInfo;
     public string StatusInfo
     {
-        get { return _statusInfo; }
-        private set { _statusInfo = value; }
+        get { return _statusInfo; }        
     }
+
 
     #endregion
 
@@ -50,6 +63,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     public KntServerCOMComponent(Store store) : base(store)
     {
         ComponentName = "KntServerCOM Component";
+        _chatGPT = new KntChatGPTComponent(store);
+        _chatGPT.Run();
     }
 
     #endregion
@@ -81,6 +96,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             //_serialPort.Handshake = Handshake.RequestToSendXOnXOff;
             _serialPort.ReadTimeout = 5000;
             _serialPort.WriteTimeout = 5000;
+
+            //_serialPort.Encoding = Encoding.UTF8;
 
             _serialPort.Open();
             _runningService = true;
@@ -150,59 +167,18 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             if (_messageQueue.Count > 0)
             {
                 var msg = _messageQueue.Dequeue();
-                SendMessage(msg.ToString());
+                if (msg != null)
+                {
+                    SendMessage(msg.ToString());
+                }
             }
             else
                 Thread.Sleep(40);
         }
     }
-    
-    private void Read()
-    {
-        string messageIn = "";
-        List<string> output;
-        int i = 0;
-
-        while (_runningService)
-        {
-            try
-            {
-                messageIn = _serialPort.ReadLine();
-
-                _statusInfo = $"Recived: {messageIn}";
-                ReceiveMessage?.Invoke(this, new ComponentEventArgs<string>(messageIn));
-
-                output = ExecuteRequest(messageIn);
-
-                if (output != null)
-                {
-                    foreach (string msg in output)
-                    {
-                        i++;
-                        _messageQueue.Enqueue(i.ToString() + " >>" + msg);
-                    }
-                }
-
-                messageIn = "";
-            }
-            catch (TimeoutException) { }
-            catch (Exception e) { _error = e.Message; }
-        }
-    }
-
-    private List<string> ExecuteRequest(string request)
-    {
-        // TODO: Demo 
-        var outputClient = new List<string>();
-
-        outputClient.Add($"Response: xxxxx");
-        outputClient.Add($" -- (for request{request}");
-
-        return outputClient;
-    }
 
     private void SendMessage(string messageSource)
-    {        
+    {
         _statusInfo = "Sending ...";
         _messageSending = true;
 
@@ -229,111 +205,287 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         _messageSending = false;
     }
 
+    private void Read()
+    {
+        string messageIn;
+        string command = "";
+        string body = "";
+
+        while (_runningService)
+        {
+            try
+            {
+                messageIn = _serialPort.ReadLine();
+
+                byte[] utf8EncodedBytes = Encoding.ASCII.GetBytes(messageIn);
+
+                _statusInfo = $"Recived: {messageIn}";
+                ReceiveMessage?.Invoke(this, new ComponentEventArgs<string>(messageIn));
+
+                (command, body) = ProcessTypeRequest(messageIn);
+
+                // TODO: Select the correct action. Employ the command pattern here.
+                if (command == "$chatgpt")
+                    ExecuteChatGptRequest(body);
+                else if (command == "$echo")
+                    ExecuteEchoRequest(body);
+                else
+                    ExecuteEchoRequest(body);
+
+                messageIn = "";
+            }
+            catch (TimeoutException) { }
+            catch (Exception e) { _error = e.Message; }
+        }
+    }
+
+    (string command, string msg) ProcessTypeRequest(string messageIn)
+    {
+        // TODO Parse the command here correctly (this is provisional).
+
+        //StringComparer _stringComparer = StringComparer.OrdinalIgnoreCase;
+
+        if (!messageIn.StartsWith("$"))
+            messageIn = "$chatgpt:" + messageIn;
+
+        var cmd = messageIn.Split(':');
+        return (cmd[0], cmd[1]);
+    }
+
+    private void ExecuteEchoRequest(string request)
+    {
+        _messageQueue.Enqueue($"Echo for request [{request}]");
+    }
+
+    private async void ExecuteChatGptRequest(string request)
+    {
+        _chatGPT.StreamToken += _chatGPT_StreamToken;
+        await _chatGPT.StreamCompletionAsync(request);
+        _chatGPT.StreamToken -= _chatGPT_StreamToken;
+    }
+
+    private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
+    {
+        _messageQueue.Enqueue(e.Entity?.ToString()); 
+    }
+
     #endregion 
 
     #region Utils / Tests
 
-    private void ConverFileAnsiToQdos(string sourceFile, string targetFile)
+    private byte[] ConverTextToQDOSBytes(string sourceText, string encodingStr = "-UTF8")
     {
-        byte[] bSource = File.ReadAllBytes(sourceFile);
+        var table = LoadQDosTable();
+        List<byte> outQDos = new List<byte>();
+        var enc = Encoding.UTF8;
 
-        int lenB = bSource.Length;
-        byte[] bTarget = new byte[lenB];
+        byte[] utf8EncodedBytes = Encoding.UTF8.GetBytes(sourceText);
+        string utf8DecodedString = Encoding.UTF8.GetString(utf8EncodedBytes);
 
-        for (int i = 0; i < lenB; i++)
-            bTarget[i] = ConvertToQdosByte(bSource[i]);
+        var charArray = utf8DecodedString.ToCharArray();
 
-        File.WriteAllBytes(targetFile, bTarget);
+        for(var i = 0; i < charArray.Count(); i++)
+        {
+            var c = charArray[i];
+            if (c == '\r')
+            {
+                var c2 = charArray[++i];
+                if (c2 == '\n')
+                    AddByteToQDosList(table, outQDos, c2);
+                else
+                {
+                    AddByteToQDosList(table, outQDos, '\n');
+                    AddByteToQDosList(table, outQDos, c2);
+                }
+            }
+            else
+                AddByteToQDosList(table, outQDos, c);
+        }
+        return outQDos.ToArray();
+
     }
 
-    private byte[] ConverTextToQDOSBytes(string sourceText)
+    public static void AddByteToQDosList(Dictionary<char, byte> table, List<byte> outQDos, char c)
     {
-        byte[] bSource = Encoding.Default.GetBytes(sourceText);
+        byte charN;
 
-        int lenB = bSource.Length;
-        byte[] bTarget = new byte[lenB];
-
-        for (int i = 0; i < lenB; i++)
-            bTarget[i] = ConvertToQdosByte(bSource[i]);
-
-        return bTarget;
+        if (table.ContainsKey(c))
+        {
+            outQDos.Add(table[c]);
+        }
+        else
+        {
+            charN = (byte)c;
+            if (charN > 191)
+                charN = 1;
+            outQDos.Add((byte)c);
+        }
     }
 
-    private byte ConvertToQdosByte(byte x)
+    private Dictionary<char, byte> LoadQDosTable()
     {
-        //TODO: Refactor pending
+        Dictionary<char, byte> table = new Dictionary<char, byte>();
 
-        char c;
-        byte res = x;
-
-        c = (char)x;
-
-        switch (c)
-        {
-            case 'á':
-                res = 140;
-                break;
-            case 'é':
-                res = 131;
-                break;
-            case 'í':
-                res = 147;
-                break;
-            case 'ó':
-                res = 150;
-                break;
-            case 'ú':
-                res = 153;
-                break;
-            case 'Á':
-                res = 140;
-                break;
-            case 'É':
-                res = 163;
-                break;
-            case 'Í':
-                res = 147;
-                break;
-            case 'Ó':
-                res = 150;
-                break;
-            case 'Ú':
-                res = 153;
-                break;
-            case 'ñ':
-                res = 137;
-                break;
-            case 'Ñ':
-                res = 169;
-                break;
-            case '¿':
-                res = 180;
-                break;
-            case '¡':
-                res = 179;
-                break;
-        }
-
-        switch (x)
-        {
-            case 147:
-                res = 34;
-                break;
-            case 148:
-                res = 34;
-                break;
-            case 145:
-                res = 39;
-                break;
-            case 146:
-                res = 39;
-                break;
-            case 151:
-                res = 45;
-                break;
-        }
-
-        return res;
+        table.Add(' ', 32);
+        table.Add('!', 33);
+        table.Add('"', 34);
+        table.Add('#', 35);
+        table.Add('$', 36);
+        table.Add('%', 37);
+        table.Add('&', 38);
+        table.Add('\'', 39);
+        table.Add('(', 40);
+        table.Add(')', 41);
+        table.Add('*', 42);
+        table.Add('+', 43);
+        table.Add(',', 44);
+        table.Add('-', 45);
+        table.Add('.', 46);
+        table.Add('/', 47);
+        table.Add('0', 48);
+        table.Add('1', 49);
+        table.Add('2', 50);
+        table.Add('3', 51);
+        table.Add('4', 52);
+        table.Add('5', 53);
+        table.Add('6', 54);
+        table.Add('7', 55);
+        table.Add('8', 56);
+        table.Add('9', 57);
+        table.Add(':', 58);
+        table.Add(';', 59);
+        table.Add('<', 60);
+        table.Add('=', 61);
+        table.Add('>', 62);
+        table.Add('?', 63);
+        table.Add('@', 64);
+        table.Add('A', 65);
+        table.Add('B', 66);
+        table.Add('C', 67);
+        table.Add('D', 68);
+        table.Add('E', 69);
+        table.Add('F', 70);
+        table.Add('G', 71);
+        table.Add('H', 72);
+        table.Add('I', 73);
+        table.Add('J', 74);
+        table.Add('K', 75);
+        table.Add('L', 76);
+        table.Add('M', 77);
+        table.Add('N', 78);
+        table.Add('O', 79);
+        table.Add('P', 80);
+        table.Add('Q', 81);
+        table.Add('R', 82);
+        table.Add('S', 83);
+        table.Add('T', 84);
+        table.Add('U', 85);
+        table.Add('V', 86);
+        table.Add('W', 87);
+        table.Add('X', 88);
+        table.Add('Y', 89);
+        table.Add('Z', 90);
+        table.Add('[', 91);
+        table.Add('\\', 92);
+        table.Add(']', 93);
+        table.Add('^', 94);
+        table.Add('_', 95);
+        table.Add('£', 96);
+        table.Add('a', 97);
+        table.Add('b', 98);
+        table.Add('c', 99);
+        table.Add('d', 100);
+        table.Add('e', 101);
+        table.Add('f', 102);
+        table.Add('g', 103);
+        table.Add('h', 104);
+        table.Add('i', 105);
+        table.Add('j', 106);
+        table.Add('k', 107);
+        table.Add('l', 108);
+        table.Add('m', 109);
+        table.Add('n', 110);
+        table.Add('o', 111);
+        table.Add('p', 112);
+        table.Add('q', 113);
+        table.Add('r', 114);
+        table.Add('s', 115);
+        table.Add('t', 116);
+        table.Add('u', 117);
+        table.Add('v', 118);
+        table.Add('w', 119);
+        table.Add('x', 120);
+        table.Add('y', 121);
+        table.Add('z', 122);
+        table.Add('{', 123);
+        table.Add('|', 124);
+        table.Add('}', 125);
+        table.Add('~', 126);
+        table.Add('©', 127);
+        table.Add('ä', 128);
+        table.Add('ã', 129);
+        table.Add('å', 130);
+        table.Add('é', 131);
+        table.Add('ö', 132);
+        table.Add('õ', 133);
+        table.Add('ø', 134);
+        table.Add('ü', 135);
+        table.Add('ç', 136);
+        table.Add('ñ', 137);
+        table.Add('æ', 138);
+        table.Add('œ', 139);
+        table.Add('á', 140);
+        table.Add('à', 141);
+        table.Add('â', 142);
+        table.Add('ë', 143);
+        table.Add('è', 144);
+        table.Add('ê', 145);
+        table.Add('ï', 146);
+        table.Add('í', 147);
+        table.Add('ì', 148);
+        table.Add('î', 149);
+        table.Add('ó', 150);
+        table.Add('ò', 151);
+        table.Add('ô', 152);
+        table.Add('ú', 153);
+        table.Add('ù', 154);
+        table.Add('û', 155);
+        table.Add('ß', 156);
+        table.Add('¢', 157);
+        table.Add('¥', 158);
+        table.Add('`', 159);
+        table.Add('Ä', 160);
+        table.Add('Ã', 161);
+        table.Add('Å', 162);
+        table.Add('É', 163);
+        table.Add('Ö', 164);
+        table.Add('Õ', 165);
+        table.Add('Ø', 166);
+        table.Add('Ü', 167);
+        table.Add('Ç', 168);
+        table.Add('Ñ', 169);
+        table.Add('Æ', 170);
+        table.Add('Œ', 171);
+        table.Add('α', 172);
+        table.Add('δ', 173);
+        table.Add('θ', 174);
+        table.Add('λ', 175);
+        table.Add('μ', 176);
+        table.Add('π', 177);
+        table.Add('Φ', 178);
+        table.Add('¡', 179);
+        table.Add('¿', 180);
+        table.Add('§', 182);
+        table.Add('¤', 183);
+        table.Add('«', 184);
+        table.Add('»', 185);
+        table.Add('°', 186);
+        table.Add('÷', 187);
+        table.Add('←', 188);
+        table.Add('→', 189);
+        table.Add('↑', 190);
+        table.Add('↓', 191);
+        return table;
     }
 
     public void TestSendBinary1()
