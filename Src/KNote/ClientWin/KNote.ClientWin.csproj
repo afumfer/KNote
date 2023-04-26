@@ -5,11 +5,17 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
 	<ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>0.0.7.17</AssemblyVersion>
-    <FileVersion>0.0.7.17</FileVersion>
+    <AssemblyVersion>0.0.7.18</AssemblyVersion>
+    <FileVersion>0.0.7.18</FileVersion>
     <Version>0.0.7</Version>
     <ApplicationIcon>stickyyellow_32_icon.ico</ApplicationIcon>	
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Temp\**" />
+    <EmbeddedResource Remove="Temp\**" />
+    <None Remove="Temp\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.31.0" />
@@ -51,10 +57,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Temp\" />
   </ItemGroup>
 
 </Project>
