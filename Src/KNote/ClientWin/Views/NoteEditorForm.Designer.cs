@@ -456,6 +456,7 @@
             textDescription.ScrollBars = ScrollBars.Both;
             textDescription.Size = new Size(277, 88);
             textDescription.TabIndex = 7;
+            textDescription.Enter += textDescription_Enter;
             // 
             // toolDescription
             // 
@@ -483,40 +484,40 @@
             // toolDescriptionHtmlTitle1
             // 
             toolDescriptionHtmlTitle1.Name = "toolDescriptionHtmlTitle1";
-            toolDescriptionHtmlTitle1.Size = new Size(180, 22);
+            toolDescriptionHtmlTitle1.Size = new Size(163, 22);
             toolDescriptionHtmlTitle1.Text = "Title 1";
             toolDescriptionHtmlTitle1.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle2
             // 
             toolDescriptionHtmlTitle2.Name = "toolDescriptionHtmlTitle2";
-            toolDescriptionHtmlTitle2.Size = new Size(180, 22);
+            toolDescriptionHtmlTitle2.Size = new Size(163, 22);
             toolDescriptionHtmlTitle2.Text = "Title 2";
             toolDescriptionHtmlTitle2.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle3
             // 
             toolDescriptionHtmlTitle3.Name = "toolDescriptionHtmlTitle3";
-            toolDescriptionHtmlTitle3.Size = new Size(180, 22);
+            toolDescriptionHtmlTitle3.Size = new Size(163, 22);
             toolDescriptionHtmlTitle3.Text = "Title 3";
             toolDescriptionHtmlTitle3.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlTitle4
             // 
             toolDescriptionHtmlTitle4.Name = "toolDescriptionHtmlTitle4";
-            toolDescriptionHtmlTitle4.Size = new Size(180, 22);
+            toolDescriptionHtmlTitle4.Size = new Size(163, 22);
             toolDescriptionHtmlTitle4.Text = "Title 4";
             toolDescriptionHtmlTitle4.Click += toolDescriptionHtml_Click;
             // 
             // toolDescriptionHtmlS3
             // 
             toolDescriptionHtmlS3.Name = "toolDescriptionHtmlS3";
-            toolDescriptionHtmlS3.Size = new Size(177, 6);
+            toolDescriptionHtmlS3.Size = new Size(160, 6);
             // 
             // toolDescriptionHtmlEdit
             // 
             toolDescriptionHtmlEdit.Name = "toolDescriptionHtmlEdit";
-            toolDescriptionHtmlEdit.Size = new Size(180, 22);
+            toolDescriptionHtmlEdit.Size = new Size(163, 22);
             toolDescriptionHtmlEdit.Text = "Edit html code ...";
             toolDescriptionHtmlEdit.Click += toolDescriptionHtml_Click;
             // 
@@ -535,108 +536,108 @@
             // toolDescriptionMarkdownH1
             // 
             toolDescriptionMarkdownH1.Name = "toolDescriptionMarkdownH1";
-            toolDescriptionMarkdownH1.Size = new Size(180, 22);
+            toolDescriptionMarkdownH1.Size = new Size(146, 22);
             toolDescriptionMarkdownH1.Text = "Title 1";
             toolDescriptionMarkdownH1.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH2
             // 
             toolDescriptionMarkdownH2.Name = "toolDescriptionMarkdownH2";
-            toolDescriptionMarkdownH2.Size = new Size(180, 22);
+            toolDescriptionMarkdownH2.Size = new Size(146, 22);
             toolDescriptionMarkdownH2.Text = "Title 2";
             toolDescriptionMarkdownH2.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH3
             // 
             toolDescriptionMarkdownH3.Name = "toolDescriptionMarkdownH3";
-            toolDescriptionMarkdownH3.Size = new Size(180, 22);
+            toolDescriptionMarkdownH3.Size = new Size(146, 22);
             toolDescriptionMarkdownH3.Text = "Title 3";
             toolDescriptionMarkdownH3.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownH4
             // 
             toolDescriptionMarkdownH4.Name = "toolDescriptionMarkdownH4";
-            toolDescriptionMarkdownH4.Size = new Size(180, 22);
+            toolDescriptionMarkdownH4.Size = new Size(146, 22);
             toolDescriptionMarkdownH4.Text = "Title 4";
             toolDescriptionMarkdownH4.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownS1
             // 
             toolDescriptionMarkdownS1.Name = "toolDescriptionMarkdownS1";
-            toolDescriptionMarkdownS1.Size = new Size(177, 6);
+            toolDescriptionMarkdownS1.Size = new Size(143, 6);
             // 
             // toolDescriptionMarkdownBold
             // 
             toolDescriptionMarkdownBold.Name = "toolDescriptionMarkdownBold";
-            toolDescriptionMarkdownBold.Size = new Size(180, 22);
+            toolDescriptionMarkdownBold.Size = new Size(146, 22);
             toolDescriptionMarkdownBold.Text = "Bold";
             toolDescriptionMarkdownBold.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownStrikethrough
             // 
             toolDescriptionMarkdownStrikethrough.Name = "toolDescriptionMarkdownStrikethrough";
-            toolDescriptionMarkdownStrikethrough.Size = new Size(180, 22);
+            toolDescriptionMarkdownStrikethrough.Size = new Size(146, 22);
             toolDescriptionMarkdownStrikethrough.Text = "Strikethrough";
             toolDescriptionMarkdownStrikethrough.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownItalic
             // 
             toolDescriptionMarkdownItalic.Name = "toolDescriptionMarkdownItalic";
-            toolDescriptionMarkdownItalic.Size = new Size(180, 22);
+            toolDescriptionMarkdownItalic.Size = new Size(146, 22);
             toolDescriptionMarkdownItalic.Text = "Italic";
             toolDescriptionMarkdownItalic.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownS2
             // 
             toolDescriptionMarkdownS2.Name = "toolDescriptionMarkdownS2";
-            toolDescriptionMarkdownS2.Size = new Size(177, 6);
+            toolDescriptionMarkdownS2.Size = new Size(143, 6);
             // 
             // toolDescriptionMarkdownList
             // 
             toolDescriptionMarkdownList.Name = "toolDescriptionMarkdownList";
-            toolDescriptionMarkdownList.Size = new Size(180, 22);
+            toolDescriptionMarkdownList.Size = new Size(146, 22);
             toolDescriptionMarkdownList.Text = "List";
             toolDescriptionMarkdownList.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownListOrdered
             // 
             toolDescriptionMarkdownListOrdered.Name = "toolDescriptionMarkdownListOrdered";
-            toolDescriptionMarkdownListOrdered.Size = new Size(180, 22);
+            toolDescriptionMarkdownListOrdered.Size = new Size(146, 22);
             toolDescriptionMarkdownListOrdered.Text = "ListOrdered";
             toolDescriptionMarkdownListOrdered.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownLine
             // 
             toolDescriptionMarkdownLine.Name = "toolDescriptionMarkdownLine";
-            toolDescriptionMarkdownLine.Size = new Size(180, 22);
+            toolDescriptionMarkdownLine.Size = new Size(146, 22);
             toolDescriptionMarkdownLine.Text = "Line";
             toolDescriptionMarkdownLine.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownLink
             // 
             toolDescriptionMarkdownLink.Name = "toolDescriptionMarkdownLink";
-            toolDescriptionMarkdownLink.Size = new Size(180, 22);
+            toolDescriptionMarkdownLink.Size = new Size(146, 22);
             toolDescriptionMarkdownLink.Text = "Link";
             toolDescriptionMarkdownLink.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownImage
             // 
             toolDescriptionMarkdownImage.Name = "toolDescriptionMarkdownImage";
-            toolDescriptionMarkdownImage.Size = new Size(180, 22);
+            toolDescriptionMarkdownImage.Size = new Size(146, 22);
             toolDescriptionMarkdownImage.Text = "Image";
             toolDescriptionMarkdownImage.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownTable
             // 
             toolDescriptionMarkdownTable.Name = "toolDescriptionMarkdownTable";
-            toolDescriptionMarkdownTable.Size = new Size(180, 22);
+            toolDescriptionMarkdownTable.Size = new Size(146, 22);
             toolDescriptionMarkdownTable.Text = "Table";
             toolDescriptionMarkdownTable.Click += toolDescriptionMarkdown_Click;
             // 
             // toolDescriptionMarkdownCode
             // 
             toolDescriptionMarkdownCode.Name = "toolDescriptionMarkdownCode";
-            toolDescriptionMarkdownCode.Size = new Size(180, 22);
+            toolDescriptionMarkdownCode.Size = new Size(146, 22);
             toolDescriptionMarkdownCode.Text = "Code";
             toolDescriptionMarkdownCode.Click += toolDescriptionMarkdown_Click;
             // 

@@ -412,6 +412,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         EditNoteAttribute();
     }
 
+    private void textDescription_Enter(object sender, EventArgs e)
+    {
+        TextBox textBox = sender as TextBox;
+        textBox.SelectionStart = textBox.Text.Length;
+        textBox.SelectionLength = 0;
+    }
+
     #region Messages managment
 
     private async void buttonAddAlarm_Click(object sender, EventArgs e)
@@ -1246,5 +1253,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     #endregion
+
 }
 
