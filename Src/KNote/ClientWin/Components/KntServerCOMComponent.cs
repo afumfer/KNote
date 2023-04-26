@@ -16,9 +16,10 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     private SerialPort _serialPort;
     private Queue _messageQueue;  
-
+    private CancellationTokenSource cancellationTokenSource;
     private KntChatGPTComponent _chatGPT;
-  
+    private bool _showViewMessage = true;
+
     #endregion
 
     #region Properties 
@@ -108,6 +109,12 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             StartService();            
             return new Result<EComponentResult>(EComponentResult.Executed);
         }
+        catch (OperationCanceledException)
+        {
+            // not doing anything
+            var res = new Result<EComponentResult>(EComponentResult.Error);
+            return res;
+        }
         catch (Exception ex)
         {
             var res = new Result<EComponentResult>(EComponentResult.Error);
@@ -119,10 +126,13 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         }
     }
 
+    
     protected override Result<EComponentResult> OnFinalized()
     {
-        CloseService();
-        return base.OnFinalized();
+        var res = base.OnFinalized();
+        _showViewMessage = false;  // for hide show info in view.
+        StopService();
+        return res;
     }
 
     #endregion
@@ -134,21 +144,44 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         _messageQueue.Enqueue(message);
     }
 
-    public void CloseService()
+    public void StopService()
     {
-        RunningService = false;
-
+        if (RunningService == false)
+        {
+            if (_serverCOMView != null)   
+                if(_showViewMessage)
+                    _serverCOMView.ShowInfo("The service is already stopped.");
+            return;
+        }
+        
         try
         {
+            RunningService = false;
+
             if (_serialPort != null && _serialPort.IsOpen)
                 _serialPort.Close();
             _statusInfo = "Com and servide closed ...";
+
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Cancel();
+            }
         }
         catch { }
     }
 
     public void StartService()
     {
+        if(RunningService == true)
+        {
+            if (_serverCOMView != null)
+                _serverCOMView.ShowInfo("Service is already running.");
+            return;
+        }
+
+        cancellationTokenSource = new CancellationTokenSource();
+        CancellationToken cancellationToken = cancellationTokenSource.Token;
+
         _serialPort = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.Two);
         _serialPort.Handshake = (Handshake)HandShake;
         _serialPort.ReadTimeout = 5000;
@@ -156,7 +189,9 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         _serialPort.Open();        
         _messageQueue = new Queue();
         _statusInfo = "Com started ...";
-        Task.Factory.StartNew(() => Server(), TaskCreationOptions.LongRunning);        
+
+        Task.Factory.StartNew(() => Server(cancellationToken), cancellationToken);        
+        
         RunningService = true;
     }
 
@@ -164,12 +199,17 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     #region Private methods
 
-    private void Server()
+    private void Server(CancellationToken cancellationToken)
     {
-        Task.Factory.StartNew(() => Read(), TaskCreationOptions.LongRunning);                
+        Task.Factory.StartNew(() => Read(cancellationToken), cancellationToken);                
 
         while (RunningService)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
+
             if (_messageQueue.Count > 0)
             {
                 var msg = _messageQueue.Dequeue();
@@ -214,7 +254,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         MessageSending = false;
     }
 
-    private void Read()
+    private void Read(CancellationToken cancellationToken)
     {
         string messageIn;
         string command = "";
@@ -224,6 +264,11 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         {
             try
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException();
+                }
+
                 messageIn = _serialPort.ReadLine();
 
                 byte[] utf8EncodedBytes = Encoding.ASCII.GetBytes(messageIn);
@@ -674,8 +719,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     public override void Dispose()
     {
-        CloseService();
-
+        StopService();
         base.Dispose();
     }
 

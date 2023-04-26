@@ -49,7 +49,7 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
     {
-        throw new NotImplementedException();
+        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()
@@ -96,7 +96,7 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
 
     private void buttonStop_Click(object sender, EventArgs e)
     {
-        _com.CloseService();
+        _com.StopService();
     }
 
     private void buttonSend_Click(object sender, EventArgs e)
