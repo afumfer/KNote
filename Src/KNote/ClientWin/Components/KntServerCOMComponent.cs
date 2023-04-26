@@ -125,7 +125,6 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             return res;
         }
     }
-
     
     protected override Result<EComponentResult> OnFinalized()
     {
