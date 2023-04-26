@@ -4,7 +4,7 @@ using KNote.ClientWin.Components;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KntServerCOMForm : Form, IViewChat
+public partial class KntServerCOMForm : Form, IViewServerCOM
 {
     #region Private members
 
@@ -16,12 +16,12 @@ public partial class KntServerCOMForm : Form, IViewChat
     #region Constructor
 
     public KntServerCOMForm()
-    {            
-        InitializeComponent();            
+    {
+        InitializeComponent();
     }
 
     public KntServerCOMForm(KntServerCOMComponent com) : this()
-    {            
+    {
         _com = com;
 
         _com.ReceiveMessage += _com_ReceiveMessage;
@@ -54,7 +54,8 @@ public partial class KntServerCOMForm : Form, IViewChat
 
     public void RefreshView()
     {
-        this.Refresh();
+        Refresh();
+        RefreshStatus();
     }
 
     public void VisibleView(bool visible)
@@ -63,6 +64,16 @@ public partial class KntServerCOMForm : Form, IViewChat
             Show();
         else
             Hide();
+    }
+
+    public void RefreshStatus()
+    {
+        statusInfo.Invoke((MethodInvoker)delegate
+        {
+            // Running on the UI thread                        
+            statusLabelInfo.Text = $"Runing service: {_com.RunningService} | Message sending: {_com.MessageSending}";
+        });
+        
     }
 
     #endregion 
@@ -80,29 +91,27 @@ public partial class KntServerCOMForm : Form, IViewChat
 
     private void buttonStart_Click(object sender, EventArgs e)
     {
-        // Here call to component for restart
+        _com.StartService();
     }
 
     private void buttonStop_Click(object sender, EventArgs e)
-    {        
-        _com.CloseSerialPort();
+    {
+        _com.CloseService();
     }
 
     private void buttonSend_Click(object sender, EventArgs e)
     {
-        //if (_serialPort == null || !_serialPort.IsOpen)
-        //{
-        //    MessageBox.Show("Serial port is closed. Press Start button.");
-        //    return;
-        //}
+        if (!_com.RunningService)
+        {
+            MessageBox.Show("The service is not running. Press Start button.");
+            return;
+        }
 
-        //if (_messageSending)
-        //{
-        //    MessageBox.Show("Sending message ... try later");
-        //    return;
-        //}
-
-        //_messageQueue.Enqueue(textBoxSend.Text);
+        if (_com.MessageSending)
+        {
+            MessageBox.Show("Sending message now ... try later");
+            return;
+        }
 
         _com.Send(textBoxSend.Text);
     }
@@ -123,8 +132,13 @@ public partial class KntServerCOMForm : Form, IViewChat
 
     private void button1_Click(object sender, EventArgs e)
     {
-        //_com.TestSendBinary2();
+        _com.TestSendBinary2();
+    }
+    private void KntServerCOMForm_Load(object sender, EventArgs e)
+    {
+        RefreshStatus();
     }
 
     #endregion
+
 }

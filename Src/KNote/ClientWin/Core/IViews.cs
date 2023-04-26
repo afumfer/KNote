@@ -83,5 +83,10 @@ public interface IViewChat : IViewBase
     void VisibleView(bool visible);
 }
 
+public interface IViewServerCOM : IViewChat
+{
+    void RefreshStatus();
+}
+
 #endregion 
 

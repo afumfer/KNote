@@ -1,0 +1,19 @@
+﻿' Note: Only one instance of KntServerCOMComponent can be executed at a time.
+
+var serverCom = GetServerCOMComponent();
+
+' (Default value for PortName: "COM1")
+'serverCom.PortName = "COM1"; 
+
+'' For Q68 (default values, BaudRate=115200, HandShake=0 -None-)
+'serverCom.BaudRate = 115200;
+'serverCom.HandShake = 0;
+
+'' For QL
+'serverCom.BaudRate = 19200;
+' (HandShake: 2 (RequestToSend) or 3 (RequestToSendXOnXOff))
+'serverCom.HandShake = 2; 
+
+
+serverCom.Run();
+serverCom.ShowServerCOMView(true);

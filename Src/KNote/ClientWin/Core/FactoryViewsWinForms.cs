@@ -117,7 +117,7 @@ public class FactoryViewsWinForms : IFactoryViews
         return new KntChatForm(component);
     }
 
-    public IViewChat View(KntServerCOMComponent component)
+    public IViewServerCOM View(KntServerCOMComponent component)
     {
         return new KntServerCOMForm(component);
     }

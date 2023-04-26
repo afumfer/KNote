@@ -28,6 +28,6 @@ public interface IFactoryViews
     IViewEditor<AppConfig> View(OptionsEditorComponent component);
     IViewBase View(KntChatGPTComponent component);
     IViewChat View(KntChatComponent component);
-    IViewChat View(KntServerCOMComponent component);
+    IViewServerCOM View(KntServerCOMComponent component);
     IViewBase View(KntLabComponent component);
 }

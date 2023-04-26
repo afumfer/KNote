@@ -15,9 +15,9 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     #region Private fields
 
     private SerialPort _serialPort;
-    private Queue _messageQueue;
+    private Queue _messageQueue;  
 
-    KntChatGPTComponent _chatGPT;
+    private KntChatGPTComponent _chatGPT;
   
     #endregion
 
@@ -27,12 +27,24 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     public bool RunningService
     {
         get { return _runningService; }
+        private set 
+        { 
+            _runningService = value;
+            if (_serverCOMView != null)
+                _serverCOMView.RefreshStatus();
+        }
     }
 
     private bool _messageSending = false;
     public bool MessageSending
     {
         get { return _messageSending; }
+        private set
+        {
+            _messageSending = value;
+            if (_serverCOMView != null)
+                _serverCOMView.RefreshStatus();
+        }
     }
 
     private string _error;
@@ -47,10 +59,22 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         get { return _statusInfo; }        
     }
 
+    public string PortName { get; set; } = "COM1";
 
-    #endregion
+    // --- BaudRate and HandShake
 
-    #region Properties 
+    // Q68            
+    //BaudRate = 115200;
+    //HandShake = 0; // Handshake.None
+
+    // QL             
+    //BaudRate = 19200;
+    //HandShake = 2; // 3; // Handshake.RequestToSendXOnXOff (3) Handshake.RequestToSend (2); 
+
+    public int BaudRate { get; set; } = 115200;
+    public int HandShake { get; set; } = 0;
+    
+    // -----------------------------------------------------------------------
 
     public bool AutoCloseComponentOnViewExit { get; set; } = false;
     public bool ShowErrorMessagesOnInitialize { get; set; } = false;
@@ -80,39 +104,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     protected override Result<EComponentResult> OnInitialized()
     {
         try
-        {
-            // TODO: !!! Personalise params COM, move to public method for restart.
-
-            // For QL
-            //_serialPort = new SerialPort("COM1", 19200, Parity.None, 8, StopBits.Two);
-            //_serialPort.Handshake = Handshake.RequestToSendXOnXOff;
-            //// Set the read/write timeouts
-            //_serialPort.ReadTimeout = 5000;
-            //_serialPort.WriteTimeout = 5000;
-
-            // For Q68   
-            _serialPort = new SerialPort("COM1", 115200, Parity.None, 8);
-            _serialPort.Handshake = Handshake.None;
-            //_serialPort.Handshake = Handshake.RequestToSendXOnXOff;
-            _serialPort.ReadTimeout = 5000;
-            _serialPort.WriteTimeout = 5000;
-
-            //_serialPort.Encoding = Encoding.UTF8;
-
-            _serialPort.Open();
-            _runningService = true;
-            _messageQueue = new Queue();
-
-            //Task.Factory.StartNew(() => Write(), TaskCreationOptions.LongRunning);
-            //Task.Factory.StartNew(() => Write(), TaskCreationOptions.AttachedToParent);
-
-            //Task.Factory.StartNew(() => Read(), TaskCreationOptions.LongRunning);
-            //await Task.Factory.StartNew(() => Read(), TaskCreationOptions.AttachedToParent);
-
-            Task.Factory.StartNew(() => Server(), TaskCreationOptions.LongRunning);
-
-            _statusInfo = "Com started ...";
-
+        {            
+            StartService();            
             return new Result<EComponentResult>(EComponentResult.Executed);
         }
         catch (Exception ex)
@@ -128,7 +121,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     protected override Result<EComponentResult> OnFinalized()
     {
-        CloseSerialPort();
+        CloseService();
         return base.OnFinalized();
     }
 
@@ -141,9 +134,9 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         _messageQueue.Enqueue(message);
     }
 
-    public void CloseSerialPort()
+    public void CloseService()
     {
-        _runningService = false;
+        RunningService = false;
 
         try
         {
@@ -154,15 +147,28 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         catch { }
     }
 
+    public void StartService()
+    {
+        _serialPort = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.Two);
+        _serialPort.Handshake = (Handshake)HandShake;
+        _serialPort.ReadTimeout = 5000;
+        _serialPort.WriteTimeout = 5000;
+        _serialPort.Open();        
+        _messageQueue = new Queue();
+        _statusInfo = "Com started ...";
+        Task.Factory.StartNew(() => Server(), TaskCreationOptions.LongRunning);        
+        RunningService = true;
+    }
+
     #endregion
 
     #region Private methods
 
     private void Server()
     {
-        Task.Factory.StartNew(() => Read(), TaskCreationOptions.LongRunning);
+        Task.Factory.StartNew(() => Read(), TaskCreationOptions.LongRunning);                
 
-        while (_runningService)
+        while (RunningService)
         {
             if (_messageQueue.Count > 0)
             {
@@ -179,8 +185,9 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     private void SendMessage(string messageSource)
     {
+        MessageSending = true;
+
         _statusInfo = "Sending ...";
-        _messageSending = true;
 
         byte[] bMessage = ConverTextToQDOSBytes(messageSource);
 
@@ -190,10 +197,11 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             {
                 for (int i = 0; i < bMessage.Length; i++)
                 {
-                    if (!_runningService)
+                    if (!RunningService)
                         break;
                     _serialPort.Write(bMessage, i, 1);
-                    Thread.Sleep(20);
+                    // This is necesary for QL/Q68
+                    Thread.Sleep(20); 
                 }
             }
 
@@ -202,7 +210,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         catch (Exception e) { _error = e.Message; }
 
         _statusInfo = "Sended ...";
-        _messageSending = false;
+        
+        MessageSending = false;
     }
 
     private void Read()
@@ -211,7 +220,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         string command = "";
         string body = "";
 
-        while (_runningService)
+        while (RunningService)
         {
             try
             {
@@ -224,7 +233,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
                 (command, body) = ProcessTypeRequest(messageIn);
 
-                // TODO: Select the correct action. Employ the command pattern here.
+                // TODO: Select the correct action, employ the command pattern here.
                 if (command == "$chatgpt")
                     ExecuteChatGptRequest(body);
                 else if (command == "$echo")
@@ -623,8 +632,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     #region IView
 
-    IViewChat _serverCOMView;
-    protected IViewChat ServerCOMView
+    IViewServerCOM _serverCOMView;
+    protected IViewServerCOM ServerCOMView
     {
         get
         {
@@ -665,7 +674,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     public override void Dispose()
     {
-        CloseSerialPort();
+        CloseService();
 
         base.Dispose();
     }

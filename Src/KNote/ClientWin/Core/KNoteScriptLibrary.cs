@@ -108,6 +108,11 @@ public class KNoteScriptLibrary: Library
             Task.Run(() => chat.SendMessage(message)).Wait();        
     }
 
+    public KntServerCOMComponent GetServerCOMComponent()
+    {
+        return new KntServerCOMComponent(_store);
+    }
+
     public KntHttpClientComponent GetHttpClientComponent()
     {
         return new KntHttpClientComponent(_store);
