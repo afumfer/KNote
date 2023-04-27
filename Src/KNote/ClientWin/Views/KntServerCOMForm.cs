@@ -73,20 +73,16 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
             // Running on the UI thread                        
             statusLabelInfo.Text = $"Runing service: {_com.RunningService} | Message sending: {_com.MessageSending}";
         });
-        
+
     }
 
-    #endregion 
+    #endregion
 
     #region Form and component event handler
 
-    private void _com_ReceiveMessage(object sender, ComponentEventArgs<string> e)
+    private void KntServerCOMForm_Load(object sender, EventArgs e)
     {
-        listBoxEcho.Invoke((MethodInvoker)delegate
-        {
-            // Running on the UI thread                        
-            listBoxEcho.Items.Add("Recived: " + e.Entity.ToString());
-        });
+        RefreshStatus();
     }
 
     private void buttonStart_Click(object sender, EventArgs e)
@@ -130,15 +126,14 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
         }
     }
 
-    private void button1_Click(object sender, EventArgs e)
+    private void _com_ReceiveMessage(object sender, ComponentEventArgs<string> e)
     {
-        _com.TestSendBinary2();
-    }
-    private void KntServerCOMForm_Load(object sender, EventArgs e)
-    {
-        RefreshStatus();
+        listBoxEcho.Invoke((MethodInvoker)delegate
+        {
+            // Running on the UI thread                        
+            listBoxEcho.Items.Add("Recived: " + e.Entity.ToString());
+        });
     }
 
     #endregion
-
 }

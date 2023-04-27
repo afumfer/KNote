@@ -1,10 +1,6 @@
-﻿using Azure.Core;
-using KNote.ClientWin.Core;
+﻿using KNote.ClientWin.Core;
 using KNote.Model;
-using Microsoft.Identity.Client;
-using mshtml;
 using System.Collections;
-using System.Diagnostics;
 using System.IO.Ports;
 using System.Text;
 
@@ -324,7 +320,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     #endregion 
 
-    #region Utils / Tests
+    #region Utils 
 
     private byte[] ConverTextToQDOSBytes(string sourceText, string encodingStr = "-UTF8")
     {
@@ -541,137 +537,6 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         return table;
     }
 
-    public void TestSendBinary1()
-    {
-        FileStream fs = new FileStream("cheetah_scr", FileMode.Open, FileAccess.Read);
-
-        byte[] b1 = new byte[fs.Length];
-        /*Read block of bytes from stream into the byte array*/
-        fs.Read(b1, 0, System.Convert.ToInt32(fs.Length));
-        /*Close the File Stream*/
-        fs.Close();
-
-        byte[] b0 = new byte[15];
-        int lenni, lea, leb, lec;
-        lenni = b1.Length;
-        lenni--;
-        lea = lenni / 65536;
-        leb = (lenni - (lea * 65536)) / 256;
-        lec = (lenni - ((lea * 65536) + (leb * 256)));
-
-        //b0[0] = 255;
-        //b0[1] = 0;
-        //b0[2] = (byte)lea;
-        //b0[3] = (byte)leb;
-        //b0[4] = (byte)lec;
-
-        b0[0] = 255;
-        b0[1] = 0;
-        b0[2] = 0;
-        b0[3] = 125;
-        b0[4] = 0;
-        b0[5] = 0;
-        b0[6] = 0;
-        b0[7] = 0;
-        b0[8] = 0;
-        b0[9] = 0;
-        b0[10] = 0;
-        b0[11] = 0;
-        b0[12] = 0;
-        b0[13] = 1;
-        b0[14] = 218;
-
-        //sersend(255);
-        //  sersend(0);
-        //  sersend(lea);
-        //  sersend(leb);
-        //  sersend(lec);
-
-
-        //for(int n=5;n<15;n++)
-        //{
-        //    b0[n] = 0;
-        //}
-
-
-        //_serialPort.Write(b0, 0, b0.Length);
-        //_serialPort.Write(b1, 0, b1.Length);
-
-        byte[] b3 = new byte[b0.Length + b1.Length];
-
-        for (int i = 0; i < b0.Length; i++)
-            b3[i] = b0[i];
-
-        for (int i = 0; i < b1.Length; i++)
-            b3[i + b0.Length] = b1[i];
-
-        for (int i = 0; i < b3.Length; i++)
-        {
-            _serialPort.Write(b3, i, 1);
-            Thread.Sleep(40);
-        }
-    }
-
-    public void TestSendBinary2()
-    {
-        //string file = "rest";
-        string file = "cheetah_scr";
-
-        FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
-        byte[] bf = new byte[fs.Length];
-        fs.Read(bf, 0, System.Convert.ToInt32(fs.Length));
-        fs.Close();
-
-        for (int i = 0; i < bf.Length; i++)
-        {
-            _serialPort.Write(bf, i, 1);
-            //Thread.Sleep(10);
-            //label1.Text = i.ToString();
-            //label1.Refresh();
-        }
-
-        MessageBox.Show("fin");
-    }
-
-    public void TestSendBinary3()
-    {
-        string file = "rest";
-        //string file = "cheetah_scr"; 
-
-        FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
-        byte[] bf = new byte[fs.Length];
-        fs.Read(bf, 0, System.Convert.ToInt32(fs.Length));
-        fs.Close();
-
-        int seg = 100;
-        int len = bf.Length;
-
-        int nSeg = 0;
-        int nRes = 0;
-
-
-        if (len <= seg)
-            nRes = len;
-        else
-        {
-            nSeg = len / seg;
-            nRes = len % seg;
-        }
-
-        int i = 0;
-
-        for (int j = 1; j <= nSeg; j++)
-        {
-            _serialPort.Write(bf, i, seg);
-            i = j * seg;
-        }
-
-        if (nRes > 0)
-            _serialPort.Write(bf, i, nRes);
-
-        MessageBox.Show("fin");
-    }
-
     #endregion
 
     #region IView
@@ -723,5 +588,4 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     }
 
     #endregion 
-
 }

@@ -267,39 +267,6 @@ public class KntChatGPTComponent : ComponentBase
 
     #region Private Methods
 
-    #region OpenAI .net old verion (6.5.3)
-    //private ChatRequest GetChatRequest(string prompt)
-    //{
-    //    _prompt = prompt;
-
-    //    var chatPrompts = new List<ChatPrompt>();
-
-    //    // Add all existing messages to chatPrompts
-    //    chatPrompts.Add(new ChatPrompt("system", "You are helpful Assistant"));
-    //    foreach (var item in _chatMessages)
-    //    {
-    //        chatPrompts.Add(new ChatPrompt(item.Role, item.Prompt));
-    //    }
-
-    //    chatPrompts.Add(new ChatPrompt("user", _prompt));
-
-    //    //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
-
-    //    return new ChatRequest(
-    //        messages: chatPrompts,
-    //        model: OpenAI.Models.Model.GPT4,
-    //        temperature: null,
-    //        topP: null,
-    //        number: null,
-    //        stops: null,
-    //        maxTokens: null,
-    //        presencePenalty: null,
-    //        frequencyPenalty: null,
-    //        logitBias: null,
-    //        user: null);
-    //}
-    #endregion
-
     private ChatRequest GetChatRequest(string prompt)
     {
         _prompt = prompt;

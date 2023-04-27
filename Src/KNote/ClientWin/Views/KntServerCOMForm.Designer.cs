@@ -37,24 +37,24 @@
             label2 = new Label();
             statusInfo = new StatusStrip();
             statusLabelInfo = new ToolStripStatusLabel();
-            button1 = new Button();
+            panelLine = new Panel();
             statusInfo.SuspendLayout();
             SuspendLayout();
             // 
             // textBoxSend
             // 
             textBoxSend.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textBoxSend.Location = new Point(14, 85);
+            textBoxSend.Location = new Point(9, 85);
             textBoxSend.Margin = new Padding(4, 3, 4, 3);
             textBoxSend.Multiline = true;
             textBoxSend.Name = "textBoxSend";
             textBoxSend.ScrollBars = ScrollBars.Vertical;
-            textBoxSend.Size = new Size(760, 376);
+            textBoxSend.Size = new Size(767, 376);
             textBoxSend.TabIndex = 0;
             // 
             // buttonStart
             // 
-            buttonStart.Location = new Point(14, 14);
+            buttonStart.Location = new Point(10, 8);
             buttonStart.Margin = new Padding(4, 3, 4, 3);
             buttonStart.Name = "buttonStart";
             buttonStart.Size = new Size(86, 28);
@@ -80,15 +80,15 @@
             listBoxEcho.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listBoxEcho.FormattingEnabled = true;
             listBoxEcho.ItemHeight = 15;
-            listBoxEcho.Location = new Point(14, 504);
+            listBoxEcho.Location = new Point(9, 504);
             listBoxEcho.Margin = new Padding(4, 3, 4, 3);
             listBoxEcho.Name = "listBoxEcho";
-            listBoxEcho.Size = new Size(760, 139);
+            listBoxEcho.Size = new Size(767, 139);
             listBoxEcho.TabIndex = 3;
             // 
             // buttonStop
             // 
-            buttonStop.Location = new Point(107, 14);
+            buttonStop.Location = new Point(104, 8);
             buttonStop.Margin = new Padding(4, 3, 4, 3);
             buttonStop.Name = "buttonStop";
             buttonStop.Size = new Size(86, 28);
@@ -100,7 +100,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(14, 486);
+            label1.Location = new Point(9, 486);
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new Size(97, 15);
@@ -110,7 +110,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(14, 67);
+            label2.Location = new Point(9, 67);
             label2.Margin = new Padding(4, 0, 4, 0);
             label2.Name = "label2";
             label2.Size = new Size(81, 15);
@@ -133,24 +133,21 @@
             statusLabelInfo.Size = new Size(16, 17);
             statusLabelInfo.Text = "...";
             // 
-            // button1
+            // panelLine
             // 
-            button1.Location = new Point(636, 14);
-            button1.Margin = new Padding(4, 3, 4, 3);
-            button1.Name = "button1";
-            button1.Size = new Size(139, 24);
-            button1.TabIndex = 9;
-            button1.Text = "Test >>>>";
-            button1.UseVisualStyleBackColor = true;
-            button1.Visible = false;
-            button1.Click += button1_Click;
+            panelLine.BackColor = Color.DarkGray;
+            panelLine.ForeColor = Color.Gray;
+            panelLine.Location = new Point(11, 42);
+            panelLine.Name = "panelLine";
+            panelLine.Size = new Size(766, 2);
+            panelLine.TabIndex = 9;
             // 
             // KntServerCOMForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(789, 684);
-            Controls.Add(button1);
+            Controls.Add(panelLine);
             Controls.Add(statusInfo);
             Controls.Add(label2);
             Controls.Add(label1);
@@ -181,6 +178,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.StatusStrip statusInfo;
         private System.Windows.Forms.ToolStripStatusLabel statusLabelInfo;
-        private System.Windows.Forms.Button button1;
+        private Panel panelLine;
     }
 }

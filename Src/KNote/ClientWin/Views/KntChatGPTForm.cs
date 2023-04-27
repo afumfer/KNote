@@ -34,7 +34,7 @@ public partial class KntChatGPTForm : Form, IViewBase
 #endif
     }
 
-#endregion
+    #endregion
 
     #region IViewBase interface
 
@@ -227,8 +227,8 @@ public partial class KntChatGPTForm : Form, IViewBase
     private async void buttonTest_Click(object sender, EventArgs e)
     {
         var result = await _com.CreateEmbeddingAsync(textPrompt.Text);
-        
-        if(result!= null)
+
+        if (result != null)
         {
             //textResult.Text = string.Join('|', result);
             textResult.Text = JsonSerializer.Serialize(result);

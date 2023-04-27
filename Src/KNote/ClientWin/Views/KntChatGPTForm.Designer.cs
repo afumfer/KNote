@@ -39,11 +39,11 @@
             radioGetCompletion = new RadioButton();
             textResult = new TextBox();
             labelResult = new Label();
+            buttonTest = new Button();
             buttonRestart = new Button();
             labelPrompt = new Label();
             textPrompt = new TextBox();
             buttonSend = new Button();
-            buttonTest = new Button();
             statusStripChat.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitChat).BeginInit();
             splitChat.Panel1.SuspendLayout();
@@ -157,6 +157,16 @@
             labelResult.TabIndex = 25;
             labelResult.Text = "Result:";
             // 
+            // buttonTest
+            // 
+            buttonTest.Location = new Point(6, 22);
+            buttonTest.Name = "buttonTest";
+            buttonTest.Size = new Size(21, 23);
+            buttonTest.TabIndex = 25;
+            buttonTest.Text = "T";
+            buttonTest.UseVisualStyleBackColor = true;
+            buttonTest.Click += buttonTest_Click;
+            // 
             // buttonRestart
             // 
             buttonRestart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -185,7 +195,7 @@
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(553, 62);
+            textPrompt.Size = new Size(553, 58);
             textPrompt.TabIndex = 0;
             // 
             // buttonSend
@@ -198,16 +208,6 @@
             buttonSend.Text = "&Send";
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;
-            // 
-            // buttonTest
-            // 
-            buttonTest.Location = new Point(11, 28);
-            buttonTest.Name = "buttonTest";
-            buttonTest.Size = new Size(49, 33);
-            buttonTest.TabIndex = 25;
-            buttonTest.Text = "Test";
-            buttonTest.UseVisualStyleBackColor = true;
-            buttonTest.Click += buttonTest_Click;
             // 
             // KntChatGPTForm
             // 

@@ -27,7 +27,6 @@ namespace KNote.ClientWin.Components
         public string ReasonPhrase { get; private set; }
         #endregion
 
-
         #region Constructor 
 
         public KntHttpClientComponent(Store store) : base(store)
