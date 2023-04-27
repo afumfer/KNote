@@ -167,7 +167,7 @@ public class KntService : IKntService, IDisposable
             {
                 // TODO: !!!
 
-                // Get params from database system variables
+                // Get params from database system variables. Validate params !!!
 
                 // Connection
                 string hostName = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "HOST_NAME");
@@ -178,7 +178,7 @@ public class KntService : IKntService, IDisposable
                 _messageBroker = new KntMessageBroker(hostName, virtualHost, port, userName, password);                
 
                 // ExchangeDeclare
-                //_messageBrokerExchangeDeclare(exchange, type);
+                //_messageBroker.ExchangeDeclare(exchange, type);
                 _messageBroker.ExchangeDeclare("ex.FanoutArmando1", "fanout");  // Test
 
                 // QueueDeclare
@@ -188,9 +188,24 @@ public class KntService : IKntService, IDisposable
                 // QueueBind
                 //_messageBroker.QueueBind(queue, exchange, routingKey);
                 _messageBroker.QueueBind("cola.Armando1", "ex.FanoutArmando1", "");   // Test
+
+                _messageBroker.ConsumerReceived += _messageBroker_ConsumerReceived;
+                _messageBroker.BasicConsume("cola.Armando3");
             }
             return _messageBroker;            
         }
+    }
+
+    private async void _messageBroker_ConsumerReceived(object sender, MessageBusEventArgs<string> e)
+    {
+        var n = await Notes.NewAsync();
+        var note = n.Entity;
+        note.Topic = e.Entity;
+        
+        var f = await Folders.GetHomeAsync();
+        note.FolderId = f.Entity.FolderId;
+
+        await Notes.SaveAsync(note);
     }
 
     #endregion
