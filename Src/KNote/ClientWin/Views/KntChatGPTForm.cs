@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;

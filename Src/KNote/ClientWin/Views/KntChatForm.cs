@@ -1,7 +1,6 @@
 ﻿using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
-using Microsoft.AspNetCore.SignalR.Client;
 
 namespace KNote.ClientWin.Views;
 

@@ -1,15 +1,9 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
-using Microsoft.Identity.Client;
 using OpenAI;
 using OpenAI.Chat;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection.Metadata;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace KNote.ClientWin.Components;
 
