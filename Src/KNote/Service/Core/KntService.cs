@@ -175,38 +175,62 @@ public class KntService : IKntService, IDisposable
                 int port = int.Parse(GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PORT"));
                 string userName = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "USER_NAME"); 
                 string password = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PASSWORD");
+
+                string exchangePublish = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_PUBLISH", "EXCHANGE_PUBLISH");  // Echange;Type                
+                string exchangeConsume = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_CONSUME", "EXCHANGE_CONSUME_1");  // queue;bind-echange;routing
+
+                var exchangePublishValues = exchangePublish.Split(';');
+                var exchangeConsumeValues = exchangeConsume.Split(';');
+
                 _messageBroker = new KntMessageBroker(hostName, virtualHost, port, userName, password);                
 
                 // ExchangeDeclare
                 //_messageBroker.ExchangeDeclare(exchange, type);
-                _messageBroker.ExchangeDeclare("ex.FanoutArmando1", "fanout");  // Test
+                //_messageBroker.ExchangeDeclare("ex.FanoutArmando1", "fanout");  // Test                
+                _messageBroker.ExchangeDeclare(exchangePublishValues[0], exchangePublishValues[1]);  // Test
 
                 // QueueDeclare
                 //_messageBroker.QueueDeclare(queue);
-                _messageBroker.QueueDeclare("cola.Armando1");  // Test
+                //_messageBroker.QueueDeclare("cola.Armando1");  // Test
+                _messageBroker.QueueDeclare(exchangeConsumeValues[0]);  // Test
 
                 // QueueBind
                 //_messageBroker.QueueBind(queue, exchange, routingKey);
-                _messageBroker.QueueBind("cola.Armando1", "ex.FanoutArmando1", "");   // Test
+                //_messageBroker.QueueBind("cola.Armando1", "ex.FanoutArmando1", "");   // Test
+                _messageBroker.QueueBind(exchangeConsumeValues[0], exchangeConsumeValues[1], exchangeConsumeValues[2]);   // Test
 
-                _messageBroker.ConsumerReceived += _messageBroker_ConsumerReceived;
-                _messageBroker.BasicConsume("cola.Armando3");
+                //_messageBroker.ConsumerReceived += _messageBroker_ConsumerReceived;
+
+                _messageBroker.ConsumerReceived += async (sender, e) =>
+                {
+                    var n = await Notes.NewAsync();
+                    var note = n.Entity;
+                    note.Topic = e.Entity;
+
+                    var f = await Folders.GetHomeAsync();
+                    note.FolderId = f.Entity.FolderId;
+
+                    await Notes.SaveAsync(note);
+                };
+
+
+                _messageBroker.BasicConsume(exchangeConsumeValues[0]);
             }
             return _messageBroker;            
         }
     }
 
-    private async void _messageBroker_ConsumerReceived(object sender, MessageBusEventArgs<string> e)
-    {
-        var n = await Notes.NewAsync();
-        var note = n.Entity;
-        note.Topic = e.Entity;
+    //private async void _messageBroker_ConsumerReceived(object sender, MessageBusEventArgs<string> e)
+    //{
+    //    var n = await Notes.NewAsync();
+    //    var note = n.Entity;
+    //    note.Topic = e.Entity;
         
-        var f = await Folders.GetHomeAsync();
-        note.FolderId = f.Entity.FolderId;
+    //    var f = await Folders.GetHomeAsync();
+    //    note.FolderId = f.Entity.FolderId;
 
-        await Notes.SaveAsync(note);
-    }
+    //    await Notes.SaveAsync(note);
+    //}
 
     #endregion
 

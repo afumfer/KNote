@@ -13,4 +13,8 @@ public interface IKntMessageBroker
 
     //event EventHandler<MessageBusEventArgs<NoteInfoDto>> ConsumerReceived;
     event EventHandler<MessageBusEventArgs<string>> ConsumerReceived;
+
+    //string PublisherName { get; }    
+    //bool Enabled { get; }
+    //string StatusInfo { get; }
 }
