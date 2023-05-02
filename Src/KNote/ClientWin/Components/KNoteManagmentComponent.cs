@@ -811,14 +811,14 @@ namespace KNote.ClientWin.Components
             View.HideView();            
         }
 
-        public void GoActiveFolder()
+        public async void GoActiveFolder()
         {        
-            RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);            
+            await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);            
         }
 
-        public void GoActiveFilter()
+        public async void GoActiveFilter()
         {            
-            RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
+            await RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
         }
 
         public void RunScriptSelectedNote()
@@ -1020,12 +1020,12 @@ namespace KNote.ClientWin.Components
 
         #region Private methods
 
-        private void ForceRefreshListNotes()
+        private async void ForceRefreshListNotes()
         {
             if (SelectMode == EnumSelectMode.Folders)                
-                RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
+                await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
             else if (SelectMode == EnumSelectMode.Filters)                
-                RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
+                await RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
         }
 
         private async void ChangeTags(EnumChangeTag action)
