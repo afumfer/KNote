@@ -1,20 +1,19 @@
-﻿using KNote.Model.Dto;
-
-namespace KNote.MessageBroker;
+﻿namespace KNote.MessageBroker;
 
 public interface IKntMessageBroker 
 {
+    string? PublisherName { get; }
+    List<string> QueuesConsume { get; }
+    string? ConsumerInfo { get; }
+    bool Enabled { get; set; }
+    string? StatusInfo { get; set; }
+
     void CreateConnection(string hostName, string virtualHost, int port, string userName, string password);
-    void ExchangeDeclare(string exchange, string type, IDictionary<string, object>? arguments = null);
-    void QueueDeclare(string queue, IDictionary<string, object>? arguments = null);
-    void QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object>? arguments = null);
-    void BasicPublish(string exchange, string routingKey, string body = "");
+    void PublishDeclare(string publisher);
+    void BasicPublish(string body, string routingKey);
+    void QueuesBind(List<string> queuesInfo);
     void BasicConsume(string queueName);
 
     //event EventHandler<MessageBusEventArgs<NoteInfoDto>> ConsumerReceived;
     event EventHandler<MessageBusEventArgs<string>> ConsumerReceived;
-
-    //string PublisherName { get; }    
-    //bool Enabled { get; }
-    //string StatusInfo { get; }
 }

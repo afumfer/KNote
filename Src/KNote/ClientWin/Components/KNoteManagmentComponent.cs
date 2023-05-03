@@ -689,7 +689,7 @@ namespace KNote.ClientWin.Components
                 return;
             }
 
-            var noteEditorComponent = new NoteEditorComponent(Store);
+            var noteEditorComponent = new NoteEditorComponent(Store);            
             await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
         }
 

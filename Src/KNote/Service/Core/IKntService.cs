@@ -1,5 +1,6 @@
 ﻿using KNote.MessageBroker;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Repository;
 using KNote.Service.Interfaces;
 using System;
@@ -29,5 +30,6 @@ namespace KNote.Service.Core
         IKntMessageBroker MessageBroker { get; }
 
         string GetSystemVariable(string scope, string variable);
+        void PublishNoteInMessageBroker(NoteExtendedDto noteInfo);
     }
 }

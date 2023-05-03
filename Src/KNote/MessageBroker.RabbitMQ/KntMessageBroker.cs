@@ -13,8 +13,23 @@ public class KntMessageBroker : IKntMessageBroker, IDisposable
 
     private IConnection? _conn;
     private IModel? _channel;
-    EventingBasicConsumer? _consumer = null!;
-    private string? _consummerTag;
+    private EventingBasicConsumer? _consumer = null!;
+
+    #endregion
+
+    #region Properties
+
+    private string? _publisherName;
+    public string? PublisherName { get { return _publisherName; } }
+
+    private string? _consumerInfo;
+    public string? ConsumerInfo { get { return _consumerInfo; } }
+
+    public List<string> QueuesConsume { get; } = new List<string>();
+    
+    public bool Enabled { get; set; }
+    
+    public string? StatusInfo { get; set; }
 
     #endregion
 
@@ -58,38 +73,44 @@ public class KntMessageBroker : IKntMessageBroker, IDisposable
         _consumer.Received += Consumer_Received;
     }
 
+    public void PublishDeclare(string publisher)
+    {
+        var publishValues = publisher.Split(';');
+        _publisherName = publishValues[0];
+        _channel?.ExchangeDeclare(_publisherName, publishValues[1], true, false, null);
+    }
+
+    public void BasicPublish(string body = "", string routingKey = "")
+    {
+        _channel?.BasicPublish(_publisherName, routingKey, null, Encoding.UTF8.GetBytes(body));
+    }
+
+    public void QueuesBind(List<string> queuesInfo)
+    {
+        foreach (var queueInfo in queuesInfo)
+        {
+            var queueInfoValues = queueInfo.Split(';');
+            QueuesConsume.Add(queueInfoValues[0]);
+
+            _channel?.QueueDeclare(queueInfoValues[0], true, false, false, null);
+            _channel?.ExchangeDeclare(queueInfoValues[1], "fanout", true, false, null);
+            _channel?.QueueBind(queueInfoValues[0], queueInfoValues[1], queueInfoValues[2], null);
+        }     
+    }
+
     public event EventHandler<MessageBusEventArgs<string>>? ConsumerReceived;
     private void Consumer_Received(object? sender, BasicDeliverEventArgs e)
     {
         string message = Encoding.UTF8.GetString(e.Body.Span);
-        //Debug.WriteLine($"Message: {message}");
+        // TODO: Capture aditional info in sender ... 
         ConsumerReceived?.Invoke(this, new MessageBusEventArgs<string>(message));
     }
 
     public void BasicConsume(string queueName)
     {
-        _consummerTag = _channel.BasicConsume(queueName, true, _consumer);
+        _consumerInfo = _channel.BasicConsume(queueName, true, _consumer);
     }
 
-    public void ExchangeDeclare(string exchange, string type, IDictionary<string, object>? arguments = null)
-    {
-        _channel?.ExchangeDeclare(exchange, type, true, false, arguments);
-    }
-
-    public void QueueDeclare(string queue, IDictionary<string, object>? arguments = null)
-    {
-        _channel?.QueueDeclare(queue, true, false, false, arguments);
-    }
-
-    public void QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object>? arguments = null)
-    {
-        _channel?.QueueBind(queue, exchange, routingKey, arguments);
-    }
-
-    public void BasicPublish(string exchange, string routingKey, string body = "")
-    {        
-        _channel?.BasicPublish(exchange, routingKey, null, Encoding.UTF8.GetBytes(body));
-    }
 
     public void CloseConnection()
     {

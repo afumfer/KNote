@@ -77,6 +77,7 @@
             menuToolsS1 = new ToolStripSeparator();
             menuKntScriptConsole = new ToolStripMenuItem();
             menuChat = new ToolStripMenuItem();
+            menuChatGPT = new ToolStripMenuItem();
             menuKNoteLab = new ToolStripMenuItem();
             menuToolsS2 = new ToolStripSeparator();
             menuOptions = new ToolStripMenuItem();
@@ -105,7 +106,6 @@
             tabSearch = new TabPage();
             imageTabExplorer = new ImageList(components);
             splitContainer2 = new SplitContainer();
-            menuChatGPT = new ToolStripMenuItem();
             menuMangment.SuspendLayout();
             statusBarManagment.SuspendLayout();
             toolBarManagment.SuspendLayout();
@@ -141,7 +141,7 @@
             // 
             menuRepositories.DropDownItems.AddRange(new ToolStripItem[] { menuCreateRepository, menuManagmentRepository, menuAddRepositoryLink, menuRemoveRepositoryLink, toolMenuIRepositoryS1, menuRefreshTreeFolders, toolMenuIRepositoryS2, menuImportData, menuExportData });
             menuRepositories.Name = "menuRepositories";
-            menuRepositories.Size = new Size(209, 22);
+            menuRepositories.Size = new Size(203, 22);
             menuRepositories.Text = "&Repositories";
             // 
             // menuCreateRepository
@@ -209,7 +209,7 @@
             // 
             menuFolders.DropDownItems.AddRange(new ToolStripItem[] { menuNewFolder, menuEditFolder, menuDeleteFolder });
             menuFolders.Name = "menuFolders";
-            menuFolders.Size = new Size(209, 22);
+            menuFolders.Size = new Size(203, 22);
             menuFolders.Text = "&Folders";
             // 
             // menuNewFolder
@@ -236,24 +236,24 @@
             // menuFileS1
             // 
             menuFileS1.Name = "menuFileS1";
-            menuFileS1.Size = new Size(206, 6);
+            menuFileS1.Size = new Size(200, 6);
             // 
             // menuHide
             // 
             menuHide.Name = "menuHide";
-            menuHide.Size = new Size(209, 22);
+            menuHide.Size = new Size(203, 22);
             menuHide.Text = "&Hide KNote managment";
             menuHide.Click += menu_Click;
             // 
             // menuFilesS2
             // 
             menuFilesS2.Name = "menuFilesS2";
-            menuFilesS2.Size = new Size(206, 6);
+            menuFilesS2.Size = new Size(200, 6);
             // 
             // menuExit
             // 
             menuExit.Name = "menuExit";
-            menuExit.Size = new Size(209, 22);
+            menuExit.Size = new Size(203, 22);
             menuExit.Text = "&Exit";
             menuExit.Click += menu_Click;
             // 
@@ -297,7 +297,6 @@
             // menuDeleteNote
             // 
             menuDeleteNote.Name = "menuDeleteNote";
-            menuDeleteNote.ShortcutKeys = Keys.Control | Keys.D;
             menuDeleteNote.Size = new Size(261, 22);
             menuDeleteNote.Text = "&Delete note";
             menuDeleteNote.Click += menu_Click;
@@ -456,6 +455,13 @@
             menuChat.Size = new Size(185, 22);
             menuChat.Text = "Chat ...";
             menuChat.Click += menu_Click;
+            // 
+            // menuChatGPT
+            // 
+            menuChatGPT.Name = "menuChatGPT";
+            menuChatGPT.Size = new Size(185, 22);
+            menuChatGPT.Text = "ChatGPT ...";
+            menuChatGPT.Click += menu_Click;
             // 
             // menuKNoteLab
             // 
@@ -739,13 +745,6 @@
             splitContainer2.SplitterDistance = 192;
             splitContainer2.SplitterWidth = 7;
             splitContainer2.TabIndex = 0;
-            // 
-            // menuChatGPT
-            // 
-            menuChatGPT.Name = "menuChatGPT";
-            menuChatGPT.Size = new Size(185, 22);
-            menuChatGPT.Text = "ChatGPT ...";
-            menuChatGPT.Click += menu_Click;
             // 
             // KNoteManagmentForm
             // 

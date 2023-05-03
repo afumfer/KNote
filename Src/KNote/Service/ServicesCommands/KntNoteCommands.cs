@@ -3,12 +3,7 @@ using KNote.Model;
 using KNote.Service.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using KNote.Repository.EntityFramework.Entities;
-using static Dapper.SqlMapper;
-using System.Data;
 using System.IO;
 
 namespace KNote.Service.ServicesCommands;
@@ -166,17 +161,31 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
 
     public override async Task<Result<NoteDto>> Execute()
     {
+        Result<NoteDto> res;
+
         if (Param.NoteId == Guid.Empty)
         {
             Param.NoteId = Guid.NewGuid();
-            var res = await Repository.Notes.AddAsync(Param);
+            res = await Repository.Notes.AddAsync(Param);
             return res;
         }
         else
         {
             if (UpdateStatus)
+            {
                 Param.InternalTags = Service.Notes.UtilGetNoteStatus((await Service.Notes.GetNoteTasksAsync(Param.NoteId)).Entity, (await Service.Notes.GetMessagesAsync(Param.NoteId)).Entity);
-            var res = await Repository.Notes.UpdateAsync(Param);
+            }
+
+            var resExist = await Repository.Notes.GetAsync(Param.NoteId);
+            if (resExist.Entity == null)
+            {
+                res = await Repository.Notes.AddAsync(Param);
+            }
+            else
+            {
+                res = await Repository.Notes.UpdateAsync(Param);
+            }
+
             return res;
         }
     }
@@ -273,6 +282,13 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
 
         }
         Param.Tasks.RemoveAll(t => t.IsDeleted());
+
+        // Send note to message Broker
+
+        if (Param.Tags.Contains(KntConst.TagForMerging))
+        {
+            Service.PublishNoteInMessageBroker(Param);
+        }
 
         return result;
     }

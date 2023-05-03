@@ -21,6 +21,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Threading.Channels;
 using Microsoft.Identity.Client;
 using static System.Formats.Asn1.AsnWriter;
+using System.Text.Json;
 
 namespace KNote.Service.Core;
 
@@ -43,7 +44,8 @@ public class KntService : IKntService, IDisposable
     public KntService(IKntRepository repository)
     {
         _repository = repository;
-        IdServiceRef = Guid.NewGuid();            
+        IdServiceRef = Guid.NewGuid();
+        InitMessageBroker();
     }
 
     #endregion
@@ -161,78 +163,8 @@ public class KntService : IKntService, IDisposable
     private IKntMessageBroker _messageBroker;
     public IKntMessageBroker MessageBroker
     {
-        get
-        {
-            if (_messageBroker == null)
-            {
-                // TODO: !!!
-
-                // Get params from database system variables. Validate params !!!
-
-                // Connection
-                string hostName = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "HOST_NAME");
-                string virtualHost = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "VIRTUAL_HOST");
-                int port = int.Parse(GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PORT"));
-                string userName = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "USER_NAME"); 
-                string password = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PASSWORD");
-
-                string exchangePublish = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_PUBLISH", "EXCHANGE_PUBLISH");  // Echange;Type                
-                string exchangeConsume = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_CONSUME", "EXCHANGE_CONSUME_1");  // queue;bind-echange;routing
-
-                var exchangePublishValues = exchangePublish.Split(';');
-                var exchangeConsumeValues = exchangeConsume.Split(';');
-
-                _messageBroker = new KntMessageBroker(hostName, virtualHost, port, userName, password);                
-
-                // ExchangeDeclare
-                //_messageBroker.ExchangeDeclare(exchange, type);
-                //_messageBroker.ExchangeDeclare("ex.FanoutArmando1", "fanout");  // Test                
-                _messageBroker.ExchangeDeclare(exchangePublishValues[0], exchangePublishValues[1]);  // Test
-
-                // QueueDeclare
-                //_messageBroker.QueueDeclare(queue);
-                //_messageBroker.QueueDeclare("cola.Armando1");  // Test
-                _messageBroker.QueueDeclare(exchangeConsumeValues[0]);  // Test
-
-                // QueueBind
-                //_messageBroker.QueueBind(queue, exchange, routingKey);
-                //_messageBroker.QueueBind("cola.Armando1", "ex.FanoutArmando1", "");   // Test
-                _messageBroker.QueueBind(exchangeConsumeValues[0], exchangeConsumeValues[1], exchangeConsumeValues[2]);   // Test
-
-                //_messageBroker.ConsumerReceived += _messageBroker_ConsumerReceived;
-
-                _messageBroker.ConsumerReceived += async (sender, e) =>
-                {
-                    var n = await Notes.NewAsync();
-                    var note = n.Entity;
-                    note.Topic = e.Entity;
-
-                    var f = await Folders.GetHomeAsync();
-                    note.FolderId = f.Entity.FolderId;
-
-                    await Notes.SaveAsync(note);
-                };
-
-
-                _messageBroker.BasicConsume(exchangeConsumeValues[0]);
-            }
-            return _messageBroker;            
-        }
+        get { return _messageBroker; }
     }
-
-    //private async void _messageBroker_ConsumerReceived(object sender, MessageBusEventArgs<string> e)
-    //{
-    //    var n = await Notes.NewAsync();
-    //    var note = n.Entity;
-    //    note.Topic = e.Entity;
-        
-    //    var f = await Folders.GetHomeAsync();
-    //    note.FolderId = f.Entity.FolderId;
-
-    //    await Notes.SaveAsync(note);
-    //}
-
-    #endregion
 
     public string GetSystemVariable(string scope, string variable)
     {
@@ -243,6 +175,106 @@ public class KntService : IKntService, IDisposable
             return "";
     }
 
+    public void PublishNoteInMessageBroker(NoteExtendedDto noteInfo)
+    {
+        if (_messageBroker.Enabled)
+        {
+            var noteSerialized = JsonSerializer.Serialize(noteInfo);
+            _messageBroker.BasicPublish(noteSerialized, "");
+        }
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private void InitMessageBroker()
+    {
+        try
+        {
+            // Connection
+            string enabledValue = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "ENABLED");  // True or False
+            if (string.IsNullOrEmpty(enabledValue))
+            {
+                if (_messageBroker == null)
+                    _messageBroker = new KntMessageBroker();
+                _messageBroker.Enabled = false;
+                _messageBroker.StatusInfo = $"{KntConst.AppName} message bus not enabled.";
+                return;
+            }
+            
+            string hostName = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "HOST_NAME");
+            string virtualHost = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "VIRTUAL_HOST");
+            int port = int.Parse(GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PORT"));
+            string userName = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "USER_NAME");
+            string password = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PASSWORD");
+            if (string.IsNullOrEmpty(hostName) || string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+            {
+                if (_messageBroker == null)
+                    _messageBroker = new KntMessageBroker();
+                _messageBroker.Enabled = false;
+                _messageBroker.StatusInfo = $"{KntConst.AppName} message bus not initialized. Connection parameters not set.";
+                return;
+            }
+
+            // Publisher and consumers config
+            var queuesConsume = new List<string>();
+            string publisher = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_PUBLISH", "EXCHANGE_PUBLISH");  // Echange;Type        
+            string queueConsume = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_CONSUME", "EXCHANGE_CONSUME_1");  // queue;bind-echange;routing
+            //TODO: more queues here ... (KNT_MESSAGEBROKER_CONFIG_CONSUME is a collection).
+            queuesConsume.Add(queueConsume);
+
+            // KntMessageBroker configuration
+            _messageBroker = new KntMessageBroker(hostName, virtualHost, port, userName, password);
+            _messageBroker.PublishDeclare(publisher);
+            _messageBroker.QueuesBind(queuesConsume);            
+            _messageBroker.ConsumerReceived += async (sender, e) =>
+            {
+                var noteInput = JsonSerializer.Deserialize<NoteExtendedDto>(e.Entity);
+
+                // Reset and override values for no importable attributes for this repository.                
+                var resExisting = await Notes.GetAsync(noteInput.NoteId);
+                if (resExisting.Entity == null)                                    
+                    noteInput.NoteNumber = 0;                
+                else                
+                    noteInput.NoteNumber = resExisting.Entity.NoteNumber;                
+                noteInput.Topic += $" - (Merged: {DateTime.Now})";
+                var f = await Folders.GetHomeAsync();
+                noteInput.FolderId = f.Entity.FolderId;
+                noteInput.FolderDto = f.Entity;                
+                noteInput.KAttributesDto = null;
+                noteInput.NoteTypeId = null;
+                noteInput.NoteTypeDto = null;
+                noteInput.Tags = noteInput.Tags.Replace(KntConst.TagForMerging, "");
+                foreach(var r in noteInput.Resources)
+                {
+                    // TODO: refactor this conversión pending ...
+                    noteInput.Description = noteInput.Description.Replace(r.Container.Replace(@"\", @"/"), Repository.RespositoryRef.ResourcesContainer);
+                    r.Container = Repository.RespositoryRef.ResourcesContainer;
+                    r.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
+                }
+
+                await Notes.SaveExtendedAsync(noteInput);
+            };
+            foreach (var queue in _messageBroker.QueuesConsume)
+                _messageBroker.BasicConsume(queue);
+            
+            _messageBroker.Enabled = bool.Parse(enabledValue);
+            if(_messageBroker.Enabled)
+                _messageBroker.StatusInfo = $"{KntConst.AppName} message bus initialized.";
+            else
+                _messageBroker.StatusInfo = $"{KntConst.AppName} message bus initialized, but not enabled.";
+        }
+        catch (Exception ex)
+        {
+            if(_messageBroker == null)
+                _messageBroker = new KntMessageBroker();
+            _messageBroker.Enabled = false;
+            _messageBroker.StatusInfo = ex.Message.ToString();
+        }
+    }
+
+    #endregion 
 
     #region IDisposable member
 

@@ -33,10 +33,10 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
     {
-        if (EmbededMode)
+        if (EmbededMode)        
             return;
-        if (e.Entity.NoteId == this.Model.NoteId)
-            this.Finalize();
+        if (e.Entity.NoteId == Model.NoteId)
+            Finalize();
     }
 
     #endregion 

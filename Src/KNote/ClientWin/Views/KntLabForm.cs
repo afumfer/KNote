@@ -1080,22 +1080,34 @@ public partial class KntLabForm : Form, IViewBase
 
     private void MessageBroker_ConsumerReceived(object sender, MessageBroker.MessageBusEventArgs<string> e)
     {
-        if (listMessages.InvokeRequired)
-        {
-            listMessages.Invoke(new MethodInvoker(delegate
-            {
-                listMessages.Items.Add(e.Entity.ToString());
-            }));
-        }
-        else
-        {
-            listMessages.Items.Add(e.Entity.ToString());
-        }
+        //if (listMessages.InvokeRequired)
+        //{
+        //    listMessages.Invoke(new MethodInvoker(delegate
+        //    {
+        //        listMessages.Items.Add(e.Entity.ToString());
+        //    }));
+        //}
+        //else
+        //{
+        //    listMessages.Items.Add(e.Entity.ToString());
+        //}
     }
 
     private void buttonMessageBrokerSendMessage_Click(object sender, EventArgs e)
     {
-        _service.MessageBroker.BasicPublish("ex.FanoutArmando1", "", "KntTest Message Broker");
+        
+        //if (_service.MessageBroker.Enabled)
+        //{
+        //    //_service.MessageBroker.BasicPublish("KntTest Message Broker", "");
+
+        //    var res = await _service.Notes.GetAsync(30886);
+
+        //    var resExtended = await _service.Notes.GetExtendedAsync(res.Entity.NoteId);
+
+        //    if (resExtended.IsValid)
+        //        _service.PublishNoteInMessageBroker(resExtended.Entity);
+        //}
+            
     }
 
     #endregion
