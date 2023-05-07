@@ -40,7 +40,7 @@ public class KntRepository : IKntRepository
         _repositoryRef = repositoryRef;           
     }
 
-    public KntRepository(KntDbContext singletonContext)
+    public KntRepository(KntDbContext singletonContext, RepositoryRef repositoryRef) : this(repositoryRef)
     {            
         _context = singletonContext;
     }

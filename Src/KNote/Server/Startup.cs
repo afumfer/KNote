@@ -1,4 +1,6 @@
-using KNote.Server.Helpers;
+using System;
+using System.Linq;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,21 +9,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Linq;
-using System.Text;
 
+using KNote.Server.Helpers;
 using KNote.Repository;
 using KNote.Model;
 using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
-using Microsoft.AspNetCore.Http;
 using KNote.Server.Hubs;
 using KNote.Service.Core;
-using System.Net.Http;
-using System.Security.Claims;
-using static Dapper.SqlMapper;
-using System.Threading;
+using KNote.Client;
 
 namespace KNote.Server;
 
@@ -69,15 +65,15 @@ public class Startup
             services.AddScoped<IKntRepository>(provider => new DP.KntRepository(repositoryRef));
         else if (orm == "EntityFramework")                                
             services.AddScoped<IKntRepository>(provider => new EF.KntRepository(repositoryRef));
-
+        
         services.AddScoped<IKntService, KntService>();
 
         #region Doc, test
         // For test, use DbContext 
         //services.AddDbContext<KntDbContext>(options =>
         //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-        #endregion 
-        
+        #endregion
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
              options.TokenValidationParameters = new TokenValidationParameters
@@ -108,7 +104,7 @@ public class Startup
             opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                 new[] { "application/octet-stream" });
         });
-        
+
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -144,5 +140,10 @@ public class Startup
             endpoints.MapHub<ChatHub>("/chathub");
             endpoints.MapFallbackToFile("index.html");
         });
+
+        //var app = builder.Build();
+        //var eventBus = app.Services.GetRequiredService<IEventBus>();
+        //eventBus.Subscribe<TransferCreatedEvent, TransferEventHandler>();
+
     }
 }

@@ -1558,7 +1558,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
     private int GetNextNoteNumber(DbConnection db)
     {
-        var sql = "SELECT MAX(NoteNumber) FROM Notes";
+        // TODO: Look here for a more efficient implementation
+        var sql = "SELECT MAX(NoteNumber) FROM Notes";        
         var result = db.ExecuteScalar<int>(sql);
             
         return result + 1;

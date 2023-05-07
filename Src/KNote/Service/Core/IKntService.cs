@@ -30,6 +30,7 @@ namespace KNote.Service.Core
         IKntMessageBroker MessageBroker { get; }
 
         string GetSystemVariable(string scope, string variable);
+        void SaveSystemVariable(string scope, string key, string value);
         void PublishNoteInMessageBroker(NoteExtendedDto noteInfo);
     }
 }

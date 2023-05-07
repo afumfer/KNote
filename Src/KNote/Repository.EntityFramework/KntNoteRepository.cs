@@ -1278,12 +1278,11 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
     private int GetNextNoteNumber(GenericRepositoryEF<KntDbContext, Note> notes)
     {
-        //var lastNote = _repository.Context.Notes.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
+        // TODO: Look here for a more efficient implementation
         var lastNote = notes
             .DbSet.OrderByDescending(n => n.NoteNumber).FirstOrDefault();
         return lastNote != null ? lastNote.NoteNumber + 1 : 1;
     }
-
 
     private void UpdateStandardValuesToNewEntity(GenericRepositoryEF<KntDbContext, Note> notes, NoteDto newEntity)
     {            

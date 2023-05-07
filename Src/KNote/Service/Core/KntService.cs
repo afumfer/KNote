@@ -45,7 +45,10 @@ public class KntService : IKntService, IDisposable
     {
         _repository = repository;
         IdServiceRef = Guid.NewGuid();
+        
+        // Experimental ...
         InitMessageBroker();
+        // .................
     }
 
     #endregion
@@ -166,13 +169,22 @@ public class KntService : IKntService, IDisposable
         get { return _messageBroker; }
     }
 
-    public string GetSystemVariable(string scope, string variable)
+    public string GetSystemVariable(string scope, string key)
     {
-        var valueDto = Task.Run(() => SystemValues.GetAsync(new KeyValuePair<string, string>(scope, variable))).Result;
+        var valueDto = Task.Run(() => SystemValues.GetAsync(new KeyValuePair<string, string>(scope, key))).Result;
         if (valueDto.IsValid)
             return valueDto.Entity.Value;
         else
             return "";
+    }
+
+    public void SaveSystemVariable(string scope, string key, string value)
+    {
+        Guid id = Guid.Empty;
+        var valueDto = Task.Run(() => SystemValues.GetAsync(new KeyValuePair<string, string>(scope, key))).Result;
+        if (valueDto.IsValid)
+            id = valueDto.Entity.SystemValueId;
+        var res = Task.Run(() => SystemValues.SaveAsync(new SystemValueDto { SystemValueId = id, Scope = scope, Key = key, Value = value }));
     }
 
     public void PublishNoteInMessageBroker(NoteExtendedDto noteInfo)
@@ -184,9 +196,32 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    // TODO: In the future, implement an alternative to get the notes counter. This is a possibility.
+    public int GetNextNoteNumber()
+    {
+        var scope = "SYSTEM";
+        var key = "NOTES_COUNTER";
+        Guid id = Guid.Empty;
+        var resNextNoteNumber = 0;
+
+        var valueDto = Task.Run(() => SystemValues.GetAsync(new KeyValuePair<string, string>(scope, key))).Result;
+        if (valueDto.IsValid)
+        {
+            resNextNoteNumber = int.Parse(valueDto.Entity.Value) + 1;
+        }
+        {
+            resNextNoteNumber = 4000; // !!! TODO: replace for count notes 
+        }
+        var res = Task.Run(() => SystemValues.SaveAsync(new SystemValueDto { SystemValueId = id, Scope = scope, Key = key, Value = resNextNoteNumber.ToString() }));
+        return resNextNoteNumber;
+
+    }
+
     #endregion
 
     #region Private methods
+
+    #region Message broker, experimental .... 
 
     private void InitMessageBroker()
     {
@@ -194,7 +229,9 @@ public class KntService : IKntService, IDisposable
         {
             // Connection
             string enabledValue = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "ENABLED");  // True or False
-            if (string.IsNullOrEmpty(enabledValue))
+            bool enabled;
+            bool.TryParse(enabledValue, out enabled);
+            if (string.IsNullOrEmpty(enabledValue) || !enabled )
             {
                 if (_messageBroker == null)
                     _messageBroker = new KntMessageBroker();
@@ -228,34 +265,13 @@ public class KntService : IKntService, IDisposable
             _messageBroker = new KntMessageBroker(hostName, virtualHost, port, userName, password);
             _messageBroker.PublishDeclare(publisher);
             _messageBroker.QueuesBind(queuesConsume);            
-            _messageBroker.ConsumerReceived += async (sender, e) =>
+            
+            _messageBroker.ConsumerReceived += (sender, e) =>
             {
-                var noteInput = JsonSerializer.Deserialize<NoteExtendedDto>(e.Entity);
-
-                // Reset and override values for no importable attributes for this repository.                
-                var resExisting = await Notes.GetAsync(noteInput.NoteId);
-                if (resExisting.Entity == null)                                    
-                    noteInput.NoteNumber = 0;                
-                else                
-                    noteInput.NoteNumber = resExisting.Entity.NoteNumber;                
-                noteInput.Topic += $" - (Merged: {DateTime.Now})";
-                var f = await Folders.GetHomeAsync();
-                noteInput.FolderId = f.Entity.FolderId;
-                noteInput.FolderDto = f.Entity;                
-                noteInput.KAttributesDto = null;
-                noteInput.NoteTypeId = null;
-                noteInput.NoteTypeDto = null;
-                noteInput.Tags = noteInput.Tags.Replace(KntConst.TagForMerging, "");
-                foreach(var r in noteInput.Resources)
-                {
-                    // TODO: refactor this conversión pending ...
-                    noteInput.Description = noteInput.Description.Replace(r.Container.Replace(@"\", @"/"), Repository.RespositoryRef.ResourcesContainer);
-                    r.Container = Repository.RespositoryRef.ResourcesContainer;
-                    r.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
-                }
-
-                await Notes.SaveExtendedAsync(noteInput);
+                // Important, this method must be synchronous
+                OnSaveNoteEventBus(e.Entity);                
             };
+            
             foreach (var queue in _messageBroker.QueuesConsume)
                 _messageBroker.BasicConsume(queue);
             
@@ -271,10 +287,44 @@ public class KntService : IKntService, IDisposable
                 _messageBroker = new KntMessageBroker();
             _messageBroker.Enabled = false;
             _messageBroker.StatusInfo = ex.Message.ToString();
+            SaveSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "ENABLED", "False");
         }
     }
 
+    private void OnSaveNoteEventBus(string noteStr)
+    {    
+        var noteInput = JsonSerializer.Deserialize<NoteExtendedDto>(noteStr);
+
+        // Reset and override values for no importable attributes for this repository.                        
+        
+        var resExisting = (Task.Run(() => Notes.GetAsync(noteInput.NoteId)).Result);
+
+        if (resExisting.Entity == null)
+            noteInput.NoteNumber = 0;  //GetNextNoteNumber();
+        else
+            noteInput.NoteNumber = resExisting.Entity.NoteNumber;
+        noteInput.Topic += $" - (Merged: {DateTime.Now})";
+        var f = (Task.Run(() => Folders.GetHomeAsync()).Result);
+        noteInput.FolderId = f.Entity.FolderId;
+        noteInput.FolderDto = f.Entity;
+        noteInput.KAttributesDto = null;
+        noteInput.NoteTypeId = null;
+        noteInput.NoteTypeDto = null;
+        noteInput.Tags = noteInput.Tags.Replace(KntConst.TagForMerging, "");
+        foreach (var r in noteInput.Resources)
+        {
+            // TODO: refactor this conversión pending ...
+            noteInput.Description = noteInput.Description.Replace(r.Container.Replace(@"\", @"/"), Repository.RespositoryRef.ResourcesContainer);
+            r.Container = Repository.RespositoryRef.ResourcesContainer;
+            r.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
+        }
+        
+        Task.Run(() => Notes.SaveExtendedAsync(noteInput)).Wait();
+    }
+
     #endregion 
+
+    #endregion
 
     #region IDisposable member
 
