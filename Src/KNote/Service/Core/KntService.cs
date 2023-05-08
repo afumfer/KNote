@@ -41,14 +41,15 @@ public class KntService : IKntService, IDisposable
 
     #region Constructors
 
-    public KntService(IKntRepository repository)
+    public KntService(IKntRepository repository, bool activeMessageBroker = false)
     {
         _repository = repository;
         IdServiceRef = Guid.NewGuid();
         
-        // Experimental ...
-        InitMessageBroker();
-        // .................
+        // Experimental ------------
+        if(activeMessageBroker)
+            InitMessageBroker();
+        //--------------------------
     }
 
     #endregion

@@ -53,7 +53,7 @@ namespace KNote.Service.Core
             {
                 if (_service == null)
                 {
-                    _service = new KntService(Repository);
+                    _service = new KntService(Repository, true);
                     _service.UserIdentityName = UserIdentityName;
                 }
                 return _service;

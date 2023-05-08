@@ -17,18 +17,19 @@ using KNote.Service.Core;
 using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 using KNote.Server.Hubs;
+using KNote.MessageBroker.RabbitMQ;
 
 
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 /// Create HostBuilder
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-///////////////////////////////////////////////////////////////
-/// Configure the HTTP request pipeline.
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/// Configure the application and add services to the container.
+/////////////////////////////////////////////////////////////////
 
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
 var connectionStrings = builder.Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
@@ -49,6 +50,7 @@ if (connectionStrings.ORM == "Dapper")
     builder.Services.AddScoped<IKntRepository>(provider => new DP.KntRepository(repositoryRef));
 else if (connectionStrings.ORM == "EntityFramework")
     builder.Services.AddScoped<IKntRepository>(provider => new EF.KntRepository(repositoryRef));
+
 builder.Services.AddScoped<IKntService, KntService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -80,10 +82,11 @@ builder.Services.AddResponseCompression(opts =>
         new[] { "application/octet-stream" });
 });
 
+builder.Services.AddSingleton<KntMessageBroker>();
 
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 /// Build App and configure the HTTP request pipeline.
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
 var app = builder.Build();
 
@@ -114,5 +117,23 @@ app.MapRazorPages();
 app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
 app.MapFallbackToFile("index.html");
+
+// Experimental ------------------------------------------------------------------------
+//
+// To use the message broker force an instance of the service layer at the application
+// level with the use of the enable activeMessageBroker parameter in its constructor.
+//
+//var eventBus = app.Services.GetRequiredService<KntService>();
+//eventBus.xxx
+//
+KntService kntService;
+if (appSettings.ActivateMessageBroker)
+{
+    if (connectionStrings.ORM == "Dapper")
+        kntService = new KntService(new DP.KntRepository(repositoryRef), true);
+    else if (connectionStrings.ORM == "EntityFramework")
+        kntService = new KntService(new EF.KntRepository(repositoryRef), true);
+}
+// -------------------------------------------------------------------------------------
 
 app.Run();

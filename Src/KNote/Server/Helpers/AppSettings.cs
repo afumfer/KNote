@@ -12,6 +12,6 @@ namespace KNote.Server.Helpers
         public string ResourcesContainerRootPath { get; set; }
         public string ResourcesContainerRootUrl { get; set; }
         public bool ResourcesContentInDB { get; set; }
-
+        public bool ActivateMessageBroker { get; set; }
     }
 }
