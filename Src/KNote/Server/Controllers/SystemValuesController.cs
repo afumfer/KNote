@@ -1,36 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using KNote.Server.Helpers;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using KNote.Service.Core;
 using Microsoft.AspNetCore.Http;
+using KNote.Service.Core;
 
-namespace KNote.Server.Controllers
+namespace KNote.Server.Controllers;
+
+// TODO: Design and implement the API that maintains system parameters
+
+[Authorize(Roles = "Admin")]
+[ApiController]
+[Route("api/[controller]")]
+public class SystemValuesController : ControllerBase
 {
-    // TODO: Diseñar e implementar el API que mantiene los parámetros del sistema
+    private readonly IKntService _service;
 
-    [Authorize(Roles = "Admin")]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class SystemValuesController : ControllerBase
+    public SystemValuesController(IKntService service, IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IKntService _service;
-
-        public SystemValuesController(IKntService service, IHttpContextAccessor httpContextAccessor)
-        {
-            _service = service;
-            _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
-        }
-
-        [HttpGet]    // GET api/users
-        public IActionResult Get()
-        {
-            return null;
-        }
+        _service = service;
+        _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
     }
 
+    [HttpGet]    // GET api/users
+    public IActionResult Get()
+    {
+        return null;
+    }
 }

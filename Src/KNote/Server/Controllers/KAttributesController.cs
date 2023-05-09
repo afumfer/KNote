@@ -1,151 +1,146 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using KNote.Server.Helpers;
-using KNote.Model;
-using KNote.Model.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using KNote.Service.Core;
 using Microsoft.AspNetCore.Http;
+using KNote.Model;
+using KNote.Model.Dto;
+using KNote.Service.Core;
 
-namespace KNote.Server.Controllers
+namespace KNote.Server.Controllers;
+
+[Authorize(Roles = "Admin")]
+[ApiController]
+[Route("api/[controller]")]
+public class KAttributesController : ControllerBase
 {
-    [Authorize(Roles = "Admin")]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class KAttributesController : ControllerBase
+    private readonly IKntService _service;
+
+    public KAttributesController(IKntService service, IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IKntService _service;
+        _service = service;
+        _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
+    }
 
-        public KAttributesController(IKntService service, IHttpContextAccessor httpContextAccessor)
+    [HttpGet]    // GET api/kattributes       
+    public async Task<IActionResult> Get()
+    {
+        try
         {
-            _service = service;
-            _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
-        }
-
-        [HttpGet]    // GET api/kattributes       
-        public async Task<IActionResult> Get()
-        {
-            try
-            {
-                var kresApi = await _service.KAttributes.GetAllAsync();
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<List<NoteTypeDto>>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            var kresApi = await _service.KAttributes.GetAllAsync();
+            if (kresApi.IsValid)
+                return Ok(kresApi);
+            else
                 return BadRequest(kresApi);
-            }
         }
-
-        [HttpGet("[action]/{typeId}")]    // GET api/kattributes/getfornotetype/typeId      
-        public async Task<IActionResult> GetForNoteType(Guid? typeId)
+        catch (Exception ex)
         {
-            try
-            {
-                var kresApi = await _service.KAttributes.GetAllAsync(typeId);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<List<NoteTypeDto>>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            var kresApi = new Result<List<NoteTypeDto>>();
+            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            return BadRequest(kresApi);
+        }
+    }
+
+    [HttpGet("[action]/{typeId}")]    // GET api/kattributes/getfornotetype/typeId      
+    public async Task<IActionResult> GetForNoteType(Guid? typeId)
+    {
+        try
+        {
+            var kresApi = await _service.KAttributes.GetAllAsync(typeId);
+            if (kresApi.IsValid)
+                return Ok(kresApi);
+            else
                 return BadRequest(kresApi);
-            }
         }
-
-        [HttpGet("{id}")]    // GET api/kattributes/id
-        public async Task<IActionResult> Get(Guid id)
+        catch (Exception ex)
         {
-            try
-            {
-                var resApi = await _service.KAttributes.GetAsync(id);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                {
-                    return BadRequest(resApi);
-                }
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<KAttributeInfoDto>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
+            var kresApi = new Result<List<NoteTypeDto>>();
+            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            return BadRequest(kresApi);
         }
+    }
 
-
-        [HttpPost]   // POST api/kattributes
-        [HttpPut]    // PUT api/kattributes
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post([FromBody]KAttributeDto entity)
+    [HttpGet("{id}")]    // GET api/kattributes/id
+    public async Task<IActionResult> Get(Guid id)
+    {
+        try
         {
-            try
+            var resApi = await _service.KAttributes.GetAsync(id);
+            if (resApi.IsValid)
+                return Ok(resApi);
+            else
             {
-                var kresApi = await _service.KAttributes.SaveAsync(entity);
-                if (kresApi.IsValid)
-                    return Ok(kresApi);
-                else
-                    return BadRequest(kresApi);
-            }
-            catch (Exception ex)
-            {
-                var kresApi = new Result<KAttributeInfoDto>();
-                kresApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(kresApi);
-            }
-        }
-
-        [HttpDelete("{id}")]    // DELETE api/kattributes/guid        
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            try
-            {
-                var resApi = await _service.KAttributes.DeleteAsync(id);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-            }
-            catch (Exception ex)
-            {
-                var resApi = new Result<NoteTypeDto>();
-                resApi.AddErrorMessage("Generic error: " + ex.Message);
                 return BadRequest(resApi);
             }
         }
-        
-        [HttpGet("{idAttribute}/[action]")]    // GET api/kattributes/guid/getattributetabulatedvalues
-        public async Task<IActionResult> GetTabulatedValues(Guid idAttribute)
+        catch (Exception ex)
         {
-            try
-            {
-                var resApi = await _service.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
-                if (resApi.IsValid)
-                    return Ok(resApi);
-                else
-                    return BadRequest(resApi);
-            }
-            catch (Exception ex)
-            {
-                var resApi = new Result<NoteTypeDto>();
-                resApi.AddErrorMessage("Generic error: " + ex.Message);
-                return BadRequest(resApi);
-            }
+            var kresApi = new Result<KAttributeInfoDto>();
+            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            return BadRequest(kresApi);
         }
+    }
 
+
+    [HttpPost]   // POST api/kattributes
+    [HttpPut]    // PUT api/kattributes
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Post([FromBody]KAttributeDto entity)
+    {
+        try
+        {
+            var kresApi = await _service.KAttributes.SaveAsync(entity);
+            if (kresApi.IsValid)
+                return Ok(kresApi);
+            else
+                return BadRequest(kresApi);
+        }
+        catch (Exception ex)
+        {
+            var kresApi = new Result<KAttributeInfoDto>();
+            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            return BadRequest(kresApi);
+        }
+    }
+
+    [HttpDelete("{id}")]    // DELETE api/kattributes/guid        
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            var resApi = await _service.KAttributes.DeleteAsync(id);
+            if (resApi.IsValid)
+                return Ok(resApi);
+            else
+                return BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            var resApi = new Result<NoteTypeDto>();
+            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            return BadRequest(resApi);
+        }
+    }
+    
+    [HttpGet("{idAttribute}/[action]")]    // GET api/kattributes/guid/getattributetabulatedvalues
+    public async Task<IActionResult> GetTabulatedValues(Guid idAttribute)
+    {
+        try
+        {
+            var resApi = await _service.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
+            if (resApi.IsValid)
+                return Ok(resApi);
+            else
+                return BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            var resApi = new Result<NoteTypeDto>();
+            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            return BadRequest(resApi);
+        }
     }
 
 }

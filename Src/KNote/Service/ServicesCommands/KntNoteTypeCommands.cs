@@ -1,13 +1,9 @@
-﻿using KNote.Model.Dto;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using KNote.Model.Dto;
 using KNote.Model;
 using KNote.Service.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using static Dapper.SqlMapper;
 
 namespace KNote.Service.ServicesCommands;
 

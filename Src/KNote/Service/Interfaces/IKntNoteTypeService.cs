@@ -1,16 +1,15 @@
-﻿using KNote.Model;
-using KNote.Model.Dto;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KNote.Model;
+using KNote.Model.Dto;
 
-namespace KNote.Service.Interfaces
+namespace KNote.Service.Interfaces;
+
+public interface IKntNoteTypeService
 {
-    public interface IKntNoteTypeService
-    {
-        Task<Result<List<NoteTypeDto>>> GetAllAsync();
-        Task<Result<NoteTypeDto>> GetAsync(Guid id);
-        Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entity);
-        Task<Result<NoteTypeDto>> DeleteAsync(Guid id);
-    }
+    Task<Result<List<NoteTypeDto>>> GetAllAsync();
+    Task<Result<NoteTypeDto>> GetAsync(Guid id);
+    Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto entity);
+    Task<Result<NoteTypeDto>> DeleteAsync(Guid id);
 }

@@ -1,6 +1,6 @@
-﻿using KNote.Model;
+﻿using System.Threading.Tasks;
+using KNote.Model;
 using KNote.Repository;
-using System.Threading.Tasks;
 
 namespace KNote.Service.Core;
 public abstract class KntCommandSaveServiceBase<TParam, TResult> : KntCommandServiceBase<TParam, TResult> where TParam : ModelBase

@@ -1,27 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Data.Common;
-using System.ComponentModel;
-using System.Linq.Expressions;
+using System.Text.Json;
 using KNote.Repository;
-using KNote.Repository.EntityFramework;
-using DP = KNote.Repository.Dapper;
 using KNote.Model.Dto;
 using KNote.Model;
 using KNote.Service.Interfaces;
 using KNote.Service.Services;
-using System.Threading;
 using KNote.MessageBroker;
 using KNote.MessageBroker.RabbitMQ;
-using System.Collections;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using System.Threading.Channels;
-using Microsoft.Identity.Client;
-using static System.Formats.Asn1.AsnWriter;
-using System.Text.Json;
 
 namespace KNote.Service.Core;
 

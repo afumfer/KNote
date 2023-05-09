@@ -1,36 +1,32 @@
-﻿using KNote.MessageBroker;
+﻿using System;
+using System.Threading.Tasks;
+using KNote.MessageBroker;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Repository;
 using KNote.Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace KNote.Service.Core
+namespace KNote.Service.Core;
+
+public interface IKntService : IDisposable
 {
-    public interface IKntService : IDisposable
-    {
-        Guid IdServiceRef { get; }
-        RepositoryRef RepositoryRef { get; }
-        Task<bool> TestDbConnection();
-        Task<bool> CreateDataBase(string newOwner = null);
-        string UserIdentityName { get; set; }
+    Guid IdServiceRef { get; }
+    RepositoryRef RepositoryRef { get; }
+    Task<bool> TestDbConnection();
+    Task<bool> CreateDataBase(string newOwner = null);
+    string UserIdentityName { get; set; }
 
-        IKntRepository Repository { get; }
+    IKntRepository Repository { get; }
 
-        IKntUserService Users { get; }
-        IKntKAttributeService KAttributes { get; }
-        IKntSystemValuesService SystemValues { get; }
-        IKntFolderService Folders { get; }
-        IKntNoteService Notes { get; }
-        IKntNoteTypeService NoteTypes { get; }
-        IKntMessageBroker MessageBroker { get; }
+    IKntUserService Users { get; }
+    IKntKAttributeService KAttributes { get; }
+    IKntSystemValuesService SystemValues { get; }
+    IKntFolderService Folders { get; }
+    IKntNoteService Notes { get; }
+    IKntNoteTypeService NoteTypes { get; }
+    IKntMessageBroker MessageBroker { get; }
 
-        string GetSystemVariable(string scope, string variable);
-        void SaveSystemVariable(string scope, string key, string value);
-        void PublishNoteInMessageBroker(NoteExtendedDto noteInfo);
-    }
+    string GetSystemVariable(string scope, string variable);
+    void SaveSystemVariable(string scope, string key, string value);
+    void PublishNoteInMessageBroker(NoteExtendedDto noteInfo);
 }

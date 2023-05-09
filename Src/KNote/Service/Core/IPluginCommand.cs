@@ -1,7 +1,4 @@
-﻿using KNote.Model;
-using KNote.Service.Services;
-
-namespace KNote.Service.Core;
+﻿namespace KNote.Service.Core;
 
 public interface IPluginCommand
 {
