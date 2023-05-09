@@ -261,6 +261,21 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    private bool _activateMessageBroker;
+    public bool ActivateMessageBroker
+    {
+        get { return _activateMessageBroker; }
+        set
+        {
+            if (_activateMessageBroker != value)
+            {
+                _activateMessageBroker = value;
+                OnPropertyChanged("ActivateMessageBroker");
+            }
+        }
+    }
+
+
     private List<RepositoryRef> _respositoryRef;
     public List<RepositoryRef> RespositoryRefs
     {

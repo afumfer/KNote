@@ -53,7 +53,7 @@ namespace KNote.Service.Core
             {
                 if (_service == null)
                 {
-                    _service = new KntService(Repository, true);
+                    _service = new KntService(Repository, ActivateMessageBroker);
                     _service.UserIdentityName = UserIdentityName;
                 }
                 return _service;
@@ -62,15 +62,17 @@ namespace KNote.Service.Core
 
         public string UserIdentityName { get; init; }
 
+        public bool ActivateMessageBroker { get; init; }
 
         #endregion
 
         #region Constructor
 
-        public ServiceRef(RepositoryRef repositoryRef, string userIdentityName)
+        public ServiceRef(RepositoryRef repositoryRef, string userIdentityName, bool activateMessageBroker = false)
         {
             RepositoryRef = repositoryRef;
             UserIdentityName = userIdentityName;
+            ActivateMessageBroker = activateMessageBroker;
         }
 
         #endregion 

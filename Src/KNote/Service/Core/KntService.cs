@@ -41,14 +41,19 @@ public class KntService : IKntService, IDisposable
 
     #region Constructors
 
-    public KntService(IKntRepository repository, bool activeMessageBroker = false)
+    public KntService(IKntRepository repository, bool activateMessageBroker = false)
     {
         _repository = repository;
         IdServiceRef = Guid.NewGuid();
         
         // Experimental ------------
-        if(activeMessageBroker)
+        if(activateMessageBroker)
             InitMessageBroker();
+        else
+        {
+            _messageBroker.Enabled = false;
+            _messageBroker.StatusInfo = $"{KntConst.AppName} message bus in not activated.";
+        }
         //--------------------------
     }
 
@@ -164,7 +169,7 @@ public class KntService : IKntService, IDisposable
     }
 
 
-    private IKntMessageBroker _messageBroker;
+    private IKntMessageBroker _messageBroker = new KntMessageBroker();
     public IKntMessageBroker MessageBroker
     {
         get { return _messageBroker; }
@@ -234,8 +239,6 @@ public class KntService : IKntService, IDisposable
             bool.TryParse(enabledValue, out enabled);
             if (string.IsNullOrEmpty(enabledValue) || !enabled )
             {
-                if (_messageBroker == null)
-                    _messageBroker = new KntMessageBroker();
                 _messageBroker.Enabled = false;
                 _messageBroker.StatusInfo = $"{KntConst.AppName} message bus not enabled.";
                 return;
@@ -248,8 +251,6 @@ public class KntService : IKntService, IDisposable
             string password = GetSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "PASSWORD");
             if (string.IsNullOrEmpty(hostName) || string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
             {
-                if (_messageBroker == null)
-                    _messageBroker = new KntMessageBroker();
                 _messageBroker.Enabled = false;
                 _messageBroker.StatusInfo = $"{KntConst.AppName} message bus not initialized. Connection parameters not set.";
                 return;
@@ -262,8 +263,8 @@ public class KntService : IKntService, IDisposable
             //TODO: more queues here ... (KNT_MESSAGEBROKER_CONFIG_CONSUME is a collection).
             queuesConsume.Add(queueConsume);
 
-            // KntMessageBroker configuration
-            _messageBroker = new KntMessageBroker(hostName, virtualHost, port, userName, password);
+            // KntMessageBroker configuration            
+            _messageBroker.CreateConnection(hostName, virtualHost, port, userName, password);
             _messageBroker.PublishDeclare(publisher);
             _messageBroker.QueuesBind(queuesConsume);            
             
@@ -288,7 +289,7 @@ public class KntService : IKntService, IDisposable
                 _messageBroker = new KntMessageBroker();
             _messageBroker.Enabled = false;
             _messageBroker.StatusInfo = ex.Message.ToString();
-            SaveSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "ENABLED", "False");
+            // SaveSystemVariable("KNT_MESSAGEBROKER_CONNECTION", "ENABLED", "False");  /// NOT for now ...
         }
     }
 
@@ -304,7 +305,7 @@ public class KntService : IKntService, IDisposable
             noteInput.NoteNumber = 0;  //GetNextNoteNumber();
         else
             noteInput.NoteNumber = resExisting.Entity.NoteNumber;
-        noteInput.Topic += $" - (Merged: {DateTime.Now})";
+        // noteInput.Topic += $" - (Merged: {DateTime.Now})"; /// for debug ...
         var f = (Task.Run(() => Folders.GetHomeAsync()).Result);
         noteInput.FolderId = f.Entity.FolderId;
         noteInput.FolderDto = f.Entity;

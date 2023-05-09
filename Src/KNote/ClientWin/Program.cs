@@ -71,9 +71,14 @@ static class Program
     static async void LoadAppStore(Store store)
     {
         var pathApp = Application.StartupPath;
-
         var appFileConfig = Path.Combine(pathApp, "KNoteData.config");
-            
+
+        // Set session values
+        store.AppUserName = SystemInformation.UserName;
+        store.ComputerName = SystemInformation.ComputerName;
+        store.AppConfig.LastDateTimeStart = DateTime.Now;
+        store.AppConfig.RunCounter += 1;
+
         if (!File.Exists(appFileConfig))
         {
             // Create default repository and add link
@@ -98,8 +103,8 @@ static class Program
                 ResourcesContainerCacheRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
             };
 
-            var initialServiceRef = new ServiceRef(r0, SystemInformation.UserName);
-            var resCreateDB = await initialServiceRef.Service.CreateDataBase(SystemInformation.UserName);
+            var initialServiceRef = new ServiceRef(r0, store.AppUserName);
+            var resCreateDB = await initialServiceRef.Service.CreateDataBase(store.AppUserName);
 
             if (resCreateDB)
             {                    
@@ -121,14 +126,8 @@ static class Program
         {
             store.LoadConfig(appFileConfig);
             foreach (var r in store.AppConfig.RespositoryRefs)                
-                store.AddServiceRef(new ServiceRef(r, SystemInformation.UserName));
+                store.AddServiceRef(new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker));
         }
-
-        // Set session values
-        store.AppUserName = SystemInformation.UserName;
-        store.ComputerName = SystemInformation.ComputerName;
-        store.AppConfig.LastDateTimeStart = DateTime.Now;
-        store.AppConfig.RunCounter += 1;
 
         store.SaveConfig(appFileConfig);
 
