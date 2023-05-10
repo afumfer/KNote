@@ -82,7 +82,8 @@ public class KntMessageBroker : IKntMessageBroker, IDisposable
 
     public void BasicPublish(string body = "", string routingKey = "")
     {
-        _channel?.BasicPublish(_publisherName, routingKey, null, Encoding.UTF8.GetBytes(body));
+        if(!string.IsNullOrEmpty(_publisherName))
+            _channel?.BasicPublish(_publisherName, routingKey, null, Encoding.UTF8.GetBytes(body));
     }
 
     public void QueuesBind(List<string> queuesInfo)

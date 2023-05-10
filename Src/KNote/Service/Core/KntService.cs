@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Linq;
 using KNote.Repository;
 using KNote.Model.Dto;
 using KNote.Model;
@@ -9,6 +10,8 @@ using KNote.Service.Interfaces;
 using KNote.Service.Services;
 using KNote.MessageBroker;
 using KNote.MessageBroker.RabbitMQ;
+using Microsoft.IdentityModel.Tokens;
+using System.Xml.XPath;
 
 namespace KNote.Service.Core;
 
@@ -171,6 +174,19 @@ public class KntService : IKntService, IDisposable
             return "";
     }
 
+    public List<string> GetSystemVariables(string scope)
+    {
+        var result = new List<string>();
+        var values = Task.Run(() => SystemValues.GetAllAsync()).Result;
+        if (values.IsValid)
+        {
+            result = values.Entity.Where(sv => sv.Scope == scope).Select(sv => sv.Value).ToList();
+            return result;
+        }
+        else
+            return result;
+    }
+
     public void SaveSystemVariable(string scope, string key, string value)
     {
         Guid id = Guid.Empty;
@@ -243,27 +259,37 @@ public class KntService : IKntService, IDisposable
                 return;
             }
 
-            // Publisher and consumers config
-            var queuesConsume = new List<string>();
+            // Publisher and consumers config            
             string publisher = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_PUBLISH", "EXCHANGE_PUBLISH");  // Echange;Type        
-            string queueConsume = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_CONSUME", "EXCHANGE_CONSUME_1");  // queue;bind-echange;routing
-            //TODO: more queues here ... (KNT_MESSAGEBROKER_CONFIG_CONSUME is a collection).
-            queuesConsume.Add(queueConsume);
+
+            //var queuesConsume = new List<string>();
+            //string queueConsume = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_CONSUME", "EXCHANGE_CONSUME_1");  // queue;bind-echange;routing            
+            //queuesConsume.Add(queueConsume);
+
+            var queuesConsume = GetSystemVariables("KNT_MESSAGEBROKER_CONFIG_CONSUME");  // queue;bind-echange;routing            
+
 
             // KntMessageBroker configuration            
             _messageBroker.CreateConnection(hostName, virtualHost, port, userName, password);
-            _messageBroker.PublishDeclare(publisher);
-            _messageBroker.QueuesBind(queuesConsume);            
             
-            _messageBroker.ConsumerReceived += (sender, e) =>
+            if(!string.IsNullOrEmpty(publisher))
+                _messageBroker.PublishDeclare(publisher);
+
+            //if (!string.IsNullOrEmpty(queueConsume))
+            if (queuesConsume.Count > 0)
             {
-                // Important, this method must be synchronous
-                OnSaveNoteEventBus(e.Entity);                
-            };
+                _messageBroker.QueuesBind(queuesConsume);            
+
+                _messageBroker.ConsumerReceived += (sender, e) =>
+                {
+                    // Important, this method must be synchronous
+                    OnSaveNoteEventBus(e.Entity);                
+                };
             
-            foreach (var queue in _messageBroker.QueuesConsume)
-                _messageBroker.BasicConsume(queue);
-            
+                foreach (var queue in _messageBroker.QueuesConsume)
+                    _messageBroker.BasicConsume(queue);
+            }
+                       
             _messageBroker.Enabled = bool.Parse(enabledValue);
             if(_messageBroker.Enabled)
                 _messageBroker.StatusInfo = $"{KntConst.AppName} message bus initialized.";
