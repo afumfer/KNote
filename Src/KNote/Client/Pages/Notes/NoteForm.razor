@@ -21,12 +21,14 @@
 
                 <div class="form-group row">
                     <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
-                    <div class="input-group col-sm-11" id="atrTopic">
-                        <InputText class="form-control" @bind-Value="@Note.Topic" />
-                        <div class="input-group-append">
-                            <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Note number (automatically assigned)">
-                                #@Note.NoteNumber
-                            </label>
+                    <div class="input-group col-sm-11 d-flex flex-column" id="atrTopic">
+                        <div class="d-flex">
+                            <InputText class="form-control" @bind-Value="@Note.Topic" />
+                            <div class="input-group-append">
+                                <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Note number (automatically assigned)">
+                                    #@Note.NoteNumber
+                                </label>
+                            </div>
                         </div>
                         <ValidationMessage For="@(() => Note.Topic)" />
                     </div>
@@ -34,13 +36,15 @@
 
                 <div class="form-group row">
                     <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
-                    <div class="input-group col-sm-11" id="atrFolder">
-                        <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
-                                    data-toggle="tooltip" title="Select folder">
-                                ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
-                            </button>
+                    <div class="input-group col-sm-11 d-flex flex-column" id="atrFolder">
+                        <div class="d-flex">
+                            <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
+                                        data-toggle="tooltip" title="Select folder">
+                                    <i class="fa fa-folder" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                         <ValidationMessage For="@(() => Note.FolderId)" />
                     </div>
