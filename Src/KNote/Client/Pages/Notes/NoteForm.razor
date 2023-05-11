@@ -34,6 +34,22 @@
                     </div>
                 </div>
 
+@*                <div class="form-group row">
+                    <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
+                    <div class="input-group col-sm-11 d-flex flex-column" id="atrFolder">
+                        <div class="d-flex">
+                            <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
+                                        data-toggle="tooltip" title="Select folder">
+                                    <i class="fa fa-folder" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <ValidationMessage For="@(() => Note.FolderId)" />
+                    </div>
+                </div>*@
+
                 <div class="form-group row">
                     <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
                     <div class="input-group col-sm-11 d-flex flex-column" id="atrFolder">
@@ -49,6 +65,7 @@
                         <ValidationMessage For="@(() => Note.FolderId)" />
                     </div>
                 </div>
+
 
                 <div class="form-group row">
                     <label for="atrPriority" class="col-sm-1 col-form-label">Priority:</label>
