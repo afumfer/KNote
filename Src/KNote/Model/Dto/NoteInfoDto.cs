@@ -11,7 +11,7 @@ public class NoteInfoDto : SmartModelDtoBase
 {        
     #region Property definitions
 
-    private Guid _noteId;        
+    private Guid _noteId;    
     public Guid NoteId
     {
         get { return _noteId; }
@@ -173,8 +173,7 @@ public class NoteInfoDto : SmartModelDtoBase
         }
     }
 
-    private Guid _folderId;
-    [Required(ErrorMessage = KMSG)]
+    private Guid _folderId;    
     public Guid FolderId
     {
         get { return _folderId; }
@@ -213,28 +212,35 @@ public class NoteInfoDto : SmartModelDtoBase
         // ---
         // Capture the validations implemented with attributes.
         // ---
-
+        
         Validator.TryValidateProperty(this.Topic,
-           new ValidationContext(this, null, null) { MemberName = "Topic" },
-           results);
+            new ValidationContext(this, null, null) { MemberName = "Topic" },
+            results);
 
         Validator.TryValidateProperty(this.InternalTags,
-           new ValidationContext(this, null, null) { MemberName = "InternalTags" },
-           results);
+            new ValidationContext(this, null, null) { MemberName = "InternalTags" },
+            results);
 
         Validator.TryValidateProperty(this.Tags,
-           new ValidationContext(this, null, null) { MemberName = "Tags" },
-           results);
+            new ValidationContext(this, null, null) { MemberName = "Tags" },
+            results);
 
         //----
         // Specific validations
         //----
 
+        if (FolderId == Guid.Empty)
+        {
+            results.Add(new ValidationResult
+                ("KMSG: The FolderId attribute cannot be empty."
+                , new[] { "FolderId" }));
+        }
+
         if (ModificationDateTime < CreationDateTime)
         {
             results.Add(new ValidationResult
-             ("KMSG: Modification date cannot be greater than creation date. "
-             , new[] { "ModificationDateTime", "CreationDateTime" }));
+                ("KMSG: Modification date cannot be greater than creation date."
+                , new[] { "ModificationDateTime", "CreationDateTime" }));
         }
 
         // TODO: Validar NoteNumber an more ....
