@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System;
 using System.Linq;
-
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Hosting;
-
 using KNote.Model;
 using KNote.Repository;
 using KNote.Server.Helpers;
@@ -30,6 +29,9 @@ var builder = WebApplication.CreateBuilder(args);
 /////////////////////////////////////////////////////////////////
 /// Configure the application and add services to the container.
 /////////////////////////////////////////////////////////////////
+
+var appSettingsSection = builder.Configuration.GetSection("AppSettings");
+builder.Services.Configure<AppSettings>(appSettingsSection);
 
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
 var connectionStrings = builder.Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
@@ -72,8 +74,11 @@ builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
 
 builder.Services.AddScoped<IFileStore, LocalFileStore>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-   options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddResponseCompression(opts =>
