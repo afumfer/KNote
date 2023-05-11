@@ -32,6 +32,9 @@ var builder = WebApplication.CreateBuilder(args);
 /// Configure the application and add services to the container.
 /////////////////////////////////////////////////////////////////
 
+var appSettingsSection = builder.Configuration.GetSection("AppSettings");
+builder.Services.Configure<AppSettings>(appSettingsSection);
+
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
 var connectionStrings = builder.Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
 
