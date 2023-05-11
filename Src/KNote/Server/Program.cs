@@ -18,6 +18,7 @@ using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 using KNote.Server.Hubs;
 using KNote.MessageBroker.RabbitMQ;
+using System.Text.Json.Serialization;
 
 
 /////////////////////////////////////////////////////////////////
@@ -72,8 +73,14 @@ builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
 
 builder.Services.AddScoped<IFileStore, LocalFileStore>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-   options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+//builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
+//   options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddResponseCompression(opts =>
