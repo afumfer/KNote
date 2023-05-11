@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System;
 using System.Linq;
-
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Hosting;
-
 using KNote.Model;
 using KNote.Repository;
 using KNote.Server.Helpers;
@@ -18,7 +17,6 @@ using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
 using KNote.Server.Hubs;
 using KNote.MessageBroker.RabbitMQ;
-using System.Text.Json.Serialization;
 
 
 /////////////////////////////////////////////////////////////////
@@ -76,9 +74,6 @@ builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
 
 builder.Services.AddScoped<IFileStore, LocalFileStore>();
 builder.Services.AddHttpContextAccessor();
-
-//builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
-//   options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
