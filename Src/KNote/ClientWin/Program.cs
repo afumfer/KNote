@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-
+using System.Diagnostics;
 using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
