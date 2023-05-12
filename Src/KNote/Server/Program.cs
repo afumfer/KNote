@@ -31,10 +31,13 @@ var builder = WebApplication.CreateBuilder(args);
 /////////////////////////////////////////////////////////////////
 
 var appSettingsSection = builder.Configuration.GetSection("AppSettings");
-builder.Services.Configure<AppSettings>(appSettingsSection);
+var connectionStringsSection = builder.Configuration.GetSection("ConnectionStrings");
 
-var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
-var connectionStrings = builder.Configuration.GetSection("ConnectionStrings").Get<ConnectionStrings>();
+builder.Services.Configure<AppSettings>(appSettingsSection);
+builder.Services.Configure<ConnectionStrings>(connectionStringsSection);
+
+var appSettings = appSettingsSection.Get<AppSettings>();
+var connectionStrings = connectionStringsSection.Get<ConnectionStrings>();
 
 var repositoryRef = new RepositoryRef
 {
@@ -74,11 +77,9 @@ builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
 
 builder.Services.AddScoped<IFileStore, LocalFileStore>();
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddResponseCompression(opts =>
@@ -124,6 +125,8 @@ app.MapHub<ChatHub>("/chathub");
 app.MapFallbackToFile("index.html");
 
 // Experimental ------------------------------------------------------------------------
+//
+//  TODO: Convert in extension method
 //
 // To use the message broker force an instance of the service layer at the application
 // level with the use of the enable activeMessageBroker parameter in its constructor.

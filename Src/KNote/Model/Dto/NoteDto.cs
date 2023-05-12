@@ -57,8 +57,9 @@ public class NoteDto : NoteInfoDto
                 OnPropertyChanged("KAttributesDto");
             }
         }
-    } 
-        
+    }
+
+    // TODO: Hack, this is temporary to solve the location of resources. We have to find another solution.
     public string ModelToViewDescription(RepositoryRef repositoryRef)
     {
         if (repositoryRef == null)
@@ -83,6 +84,7 @@ public class NoteDto : NoteInfoDto
             .Replace(repositoryRef.ResourcesContainer, replaceString);
     }
 
+    // TODO: Hack, this is temporary to solve the location of resources. We have to find another solution.
     public string ViewToModelDescription(RepositoryRef repositoryRef, string contentView)
     {
         if (repositoryRef == null || string.IsNullOrEmpty(contentView))

@@ -9,6 +9,7 @@ using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using System.IO;
 
 namespace KNote.Server.Controllers;
 
@@ -40,7 +41,12 @@ public class NotesController : ControllerBase
         {
             var resApi = await _service.Notes.GetAllAsync();
             if (resApi.IsValid)
+            {
+                // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
+                ListNotesPersonalizeResourceForDescription(resApi.Entity, _service.RepositoryRef); 
+                // ----
                 return Ok(resApi);
+            }
             else
                 return BadRequest(resApi);
         }
@@ -58,12 +64,17 @@ public class NotesController : ControllerBase
     {
         try
         {                
-            var kresApi = await _service.Notes.GetFilter(notesFilter);
+            var resApi = await _service.Notes.GetFilter(notesFilter);
                             
-            if (kresApi.IsValid)
-                return Ok(kresApi);
+            if (resApi.IsValid)
+            {
+                // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
+                ListNotesPersonalizeResourceForDescription(resApi.Entity, _service.RepositoryRef);
+                // ----
+                return Ok(resApi);
+            }
             else
-                return BadRequest(kresApi);
+                return BadRequest(resApi);
         }
         catch (Exception ex)
         {
@@ -86,12 +97,17 @@ public class NotesController : ControllerBase
             notesSearch.PageIdentifier.PageSize = notesSearchParam.PageSize;
             // .....
 
-            var kresApi = await _service.Notes.GetSearch(notesSearch);
+            var resApi = await _service.Notes.GetSearch(notesSearch);
             
-            if (kresApi.IsValid)
-                return Ok(kresApi);
+            if (resApi.IsValid)
+            {
+                // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
+                ListNotesPersonalizeResourceForDescription(resApi.Entity, _service.RepositoryRef);
+                // ----
+                return Ok(resApi);
+            }
             else
-                return BadRequest(kresApi);
+                return BadRequest(resApi);
         }
         catch (Exception ex)
         {
@@ -109,7 +125,12 @@ public class NotesController : ControllerBase
         {
             var resApi = await _service.Notes.HomeNotesAsync();
             if (resApi.IsValid)
+            {
+                // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
+                ListNotesPersonalizeResourceForDescription(resApi.Entity, _service.RepositoryRef);
+                // ----
                 return Ok(resApi);
+            }
             else
                 return BadRequest(resApi);
 
@@ -130,6 +151,9 @@ public class NotesController : ControllerBase
             var resApi = await _service.Notes.GetAsync(noteId);
             if (resApi.IsValid)
             {
+                // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
+                resApi.Entity.Description = PersonalizeResourceForDescription(resApi.Entity.Description, _service.RepositoryRef); 
+                // ---
                 return Ok(resApi);
             }
             else
@@ -385,4 +409,29 @@ public class NotesController : ControllerBase
             return BadRequest(kresApi);
         }
     }
+
+    #region Private methods
+
+    private string PersonalizeResourceForDescription(string description, RepositoryRef repositoryRef)
+    {
+        if (repositoryRef == null || string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
+            return description;
+
+        string replaceString = "";
+        replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+        replaceString = replaceString.Replace(@"\", @"/");
+        
+        return description?
+            .Replace(repositoryRef.ResourcesContainer, replaceString);
+    }
+
+    private void ListNotesPersonalizeResourceForDescription(List<NoteInfoDto>notes, RepositoryRef repositoryRef)
+    {
+        foreach(var n in notes)
+        {
+            n.Description = PersonalizeResourceForDescription(n.Description, repositoryRef);
+        }
+    }
+
+    #endregion 
 }
