@@ -43,7 +43,7 @@ public class NotesController : ControllerBase
             if (resApi.IsValid)
             {
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
-                ListNotesPersonalizeResourceForDescription(resApi.Entity, _service.RepositoryRef); 
+                ListNotesUpdateResourceInDescriptionForRead(resApi.Entity, _service.RepositoryRef); 
                 // ----
                 return Ok(resApi);
             }
@@ -69,7 +69,7 @@ public class NotesController : ControllerBase
             if (resApi.IsValid)
             {
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
-                ListNotesPersonalizeResourceForDescription(resApi.Entity, _service.RepositoryRef);
+                ListNotesUpdateResourceInDescriptionForRead(resApi.Entity, _service.RepositoryRef);
                 // ----
                 return Ok(resApi);
             }
@@ -102,7 +102,7 @@ public class NotesController : ControllerBase
             if (resApi.IsValid)
             {
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
-                ListNotesPersonalizeResourceForDescription(resApi.Entity, _service.RepositoryRef);
+                ListNotesUpdateResourceInDescriptionForRead(resApi.Entity, _service.RepositoryRef);
                 // ----
                 return Ok(resApi);
             }
@@ -127,7 +127,7 @@ public class NotesController : ControllerBase
             if (resApi.IsValid)
             {
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
-                ListNotesPersonalizeResourceForDescription(resApi.Entity, _service.RepositoryRef);
+                ListNotesUpdateResourceInDescriptionForRead(resApi.Entity, _service.RepositoryRef);
                 // ----
                 return Ok(resApi);
             }
@@ -152,7 +152,7 @@ public class NotesController : ControllerBase
             if (resApi.IsValid)
             {
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
-                resApi.Entity.Description = PersonalizeResourceForDescription(resApi.Entity.Description, _service.RepositoryRef); 
+                resApi.Entity.Description = UpdateResourceInDescriptionForRead(resApi.Entity.Description, _service.RepositoryRef); 
                 // ---
                 return Ok(resApi);
             }
@@ -198,6 +198,7 @@ public class NotesController : ControllerBase
     {            
         try
         {
+            note.Description = UpdateResourceInDescriptionForWrite(note.Description, _service.RepositoryRef);
             var resApi = await _service.Notes.SaveAsync(note);
             if (resApi.IsValid)
             {                    
@@ -389,7 +390,6 @@ public class NotesController : ControllerBase
         }
     }
 
-
     [HttpDelete("tasks/{id}")]    // DELETE api/notes/deletenotetask/guid
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> DeleteTask(Guid id)
@@ -412,7 +412,11 @@ public class NotesController : ControllerBase
 
     #region Private methods
 
-    private string PersonalizeResourceForDescription(string description, RepositoryRef repositoryRef)
+    #region Manage resource names referenced in note descriptions
+    
+    // TODO: The following three methods will be translated to frontend application code to release resources on the server.
+
+    private string UpdateResourceInDescriptionForRead(string description, RepositoryRef repositoryRef)
     {
         if (repositoryRef == null || string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
             return description;
@@ -420,18 +424,34 @@ public class NotesController : ControllerBase
         string replaceString = "";
         replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
         replaceString = replaceString.Replace(@"\", @"/");
-        
+
         return description?
             .Replace(repositoryRef.ResourcesContainer, replaceString);
     }
 
-    private void ListNotesPersonalizeResourceForDescription(List<NoteInfoDto>notes, RepositoryRef repositoryRef)
+    private void ListNotesUpdateResourceInDescriptionForRead(List<NoteInfoDto>notes, RepositoryRef repositoryRef)
     {
         foreach(var n in notes)
         {
-            n.Description = PersonalizeResourceForDescription(n.Description, repositoryRef);
+            n.Description = UpdateResourceInDescriptionForRead(n.Description, repositoryRef);
         }
     }
 
+    private string UpdateResourceInDescriptionForWrite(string description, RepositoryRef repositoryRef)
+    {
+        if (repositoryRef == null || string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
+            return description;
+
+        string replaceString = "";
+        replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+        replaceString = replaceString.Replace(@"\", @"/");
+
+        var newDescription = description?
+            .Replace(replaceString, repositoryRef.ResourcesContainer);
+        return newDescription;
+    }
+
     #endregion 
+
+    #endregion
 }

@@ -18,6 +18,9 @@ using DP = KNote.Repository.Dapper;
 using KNote.Server.Hubs;
 using KNote.MessageBroker.RabbitMQ;
 
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 /////////////////////////////////////////////////////////////////
 /// Create HostBuilder
@@ -90,6 +93,25 @@ builder.Services.AddResponseCompression(opts =>
 
 builder.Services.AddSingleton<KntMessageBroker>();
 
+// Experimental ------------------------------------------------------------------------
+//
+//  TODO: Convert in extension method
+//
+// To use the message broker force an instance of the service layer at the application
+// level with the use of the enable activeMessageBroker parameter in its constructor.
+// (No use: "var kntServiceForMessageBroker = app.Services.GetRequiredService<KntService>();")
+//
+KntService kntServiceForMessageBroker;
+if (appSettings.ActivateMessageBroker)
+{
+    if (connectionStrings.ORM == "Dapper")
+        kntServiceForMessageBroker = new KntService(new DP.KntRepository(repositoryRef), true);
+    else if (connectionStrings.ORM == "EntityFramework")
+        kntServiceForMessageBroker = new KntService(new EF.KntRepository(repositoryRef), true);
+}
+// -------------------------------------------------------------------------------------
+
+
 /////////////////////////////////////////////////////////////////
 /// Build App and configure the HTTP request pipeline.
 /////////////////////////////////////////////////////////////////
@@ -112,9 +134,18 @@ app.UsePathBase("/KNote");
 
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
-app.UseStaticFiles();
-app.UseRouting();
 
+app.UseStaticFiles();
+
+// Middleware to serve files from ResourcesContainerRootUrl on ResourcesContainerRootPath.
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        appSettings.ResourcesContainerRootPath),
+    RequestPath = appSettings.ResourcesContainerRootUrl
+});
+
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("KntPolicy");
@@ -123,25 +154,5 @@ app.MapRazorPages();
 app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
 app.MapFallbackToFile("index.html");
-
-// Experimental ------------------------------------------------------------------------
-//
-//  TODO: Convert in extension method
-//
-// To use the message broker force an instance of the service layer at the application
-// level with the use of the enable activeMessageBroker parameter in its constructor.
-//
-//var eventBus = app.Services.GetRequiredService<KntService>();
-//eventBus.xxx
-//
-KntService kntService;
-if (appSettings.ActivateMessageBroker)
-{
-    if (connectionStrings.ORM == "Dapper")
-        kntService = new KntService(new DP.KntRepository(repositoryRef), true);
-    else if (connectionStrings.ORM == "EntityFramework")
-        kntService = new KntService(new EF.KntRepository(repositoryRef), true);
-}
-// -------------------------------------------------------------------------------------
 
 app.Run();

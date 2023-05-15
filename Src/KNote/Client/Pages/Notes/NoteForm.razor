@@ -317,9 +317,9 @@
     private void InsertInDescription(ResourceInfoDto resource)
     {
         if (resource.FileType == "image/jpeg")
-            Note.Description += "\n\n![alt text](" + resource?.RelativeUrl + " '" + resource?.Description + "' )";
+            Note.Description += "\n\n![alt text](" + resource?.FullUrl + " '" + resource?.Description + "' )";
         else
-            Note.Description += "\n\n<a href=" + resource?.RelativeUrl + " target='_blank'>" + resource?.Description + "</a>";
+            Note.Description += "\n\n<a href=" + resource?.FullUrl + " target='_blank'>" + resource?.Description + "</a>";
 
         tabsSelectedIndex = 0;
         StateHasChanged();        
