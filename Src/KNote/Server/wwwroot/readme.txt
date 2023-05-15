@@ -1,1 +1,0 @@
-﻿This directory is the repository of files for the KNote database, only for the development environment. 
