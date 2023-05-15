@@ -214,9 +214,13 @@ public class KntChatGPTComponent : ComponentBase
 
         await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
         {
-            var res = result.FirstChoice.ToString()?.Replace("\n", "\r\n");
-            tempResult.Append(res);            
-            StreamToken?.Invoke(this, new ComponentEventArgs<string>(res));
+            foreach (var choice in result.Choices.Where(choice => choice.Delta?.Content != null))
+            {
+                // Partial response content
+                var res = result.FirstChoice.ToString()?.Replace("\n", "\r\n");
+                tempResult.Append(res);
+                StreamToken?.Invoke(this, new ComponentEventArgs<string>(res));
+            }
         });
 
         stopwatch.Stop();
