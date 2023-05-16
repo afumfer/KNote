@@ -302,7 +302,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     public (string, string) UtilGetResourceUrls(ResourceDto resource)
     {
-        string rootUrl = Repository.RespositoryRef.ResourcesContainerCacheRootUrl;
+        string rootUrl = Repository.RespositoryRef.ResourcesContainerRootUrl;
         string relativeUrl;
         string fullUrl;
 
@@ -331,7 +331,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         if (resource == null)
             return false;
 
-        string rootCacheResource = Repository.RespositoryRef.ResourcesContainerCacheRootPath;
+        string rootCacheResource = Repository.RespositoryRef.ResourcesContainerRootPath;
         if (string.IsNullOrEmpty(resource.Container))
         {
             if (forceUpdateDto)
@@ -377,7 +377,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     public string UtilGetResourcePath(ResourceDto resource)
     {        
-        string rootPath = Repository.RespositoryRef.ResourcesContainerCacheRootPath;
+        string rootPath = Repository.RespositoryRef.ResourcesContainerRootPath;
         string relativePath;
         string fullPath;
 

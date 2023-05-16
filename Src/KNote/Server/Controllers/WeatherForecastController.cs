@@ -23,14 +23,11 @@ public class WeatherForecastController : ControllerBase
 
     private readonly ILogger<WeatherForecastController> logger;
     IKntService service;
-    private readonly AppSettings appSettings;
-
-
-    public WeatherForecastController(ILogger<WeatherForecastController> logger, IKntService service, IOptions<AppSettings> appSettings)
+    
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IKntService service)
     {
         this.logger = logger;
-        this.service = service;
-        this.appSettings = appSettings.Value;
+        this.service = service;        
     }
 
     [HttpGet]
@@ -57,19 +54,5 @@ public class WeatherForecastController : ControllerBase
     {
         return (await service.Folders.GetTreeAsync()).Entity;
     }
-
-
-    [HttpGet("GetAppSettings")]
-    public IEnumerable<string> GetAppSettings()
-    {
-        string[] values = new string[] 
-        { 
-            appSettings.ResourcesContainer,
-            appSettings.ResourcesContainerRootPath, 
-            appSettings.ResourcesContainerRootUrl 
-        };
-        return values;
-    }
-
 
 }

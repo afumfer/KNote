@@ -838,7 +838,7 @@ public partial class KntLabForm : Form, IViewBase
                     if (n.NotaEx[0] == '\\')
                         n.NotaEx = n.NotaEx.Substring(1);
 
-                    string fileImport = Path.Combine(new[] { service.RepositoryRef.ResourcesContainerCacheRootPath, service.RepositoryRef.ResourcesContainer, n.NotaEx });
+                    string fileImport = Path.Combine(new[] { service.RepositoryRef.ResourcesContainerRootPath, service.RepositoryRef.ResourcesContainer, n.NotaEx });
 
                     ResourceDto resource = new ResourceDto
                     {

@@ -49,8 +49,8 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
             Model.Orm = repositoryForEdit.Orm;
             Model.ResourcesContainer = repositoryForEdit.ResourcesContainer;
             Model.ResourceContentInDB = repositoryForEdit.ResourceContentInDB;
-            Model.ResourcesContainerCacheRootPath = repositoryForEdit.ResourcesContainerCacheRootPath;
-            Model.ResourcesContainerCacheRootUrl = repositoryForEdit.ResourcesContainerCacheRootUrl;
+            Model.ResourcesContainerRootPath = repositoryForEdit.ResourcesContainerRootPath;
+            Model.ResourcesContainerRootUrl = repositoryForEdit.ResourcesContainerRootUrl;
             Model.SetIsDirty(false);
             
             if (refreshView)
@@ -98,8 +98,8 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
                 repositoryForEdit.Orm = Model.Orm;
                 repositoryForEdit.ResourcesContainer = Model.ResourcesContainer;
                 repositoryForEdit.ResourceContentInDB = Model.ResourceContentInDB;
-                repositoryForEdit.ResourcesContainerCacheRootPath = Model.ResourcesContainerCacheRootPath;
-                repositoryForEdit.ResourcesContainerCacheRootUrl = Model.ResourcesContainerCacheRootUrl;
+                repositoryForEdit.ResourcesContainerRootPath = Model.ResourcesContainerRootPath;
+                repositoryForEdit.ResourcesContainerRootUrl = Model.ResourcesContainerRootUrl;
                 Model.SetIsDirty(false);
                 Store.SaveConfig();
                 OnSavedEntity(Model);

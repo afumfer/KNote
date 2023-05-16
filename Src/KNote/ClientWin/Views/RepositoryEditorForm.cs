@@ -186,8 +186,8 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         textAliasName.Text = _com.Model.Alias;
         textResourcesContainer.Text = _com.Model.ResourcesContainer;
         checkResourceContentInDB.Checked = _com.Model.ResourceContentInDB;
-        textResourcesContainerRoot.Text = _com.Model.ResourcesContainerCacheRootPath;
-        textResourcesContainerUrl.Text = _com.Model.ResourcesContainerCacheRootUrl;
+        textResourcesContainerRoot.Text = _com.Model.ResourcesContainerRootPath;
+        textResourcesContainerUrl.Text = _com.Model.ResourcesContainerRootUrl;
 
         if (!string.IsNullOrEmpty(_com.Model.ConnectionString))
         {                
@@ -215,8 +215,8 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         _com.Model.Alias = textAliasName.Text;
         _com.Model.ResourcesContainer = textResourcesContainer.Text;
         _com.Model.ResourceContentInDB = checkResourceContentInDB.Checked;
-        _com.Model.ResourcesContainerCacheRootPath = textResourcesContainerRoot.Text;
-        _com.Model.ResourcesContainerCacheRootUrl = textResourcesContainerUrl.Text;
+        _com.Model.ResourcesContainerRootPath = textResourcesContainerRoot.Text;
+        _com.Model.ResourcesContainerRootUrl = textResourcesContainerUrl.Text;
         if (radioSqLite.Checked)
         {
             _com.Model.Provider = "Microsoft.Data.Sqlite";

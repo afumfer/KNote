@@ -85,32 +85,32 @@ public class RepositoryRef : SmartModelDtoBase
         }
     }
 
-    private string _resourcesContainerCacheRootPath;
+    private string _resourcesContainerRootPath;
     [Required(ErrorMessage = "Resources continer root folder is required.")]
-    public string ResourcesContainerCacheRootPath
+    public string ResourcesContainerRootPath
     {
-        get { return _resourcesContainerCacheRootPath; }
+        get { return _resourcesContainerRootPath; }
         set
         {
-            if (_resourcesContainerCacheRootPath != value)
+            if (_resourcesContainerRootPath != value)
             {
-                _resourcesContainerCacheRootPath = value;
-                OnPropertyChanged("ResourcesContainerCacheRootPath");
+                _resourcesContainerRootPath = value;
+                OnPropertyChanged("ResourcesContainerRootPath");
             }
         }
     }
 
-    private string _resourcesContainerCacheRootUrl;
+    private string _resourcesContainerRootUrl;
     [Required(ErrorMessage = "Resources continer URL is required.")]
-    public string ResourcesContainerCacheRootUrl
+    public string ResourcesContainerRootUrl
     {
-        get { return _resourcesContainerCacheRootUrl; }
+        get { return _resourcesContainerRootUrl; }
         set
         {
-            if (_resourcesContainerCacheRootUrl != value)
+            if (_resourcesContainerRootUrl != value)
             {
-                _resourcesContainerCacheRootUrl = value;
-                OnPropertyChanged("ResourcesContainerCacheRootUrl");
+                _resourcesContainerRootUrl = value;
+                OnPropertyChanged("ResourcesContainerRootUrl");
             }
         }
     }
@@ -186,12 +186,12 @@ public class RepositoryRef : SmartModelDtoBase
            new ValidationContext(this, null, null) { MemberName = "ResourcesContainer" },
            results);
 
-        Validator.TryValidateProperty(this.ResourcesContainerCacheRootPath,
-           new ValidationContext(this, null, null) { MemberName = "ResourcesContainerCacheRootPath" },
+        Validator.TryValidateProperty(this.ResourcesContainerRootPath,
+           new ValidationContext(this, null, null) { MemberName = "ResourcesContainerRootPath" },
            results);
 
-        Validator.TryValidateProperty(this.ResourcesContainerCacheRootUrl,
-           new ValidationContext(this, null, null) { MemberName = "ResourcesContainerCacheRootUrl" },
+        Validator.TryValidateProperty(this.ResourcesContainerRootUrl,
+           new ValidationContext(this, null, null) { MemberName = "ResourcesContainerRootUrl" },
            results);
 
         // ---
@@ -205,11 +205,11 @@ public class RepositoryRef : SmartModelDtoBase
              , new[] { "ConnectionString" }));
         }
 
-        if (!Directory.Exists(ResourcesContainerCacheRootPath))
+        if (!Directory.Exists(ResourcesContainerRootPath))
         {
             results.Add(new ValidationResult
              ("KMSG: Resources root path directory does not exist."
-             , new[] { "ResourcesContainerCacheRootPath" }));
+             , new[] { "ResourcesContainerRootPath" }));
         }
 
         if (Orm != "Dapper" && Orm != "EntityFramework")

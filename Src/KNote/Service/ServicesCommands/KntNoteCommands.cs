@@ -541,7 +541,7 @@ public class KntNotesDeleteResourceAsyncCommand : KntCommandServiceBase<Guid, Re
                 try
                 {
                     var repRef = Repository.RespositoryRef;
-                    var fullPathRec = Path.Combine(repRef.ResourcesContainerCacheRootPath, result.Entity.Container, result.Entity.Name);
+                    var fullPathRec = Path.Combine(repRef.ResourcesContainerRootPath, result.Entity.Container, result.Entity.Name);
                     if (File.Exists(fullPathRec))
                         File.Delete(fullPathRec);
                 }

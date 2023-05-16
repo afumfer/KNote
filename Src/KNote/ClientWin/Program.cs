@@ -98,8 +98,8 @@ static class Program
                 Provider = "Microsoft.Data.Sqlite",
                 Orm = "EntityFramework",
                 ResourcesContainer = "NotesResources",
-                ResourcesContainerCacheRootPath = pathResourcesCache,
-                ResourcesContainerCacheRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
+                ResourcesContainerRootPath = pathResourcesCache,
+                ResourcesContainerRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
             };
 
             var initialServiceRef = new ServiceRef(r0, store.AppUserName);

@@ -66,16 +66,16 @@ public class NoteDto : NoteInfoDto
             return Description;
             
         string replaceString = "";
-        if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
+        if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerRootUrl))
         {
-            replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+            replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootUrl, repositoryRef?.ResourcesContainer);
             replaceString = replaceString.Replace(@"\", @"/");
         }
         else
         {
-            if (repositoryRef.ResourcesContainerCacheRootPath != null && repositoryRef?.ResourcesContainer != null)
+            if (repositoryRef.ResourcesContainerRootPath != null && repositoryRef?.ResourcesContainer != null)
             {
-                replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootPath, repositoryRef?.ResourcesContainer);
+                replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootPath, repositoryRef?.ResourcesContainer);
                 replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             }
         }
@@ -91,14 +91,14 @@ public class NoteDto : NoteInfoDto
             return contentView;
 
         string replaceString;
-        if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
+        if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerRootUrl))
         {
-            replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+            replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootUrl, repositoryRef?.ResourcesContainer);
             replaceString = replaceString.Replace(@"\", @"/");
         }
         else
         {
-            replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootPath, repositoryRef?.ResourcesContainer);
+            replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootPath, repositoryRef?.ResourcesContainer);
             replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
 

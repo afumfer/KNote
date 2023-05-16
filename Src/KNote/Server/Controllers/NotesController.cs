@@ -28,10 +28,10 @@ public class NotesController : ControllerBase
 
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
 
-        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerCacheRootPath))
-            _service.RepositoryRef.ResourcesContainerCacheRootPath = _fileStore.GetResourcesContainerRootPath();
-        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerCacheRootUrl))
-            _service.RepositoryRef.ResourcesContainerCacheRootUrl = _fileStore.GetResourcesContainerRootUrl();
+        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerRootPath))
+            _service.RepositoryRef.ResourcesContainerRootPath = _fileStore.GetResourcesContainerRootPath();
+        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerRootUrl))
+            _service.RepositoryRef.ResourcesContainerRootUrl = _fileStore.GetResourcesContainerRootUrl();
     }
 
     [HttpGet]   // GET api/notes
@@ -418,11 +418,11 @@ public class NotesController : ControllerBase
 
     private string UpdateResourceInDescriptionForRead(string description, RepositoryRef repositoryRef)
     {
-        if (repositoryRef == null || string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
+        if (repositoryRef == null || string.IsNullOrEmpty(repositoryRef?.ResourcesContainerRootUrl))
             return description;
 
         string replaceString = "";
-        replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+        replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootUrl, repositoryRef?.ResourcesContainer);
         replaceString = replaceString.Replace(@"\", @"/");
 
         return description?
@@ -439,11 +439,11 @@ public class NotesController : ControllerBase
 
     private string UpdateResourceInDescriptionForWrite(string description, RepositoryRef repositoryRef)
     {
-        if (repositoryRef == null || string.IsNullOrEmpty(repositoryRef?.ResourcesContainerCacheRootUrl))
+        if (repositoryRef == null || string.IsNullOrEmpty(repositoryRef?.ResourcesContainerRootUrl))
             return description;
 
         string replaceString = "";
-        replaceString = Path.Combine(repositoryRef?.ResourcesContainerCacheRootUrl, repositoryRef?.ResourcesContainer);
+        replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootUrl, repositoryRef?.ResourcesContainer);
         replaceString = replaceString.Replace(@"\", @"/");
 
         var newDescription = description?

@@ -172,7 +172,7 @@
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
 
-        settings = await Http.GetFromJsonAsync<string[]>("api/WeatherForecast/GetAppSettings");
+        settings = await Http.GetFromJsonAsync<string[]>("api/SystemValues/GetAppSettings");
 
         entries = Directory.GetDirectories(@"/")
                            .Where(entry =>

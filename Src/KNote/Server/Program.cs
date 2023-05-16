@@ -34,29 +34,17 @@ var builder = WebApplication.CreateBuilder(args);
 /////////////////////////////////////////////////////////////////
 
 var appSettingsSection = builder.Configuration.GetSection("AppSettings");
-var connectionStringsSection = builder.Configuration.GetSection("ConnectionStrings");
+var repositoryRefSection = builder.Configuration.GetSection("RepositoryRef");
 
 builder.Services.Configure<AppSettings>(appSettingsSection);
-builder.Services.Configure<ConnectionStrings>(connectionStringsSection);
+builder.Services.Configure<RepositoryRef>(repositoryRefSection);
 
 var appSettings = appSettingsSection.Get<AppSettings>();
-var connectionStrings = connectionStringsSection.Get<ConnectionStrings>();
+var repositoryRef = repositoryRefSection.Get<RepositoryRef>();
 
-var repositoryRef = new RepositoryRef
-{
-    Alias = KntConst.AppName,
-    ConnectionString = connectionStrings.Connection,
-    Provider = connectionStrings.Provider,
-    Orm = connectionStrings.ORM,
-    ResourceContentInDB = appSettings.ResourcesContentInDB,
-    ResourcesContainer = appSettings.ResourcesContainer,
-    ResourcesContainerCacheRootPath = appSettings.ResourcesContainerRootPath,
-    ResourcesContainerCacheRootUrl = appSettings.ResourcesContainerRootUrl
-};
-
-if (connectionStrings.ORM == "Dapper")
+if (repositoryRef.Orm == "Dapper")
     builder.Services.AddScoped<IKntRepository>(provider => new DP.KntRepository(repositoryRef));
-else if (connectionStrings.ORM == "EntityFramework")
+else if (repositoryRef.Orm == "EntityFramework")
     builder.Services.AddScoped<IKntRepository>(provider => new EF.KntRepository(repositoryRef));
 
 builder.Services.AddScoped<IKntService, KntService>();
@@ -104,9 +92,9 @@ builder.Services.AddSingleton<KntMessageBroker>();
 KntService kntServiceForMessageBroker;
 if (appSettings.ActivateMessageBroker)
 {
-    if (connectionStrings.ORM == "Dapper")
+    if (repositoryRef.Orm == "Dapper")
         kntServiceForMessageBroker = new KntService(new DP.KntRepository(repositoryRef), true);
-    else if (connectionStrings.ORM == "EntityFramework")
+    else if (repositoryRef.Orm == "EntityFramework")
         kntServiceForMessageBroker = new KntService(new EF.KntRepository(repositoryRef), true);
 }
 // -------------------------------------------------------------------------------------
@@ -137,13 +125,17 @@ app.UseBlazorFrameworkFiles();
 
 app.UseStaticFiles();
 
-// Middleware to serve files from ResourcesContainerRootUrl on ResourcesContainerRootPath.
-app.UseStaticFiles(new StaticFileOptions
+// Middleware to serve files from ResourcesContainerRootUrl on ResourcesContainerRootPath
+// Personalize in appsetting
+if (appSettings.MountResourceContainerOnStartup)
 {
-    FileProvider = new PhysicalFileProvider(
-        appSettings.ResourcesContainerRootPath),
-    RequestPath = appSettings.ResourcesContainerRootUrl
-});
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+            repositoryRef.ResourcesContainerRootPath),
+        RequestPath = repositoryRef.ResourcesContainerRootUrl
+    });
+}
 
 app.UseRouting();
 app.UseAuthentication();

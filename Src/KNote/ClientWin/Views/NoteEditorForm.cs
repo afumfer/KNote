@@ -1211,11 +1211,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         var repRef = _com.Service.RepositoryRef;
         var tmpFile = Path.Combine(_selectedResource.Container, _selectedResource.Name);
 
-        var containerWithRootUrl = Path.Combine(repRef.ResourcesContainerCacheRootUrl, repRef.ResourcesContainer);
-        if (!string.IsNullOrEmpty(repRef.ResourcesContainerCacheRootUrl))
+        var containerWithRootUrl = Path.Combine(repRef.ResourcesContainerRootUrl, repRef.ResourcesContainer);
+        if (!string.IsNullOrEmpty(repRef.ResourcesContainerRootUrl))
             tmpFile = tmpFile.Replace(repRef.ResourcesContainer, containerWithRootUrl);
         else
-            tmpFile = Path.Combine(repRef.ResourcesContainerCacheRootPath, tmpFile);
+            tmpFile = Path.Combine(repRef.ResourcesContainerRootPath, tmpFile);
 
         tmpFile = tmpFile.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
