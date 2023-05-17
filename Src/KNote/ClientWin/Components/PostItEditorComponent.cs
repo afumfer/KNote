@@ -317,7 +317,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
         {
             NoteId = Model.NoteId,
             UserId = await PostItGetUserId(),
-            ActionType = EnumActionType.NoteAlarm,
+            ActionType = EnumActionType.UserAlarm,
             NotificationType = EnumNotificationType.PostIt,
             AlarmType = EnumAlarmType.Standard,
             AlarmDateTime = alarmDateTime,
