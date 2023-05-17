@@ -52,5 +52,8 @@ public interface IKntNoteService
     (string, string) UtilGetResourceUrls(ResourceDto resource);
     bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);
     string UtilGetResourcePath(ResourceDto resource);
-    #endregion 
+    string UtilUpdateResourceInDescriptionForRead(string description);
+    string UtilUpdateResourceInDescriptionForWrite(string description);
+
+    #endregion
 }

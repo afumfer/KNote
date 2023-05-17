@@ -330,7 +330,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         RefreshStatus();
         _selectedFolderId = _com.Model.FolderId;            
         if (_com.Model?.ContentType == "html")
-            htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
+            //htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
+            htmlDescription.BodyHtml = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description);
         else if (_com.Model?.ContentType == "navigation")
         {
             webView2.TextUrl = _com.Model.Description;            
@@ -340,8 +341,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 await webView2.NavigateToString(" ");
         }
         else
-        {             
-            textDescription.Text = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
+        {
+            //textDescription.Text = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
+            textDescription.Text = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description);
             textDescription.SelectionStart = 0;
         }
     }
@@ -349,11 +351,13 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     private void ControlsToModel()
     {
         if (_com.Model.ContentType == "html")
-            _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
+            //_com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
+            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml);
         else if (_com.Model.ContentType == "navigation")            
             _com.Model.Description = webView2.TextUrl;
         else
-            _com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);
+            //_com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);
+            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text);
 
         _com.Model.FolderId = _selectedFolderId;
         _com.Model.Topic = labelCaption.Text;

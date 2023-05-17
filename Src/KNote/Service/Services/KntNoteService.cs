@@ -390,5 +390,34 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return fullPath;
     }
 
+    public string UtilUpdateResourceInDescriptionForRead(string description)
+    {        
+        if (Repository.RespositoryRef == null || string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootUrl))
+            return description;
+
+        string replaceString = "";
+        replaceString = Path.Combine(Repository.RespositoryRef.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
+        //replaceString = replaceString.Replace(@"\", @"/");
+        replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        return description?
+            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString);
+    }
+
+    public string UtilUpdateResourceInDescriptionForWrite(string description)
+    {
+        if (Repository.RespositoryRef == null || string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootUrl))
+            return description;
+
+        string replaceString = "";
+        replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
+        //replaceString = replaceString.Replace(@"\", @"/");
+        replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        var newDescription = description?
+            .Replace(replaceString, Repository.RespositoryRef.ResourcesContainer);
+        return newDescription;
+    }
+
     #endregion
 }
