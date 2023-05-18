@@ -12,6 +12,7 @@ using KNote.MessageBroker;
 using KNote.MessageBroker.RabbitMQ;
 using Microsoft.IdentityModel.Tokens;
 using System.Xml.XPath;
+using System.IO;
 
 namespace KNote.Service.Core;
 
@@ -261,13 +262,7 @@ public class KntService : IKntService, IDisposable
 
             // Publisher and consumers config            
             string publisher = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_PUBLISH", "EXCHANGE_PUBLISH");  // Echange;Type        
-
-            //var queuesConsume = new List<string>();
-            //string queueConsume = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_CONSUME", "EXCHANGE_CONSUME_1");  // queue;bind-echange;routing            
-            //queuesConsume.Add(queueConsume);
-
             var queuesConsume = GetSystemVariables("KNT_MESSAGEBROKER_CONFIG_CONSUME");  // queue;bind-echange;routing            
-
 
             // KntMessageBroker configuration            
             _messageBroker.CreateConnection(hostName, virtualHost, port, userName, password);
@@ -317,8 +312,7 @@ public class KntService : IKntService, IDisposable
         if (resExisting.Entity == null)
             noteInput.NoteNumber = 0;  //GetNextNoteNumber();
         else
-            noteInput.NoteNumber = resExisting.Entity.NoteNumber;
-        // noteInput.Topic += $" - (Merged: {DateTime.Now})"; /// for debug ...
+            noteInput.NoteNumber = resExisting.Entity.NoteNumber;        
         var f = (Task.Run(() => Folders.GetHomeAsync()).Result);
         noteInput.FolderId = f.Entity.FolderId;
         noteInput.FolderDto = f.Entity;
@@ -327,9 +321,9 @@ public class KntService : IKntService, IDisposable
         noteInput.NoteTypeDto = null;
         noteInput.Tags = noteInput.Tags.Replace(KntConst.TagForMerging, "");
         foreach (var r in noteInput.Resources)
-        {
-            // TODO: refactor this conversión pending ...
-            noteInput.Description = noteInput.Description.Replace(r.Container.Replace(@"\", @"/"), Repository.RespositoryRef.ResourcesContainer);
+        {            
+            noteInput.Description = noteInput.Description.Replace(r.Container.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar), 
+                Repository.RespositoryRef.ResourcesContainer);            
             r.Container = Repository.RespositoryRef.ResourcesContainer;
             r.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
         }

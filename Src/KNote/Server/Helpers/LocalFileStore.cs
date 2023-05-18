@@ -46,13 +46,13 @@ public class LocalFileStore : IFileStore
 
         var actualUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}{httpContextAccessor.HttpContext.Request.PathBase}";
         var fullUrl = Path.Combine(actualUrl, container, filename);
-        return fullUrl.Replace(@"\", @"/");
+        return fullUrl.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 
     public string GetRelativeUrl(string filename, string container)
     {            
         var relativeUrl = Path.Combine(container, filename);
-        return relativeUrl.Replace(@"\", @"/");
+        return relativeUrl.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 
     public string GetResourcesContainerRootUrl()

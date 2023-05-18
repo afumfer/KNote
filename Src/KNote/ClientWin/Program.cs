@@ -99,7 +99,7 @@ static class Program
                 Orm = "EntityFramework",
                 ResourcesContainer = "NotesResources",
                 ResourcesContainerRootPath = pathResourcesCache,
-                ResourcesContainerRootUrl = @"file:///" + pathResourcesCache.Replace(@"\", @"/")
+                ResourcesContainerRootUrl = @"file:///" + pathResourcesCache.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             };
 
             var initialServiceRef = new ServiceRef(r0, store.AppUserName);

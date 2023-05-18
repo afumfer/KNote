@@ -198,10 +198,21 @@ public class NotesController : ControllerBase
     {            
         try
         {
+            // Hack to make it compatible with the desktop application. ----------------------------------
             note.Description = _service.Notes.UtilUpdateResourceInDescriptionForWrite(note.Description);
+            if (note.Description.StartsWith(@"<BODY"))
+                note.ContentType = "html";
+            else
+            {                
+                note.Description = note.Description.Replace("\n", "\r\n");
+                note.ContentType = "markdown";
+            }
+            // -------------------------------------------------------------------------------------------
+
             var resApi = await _service.Notes.SaveAsync(note);
             if (resApi.IsValid)
-            {                    
+            {      
+                resApi.Entity.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(resApi.Entity.Description);
                 return Ok(resApi);
             }
 
@@ -221,8 +232,7 @@ public class NotesController : ControllerBase
     public async Task<IActionResult> Delete(Guid id)
     {
         try
-        {
-            //var resApi = await _service.Notes.DeleteAsync(id);
+        {            
             var resApi = await _service.Notes.DeleteExtendedAsync(id);
             if (resApi.IsValid)
                 return Ok(resApi);
