@@ -390,33 +390,54 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return fullPath;
     }
 
-    public string UtilUpdateResourceInDescriptionForRead(string description)
-    {        
-        if (Repository.RespositoryRef == null || string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootUrl))
+    public string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false)
+    {
+        var replaceString = UtilGetReplaceResourceString(considerRootPath);
+
+        if (replaceString == null)
             return description;
-
-        string replaceString = "";
-        replaceString = Path.Combine(Repository.RespositoryRef.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
-        //replaceString = replaceString.Replace(@"\", @"/");
-        replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-
         return description?
-            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString);
+            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString)
+            .Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 
-    public string UtilUpdateResourceInDescriptionForWrite(string description)
+    public string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false)
     {
-        if (Repository.RespositoryRef == null || string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootUrl))
+        var replaceString = UtilGetReplaceResourceString(considerRootPath);
+
+        if (replaceString == null)
             return description;
+        else
+            return description?
+                .Replace(replaceString, Repository.RespositoryRef.ResourcesContainer)
+                .Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);        
+    }
 
-        string replaceString = "";
-        replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
-        //replaceString = replaceString.Replace(@"\", @"/");
-        replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    private string UtilGetReplaceResourceString(bool considerRootPath = false)
+    {
+        if (Repository.RespositoryRef == null || string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainer))
+            return null;
 
-        var newDescription = description?
-            .Replace(replaceString, Repository.RespositoryRef.ResourcesContainer);
-        return newDescription;
+        string replaceString = null;
+
+        if (!string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootUrl))
+            replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
+        else
+        {
+            if (considerRootPath)
+            {
+                if (!string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootPath))
+                    replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootPath, Repository.RespositoryRef?.ResourcesContainer);
+            }
+        }
+
+        if (replaceString == null)
+            return null;
+        else
+        {
+            //replaceString = replaceString.Replace(@"\", @"/");
+            return replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }        
     }
 
     #endregion

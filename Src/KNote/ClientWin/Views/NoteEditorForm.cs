@@ -726,9 +726,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             textDescription.Visible = false;
             webView2.Visible = false;
             htmlDescription.Visible = true;
-            htmlDescription.BodyHtml = "";
-            //htmlDescription.BodyHtml = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
-            htmlDescription.BodyHtml = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description);
+            htmlDescription.BodyHtml = "";            
+            htmlDescription.BodyHtml = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
             htmlDescription.Refresh();
             labelLoadingHtml.Visible = false;
         }
@@ -746,9 +745,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else
         {
             htmlDescription.Visible = false;
-            webView2.Visible = false;
-            //textDescription.Text = _com.Model.ModelToViewDescription(_com.Service?.RepositoryRef);
-            textDescription.Text = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description);
+            webView2.Visible = false;            
+            textDescription.Text = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
             textDescription.Visible = true;
         }
 
@@ -903,14 +901,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         _com.Model.Tags = textTags.Text;
         _com.Model.InternalTags = textStatus.Text;
 
-        if (_com.Model.ContentType == "html")
-            //_com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, htmlDescription.BodyHtml);
-            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml);
+        if (_com.Model.ContentType == "html")            
+            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
         else if (_com.Model.ContentType == "navigation")
             _com.Model.Description = webView2.TextUrl;
-        else
-            //_com.Model.Description = _com.Model.ViewToModelDescription(_com.Service?.RepositoryRef, textDescription.Text);
-            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text);
+        else            
+            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
 
         int p;
         if (int.TryParse(textPriority.Text, out p))

@@ -58,53 +58,5 @@ public class NoteDto : NoteInfoDto
             }
         }
     }
-
-    // TODO: Hack, this is temporary to solve the location of resources. We have to find another solution.
-    //public string ModelToViewDescription(RepositoryRef repositoryRef)
-    //{
-    //    if (repositoryRef == null)
-    //        return Description;
-            
-    //    string replaceString = "";
-    //    if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerRootUrl))
-    //    {
-    //        replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootUrl, repositoryRef?.ResourcesContainer);
-    //        replaceString = replaceString.Replace(@"\", @"/");
-    //    }
-    //    else
-    //    {
-    //        if (repositoryRef.ResourcesContainerRootPath != null && repositoryRef?.ResourcesContainer != null)
-    //        {
-    //            replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootPath, repositoryRef?.ResourcesContainer);
-    //            replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-    //        }
-    //    }
-
-    //    return Description?
-    //        .Replace(repositoryRef.ResourcesContainer, replaceString);
-    //}
-
-    // TODO: Hack, this is temporary to solve the location of resources. We have to find another solution.
-    //public string ViewToModelDescription(RepositoryRef repositoryRef, string contentView)
-    //{
-    //    if (repositoryRef == null || string.IsNullOrEmpty(contentView))
-    //        return contentView;
-
-    //    string replaceString;
-    //    if (!string.IsNullOrEmpty(repositoryRef?.ResourcesContainerRootUrl))
-    //    {
-    //        replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootUrl, repositoryRef?.ResourcesContainer);
-    //        replaceString = replaceString.Replace(@"\", @"/");
-    //    }
-    //    else
-    //    {
-    //        replaceString = Path.Combine(repositoryRef?.ResourcesContainerRootPath, repositoryRef?.ResourcesContainer);
-    //        replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-    //    }
-
-    //    return contentView
-    //        .Replace(replaceString,
-    //        repositoryRef.ResourcesContainer);
-    //}
 }
 
