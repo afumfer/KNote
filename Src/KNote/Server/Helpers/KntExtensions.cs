@@ -62,9 +62,12 @@ public static class KntExtensions
                     repositoryRef.ResourcesContainerRootPath),
                 RequestPath = repositoryRef.ResourcesContainerRootUrl
             };
+            return app.UseMiddleware<StaticFileMiddleware>(Options.Create(options));
         }
-
-        return app.UseMiddleware<StaticFileMiddleware>(Options.Create(options));
+        else
+        {
+            return app;
+        }
     }
     
     public static void KntConfigureMessageBroker(this IApplicationBuilder app, AppSettings appSettings, RepositoryRef repositoryRef)
