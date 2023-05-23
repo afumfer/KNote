@@ -19,12 +19,16 @@
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
+
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
 
         if (appState != null)
         {
-            if(appState.SelectedFolder != null)
+            // TODO: !!! Refactor this
+            //if(appState.SelectedFolder != null)
+            if (!string.IsNullOrEmpty(appState.SelectedFolder.Name))
             {
                 folder.ParentId = appState.SelectedFolder.FolderId;
                 folder.ParentFolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();                
@@ -35,9 +39,7 @@
                 folder.ParentFolderDto = null;
             }
         }
-        folder.SetIsDirty(false);
-
-        base.OnInitialized();
+        folder.SetIsDirty(false);        
     }
 
     public void Dispose()

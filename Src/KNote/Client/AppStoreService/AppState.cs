@@ -41,7 +41,7 @@ public class AppState
         get
         {
             if (_selectedFolder == null)
-                _selectedFolder = new FolderDto();
+                _selectedFolder = new FolderDto();  // TODO: !!! Refactor this.
             return _selectedFolder;
         }
         set

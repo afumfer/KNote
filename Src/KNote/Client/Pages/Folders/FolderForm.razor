@@ -77,12 +77,9 @@
     {
         base.OnInitialized();
 
-        if (Folder.ParentFolderDto != null || Folder.ParentFolderDto.FolderId != Guid.Empty)
+        if (Folder.ParentFolderDto != null)        
         {
-            var a = Folder.ParentFolderDto?.Name;
-            var fp = Folder.ParentFolderDto;
             nameParent = Folder.ParentFolderDto.Name;
-
         }
         else
             OnResetParentFolder();       
@@ -126,6 +123,7 @@
     private void OnResetParentFolder()
     {
         Folder.ParentId = null;
+        Folder.ParentFolderDto = null;
         nameParent = "(root)";
     }
 
