@@ -66,7 +66,7 @@
 </EditForm>
 
 @code {
-    [Parameter] [EditorRequired] public FolderDto Folder { get; set; } = null!;
+    [Parameter] [EditorRequired] public FolderDto Folder { get; set; }
     [Parameter] public string Title { get; set; } = "...";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
@@ -75,10 +75,17 @@
 
     protected override void OnInitialized()
     {
-        if (Folder.ParentFolderDto != null)
+        base.OnInitialized();
+
+        if (Folder.ParentFolderDto != null || Folder.ParentFolderDto.FolderId != Guid.Empty)
+        {
+            var a = Folder.ParentFolderDto?.Name;
+            var fp = Folder.ParentFolderDto;
             nameParent = Folder.ParentFolderDto.Name;
 
-        base.OnInitialized();
+        }
+        else
+            OnResetParentFolder();       
     }
 
     protected async Task Save(EditContext formContext)
@@ -87,6 +94,12 @@
         if (formIsValid == false)
         {            
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder.", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            return;
+        }
+
+        if (string.IsNullOrEmpty(nameParent))
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save folder.", Detail = "Parent folder can't be null value.", Duration = 12000 });
             return;
         }
 

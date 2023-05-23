@@ -13,7 +13,7 @@
 <AuthorizeView>
     <Authorized>        
         <RadzenIcon Icon="person" class="mr-1 ml-1"
-            MouseEnter="@(args => tooltipService.Open(args, @context.User.Identity.Name, new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
+            MouseEnter="@(args => tooltipService.Open(args, @context?.User?.Identity?.Name, new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
         <RadzenIcon Icon="logout" @onclick="@(() => GoLogout())" class="mr-1 ml-1" 
             MouseEnter="@(args => tooltipService.Open(args, "Logout", new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
     </Authorized>

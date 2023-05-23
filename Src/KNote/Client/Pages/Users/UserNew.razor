@@ -5,6 +5,8 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+<NavigationLock ConfirmExternalNavigation=true />
+
 <UserForm Title="New User" OnValidSubmit="OnNew" OnExit="OnExit" User="user"></UserForm>
 
 @code {
@@ -22,9 +24,30 @@
         }
     }
 
-    private void OnExit()
-    {        
-        dialogService.Close(null);
+    private async Task OnExit()
+    {                
+        if (user == null)
+        {
+            dialogService.Close(null);
+            return;
+        }
+
+        if (user.IsDirty())
+        {
+            var resultDialog = await dialogService.Confirm(
+                @"Do you want to leave the page and lose your changes?",
+                $"{KntConst.AppName}",
+                new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+            if (resultDialog == true)
+            {
+                dialogService.Close(null);
+            }
+        }
+        else
+        {
+            dialogService.Close(null);
+        }
     }
 
 }

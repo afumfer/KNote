@@ -8,6 +8,8 @@
 @attribute [Authorize(Roles = "Admin, ProjecManager")]
 
 
+<NavigationLock ConfirmExternalNavigation=true />
+
 <FolderForm Title="New folder" OnValidSubmit="OnNew" OnExit="OnExit" Folder="folder" />
 
 @code {
@@ -19,7 +21,7 @@
     {
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
-        
+
         if (appState != null)
         {
             if(appState.SelectedFolder != null)
@@ -27,7 +29,14 @@
                 folder.ParentId = appState.SelectedFolder.FolderId;
                 folder.ParentFolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();                
             }
+            else
+            {
+                folder.ParentId = null;
+                folder.ParentFolderDto = null;
+            }
         }
+        folder.SetIsDirty(false);
+
         base.OnInitialized();
     }
 
@@ -43,7 +52,7 @@
         {
             if (appState.FoldersTree != null)
             {
-                FolderDto toUpdate;
+                FolderDto? toUpdate;
                 var newFolder = result.Entity.GetSimpleDto<FolderDto>();
                 newFolder.Selected = true;
 
@@ -80,9 +89,30 @@
         }
     }
 
-    private void OnExit()
+    private async Task OnExit()
     {
-       dialogService.Close(null);
+        if (folder == null)
+        {
+            dialogService.Close(null);
+            return;
+        }
+
+        if (folder.IsDirty())
+        {
+            var resultDialog = await dialogService.Confirm(
+                @"Do you want to leave the page and lose your changes?",
+                $"{KntConst.AppName}",
+                new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+            if (resultDialog == true)
+            {
+                dialogService.Close(null);
+            }
+        }
+        else
+        {
+            dialogService.Close(null);
+        }
     }
 
 }

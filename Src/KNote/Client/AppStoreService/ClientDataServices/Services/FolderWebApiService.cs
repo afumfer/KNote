@@ -35,7 +35,9 @@ public class FolderWebApiService : BaseService, IFolderWebApiService
         HttpResponseMessage httpRes;
 
         if (folder.FolderId == Guid.Empty)
+        {
             httpRes = await httpClient.PostAsJsonAsync($"api/folders", folder);
+        }
         else
             httpRes = await httpClient.PutAsJsonAsync($"api/folders", folder);
         

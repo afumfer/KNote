@@ -5,8 +5,11 @@
 @inject IStore store
 @inject NotificationService notificationService
 @inject DialogService dialogService
+@inject IJSRuntime js
 
 @attribute [Authorize(Roles = "Staff, ProjecManager, Admin")]
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" ConfirmExternalNavigation=true />
 
 @if (showForm)
 {
@@ -81,6 +84,7 @@ else
         else
         {
             note = result.Entity;
+            note.SetIsDirty(false);
             showForm = true;
         }
     }
@@ -95,15 +99,18 @@ else
         {
             var result = await store.Notes.SaveAsync(note);
 
-            if(result.IsValid)
-                note = result.Entity;            
+            if (result.IsValid)
+            {
+                note = result.Entity;
+                note.SetIsDirty(false);
+            }
         }
     }
 
     private async Task GetNewNote()
     {
         var result = await store.Notes.NewAsync();
-        
+
         if (result.IsValid)
         {
             note = result.Entity;
@@ -112,6 +119,7 @@ else
                 note.FolderDto = store.AppState.SelectedFolder.GetSimpleDto<FolderDto>();
                 note.FolderId = store.AppState.SelectedFolder.FolderId;
             }
+            note.SetIsDirty(false);
             showForm = true;
         }
     }
@@ -134,6 +142,25 @@ else
     private void OnExit()
     {        
         store.NavigateTo(PageReturn!);
+    }
+
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        if (note == null)
+            return;
+
+        if (note.IsDirty())
+        {
+            var resultDialog = await dialogService.Confirm(
+                @"Do you want to leave the page and lose your changes?",
+                $"{KntConst.AppName}",
+                new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+            if (resultDialog != true)
+            {
+                context.PreventNavigation();
+            }            
+        }
     }
 
     #endregion

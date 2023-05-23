@@ -5,6 +5,9 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+
+<NavigationLock ConfirmExternalNavigation=true />
+
 @if (user != null)
 {
     <UserForm Title="User Edit" OnValidSubmit="OnSave" OnExit="OnExit" User="user"></UserForm>
@@ -13,7 +16,6 @@ else
 {
     <text>Loading ... </text>
 }
-
 
 @code {
     [Parameter] public string UserId { get; set; } = string.Empty;
@@ -35,9 +37,12 @@ else
 
         var result = await store.Users.GetAsync(id);
         if (!result.IsValid)                    
-            dialogService.Close(null);        
+            dialogService.Close(null);
         else
-            user = result.Entity;        
+        {
+            user = result.Entity;
+            user.SetIsDirty(false);
+        }
     }
 
     private async Task OnSave()
@@ -59,9 +64,30 @@ else
         }
     }
 
-    private void OnExit()
-    {        
-        dialogService.Close(null);
+    private async Task OnExit()
+    {                
+        if (user == null)
+        {
+            dialogService.Close(null);
+            return;
+        }
+                  
+        if (user.IsDirty())
+        {
+            var resultDialog = await dialogService.Confirm(
+                @"Do you want to leave the page and lose your changes?",
+                $"{KntConst.AppName}",
+                new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+            if (resultDialog == true)
+            {
+                dialogService.Close(null);
+            }
+        }
+        else
+        {
+            dialogService.Close(null);
+        }
     }
 
 }

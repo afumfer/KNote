@@ -77,8 +77,10 @@
         {
             if (foldersTree?.Count > 0)
             {
-                var f = foldersTree.Select(x => x).FirstOrDefault();
-                f.Selected = true;
+                FolderDto? f;
+                f = foldersTree.Select(x => x).FirstOrDefault();
+                if(f != null)
+                    f.Selected = true;
                 OnFolderSelected(f);
             }            
         }
@@ -86,7 +88,7 @@
             OnFolderSelected(appState.SelectedFolder.GetSimpleDto<FolderDto>());
     }
 
-    void OnFolderSelected(FolderDto f)
+    void OnFolderSelected(FolderDto? f)
     {
         selectedFolder = f;
         appState.SelectedFolder = selectedFolder.GetSimpleDto<FolderDto>();
@@ -96,7 +98,7 @@
     {
         var res = await dialogService.OpenAsync<FolderNew>($"New folder",
                new Dictionary<string, object>() {  },
-               new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+               new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)           
             await Load();  
@@ -106,7 +108,7 @@
     {
         var res = await dialogService.OpenAsync<FolderEdit>($"Edit folder",
                new Dictionary<string, object>() { { "FolderId", folder.FolderId.ToString() } },
-               new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+               new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)        
             await Load(); 

@@ -5,6 +5,9 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+
+<NavigationLock ConfirmExternalNavigation=true />
+
 @if (noteType != null)
 {
     <TypeForm Title="Note type edit" OnValidSubmit="OnSave" OnExit="OnExit" NoteType="noteType" />
@@ -22,7 +25,7 @@ else
     protected async override Task OnInitializedAsync()
     {
         base.OnInitialized();
-        
+
         Guid id;
         var parseOk = Guid.TryParse(TypeId, out id);
         if (!parseOk)
@@ -31,12 +34,15 @@ else
             dialogService.Close(null);
             return;
         }
-        
+
         var result = await store.NoteTypes.GetAsync(id);
         if (!result.IsValid)                    
-            dialogService.Close(null);        
-        else        
-            noteType = result.Entity;                
+            dialogService.Close(null);
+        else
+        {            
+            noteType = result.Entity;
+            noteType.SetIsDirty(false);
+        }
     }
 
     private async Task OnSave()
@@ -58,8 +64,29 @@ else
         }
     }
 
-    private void OnExit()
+    private async Task OnExit()
     {        
-        dialogService.Close(null);
+        if (noteType == null)
+        {
+            dialogService.Close(null);
+            return;
+        }
+
+        if (noteType.IsDirty())
+        {
+            var resultDialog = await dialogService.Confirm(
+                @"Do you want to leave the page and lose your changes?",
+                $"{KntConst.AppName}",
+                new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+            if (resultDialog == true)
+            {
+                dialogService.Close(null);
+            }
+        }
+        else
+        {
+            dialogService.Close(null);
+        }
     }
 }

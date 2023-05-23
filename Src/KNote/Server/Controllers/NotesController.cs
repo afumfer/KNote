@@ -200,12 +200,15 @@ public class NotesController : ControllerBase
         {
             // Hack to make it compatible with the desktop application. ----------------------------------
             note.Description = _service.Notes.UtilUpdateResourceInDescriptionForWrite(note.Description);
-            if (note.Description.StartsWith(@"<BODY"))
-                note.ContentType = "html";
-            else
-            {                
-                note.Description = note.Description.Replace("\n", "\r\n");
-                note.ContentType = "markdown";
+            if(note.Description != null)
+            {
+                if (note.Description.StartsWith(@"<BODY"))
+                    note.ContentType = "html";
+                else
+                {                
+                    note.Description = note.Description.Replace("\n", "\r\n");
+                    note.ContentType = "markdown";
+                }
             }
             // -------------------------------------------------------------------------------------------
 

@@ -41,7 +41,10 @@
             </div>                
             <div>
                 <InputTextArea @bind-Value="CurrentValue" />
-                <ValidationMessage For="For" />
+                @if(For != null)
+                {                    
+                    <ValidationMessage For="For" />
+                }
             </div>
         </RadzenTabsItem>
 
@@ -50,8 +53,7 @@
 
 
 @code {
-
-    [Parameter] public Expression<Func<TValue>> For { get; set; }
+    [Parameter] public Expression<Func<TValue>> For { get; set; } = null!;
 
     private void InsertMarkDownCommand(enumMarkDownCommand command)
     {

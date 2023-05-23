@@ -37,9 +37,10 @@ public class AuthenticationProviderJWT : AuthenticationStateProvider, ILoginServ
 
     public AuthenticationState BuildAuthenticationState(string token)
     {
+        //AuthenticationState authState = null!;
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);       
         var authState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));        
-        store.AppState.UserName = authState.User.Identity.Name;
+        store.AppState.UserName = authState?.User?.Identity?.Name;
         return authState;
     }
 
@@ -71,7 +72,7 @@ public class AuthenticationProviderJWT : AuthenticationStateProvider, ILoginServ
             keyValuePairs.Remove(ClaimTypes.Role);
         }
 
-        claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString())));
+        claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value?.ToString())));
         return claims;
     }
 

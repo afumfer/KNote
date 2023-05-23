@@ -4,7 +4,7 @@ namespace KNote.Client.Helpers;
 
 public static class NavigationManagerExtensions
 {
-    public static Dictionary<string, string> GetQueryStrings(this NavigationManager navigationManager, string url)
+    public static Dictionary<string, string>? GetQueryStrings(this NavigationManager navigationManager, string url)
     {
         if (string.IsNullOrWhiteSpace(url) || !url.Contains("?") || url.Substring(url.Length - 1) == "?")
         {

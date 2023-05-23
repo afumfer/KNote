@@ -27,11 +27,11 @@
 @code {
     [Parameter] public string Label { get; set; } = "Image";
     [Parameter] public EventCallback<KntFileInfo> OnSelectedFile { get; set; }
-    [Parameter] public string ContentBase64 { get; set; }
+    [Parameter] public string? ContentBase64 { get; set; }
 
-    private KntFileInfo fileSelected;
+    private KntFileInfo? fileSelected;
 
-    private string imgSrc;
+    private string? imgSrc;
     private int imgWidth = 50;
 
     protected override void OnInitialized()
