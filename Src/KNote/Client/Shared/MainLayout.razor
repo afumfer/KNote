@@ -13,24 +13,30 @@
 <RadzenLayout>
 
     <RadzenHeader>
-        <div class="row justify-content-start align-items-center">
-            <div class="col-5 d-flex align-items-center">
-                <RadzenSidebarToggle Click="@(() => sidebar = !sidebar)" />                    
-                <RadzenLabel Text="@KntConst.AppName" Style="font-size:large" />
-            </div>
-            <div class="col-7 d-flex align-items-center justify-content-end">
-                <MainLayoutHeader />
-            </div>
-        </div>        
+        <ChildContent>
+            <RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Gap="0px">
+                <RadzenColumn Size="5">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                        <RadzenSidebarToggle Click="@(() => sidebar = !sidebar)" />
+                        <RadzenLabel Text="@KntConst.AppName" Style="font-size:large" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="7">
+                    <RadzenStack  Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                        <MainLayoutHeader />
+                    </RadzenStack>                
+                </RadzenColumn>
+            </RadzenRow>
+        </ChildContent>
     </RadzenHeader>
-
-    <RadzenBody>        
-        @Body
-    </RadzenBody>
 
     <RadzenSidebar @bind-Expanded="@sidebar">
         <MainLayoutNavMenu />
     </RadzenSidebar>
+
+    <RadzenBody>
+        @Body
+    </RadzenBody>
 
     <RadzenFooter class="p-1 ml-1 mr-1">
         <MainLayoutFooter TextLeft="@($"{KntConst.AppName} - v{store.AppState.AppVersion}")"
