@@ -36,12 +36,12 @@ public class AppState
     }
 
     private FolderDto? _selectedFolder;
-    public FolderDto SelectedFolder
+    public FolderDto? SelectedFolder
     {
         get
         {
             if (_selectedFolder == null)
-                _selectedFolder = new FolderDto();  // TODO: !!! Refactor this.
+                _selectedFolder = new FolderDto();
             return _selectedFolder;
         }
         set
@@ -49,6 +49,18 @@ public class AppState
             _selectedFolder = value;
             NotifyStateChanged();
         }
+    }
+
+    public bool IsSelectedFolder()
+    {
+        if (_selectedFolder == null)
+            return false;
+        else if (SelectedFolder?.FolderId == Guid.Empty)
+            return false;
+        else if (string.IsNullOrEmpty(SelectedFolder?.Name))
+            return false;
+        else
+            return true;
     }
 
     private List<FolderDto>? _foldersTree;

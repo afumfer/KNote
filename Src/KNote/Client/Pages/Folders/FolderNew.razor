@@ -25,12 +25,10 @@
         appState.OnChange += StateHasChanged;
 
         if (appState != null)
-        {
-            // TODO: !!! Refactor this
-            //if(appState.SelectedFolder != null)
-            if (!string.IsNullOrEmpty(appState.SelectedFolder.Name))
+        {            
+            if(appState.IsSelectedFolder())
             {
-                folder.ParentId = appState.SelectedFolder.FolderId;
+                folder.ParentId = appState.SelectedFolder?.FolderId;
                 folder.ParentFolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();                
             }
             else
@@ -65,7 +63,8 @@
                 }
                 else
                 {
-                    if (appState.FoldersIndex.TryGetValue((Guid)folder.ParentId, out toUpdate))
+                    Guid parentId = folder.ParentId ?? Guid.Empty;
+                    if (appState.FoldersIndex.TryGetValue(parentId, out toUpdate))
                     {
                         if (toUpdate != null)
                         {
@@ -84,7 +83,7 @@
                         {
                             appState.FoldersTree = null;
                         }
-                    }
+                    }                                            
                 }
             }            
             dialogService.Close(result.Entity);

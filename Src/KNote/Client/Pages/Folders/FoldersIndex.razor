@@ -25,8 +25,8 @@
 <div class="container-fluid border pt-2">
     <div class="row">
         @if (foldersTree == null)
-        {
-            <p><em>Loading tree folders ...</em></p>
+        {            
+            <RadzenLabel class="m-2" Text="Loading tree folders ..." />
         }
         else
         {
@@ -73,7 +73,7 @@
 
         appState.FoldersTree = foldersTree;
 
-        if (appState.SelectedFolder == null)
+        if (!appState.IsSelectedFolder())
         {
             if (foldersTree?.Count > 0)
             {
@@ -127,7 +127,8 @@
             var result = await store.Folders.DeleteAsync(folder.FolderId);
             if (result.IsValid)                            
             {
-                foldersTree = null;                
+                foldersTree = null;
+                await OnRefreshTree();
                 await Load();
             }
         }
@@ -136,6 +137,7 @@
     private async Task OnRefreshTree()
     {
         foldersTree = null;
+        appState.SelectedFolder = null;
         appState.FoldersTree = null;
         await Load();
     }

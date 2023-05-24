@@ -113,8 +113,11 @@
             if (foldersTree?.Count > 0)
             {
                 var f = foldersTree.Select(x => x).FirstOrDefault();
-                if (f!= null)
+                if (f != null)
+                {
                     f.Selected = true;
+                    await FolderSelected(f);
+                }
             }
         }
         else

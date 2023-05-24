@@ -66,7 +66,7 @@ else
         if (result.IsValid)
         {
             note = result.Entity;
-            if (appState.SelectedFolder != null)
+            if (appState.IsSelectedFolder())
             {
                 note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
                 note.FolderId = appState.SelectedFolder.FolderId;

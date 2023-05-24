@@ -30,13 +30,13 @@
 
 
 @code {
-    [Parameter] public List<FolderDto> FoldersInfo { get; set; }
+    [Parameter] public List<FolderDto> FoldersInfo { get; set; } = null!;
     [Parameter] public EventCallback<FolderDto> FolderSelected { get; set; }
     [Parameter] public EventCallback<FolderDto> FolderDelete { get; set; }
     [Parameter] public EventCallback<FolderDto> FolderEdit { get; set; }
     [Parameter] public bool EditMode { get; set; }    
 
-    private AppState appState;
+    private AppState appState = null!;
 
     protected override void OnInitialized()
     {
@@ -44,6 +44,13 @@
         appState.OnChange += StateHasChanged;
 
         base.OnInitialized();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (FoldersInfo is null)
+            FoldersInfo = new List<FolderDto>();
     }
 
     public void Dispose()
@@ -66,29 +73,32 @@
         await FolderEdit.InvokeAsync(folder);
     }
 
-    bool ShouldSelected(object data)
+    private bool ShouldSelected(object data)
     {
+        if (appState.SelectedFolder is null)
+            return false;
+
         if(string.IsNullOrEmpty(appState.SelectedFolder.Name))
             return false; 
 
         var folder = data as FolderDto;
-        return folder.Name == appState.SelectedFolder.Name;              
+        return folder?.Name == appState.SelectedFolder.Name;              
     }
 
     // TODO: !!! refactor (is not working when level folder > 1)
-    bool ShouldExpanded(object data)
+    private bool ShouldExpanded(object data)
     {
-        if(appState.SelectedFolder == null)
+        if(!appState.IsSelectedFolder())
             return false; 
 
-        if(appState.SelectedFolder.ParentId == null)
+        if(appState.SelectedFolder?.ParentId is null)
             return false; 
 
         var folder = data as FolderDto;
-        return folder.FolderId == appState.SelectedFolder.ParentId;        
+        return folder?.FolderId == appState.SelectedFolder.ParentId;        
     }
 
-    async void OnChange(TreeEventArgs args)
+    private async void OnChange(TreeEventArgs args)
     {
         var folder = args.Value as FolderDto;
         await FolderSelected.InvokeAsync(folder);        
