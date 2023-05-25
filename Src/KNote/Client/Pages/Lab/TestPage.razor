@@ -145,6 +145,8 @@
                 </RadzenSplitter>
             </RadzenTabsItem>
 
+
+
         </Tabs>
     </RadzenTabs>
 
@@ -152,8 +154,10 @@
 
 <hr />
 
-
 @code {
+
+    #region Tests
+
     private WeatherForecast[]? forecasts;
     private List<FolderInfoDto> folders = new List<FolderInfoDto>();
     private List<FolderDto> foldersFull = new List<FolderDto>();
@@ -294,5 +298,7 @@
     {
         navigationManger.NavigateTo("index");
     }
+
+    #endregion 
 
 }

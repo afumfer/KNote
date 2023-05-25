@@ -30,9 +30,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KntWebView", "KntWebView\Kn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KntRedmineApi", "KntRedmineApi\KntRedmineApi.csproj", "{2CC720E7-2C87-4305-AC74-54EF2697FE98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNote.MessageBroker", "MessageBroker\KNote.MessageBroker.csproj", "{2AB16603-5C31-42BE-B7E7-B19AA1198017}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.MessageBroker", "MessageBroker\KNote.MessageBroker.csproj", "{2AB16603-5C31-42BE-B7E7-B19AA1198017}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNote.MessageBroker.RabbitMQ", "MessageBroker.RabbitMQ\KNote.MessageBroker.RabbitMQ.csproj", "{7C2731F4-C548-40E3-95E2-EF6EF4F27DCB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.MessageBroker.RabbitMQ", "MessageBroker.RabbitMQ\KNote.MessageBroker.RabbitMQ.csproj", "{7C2731F4-C548-40E3-95E2-EF6EF4F27DCB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
