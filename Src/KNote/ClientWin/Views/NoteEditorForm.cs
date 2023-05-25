@@ -207,6 +207,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             if (htmlDescription.Visible)
             {
+                if (textTags.Text.Contains(KntConst.TagForOnlyHtml))
+                {
+                    ShowInfo($"This note is tagged {KntConst.TagForOnlyHtml} and can only be viewed in html format.");
+                    return;
+                }
+
                 var config = new ReverseMarkdown.Config
                 {
                     UnknownTags = ReverseMarkdown.Config.UnknownTagsOption.PassThrough, // Include the unknown tag completely in the result (default as well)
@@ -258,6 +264,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
+            if (textTags.Text.Contains(KntConst.TagForOnlyHtml))
+            {
+                ShowInfo($"This note is tagged {KntConst.TagForOnlyHtml} and can only be viewed in html format.");
+                return;
+            }
+
             webView2.TextUrl = textDescription.Text;
             await webView2.Navigate();
             _com.Model.ContentType = "navigation";
