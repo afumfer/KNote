@@ -8,7 +8,7 @@
 @inject HttpClient Http
 @inject IStore store
 @inject NavigationManager navigationManger
-
+@inject DialogService dialogService
 
 <div class="container-fluid border">
     <div class="row">
@@ -145,6 +145,15 @@
                 </RadzenSplitter>
             </RadzenTabsItem>
 
+            <RadzenTabsItem Text="&nbsp;Upload File" Icon="format_list_bulleted">
+                <h4>Upload file test</h4>
+
+                <hr />
+                <button class="btn btn-primary" @onclick="UploadFiles">Upload file</button>
+                <hr />
+
+
+            </RadzenTabsItem>
 
 
         </Tabs>
@@ -300,5 +309,15 @@
     }
 
     #endregion 
+
+    private async Task UploadFiles()
+    {
+        var res = await dialogService.OpenAsync<FileUpload>($"File upload",
+               new Dictionary<string, object>() { },
+               new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
+
+        //if (res != null)
+        //    await Load();
+    }
 
 }

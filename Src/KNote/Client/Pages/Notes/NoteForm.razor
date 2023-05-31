@@ -278,22 +278,23 @@
         }
         else
         {            
-            var resultDialog = await dialogService.OpenAsync<NoteResourceSelector>($"New resource",
+            var resultDialog = await dialogService.OpenAsync<NoteResourceSelector>($"New resource and upload resource file",
                    new Dictionary<string, object>() { },
                    new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
 
             if(resultDialog != null)
-            {
+            {                
                 resultDialog.NoteId = Note.NoteId;
                 resultDialog.Name = Note.NoteId.ToString() + "_" + resultDialog.Name;
 
                 var resultApi = await webApiService.Notes.SaveResourceAsync(resultDialog);
                 if (resultApi.IsValid)
                 {
-                    // TODO: This not refresh UI, ?? 
-                    //resources.Add(resultApi.Entity);
+                    // Option 1. TODO: test this not refresh UI, ??
+                    //resources?.Add(resultApi.Entity);
+                    //StateHasChanged();
 
-                    // Alternative implementation
+                    // Option 2. Alternative implementation
                     resources = null;
                     await ShowPanel(2);
                 }
@@ -306,9 +307,11 @@
         var result = await webApiService.Notes.DeleteResourceAsync(resource.ResourceId);
         if (result.IsValid)
         {
-            // TODO: This not refresh UI, ??
+            // Option 1. TODO: test this not refresh UI, ??
             //resources.Add(resultApi.Entity);
+            //StateHasChanged();
 
+            // Option 2. Alternative implementation
             resources = null;
             await ShowPanel(2);
         }

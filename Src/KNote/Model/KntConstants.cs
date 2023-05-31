@@ -16,6 +16,7 @@ public static class KntConst
     public static string License { get; private set; }
     public static string TagForMerging { get; private set; } = "[@NoteMerging]";
     public static string TagForOnlyHtml { get; private set; } = "[@OnlyHtml]";
+    public static int MaxLenResourceFile { get; private set; } = 5120000;
     public static Dictionary<EnumKAttributeDataType, string> KAttributes { get; private set; }
     public static Dictionary<EnumAlarmType, string> AlarmType { get; private set; }   
     public static Dictionary<EnumNotificationType, string> NotificationType { get; private set; }    

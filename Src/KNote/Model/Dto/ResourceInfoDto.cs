@@ -90,7 +90,8 @@ public class ResourceInfoDto : SmartModelDtoBase
         {
             if (_fileType != value)
             {
-                _fileType = value;
+                var typeStringLen = value.Length > 64 ? 64 : value.Length;
+                _fileType = value.Substring(0, typeStringLen);  // TODO: hack, the database attribute is 64                
                 OnPropertyChanged("FileType");
             }
         }
