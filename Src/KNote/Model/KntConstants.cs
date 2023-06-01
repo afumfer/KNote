@@ -14,8 +14,7 @@ public static class KntConst
     public static string HelpUrl { get; } = @"https://github.com/afumfer/KNote/blob/master/Docs/Manual.md";
     public static string GithubProject { get; } = @"https://github.com/afumfer/KNote";
     public static string License { get; private set; }
-    public static string TagForMerging { get; private set; } = "[@NoteMerging]";
-    public static string TagForOnlyHtml { get; private set; } = "[@OnlyHtml]";
+    public static string TagForMerging { get; private set; } = "[@NoteMerging]";    
     public static int MaxLenResourceFile { get; private set; } = 5120000;
     public static Dictionary<EnumKAttributeDataType, string> KAttributes { get; private set; }
     public static Dictionary<EnumAlarmType, string> AlarmType { get; private set; }   

@@ -117,8 +117,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
             //  not altered after leaving the view when there are no modifications).
             Model.Topic = DateTime.Now.ToString();
             Model.Tags = "";
-            Model.Description = "";
-            Model.ContentType = "markdown";
+            Model.Description = "";            
 
             // Context default values
             if (FolderWithServiceRef == null)

@@ -32,19 +32,9 @@
         </div>
     </div>
 
-    <div class="bg-white p-2">
-        @*
-        @if ((Note.Description?.Length > 6000))
-        {
-        <ViewMarkdown MarkdownContent="@(Note.Description?.Substring(0,6000))" />
-        <p>...</p>
-        }
-        else
-        {
-        <ViewMarkdown MarkdownContent="@Note.Description" />
-        }*@
-
-        <ViewMarkdown MarkdownContent="@Note.Description" />
+    
+    <div class="form-group form-markdown bg-white p-2">
+        <ViewMarkdown MarkdownContent="@Note.Description" />    
     </div>
 
 </RadzenCard>

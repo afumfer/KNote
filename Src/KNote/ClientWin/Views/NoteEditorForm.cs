@@ -188,6 +188,19 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             _com.Model.Script = textScriptCode.Text;
             _com.RunScript();
         }
+        else if (menuSel == buttonLockFormat)
+        {
+            if (buttonLockFormat.Checked)
+            {
+                _com.Model.ContentType = _com.Model.ContentType.Replace("#", "");
+                buttonLockFormat.Checked = false;
+            }
+            else
+            {
+                _com.Model.ContentType = "#" + _com.Model.ContentType;
+                buttonLockFormat.Checked = true;
+            }
+        }
     }
 
     private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -207,9 +220,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             if (htmlDescription.Visible)
             {
-                if (textTags.Text.Contains(KntConst.TagForOnlyHtml))
+                if (_com.Model.ContentType.Contains('#'))
                 {
-                    ShowInfo($"This note is tagged {KntConst.TagForOnlyHtml} and can only be viewed in html format.");
+                    ShowInfo($"This note cannot be changed to another format, the format is locked.");
                     return;
                 }
 
@@ -244,6 +257,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
+            if (_com.Model.ContentType.Contains('#'))
+            {
+                ShowInfo($"This note cannot be changed to another format, the format is locked.");
+                return;
+            }
+
             var MarkdownContent = textDescription.Text;
             var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
             var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
@@ -264,9 +283,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
-            if (textTags.Text.Contains(KntConst.TagForOnlyHtml))
+            if (_com.Model.ContentType.Contains('#'))
             {
-                ShowInfo($"This note is tagged {KntConst.TagForOnlyHtml} and can only be viewed in html format.");
+                ShowInfo($"This note cannot be changed to another format, the format is locked.");
                 return;
             }
 
@@ -658,13 +677,16 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void PersonalizeControls()
     {
+        if (_com.Model is null)
+            return;
+
         textDescription.Dock = DockStyle.Fill;
         htmlDescription.Dock = DockStyle.Fill;
         webView2.Dock = DockStyle.Fill;
 
-        if (_com.Model?.ContentType == "html")
+        if (_com.Model.ContentType.Contains("html"))
             EnableHtmlView();
-        else if (_com.Model?.ContentType == "navigation")
+        else if (_com.Model.ContentType.Contains("navigation"))
             EnableWebView2View();
         else
             EnableMarkdownView();
@@ -685,19 +707,15 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         panelDescription.Visible = true;
 
-        // !!!
-        //picResource.Location = new Point(396, 36);
         webViewResource.Location = new Point(396, 36);
         panelPreview.Location = new Point(396, 36);
         if (_com.EditMode)
         {
-            //picResource.Size = new Size(392, 464);
             webViewResource.Size = new Size(392, 464);
             panelPreview.Size = new Size(392, 464);
         }
         else
         {
-            //picResource.Size = new Size(392, 490);
             webViewResource.Size = new Size(392, 490);
             panelPreview.Size = new Size(392, 490);
         }
@@ -731,19 +749,19 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textStatus.Text = _com.Model.InternalTags;
         textPriority.Text = _com.Model.Priority.ToString();
 
-        if (_com.Model.ContentType == "html")
+        if (_com.Model.ContentType.Contains("html"))
         {
             labelLoadingHtml.Visible = true;
             labelLoadingHtml.Refresh();
             textDescription.Visible = false;
             webView2.Visible = false;
             htmlDescription.Visible = true;
-            htmlDescription.BodyHtml = "";            
+            htmlDescription.BodyHtml = "";
             htmlDescription.BodyHtml = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
             htmlDescription.Refresh();
             labelLoadingHtml.Visible = false;
         }
-        else if (_com.Model.ContentType == "navigation")
+        else if (_com.Model.ContentType.Contains("navigation"))
         {
             textDescription.Visible = false;
             htmlDescription.Visible = false;
@@ -757,10 +775,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else
         {
             htmlDescription.Visible = false;
-            webView2.Visible = false;            
+            webView2.Visible = false;
             textDescription.Text = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
             textDescription.Visible = true;
         }
+
+        buttonLockFormat.Checked = _com.Model.ContentType.Contains('#');
 
         // KAttributes           
         textNoteType.Text = _com.Model.NoteTypeDto.Name;
@@ -913,11 +933,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         _com.Model.Tags = textTags.Text;
         _com.Model.InternalTags = textStatus.Text;
 
-        if (_com.Model.ContentType == "html")            
+        if (_com.Model.ContentType.Contains("html"))
             _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
-        else if (_com.Model.ContentType == "navigation")
+        else if (_com.Model.ContentType.Contains("navigation"))
             _com.Model.Description = webView2.TextUrl;
-        else            
+        else
             _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
 
         int p;

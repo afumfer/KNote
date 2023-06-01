@@ -94,7 +94,10 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private void InitializeComponentEditor()
     {
-        if (_com.Model?.ContentType == "html")
+        if (_com.Model is null)
+            return;
+
+        if (_com.Model.ContentType.Contains("html"))
         {
             htmlDescription.Location = new System.Drawing.Point(3, 28);
             htmlDescription.Size = new System.Drawing.Size(472, 292);
@@ -102,7 +105,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right)));                
         }
-        else if (_com.Model?.ContentType == "navigation")
+        else if (_com.Model.ContentType.Contains("navigation"))
         {
             webView2.Location = new System.Drawing.Point(3, 28);
             webView2.Size = new System.Drawing.Size(472, 292);
@@ -326,12 +329,15 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private async void ModelToControls()
     {
+        if (_com.Model is null)
+            return;
+
         labelCaption.Text = _com.Model.Topic;
         RefreshStatus();
         _selectedFolderId = _com.Model.FolderId;            
-        if (_com.Model?.ContentType == "html")            
+        if (_com.Model.ContentType.Contains("html"))
             htmlDescription.BodyHtml = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
-        else if (_com.Model?.ContentType == "navigation")
+        else if (_com.Model.ContentType.Contains("navigation"))
         {
             webView2.TextUrl = _com.Model.Description;            
             if (!string.IsNullOrEmpty(_com.Model.Description))            
@@ -348,9 +354,12 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private void ControlsToModel()
     {
-        if (_com.Model.ContentType == "html")            
+        if (_com.Model is null)
+            return;
+
+        if (_com.Model.ContentType.Contains("html"))
             _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
-        else if (_com.Model.ContentType == "navigation")            
+        else if (_com.Model.ContentType.Contains("navigation"))
             _com.Model.Description = webView2.TextUrl;
         else            
             _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
@@ -363,11 +372,14 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private void ModelToControlsPostIt(bool updateSizeAndLocation = true, bool forceAlwaysTop = false)
     {
-        if (_com.Model?.ContentType == "html")
+        if (_com.Model is null)
+            return;
+
+        if (_com.Model.ContentType.Contains("html"))
         {
             htmlDescription.Visible = true;
         }
-        if (_com.Model?.ContentType == "navigation")
+        if (_com.Model.ContentType.Contains("navigation"))
         {
             webView2.Visible = true;
         }

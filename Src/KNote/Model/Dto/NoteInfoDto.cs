@@ -152,7 +152,7 @@ public class NoteInfoDto : SmartModelDtoBase
         set
         {
             if (_contentType != value)
-            {
+            {                
                 _contentType = value;
                 OnPropertyChanged("ContentType");
             }

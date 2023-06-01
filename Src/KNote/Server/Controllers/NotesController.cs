@@ -202,13 +202,19 @@ public class NotesController : ControllerBase
             note.Description = _service.Notes.UtilUpdateResourceInDescriptionForWrite(note.Description);
             if(note.Description != null)
             {
+                var blockingContentType = note.ContentType.Contains('#');
                 if (note.Description.StartsWith(@"<BODY"))
+                {
+                    blockingContentType = true; // override this value
                     note.ContentType = "html";
+                }
                 else
                 {                
                     note.Description = note.Description.Replace("\n", "\r\n");
                     note.ContentType = "markdown";
                 }
+                if(blockingContentType)
+                    note.ContentType = "#" + note.ContentType;
             }
             // -------------------------------------------------------------------------------------------
 

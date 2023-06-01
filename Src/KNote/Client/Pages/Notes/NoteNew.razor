@@ -70,8 +70,7 @@ else
             {
                 note.FolderDto = appState.SelectedFolder.GetSimpleDto<FolderDto>();
                 note.FolderId = appState.SelectedFolder.FolderId;
-            }
-            note.ContentType = "html";
+            }            
             note.SetIsNew(true);
             note.SetIsDirty(false);
             showForm = true;
