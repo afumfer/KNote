@@ -278,7 +278,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("{id}/[action]")]    // GET api/notes/getresources
-    [Authorize]
+    [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> Resources(Guid id)
     {
         try
@@ -363,7 +363,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("{id}/[action]")]    // GET api/notes/tasks
-    [Authorize]
+    [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> Tasks(Guid id)
     {
         try
@@ -385,7 +385,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("[action]")]    // GET api/notes/getnotetasks
-    [Authorize]
+    [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> GetStartedTasksByDateTimeRage([FromQuery] string start, [FromQuery] string end)
     {
         try

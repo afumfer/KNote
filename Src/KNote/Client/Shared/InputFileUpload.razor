@@ -4,30 +4,15 @@
 
 @implements IAsyncDisposable
 
-<div>
-    <label>Click or drag & drop in next control:</label>
-    <p />
-    <div>
+<div @ref="fileDropContainer" class="file-drop-zone @HoverClass" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ondragover="OnDragEnter">
         <InputFile OnChange="LoadFile" @ref="inputFile" />
-    </div>
-    <p />
 </div>
 
-<div @ref="fileDropContainer">
+<div class="image-container" >  
     @if (imgSrc != null)
     {
-        <hr />
-        <div>
-            <div style="margin:10px">
-                <img src="@imgSrc" style="width: @(imgWidth)px;" />
-            </div>
-        </div>
-        <hr />
+        <img src="@imgSrc" style="width: @(imgWidth)px;" />        
     }
-    else
-    {
-        <p>or copy & paste here ...</p>
-    }    
 </div>
 
 @code {
@@ -39,6 +24,7 @@
 
     private KntFileInfo? fileSelected;
 
+    private string? HoverClass;
     private string? imgSrc;
     private int imgWidth = 50;
 
@@ -63,6 +49,10 @@
             _filePasteFunctionReference = await _filePasteModule.InvokeAsync<IJSObjectReference>("initializeFilePaste", fileDropContainer, inputFile.Element);
         }
     }
+
+    void OnDragEnter(DragEventArgs e) => HoverClass = "hover";
+
+    void OnDragLeave(DragEventArgs e) => HoverClass = string.Empty;
 
     async Task LoadFile(InputFileChangeEventArgs e)    
     {

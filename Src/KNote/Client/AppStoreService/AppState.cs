@@ -1,11 +1,9 @@
-﻿using KNote.Client.AppStoreService.ClientDataServices;
-using KNote.Model.Dto;
+﻿using KNote.Model.Dto;
 
 namespace KNote.Client.AppStoreService;
 
 public class AppState
 {
-
     #region Generic readonly configuration properties
 
     public readonly Version? AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName()?.Version;

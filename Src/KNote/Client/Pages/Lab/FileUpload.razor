@@ -7,29 +7,9 @@
 
 <h3>File Upload</h3>
 
-<div @ref="fileDropContainer" class="@HoverClass" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ondragover="OnDragEnter" style="align-items: center;width: 100%;
-        border: 2px dotted #fb275d;
-        display: flex;
-        align-items: center;
-        margin-bottom: 2px;
-        min-height: 60px;">
-    <div>
-        <InputFile OnChange="@OnChange" @ref="inputFile" multiple style="" />
-    </div>
-    <p>...</p>
+<div @ref="fileDropContainer" class="file-drop-zone @HoverClass" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ondragover="OnDragEnter">
+    <InputFile OnChange="@OnChange" @ref="inputFile" multiple />
 </div>
-
-@*<div @ref="fileDropContainer" class="@HoverClass" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ondragover="OnDragEnter" style="align-items: center;">
-    <InputFile OnChange="@OnChange" @ref="inputFile" multiple style="width: 100%;
-        border: 2px dotted #fb275d;
-        display: flex;
-        align-items: center;
-        margin-bottom: 2px;
-        min-height: 60px;" />
-</div>*@
-
-
-
 <div class="error-message-container">
     <p>@ErrorMessage</p>
 </div>
@@ -50,8 +30,8 @@
 </div>
 
 @code {
+
     ElementReference fileDropContainer;
-    //RadzenCard fileDropContainer;
     InputFile inputFile;
 
     IJSObjectReference _filePasteModule;
@@ -59,7 +39,7 @@
 
     private string HoverClass;
     private List<string> imageSources = new();
-    private const int maxAllowedFiles = 5;
+    private const int maxAllowedFiles = 2;
     private string ErrorMessage;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -113,9 +93,7 @@
     }
 
     private void OnExit()
-    {
-        
-        dialogService.Close(null);
-        
+    {        
+        dialogService.Close(null);        
     }
 }

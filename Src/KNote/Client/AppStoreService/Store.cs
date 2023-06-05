@@ -57,7 +57,7 @@ public class Store : IStore, IDisposable
         return _navigationManager.Uri;        
     }
 
-    public Dictionary<string, string> GetQueryStrings(string url)
+    public Dictionary<string, string>? GetQueryStrings(string url)
     {                
         return  _navigationManager.GetQueryStrings(url);
     }

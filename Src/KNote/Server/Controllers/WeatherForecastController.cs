@@ -9,9 +9,11 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Server.Helpers;
 using KNote.Service.Core;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KNote.Server.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class WeatherForecastController : ControllerBase

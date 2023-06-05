@@ -10,7 +10,6 @@ using KNote.Service.Core;
 
 namespace KNote.Server.Controllers;
 
-[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/[controller]")]
 public class NoteTypesController : ControllerBase
