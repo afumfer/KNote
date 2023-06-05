@@ -18,55 +18,8 @@
     </div>
 </div>
 
-
-@*<style>
-    /* improved CSS for speech bubbles */
-    .assistant, .user {
-        position: relative;
-        font-family: arial;
-        font-size: 1.1em;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-
-    .assistant:after, .user:after {
-        content: '';
-        border: 20px solid transparent;
-        position: absolute;
-        margin-top: -30px;
-    }
-
-    .user {
-        margin-left: 20%;
-        margin-right: 100px;
-        top: 30%;
-        text-align: right;
-    }
-
-    .assistant {
-        margin-left: 100px;
-        margin-right: 20%;
-    }
-
-    .user:after {
-        border-left-color: lightgray; /*#D3D3D3;*/
-        border-right: 0;
-        right: -20px;
-    }
-
-    .assistant:after {
-        border-right-color: dimgray; /*#808080;*/
-        border-left: 0;
-        left: -20px;
-    }
-
-    .msg {
-        font-size: medium;
-    }
-</style>*@
-
 <p class="mt-2 ml-2" style="font-size:small"><b>Total Tokens:</b> @totalTokens</p>
+
 <div class="mt-3" id="chatcontainer" style="height:82%; width:100%; overflow: scroll;">
     @foreach (var item in messages)
     {
@@ -107,6 +60,7 @@
         </div>
     }
 </div>
+
 @if (!processing)
 {
     <div class="row pt-2">
