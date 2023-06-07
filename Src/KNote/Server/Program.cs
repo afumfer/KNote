@@ -10,103 +10,121 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting;
+using NLog.Web;
+using NLog;
 using KNote.Model;
 using KNote.Server.Helpers;
 using KNote.Server.Hubs;
 using KNote.MessageBroker.RabbitMQ;
+using Microsoft.Extensions.Logging;
 
+var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+logger.Debug("Init KNote WebServer main.");
 
-/////////////////////////////////////////////////////////////////
-/// Create HostBuilder
-/////////////////////////////////////////////////////////////////
-
-var builder = WebApplication.CreateBuilder(args);
-
-
-/////////////////////////////////////////////////////////////////
-/// Configure the application and add services to the container.
-/////////////////////////////////////////////////////////////////
-
-var appSettingsSection = builder.Configuration.GetSection("AppSettings");
-var repositoryRefSection = builder.Configuration.GetSection("RepositoryRef");
-
-builder.Services.Configure<AppSettings>(appSettingsSection);
-builder.Services.Configure<RepositoryRef>(repositoryRefSection);
-
-var appSettings = appSettingsSection.Get<AppSettings>();
-var repositoryRef = repositoryRefSection.Get<RepositoryRef>();
-
-builder.Services.KntAddServices(appSettings, repositoryRef);
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-     options.TokenValidationParameters = new TokenValidationParameters
-     {
-         ValidateIssuer = false,
-         ValidateAudience = false,
-         ValidateLifetime = true,
-         ValidateIssuerSigningKey = true,
-         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.Secret)),
-         ClockSkew = TimeSpan.Zero
-     });
-
-builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
+try
 {
-    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
-}));
+    ////////////////////////////////////////////////////////////////
+    // Create HostBuilder
 
-builder.Services.AddScoped<IFileStore, LocalFileStore>();
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllersWithViews()
-    .AddJsonOptions(options =>
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-builder.Services.AddRazorPages();
-builder.Services.AddSignalR();
-builder.Services.AddResponseCompression(opts =>
-{
-    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-        new[] { "application/octet-stream" });
-});
-
-builder.Services.AddSingleton<KntMessageBroker>();
+    var builder = WebApplication.CreateBuilder(args);
 
 
-/////////////////////////////////////////////////////////////////
-/// Build App and configure the HTTP request pipeline.
-/////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
+    // Configure the application and add services to the container.
 
-var app = builder.Build();
+    var appSettingsSection = builder.Configuration.GetSection("AppSettings");
+    var repositoryRefSection = builder.Configuration.GetSection("RepositoryRef");
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-    app.UseWebAssemblyDebugging();
+    builder.Services.Configure<AppSettings>(appSettingsSection);
+    builder.Services.Configure<RepositoryRef>(repositoryRefSection);
+
+    var appSettings = appSettingsSection.Get<AppSettings>();
+    var repositoryRef = repositoryRefSection.Get<RepositoryRef>();
+
+    builder.Services.KntAddServices(appSettings, repositoryRef);
+
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+         options.TokenValidationParameters = new TokenValidationParameters
+         {
+             ValidateIssuer = false,
+             ValidateAudience = false,
+             ValidateLifetime = true,
+             ValidateIssuerSigningKey = true,
+             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.Secret)),
+             ClockSkew = TimeSpan.Zero
+         });
+
+    builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
+    {
+        builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+    }));
+
+    builder.Services.AddScoped<IFileStore, LocalFileStore>();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddControllersWithViews()
+        .AddJsonOptions(options =>
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+    builder.Services.AddRazorPages();
+    builder.Services.AddSignalR();
+    builder.Services.AddResponseCompression(opts =>
+    {
+        opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+            new[] { "application/octet-stream" });
+    });
+
+    builder.Services.AddSingleton<KntMessageBroker>();
+
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
+
+    /////////////////////////////////////////////////////////////////
+    /// Build App and configure the HTTP request pipeline.
+
+    var app = builder.Build();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+        app.UseWebAssemblyDebugging();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+
+    app.UsePathBase("/KNote");
+
+    app.UseHttpsRedirection();
+    app.UseBlazorFrameworkFiles();
+
+    app.UseStaticFiles();
+    app.KntAddResourcesStaticFiles(appSettings, repositoryRef);
+
+    app.UseRouting();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.UseCors("KntPolicy");
+
+    app.MapRazorPages();
+    app.MapControllers();
+    app.MapHub<ChatHub>("/chathub");
+    app.MapFallbackToFile("index.html");
+
+    app.KntConfigureMessageBroker(appSettings, repositoryRef);
+
+    app.Run();
+
 }
-else
+catch (Exception ex)
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    logger.Error(ex, "KNote Server has stopped because there was an exception.");
+    throw;
+}
+finally
+{
+    NLog.LogManager.Shutdown();
 }
 
-app.UsePathBase("/KNote");
-
-app.UseHttpsRedirection();
-app.UseBlazorFrameworkFiles();
-
-app.UseStaticFiles();
-app.KntAddResourcesStaticFiles(appSettings, repositoryRef);
-
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseCors("KntPolicy");
-
-app.MapRazorPages();
-app.MapControllers();
-app.MapHub<ChatHub>("/chathub");
-app.MapFallbackToFile("index.html");
-
-app.KntConfigureMessageBroker(appSettings, repositoryRef);
-
-app.Run();
