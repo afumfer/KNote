@@ -18,8 +18,8 @@ using KNote.Server.Hubs;
 using KNote.MessageBroker.RabbitMQ;
 using Microsoft.Extensions.Logging;
 
-var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-logger.Debug("Init KNote WebServer main.");
+var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+logger.Trace("Init KNote WebServer main.");
 
 try
 {
@@ -78,6 +78,7 @@ try
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
+
     /////////////////////////////////////////////////////////////////
     /// Build App and configure the HTTP request pipeline.
 
@@ -116,7 +117,6 @@ try
     app.KntConfigureMessageBroker(appSettings, repositoryRef);
 
     app.Run();
-
 }
 catch (Exception ex)
 {
@@ -125,6 +125,6 @@ catch (Exception ex)
 }
 finally
 {
-    NLog.LogManager.Shutdown();
+    LogManager.Shutdown();
 }
 

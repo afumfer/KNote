@@ -77,7 +77,7 @@ public class UsersController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "User {id} get at {dateTime}.", id, DateTime.Now);
+            _logger.LogError(ex, "User {id} get at {dateTime}", id, DateTime.Now);
             var kresApi = new Result<UserDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -91,7 +91,7 @@ public class UsersController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("User {user} post/put at {dateTime}.", userDto.FullName, DateTime.Now);
+            _logger.LogTrace("User {user} post/put at {dateTime}.", userDto.FullName?.ToString(), DateTime.Now);
 
             var kresApi = await _service.Users.SaveAsync(userDto);
             if (kresApi.IsValid)
@@ -101,7 +101,7 @@ public class UsersController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "User {user} post/put at {dateTime}.", userDto.FullName, DateTime.Now);
+            _logger.LogError(ex, "User {user} post/put at {dateTime}.", userDto.FullName?.ToString(), DateTime.Now);
             var kresApi = new Result<UserDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -147,13 +147,13 @@ public class UsersController : ControllerBase
             }
             else
             {
-                _logger.LogWarning("User {user} register BadRequest at {dateTime}.", user.UserName, DateTime.Now);
+                _logger.LogWarning("User {user} register BadRequest at {dateTime}.", user.UserName?.ToString(), DateTime.Now);
                 return BadRequest(new UserTokenDto { success = kresService.IsValid, token = "", error = kresService.ErrorMessage });
             }                    
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "User {user} register at {dateTime}.", user.UserName, DateTime.Now);
+            _logger.LogWarning(ex, "User {user} register at {dateTime}.", user.UserName?.ToString(), DateTime.Now);
             return BadRequest(new UserTokenDto { success = false, token = "", error = ex.Message });
         }
     }

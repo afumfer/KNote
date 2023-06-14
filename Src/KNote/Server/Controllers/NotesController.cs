@@ -43,7 +43,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes GetAll {dateTime}.", DateTime.Now);
+            _logger.LogTrace("GetAll {dateTime}.", DateTime.Now);
 
             var resApi = await _service.Notes.GetAllAsync();
             if (resApi.IsValid)
@@ -58,7 +58,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes GetAll at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "GetAll at {dateTime}.", DateTime.Now);
             var resApi = new Result<List<NoteInfoDto>>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);
@@ -71,7 +71,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes Filter {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Filter {dateTime}.", DateTime.Now);
 
             var resApi = await _service.Notes.GetFilter(notesFilter);
                             
@@ -87,7 +87,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes filter at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Filter at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteInfoDto>>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -99,7 +99,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes Search {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Search {dateTime}.", DateTime.Now);
             
             var notesSearch = new NotesSearchDto();
             notesSearch.TextSearch = notesSearchParam.TextSearch;
@@ -122,7 +122,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes Search at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Search at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteInfoDto>>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -135,7 +135,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes HomeNotes {dateTime}.", DateTime.Now);
+            _logger.LogTrace("HomeNotes {dateTime}.", DateTime.Now);
 
             var resApi = await _service.Notes.HomeNotesAsync();
             if (resApi.IsValid)
@@ -151,7 +151,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes HomeNotes at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "HomeNotes at {dateTime}.", DateTime.Now);
             var resApi = new Result<List<NoteInfoDto>>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);
@@ -159,13 +159,13 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("{noteId}")]    // GET api/notes/{guidnote}
-    public async Task<IActionResult> Get(Guid noteId)
+    public async Task<IActionResult> Get(Guid id)
     {
         try
         {
-            _logger.LogTrace("Notes Get/id {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Get id {id} at {dateTime}.", id, DateTime.Now);
 
-            var resApi = await _service.Notes.GetAsync(noteId);
+            var resApi = await _service.Notes.GetAsync(id);
             if (resApi.IsValid)
             {
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
@@ -180,7 +180,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes Get at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Get {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<NoteInfoDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -193,7 +193,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes New {dateTime}.", DateTime.Now);
+            _logger.LogTrace("New {dateTime}.", DateTime.Now);
 
             var resApi = await _service.Notes.NewAsync();
             if (resApi.IsValid)
@@ -205,7 +205,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes New at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "New at {dateTime}.", DateTime.Now);
             var kresApi = new Result<NoteInfoDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -219,7 +219,7 @@ public class NotesController : ControllerBase
     {            
         try
         {
-            _logger.LogTrace("Notes Post/Put {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Post/Put {topic} at {dateTime}.", note.Topic?.ToString(), DateTime.Now);
 
             // Hack to make it compatible with the desktop application. ----------------------------------
             note.Description = _service.Notes.UtilUpdateResourceInDescriptionForWrite(note.Description);
@@ -253,7 +253,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes Post/Put at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Post/Put {topic} at {dateTime}.", note.Topic?.ToString(), DateTime.Now);
             var kresApi = new Result<NoteInfoDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -266,7 +266,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes Delete {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Delete {id} at {dateTime}.", id, DateTime.Now);
 
             var resApi = await _service.Notes.DeleteExtendedAsync(id);
             if (resApi.IsValid)
@@ -276,7 +276,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes Delete at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Delete {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<NoteInfoDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -290,7 +290,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes Resources(post/put) {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Resources(post/put) {dateTime}.", DateTime.Now);
 
             var resApi = await _service.Notes.SaveResourceAsync(entity);
             if (resApi.IsValid)                                    
@@ -300,7 +300,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes Resources(post/put) at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Resources(post/put) at {dateTime}.", DateTime.Now);
             var kresApi = new Result<ResourceDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -313,7 +313,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes Resources/id {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Resources {id} at {dateTime}.", id, DateTime.Now);
 
             var resApi = await _service.Notes.GetResourcesInfoAsync(id);
             if (resApi.IsValid)                
@@ -323,7 +323,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes Resources/Id at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Resources {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<List<ResourceDto>>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -336,7 +336,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes DeleteResources {dateTime}.", DateTime.Now);
+            _logger.LogTrace("DeleteResources {if} at {dateTime}.", id, DateTime.Now);
 
             var resApi = await _service.Notes.DeleteResourceInfoAsync(id);
             if (resApi.IsValid)                
@@ -346,7 +346,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes DeleteResources/id at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "DeleteResources {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<ResourceDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -361,7 +361,7 @@ public class NotesController : ControllerBase
         Result<ResourceDto> resApi = new Result<ResourceDto>();
         try
         {
-            _logger.LogTrace("Notes SaveFile {dateTime}.", DateTime.Now);
+            _logger.LogTrace("SaveFile {dateTime}.", DateTime.Now);
 
             if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
             {
@@ -372,7 +372,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes SaveFile at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "SaveFile at {dateTime}.", DateTime.Now);
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);                
         }
@@ -385,7 +385,7 @@ public class NotesController : ControllerBase
     {            
         try
         {
-            _logger.LogTrace("Notes Tasks(post/put) {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Tasks(post/put) {dateTime}.", DateTime.Now);
 
             var resApi = await _service.Notes.SaveNoteTaskAsync(entity);
             if (resApi.IsValid)
@@ -397,7 +397,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes Tasks at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Tasks at {dateTime}.", DateTime.Now);
             var kresApi = new Result<NoteTaskDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -410,7 +410,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes Tasks/id {dateTime}.", DateTime.Now);
+            _logger.LogTrace("Tasks {id} {dateTime}.", id, DateTime.Now);
 
             var resApi = await _service.Notes.GetNoteTasksAsync(id);
             if (resApi.IsValid)                
@@ -422,7 +422,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes Tasks/id at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "Tasks {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<List<NoteTaskDto>>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -435,7 +435,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes GetStartedTasksByDateTimeRage {dateTime}.", DateTime.Now);
+            _logger.LogTrace("GetStartedTasksByDateTimeRage {dateTime}.", DateTime.Now);
 
             var satartDateTime = DateTime.ParseExact(start, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
             var endDateTime = DateTime.ParseExact(end, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
@@ -450,7 +450,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes GetStartedTasksByDateTimeRage at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "GetStartedTasksByDateTimeRage at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteTaskDto>>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -463,7 +463,7 @@ public class NotesController : ControllerBase
     {
         try
         {
-            _logger.LogTrace("Notes DeleteTask {dateTime}.", DateTime.Now);
+            _logger.LogTrace("DeleteTask {dateTime}.", DateTime.Now);
 
             var resApi = await _service.Notes.DeleteNoteTaskAsync(id);
             if (resApi.IsValid)
@@ -473,7 +473,7 @@ public class NotesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Notes DeleteTask at {dateTime}.", DateTime.Now);
+            _logger.LogError(ex, "DeleteTask at {dateTime}.", DateTime.Now);
             var kresApi = new Result<NoteTaskDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);

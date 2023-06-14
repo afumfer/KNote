@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
+using KNote.Repository.EntityFramework.Entities;
+using NLog.Filters;
 
 namespace KNote.Server.Controllers;
 
@@ -15,11 +18,13 @@ namespace KNote.Server.Controllers;
 public class NoteTypesController : ControllerBase
 {
     private readonly IKntService _service;
+    private readonly ILogger<NoteTypesController> _logger;
 
-    public NoteTypesController(IKntService service, IHttpContextAccessor httpContextAccessor)
+    public NoteTypesController(IKntService service, IHttpContextAccessor httpContextAccessor, ILogger<NoteTypesController> logger)
     {
         _service = service;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
+        _logger = logger;
     }
 
     [HttpGet]    // GET api/notetypes       
@@ -27,6 +32,8 @@ public class NoteTypesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Get at {dateTime}.", DateTime.Now);
+
             var kresApi = await _service.NoteTypes.GetAllAsync();
             if (kresApi.IsValid)
                 return Ok(kresApi);
@@ -35,6 +42,7 @@ public class NoteTypesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Get at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteTypeDto>>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -46,6 +54,8 @@ public class NoteTypesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Get {id} get at {dateTime}.", id, DateTime.Now);
+
             var resApi = await _service.NoteTypes.GetAsync(id);
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -56,6 +66,7 @@ public class NoteTypesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Get {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<NoteTypeDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -69,7 +80,9 @@ public class NoteTypesController : ControllerBase
     public async Task<IActionResult> Post([FromBody]NoteTypeDto noteType)
     {
         try
-        {                                
+        {
+            _logger.LogTrace("Post {name} get at {dateTime}.", noteType.Name?.ToString(), DateTime.Now);
+
             var kresApi = await _service.NoteTypes.SaveAsync(noteType);
             if (kresApi.IsValid)
                 return Ok(kresApi);
@@ -78,6 +91,7 @@ public class NoteTypesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Post {name} at {dateTime}.", noteType.Name?.ToString(), DateTime.Now);
             var kresApi = new Result<NoteTypeDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -90,6 +104,8 @@ public class NoteTypesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Delete {id} get at {dateTime}.", id, DateTime.Now);
+
             var resApi = await _service.NoteTypes.DeleteAsync(id);
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -98,6 +114,7 @@ public class NoteTypesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Delete {id} at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<NoteTypeDto>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);

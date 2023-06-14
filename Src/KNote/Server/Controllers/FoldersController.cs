@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Http;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
+using KNote.Client.Shared;
+using KNote.Repository.EntityFramework.Entities;
+using NLog.Filters;
 
 namespace KNote.Server.Controllers;
 
@@ -16,11 +20,13 @@ namespace KNote.Server.Controllers;
 public class FoldersController : ControllerBase
 {
     private readonly IKntService _service;
+    private readonly ILogger<FoldersController> _logger;
 
-    public FoldersController(IKntService service, IHttpContextAccessor httpContextAccessor)
+    public FoldersController(IKntService service, IHttpContextAccessor httpContextAccessor, ILogger<FoldersController> logger)
     {
         _service = service;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
+        _logger = logger;
     }
 
     [HttpGet]   // GET api/folders
@@ -28,6 +34,8 @@ public class FoldersController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Get at {dateTime}.", DateTime.Now);
+
             var resApi = await _service.Folders.GetAllAsync();
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -38,6 +46,7 @@ public class FoldersController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Get at {dateTime}.", DateTime.Now);
             var resApi = new Result<List<FolderInfoDto>>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);
@@ -49,6 +58,8 @@ public class FoldersController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("GetTree at {dateTime}.", DateTime.Now);
+
             var resApi = await _service.Folders.GetTreeAsync();
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -58,6 +69,7 @@ public class FoldersController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Tree at {dateTime}.", DateTime.Now);
             var resApi = new Result<List<FolderInfoDto>>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);
@@ -65,11 +77,13 @@ public class FoldersController : ControllerBase
     }
 
     [HttpGet("{folderId}")]    // GET api/folders/guidfolder
-    public async Task<IActionResult> Get(Guid folderId)
+    public async Task<IActionResult> Get(Guid id)
     {
         try
         {
-            var resApi = await _service.Folders.GetAsync(folderId);
+            _logger.LogTrace("Get {id} get at {dateTime}.", id, DateTime.Now);
+
+            var resApi = await _service.Folders.GetAsync(id);
             if (resApi.IsValid)
                 return Ok(resApi);
             else
@@ -77,6 +91,7 @@ public class FoldersController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Get {id }at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<FolderInfoDto>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);
@@ -90,6 +105,8 @@ public class FoldersController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Post {name} get at {dateTime}.", folder.Name?.ToString(), DateTime.Now);
+
             var resApi = await _service.Folders.SaveAsync(folder);
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -98,6 +115,7 @@ public class FoldersController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Post {name} at {dateTime}.", folder.Name?.ToString(), DateTime.Now);
             var resApi = new Result<FolderInfoDto>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);
@@ -110,6 +128,8 @@ public class FoldersController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Delete {id} get at {dateTime}.", id, DateTime.Now);
+
             var resApi = await _service.Folders.DeleteAsync(id);
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -118,6 +138,7 @@ public class FoldersController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Delete {id} at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<FolderInfoDto>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);

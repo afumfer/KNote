@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
+using KNote.Client.Shared;
 
 namespace KNote.Server.Controllers;
 
@@ -16,11 +18,13 @@ namespace KNote.Server.Controllers;
 public class KAttributesController : ControllerBase
 {
     private readonly IKntService _service;
+    private readonly ILogger<KAttributesController> _logger;
 
-    public KAttributesController(IKntService service, IHttpContextAccessor httpContextAccessor)
+    public KAttributesController(IKntService service, IHttpContextAccessor httpContextAccessor, ILogger<KAttributesController> logger)
     {
         _service = service;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
+        _logger = logger;
     }
 
     [HttpGet]    // GET api/kattributes       
@@ -28,6 +32,8 @@ public class KAttributesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Get at {dateTime}.", DateTime.Now);
+
             var kresApi = await _service.KAttributes.GetAllAsync();
             if (kresApi.IsValid)
                 return Ok(kresApi);
@@ -36,6 +42,7 @@ public class KAttributesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Get at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteTypeDto>>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -47,6 +54,8 @@ public class KAttributesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("GetForNoteType {id} get at {dateTime}.", typeId, DateTime.Now);
+
             var kresApi = await _service.KAttributes.GetAllAsync(typeId);
             if (kresApi.IsValid)
                 return Ok(kresApi);
@@ -55,6 +64,7 @@ public class KAttributesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "GetForNoteType at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteTypeDto>>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -66,6 +76,8 @@ public class KAttributesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Get {id} get at {dateTime}.", id, DateTime.Now);
+
             var resApi = await _service.KAttributes.GetAsync(id);
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -76,6 +88,7 @@ public class KAttributesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Get {id} get at {dateTime}", id, DateTime.Now);
             var kresApi = new Result<KAttributeInfoDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -90,6 +103,8 @@ public class KAttributesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Post {name} get at {dateTime}.", entity.Name?.ToString(), DateTime.Now);
+
             var kresApi = await _service.KAttributes.SaveAsync(entity);
             if (kresApi.IsValid)
                 return Ok(kresApi);
@@ -98,6 +113,7 @@ public class KAttributesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Post {name} get at {dateTime}", entity.Name?.ToString(), DateTime.Now);
             var kresApi = new Result<KAttributeInfoDto>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
@@ -110,6 +126,8 @@ public class KAttributesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("Delete {id} get at {dateTime}.", id, DateTime.Now);
+
             var resApi = await _service.KAttributes.DeleteAsync(id);
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -118,6 +136,7 @@ public class KAttributesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Delete {id} delete at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<NoteTypeDto>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);
@@ -129,6 +148,8 @@ public class KAttributesController : ControllerBase
     {
         try
         {
+            _logger.LogTrace("GetTabulatedValues {id} get at {dateTime}.", idAttribute, DateTime.Now);
+
             var resApi = await _service.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
             if (resApi.IsValid)
                 return Ok(resApi);
@@ -137,6 +158,7 @@ public class KAttributesController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "GetTabulatedValues {id} delete at {dateTime}.", idAttribute, DateTime.Now);
             var resApi = new Result<NoteTypeDto>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);

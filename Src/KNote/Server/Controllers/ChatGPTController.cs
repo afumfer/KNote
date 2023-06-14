@@ -9,6 +9,7 @@ using OpenAI.Chat;
 using OpenAI;
 using KNote.Model;
 using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.Server.Controllers;
 
@@ -19,12 +20,14 @@ public class ChatGPTController : Controller
 {
     private readonly IKntService _service;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<ChatGPTController> _logger;
 
-    public ChatGPTController(IKntService service, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
+    public ChatGPTController(IKntService service, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger<ChatGPTController> logger)
     {
         _service = service;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         _configuration = configuration;
+        _logger = logger;
     }
 
     [HttpPost]   // POST api/chatgpt
@@ -32,6 +35,8 @@ public class ChatGPTController : Controller
     {
         try
         {
+            _logger.LogTrace("Post chatMessage {date}", DateTime.Now);
+
             var Organization = _configuration["OpenAIServiceOptions:Organization"] ?? "";
             var ApiKey = _configuration["OpenAIServiceOptions:ApiKey"] ?? "";
 
@@ -62,6 +67,7 @@ public class ChatGPTController : Controller
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Post chatMessage at {dateTime}.", DateTime.Now);
             var kresApi = new Result<string>();
             kresApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(kresApi);
