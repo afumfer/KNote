@@ -684,7 +684,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         htmlDescription.Dock = DockStyle.Fill;
         webView2.Dock = DockStyle.Fill;
 
-        if (_com.Model.ContentType.Contains("html"))
+        if (_com.Model.ContentType == null || _com.Model.ContentType.Contains("markdown"))
+            EnableMarkdownView();
+        else if (_com.Model.ContentType.Contains("html"))
             EnableHtmlView();
         else if (_com.Model.ContentType.Contains("navigation"))
             EnableWebView2View();
@@ -749,7 +751,14 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textStatus.Text = _com.Model.InternalTags;
         textPriority.Text = _com.Model.Priority.ToString();
 
-        if (_com.Model.ContentType.Contains("html"))
+        if (_com.Model.ContentType is null || _com.Model.ContentType.Contains("markdown"))
+        {
+            htmlDescription.Visible = false;
+            webView2.Visible = false;
+            textDescription.Text = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
+            textDescription.Visible = true;
+        }
+        else if (_com.Model.ContentType.Contains("html"))
         {
             labelLoadingHtml.Visible = true;
             labelLoadingHtml.Refresh();
@@ -780,7 +789,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             textDescription.Visible = true;
         }
 
-        buttonLockFormat.Checked = _com.Model.ContentType.Contains('#');
+        buttonLockFormat.Checked = _com.Model.ContentType != null && _com.Model.ContentType.Contains('#');
 
         // KAttributes           
         textNoteType.Text = _com.Model.NoteTypeDto.Name;
@@ -808,7 +817,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // Script             
         textScriptCode.Text = _com.Model.Script;
-
+                
         this.Update();
         this.Refresh();
     }
@@ -933,7 +942,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         _com.Model.Tags = textTags.Text;
         _com.Model.InternalTags = textStatus.Text;
 
-        if (_com.Model.ContentType.Contains("html"))
+        if (_com.Model.ContentType is null || _com.Model.ContentType.Contains("markdown"))
+            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+        else if (_com.Model.ContentType.Contains("html"))
             _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
         else if (_com.Model.ContentType.Contains("navigation"))
             _com.Model.Description = webView2.TextUrl;
