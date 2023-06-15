@@ -3,6 +3,7 @@ using KNote.Model;
 using KNote.Repository;
 using EF = KNote.Repository.EntityFramework;
 using DP = KNote.Repository.Dapper;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.Service.Core;
 
@@ -66,11 +67,12 @@ public class ServiceRef
 
     #region Constructor
 
-    public ServiceRef(RepositoryRef repositoryRef, string userIdentityName, bool activateMessageBroker = false)
+    public ServiceRef(RepositoryRef repositoryRef, string userIdentityName, bool activateMessageBroker = false, ILogger logger = null)
     {
         RepositoryRef = repositoryRef;
         UserIdentityName = userIdentityName;
         ActivateMessageBroker = activateMessageBroker;
+        Service.Logger = logger;
     }
 
     #endregion 

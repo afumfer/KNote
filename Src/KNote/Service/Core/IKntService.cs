@@ -5,11 +5,13 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Repository;
 using KNote.Service.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.Service.Core;
 
 public interface IKntService : IDisposable
 {
+    ILogger Logger { get; set; }
     Guid IdServiceRef { get; }
     RepositoryRef RepositoryRef { get; }
     Task<bool> TestDbConnection();

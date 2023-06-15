@@ -25,11 +25,12 @@ public class FoldersController : ControllerBase
     public FoldersController(IKntService service, IHttpContextAccessor httpContextAccessor, ILogger<FoldersController> logger)
     {
         _service = service;
+        _service.Logger = logger;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         _logger = logger;
     }
 
-    [HttpGet]   // GET api/folders
+    [HttpGet]
     public async Task<IActionResult> Get()
     {
         try
@@ -53,7 +54,7 @@ public class FoldersController : ControllerBase
         }
     }
 
-    [HttpGet("[action]")]   // GET api/folders/gettree
+    [HttpGet("[action]")]
     public async Task<IActionResult> Tree()
     {
         try
@@ -76,7 +77,7 @@ public class FoldersController : ControllerBase
         }
     }
 
-    [HttpGet("{folderId}")]    // GET api/folders/guidfolder
+    [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
         try
@@ -98,8 +99,8 @@ public class FoldersController : ControllerBase
         }
     }
 
-    [HttpPost]   // POST api/folders
-    [HttpPut]    // PUT api/folders
+    [HttpPost]
+    [HttpPut]
     [Authorize(Roles = "Admin, ProjecManager")]
     public async Task<IActionResult> Post([FromBody]FolderDto folder)
     {
@@ -122,7 +123,7 @@ public class FoldersController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]    // DELETE api/folders/guid     
+    [HttpDelete("{id}")]
     [Authorize(Roles = "Admin, ProjecManager")]
     public async Task<IActionResult> Delete(Guid id)
     {

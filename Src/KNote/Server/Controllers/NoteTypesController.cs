@@ -23,11 +23,12 @@ public class NoteTypesController : ControllerBase
     public NoteTypesController(IKntService service, IHttpContextAccessor httpContextAccessor, ILogger<NoteTypesController> logger)
     {
         _service = service;
-        _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
+        _service.Logger = logger;
+        _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;        
         _logger = logger;
     }
 
-    [HttpGet]    // GET api/notetypes       
+    [HttpGet]
     public async Task<IActionResult> Get()
     {
         try
@@ -49,7 +50,7 @@ public class NoteTypesController : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]    // GET api/notetypes/id
+    [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
         try
@@ -74,8 +75,8 @@ public class NoteTypesController : ControllerBase
     }
 
 
-    [HttpPost]   // POST api/notetypes
-    [HttpPut]    // PUT api/notetypes
+    [HttpPost]
+    [HttpPut]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Post([FromBody]NoteTypeDto noteType)
     {
@@ -98,7 +99,7 @@ public class NoteTypesController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]    // DELETE api/notetypes/id       
+    [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id)
     {

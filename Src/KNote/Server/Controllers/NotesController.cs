@@ -27,6 +27,7 @@ public class NotesController : ControllerBase
     public NotesController(IKntService service, IFileStore fileStore, IHttpContextAccessor httpContextAccessor, ILogger<NotesController> logger)
     {
         _service = service;            
+        _service.Logger = logger;
         _fileStore = fileStore;
         _logger = logger;
 
@@ -38,7 +39,7 @@ public class NotesController : ControllerBase
             _service.RepositoryRef.ResourcesContainerRootUrl = _fileStore.GetResourcesContainerRootUrl();
     }
 
-    [HttpGet]   // GET api/notes
+    [HttpGet]
     public async Task<IActionResult> Get()
     {
         try
@@ -65,7 +66,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpPost("[action]")]   // POST api/notes/filter        
+    [HttpPost("[action]")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]        
     public async Task <IActionResult> Filter([FromBody] NotesFilterDto notesFilter)
     {
@@ -94,7 +95,7 @@ public class NotesController : ControllerBase
         }
     }
             
-    [HttpGet("[action]")]   // GET api/notes/search
+    [HttpGet("[action]")]
     public async Task<IActionResult> Search([FromQuery] NotesSearchParam notesSearchParam)  // NotesSearchDto notesSearch
     {
         try
@@ -130,7 +131,7 @@ public class NotesController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("[action]")]   // GET api/notes/homenotes
+    [HttpGet("[action]")]
     public async Task<IActionResult> HomeNotes()
     {
         try
@@ -158,7 +159,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpGet("{noteId}")]    // GET api/notes/{guidnote}
+    [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
         try
@@ -187,7 +188,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpGet("[action]")]    // GET api/notes/new
+    [HttpGet("[action]")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> New()
     {
@@ -212,8 +213,8 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpPost]   // POST api/notes
-    [HttpPut]    // PUT api/notes
+    [HttpPost]
+    [HttpPut]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> Post([FromBody]NoteDto note)
     {            
@@ -260,7 +261,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]    // DELETE api/notes/guid
+    [HttpDelete("{id}")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -307,7 +308,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpGet("{id}/[action]")]    // GET api/notes/getresources
+    [HttpGet("{id}/[action]")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> Resources(Guid id)
     {
@@ -330,7 +331,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpDelete("resources/{id}")]    // DELETE api/notes/resources/guid
+    [HttpDelete("resources/{id}")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> DeleteResources(Guid id)
     {
@@ -353,8 +354,8 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpPost("[action]")]    // POST api/notes/savefile
-    [HttpPut("[action]")]    // PUT api/notes/savefile
+    [HttpPost("[action]")]
+    [HttpPut("[action]")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> SaveFile(ResourceDto resource)
     {
@@ -404,7 +405,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpGet("{id}/[action]")]    // GET api/notes/tasks
+    [HttpGet("{id}/[action]")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> Tasks(Guid id)
     {
@@ -429,7 +430,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpGet("[action]")]    // GET api/notes/getnotetasks
+    [HttpGet("[action]")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> GetStartedTasksByDateTimeRage([FromQuery] string start, [FromQuery] string end)
     {
@@ -457,7 +458,7 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpDelete("tasks/{id}")]    // DELETE api/notes/deletenotetask/guid
+    [HttpDelete("tasks/{id}")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
     public async Task<IActionResult> DeleteTask(Guid id)
     {

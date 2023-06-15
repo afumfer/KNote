@@ -1,5 +1,7 @@
 ﻿using System.Xml.Serialization;
 using System.Reflection;
+//using Microsoft.Extensions.Logging;
+using NLog;
 
 using KNote.Model;
 using KNote.ClientWin.Components;
@@ -50,6 +52,8 @@ public class Store
     {            
         get { return _activeFilterWithServiceRef; }
     }
+
+    public ILogger Logger { get; set; }
 
     #endregion
 

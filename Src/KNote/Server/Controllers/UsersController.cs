@@ -30,12 +30,13 @@ public class UsersController : ControllerBase
     public UsersController(IKntService service, IHttpContextAccessor httpContextAccessor, IOptions<AppSettings> appSettings, ILogger<UsersController> logger)
     {
         _service = service;
+        _service.Logger = logger;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         _appSettings = appSettings.Value;
         _logger = logger;
     }
 
-    [HttpGet]    // GET api/users        
+    [HttpGet]
     public async Task<IActionResult> Get([FromQuery] PageIdentifier pagination)
     {
         try
@@ -60,7 +61,7 @@ public class UsersController : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]    // GET api/users/id
+    [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
         try
@@ -84,8 +85,8 @@ public class UsersController : ControllerBase
         }
     }
 
-    [HttpPost]   // POST api/users
-    [HttpPut]    // PUT api/users
+    [HttpPost]
+    [HttpPut]
     [Authorize(Roles = "Admin")]        
     public async Task<IActionResult> Post([FromBody] UserDto userDto)
     {
@@ -108,7 +109,7 @@ public class UsersController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]    // DELETE api/users/id
+    [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id)
     {

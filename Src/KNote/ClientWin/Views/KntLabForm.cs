@@ -11,6 +11,9 @@ using KNote.Model.Dto;
 using KntScript;
 using KNote.Service.Core;
 
+using NLog;
+
+
 namespace KNote.ClientWin.Views;
 
 public partial class KntLabForm : Form, IViewBase
@@ -1095,7 +1098,7 @@ public partial class KntLabForm : Form, IViewBase
 
     private void buttonMessageBrokerSendMessage_Click(object sender, EventArgs e)
     {
-        
+
         //if (_service.MessageBroker.Enabled)
         //{
         //    //_service.MessageBroker.BasicPublish("KntTest Message Broker", "");
@@ -1107,8 +1110,34 @@ public partial class KntLabForm : Form, IViewBase
         //    if (resExtended.IsValid)
         //        _service.PublishNoteInMessageBroker(resExtended.Entity);
         //}
-            
+
     }
+
+    #endregion
+
+    #region NLog
+
+    //private static Logger _logger = LogManager.Setup().GetCurrentClassLogger();
+
+
+    private static Logger _logger = LogManager.GetCurrentClassLogger();
+
+    private void buttonNLog_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            _logger.Trace("Crear archivos.");
+            File.WriteAllText(@"C:\Tmp\test.txt", "Hello, World!");
+            _logger.Debug("El archivo fue creado exitosamente.");
+            File.WriteAllText(@"ñ:\Tmp\test.txt", "Hello, World!");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Ocurrió un error al intentar crear el archivo.");
+        }
+    }
+
+    //
 
     #endregion
 

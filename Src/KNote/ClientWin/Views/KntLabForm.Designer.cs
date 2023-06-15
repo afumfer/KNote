@@ -49,6 +49,8 @@
             buttonShowConsole = new Button();
             buttonRunScript = new Button();
             tabAppLab = new TabPage();
+            buttonNLog = new Button();
+            buttonServerCOMForm = new Button();
             buttonMessageBrokerSendMessage = new Button();
             buttonConfigureMessageBroker = new Button();
             buttonGetPluginFile = new Button();
@@ -63,7 +65,6 @@
             buttonImportAnotasXML = new Button();
             buttonRunMonitor = new Button();
             tabControlLab = new TabControl();
-            buttonServerCOMForm = new Button();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
             tabRichEditor.SuspendLayout();
@@ -269,6 +270,7 @@
             // 
             // tabAppLab
             // 
+            tabAppLab.Controls.Add(buttonNLog);
             tabAppLab.Controls.Add(buttonServerCOMForm);
             tabAppLab.Controls.Add(buttonMessageBrokerSendMessage);
             tabAppLab.Controls.Add(buttonConfigureMessageBroker);
@@ -291,11 +293,31 @@
             tabAppLab.Text = "Lab app components";
             tabAppLab.UseVisualStyleBackColor = true;
             // 
+            // buttonNLog
+            // 
+            buttonNLog.Location = new Point(349, 164);
+            buttonNLog.Name = "buttonNLog";
+            buttonNLog.Size = new Size(127, 28);
+            buttonNLog.TabIndex = 18;
+            buttonNLog.Text = "Test NLog";
+            buttonNLog.UseVisualStyleBackColor = true;
+            buttonNLog.Click += buttonNLog_Click;
+            // 
+            // buttonServerCOMForm
+            // 
+            buttonServerCOMForm.Location = new Point(349, 85);
+            buttonServerCOMForm.Name = "buttonServerCOMForm";
+            buttonServerCOMForm.Size = new Size(297, 28);
+            buttonServerCOMForm.TabIndex = 17;
+            buttonServerCOMForm.Text = "ServerCOM";
+            buttonServerCOMForm.UseVisualStyleBackColor = true;
+            buttonServerCOMForm.Click += buttonServerCOMForm_Click;
+            // 
             // buttonMessageBrokerSendMessage
             // 
-            buttonMessageBrokerSendMessage.Location = new Point(519, 167);
+            buttonMessageBrokerSendMessage.Location = new Point(524, 128);
             buttonMessageBrokerSendMessage.Name = "buttonMessageBrokerSendMessage";
-            buttonMessageBrokerSendMessage.Size = new Size(127, 28);
+            buttonMessageBrokerSendMessage.Size = new Size(122, 28);
             buttonMessageBrokerSendMessage.TabIndex = 16;
             buttonMessageBrokerSendMessage.Text = "Send Message";
             buttonMessageBrokerSendMessage.UseVisualStyleBackColor = true;
@@ -303,9 +325,9 @@
             // 
             // buttonConfigureMessageBroker
             // 
-            buttonConfigureMessageBroker.Location = new Point(349, 133);
+            buttonConfigureMessageBroker.Location = new Point(349, 128);
             buttonConfigureMessageBroker.Name = "buttonConfigureMessageBroker";
-            buttonConfigureMessageBroker.Size = new Size(297, 28);
+            buttonConfigureMessageBroker.Size = new Size(169, 28);
             buttonConfigureMessageBroker.TabIndex = 15;
             buttonConfigureMessageBroker.Text = "Configure Message Broker";
             buttonConfigureMessageBroker.UseVisualStyleBackColor = true;
@@ -429,16 +451,6 @@
             tabControlLab.Size = new Size(670, 577);
             tabControlLab.TabIndex = 4;
             // 
-            // buttonServerCOMForm
-            // 
-            buttonServerCOMForm.Location = new Point(349, 85);
-            buttonServerCOMForm.Name = "buttonServerCOMForm";
-            buttonServerCOMForm.Size = new Size(297, 28);
-            buttonServerCOMForm.TabIndex = 17;
-            buttonServerCOMForm.Text = "ServerCOM";
-            buttonServerCOMForm.UseVisualStyleBackColor = true;
-            buttonServerCOMForm.Click += buttonServerCOMForm_Click;
-            // 
             // KntLabForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -463,29 +475,29 @@
         }
 
         #endregion
-        private System.Windows.Forms.TabControl tabControlLab;
-        private System.Windows.Forms.TabPage tabAppLab;
-        private System.Windows.Forms.TabPage tabKntScriptLab;
-        private System.Windows.Forms.Button buttonRunBackground;
-        private System.Windows.Forms.Button buttonInteract;
-        private System.Windows.Forms.Button buttonShowConsole;
-        private System.Windows.Forms.Button buttonRunScript;
-        private System.Windows.Forms.GroupBox groupSamples;
-        private System.Windows.Forms.Button buttonRunSample;
-        private System.Windows.Forms.Button buttonShowSample;
-        private System.Windows.Forms.ListBox listSamples;
-        private System.Windows.Forms.Button buttonRunMonitor;
-        private System.Windows.Forms.ListBox listMessages;
-        private System.Windows.Forms.Button buttonImportAnotasXML;
-        private System.Windows.Forms.TabPage tabRichEditor;
+        private TabControl tabControlLab;
+        private TabPage tabAppLab;
+        private TabPage tabKntScriptLab;
+        private Button buttonRunBackground;
+        private Button buttonInteract;
+        private Button buttonShowConsole;
+        private Button buttonRunScript;
+        private GroupBox groupSamples;
+        private Button buttonRunSample;
+        private Button buttonShowSample;
+        private ListBox listSamples;
+        private Button buttonRunMonitor;
+        private ListBox listMessages;
+        private Button buttonImportAnotasXML;
+        private TabPage tabRichEditor;
         private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
-        private System.Windows.Forms.OpenFileDialog openFileDialog;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button buttonSelectScriptDirectory;
-        private System.Windows.Forms.Button buttonTestReadVarItem;
-        private System.Windows.Forms.Button buttonTestProcessStart;
-        private System.Windows.Forms.Button buttonTestReflection;
+        private OpenFileDialog openFileDialog;
+        private Label label1;
+        private Label label2;
+        private Button buttonSelectScriptDirectory;
+        private Button buttonTestReadVarItem;
+        private Button buttonTestProcessStart;
+        private Button buttonTestReflection;
         private TabPage tabWebView2;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
         private Button btnGoBack;
@@ -498,5 +510,6 @@
         private Button buttonMessageBrokerSendMessage;
         private Button buttonConfigureMessageBroker;
         private Button buttonServerCOMForm;
+        private Button buttonNLog;
     }
 }

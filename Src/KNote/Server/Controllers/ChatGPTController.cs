@@ -30,7 +30,7 @@ public class ChatGPTController : Controller
         _logger = logger;
     }
 
-    [HttpPost]   // POST api/chatgpt
+    [HttpPost]
     public async Task<IActionResult> Post([FromBody] List<ChatMessage> chatMessages)
     {
         try

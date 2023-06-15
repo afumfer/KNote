@@ -14,22 +14,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Xml.XPath;
 using System.IO;
 
+using Microsoft.Extensions.Logging;
+//using NLog;
+
 namespace KNote.Service.Core;
 
 public class KntService : IKntService, IDisposable
 {
-    #region Properties
-
-    public Guid IdServiceRef { get; }
-
-    private readonly IKntRepository _repository;
-    public IKntRepository Repository
-    {
-        get { return _repository; }
-    }
-
-    #endregion 
-
     #region Constructors
 
     public KntService(IKntRepository repository, bool activateMessageBroker = false)
@@ -51,6 +42,14 @@ public class KntService : IKntService, IDisposable
     #endregion
 
     #region IKntService members
+
+    public Guid IdServiceRef { get; }
+
+    private readonly IKntRepository _repository;
+    public IKntRepository Repository
+    {
+        get { return _repository; }
+    }
 
     private IKntUserService _users;
     public IKntUserService Users
@@ -164,6 +163,12 @@ public class KntService : IKntService, IDisposable
     public IKntMessageBroker MessageBroker
     {
         get { return _messageBroker; }
+    }
+
+
+    public ILogger Logger 
+    { 
+        get ; set; 
     }
 
     public string GetSystemVariable(string scope, string key)

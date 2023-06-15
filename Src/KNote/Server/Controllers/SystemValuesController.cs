@@ -22,12 +22,13 @@ public class SystemValuesController : ControllerBase
     public SystemValuesController(IKntService service, IHttpContextAccessor httpContextAccessor, IOptions<AppSettings> appSettings, ILogger<SystemValuesController> logger)
     {
         _service = service;
+        _service.Logger = logger;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         _appSettings = appSettings.Value;
         _logger = logger;
     }
 
-    [HttpGet]    // GET api/users
+    [HttpGet]
     public IActionResult Get()
     {
         return null;

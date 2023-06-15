@@ -1,15 +1,20 @@
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using NLog;
+using Microsoft.Extensions.Logging;
 using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
 using KNote.Model;
 using KNote.Service.Core;
+using NLog.Extensions.Logging;
 
 namespace KNote.ClientWin;
 
 static class Program
 {
+
+
     /// <summary>
     ///  The main entry point for the application.
     /// </summary>        
@@ -64,7 +69,9 @@ static class Program
             SetProcessDPIAware();
         }
 
-        Application.Run(applicationContext);            
+        Application.Run(applicationContext);
+
+        LogManager.Shutdown();
     }
 
     static async void LoadAppStore(Store store)
@@ -77,6 +84,15 @@ static class Program
         store.ComputerName = SystemInformation.ComputerName;
         store.AppConfig.LastDateTimeStart = DateTime.Now;
         store.AppConfig.RunCounter += 1;
+
+
+        // TODO: !!! Refactor this
+        store.Logger = LogManager.GetCurrentClassLogger();
+
+        var loggerFactory = new NLog.Extensions.Logging.NLogLoggerFactory();
+        var logger = loggerFactory.CreateLogger<KntService>();
+        // ---------------------------------------------------------------------
+
 
         if (!File.Exists(appFileConfig))
         {
@@ -102,7 +118,7 @@ static class Program
                 ResourcesContainerRootUrl = @"file:///" + pathResourcesCache.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             };
 
-            var initialServiceRef = new ServiceRef(r0, store.AppUserName);
+            var initialServiceRef = new ServiceRef(r0, store.AppUserName, false);
             var resCreateDB = await initialServiceRef.Service.CreateDataBase(store.AppUserName);
 
             if (resCreateDB)
@@ -125,7 +141,7 @@ static class Program
         {
             store.LoadConfig(appFileConfig);
             foreach (var r in store.AppConfig.RespositoryRefs)                
-                store.AddServiceRef(new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker));
+                store.AddServiceRef(new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker, logger));
         }
 
         store.SaveConfig(appFileConfig);

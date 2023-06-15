@@ -23,11 +23,12 @@ public class KAttributesController : ControllerBase
     public KAttributesController(IKntService service, IHttpContextAccessor httpContextAccessor, ILogger<KAttributesController> logger)
     {
         _service = service;
+        _service.Logger = logger;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         _logger = logger;
     }
 
-    [HttpGet]    // GET api/kattributes       
+    [HttpGet]
     public async Task<IActionResult> Get()
     {
         try
@@ -49,14 +50,14 @@ public class KAttributesController : ControllerBase
         }
     }
 
-    [HttpGet("[action]/{typeId}")]    // GET api/kattributes/getfornotetype/typeId      
-    public async Task<IActionResult> GetForNoteType(Guid? typeId)
+    [HttpGet("[action]/{id}")]
+    public async Task<IActionResult> GetForNoteType(Guid? id)
     {
         try
         {
-            _logger.LogTrace("GetForNoteType {id} get at {dateTime}.", typeId, DateTime.Now);
+            _logger.LogTrace("GetForNoteType {id} get at {dateTime}.", id, DateTime.Now);
 
-            var kresApi = await _service.KAttributes.GetAllAsync(typeId);
+            var kresApi = await _service.KAttributes.GetAllAsync(id);
             if (kresApi.IsValid)
                 return Ok(kresApi);
             else
@@ -71,7 +72,7 @@ public class KAttributesController : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]    // GET api/kattributes/id
+    [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
         try
@@ -95,9 +96,8 @@ public class KAttributesController : ControllerBase
         }
     }
 
-
-    [HttpPost]   // POST api/kattributes
-    [HttpPut]    // PUT api/kattributes
+    [HttpPost]
+    [HttpPut]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Post([FromBody]KAttributeDto entity)
     {
@@ -120,7 +120,7 @@ public class KAttributesController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]    // DELETE api/kattributes/guid        
+    [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -143,14 +143,14 @@ public class KAttributesController : ControllerBase
         }
     }
     
-    [HttpGet("{idAttribute}/[action]")]    // GET api/kattributes/guid/getattributetabulatedvalues
-    public async Task<IActionResult> GetTabulatedValues(Guid idAttribute)
+    [HttpGet("{id}/[action]")]
+    public async Task<IActionResult> GetTabulatedValues(Guid id)
     {
         try
         {
-            _logger.LogTrace("GetTabulatedValues {id} get at {dateTime}.", idAttribute, DateTime.Now);
+            _logger.LogTrace("GetTabulatedValues {id} get at {dateTime}.", id, DateTime.Now);
 
-            var resApi = await _service.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
+            var resApi = await _service.KAttributes.GetKAttributeTabulatedValuesAsync(id);
             if (resApi.IsValid)
                 return Ok(resApi);
             else
@@ -158,7 +158,7 @@ public class KAttributesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "GetTabulatedValues {id} delete at {dateTime}.", idAttribute, DateTime.Now);
+            _logger.LogError(ex, "GetTabulatedValues {id} delete at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<NoteTypeDto>();
             resApi.AddErrorMessage("Generic error: " + ex.Message);
             return BadRequest(resApi);
