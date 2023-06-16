@@ -164,6 +164,8 @@ public partial class KntChatGPTForm : Form, IViewBase
             textPrompt.Enabled = false;
             buttonSend.Enabled = false;
             buttonRestart.Enabled = false;
+            radioGetCompletion.Enabled = false;
+            radioGetStream.Enabled = false;
         }
         else
         {
@@ -171,6 +173,8 @@ public partial class KntChatGPTForm : Form, IViewBase
             textPrompt.Enabled = true;
             buttonSend.Enabled = true;
             buttonRestart.Enabled = true;
+            radioGetCompletion.Enabled = true;
+            radioGetStream.Enabled = true;
             textResult.SelectionStart = textResult.Text.Length;
             textResult.ScrollToCaret();
             ActiveControl = textPrompt;
