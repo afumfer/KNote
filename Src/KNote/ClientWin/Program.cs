@@ -1,7 +1,9 @@
 using System.Runtime.InteropServices;
 using System.Diagnostics;
-using NLog;
+using System.Security.Policy;
+using System;
 using Microsoft.Extensions.Logging;
+using NLog;
 using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
@@ -13,65 +15,52 @@ namespace KNote.ClientWin;
 
 static class Program
 {
-
-
     /// <summary>
     ///  The main entry point for the application.
     /// </summary>        
     [STAThread]
     static void Main()        
     {
-
 #if RELEASE
-        Process[] instancias = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
-
-        if (instancias.Length > 1)
-        {
-            BringToFront();
-            return;
-        }
+            Process[] instancias = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
+            if (instancias.Length > 1)
+            {
+                BringToFront();
+                return;
+            }
 #endif
 
         ApplicationConfiguration.Initialize();
-
         ApplicationContext applicationContext = new ApplicationContext();
-           
         Store appStore = new Store(new FactoryViewsWinForms());
-
-        #region Splash
-
+        KNoteManagmentComponent knoteManagment;
         SplashForm splashForm = new SplashForm(appStore);
-        splashForm.Show();
-        Application.DoEvents();
-
-        #endregion
-            
+        
+        splashForm.Show(); Application.DoEvents();
         LoadAppStore(appStore);
 
-        #region Demo & lab ... for debug
-
-        // applicationContext.MainForm = new LabForm(appStore);
-
-        #endregion
-
-        #region Normal start
-
-        var knoteManagment = new KNoteManagmentComponent(appStore);
-        knoteManagment.Run();
-        applicationContext.MainForm = (Form)knoteManagment.View;
-
-        #endregion
-
-        splashForm.Close();
-
-        if (Environment.OSVersion.Version.Major >= 6)
+        try
         {
-            SetProcessDPIAware();
+            knoteManagment = new KNoteManagmentComponent(appStore);
+            knoteManagment.Run();
+            applicationContext.MainForm = (Form)knoteManagment.View;
+            splashForm.Close();
+            if (Environment.OSVersion.Version.Major >= 6)
+                SetProcessDPIAware();
+            
+            Application.Run(applicationContext);
+
+            appStore.Logger?.LogInformation("KNote finalized");
         }
-
-        Application.Run(applicationContext);
-
-        LogManager.Shutdown();
+        catch (Exception ex)
+        {
+            appStore.Logger.LogCritical(ex, "KNote has stopped because there was an exception.");
+            throw;
+        }
+        finally
+        {
+            LogManager.Shutdown();
+        }
     }
 
     static async void LoadAppStore(Store store)
@@ -85,19 +74,18 @@ static class Program
         store.AppConfig.LastDateTimeStart = DateTime.Now;
         store.AppConfig.RunCounter += 1;
 
-
-        // TODO: !!! Refactor this
-        store.Logger = LogManager.GetCurrentClassLogger();
-
-        var loggerFactory = new NLog.Extensions.Logging.NLogLoggerFactory();
-        var logger = loggerFactory.CreateLogger<KntService>();
-        // ---------------------------------------------------------------------
-
-
-        if (!File.Exists(appFileConfig))
+        // Log configuration                
+        if (File.Exists(Path.Combine(pathApp, "NLog.config")))
         {
-            // Create default repository and add link
-                                
+            LogManager.Setup().LoadConfigurationFromFile(Path.Combine(pathApp, "NLog.config"));
+            store.Logger = new NLogLoggerFactory().CreateLogger<Store>();
+        }
+        else
+            store.Logger = null;
+
+        // Create default repository and add link
+        if (!File.Exists(appFileConfig))
+        {                                            
             var pathData = Path.Combine(pathApp, "Data");
             if (!Directory.Exists(pathData))
                 Directory.CreateDirectory(pathData);
@@ -118,7 +106,7 @@ static class Program
                 ResourcesContainerRootUrl = @"file:///" + pathResourcesCache.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             };
 
-            var initialServiceRef = new ServiceRef(r0, store.AppUserName, false);
+            var initialServiceRef = new ServiceRef(r0, store.AppUserName, false, store.Logger);
             var resCreateDB = await initialServiceRef.Service.CreateDataBase(store.AppUserName);
 
             if (resCreateDB)
@@ -137,11 +125,12 @@ static class Program
             store.AppConfig.LogFile = pathApp + @"\KNoteWinApp.log";
             store.AppConfig.LogActivated = false;
         }
+        // Load sevices references
         else
         {
             store.LoadConfig(appFileConfig);
             foreach (var r in store.AppConfig.RespositoryRefs)                
-                store.AddServiceRef(new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker, logger));
+                store.AddServiceRef(new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger));
         }
 
         store.SaveConfig(appFileConfig);

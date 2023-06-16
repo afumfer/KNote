@@ -108,7 +108,7 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
             else if (EditorMode == EnumRepositoryEditorMode.AddLink)
             {                    
                 // Add link repository
-                var newService = new ServiceRef(Model, Store.AppUserName);                    
+                var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);                    
                 if (await newService.Service.TestDbConnection())
                 {
                     Store.AddServiceRef(newService);                    
@@ -127,7 +127,7 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
             else if (EditorMode == EnumRepositoryEditorMode.Create)
             {
                 // Create repository and add link                    
-                var newService = new ServiceRef(Model, Store.AppUserName);
+                var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);
                 if (await newService.Service.CreateDataBase(SystemInformation.UserName))
                 {
                     Store.AddServiceRef(newService);

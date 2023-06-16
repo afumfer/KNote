@@ -1,7 +1,7 @@
 ﻿using System.Xml.Serialization;
 using System.Reflection;
-//using Microsoft.Extensions.Logging;
-using NLog;
+using Microsoft.Extensions.Logging;
+//using NLog;
 
 using KNote.Model;
 using KNote.ClientWin.Components;
@@ -9,6 +9,7 @@ using KNote.ClientWin.Views;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
+using System.ComponentModel;
 
 namespace KNote.ClientWin.Core;
 
@@ -84,6 +85,7 @@ public class Store
         if(_activeFolderWithServiceRef != activeFolderWithServiceRef)
         {
             _activeFolderWithServiceRef = activeFolderWithServiceRef;
+            Logger?.LogTrace("ChangeActiveFolderWithServiceRef {message}", activeFolderWithServiceRef.ToString());
             ChangedActiveFolderWithServiceRef?.Invoke(this, new ComponentEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
         }
     }
@@ -94,6 +96,7 @@ public class Store
         if (_activeFilterWithServiceRef != activeFilterWithServiceRef)
         {
             _activeFilterWithServiceRef = activeFilterWithServiceRef;
+            Logger?.LogTrace("ChangeActiveFilterWithServiceRef {message}", activeFilterWithServiceRef.ToString());
             ChangedActiveFilterWithServiceRef?.Invoke(this, new ComponentEventArgs<NotesFilterWithServiceRef>(activeFilterWithServiceRef));
         }
     }
@@ -101,7 +104,8 @@ public class Store
     public event EventHandler<ComponentEventArgs<ServiceRef>> AddedServiceRef;
     public void AddServiceRef(ServiceRef serviceRef)
     {
-        _servicesRefs.Add(serviceRef);                        
+        _servicesRefs.Add(serviceRef);
+        Logger?.LogInformation("Added ServiceRef {component}", serviceRef.ToString());
         AddedServiceRef?.Invoke(this, new ComponentEventArgs<ServiceRef>(serviceRef));
     }
 
@@ -114,6 +118,7 @@ public class Store
     public void RemoveServiceRef(ServiceRef serviceRef)
     {            
         _servicesRefs.Remove(serviceRef);
+        Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
         AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);            
         RemovedServiceRef?.Invoke(this, new ComponentEventArgs<ServiceRef>(serviceRef));
     }
@@ -169,6 +174,7 @@ public class Store
         }
 
         _listComponents.Add(component);
+        Logger?.LogInformation("Added Component {component}", component.ToString());
         AddedComponent?.Invoke(this, new ComponentEventArgs<ComponentBase>(component));
     }
 
@@ -193,6 +199,7 @@ public class Store
         }
 
         _listComponents.Remove(component);
+        Logger?.LogInformation("Removed Component {component}", component.ToString());
         RemovedComponent?.Invoke(this, new ComponentEventArgs<ComponentBase>(component));
     }
 
@@ -207,8 +214,9 @@ public class Store
             serializer.Serialize(w, AppConfig);
             w.Close();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "SaveConfig: {message}", configFile?.ToString());
             throw;
         }
     }
@@ -227,8 +235,9 @@ public class Store
             AppConfig.RunCounter++;
             reader.Close();                
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "LoadConfig: {message}", configFile?.ToString());
             throw;
         }            
     }
@@ -277,8 +286,9 @@ public class Store
             }
             return await Task.FromResult<bool>(true);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "SaveActiveNotes.");
             return await Task.FromResult<bool>(false);
         }
     }
@@ -327,8 +337,9 @@ public class Store
 
             return await Task.FromResult<bool>(true);
         }
-        catch (Exception)
-        {                
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "SaveAndCloseActiveNotes.");
             return await Task.FromResult<bool>(false);
         }
     }

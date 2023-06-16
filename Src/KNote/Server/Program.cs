@@ -120,7 +120,7 @@ try
 }
 catch (Exception ex)
 {
-    logger.Error(ex, "KNote Server has stopped because there was an exception.");
+    logger.Fatal(ex, "KNote Server has stopped because there was an exception.");
     throw;
 }
 finally
