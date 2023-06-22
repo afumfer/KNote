@@ -28,7 +28,6 @@ public class BaseService
                 res.AddErrorMessage($"Error. The web server has responded with the following message: StatusCode - {httpRes.StatusCode}. Reason Phrase - {httpRes.ReasonPhrase}");
             }
         }
-
         else
         {
             res = new Result<T>();
