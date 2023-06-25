@@ -1,15 +1,12 @@
 ﻿using System.Xml.Serialization;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-//using NLog;
-
 using KNote.Model;
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Views;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
-using System.ComponentModel;
 
 namespace KNote.ClientWin.Core;
 
@@ -85,7 +82,7 @@ public class Store
         if(_activeFolderWithServiceRef != activeFolderWithServiceRef)
         {
             _activeFolderWithServiceRef = activeFolderWithServiceRef;
-            Logger?.LogTrace("ChangeActiveFolderWithServiceRef {message}", activeFolderWithServiceRef.ToString());
+            Logger?.LogTrace("ChangeActiveFolderWithServiceRef {message}", activeFolderWithServiceRef?.ToString());
             ChangedActiveFolderWithServiceRef?.Invoke(this, new ComponentEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
         }
     }
@@ -96,7 +93,7 @@ public class Store
         if (_activeFilterWithServiceRef != activeFilterWithServiceRef)
         {
             _activeFilterWithServiceRef = activeFilterWithServiceRef;
-            Logger?.LogTrace("ChangeActiveFilterWithServiceRef {message}", activeFilterWithServiceRef.ToString());
+            Logger?.LogTrace("ChangeActiveFilterWithServiceRef {message}", activeFilterWithServiceRef?.ToString());
             ChangedActiveFilterWithServiceRef?.Invoke(this, new ComponentEventArgs<NotesFilterWithServiceRef>(activeFilterWithServiceRef));
         }
     }
@@ -104,6 +101,9 @@ public class Store
     public event EventHandler<ComponentEventArgs<ServiceRef>> AddedServiceRef;
     public void AddServiceRef(ServiceRef serviceRef)
     {
+        if(serviceRef is null)
+            throw new ArgumentNullException(nameof(serviceRef));
+
         _servicesRefs.Add(serviceRef);
         Logger?.LogInformation("Added ServiceRef {component}", serviceRef.ToString());
         AddedServiceRef?.Invoke(this, new ComponentEventArgs<ServiceRef>(serviceRef));
@@ -111,12 +111,18 @@ public class Store
 
     public void AddServiceRefInAppConfig(ServiceRef serviceRef)
     {
+        if (serviceRef is null)
+            throw new ArgumentNullException(nameof(serviceRef));
+
         AppConfig.RespositoryRefs.Add(serviceRef.RepositoryRef);
     }
 
     public event EventHandler<ComponentEventArgs<ServiceRef>> RemovedServiceRef;
     public void RemoveServiceRef(ServiceRef serviceRef)
-    {            
+    {
+        if (serviceRef is null)
+            throw new ArgumentNullException(nameof(serviceRef));
+
         _servicesRefs.Remove(serviceRef);
         Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
         AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);            
