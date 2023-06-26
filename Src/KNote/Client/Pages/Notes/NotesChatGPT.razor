@@ -137,7 +137,7 @@ else
                     Role = result.Entity.Role,
                     Tokens = result.Entity.CompletionTokens
                 });
-            totalTokens = totalTokens + result.Entity.TotalTokens;
+            totalTokens = totalTokens + (result.Entity.TotalTokens ?? 0);
         }
         promptInput = "";
         processing = false;

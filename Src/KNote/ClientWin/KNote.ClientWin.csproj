@@ -5,8 +5,8 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
 	<ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>0.0.7.21</AssemblyVersion>
-    <FileVersion>0.0.7.21</FileVersion>
+    <AssemblyVersion>0.0.7.22</AssemblyVersion>
+    <FileVersion>0.0.7.22</FileVersion>
     <Version>0.0.7</Version>
     <ApplicationIcon>stickyyellow_32_icon.ico</ApplicationIcon>	
   </PropertyGroup>
@@ -19,10 +19,10 @@
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.31.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.8" />
     <PackageReference Include="NLog" Version="5.2.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.0" />
-    <PackageReference Include="OpenAI-DotNet" Version="6.8.7" />
+    <PackageReference Include="OpenAI-DotNet" Version="7.0.3" />
     <PackageReference Include="ReverseMarkdown" Version="3.25.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />

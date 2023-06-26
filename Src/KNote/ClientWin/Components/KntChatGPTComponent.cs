@@ -173,7 +173,7 @@ public class KntChatGPTComponent : ComponentBase
         });
         
         _result = result.FirstChoice.Message.ToString().Replace("\n", "\r\n");
-        _totalTokens += result.Usage.TotalTokens;
+        _totalTokens += result.Usage.TotalTokens ?? 0;
         _totalProcessingTime += result.ProcessingTime;
         
         _chatTextMessasges.Append($"\r\n");
@@ -214,10 +214,9 @@ public class KntChatGPTComponent : ComponentBase
 
         await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
         {
-            foreach (var choice in result.Choices.Where(choice => choice.Delta?.Content != null))
+            foreach (var choice in result.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
             {
-                // Partial response content
-                var res = result.FirstChoice.ToString()?.Replace("\n", "\r\n");
+                var res = choice.Delta.Content.ToString()?.Replace("\n", "\r\n");
                 tempResult.Append(res);
                 StreamToken?.Invoke(this, new ComponentEventArgs<string>(res));
             }
@@ -249,6 +248,7 @@ public class KntChatGPTComponent : ComponentBase
         StreamToken?.Invoke(this, new ComponentEventArgs<string>($"\r\n\r\n"));
     }
 
+    // Demo...
     public async Task<IReadOnlyList<double>> CreateEmbeddingAsync(string text)
     {
         var res = await _openAIClient.EmbeddingsEndpoint.CreateEmbeddingAsync(text);
