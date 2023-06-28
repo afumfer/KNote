@@ -48,18 +48,16 @@ public class UserWebApiService : BaseService, IUserWebApiService
         return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Save user", true);
     }
 
-    public async Task<UserTokenDto> RegisterAsync(UserRegisterDto user)
+    public async Task<UserTokenDto?> RegisterAsync(UserRegisterDto user)
     {
         var httpRes = await httpClient.PostAsJsonAsync($"api/users/register", user);
-        var res = await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();
-        return res;
+        return await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();        
     }
 
-    public async Task<UserTokenDto> LoginAsync(UserCredentialsDto user)
+    public async Task<UserTokenDto?> LoginAsync(UserCredentialsDto user)
     {
         var httpRes = await httpClient.PostAsJsonAsync($"api/users/login", user);
-        var res = await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();
-        return res;
+        return await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();         
     }
 }
 

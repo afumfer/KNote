@@ -13,7 +13,7 @@ public class FoldersTests : WebApiTestBase
     }
 
     [TestMethod]
-    public async Task Get_All_Folders()
+    public async Task Get_All()
     {
         var httpRes = await HttpClient.GetAsync($"{UrlBase}api/folders");
         var res = await ProcessResultFromTestHttpResponse<List<FolderInfoDto>>(httpRes);
@@ -23,7 +23,7 @@ public class FoldersTests : WebApiTestBase
     }
 
     [TestMethod]
-    public async Task Get_Tree_Folders()
+    public async Task Get_Tree()
     {
         var httpRes = await HttpClient.GetAsync($"{UrlBase}api/folders/tree");
         var res = await ProcessResultFromTestHttpResponse<List<FolderDto>>(httpRes);
@@ -33,7 +33,7 @@ public class FoldersTests : WebApiTestBase
     }
 
     [TestMethod]
-    public async Task Execute_BasicCRUD_Folder()
+    public async Task Execute_BasicCRUD()
     {
         // Create 
         string folderName = "__TEST FOLDER ###__";
