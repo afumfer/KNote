@@ -7,7 +7,6 @@ namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public class NoteWebApiService : BaseService, INoteWebApiService
 {
-
     public NoteWebApiService(AppState appState, HttpClient httpClient) : base(appState, httpClient)
     {
 
@@ -17,6 +16,18 @@ public class NoteWebApiService : BaseService, INoteWebApiService
     {
         var httpRes = await httpClient.GetAsync("api/notes/homenotes");        
         return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get home notes");
+    }
+
+    public async Task<Result<List<NoteInfoDto>>> GetSearch(string queryString)
+    {
+        var httpRes = await httpClient.GetAsync($"api/notes/search?{queryString}");
+        return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get notes from search string");
+    }
+
+    public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
+    {
+        var httpRes = await httpClient.PostAsJsonAsync($"api/notes/filter", notesFilter);
+        return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get notes from filter");
     }
 
     public async Task<Result<NoteDto>> GetAsync(Guid noteId)
@@ -109,18 +120,5 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         var httpRes = await httpClient.DeleteAsync($"api/notes/tasks/{noteTaskId}");
         return await ProcessResultFromHttpResponse<NoteTaskDto>(httpRes, "Delete note task", true);
     }
-
-    public async Task<Result<List<NoteInfoDto>>> GetSearch(string queryString)
-    {
-        var httpRes = await httpClient.GetAsync($"api/notes/search?{queryString}");
-        return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get notes from search string");
-    }
-    
-    public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
-    {
-        var httpRes = await httpClient.PostAsJsonAsync($"api/notes/filter", notesFilter);
-        return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get notes from filter");
-    }
-
 }
 
