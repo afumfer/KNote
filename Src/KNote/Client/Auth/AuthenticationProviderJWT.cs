@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using KNote.Client.Helpers;
 using KNote.Client.AppStoreService;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace KNote.Client.Auth;
 
@@ -41,50 +42,60 @@ public class AuthenticationProviderJWT : AuthenticationStateProvider, ILoginServ
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);       
         var authState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));        
         store.AppState.UserName = authState?.User?.Identity?.Name;
-        return authState;
+        return authState!;
     }
 
-    private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+    private IEnumerable<Claim> ParseClaimsFromJwt(string token)
     {
-        var claims = new List<Claim>();
-        var payload = jwt.Split('.')[1];
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-
-        keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
-
-        if (roles != null)
-        {
-            if (roles.ToString().Trim().StartsWith("["))
-            {
-                var parsedRoles = JsonSerializer.Deserialize<string[]>(roles.ToString());
-
-                foreach (var parsedRole in parsedRoles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, parsedRole));
-                }
-            }
-            else
-            {
-                claims.Add(new Claim(ClaimTypes.Role, roles.ToString()));
-            }
-
-            keyValuePairs.Remove(ClaimTypes.Role);
-        }
-
-        claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value?.ToString())));
-        return claims;
+        var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+        var tokenDeserialized = jwtSecurityTokenHandler.ReadJwtToken(token);
+        return tokenDeserialized.Claims;
     }
 
-    private byte[] ParseBase64WithoutPadding(string base64)
-    {
-        switch (base64.Length % 4)
-        {
-            case 2: base64 += "=="; break;
-            case 3: base64 += "="; break;
-        }
-        return Convert.FromBase64String(base64);
-    }
+    //private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+    //{
+    //    var claims = new List<Claim>();
+    //    var payload = jwt.Split('.')[1];
+    //    var jsonBytes = ParseBase64WithoutPadding(payload);
+    //    var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
+
+    //    keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
+
+    //    if (roles != null)
+    //    {
+    //        if (roles.ToString().Trim().StartsWith("["))
+    //        {
+    //            var parsedRoles = JsonSerializer.Deserialize<string[]>(roles.ToString());
+
+    //            foreach (var parsedRole in parsedRoles)
+    //            {
+    //                claims.Add(new Claim(ClaimTypes.Role, parsedRole));
+    //            }
+    //        }
+    //        else
+    //        {
+    //            claims.Add(new Claim(ClaimTypes.Role, roles.ToString()));
+    //        }
+
+    //        keyValuePairs.Remove(ClaimTypes.Role);
+    //    }
+
+    //    claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value?.ToString())));
+    //    return claims;
+    //}
+
+    //private byte[] ParseBase64WithoutPadding(string base64)
+    //{
+    //    switch (base64.Length % 4)
+    //    {
+    //        case 2: base64 += "=="; break;
+    //        case 3: base64 += "="; break;
+    //    }
+    //    return Convert.FromBase64String(base64);
+    //}
+
+
+
 
     public async Task Login(string token)
     {

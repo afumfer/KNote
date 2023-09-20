@@ -191,14 +191,9 @@ public class UsersController : ControllerBase
     {
         var claims = new List<Claim>()
         {
-            //new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
-            //new Claim(ClaimTypes.Name, userDto.UserName),
-
             new Claim(ClaimTypes.Name, userDto.UserName),
             new Claim(JwtRegisteredClaimNames.UniqueName, userDto.EMail),
                             
-            //new Claim("KNoteApp", "KNoteWeb"),
-
             // Jti es un identificador del toquen, podría ser útil para llevar un registro y en algún 
             // momento poder invalidar dicho token. (Podría servir también como un id de sesión). 
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
