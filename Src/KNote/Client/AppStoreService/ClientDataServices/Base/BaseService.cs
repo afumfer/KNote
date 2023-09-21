@@ -5,14 +5,14 @@ namespace KNote.Client.AppStoreService.ClientDataServices.Base;
 
 public class BaseService
 {
-    protected readonly HttpClient httpClient;
+    protected readonly HttpClient _httpClient;
 
-    protected readonly AppState appState;
+    protected readonly AppState _appState;
 
     public BaseService(AppState appState, HttpClient httpClient)
     {
-        this.httpClient = httpClient;
-        this.appState = appState;
+        _httpClient = httpClient;
+        _appState = appState;
     }
 
     protected async Task<Result<T>> ProcessResultFromHttpResponse<T>(HttpResponseMessage httpRes, string action, bool emitNotifySucess = false)
@@ -37,10 +37,10 @@ public class BaseService
         if (res.IsValid)
         {
             if (emitNotifySucess)
-                appState.NotifySuccess(action, $"The action '{action}' has been executed.");
+                _appState.NotifySuccess(action, $"The action '{action}' has been executed.");
         }
         else
-            appState.NotifyError(action, res.ErrorMessage);
+            _appState.NotifyError(action, res.ErrorMessage);
         
         return res;
     }

@@ -20,19 +20,19 @@ public class UserWebApiService : BaseService, IUserWebApiService
         else
             urlApi = $"api/users?pageNumber={pagination.PageNumber}&pageSize={pagination.PageSize}";
 
-        var httpRes = await httpClient.GetAsync(urlApi);
+        var httpRes = await _httpClient.GetAsync(urlApi);
         return await ProcessResultFromHttpResponse<List<UserDto>>(httpRes, "Get users");
     }
 
     public async Task<Result<UserDto>> DeleteAsync(Guid userId)
     {
-        var httpRes = await httpClient.DeleteAsync($"api/users/{userId}");
+        var httpRes = await _httpClient.DeleteAsync($"api/users/{userId}");
         return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Delete user", true);
     }
 
     public async Task<Result<UserDto>> GetAsync(Guid userId)
     {
-        var httpRes = await httpClient.GetAsync($"api/users/{userId}");
+        var httpRes = await _httpClient.GetAsync($"api/users/{userId}");
         return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Get user");
     }
 
@@ -41,22 +41,22 @@ public class UserWebApiService : BaseService, IUserWebApiService
         HttpResponseMessage httpRes;
 
         if (user.UserId == Guid.Empty)
-            httpRes = await httpClient.PostAsJsonAsync($"api/users", user);
+            httpRes = await _httpClient.PostAsJsonAsync($"api/users", user);
         else
-            httpRes = await httpClient.PutAsJsonAsync($"api/users", user);
+            httpRes = await _httpClient.PutAsJsonAsync($"api/users", user);
 
         return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Save user", true);
     }
 
     public async Task<UserTokenDto?> RegisterAsync(UserRegisterDto user)
     {
-        var httpRes = await httpClient.PostAsJsonAsync($"api/users/register", user);
+        var httpRes = await _httpClient.PostAsJsonAsync($"api/users/register", user);
         return await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();        
     }
 
     public async Task<UserTokenDto?> LoginAsync(UserCredentialsDto user)
     {
-        var httpRes = await httpClient.PostAsJsonAsync($"api/users/login", user);
+        var httpRes = await _httpClient.PostAsJsonAsync($"api/users/login", user);
         return await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();         
     }
 }

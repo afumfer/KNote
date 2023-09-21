@@ -14,19 +14,19 @@ public class FolderWebApiService : BaseService, IFolderWebApiService
 
     public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
     {        
-        var httpRes = await httpClient.GetAsync("api/folders");
+        var httpRes = await _httpClient.GetAsync("api/folders");
         return await ProcessResultFromHttpResponse<List<FolderInfoDto>>(httpRes, "Get folders");
     }
 
     public async Task<Result<List<FolderDto>>> GetTreeAsync()
     {                
-        var httpRes = await httpClient.GetAsync("api/folders/tree");
+        var httpRes = await _httpClient.GetAsync("api/folders/tree");
         return await ProcessResultFromHttpResponse<List<FolderDto>>(httpRes, "Get folders");
     }
 
     public async Task<Result<FolderDto>> GetAsync(Guid folderId)
     {        
-        var httpRes = await httpClient.GetAsync($"api/folders/{folderId}");
+        var httpRes = await _httpClient.GetAsync($"api/folders/{folderId}");
         return await ProcessResultFromHttpResponse<FolderDto>(httpRes, "Get folder");
     }
 
@@ -36,17 +36,17 @@ public class FolderWebApiService : BaseService, IFolderWebApiService
 
         if (folder.FolderId == Guid.Empty)
         {
-            httpRes = await httpClient.PostAsJsonAsync($"api/folders", folder);
+            httpRes = await _httpClient.PostAsJsonAsync($"api/folders", folder);
         }
         else
-            httpRes = await httpClient.PutAsJsonAsync($"api/folders", folder);
+            httpRes = await _httpClient.PutAsJsonAsync($"api/folders", folder);
         
         return await ProcessResultFromHttpResponse<FolderDto>(httpRes, "Save folder", true);
     }
 
     public async Task<Result<FolderDto>> DeleteAsync(Guid id)
     {
-        var httpRes = await httpClient.DeleteAsync($"api/folders/{id}");
+        var httpRes = await _httpClient.DeleteAsync($"api/folders/{id}");
         return await ProcessResultFromHttpResponse<FolderDto>(httpRes, "Delete folder", true);
     }
 }
