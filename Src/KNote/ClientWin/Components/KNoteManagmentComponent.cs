@@ -91,7 +91,7 @@ namespace KNote.ClientWin.Components
         }
 
         private async void Store_ChangedActiveFolderWithServiceRef(object sender, ComponentEventArgs<FolderWithServiceRef> e)
-        {
+        {            
             await RefreshActiveFolderWithServiceRef(e.Entity);            
         }
 
@@ -102,6 +102,8 @@ namespace KNote.ClientWin.Components
 
         private async Task RefreshActiveFolderWithServiceRef(FolderWithServiceRef folderWithServideRef)
         {
+            View.ActivateWaitState();
+
             if (folderWithServideRef == null)
                 return;
 
@@ -118,10 +120,14 @@ namespace KNote.ClientWin.Components
 
             View.ShowInfo(null);
             NotifyMessage($"Loaded notes list for folder {folderWithServideRef.FolderInfo?.FolderNumber}");
+
+            View.DeactivateWaitState();
         }
 
         private async Task RefreshActiveFilterWithServiceRef(NotesFilterWithServiceRef notesFilterWithServiceRef)
         {
+            View.ActivateWaitState();
+
             SelectMode = EnumSelectMode.Filters;
 
             NotifyMessage($"Loading notes filter: {notesFilterWithServiceRef?.NotesFilter?.TextSearch}");
@@ -135,6 +141,8 @@ namespace KNote.ClientWin.Components
 
             View.ShowInfo(null);
             NotifyMessage($"Loaded notes filter {notesFilterWithServiceRef?.NotesFilter?.TextSearch}");
+
+            View.DeactivateWaitState();
         }
 
         public override void Dispose()
@@ -787,6 +795,7 @@ namespace KNote.ClientWin.Components
 
         public void RefreshRepositoryAndFolderTree()
         {
+            View.ActivateWaitState();
             NotifyMessage("Refreshing tree folder ...");
             SelectedFilterWithServiceRef = null;
             SelectedFolderWithServiceRef = null;
@@ -799,6 +808,7 @@ namespace KNote.ClientWin.Components
             NotesSelectorComponent.CleanView();
             View.ShowInfo(null);
             NotifyMessage("Refreshed tree folder ...");
+            View.DeactivateWaitState();
         }
 
         public void ShowKNoteManagment() 
@@ -828,6 +838,8 @@ namespace KNote.ClientWin.Components
         
         public async void MoveSelectedNotes()
         {
+            View.ActivateWaitState();
+            
             var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
             if(selectedNotes == null || selectedNotes?.Count == 0)
             {                
@@ -848,16 +860,18 @@ namespace KNote.ClientWin.Components
                 await SelectedServiceRef.Service.Notes.UtilPatchFolder(n.NoteId, newFolderId);
 
             ForceRefreshListNotes();
+
+            View.DeactivateWaitState();
         }
 
         public void AddTagsSelectedNotes()
-        {
-            ChangeTags(EnumChangeTag.Add);
+        {            
+            ChangeTags(EnumChangeTag.Add);            
         }
 
         public void RemoveTagsSelectedNotes()
-        {
-            ChangeTags(EnumChangeTag.Remove);
+        {            
+            ChangeTags(EnumChangeTag.Remove);            
         }
 
         public void RunScriptSelectedNotes()
@@ -1031,7 +1045,7 @@ namespace KNote.ClientWin.Components
         private async void ChangeTags(EnumChangeTag action)
         {
             var strTmp = "";
-
+            
             var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
             if (selectedNotes == null || selectedNotes?.Count == 0)
             {
@@ -1062,6 +1076,7 @@ namespace KNote.ClientWin.Components
             else
                 formReadVar.Text = "Remove tags in selected notes";
             formReadVar.Size = new Size(500, 150);
+            
             var result = formReadVar.ShowDialog();
 
             if (result == DialogResult.Cancel)
@@ -1069,6 +1084,9 @@ namespace KNote.ClientWin.Components
             else
             {
                 var tag = listVars[0].VarNewValueText;
+
+                View.ActivateWaitState();
+
                 foreach (var note in selectedNotes)
                     if (action == EnumChangeTag.Add)
                         await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
@@ -1076,6 +1094,8 @@ namespace KNote.ClientWin.Components
                         await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
 
                 ForceRefreshListNotes();
+
+                View.DeactivateWaitState();
             }
         }
 

@@ -107,6 +107,22 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         return DialogResult.OK;
     }
 
+    public void RefreshView()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ActivateWaitState()
+    {
+        this.Cursor = Cursors.WaitCursor;
+    }
+
+    public void DeactivateWaitState()
+    {
+        this.Cursor = Cursors.Default;
+    }
+
+
     #endregion
 
     #region Form events handlers
@@ -378,12 +394,6 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         if (_com.Store.AppConfig.ManagmentHeight > 0)
             Height = _com.Store.AppConfig.ManagmentHeight;
     }
-
-    public void RefreshView()
-    {
-        throw new NotImplementedException();
-    }
-
 
     #endregion
 }

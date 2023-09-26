@@ -67,7 +67,9 @@ public interface IViewSelector<TItem> : IViewEmbeddable
 public interface IViewKNoteManagment : IViewBase
 {
     void HideView();
-    void ActivateView();    
+    void ActivateView();
+    void ActivateWaitState();
+    void DeactivateWaitState();
 }
 
 public interface IViewPostIt<T> : IViewBase
