@@ -44,4 +44,13 @@ public class BaseService
         
         return res;
     }
+
+    protected async Task<Result<T>?> GetResultFromHttpResponse<T>(HttpResponseMessage httpRes, bool throwsEx = true)
+    {                
+        if(throwsEx)
+            httpRes.EnsureSuccessStatusCode();  
+
+        return await httpRes.Content.ReadFromJsonAsync<Result<T>>();        
+    }
+
 }
