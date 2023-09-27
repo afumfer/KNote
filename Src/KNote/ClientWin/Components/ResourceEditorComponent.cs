@@ -23,7 +23,7 @@ public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceD
         return Store.FactoryViews.View(this);
     }
 
-    public override async Task<bool> NewModel(IKntService service)
+    public override Task<bool> NewModel(IKntService service)
     {
         Service = service;
 
@@ -31,7 +31,7 @@ public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceD
         Model = new ResourceDto();
         Model.ResourceId = Guid.NewGuid();
         Model.ContentInDB = false;
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult(true);
     }
 
     public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)

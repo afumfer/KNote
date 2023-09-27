@@ -32,18 +32,18 @@ public class OptionsEditorComponent : ComponentEditorBase<IViewEditor<AppConfig>
         throw new NotImplementedException();
     }
 
-    public async override Task<bool> SaveModel()
+    public override Task<bool> SaveModel()
     {
         View.RefreshModel();
 
         if (!Model.IsDirty())
-            return await Task.FromResult<bool>(true);
+            return Task.FromResult(true);
 
         var msgVal = Model.GetErrorMessage();
         if (!string.IsNullOrEmpty(msgVal))
         {
             View.ShowInfo(msgVal);
-            return await Task.FromResult<bool>(false);
+            return Task.FromResult(false);
         }
 
         Store.AppConfig.AlarmActivated = Model.AlarmActivated;
@@ -54,7 +54,7 @@ public class OptionsEditorComponent : ComponentEditorBase<IViewEditor<AppConfig>
         Store.AppConfig.ChatHubUrl = Model.ChatHubUrl;
         Store.SaveConfig();
 
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult(true);
     }
 
     public override Task<bool> DeleteModel(IKntService service, Guid id)

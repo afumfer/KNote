@@ -24,7 +24,7 @@ public class LocalFileStore : IFileStore
         if (File.Exists(fileDirectory))            
             File.Delete(fileDirectory);            
 
-        return Task.FromResult(0);
+        return Task.CompletedTask;
     }
 
     public async Task<string> SaveFile(string contentBase64, string filename, string container)

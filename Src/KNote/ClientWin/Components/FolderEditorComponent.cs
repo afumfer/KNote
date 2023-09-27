@@ -46,13 +46,13 @@ public class FolderEditorComponent : ComponentEditorBase<IViewEditor<FolderDto>,
         }            
     }
 
-    public override async Task<bool> NewModel(IKntService service)
+    public override Task<bool> NewModel(IKntService service)
     {            
         Service = service;
 
         // TODO: call service for new model
         Model = new FolderDto();
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult(true);
     }
 
     public override async Task<bool> SaveModel()

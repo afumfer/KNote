@@ -701,10 +701,10 @@ namespace KNote.ClientWin.Components
             await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
         }
 
-        public async void NewFolder()
+        public void NewFolder()
         {
             var folderEditorComponent = new FolderEditorComponent(Store);
-            await folderEditorComponent.NewModel(SelectedServiceRef.Service);
+            folderEditorComponent.NewModel(SelectedServiceRef.Service);
             folderEditorComponent.Model.ParentId = SelectedFolderInfo?.FolderId;
             folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo?.GetSimpleDto<FolderDto>();
             var res = folderEditorComponent.RunModal();
@@ -712,7 +712,7 @@ namespace KNote.ClientWin.Components
             {                
                 var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>() };
                 FoldersSelectorComponent.AddItem(fs);
-            }
+            }            
         }
 
         public async void EditFolder()

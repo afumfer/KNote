@@ -132,14 +132,14 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
 
             View.RefreshView();
 
-            return await Task.FromResult<bool>(true);
+            return true;
         }
         catch (Exception ex)
         {
             View.ShowInfo(ex.Message);
         }
 
-        return await Task.FromResult<bool>(false);
+        return false;
     }
 
     public async override Task<bool> SaveModel()
@@ -204,7 +204,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
             try
             {
                 if (noteId == Guid.Empty)
-                    return await Task.FromResult<bool>(true);
+                    return true;
 
                 var response = await service.Notes.DeleteExtendedAsync(noteId);                    
 
@@ -283,7 +283,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
         else
         {                
             View.ShowInfo("This note could not be saved.");
-            return await Task.FromResult<bool>(false);
+            return false;
         }
     }
 
@@ -328,7 +328,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
             
         var resSaveMsg = await Service.Notes.SaveMessageAsync(alarm, true);
             
-        return await Task.FromResult<bool>(resSaveMsg.IsValid);
+        return resSaveMsg.IsValid;
     }
 
     public async Task<bool> FastTaskAndHide()
@@ -357,7 +357,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
         else
         {
             View.ShowInfo("This note could not be saved.");
-            return await Task.FromResult<bool>(false);
+            return false;
         }
     }
 
@@ -375,7 +375,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
 
         var resSaveTask = await Service.Notes.SaveNoteTaskAsync(task, true);
 
-        return await Task.FromResult<bool>(resSaveTask.IsValid);
+        return resSaveTask.IsValid;
     }
 
     public void FinalizeAndExtendEdit()

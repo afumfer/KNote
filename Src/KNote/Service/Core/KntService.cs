@@ -135,7 +135,7 @@ public class KntService : IKntService, IDisposable
         {
             var res = await SystemValues.GetAllAsync();
             if (!res.IsValid)
-                return await Task.FromResult(false);
+                return false;
 
             if (!string.IsNullOrEmpty(newOwner))
             {
@@ -145,17 +145,17 @@ public class KntService : IKntService, IDisposable
                     resGetU.Entity.UserName = newOwner;
                     var resUpdateU = await Users.SaveAsync(resGetU.Entity);
                     if (!resUpdateU.IsValid)
-                        return await Task.FromResult(false);
+                        return false;
                 }
                 else
-                    return await Task.FromResult(false);
+                    return false;
             }
         }
         catch (Exception)
         {
-            return await Task.FromResult(false);
+            return false;
         }
-        return await Task.FromResult(true);
+        return true;
     }
 
 

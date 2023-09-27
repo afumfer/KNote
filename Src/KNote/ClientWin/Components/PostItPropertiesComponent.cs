@@ -22,11 +22,11 @@ public class PostItPropertiesComponent : ComponentEditorBase<IViewPostIt<WindowD
         return Store.FactoryViews.View(this);
     }        
 
-    public async override Task<bool> NewModel(IKntService service)
+    public override Task<bool> NewModel(IKntService service)
     {
         Model = new WindowDto();
 
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult<bool>(true);
     }
 
     public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
@@ -35,11 +35,11 @@ public class PostItPropertiesComponent : ComponentEditorBase<IViewPostIt<WindowD
     }
 
 
-    public async override Task<bool> SaveModel()
+    public override Task<bool> SaveModel()
     {
         View.RefreshModel();
         Finalize();
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult<bool>(true);
     }
 
     public override Task<bool> DeleteModel(IKntService service, Guid id)

@@ -46,14 +46,14 @@ public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDt
         }
     }
 
-    public override async Task<bool> NewModel(IKntService service)
+    public override Task<bool> NewModel(IKntService service)
     {
         Service = service;
 
         // TODO: call service for new model
         Model = new KMessageDto();
         Model.KMessageId = Guid.NewGuid();
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult(true);
     }
 
     public override async Task<bool> SaveModel()

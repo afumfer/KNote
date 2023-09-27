@@ -248,7 +248,7 @@ public class Store
         }            
     }
 
-    public async Task<bool> CheckNoteIsActive(Guid noteId)
+    public Task<bool> CheckNoteIsActive(Guid noteId)
     {
         foreach(var com in _listComponents)
         {
@@ -256,22 +256,22 @@ public class Store
             {
                 var comNote = (NoteEditorComponent)com;
                 if (comNote.Model.NoteId == noteId && comNote.EditMode == true )
-                    return await Task.FromResult<bool>(true);
+                    return Task.FromResult(true);
 
             }
         }
-        return await Task.FromResult<bool>(false);
+        return Task.FromResult(false);
     }
 
-    public async Task<bool> CheckPostItIsActive(Guid noteId)
+    public Task<bool> CheckPostItIsActive(Guid noteId)
     {
         foreach (var com in _listComponents)
         {
             if (com is PostItEditorComponent)
                 if (((PostItEditorComponent)com).Model.NoteId == noteId)
-                    return await Task.FromResult<bool>(true);
+                    return Task.FromResult(true);
         }
-        return await Task.FromResult<bool>(false);
+        return Task.FromResult(false);
     }
 
     public async Task<bool> SaveActiveNotes()
@@ -290,12 +290,12 @@ public class Store
                         await comNote.SaveModel();
                 }
             }
-            return await Task.FromResult<bool>(true);
+            return true;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "SaveActiveNotes.");
-            return await Task.FromResult<bool>(false);
+            return false;
         }
     }
 
@@ -341,12 +341,12 @@ public class Store
                 note.Finalize();
             }
 
-            return await Task.FromResult<bool>(true);
+            return true;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "SaveAndCloseActiveNotes.");
-            return await Task.FromResult<bool>(false);
+            return false;
         }
     }
 

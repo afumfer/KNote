@@ -23,14 +23,14 @@ public class TaskEditorComponent : ComponentEditorBase<IViewEditor<NoteTaskDto>,
         return Store.FactoryViews.View(this);
     }
 
-    public override async Task<bool> NewModel(IKntService service)
+    public override Task<bool> NewModel(IKntService service)
     {
         Service = service;
 
         // TODO: call service for new model
         Model = new NoteTaskDto();
         Model.NoteTaskId = Guid.NewGuid();
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult(true);
     }
 
     public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)

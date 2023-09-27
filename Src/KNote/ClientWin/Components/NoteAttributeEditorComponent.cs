@@ -32,21 +32,21 @@ public class NoteAttributeEditorComponent : ComponentEditorBase<IViewEditor<Note
         throw new NotImplementedException();
     }
 
-    public override async Task<bool> NewModel(IKntService service)
+    public override Task<bool> NewModel(IKntService service)
     {
         Service = service;
 
         // TODO: call service for new model
         Model = new NoteKAttributeDto();
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult(true);
     }
 
-    public async override Task<bool> SaveModel()
+    public override Task<bool> SaveModel()
     {
         View.RefreshModel();
 
         if (!Model.IsDirty())
-            return await Task.FromResult<bool>(true);
+            return Task.FromResult(true);
 
         var isNew = (Model.NoteKAttributeId == Guid.Empty);
 
@@ -54,7 +54,7 @@ public class NoteAttributeEditorComponent : ComponentEditorBase<IViewEditor<Note
         if (!string.IsNullOrEmpty(msgVal))
         {
             View.ShowInfo(msgVal);
-            return await Task.FromResult<bool>(false);
+            return Task.FromResult(false);
         }
 
         try
@@ -89,10 +89,10 @@ public class NoteAttributeEditorComponent : ComponentEditorBase<IViewEditor<Note
         catch (Exception ex)
         {
             View.ShowInfo(ex.Message);
-            return await Task.FromResult<bool>(false);
+            return Task.FromResult(false);
         }
 
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult(true);
     }
 
     public override Task<bool> DeleteModel(IKntService service, Guid id)

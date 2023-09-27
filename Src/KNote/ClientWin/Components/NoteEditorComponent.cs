@@ -189,15 +189,15 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
                 if (response.IsValid)
                     OnDeletedEntity(response.Entity);
-
-                return await Task.FromResult<bool>(true);
+                
+                return true;
             }
             catch (Exception ex)
             {
                 View.ShowInfo(ex.Message);
             }
         }
-        return await Task.FromResult<bool>(false);
+        return false;
     }
 
     #endregion
@@ -253,15 +253,15 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
             Model.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
 
             if (newType == null)
-                return await Task.FromResult(true);
+                return true;
 
             // Add new attributes
             Model.KAttributesDto = await Service.Notes.UtilCompleteNoteAttributes(Model.KAttributesDto, Model.NoteId, newType.NoteTypeId);                
-            return await Task.FromResult(true);
+            return true;
         }
         catch (Exception)
         {
-            return await Task.FromResult(false);
+            return false;
         }
     }
 
@@ -478,7 +478,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
     }
 
 
-    public async Task<ResourceDto> EditResource(Guid resourceId)
+    public Task<ResourceDto> EditResource(Guid resourceId)
     {
         var resourceEditor = new ResourceEditorComponent(Store);
         resourceEditor.AutoDBSave = false;  // don't save automatically
@@ -486,16 +486,14 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
         var resource = Model.Resources.Where(_ => _.ResourceId == resourceId).SingleOrDefault();                     
 
         resourceEditor.LoadModel(Service, resource, false);
-
-        var dummy = await Task.FromResult(true);
-
+        
         var res = resourceEditor.RunModal();
         if (res.Entity == EComponentResult.Executed)
         {
-            return resourceEditor.Model;
+            return Task.FromResult(resourceEditor.Model);
         }
         else
-            return null;
+            return Task.FromResult<ResourceDto>(null);
     }
 
     public async Task<bool> DeleteResource(Guid resourceId)

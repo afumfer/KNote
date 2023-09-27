@@ -510,7 +510,7 @@ public partial class KntLabForm : Form, IViewBase
             }
         }
 
-        return await Task.FromResult<bool>(true);
+        return true;
     }
 
     private List<TagKeyValue> ProcessTag(string tags)
@@ -599,7 +599,7 @@ public partial class KntLabForm : Form, IViewBase
             var res = await service.KAttributes.SaveAsync(attributeDto);
         }
 
-        return await Task.FromResult<bool>(true);
+        return true;
     }
 
     private async Task<bool> SaveFolderDto(IKntService service, Guid? userId, CarpetaExport carpetaExport, Guid? parent, List<EtiquetaExport> etiquetas)
@@ -921,7 +921,7 @@ public partial class KntLabForm : Form, IViewBase
             await SaveFolderDto(service, userId, c, folder.FolderId, etiquetas);
         }
 
-        return await Task.FromResult<bool>(true);
+        return true;
     }
 
     #endregion 

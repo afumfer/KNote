@@ -133,13 +133,13 @@ public class NotesSelectorComponent : ComponentSelectorBase<IViewSelector<NoteIn
             else
             {
                 View.ShowInfo(response.ErrorMessage);
-                resLoad = await Task.FromResult<bool>(false); 
+                resLoad = false;
             }
         }
         catch (Exception ex)
         {
             View.ShowInfo(ex.Message);
-            resLoad = await Task.FromResult<bool>(false);
+            resLoad = false;
         }
         finally
         {

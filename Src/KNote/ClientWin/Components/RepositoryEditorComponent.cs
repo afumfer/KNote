@@ -35,7 +35,7 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
         return Store.FactoryViews.View(this);
     }
 
-    public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
+    public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
     {
         try
         {
@@ -55,22 +55,22 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
             
             if (refreshView)
                 View.RefreshView();
-            return await Task.FromResult<bool>(true);
+            return Task.FromResult(true);
         }
         catch (Exception ex)
         {
             View.ShowInfo(ex.Message);
-            return await Task.FromResult<bool>(false);
+            return Task.FromResult(false);
         }
     }
 
-    public async override Task<bool> NewModel(IKntService service = null)
+    public override Task<bool> NewModel(IKntService service = null)
     {
         Service = service;
 
         Model = new RepositoryRef();
 
-        return await Task.FromResult<bool>(true);
+        return Task.FromResult(true);
     }
 
     public async override Task<bool> SaveModel()
@@ -78,13 +78,13 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
         View.RefreshModel();
 
         if (!Model.IsDirty())
-            return await Task.FromResult<bool>(true);
+            return true;
 
         var msgVal = Model.GetErrorMessage();
         if (!string.IsNullOrEmpty(msgVal))
         {
             View.ShowInfo(msgVal);
-            return await Task.FromResult<bool>(false);
+            return false;
         }
 
         try
@@ -120,7 +120,7 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
                 else
                 {
                     View.ShowInfo("Invalid database.");
-                    return await Task.FromResult<bool>(false);
+                    return false;
                 }
             }
 
@@ -139,7 +139,7 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
                 else
                 {
                     View.ShowInfo("Can't create database.");
-                    return await Task.FromResult<bool>(false);
+                    return false;
                 }
             }
 
@@ -148,10 +148,10 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
         catch (Exception ex)
         {
             View.ShowInfo(ex.Message);
-            return await Task.FromResult<bool>(false);
+            return false;
         }
 
-        return await Task.FromResult<bool>(true);
+        return true;
     }
 
     public async override Task<bool> DeleteModel()
@@ -173,14 +173,14 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
                 Store.RemoveServiceRef(serviceForDelete);
                 Store.SaveConfig();
                 OnDeletedEntity(serviceForDelete.RepositoryRef);
-                return await Task.FromResult<bool>(true);
+                return true;
             }
             catch (Exception ex)
             {
                 View.ShowInfo(ex.Message);
             }
         }
-        return await Task.FromResult<bool>(false);
+        return false;
     }
 
     #endregion 
