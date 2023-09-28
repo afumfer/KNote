@@ -70,6 +70,8 @@ public interface IViewKNoteManagment : IViewBase
     void ActivateView();
     void ActivateWaitState();
     void DeactivateWaitState();
+    void ReportProgressKNoteManagment(int porcentaje);
+    void SetVisibleProgressBar(bool visible);    
 }
 
 public interface IViewPostIt<T> : IViewBase

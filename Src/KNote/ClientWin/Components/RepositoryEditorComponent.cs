@@ -4,13 +4,6 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Components;
 
-public enum EnumRepositoryEditorMode
-{
-    AddLink,
-    Create,
-    Managment
-}
-
 public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<RepositoryRef>, RepositoryRef>
 {
     #region Properties 
@@ -185,3 +178,14 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
 
     #endregion 
 }
+
+#region Public enums 
+
+public enum EnumRepositoryEditorMode
+{
+    AddLink,
+    Create,
+    Managment
+}
+
+#endregion

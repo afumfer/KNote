@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
 using KNote.Model;
+using static KNote.ClientWin.Components.KNoteManagmentComponent;
 
 namespace KNote.ClientWin.Views;
 
@@ -122,6 +123,15 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         this.Cursor = Cursors.Default;
     }
 
+    public void ReportProgressKNoteManagment(int porcentaje)
+    {
+        progressBar.Value = porcentaje;
+    }
+
+    public void SetVisibleProgressBar(bool visible)
+    {
+        progressBar.Visible = visible;
+    }
 
     #endregion
 
@@ -233,11 +243,11 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         }
         else if (menuSel == menuAddTags)
         {
-            _com.AddTagsSelectedNotes();
+            _com.ChangeTags(EnumChangeTag.Add);
         }
         else if (menuSel == menuRemoveTags)
         {
-            _com.RemoveTagsSelectedNotes();
+            _com.ChangeTags(EnumChangeTag.Remove);
         }
         else if (menuSel == menuExecuteKntScript)
         {

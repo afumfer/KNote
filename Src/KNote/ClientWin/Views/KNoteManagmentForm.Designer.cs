@@ -88,6 +88,7 @@
             statusLabel1 = new ToolStripStatusLabel();
             statusS1 = new ToolStripStatusLabel();
             statusLabel2 = new ToolStripStatusLabel();
+            progressBar = new ToolStripProgressBar();
             toolBarManagment = new ToolStrip();
             toolNewNote = new ToolStripButton();
             toolEditNote = new ToolStripButton();
@@ -507,7 +508,7 @@
             // 
             // statusBarManagment
             // 
-            statusBarManagment.Items.AddRange(new ToolStripItem[] { statusLabel1, statusS1, statusLabel2 });
+            statusBarManagment.Items.AddRange(new ToolStripItem[] { statusLabel1, statusS1, statusLabel2, progressBar });
             statusBarManagment.Location = new Point(0, 668);
             statusBarManagment.Name = "statusBarManagment";
             statusBarManagment.Padding = new Padding(1, 0, 16, 0);
@@ -536,6 +537,12 @@
             statusLabel2.Size = new Size(19, 17);
             statusLabel2.Text = "....";
             statusLabel2.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // progressBar
+            // 
+            progressBar.Name = "progressBar";
+            progressBar.Size = new Size(100, 16);
+            progressBar.Visible = false;
             // 
             // toolBarManagment
             // 
@@ -781,83 +788,84 @@
             PerformLayout();
         }
 
-        private System.Windows.Forms.MenuStrip menuMangment;
-        private System.Windows.Forms.ToolStripMenuItem menuFile;
-        private System.Windows.Forms.ToolStripMenuItem menuRepositories;
-        private System.Windows.Forms.ToolStripMenuItem menuCreateRepository;
-        private System.Windows.Forms.ToolStripMenuItem menuAddRepositoryLink;
-        private System.Windows.Forms.ToolStripMenuItem menuManagmentRepository;
-        private System.Windows.Forms.ToolStripMenuItem menuRemoveRepositoryLink;
-        private System.Windows.Forms.ToolStripSeparator toolMenuIRepositoryS1;
-        private System.Windows.Forms.ToolStripMenuItem menuRefreshTreeFolders;
-        private System.Windows.Forms.ToolStripSeparator toolMenuIRepositoryS2;
-        private System.Windows.Forms.ToolStripMenuItem menuImportData;
-        private System.Windows.Forms.ToolStripMenuItem menuFolders;
-        private System.Windows.Forms.ToolStripMenuItem menuNewFolder;
-        private System.Windows.Forms.ToolStripMenuItem menuEditFolder;
-        private System.Windows.Forms.ToolStripMenuItem menuDeleteFolder;
-        private System.Windows.Forms.ToolStripSeparator menuFileS1;
-        private System.Windows.Forms.ToolStripMenuItem menuHide;
-        private System.Windows.Forms.ToolStripSeparator menuFilesS2;
-        private System.Windows.Forms.ToolStripMenuItem menuExit;
-        private System.Windows.Forms.ToolStripMenuItem menuEdit;
-        private System.Windows.Forms.ToolStripMenuItem menuNewNote;
-        private System.Windows.Forms.ToolStripMenuItem menuEditNote;
-        private System.Windows.Forms.ToolStripMenuItem menuDeleteNote;
-        private System.Windows.Forms.ToolStripSeparator menuEditS1;
-        private System.Windows.Forms.ToolStripMenuItem menuMoveSelectedNotes;
-        private System.Windows.Forms.ToolStripSeparator menuEditS2;
-        private System.Windows.Forms.ToolStripMenuItem menuAddTags;
-        private System.Windows.Forms.ToolStripMenuItem menuRemoveTags;
-        private System.Windows.Forms.ToolStripSeparator menuEditS3;
-        private System.Windows.Forms.ToolStripMenuItem menuMoreOptions;
-        private System.Windows.Forms.ToolStripMenuItem menuExecuteKntScript;
-        private System.Windows.Forms.ToolStripMenuItem menuView;
-        private System.Windows.Forms.ToolStripMenuItem menuFoldersExplorer;
-        private System.Windows.Forms.ToolStripMenuItem menuSearchPanel;
-        private System.Windows.Forms.ToolStripMenuItem menuTools;
-        private System.Windows.Forms.ToolStripMenuItem menuReports;
-        private System.Windows.Forms.ToolStripSeparator menuToolsS1;
-        private System.Windows.Forms.ToolStripSeparator menuToolsS2;
-        private System.Windows.Forms.ToolStripMenuItem menuKntScriptConsole;
-        private System.Windows.Forms.ToolStripMenuItem menuKNoteLab;
-        private System.Windows.Forms.ToolStripMenuItem menuOptions;
-        private System.Windows.Forms.ToolStripMenuItem menuHelp;
-        private System.Windows.Forms.ToolStripMenuItem menuHelpDoc;
-        private System.Windows.Forms.ToolStripMenuItem menuAbout;
-        private System.Windows.Forms.StatusStrip statusBarManagment;
-        private System.Windows.Forms.ToolStripStatusLabel statusLabel1;
-        private System.Windows.Forms.ToolStripStatusLabel statusS1;
-        private System.Windows.Forms.ToolStripStatusLabel statusLabel2;
-        private System.Windows.Forms.ToolStrip toolBarManagment;
-        private System.Windows.Forms.ToolStripButton toolNewNote;
-        private System.Windows.Forms.ToolStripButton toolEditNote;
-        private System.Windows.Forms.ToolStripButton toolDeleteNote;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripButton toolPrintReports;
-        private System.Windows.Forms.ToolStripButton toolConfiguration;
-        private System.Windows.Forms.Panel panelSupManagment;
-        private System.Windows.Forms.Label labelFolderDetail;
-        private System.Windows.Forms.Label labelFolder;
-        private System.Windows.Forms.PictureBox pictureBoxFolder;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.TabControl tabExplorers;
-        private System.Windows.Forms.TabPage tabTreeFolders;
-        private System.Windows.Forms.TabPage tabSearch;
-        private System.Windows.Forms.ImageList imageTabExplorer;
+        private MenuStrip menuMangment;
+        private ToolStripMenuItem menuFile;
+        private ToolStripMenuItem menuRepositories;
+        private ToolStripMenuItem menuCreateRepository;
+        private ToolStripMenuItem menuAddRepositoryLink;
+        private ToolStripMenuItem menuManagmentRepository;
+        private ToolStripMenuItem menuRemoveRepositoryLink;
+        private ToolStripSeparator toolMenuIRepositoryS1;
+        private ToolStripMenuItem menuRefreshTreeFolders;
+        private ToolStripSeparator toolMenuIRepositoryS2;
+        private ToolStripMenuItem menuImportData;
+        private ToolStripMenuItem menuFolders;
+        private ToolStripMenuItem menuNewFolder;
+        private ToolStripMenuItem menuEditFolder;
+        private ToolStripMenuItem menuDeleteFolder;
+        private ToolStripSeparator menuFileS1;
+        private ToolStripMenuItem menuHide;
+        private ToolStripSeparator menuFilesS2;
+        private ToolStripMenuItem menuExit;
+        private ToolStripMenuItem menuEdit;
+        private ToolStripMenuItem menuNewNote;
+        private ToolStripMenuItem menuEditNote;
+        private ToolStripMenuItem menuDeleteNote;
+        private ToolStripSeparator menuEditS1;
+        private ToolStripMenuItem menuMoveSelectedNotes;
+        private ToolStripSeparator menuEditS2;
+        private ToolStripMenuItem menuAddTags;
+        private ToolStripMenuItem menuRemoveTags;
+        private ToolStripSeparator menuEditS3;
+        private ToolStripMenuItem menuMoreOptions;
+        private ToolStripMenuItem menuExecuteKntScript;
+        private ToolStripMenuItem menuView;
+        private ToolStripMenuItem menuFoldersExplorer;
+        private ToolStripMenuItem menuSearchPanel;
+        private ToolStripMenuItem menuTools;
+        private ToolStripMenuItem menuReports;
+        private ToolStripSeparator menuToolsS1;
+        private ToolStripSeparator menuToolsS2;
+        private ToolStripMenuItem menuKntScriptConsole;
+        private ToolStripMenuItem menuKNoteLab;
+        private ToolStripMenuItem menuOptions;
+        private ToolStripMenuItem menuHelp;
+        private ToolStripMenuItem menuHelpDoc;
+        private ToolStripMenuItem menuAbout;
+        private StatusStrip statusBarManagment;
+        private ToolStripStatusLabel statusLabel1;
+        private ToolStripStatusLabel statusS1;
+        private ToolStripStatusLabel statusLabel2;
+        private ToolStrip toolBarManagment;
+        private ToolStripButton toolNewNote;
+        private ToolStripButton toolEditNote;
+        private ToolStripButton toolDeleteNote;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripButton toolPrintReports;
+        private ToolStripButton toolConfiguration;
+        private Panel panelSupManagment;
+        private Label labelFolderDetail;
+        private Label labelFolder;
+        private PictureBox pictureBoxFolder;
+        private SplitContainer splitContainer1;
+        private SplitContainer splitContainer2;
+        private TabControl tabExplorers;
+        private TabPage tabTreeFolders;
+        private TabPage tabSearch;
+        private ImageList imageTabExplorer;
         #endregion
 
-        private System.Windows.Forms.ToolStripMenuItem menuNewNoteAsPostIt;
-        private System.Windows.Forms.ToolStripMenuItem menuEditNoteAsPostIt;
-        private System.Windows.Forms.ToolStripMenuItem menuHeaderPanelVisible;
-        private System.Windows.Forms.ToolStripMenuItem menuExportData;
-        private System.Windows.Forms.ToolStripMenuItem menuMainVisible;
-        private System.Windows.Forms.ToolStripMenuItem menuVerticalPanelForNotes;
-        private System.Windows.Forms.ToolStripSeparator menuViewS1;
+        private ToolStripMenuItem menuNewNoteAsPostIt;
+        private ToolStripMenuItem menuEditNoteAsPostIt;
+        private ToolStripMenuItem menuHeaderPanelVisible;
+        private ToolStripMenuItem menuExportData;
+        private ToolStripMenuItem menuMainVisible;
+        private ToolStripMenuItem menuVerticalPanelForNotes;
+        private ToolStripSeparator menuViewS1;
         private ToolStripMenuItem menuToolbarVisible;
         private ToolStripMenuItem menuChat;
         private ToolStripMenuItem menuChatGPT;
+        private ToolStripProgressBar progressBar;
     }
 }
