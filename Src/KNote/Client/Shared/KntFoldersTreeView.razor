@@ -4,13 +4,13 @@
 @inject TooltipService tooltipService
 
 
-<RadzenTree Data=@FoldersInfo  Change=@OnChange>
+<RadzenTree Data=@FoldersInfo Change=@OnFolderSelected>
     <RadzenTreeLevel 
         TextProperty="Name" 
         ChildrenProperty="ChildFolders"     
         Expanded=@ShouldExpanded 
         Selected=@ShouldSelected
-        HasChildren=@(f => (f as FolderDto).ChildFolders.Any()) >
+        HasChildren=@(f => ((FolderDto)f).ChildFolders.Any()) >
             <Template>       
                 <RadzenIcon Icon="folder" Style="color: lightgray"/> @context.Text
                 @if (EditMode)
@@ -58,8 +58,9 @@
         appState.OnChange -= StateHasChanged;
     }
 
-    protected async Task OnFolderSelected(FolderDto folder)
+    private async Task OnFolderSelected(TreeEventArgs args)
     {
+        var folder = args.Value as FolderDto;
         await FolderSelected.InvokeAsync(folder);
     }
 
@@ -97,11 +98,4 @@
         var folder = data as FolderDto;
         return folder?.FolderId == appState.SelectedFolder.ParentId;        
     }
-
-    private async void OnChange(TreeEventArgs args)
-    {
-        var folder = args.Value as FolderDto;
-        await FolderSelected.InvokeAsync(folder);        
-    }
-
 }
