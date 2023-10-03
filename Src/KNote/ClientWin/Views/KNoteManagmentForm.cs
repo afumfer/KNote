@@ -203,23 +203,23 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         }
         else if (menuSel == menuEditNote)
         {
-            _com.EditNote();
+            await _com.EditNote();
         }
         else if (menuSel == menuEditNoteAsPostIt)
         {
-            _com.EditNotePostIt();
+            await _com.EditNotePostIt();
         }
         else if (menuSel == menuNewNote)
         {
-            _com.AddNote();
+            await _com.AddNote();
         }
         else if (menuSel == menuNewNoteAsPostIt)
         {
-            _com.AddNotePostIt();
+            await _com.AddNotePostIt();
         }
         else if (menuSel == menuDeleteNote)
         {
-            _com.DeleteNote();
+            await _com.DeleteNote();
         }
         else if (menuSel == menuKntScriptConsole)
         {
@@ -315,17 +315,17 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             MessageBox.Show("In construction ... ");
     }
 
-    private void buttonToolBar_Click(object sender, EventArgs e)
+    private async void buttonToolBar_Click(object sender, EventArgs e)
     {
         ToolStripItem menuSel;
         menuSel = (ToolStripItem)sender;
 
         if (menuSel == toolEditNote)
-            _com.EditNote();
+            await _com.EditNote();
         else if (menuSel == toolNewNote)
-            _com.AddNote();
+            await _com.AddNote();
         else if (menuSel == toolDeleteNote)
-            _com.DeleteNote();
+            await _com.DeleteNote();
         else if (menuSel == toolConfiguration)
             _com.ManagmentRepository();
 

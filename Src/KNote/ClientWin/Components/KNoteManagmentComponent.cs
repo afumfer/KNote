@@ -318,12 +318,12 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }
     }
 
-    private void _notesSelectorComponent_EntitySelectionDoubleClick(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void _notesSelectorComponent_EntitySelectionDoubleClick(object sender, ComponentEventArgs<NoteInfoDto> e)
     {
         if (e.Entity == null)
             return;
         _selectedNoteInfo = e.Entity;
-        EditNote();
+        await EditNote();
     }
 
     private async void _notesSelectorComponent_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
@@ -339,34 +339,34 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         NotifyMessage($"Loaded note details for note {e.Entity.NoteNumber}");
     }
 
-    private void ExtendAddNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendAddNote(object sender, ComponentEventArgs<NoteInfoDto> e)
     {
-        AddNote();
+        await AddNote();
     }
 
-    private void ExtendAddNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendAddNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
     {
-        AddNotePostIt();
+        await AddNotePostIt();
     }
 
-    private void ExtendEditNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendEditNote(object sender, ComponentEventArgs<NoteInfoDto> e)
     {
-        EditNote();
+        await EditNote();
     }
 
-    private void AddFastResolvedTask(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void AddFastResolvedTask(object sender, ComponentEventArgs<NoteInfoDto> e)
     {
-        AddFastResolvedTask();
+        await AddFastResolvedTask();
     }
    
-    private void ExtendEditNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendEditNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
     {
-        EditNotePostIt();
+        await EditNotePostIt();
     }
 
-    private void ExtendDeleteNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendDeleteNote(object sender, ComponentEventArgs<NoteInfoDto> e)
     {
-        DeleteNote();
+        await DeleteNote();
     }
 
     private void ExtendMoveSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
@@ -562,7 +562,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         kntChatGPTComponent.ShowChatGPTView(true, true);
     }
 
-    public async void EditNote()
+    public async Task EditNote()
     {
         if (SelectedNoteInfo == null)
         {
@@ -578,7 +578,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         await EditNote(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
     }
 
-    public async void AddFastResolvedTask()
+    public async Task AddFastResolvedTask()
     {
         if (SelectedNoteInfo == null)
         {
@@ -615,7 +615,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
         var res = (await service.Notes.SaveExtendedAsync(resNoteForSaveTask)).Entity;
         
-        OnNoteEditorSaved(res.GetSimpleDto<NoteInfoDto>());            
+        await OnNoteEditorSaved(res.GetSimpleDto<NoteInfoDto>());            
     }
 
     public async Task<bool> EditNote(IKntService service, Guid noteId)
@@ -626,7 +626,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         return res;
     }
 
-    public async void EditNotePostIt()
+    public async Task EditNotePostIt()
     {
         if (SelectedNoteInfo == null)
         {
@@ -651,24 +651,24 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         return res;
     }
 
-    public void AddNote()
+    public async Task AddNote()
     {
         if(SelectedFolderInfo == null)
         {
             View.ShowInfo("There is no selected folder to create new note.");
             return;
         }
-        AddNote(SelectedServiceRef.Service);
+        await AddNote(SelectedServiceRef.Service);
     }
 
-    public async void AddNote(IKntService service)
+    public async Task AddNote(IKntService service)
     {
         var noteEditorComponent = new NoteEditorComponent(Store);
         await noteEditorComponent.NewModel(service);
         noteEditorComponent.Run();
     }
 
-    public void AddNotePostIt()
+    public async Task AddNotePostIt()
     {
         if (SelectedFolderInfo == null)
         {
@@ -676,10 +676,10 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             return;
         }
 
-        AddNotePostIt(SelectedFolderWithServiceRef);
+        await AddNotePostIt(SelectedFolderWithServiceRef);
     }
 
-    public void AddDefaultNotePostIt()
+    public async Task AddDefaultNotePostIt()
     {
         if (Store.DefaultFolderWithServiceRef == null)
         {
@@ -687,10 +687,10 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             return;
         }
 
-        AddNotePostIt(DefaultFolderWithServiceRef);
+        await AddNotePostIt(DefaultFolderWithServiceRef);
     }
     
-    public async void DeleteNote()
+    public async Task DeleteNote()
     {
         if (SelectedNoteInfo == null)
         {
@@ -1046,14 +1046,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         NotesSelectorComponent.AddItem(noteInfo);
     }
 
-    private void PostItEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
+    private async void PostItEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
     {
-        OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>());
+        await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    private async void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
     {
-        OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>()); 
+        await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>()); 
     }
 
     private async void PostItEditorComponent_ExtendedEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
@@ -1066,7 +1066,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
     }
 
-    private async void OnNoteEditorSaved(NoteInfoDto noteInfo)
+    private async Task OnNoteEditorSaved(NoteInfoDto noteInfo)
     {
         if (NoteEditorComponent.Model.NoteId == noteInfo.NoteId)
             await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);
@@ -1124,7 +1124,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }
     }
     
-    private async void AddNotePostIt(FolderWithServiceRef folderWithServiceRef)
+    private async Task AddNotePostIt(FolderWithServiceRef folderWithServiceRef)
     {
         var postItEditorComponent = new PostItEditorComponent(Store);
         postItEditorComponent.FolderWithServiceRef = folderWithServiceRef;

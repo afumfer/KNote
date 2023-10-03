@@ -52,14 +52,14 @@ public partial class NotifyForm : Form, IViewBase
 
     #region Menu events handlers 
 
-    private void notifyKNote_DoubleClick(object sender, EventArgs e)
+    private async void notifyKNote_DoubleClick(object sender, EventArgs e)
     {
-        _com.AddDefaultNotePostIt();
+        await _com.AddDefaultNotePostIt();
     }
 
-    private void menuNewNote_Click(object sender, EventArgs e)
+    private async void menuNewNote_Click(object sender, EventArgs e)
     {
-        _com.AddDefaultNotePostIt();
+        await _com.AddDefaultNotePostIt();
     }
 
     private void menuShowKNoteManagment_Click(object sender, EventArgs e)
