@@ -173,7 +173,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         else if (menuSel == buttonDelete)
         {
-            DeleteModel();
+            await DeleteModel();
         }
         else if (menuSel == buttonUndo)
         {
@@ -539,9 +539,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         await AddResource();
     }
 
-    private void buttonResourceEdit_Click(object sender, EventArgs e)
+    private async void buttonResourceEdit_Click(object sender, EventArgs e)
     {
-        EditResource();
+        await EditResource();
     }
 
     private async void buttonResourceDelete_Click(object sender, EventArgs e)
@@ -566,10 +566,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
     }
 
-    private void listViewResources_DoubleClick(object sender, EventArgs e)
+    private async void listViewResources_DoubleClick(object sender, EventArgs e)
     {
         if (_com.EditMode)
-            EditResource();
+            await EditResource();
     }
 
     private void linkViewFile_Click(object sender, EventArgs e)
@@ -964,7 +964,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         return await _com.SaveModel();
     }
 
-    private async void DeleteModel()
+    private async Task DeleteModel()
     {
         var res = await _com.DeleteModel();
         if (res)
@@ -1187,7 +1187,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textTaskTags.Text = task.Tags;
     }
 
-    private async void EditResource()
+    private async Task EditResource()
     {
         if (_selectedResource == null)
         {

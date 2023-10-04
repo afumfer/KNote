@@ -38,6 +38,7 @@ public class MessagesManagmentComponent : ComponentBase
         try
         {
             VisibleWindows();
+            //Task.Run(() => VisibleWindows());
 
             kntTimerAlarms = new System.Windows.Forms.Timer();
             kntTimerAlarms.Tick += kntTimerAlarms_Tick;
@@ -63,21 +64,21 @@ public class MessagesManagmentComponent : ComponentBase
 
     #region Private methods
 
-    private void KntTimerAutoSave_Tick(object sender, EventArgs e)
+    private async void KntTimerAutoSave_Tick(object sender, EventArgs e)
     {
         if (!Store.AppConfig.AutoSaveActivated)
             return;
         kntTimerAutoSave.Stop();                        
-        SaveNotes();             
+        await SaveNotes();             
         kntTimerAutoSave.Enabled = true;
     }
 
-    private void kntTimerAlarms_Tick(object sender, EventArgs e)
+    private async void kntTimerAlarms_Tick(object sender, EventArgs e)
     {
         if (!Store.AppConfig.AlarmActivated)
             return;
         kntTimerAlarms.Stop();                        
-        AlarmsWindows();            
+        await AlarmsWindows();            
         kntTimerAlarms.Enabled = true;            
     }
 
@@ -92,7 +93,7 @@ public class MessagesManagmentComponent : ComponentBase
         }
     }
 
-    private async void AlarmsWindows()
+    private async Task AlarmsWindows()
     {
         foreach (var store in Store.GetAllServiceRef())
         {
@@ -116,7 +117,7 @@ public class MessagesManagmentComponent : ComponentBase
         }
     }
 
-    private async void SaveNotes()
+    private async Task SaveNotes()
     {
         await Store.SaveActiveNotes();
     }

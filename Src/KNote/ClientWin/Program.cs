@@ -37,7 +37,8 @@ static class Program
         SplashForm splashForm = new SplashForm(appStore);
         
         splashForm.Show(); Application.DoEvents();
-        LoadAppStore(appStore);
+        
+        LoadAppStore(appStore);        
 
         try
         {

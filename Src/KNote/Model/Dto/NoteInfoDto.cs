@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -148,7 +149,12 @@ public class NoteInfoDto : SmartModelDtoBase
     [MaxLength(1024)]
     public string ContentType
     {
-        get { return _contentType; }
+        get 
+        {
+            if (_contentType == null)
+                _contentType = "";
+            return _contentType; 
+        }
         set
         {
             if (_contentType != value)

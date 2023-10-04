@@ -276,14 +276,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         NewFolder();
     }
 
-    private void ExtendEditFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+    private async void ExtendEditFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
     {
-        EditFolder();
+        await EditFolder();
     }
 
-    private void ExtendDeleteFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+    private async void ExtendDeleteFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
     {
-        DeleteFolder();
+        await DeleteFolder();
     }
 
     #endregion
@@ -369,9 +369,9 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         await DeleteNote();
     }
 
-    private void ExtendMoveSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendMoveSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
     {
-        MoveSelectedNotes();
+        await MoveSelectedNotes();
     }
 
     private void ExtendNull(object sender, ComponentEventArgs<NoteInfoDto> e)
@@ -379,14 +379,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         
     }
 
-    private void ExtendAddTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendAddTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
     {            
-        ChangeTags(EnumChangeTag.Add);
+        await ChangeTags(EnumChangeTag.Add);
     }
 
-    private void ExtendRemoveTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendRemoveTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
     {            
-        ChangeTags(EnumChangeTag.Remove);
+        await ChangeTags(EnumChangeTag.Remove);
     }
 
     #endregion
@@ -716,7 +716,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }            
     }
 
-    public async void EditFolder()
+    public async Task EditFolder()
     {
         if(SelectedFolderInfo == null)
         {
@@ -735,7 +735,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }            
     }
 
-    public async void DeleteFolder()
+    public async Task DeleteFolder()
     {
         if (SelectedFolderInfo == null)
         {
@@ -751,7 +751,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }            
     }
 
-    public async void RemoveRepositoryLink()
+    public async Task RemoveRepositoryLink()
     {
         if (SelectedServiceRef == null)
         {
@@ -766,17 +766,17 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }
     }
 
-    public void AddRepositoryLink()
+    public async Task AddRepositoryLink()
     {
-        NewRepository(EnumRepositoryEditorMode.AddLink);
+        await NewRepository(EnumRepositoryEditorMode.AddLink);
     }
 
-    public void CreateRepository()
+    public async Task CreateRepository()
     {
-        NewRepository(EnumRepositoryEditorMode.Create);
+        await NewRepository(EnumRepositoryEditorMode.Create);
     }
 
-    public async void ManagmentRepository()
+    public async Task ManagmentRepository()
     {
         if (SelectedServiceRef == null)
         {
@@ -822,12 +822,12 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         View.HideView();            
     }
 
-    public async void GoActiveFolder()
+    public async Task GoActiveFolder()
     {        
         await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);            
     }
 
-    public async void GoActiveFilter()
+    public async Task GoActiveFilter()
     {            
         await RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
     }
@@ -837,7 +837,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         Store.RunScript(SelectedNoteInfo.Script);
     }
     
-    public async void MoveSelectedNotes()
+    public async Task MoveSelectedNotes()
     {                
         var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
         if(selectedNotes == null || selectedNotes?.Count == 0)
@@ -870,15 +870,15 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             View.ReportProgressKNoteManagment(percentageInt);
         }                           
 
-        ForceRefreshListNotes();
+        await ForceRefreshListNotes();
 
         View.SetVisibleProgressBar(false);
         View.DeactivateWaitState();
     }
 
-    public async void ChangeTags(EnumChangeTag action)
+    public async Task ChangeTags(EnumChangeTag action)
     {
-        var strTmp = "";
+        string strTmp;
 
         var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
         if (selectedNotes == null || selectedNotes?.Count == 0)
@@ -937,7 +937,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
                 View.ReportProgressKNoteManagment(percentageInt);
             }
 
-            ForceRefreshListNotes();
+            await ForceRefreshListNotes();
 
             View.SetVisibleProgressBar(false);
             View.DeactivateWaitState();
@@ -1023,17 +1023,17 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region Events handlers for extension components 
 
-    private void PostItEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteDto> e)
+    private async void PostItEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteDto> e)
     {
-        OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
+        await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    private async void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
     {
-        OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
+        await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private async void OnNoteEditorAdded(NoteInfoDto noteInfo)
+    private async Task OnNoteEditorAdded(NoteInfoDto noteInfo)
     {
         if (NotesSelectorComponent.ListEntities == null)
             return;
@@ -1104,15 +1104,15 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region Private methods
 
-    private async void ForceRefreshListNotes()
+    private async Task ForceRefreshListNotes()
     {
-        if (SelectMode == EnumSelectMode.Folders)                
+        if (SelectMode == EnumSelectMode.Folders)
             await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
         else if (SelectMode == EnumSelectMode.Filters)                
             await RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
     }
 
-    private async void NewRepository(EnumRepositoryEditorMode mode)
+    private async Task NewRepository(EnumRepositoryEditorMode mode)
     {
         var repositoryEditorComponent = new RepositoryEditorComponent(Store);
         repositoryEditorComponent.EditorMode = mode;

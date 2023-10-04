@@ -174,27 +174,27 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         }
         else if (menuSel == menuEditFolder)
         {
-            _com.EditFolder();
+            await _com.EditFolder();
         }
         else if (menuSel == menuDeleteFolder)
         {
-            _com.DeleteFolder();
+            await _com.DeleteFolder();
         }
         else if (menuSel == menuRemoveRepositoryLink)
         {
-            _com.RemoveRepositoryLink();
+            await _com.RemoveRepositoryLink();
         }
         else if (menuSel == menuAddRepositoryLink)
         {
-            _com.AddRepositoryLink();
+            await _com.AddRepositoryLink();
         }
         else if (menuSel == menuCreateRepository)
         {
-            _com.CreateRepository();
+            await _com.CreateRepository();
         }
         else if (menuSel == menuManagmentRepository)
         {
-            _com.ManagmentRepository();
+            await _com.ManagmentRepository();
         }
         else if (menuSel == menuRefreshTreeFolders)
         {
@@ -239,15 +239,15 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         }
         else if (menuSel == menuMoveSelectedNotes)
         {
-            _com.MoveSelectedNotes();
+            await _com.MoveSelectedNotes();
         }
         else if (menuSel == menuAddTags)
         {
-            _com.ChangeTags(EnumChangeTag.Add);
+            await _com.ChangeTags(EnumChangeTag.Add);
         }
         else if (menuSel == menuRemoveTags)
         {
-            _com.ChangeTags(EnumChangeTag.Remove);
+            await _com.ChangeTags(EnumChangeTag.Remove);
         }
         else if (menuSel == menuExecuteKntScript)
         {
@@ -261,13 +261,13 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             if (tabExplorers.SelectedIndex == 0)
                 return;
-            SelectTab(0);
+            await SelectTab(0);
         }
         else if (menuSel == menuSearchPanel)
         {
             if (tabExplorers.SelectedIndex == 1)
                 return;
-            SelectTab(1);
+            await SelectTab(1);
         }
         else if (menuSel == menuHeaderPanelVisible)
         {
@@ -327,13 +327,13 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         else if (menuSel == toolDeleteNote)
             await _com.DeleteNote();
         else if (menuSel == toolConfiguration)
-            _com.ManagmentRepository();
+            await _com.ManagmentRepository();
 
     }
 
-    private void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
+    private async void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
     {
-        SelectTab(tabExplorers.SelectedIndex);
+        await SelectTab(tabExplorers.SelectedIndex);
     }
 
     private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
@@ -351,21 +351,21 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
     #region Private methods
 
-    private void SelectTab(int tabIndex)
+    private async Task SelectTab(int tabIndex)
     {
         if (tabIndex == 0)
         {
             tabExplorers.SelectedTab = tabExplorers.TabPages[0];
             menuFoldersExplorer.Checked = true;
             menuSearchPanel.Checked = false;
-            _com.GoActiveFolder();
+            await _com.GoActiveFolder();
         }
         else if (tabIndex == 1)
         {
             tabExplorers.SelectedTab = tabExplorers.TabPages[1];
             menuFoldersExplorer.Checked = false;
             menuSearchPanel.Checked = true;
-            _com.GoActiveFilter();
+            await _com.GoActiveFilter();
         }
     }
 

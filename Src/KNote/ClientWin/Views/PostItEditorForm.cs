@@ -334,7 +334,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
         labelCaption.Text = _com.Model.Topic;
         RefreshStatus();
-        _selectedFolderId = _com.Model.FolderId;            
+        _selectedFolderId = _com.Model.FolderId;
+
         if (_com.Model.ContentType.Contains("html"))
             htmlDescription.BodyHtml = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
         else if (_com.Model.ContentType.Contains("navigation"))
