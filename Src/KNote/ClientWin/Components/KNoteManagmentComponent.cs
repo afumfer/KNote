@@ -876,8 +876,30 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         View.DeactivateWaitState();
     }
 
+    //public async Task ChangeTagsActionDemo()
+    //{
+    //    View.SetVisibleProgressBar(true);
+    //    for (var i = 1; i <= 10; i++)
+    //    {
+    //        await Task.Delay(TimeSpan.FromSeconds(1));
+    //        View.ReportProgressKNoteManagment(i * 10);
+    //    }
+    //    View.SetVisibleProgressBar(false);
+    //}
+
+    //public HeavyProcessForm _heavyProcess = new HeavyProcessForm();
+
     public async Task ChangeTags(EnumChangeTag action)
     {
+
+        //// Concept test
+        //_heavyProcess.TopMost = true;       
+        //_heavyProcess.Show();
+        //await _heavyProcess.Exec(ChangeTagsActionDemo);
+        //_heavyProcess.Hide();
+        //await Task.CompletedTask;
+        //// ---
+
         string strTmp;
 
         var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
