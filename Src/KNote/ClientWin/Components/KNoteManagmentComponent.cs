@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
@@ -876,30 +877,10 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         View.DeactivateWaitState();
     }
 
-    //public async Task ChangeTagsActionDemo()
-    //{
-    //    View.SetVisibleProgressBar(true);
-    //    for (var i = 1; i <= 10; i++)
-    //    {
-    //        await Task.Delay(TimeSpan.FromSeconds(1));
-    //        View.ReportProgressKNoteManagment(i * 10);
-    //    }
-    //    View.SetVisibleProgressBar(false);
-    //}
-
-    //public HeavyProcessForm _heavyProcess = new HeavyProcessForm();
+    // -------------------------------------------------------------------------------------------------------
 
     public async Task ChangeTags(EnumChangeTag action)
     {
-
-        //// Concept test
-        //_heavyProcess.TopMost = true;       
-        //_heavyProcess.Show();
-        //await _heavyProcess.Exec(ChangeTagsActionDemo);
-        //_heavyProcess.Hide();
-        //await Task.CompletedTask;
-        //// ---
-
         string strTmp;
 
         var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
@@ -941,30 +922,86 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         {
             var tag = listVars[0].VarNewValueText;
 
-            View.ActivateWaitState();
-            View.SetVisibleProgressBar(true);
 
-            var index = 0;
-            foreach (var note in selectedNotes)
-            {
-                if (action == EnumChangeTag.Add)
-                    await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
-                else
-                    await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
+            //Concept test --------------------------------
+            _heavyProcess.TopMost = true;
+            _heavyProcess.UpdateProcessName("Updating Tags");
+            _heavyProcess.Show();
+            //await _heavyProcess.Exec(ChangeTagsActionDemo);
+            await _heavyProcess.Exec3(ChangeTagsAction, action, selectedNotes, tag);
+            _heavyProcess.Hide();
+            await Task.CompletedTask;
+            //---------------------------------------------
 
-                index++;
-                var percentage = (double)index / selectedNotes.Count;
-                percentage = percentage * 100;
-                var percentageInt = (int)Math.Round(percentage, 0);
-                View.ReportProgressKNoteManagment(percentageInt);
-            }
+
+
+            //View.ActivateWaitState();
+            //View.SetVisibleProgressBar(true);
+
+            //var index = 0;
+            //foreach (var note in selectedNotes)
+            //{
+            //    if (action == EnumChangeTag.Add)
+            //        await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
+            //    else
+            //        await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
+
+            //    index++;
+            //    var percentage = (double)index / selectedNotes.Count;
+            //    percentage = percentage * 100;
+            //    var percentageInt = (int)Math.Round(percentage, 0);
+            //    View.ReportProgressKNoteManagment(percentageInt);
+            //}
 
             await ForceRefreshListNotes();
 
-            View.SetVisibleProgressBar(false);
-            View.DeactivateWaitState();
+            //View.SetVisibleProgressBar(false);
+            //View.DeactivateWaitState();
         }
     }
+
+    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag)
+    {
+        var index = 0;
+        foreach (var note in selectedNotes)
+        {
+            if (action == EnumChangeTag.Add)
+                await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
+            else
+                await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
+
+            index++;
+            var percentage = (double)index / selectedNotes.Count;
+            percentage = percentage * 100;
+            var percentageInt = (int)Math.Round(percentage, 0);
+            // This delay is necessary
+            await Task.Delay(1);  
+            _heavyProcess.UpdateProgress(percentageInt);
+            _heavyProcess.UpdateProcessInfo($"Updating Note #: {note.NoteNumber}");
+        }
+    }
+
+    public async Task ChangeTagsActionDemo()
+    {
+        View.SetVisibleProgressBar(true);
+        for (var i = 1; i <= 10; i++)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            View.ReportProgressKNoteManagment(i * 10);
+            _heavyProcess.UpdateProgress(i * 10);
+        }
+        View.SetVisibleProgressBar(false);
+    }
+
+
+
+
+    // TODO: this Windows Form must be a KNote component. 
+    public HeavyProcessForm _heavyProcess = new HeavyProcessForm();
+
+
+
+    // ------------------------------------------------------------------
 
     public void RunScriptSelectedNotes()
     {

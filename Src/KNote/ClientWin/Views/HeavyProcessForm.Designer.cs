@@ -29,44 +29,57 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HeavyProcessForm));
-            btnCancel = new Button();
-            pbProcess = new ProgressBar();
+            buttonCancel = new Button();
+            progressProcess = new ProgressBar();
+            labelProcess = new Label();
             labelInfo = new Label();
             SuspendLayout();
             // 
-            // btnCancel
+            // buttonCancel
             // 
-            btnCancel.Location = new Point(281, 121);
-            btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(84, 29);
-            btnCancel.TabIndex = 0;
-            btnCancel.Text = "&Cancel";
-            btnCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Location = new Point(281, 112);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new Size(84, 29);
+            buttonCancel.TabIndex = 0;
+            buttonCancel.Text = "&Cancel";
+            buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += buttonCancel_Click;
             // 
-            // pbProcess
+            // progressProcess
             // 
-            pbProcess.Location = new Point(12, 80);
-            pbProcess.Name = "pbProcess";
-            pbProcess.Size = new Size(353, 22);
-            pbProcess.TabIndex = 1;
+            progressProcess.Location = new Point(15, 72);
+            progressProcess.Name = "progressProcess";
+            progressProcess.Size = new Size(353, 22);
+            progressProcess.TabIndex = 1;
+            // 
+            // labelProcess
+            // 
+            labelProcess.AutoSize = true;
+            labelProcess.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelProcess.Location = new Point(15, 18);
+            labelProcess.Name = "labelProcess";
+            labelProcess.Size = new Size(81, 15);
+            labelProcess.TabIndex = 2;
+            labelProcess.Text = "Label process";
             // 
             // labelInfo
             // 
             labelInfo.AutoSize = true;
-            labelInfo.Location = new Point(15, 16);
+            labelInfo.Location = new Point(15, 45);
             labelInfo.Name = "labelInfo";
-            labelInfo.Size = new Size(83, 15);
-            labelInfo.TabIndex = 2;
-            labelInfo.Text = "Heavy process";
+            labelInfo.Size = new Size(16, 15);
+            labelInfo.TabIndex = 3;
+            labelInfo.Text = "...";
             // 
             // HeavyProcessForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(377, 167);
+            ClientSize = new Size(377, 153);
             Controls.Add(labelInfo);
-            Controls.Add(pbProcess);
-            Controls.Add(btnCancel);
+            Controls.Add(labelProcess);
+            Controls.Add(progressProcess);
+            Controls.Add(buttonCancel);
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
@@ -82,8 +95,9 @@
 
         #endregion
 
-        private Button btnCancel;
-        private ProgressBar pbProcess;
+        private Button buttonCancel;
+        private ProgressBar progressProcess;
+        private Label labelProcess;
         private Label labelInfo;
     }
 }

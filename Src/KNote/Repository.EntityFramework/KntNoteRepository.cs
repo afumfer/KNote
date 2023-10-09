@@ -1109,13 +1109,13 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             {
                 if (string.IsNullOrEmpty(oldTag))
                 {
-                    if (!(entityForUpdate.Tags.IndexOf(newTag) >= 0))
+                    if (!(entityForUpdate.Tags?.IndexOf(newTag) >= 0))
                         entityForUpdate.Tags += " " + newTag;
                 }
                 else
-                    entityForUpdate.Tags = entityForUpdate.Tags.Replace(oldTag, newTag);
+                    entityForUpdate.Tags = entityForUpdate.Tags?.Replace(oldTag, newTag);
 
-                entityForUpdate.Tags = entityForUpdate.Tags.Trim();
+                entityForUpdate.Tags = entityForUpdate.Tags?.Trim();
                 resRep = await notes.UpdateAsync(entityForUpdate);
                 result.Entity = resRep.IsValid;
             }
