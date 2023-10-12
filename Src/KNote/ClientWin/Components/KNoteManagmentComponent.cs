@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
 
 using KntScript;
@@ -922,36 +924,29 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         {
             var tag = listVars[0].VarNewValueText;
 
-
             //Concept test --------------------------------
-            _heavyProcess.TopMost = true;
-            _heavyProcess.UpdateProcessName("Updating Tags");
-            _heavyProcess.Show();
-            //await _heavyProcess.Exec(ChangeTagsActionDemo);
-            await _heavyProcess.Exec3(ChangeTagsAction, action, selectedNotes, tag);
-            _heavyProcess.Hide();
-            await Task.CompletedTask;
-            //---------------------------------------------
-
-
-
-            //View.ActivateWaitState();
-            //View.SetVisibleProgressBar(true);
-
-            //var index = 0;
-            //foreach (var note in selectedNotes)
-            //{
-            //    if (action == EnumChangeTag.Add)
-            //        await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
-            //    else
-            //        await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
-
-            //    index++;
-            //    var percentage = (double)index / selectedNotes.Count;
-            //    percentage = percentage * 100;
-            //    var percentageInt = (int)Math.Round(percentage, 0);
-            //    View.ReportProgressKNoteManagment(percentageInt);
-            //}
+            try
+            {
+                var reportProgress = new Progress<KeyValuePair<int, string>>(ReportProgressChangeTags);                
+                _heavyProcess.TopMost = true;                
+                _heavyProcess.ReportProgress = new Progress<KeyValuePair<int, string>>(ReportProgressChangeTags);
+                _heavyProcess.UpdateProcessName("Updating Tags");
+                _heavyProcess.Show();                
+                await _heavyProcess.Exec3(ChangeTagsAction, action, selectedNotes, tag);
+            }
+            catch (TaskCanceledException)
+            {
+                //View.ShowInfo("Action canceled.");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                _heavyProcess.Hide();
+                await Task.CompletedTask;
+            }
 
             await ForceRefreshListNotes();
 
@@ -960,7 +955,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag)
+    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, IProgress<KeyValuePair<int, string>> progress, CancellationTokenSource cancellationToken = null)
     {
         var index = 0;
         foreach (var note in selectedNotes)
@@ -973,33 +968,30 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             index++;
             var percentage = (double)index / selectedNotes.Count;
             percentage = percentage * 100;
-            var percentageInt = (int)Math.Round(percentage, 0);
-            // This delay is necessary
-            await Task.Delay(1);  
-            _heavyProcess.UpdateProgress(percentageInt);
-            _heavyProcess.UpdateProcessInfo($"Updating Note #: {note.NoteNumber}");
+            var percentageInt = (int)Math.Round(percentage, 0);            
+            await Task.Delay(1); // This delay is necessary
+            if(progress != null)
+                progress.Report(new KeyValuePair<int, string>(percentageInt, $"Updating Note #: {note.NoteNumber}"));
+
+            if (cancellationToken !=null && cancellationToken.IsCancellationRequested)
+            {
+                throw new TaskCanceledException();
+            }
         }
     }
 
-    public async Task ChangeTagsActionDemo()
+    private void ReportProgressChangeTags(KeyValuePair<int, string>progress)
     {
-        View.SetVisibleProgressBar(true);
-        for (var i = 1; i <= 10; i++)
+        if(_heavyProcess != null)
         {
-            await Task.Delay(TimeSpan.FromSeconds(1));
-            View.ReportProgressKNoteManagment(i * 10);
-            _heavyProcess.UpdateProgress(i * 10);
+            _heavyProcess?.UpdateProgress(progress.Key);
+            _heavyProcess?.UpdateProcessInfo(progress.Value);
         }
-        View.SetVisibleProgressBar(false);
     }
-
-
-
 
     // TODO: this Windows Form must be a KNote component. 
     public HeavyProcessForm _heavyProcess = new HeavyProcessForm();
-
-
+    
 
     // ------------------------------------------------------------------
 

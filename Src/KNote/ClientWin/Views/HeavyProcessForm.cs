@@ -14,9 +14,12 @@ namespace KNote.ClientWin.Views
 {
     public partial class HeavyProcessForm : Form
     {
+        public CancellationTokenSource CancellationToken { get; private set; }
+        public IProgress<KeyValuePair<int, string>> ReportProgress { get; set; }
+
         public HeavyProcessForm()  // Func<Task> process
         {
-            InitializeComponent();
+            InitializeComponent();            
         }
 
         private void HeavyProcessForm_Load(object sender, EventArgs e)
@@ -33,15 +36,15 @@ namespace KNote.ClientWin.Views
                 await process();
             }
         }
-
-        //public async Task Exec2(Func<EnumChangeTag, List<NoteInfoDto>, string, Task> process, EnumChangeTag action, string tag, List<NoteInfoDto> selectedNotes)
-        public async Task Exec3<TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, Task> process, TParam1 action, TParam2 selectedNotes, TParam3 tag)
+        
+        public async Task Exec3<TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, IProgress<KeyValuePair<int, string>>, CancellationTokenSource, Task> process, TParam1 action, TParam2 selectedNotes, TParam3 tag)
         {
             progressProcess.Value = 0;
+            CancellationToken = new CancellationTokenSource();
 
             if (process != null)
             {
-                await process(action, selectedNotes, tag);
+                await process(action, selectedNotes, tag, ReportProgress, CancellationToken);
             }
         }
 
@@ -62,7 +65,7 @@ namespace KNote.ClientWin.Views
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-
+            CancellationToken.Cancel();
         }
     }
 }
