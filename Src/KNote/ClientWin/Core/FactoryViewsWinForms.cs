@@ -126,4 +126,9 @@ public class FactoryViewsWinForms : IFactoryViews
     {
         return new KntLabForm(component);
     }
+
+    public IViewHeavyProcess View(HeavyProcessComponent component)
+    {
+        return new HeavyProcessForm(component);
+    }
 }

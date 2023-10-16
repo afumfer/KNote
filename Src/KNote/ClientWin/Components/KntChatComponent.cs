@@ -134,7 +134,7 @@ public class KntChatComponent : ComponentBase, IDisposable
 
     #endregion 
 
-    #region IViewBase
+    #region View
 
     IViewChat _chatView;
     protected IViewChat ChatView

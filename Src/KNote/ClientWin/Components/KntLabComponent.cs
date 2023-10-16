@@ -1,9 +1,4 @@
 ﻿using KNote.ClientWin.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KNote.ClientWin.Components;
 
@@ -18,7 +13,7 @@ public class KntLabComponent : ComponentBase
 
     #endregion
 
-    #region IViewBase
+    #region View
 
     IViewBase _labView;
     protected IViewBase LabView

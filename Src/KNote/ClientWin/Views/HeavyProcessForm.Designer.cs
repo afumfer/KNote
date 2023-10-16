@@ -88,7 +88,7 @@
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Processing task";
-            Load += HeavyProcessForm_Load;
+            FormClosing += HeavyProcessForm_FormClosing;            
             ResumeLayout(false);
             PerformLayout();
         }

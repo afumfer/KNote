@@ -30,4 +30,5 @@ public interface IFactoryViews
     IViewChat View(KntChatComponent component);
     IViewServerCOM View(KntServerCOMComponent component);
     IViewBase View(KntLabComponent component);
+    IViewHeavyProcess View(HeavyProcessComponent component);
 }

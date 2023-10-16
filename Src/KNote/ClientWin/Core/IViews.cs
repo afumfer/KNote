@@ -92,5 +92,16 @@ public interface IViewServerCOM : IViewChat
     void RefreshStatus();
 }
 
+public interface IViewHeavyProcess : IViewBase
+{
+    CancellationTokenSource CancellationToken { get; set; }
+    public IProgress<KeyValuePair<int, string>> ReportProgress { get; set; }
+    void UpdateProgress(int progress);
+    void UpdateProcessName(string process);
+    void UpdateProcessInfo(string info);
+    void HideView();    
+}
+
+
 #endregion 
 

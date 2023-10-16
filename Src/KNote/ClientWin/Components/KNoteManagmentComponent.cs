@@ -11,6 +11,7 @@ using KNote.Service.Core;
 
 using KntScript;
 using Markdig.Syntax.Inlines;
+using SQLitePCL;
 
 namespace KNote.ClientWin.Components;
 
@@ -243,8 +244,8 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         return result;
     }
 
-    #endregion 
-    
+    #endregion
+
     #region Components included
 
     #region FoldersSelector component
@@ -514,6 +515,31 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     }
     // -----------------------------------------------------------------------------------
     #endregion
+
+    #region Heavy process component
+
+    private HeavyProcessComponent _heavyProcessComponent;
+    public HeavyProcessComponent HeavyProcessComponent
+    {
+        get
+        {
+            if (_heavyProcessComponent == null)
+            {
+                _heavyProcessComponent = new HeavyProcessComponent(Store);
+                _heavyProcessComponent.ReportProgress = new Progress<KeyValuePair<int, string>>(ReportProgressChangeTags);
+            }
+            return _heavyProcessComponent;
+        }
+    }
+
+    private void ReportProgressChangeTags(KeyValuePair<int, string> progress)
+    {
+        HeavyProcessComponent.UpdateProgress(progress.Key);
+        HeavyProcessComponent.UpdateProcessInfo(progress.Value);
+    }
+
+    #endregion 
+
 
     #endregion
 
@@ -839,7 +865,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     {
         Store.RunScript(SelectedNoteInfo.Script);
     }
-    
+
     public async Task MoveSelectedNotes()
     {                
         var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
@@ -857,10 +883,29 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         if (res.Entity != EComponentResult.Executed)
             return;
 
-        View.ActivateWaitState();
-        View.SetVisibleProgressBar(true);
-        
-        var newFolderId = folderSelector.SelectedEntity.FolderInfo.FolderId;
+        try
+        {
+            var newFolderId = folderSelector.SelectedEntity.FolderInfo.FolderId;
+            HeavyProcessComponent.UpdateProcessName("Moving notes to the new folder");
+            await HeavyProcessComponent.Exec2(MoveSelectedNotesAction, selectedNotes, newFolderId);
+        }
+        catch (TaskCanceledException)
+        {
+            //View.ShowInfo("The operation has been canceled.");
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        finally
+        {
+            await Task.CompletedTask;
+            await ForceRefreshListNotes();
+        }
+    }
+
+    public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, IProgress<KeyValuePair<int, string>> progress, CancellationTokenSource cancellationToken = null)
+    {        
         var index = 0;
         foreach (var n in selectedNotes)
         {
@@ -870,16 +915,17 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             var percentage = (double)index / selectedNotes.Count;
             percentage = percentage * 100;
             var percentageInt = (int)Math.Round(percentage, 0);
-            View.ReportProgressKNoteManagment(percentageInt);
-        }                           
 
-        await ForceRefreshListNotes();
+            await Task.Delay(1); // This delay is necessary
+            if (progress != null)
+                progress.Report(new KeyValuePair<int, string>(percentageInt, $"Updating Note #: {n.NoteNumber}"));
 
-        View.SetVisibleProgressBar(false);
-        View.DeactivateWaitState();
+            if (cancellationToken != null && cancellationToken.IsCancellationRequested)
+            {
+                throw new TaskCanceledException();
+            }
+        }       
     }
-
-    // -------------------------------------------------------------------------------------------------------
 
     public async Task ChangeTags(EnumChangeTag action)
     {
@@ -902,12 +948,11 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
         var listVars = new List<ReadVarItem> {new ReadVarItem
         {
-
             Label = strTmp,
             VarIdent = "Tag",
             VarValue = "",
             VarNewValueText = ""
-        } };
+        }};
 
         var formReadVar = new ReadVarForm(listVars);
         if (action == EnumChangeTag.Add)
@@ -922,21 +967,15 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             return;
         else
         {
-            var tag = listVars[0].VarNewValueText;
-
-            //Concept test --------------------------------
             try
             {
-                var reportProgress = new Progress<KeyValuePair<int, string>>(ReportProgressChangeTags);                
-                _heavyProcess.TopMost = true;                
-                _heavyProcess.ReportProgress = new Progress<KeyValuePair<int, string>>(ReportProgressChangeTags);
-                _heavyProcess.UpdateProcessName("Updating Tags");
-                _heavyProcess.Show();                
-                await _heavyProcess.Exec3(ChangeTagsAction, action, selectedNotes, tag);
+                var tag = listVars[0].VarNewValueText;
+                HeavyProcessComponent.UpdateProcessName("Updating Tags");                
+                await HeavyProcessComponent.Exec3(ChangeTagsAction, action, selectedNotes, tag);
             }
             catch (TaskCanceledException)
             {
-                //View.ShowInfo("Action canceled.");
+                //View.ShowInfo("The operation has been canceled.");
             }
             catch (Exception)
             {
@@ -944,14 +983,9 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             }
             finally
             {
-                _heavyProcess.Hide();
                 await Task.CompletedTask;
+                await ForceRefreshListNotes();
             }
-
-            await ForceRefreshListNotes();
-
-            //View.SetVisibleProgressBar(false);
-            //View.DeactivateWaitState();
         }
     }
 
@@ -979,21 +1013,6 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             }
         }
     }
-
-    private void ReportProgressChangeTags(KeyValuePair<int, string>progress)
-    {
-        if(_heavyProcess != null)
-        {
-            _heavyProcess?.UpdateProgress(progress.Key);
-            _heavyProcess?.UpdateProcessInfo(progress.Value);
-        }
-    }
-
-    // TODO: this Windows Form must be a KNote component. 
-    public HeavyProcessForm _heavyProcess = new HeavyProcessForm();
-    
-
-    // ------------------------------------------------------------------
 
     public void RunScriptSelectedNotes()
     {
@@ -1199,8 +1218,6 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     }
 
     #endregion
-
-
 }
 
 #region Public enums 

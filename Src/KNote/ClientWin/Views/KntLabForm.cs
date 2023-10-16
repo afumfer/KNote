@@ -86,7 +86,7 @@ public partial class KntLabForm : Form, IViewBase
 
     public void RefreshView()
     {
-        throw new NotImplementedException();
+        Refresh();
     }
 
     public void OnClosingView()
