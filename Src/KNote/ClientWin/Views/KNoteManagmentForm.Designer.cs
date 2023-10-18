@@ -41,7 +41,6 @@
             menuRefreshTreeFolders = new ToolStripMenuItem();
             toolMenuIRepositoryS2 = new ToolStripSeparator();
             menuImportData = new ToolStripMenuItem();
-            menuExportData = new ToolStripMenuItem();
             menuFolders = new ToolStripMenuItem();
             menuNewFolder = new ToolStripMenuItem();
             menuEditFolder = new ToolStripMenuItem();
@@ -140,7 +139,7 @@
             // 
             // menuRepositories
             // 
-            menuRepositories.DropDownItems.AddRange(new ToolStripItem[] { menuCreateRepository, menuManagmentRepository, menuAddRepositoryLink, menuRemoveRepositoryLink, toolMenuIRepositoryS1, menuRefreshTreeFolders, toolMenuIRepositoryS2, menuImportData, menuExportData });
+            menuRepositories.DropDownItems.AddRange(new ToolStripItem[] { menuCreateRepository, menuManagmentRepository, menuAddRepositoryLink, menuRemoveRepositoryLink, toolMenuIRepositoryS1, menuRefreshTreeFolders, toolMenuIRepositoryS2, menuImportData });
             menuRepositories.Name = "menuRepositories";
             menuRepositories.Size = new Size(203, 22);
             menuRepositories.Text = "&Repositories";
@@ -198,13 +197,6 @@
             menuImportData.Text = "Import data ...";
             menuImportData.Visible = false;
             menuImportData.Click += menu_Click;
-            // 
-            // menuExportData
-            // 
-            menuExportData.Name = "menuExportData";
-            menuExportData.Size = new Size(282, 22);
-            menuExportData.Text = "toolStripMenuItem2";
-            menuExportData.Visible = false;
             // 
             // menuFolders
             // 
@@ -268,7 +260,7 @@
             // menuNewNote
             // 
             menuNewNote.Name = "menuNewNote";
-            menuNewNote.ShortcutKeys = Keys.Control | Keys.N;
+            menuNewNote.ShortcutKeys = Keys.F2;
             menuNewNote.Size = new Size(261, 22);
             menuNewNote.Text = "&New note";
             menuNewNote.Click += menu_Click;
@@ -283,7 +275,7 @@
             // menuEditNote
             // 
             menuEditNote.Name = "menuEditNote";
-            menuEditNote.ShortcutKeys = Keys.Control | Keys.E;
+            menuEditNote.ShortcutKeys = Keys.F3;
             menuEditNote.Size = new Size(261, 22);
             menuEditNote.Text = "&Edit note";
             menuEditNote.Click += menu_Click;
@@ -365,29 +357,29 @@
             menuFoldersExplorer.Checked = true;
             menuFoldersExplorer.CheckState = CheckState.Checked;
             menuFoldersExplorer.Name = "menuFoldersExplorer";
-            menuFoldersExplorer.ShortcutKeys = Keys.F2;
-            menuFoldersExplorer.Size = new Size(263, 22);
+            menuFoldersExplorer.ShortcutKeys = Keys.F11;
+            menuFoldersExplorer.Size = new Size(237, 22);
             menuFoldersExplorer.Text = "&Folders explorer";
             menuFoldersExplorer.Click += menu_Click;
             // 
             // menuSearchPanel
             // 
             menuSearchPanel.Name = "menuSearchPanel";
-            menuSearchPanel.ShortcutKeys = Keys.F3;
-            menuSearchPanel.Size = new Size(263, 22);
+            menuSearchPanel.ShortcutKeys = Keys.Shift | Keys.F11;
+            menuSearchPanel.Size = new Size(237, 22);
             menuSearchPanel.Text = "Search panel";
             menuSearchPanel.Click += menu_Click;
             // 
             // menuViewS1
             // 
             menuViewS1.Name = "menuViewS1";
-            menuViewS1.Size = new Size(260, 6);
+            menuViewS1.Size = new Size(228, 6);
             // 
             // menuVerticalPanelForNotes
             // 
             menuVerticalPanelForNotes.Name = "menuVerticalPanelForNotes";
-            menuVerticalPanelForNotes.ShortcutKeys = Keys.Shift | Keys.F9;
-            menuVerticalPanelForNotes.Size = new Size(263, 22);
+            menuVerticalPanelForNotes.ShortcutKeys = Keys.F12;
+            menuVerticalPanelForNotes.Size = new Size(237, 22);
             menuVerticalPanelForNotes.Text = "Vertical panel for list notes";
             menuVerticalPanelForNotes.Click += menu_Click;
             // 
@@ -397,8 +389,8 @@
             menuHeaderPanelVisible.CheckOnClick = true;
             menuHeaderPanelVisible.CheckState = CheckState.Checked;
             menuHeaderPanelVisible.Name = "menuHeaderPanelVisible";
-            menuHeaderPanelVisible.ShortcutKeys = Keys.Shift | Keys.F10;
-            menuHeaderPanelVisible.Size = new Size(263, 22);
+            menuHeaderPanelVisible.ShortcutKeys = Keys.Alt | Keys.F12;
+            menuHeaderPanelVisible.Size = new Size(237, 22);
             menuHeaderPanelVisible.Text = "Show header panel";
             menuHeaderPanelVisible.Click += menu_Click;
             // 
@@ -407,8 +399,8 @@
             menuToolbarVisible.Checked = true;
             menuToolbarVisible.CheckState = CheckState.Checked;
             menuToolbarVisible.Name = "menuToolbarVisible";
-            menuToolbarVisible.ShortcutKeys = Keys.Shift | Keys.F11;
-            menuToolbarVisible.Size = new Size(263, 22);
+            menuToolbarVisible.ShortcutKeys = Keys.Control | Keys.F12;
+            menuToolbarVisible.Size = new Size(237, 22);
             menuToolbarVisible.Text = "Show toolbar";
             menuToolbarVisible.Click += menu_Click;
             // 
@@ -419,7 +411,7 @@
             menuMainVisible.CheckState = CheckState.Checked;
             menuMainVisible.Name = "menuMainVisible";
             menuMainVisible.ShortcutKeys = Keys.Shift | Keys.F12;
-            menuMainVisible.Size = new Size(263, 22);
+            menuMainVisible.Size = new Size(231, 22);
             menuMainVisible.Text = "Show main menu";
             menuMainVisible.Click += menu_Click;
             // 
@@ -460,6 +452,7 @@
             // menuChatGPT
             // 
             menuChatGPT.Name = "menuChatGPT";
+            menuChatGPT.ShortcutKeys = Keys.F7;
             menuChatGPT.Size = new Size(185, 22);
             menuChatGPT.Text = "ChatGPT ...";
             menuChatGPT.Click += menu_Click;
@@ -467,7 +460,6 @@
             // menuKNoteLab
             // 
             menuKNoteLab.Name = "menuKNoteLab";
-            menuKNoteLab.ShortcutKeys = Keys.F10;
             menuKNoteLab.Size = new Size(185, 22);
             menuKNoteLab.Text = "KNote &lab ...";
             menuKNoteLab.Visible = false;
@@ -859,7 +851,6 @@
         private ToolStripMenuItem menuNewNoteAsPostIt;
         private ToolStripMenuItem menuEditNoteAsPostIt;
         private ToolStripMenuItem menuHeaderPanelVisible;
-        private ToolStripMenuItem menuExportData;
         private ToolStripMenuItem menuMainVisible;
         private ToolStripMenuItem menuVerticalPanelForNotes;
         private ToolStripSeparator menuViewS1;

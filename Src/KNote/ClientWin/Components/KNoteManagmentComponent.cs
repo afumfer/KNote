@@ -868,7 +868,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     public async Task MoveSelectedNotes()
     {                
-        var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
+        var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo().ToList();
         if(selectedNotes == null || selectedNotes?.Count == 0)
         {                
             View.ShowInfo("You have not selected notes .");
@@ -907,9 +907,10 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, IProgress<KeyValuePair<int, string>> progress, CancellationTokenSource cancellationToken = null)
     {        
         var index = 0;
+        var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
         foreach (var n in selectedNotes)
         {
-            await SelectedServiceRef.Service.Notes.UtilPatchFolder(n.NoteId, newFolderId);
+            await service.Notes.UtilPatchFolder(n.NoteId, newFolderId);
 
             index++;
             var percentage = (double)index / selectedNotes.Count;
@@ -931,7 +932,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     {
         string strTmp;
 
-        var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
+        var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo().ToList();
         if (selectedNotes == null || selectedNotes?.Count == 0)
         {
             if (action == EnumChangeTag.Add)
@@ -992,12 +993,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, IProgress<KeyValuePair<int, string>> progress, CancellationTokenSource cancellationToken = null)
     {
         var index = 0;
+        var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
+
         foreach (var note in selectedNotes)
         {
             if (action == EnumChangeTag.Add)
-                await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
+                await service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
             else
-                await SelectedServiceRef.Service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
+                await service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
 
             index++;
             var percentage = (double)index / selectedNotes.Count;

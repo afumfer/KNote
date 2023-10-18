@@ -5,6 +5,12 @@ namespace KNote.ClientWin.Components;
 
 public class HeavyProcessComponent : ComponentBase
 {
+    #region Fields
+
+    private bool _processInExecution;
+
+    #endregion 
+
     #region Public properties
 
     public CancellationTokenSource CancellationToken { get; set; }
@@ -17,6 +23,7 @@ public class HeavyProcessComponent : ComponentBase
     public HeavyProcessComponent(Store store) : base(store)
     {
         ComponentName = "KntLab Component";
+        _processInExecution = false;
     }
 
     #endregion
@@ -55,18 +62,13 @@ public class HeavyProcessComponent : ComponentBase
 
     public async Task Exec2<TParam1, TParam2>(Func<TParam1, TParam2, IProgress<KeyValuePair<int, string>>, CancellationTokenSource, Task> process, TParam1 action, TParam2 selectedNotes)
     {
+        if (!await PrepareTask())
+            return;
+
         try
         {
-            HeavyProcessView.UpdateProgress(0);
-            CancellationToken = new CancellationTokenSource();
-            HeavyProcessView.CancellationToken = CancellationToken;
-
-            HeavyProcessView.ShowView();
-
-            if (process != null)
-            {
-                await process(action, selectedNotes, ReportProgress, CancellationToken);
-            }
+            if (process != null)            
+                await process(action, selectedNotes, ReportProgress, CancellationToken);            
         }
         catch (Exception)
         {
@@ -74,24 +76,19 @@ public class HeavyProcessComponent : ComponentBase
         }
         finally
         {
-            HeavyProcessView.HideView();
+            await CompleteTask();
         }
     }
 
     public async Task Exec3<TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, IProgress<KeyValuePair<int, string>>, CancellationTokenSource, Task> process, TParam1 action, TParam2 selectedNotes, TParam3 tag)
     {
+        if(!await PrepareTask())            
+            return;
+
         try
-        {
-            HeavyProcessView.UpdateProgress(0);
-            CancellationToken = new CancellationTokenSource();
-            HeavyProcessView.CancellationToken = CancellationToken;
-
-            HeavyProcessView.ShowView();
-
-            if (process != null)
-            {
-                await process(action, selectedNotes, tag, ReportProgress, CancellationToken);
-            }
+        {            
+            if (process != null)            
+                await process(action, selectedNotes, tag, ReportProgress, CancellationToken);            
         }
         catch (Exception)
         {
@@ -99,10 +96,37 @@ public class HeavyProcessComponent : ComponentBase
         }
         finally
         {
-            HeavyProcessView.HideView();
+            await CompleteTask();
         }
     }
 
-    #endregion 
+    #endregion
 
+    #region Private methods
+
+    private async Task<bool> PrepareTask() 
+    {
+        if (_processInExecution)
+        {
+            HeavyProcessView.ShowInfo("Cannot run this process, there is another heavy process running.");
+            return await Task.FromResult<bool>(false);
+        }
+        _processInExecution = true;
+        HeavyProcessView.UpdateProgress(0);
+        CancellationToken = new CancellationTokenSource();
+        HeavyProcessView.CancellationToken = CancellationToken;
+
+        HeavyProcessView.ShowView();
+
+        return await Task.FromResult<bool>(true);
+    }
+
+    private async Task CompleteTask()
+    {
+        HeavyProcessView.HideView();
+        _processInExecution = false;
+        await Task.CompletedTask;
+    }
+
+    #endregion 
 }
