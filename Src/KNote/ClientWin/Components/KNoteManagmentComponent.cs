@@ -1,17 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
-
 using KntScript;
-using Markdig.Syntax.Inlines;
-using SQLitePCL;
 
 namespace KNote.ClientWin.Components;
 
@@ -493,7 +487,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     #endregion
 
     #region KntChat component 
-    // TODO: -- Experimental -------------------------------------------------------------
+    
     private KntChatComponent _kntChatComponent;
     public KntChatComponent KntChatComponent
     {
@@ -513,7 +507,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     {
         KntChatComponent.VisibleView(true);
     }
-    // -----------------------------------------------------------------------------------
+    
     #endregion
 
     #region Heavy process component
@@ -526,16 +520,19 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             if (_heavyProcessComponent == null)
             {
                 _heavyProcessComponent = new HeavyProcessComponent(Store);
-                _heavyProcessComponent.ReportProgress = new Progress<KeyValuePair<int, string>>(ReportProgressChangeTags);
+                _heavyProcessComponent.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
             }
             return _heavyProcessComponent;
         }
     }
 
-    private void ReportProgressChangeTags(KeyValuePair<int, string> progress)
+    private void ReportProgressChangeTags(KNoteProgress progress)
     {
-        HeavyProcessComponent.UpdateProgress(progress.Key);
-        HeavyProcessComponent.UpdateProcessInfo(progress.Value);
+        if (progress.HeavyProcessComponent == null)
+            return;
+        progress.HeavyProcessComponent.UpdateProgress(progress.Progress);
+        if(progress.Info != null)
+            progress.HeavyProcessComponent.UpdateProcessInfo(progress.Info);
     }
 
     #endregion 
@@ -885,9 +882,12 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
         try
         {
-            var newFolderId = folderSelector.SelectedEntity.FolderInfo.FolderId;
-            HeavyProcessComponent.UpdateProcessName("Moving notes to the new folder");
-            await HeavyProcessComponent.Exec2(MoveSelectedNotesAction, selectedNotes, newFolderId);
+            var folderId = folderSelector.SelectedEntity.FolderInfo.FolderId;
+            var folderName = folderSelector.SelectedEntity.FolderInfo.Name;
+
+            // --- Heavy process singleton model
+            HeavyProcessComponent.UpdateProcessName($"Moving notes to folder '{folderName}'.");
+            await HeavyProcessComponent.Exec2(MoveSelectedNotesAction, selectedNotes, folderId);            
         }
         catch (TaskCanceledException)
         {
@@ -904,8 +904,8 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, IProgress<KeyValuePair<int, string>> progress, CancellationTokenSource cancellationToken = null)
-    {        
+    public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessComponent heavyProcessComponent = null)
+    {
         var index = 0;
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
         foreach (var n in selectedNotes)
@@ -918,38 +918,38 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             var percentageInt = (int)Math.Round(percentage, 0);
 
             await Task.Delay(1); // This delay is necessary
-            if (progress != null)
-                progress.Report(new KeyValuePair<int, string>(percentageInt, $"Updating Note #: {n.NoteNumber}"));
+            if (progress != null)                
+                progress.Report(new KNoteProgress { Progress = percentageInt, Info = $"Updating Note #{n.NoteNumber}", HeavyProcessComponent = heavyProcessComponent });
 
             if (cancellationToken != null && cancellationToken.IsCancellationRequested)
             {
                 throw new TaskCanceledException();
             }
-        }       
+        }
     }
 
     public async Task ChangeTags(EnumChangeTag action)
     {
-        string strTmp;
+        string labelInput;        
 
         var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo().ToList();
         if (selectedNotes == null || selectedNotes?.Count == 0)
         {
             if (action == EnumChangeTag.Add)
-                View.ShowInfo("You have not selected notes for add tags .");
+                View.ShowInfo("You have not selected notes for add tags.");
             else
-                View.ShowInfo("You have not selected notes for remove tags .");
+                View.ShowInfo("You have not selected notes for remove tags.");
             return;
         }
 
         if (action == EnumChangeTag.Add)
-            strTmp = "Type new tag:";
+            labelInput = "New tag:";
         else
-            strTmp = "Type tag for remove:";
+            labelInput = "Tag for remove:";
 
         var listVars = new List<ReadVarItem> {new ReadVarItem
         {
-            Label = strTmp,
+            Label = labelInput,
             VarIdent = "Tag",
             VarValue = "",
             VarNewValueText = ""
@@ -971,8 +971,12 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             try
             {
                 var tag = listVars[0].VarNewValueText;
-                HeavyProcessComponent.UpdateProcessName("Updating Tags");                
-                await HeavyProcessComponent.Exec3(ChangeTagsAction, action, selectedNotes, tag);
+
+                // --- Heavy process instance model
+                using var heavyProcessComponent = new HeavyProcessComponent(Store);
+                heavyProcessComponent.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
+                heavyProcessComponent.UpdateProcessName($"Updating tags. {labelInput} {tag} .");
+                await heavyProcessComponent.Exec3(ChangeTagsAction, action, selectedNotes, tag);
             }
             catch (TaskCanceledException)
             {
@@ -990,7 +994,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, IProgress<KeyValuePair<int, string>> progress, CancellationTokenSource cancellationToken = null)
+    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessComponent heavyProcessComponent = null)
     {
         var index = 0;
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
@@ -1005,12 +1009,12 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             index++;
             var percentage = (double)index / selectedNotes.Count;
             percentage = percentage * 100;
-            var percentageInt = (int)Math.Round(percentage, 0);            
+            var percentageInt = (int)Math.Round(percentage, 0);
             await Task.Delay(1); // This delay is necessary
-            if(progress != null)
-                progress.Report(new KeyValuePair<int, string>(percentageInt, $"Updating Note #: {note.NoteNumber}"));
+            if (progress != null)
+                progress.Report(new KNoteProgress { Progress = percentageInt, Info = $"Updating Note #{note.NoteNumber}", HeavyProcessComponent = heavyProcessComponent });
 
-            if (cancellationToken !=null && cancellationToken.IsCancellationRequested)
+            if (cancellationToken != null && cancellationToken.IsCancellationRequested)
             {
                 throw new TaskCanceledException();
             }

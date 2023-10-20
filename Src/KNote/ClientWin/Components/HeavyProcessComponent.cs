@@ -13,8 +13,9 @@ public class HeavyProcessComponent : ComponentBase
 
     #region Public properties
 
-    public CancellationTokenSource CancellationToken { get; set; }
-    public IProgress<KeyValuePair<int, string>> ReportProgress { get; set; }
+    public CancellationTokenSource CancellationToken { get; set; }    
+
+    public IProgress<KNoteProgress> ReportProgress { get; set; }
 
     #endregion 
 
@@ -60,15 +61,15 @@ public class HeavyProcessComponent : ComponentBase
         HeavyProcessView.UpdateProcessInfo(info);
     }
 
-    public async Task Exec2<TParam1, TParam2>(Func<TParam1, TParam2, IProgress<KeyValuePair<int, string>>, CancellationTokenSource, Task> process, TParam1 action, TParam2 selectedNotes)
+    public async Task Exec2<TParam1, TParam2>(Func<TParam1, TParam2, CancellationTokenSource, IProgress<KNoteProgress>, HeavyProcessComponent, Task> process, TParam1 param1, TParam2 param2)
     {
         if (!await PrepareTask())
             return;
 
         try
         {
-            if (process != null)            
-                await process(action, selectedNotes, ReportProgress, CancellationToken);            
+            if (process != null)
+                await process(param1, param2, CancellationToken, ReportProgress, this);
         }
         catch (Exception)
         {
@@ -80,15 +81,15 @@ public class HeavyProcessComponent : ComponentBase
         }
     }
 
-    public async Task Exec3<TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, IProgress<KeyValuePair<int, string>>, CancellationTokenSource, Task> process, TParam1 action, TParam2 selectedNotes, TParam3 tag)
+    public async Task Exec3<TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, CancellationTokenSource, IProgress<KNoteProgress>, HeavyProcessComponent, Task> process, TParam1 param1, TParam2 param2, TParam3 param3)
     {
-        if(!await PrepareTask())            
+        if (!await PrepareTask())
             return;
 
         try
-        {            
-            if (process != null)            
-                await process(action, selectedNotes, tag, ReportProgress, CancellationToken);            
+        {
+            if (process != null)
+                await process(param1, param2, param3, CancellationToken, ReportProgress, this);
         }
         catch (Exception)
         {
@@ -129,4 +130,11 @@ public class HeavyProcessComponent : ComponentBase
     }
 
     #endregion 
+}
+
+public class KNoteProgress
+{
+    public int Progress { get; set; }
+    public string Info { get; set; }    
+    public HeavyProcessComponent HeavyProcessComponent { get; set; }    
 }
