@@ -29,38 +29,38 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InOutDeviceForm));
-            this.textOut = new System.Windows.Forms.TextBox();
-            this.SuspendLayout();
+            textOut = new TextBox();
+            SuspendLayout();
             // 
             // textOut
             // 
-            this.textOut.BackColor = System.Drawing.Color.Black;
-            this.textOut.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textOut.Font = new System.Drawing.Font("Courier New", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textOut.ForeColor = System.Drawing.Color.White;
-            this.textOut.Location = new System.Drawing.Point(0, 0);
-            this.textOut.Multiline = true;
-            this.textOut.Name = "textOut";
-            this.textOut.Size = new System.Drawing.Size(737, 387);
-            this.textOut.TabIndex = 0;
+            textOut.BackColor = Color.Black;
+            textOut.Dock = DockStyle.Fill;
+            textOut.Font = new Font("Courier New", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            textOut.ForeColor = Color.White;
+            textOut.Location = new Point(0, 0);
+            textOut.Multiline = true;
+            textOut.Name = "textOut";
+            textOut.Size = new Size(737, 387);
+            textOut.TabIndex = 0;
+            textOut.TabStop = false;
             // 
             // InOutDeviceForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(737, 387);
-            this.Controls.Add(this.textOut);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "InOutDeviceForm";
-            this.ShowInTaskbar = false;
-            this.Text = "KntScript out console";
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(737, 387);
+            Controls.Add(textOut);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Name = "InOutDeviceForm";
+            ShowInTaskbar = false;
+            Text = "KntScript out console";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
-        private System.Windows.Forms.TextBox textOut;
+        private TextBox textOut;
     }
 }

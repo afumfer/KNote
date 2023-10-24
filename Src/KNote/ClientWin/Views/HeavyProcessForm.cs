@@ -52,11 +52,12 @@ public partial class HeavyProcessForm : Form, IViewHeavyProcess
     public void UpdateProcessName(string process)
     {
         labelProcess.Text = process;
+        labelProcess.Refresh();
     }
 
     public void UpdateProcessInfo(string info)
     {
-        labelInfo.Text = info;
+        labelInfo.Text = info;        
     }
 
     public void ShowView()
