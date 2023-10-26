@@ -146,7 +146,11 @@ public partial class KntRedmineForm : Form
                 if (res)
                 {
                     var resSaveNote = await _manager.Service.Notes.SaveExtendedAsync(note);
-                    listInfoRedmine.Items.Add($"{i++} - #{note.Tags}: {note.Topic}");
+                    if(resSaveNote.IsValid)
+                        listInfoRedmine.Items.Add($"{i++} - {note.Tags}: {note.Topic}");
+                    else 
+                        listInfoRedmine.Items.Add($"{i++} - {resSaveNote.ErrorMessage}");
+
                     listInfoRedmine.Refresh();
                 }
                 else

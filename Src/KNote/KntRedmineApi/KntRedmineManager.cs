@@ -8,6 +8,7 @@ using Pandoc;
 using KNote.Repository.EntityFramework.Entities;
 using System.Globalization;
 using KNote.Service.Core;
+using System.Runtime.InteropServices;
 
 namespace KntRedmineApi;
 
@@ -217,6 +218,7 @@ public class KntRedmineManager
             if (folder != null)
             {
                 noteDto.FolderId = folder.FolderId;
+                noteDto.FolderDto = folder.GetSimpleDto<FolderDto>();
             }
             else
             {
@@ -232,9 +234,13 @@ public class KntRedmineManager
                 {
                     _folders = (await _service.Folders.GetAllAsync()).Entity;
                     noteDto.FolderId = resSave.Entity.FolderId;
+                    noteDto.FolderDto = resSave.Entity;
                 }
                 else
+                {
                     noteDto.FolderId = _parentFolder.FolderId;
+                    noteDto.FolderDto = _parentFolder;
+                }
             }
 
             foreach (var r in noteDto.Resources)
@@ -253,6 +259,9 @@ public class KntRedmineManager
             }
 
             noteDto.Description = await TextToMarkdown(_toolsPath, noteDto.Description);
+
+            var xx = noteDto.IsValid();
+            var yy = noteDto.Messages;
 
             // This pandoc code version has encoding issue ...
             //note.Description = await pandocEngine.ConvertToText<TextileIn, CommonMarkOut>(note.Description);                
