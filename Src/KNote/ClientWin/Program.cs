@@ -22,12 +22,12 @@ static class Program
     static void Main()        
     {
 #if RELEASE
-            Process[] instancias = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
-            if (instancias.Length > 1)
-            {
-                BringToFront();
-                return;
-            }
+        Process[] instancias = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
+        if (instancias.Length > 1)
+        {
+            BringToFront();
+            return;
+        }
 #endif
 
         ApplicationConfiguration.Initialize();

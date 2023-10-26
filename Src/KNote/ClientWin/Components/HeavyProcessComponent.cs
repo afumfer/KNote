@@ -125,6 +125,8 @@ public class HeavyProcessComponent : ComponentBase
     private async Task CompleteTask()
     {
         HeavyProcessView.HideView();
+        CancellationToken.Dispose();
+        CancellationToken = null;
         _processInExecution = false;
         await Task.CompletedTask;
     }
