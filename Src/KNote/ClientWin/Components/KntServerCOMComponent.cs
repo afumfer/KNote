@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
 using System.Collections;
+using System.IO;
 using System.IO.Ports;
 using System.Text;
 
@@ -12,9 +13,10 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     private SerialPort _serialPort;
     private Queue _messageQueue;  
-    private CancellationTokenSource cancellationTokenSource;
-    private KntChatGPTComponent _chatGPT;
-    private bool _showViewMessage = true;
+    private CancellationTokenSource _cancellationTokenSource;    
+    private bool _showViewMessage;
+    private readonly Dictionary<char, byte> _convTable;
+    private readonly KntChatGPTComponent _chatGPT;
 
     #endregion
 
@@ -32,18 +34,6 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         }
     }
 
-    private bool _messageSending = false;
-    public bool MessageSending
-    {
-        get { return _messageSending; }
-        private set
-        {
-            _messageSending = value;
-            if (_serverCOMView != null)
-                _serverCOMView.RefreshStatus();
-        }
-    }
-
     private string _error;
     public string Error
     {
@@ -56,26 +46,27 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         get { return _statusInfo; }        
     }
 
-    public string PortName { get; set; } = "COM1";
+    private bool _messageSending = false;
+    public bool MessageSending
+    {
+        get { return _messageSending; }
+        private set
+        {
+            _messageSending = value;
+            if (_serverCOMView != null)
+                _serverCOMView.RefreshStatus();
+        }
+    }
 
-    // --- BaudRate and HandShake
+    public string PortName { get; set; }
 
-    // Q68            
-    //BaudRate = 115200;
-    //HandShake = 0; // Handshake.None
+    public int BaudRate { get; set; }
 
-    // QL             
-    //BaudRate = 19200;
-    //HandShake = 2; // 3; // Handshake.RequestToSendXOnXOff (3) Handshake.RequestToSend (2); 
+    public int HandShake { get; set; }        
 
-    public int BaudRate { get; set; } = 115200;
-    public int HandShake { get; set; } = 0;
-    
-    // -----------------------------------------------------------------------
+    public bool AutoCloseComponentOnViewExit { get; set; }
 
-    public bool AutoCloseComponentOnViewExit { get; set; } = false;
-    public bool ShowErrorMessagesOnInitialize { get; set; } = false;
-    public string Tag { get; set; } = "KntServerCOMComponent v 0.1";
+    public bool ShowErrorMessagesOnInitialize { get; set; }
 
     #endregion
 
@@ -84,6 +75,26 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     public KntServerCOMComponent(Store store) : base(store)
     {
         ComponentName = "KntServerCOM Component";
+
+        // --- BaudRate and HandShake
+        // Q68            
+        //   BaudRate = 115200;
+        //   HandShake = 0; // Handshake.None
+        // QL             
+        //   BaudRate = 19200;
+        //   HandShake = 2; // 3; // Handshake.RequestToSendXOnXOff (3) Handshake.RequestToSend (2); 
+        PortName = "COM1";
+        BaudRate = 115200;
+        HandShake = (int)Handshake.None;
+
+        // --- Control flags
+        AutoCloseComponentOnViewExit = false;
+        ShowErrorMessagesOnInitialize = false;
+        _showViewMessage = true;
+
+        _convTable = LoadQDosTable();
+
+        // ChatGPT included component
         _chatGPT = new KntChatGPTComponent(store);
         _chatGPT.Run();
     }
@@ -157,9 +168,9 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                 _serialPort.Close();
             _statusInfo = "Com and servide closed ...";
 
-            if (cancellationTokenSource != null)
+            if (_cancellationTokenSource != null)
             {
-                cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Cancel();
             }
         }
         catch { }
@@ -174,15 +185,18 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             return;
         }
 
-        cancellationTokenSource = new CancellationTokenSource();
-        CancellationToken cancellationToken = cancellationTokenSource.Token;
+        _cancellationTokenSource = new CancellationTokenSource();
+        CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
         _serialPort = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.Two);
-        _serialPort.Handshake = (Handshake)HandShake;
+        _serialPort.Handshake = (Handshake)HandShake;        
         _serialPort.ReadTimeout = 5000;
         _serialPort.WriteTimeout = 5000;
-        _serialPort.Open();        
+        _serialPort.Encoding = Encoding.ASCII;
+        _serialPort.Open();   
+        
         _messageQueue = new Queue();
+
         _statusInfo = "Com started ...";
 
         Task.Factory.StartNew(() => Server(cancellationToken), cancellationToken);        
@@ -220,32 +234,34 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     private void SendMessage(string messageSource)
     {
-        MessageSending = true;
-
         _statusInfo = "Sending ...";
-
-        byte[] bMessage = ConverTextToQDOSBytes(messageSource);
+        MessageSending = true;        
 
         try
         {
             if (!String.IsNullOrEmpty(messageSource))
             {
-                for (int i = 0; i < bMessage.Length; i++)
-                {
-                    if (!RunningService)
-                        break;
-                    _serialPort.Write(bMessage, i, 1);
-                    // This is necesary for QL/Q68
-                    Thread.Sleep(20); 
-                }
+                byte[] bMessage = ConverStringUtf8ToQDOSBytes(messageSource);
+
+                // TODO: !!! delete this code, debug actions ----------
+                //for (int i = 0; i < bMessage.Length; i++)
+                //{
+                //    if (!RunningService)
+                //        break;
+                //    _serialPort.Write(bMessage, i, 1);
+                //    // This is necesary for QL/Q68
+                //    Thread.Sleep(20); 
+                //}
+                // ----------------------------------------------------
+
+                _serialPort.Write(bMessage, 0, bMessage.Length);
             }
 
         }
         catch (TimeoutException) { }
         catch (Exception e) { _error = e.Message; }
 
-        _statusInfo = "Sended ...";
-        
+        _statusInfo = "Sended ...";        
         MessageSending = false;
     }
 
@@ -263,20 +279,29 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                 {
                     throw new OperationCanceledException();
                 }
+                                
+                messageIn = "";
 
-                messageIn = _serialPort.ReadLine();
-
-                byte[] utf8EncodedBytes = Encoding.ASCII.GetBytes(messageIn);
-
+                while (true)
+                {
+                    if(_serialPort.BytesToRead > 0)
+                    {
+                        byte b = (byte)_serialPort.ReadByte();
+                        if (b ==  10)  // \n                         
+                            break;                                                 
+                        messageIn += ConvertByteToQDOSChar(b);                        
+                    }
+                }
+               
                 _statusInfo = $"Recived: {messageIn}";
                 ReceiveMessage?.Invoke(this, new ComponentEventArgs<string>(messageIn));
 
-                (command, body) = ProcessTypeRequest(messageIn);
+                (command, body) = GetRequestType(messageIn);
 
-                // TODO: Select the correct action, employ the command pattern here.
-                if (command == "$chatgpt")
+                // TODO: Select the correct action, use the command pattern here.
+                if (command == "#chatgpt")
                     ExecuteChatGptRequest(body);
-                else if (command == "$echo")
+                else if (command == "#echo")
                     ExecuteEchoRequest(body);
                 else
                     ExecuteEchoRequest(body);
@@ -288,17 +313,21 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         }
     }
 
-    (string command, string msg) ProcessTypeRequest(string messageIn)
+    (string command, string msg) GetRequestType(string messageIn)
     {
-        // TODO Parse the command here correctly (this is provisional).
+        // TODO: Parse the command here correctly (this is provisional).
 
-        //StringComparer _stringComparer = StringComparer.OrdinalIgnoreCase;
+        if(string.IsNullOrEmpty(messageIn))
+            messageIn = "#echo:Error, invalid message.";
 
-        if (!messageIn.StartsWith("$"))
-            messageIn = "$chatgpt:" + messageIn;
+        // If there is no command, the default command is chatgpt
+        if (!messageIn.StartsWith("#"))
+            messageIn = "#chatgpt:" + messageIn;
 
-        var cmd = messageIn.Split(':');
-        return (cmd[0], cmd[1]);
+        var command = messageIn.Substring(0, messageIn.IndexOf(':'));
+        var msg = messageIn.Substring(messageIn.IndexOf(':') + 1, messageIn.Length - messageIn.IndexOf(':') - 1);
+
+        return (command, msg);
     }
 
     private void ExecuteEchoRequest(string request)
@@ -308,9 +337,12 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     private async void ExecuteChatGptRequest(string request)
     {
-        _chatGPT.StreamToken += _chatGPT_StreamToken;
+        _chatGPT.StreamToken += _chatGPT_StreamToken;        
         await _chatGPT.StreamCompletionAsync(request);
         _chatGPT.StreamToken -= _chatGPT_StreamToken;
+
+        // TODO: !!! provisional -- signal for end of stream.        
+        _messageQueue.Enqueue('¥');  // char 158        
     }
 
     private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
@@ -322,59 +354,56 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     #region Utils 
 
-    private byte[] ConverTextToQDOSBytes(string sourceText, string encodingStr = "-UTF8")
+    private byte[] ConverStringUtf8ToQDOSBytes(string sourceText)
     {
-        var table = LoadQDosTable();
         List<byte> outQDos = new List<byte>();
-        var enc = Encoding.UTF8;
 
         byte[] utf8EncodedBytes = Encoding.UTF8.GetBytes(sourceText);
         string utf8DecodedString = Encoding.UTF8.GetString(utf8EncodedBytes);
 
         var charArray = utf8DecodedString.ToCharArray();
 
-        for(var i = 0; i < charArray.Count(); i++)
+        for (var i = 0; i < charArray.Count(); i++)
         {
             var c = charArray[i];
             if (c == '\r')
             {
                 var c2 = charArray[++i];
-                if (c2 == '\n')
-                    AddByteToQDosList(table, outQDos, c2);
+                if (c2 == '\n')                    
+                    outQDos.Add(ConvertCharToQDOSByte(c2));
                 else
                 {
-                    AddByteToQDosList(table, outQDos, '\n');
-                    AddByteToQDosList(table, outQDos, c2);
+                    outQDos.Add(ConvertCharToQDOSByte('\n'));
+                    outQDos.Add(ConvertCharToQDOSByte(c2));
                 }
             }
             else
-                AddByteToQDosList(table, outQDos, c);
+                outQDos.Add(ConvertCharToQDOSByte(c));
+
         }
         return outQDos.ToArray();
-
     }
 
-    public static void AddByteToQDosList(Dictionary<char, byte> table, List<byte> outQDos, char c)
+    private byte ConvertCharToQDOSByte(char c)
     {
-        byte charN;
-
-        if (table.ContainsKey(c))
-        {
-            outQDos.Add(table[c]);
-        }
+        if (_convTable.ContainsKey(c))
+            return _convTable[c];
         else
-        {
-            charN = (byte)c;
-            if (charN > 191)
-                charN = 1;
-            outQDos.Add((byte)c);
-        }
+            return (byte)c;
+    }
+
+    private char ConvertByteToQDOSChar(byte b)
+    {
+        if (b < 128)
+            return (char)b;
+        else        
+            return _convTable.Where(v => v.Value == b).FirstOrDefault().Key;    
     }
 
     private Dictionary<char, byte> LoadQDosTable()
     {
         Dictionary<char, byte> table = new Dictionary<char, byte>();
-
+       
         table.Add(' ', 32);
         table.Add('!', 33);
         table.Add('"', 34);
@@ -534,6 +563,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         table.Add('→', 189);
         table.Add('↑', 190);
         table.Add('↓', 191);
+        
         return table;
     }
 

@@ -135,6 +135,7 @@
             // 
             // panelLine
             // 
+            panelLine.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             panelLine.BackColor = Color.DarkGray;
             panelLine.ForeColor = Color.Gray;
             panelLine.Location = new Point(11, 42);
@@ -169,15 +170,15 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBoxSend;
-        private System.Windows.Forms.Button buttonStart;
-        private System.Windows.Forms.Button buttonSend;
-        private System.Windows.Forms.ListBox listBoxEcho;
-        private System.Windows.Forms.Button buttonStop;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.StatusStrip statusInfo;
-        private System.Windows.Forms.ToolStripStatusLabel statusLabelInfo;
+        private TextBox textBoxSend;
+        private Button buttonStart;
+        private Button buttonSend;
+        private ListBox listBoxEcho;
+        private Button buttonStop;
+        private Label label1;
+        private Label label2;
+        private StatusStrip statusInfo;
+        private ToolStripStatusLabel statusLabelInfo;
         private Panel panelLine;
     }
 }

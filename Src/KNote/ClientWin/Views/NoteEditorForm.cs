@@ -135,11 +135,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         PersonalizeControls();
     }
 
-    private void WebView2_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
-    {
-        //
-    }
-
     private async void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
@@ -1254,6 +1249,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         var tmpFile = _com.Service.Notes.UtilUpdateResourceInDescriptionForRead(
             Path.Combine(_selectedResource.Container, _selectedResource.Name), true);
 
+        tabNoteData.SelectedIndex = 0;
+
         if (!buttonViewHtml.Enabled)
         {
             string strLink = (_selectedResource.FileType.Contains("image")) ?
@@ -1263,11 +1260,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             htmlDescription.Focus();
         }
         else
-        {
+        {            
             string strLink = (_selectedResource.FileType.Contains("image")) ?
                 $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
             var selStart = textDescription.SelectionStart;
-            textDescription.Text = textDescription.Text.Insert(selStart, strLink);
+            textDescription.Text = textDescription.Text.Insert(selStart, strLink);                        
+            textDescription.Focus();
+            textDescription.Select(selStart + strLink.Length, 0);
         }
     }
 

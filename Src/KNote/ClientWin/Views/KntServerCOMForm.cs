@@ -44,7 +44,8 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
     public void OnClosingView()
     {
         _viewFinalized = true;
-        this.Close();
+        _com.ReceiveMessage -= _com_ReceiveMessage;
+        Close();
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
