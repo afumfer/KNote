@@ -242,18 +242,6 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             if (!String.IsNullOrEmpty(messageSource))
             {
                 byte[] bMessage = ConverStringUtf8ToQDOSBytes(messageSource);
-
-                // TODO: !!! delete this code, debug actions ----------
-                //for (int i = 0; i < bMessage.Length; i++)
-                //{
-                //    if (!RunningService)
-                //        break;
-                //    _serialPort.Write(bMessage, i, 1);
-                //    // This is necesary for QL/Q68
-                //    Thread.Sleep(20); 
-                //}
-                // ----------------------------------------------------
-
                 _serialPort.Write(bMessage, 0, bMessage.Length);
             }
 
@@ -287,7 +275,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                     if(_serialPort.BytesToRead > 0)
                     {
                         byte b = (byte)_serialPort.ReadByte();
-                        if (b ==  10)  // \n                         
+                        if (b ==  26)  // 26=(EOF)
                             break;                                                 
                         messageIn += ConvertByteToQDOSChar(b);                        
                     }
@@ -301,6 +289,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                 // TODO: Select the correct action, use the command pattern here.
                 if (command == "#chatgpt")
                     ExecuteChatGptRequest(body);
+                else if (command == "#restartchatgpt")
+                    ExecuteRestartChatGptRequest();
                 else if (command == "#echo")
                     ExecuteEchoRequest(body);
                 else
@@ -341,9 +331,15 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         await _chatGPT.StreamCompletionAsync(request);
         _chatGPT.StreamToken -= _chatGPT_StreamToken;
 
-        // TODO: !!! provisional -- signal for end of stream.        
-        _messageQueue.Enqueue('¥');  // char 158        
+        // Signal for end of stream.        
+        _messageQueue.Enqueue((char)26);  // 26=EOF 
     }
+
+    private void ExecuteRestartChatGptRequest()
+    {
+        _chatGPT.RestartChatGPT();
+    }
+
 
     private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
     {
