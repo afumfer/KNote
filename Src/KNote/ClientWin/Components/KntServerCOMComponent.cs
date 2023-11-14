@@ -1,7 +1,6 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
 using System.Collections;
-using System.IO;
 using System.IO.Ports;
 using System.Text;
 
@@ -92,7 +91,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         ShowErrorMessagesOnInitialize = false;
         _showViewMessage = true;
 
-        _convTable = LoadQDosTable();
+        _convTable = LoadQDOSCharacterSetTable();
 
         // ChatGPT included component
         _chatGPT = new KntChatGPTComponent(store);
@@ -241,7 +240,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         {
             if (!String.IsNullOrEmpty(messageSource))
             {
-                byte[] bMessage = ConverStringUtf8ToQDOSBytes(messageSource);
+                byte[] bMessage = ConverUtf8StringToClientOSBytes(messageSource);
                 _serialPort.Write(bMessage, 0, bMessage.Length);
             }
 
@@ -256,8 +255,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     private void Read(CancellationToken cancellationToken)
     {
         string messageIn;
-        string command = "";
-        string body = "";
+        //string command = "";
+        //string body = "";
 
         while (RunningService)
         {
@@ -277,24 +276,25 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                         byte b = (byte)_serialPort.ReadByte();
                         if (b ==  26)  // 26=(EOF)
                             break;                                                 
-                        messageIn += ConvertByteToQDOSChar(b);                        
+                        messageIn += ConvertByteToClientOSChar(b);                        
                     }
                 }
                
                 _statusInfo = $"Recived: {messageIn}";
                 ReceiveMessage?.Invoke(this, new ComponentEventArgs<string>(messageIn));
 
-                (command, body) = GetRequestType(messageIn);
-
+                var req = GetKComRequest(messageIn);
+                
+                // Dispatch actions:
                 // TODO: Select the correct action, use the command pattern here.
-                if (command == "#chatgpt")
-                    ExecuteChatGptRequest(body);
-                else if (command == "#restartchatgpt")
+                if (req.Command == "#chatgpt")
+                    ExecuteChatGptRequest(req.Body);
+                else if (req.Command == "#restartchatgpt")
                     ExecuteRestartChatGptRequest();
-                else if (command == "#echo")
-                    ExecuteEchoRequest(body);
+                else if (req.Command == "#echo")
+                    ExecuteEchoRequest(req.Body);
                 else
-                    ExecuteEchoRequest(body);
+                    ExecuteEchoRequest(req.Body);
 
                 messageIn = "";
             }
@@ -303,26 +303,73 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         }
     }
 
-    (string command, string msg) GetRequestType(string messageIn)
+    private KComRequest GetKComRequest(string messageIn)
     {
-        // TODO: Parse the command here correctly (this is provisional).
+        // TODO: Parse the message here correctly (this is a quick and dirty implementation).
 
-        if(string.IsNullOrEmpty(messageIn))
-            messageIn = "#echo:Error, invalid message.";
+        KComRequest kComReq = new KComRequest();
+
+        if (string.IsNullOrEmpty(messageIn))
+            messageIn = "#echo:\nError, invalid message.";
 
         // If there is no command, the default command is chatgpt
         if (!messageIn.StartsWith("#"))
-            messageIn = "#chatgpt:" + messageIn;
+            messageIn = "#chatgpt:\n" + messageIn;
 
-        var command = messageIn.Substring(0, messageIn.IndexOf(':'));
-        var msg = messageIn.Substring(messageIn.IndexOf(':') + 1, messageIn.Length - messageIn.IndexOf(':') - 1);
+        try
+        {
+            var indHeader = messageIn.IndexOf('\n');
+            var indCommand = messageIn.IndexOf(':');
 
-        return (command, msg);
+            if (indHeader == -1)
+            {
+                kComReq.Command = messageIn.Substring(0, indCommand);
+                kComReq.Body = messageIn.Substring(indCommand + 1, messageIn.Length - indCommand - 1);
+                return kComReq;
+            }
+
+            var header = messageIn.Substring(0, indHeader);
+            var headerArray = header.Split(':');
+
+            kComReq.Command = headerArray[0];
+
+            if (!string.IsNullOrEmpty(headerArray[1]))
+            {
+                var colecParams = headerArray[1].Split(';');
+                foreach (var parN in colecParams)
+                {
+                    var par = parN.Split('=');
+                    kComReq.Parameters.Add(par[0], par[1]);
+                }
+            }
+
+            kComReq.Body = messageIn.Substring(messageIn.IndexOf('\n') + 1, messageIn.Length - indHeader - 1);
+
+            return kComReq;
+        }
+        catch (Exception)
+        {
+            kComReq.Command = "#echo";
+            kComReq.Body = "Error, invalid message.";
+            return kComReq;
+        }
     }
 
     private void ExecuteEchoRequest(string request)
     {
+        // TODO: In the future, add a header here for responses.
+        // ...
+
         _messageQueue.Enqueue($"Echo for request [{request}]");
+
+        // Signal for end of stream.  
+        _messageQueue.Enqueue((char)26);  // byte #26 = EOF 
+    }
+
+    private void ExecuteRestartChatGptRequest()
+    {
+        _chatGPT.RestartChatGPT();
+        _messageQueue.Enqueue((char)26);
     }
 
     private async void ExecuteChatGptRequest(string request)
@@ -330,16 +377,9 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         _chatGPT.StreamToken += _chatGPT_StreamToken;        
         await _chatGPT.StreamCompletionAsync(request);
         _chatGPT.StreamToken -= _chatGPT_StreamToken;
-
-        // Signal for end of stream.        
-        _messageQueue.Enqueue((char)26);  // 26=EOF 
+        
+        _messageQueue.Enqueue((char)26); 
     }
-
-    private void ExecuteRestartChatGptRequest()
-    {
-        _chatGPT.RestartChatGPT();
-    }
-
 
     private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
     {
@@ -350,7 +390,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     #region Utils 
 
-    private byte[] ConverStringUtf8ToQDOSBytes(string sourceText)
+    private byte[] ConverUtf8StringToClientOSBytes(string sourceText)
     {
         List<byte> outQDos = new List<byte>();
 
@@ -366,21 +406,21 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             {
                 var c2 = charArray[++i];
                 if (c2 == '\n')                    
-                    outQDos.Add(ConvertCharToQDOSByte(c2));
+                    outQDos.Add(ConvertCharToClientOSByte(c2));
                 else
                 {
-                    outQDos.Add(ConvertCharToQDOSByte('\n'));
-                    outQDos.Add(ConvertCharToQDOSByte(c2));
+                    outQDos.Add(ConvertCharToClientOSByte('\n'));
+                    outQDos.Add(ConvertCharToClientOSByte(c2));
                 }
             }
             else
-                outQDos.Add(ConvertCharToQDOSByte(c));
+                outQDos.Add(ConvertCharToClientOSByte(c));
 
         }
         return outQDos.ToArray();
     }
 
-    private byte ConvertCharToQDOSByte(char c)
+    private byte ConvertCharToClientOSByte(char c)
     {
         if (_convTable.ContainsKey(c))
             return _convTable[c];
@@ -388,16 +428,18 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             return (byte)c;
     }
 
-    private char ConvertByteToQDOSChar(byte b)
+    private char ConvertByteToClientOSChar(byte b)
     {
-        if (b < 128)
+        if (b < 128)  // ASCII standard
             return (char)b;
         else        
             return _convTable.Where(v => v.Value == b).FirstOrDefault().Key;    
     }
 
-    private Dictionary<char, byte> LoadQDosTable()
+    private Dictionary<char, byte> LoadQDOSCharacterSetTable()
     {
+        // QDOS (Sinclair QL) character set table  
+
         Dictionary<char, byte> table = new Dictionary<char, byte>();
        
         table.Add(' ', 32);
@@ -611,6 +653,17 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     {
         StopService();
         base.Dispose();
+    }
+
+    #endregion
+
+    #region Request / Response types
+
+    private class KComRequest
+    {
+        public string Command { get; set; }
+        public Dictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
+        public string Body { get; set; }
     }
 
     #endregion 
