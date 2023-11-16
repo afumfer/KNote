@@ -1,9 +1,14 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
+using Microsoft.AspNetCore.SignalR.Protocol;
 using System.Collections;
+using System.Diagnostics.Eventing.Reader;
+using System.Drawing;
 using System.IO.Ports;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KNote.ClientWin.Components;
 
@@ -197,6 +202,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         _serialPort.Open();   
         
         _messageQueue = new Queue();
+        _chatGPT.RestartChatGPT();
 
         _statusInfo = "Com started ...";
 
@@ -211,7 +217,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     private void Server(CancellationToken cancellationToken)
     {
-        Task.Factory.StartNew(() => Read(cancellationToken), cancellationToken);                
+        Task.Factory.StartNew(() => Read(cancellationToken), cancellationToken);                        
 
         while (RunningService)
         {
@@ -230,7 +236,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             }
             else
                 Thread.Sleep(40);
-        }
+        }        
     }
 
     private void SendMessage(string messageSource)
@@ -240,18 +246,56 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
         try
         {
-            if (!String.IsNullOrEmpty(messageSource))
+            if (!string.IsNullOrEmpty(messageSource))
             {
                 byte[] bMessage = ConverUtf8StringToClientOSBytes(messageSource);
-                _serialPort.Write(bMessage, 0, bMessage.Length);
-            }
 
+                //// Option 1, for debug
+                //for (int i = 0; i < bMessage.Length; i++)
+                //{
+                //    if (!RunningService)
+                //        break;
+                //    _serialPort.Write(bMessage, i, 1);
+                //    // This is necesary for QL/Q68
+                //    Thread.Sleep(20);
+                //}
+
+                // Option 2.
+                //_serialPort.Write(bMessage, 0, bMessage.Length);
+
+                // Option 3. // This option work fine in for QL/Q68
+                if (bMessage.Length < 64)
+                    _serialPort.Write(bMessage, 0, bMessage.Length);
+                else 
+                {
+                    List<byte[]> divided = DivideArray(bMessage, 16);
+                    foreach(var ab in divided)
+                    {
+                        _serialPort.Write(ab, 0, ab.Length);
+                        Thread.Sleep(40);
+                    }
+                }
+            }
         }
         catch (TimeoutException) { }
         catch (Exception e) { _error = e.Message; }
 
         _statusInfo = "Sended ...";        
         MessageSending = false;
+    }
+
+    public List<byte[]> DivideArray(byte[] source, int chunkSize)
+    {
+        List<byte[]> list = new ();        
+        for (var i = 0; i < source.Length; i += chunkSize)
+        {            
+            if (i + chunkSize > source.Length) 
+                chunkSize = source.Length - i;
+            byte[] chunk = new byte[chunkSize];
+            Buffer.BlockCopy(source, i, chunk, 0, chunkSize);
+            list.Add(chunk);
+        }
+        return list;
     }
 
     private void Read(CancellationToken cancellationToken)
