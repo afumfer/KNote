@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntServerCOMForm));
             textBoxSend = new TextBox();
             buttonStart = new Button();
             buttonSend = new Button();
@@ -49,7 +50,7 @@
             textBoxSend.Multiline = true;
             textBoxSend.Name = "textBoxSend";
             textBoxSend.ScrollBars = ScrollBars.Vertical;
-            textBoxSend.Size = new Size(767, 376);
+            textBoxSend.Size = new Size(562, 173);
             textBoxSend.TabIndex = 0;
             // 
             // buttonStart
@@ -66,7 +67,7 @@
             // buttonSend
             // 
             buttonSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSend.Location = new Point(586, 58);
+            buttonSend.Location = new Point(381, 58);
             buttonSend.Margin = new Padding(4, 3, 4, 3);
             buttonSend.Name = "buttonSend";
             buttonSend.Size = new Size(189, 24);
@@ -80,10 +81,10 @@
             listBoxEcho.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listBoxEcho.FormattingEnabled = true;
             listBoxEcho.ItemHeight = 15;
-            listBoxEcho.Location = new Point(9, 504);
+            listBoxEcho.Location = new Point(9, 294);
             listBoxEcho.Margin = new Padding(4, 3, 4, 3);
             listBoxEcho.Name = "listBoxEcho";
-            listBoxEcho.Size = new Size(767, 139);
+            listBoxEcho.Size = new Size(562, 124);
             listBoxEcho.TabIndex = 3;
             // 
             // buttonStop
@@ -100,7 +101,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(9, 486);
+            label1.Location = new Point(11, 275);
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new Size(97, 15);
@@ -120,10 +121,10 @@
             // statusInfo
             // 
             statusInfo.Items.AddRange(new ToolStripItem[] { statusLabelInfo });
-            statusInfo.Location = new Point(0, 662);
+            statusInfo.Location = new Point(0, 439);
             statusInfo.Name = "statusInfo";
             statusInfo.Padding = new Padding(1, 0, 16, 0);
-            statusInfo.Size = new Size(789, 22);
+            statusInfo.Size = new Size(584, 22);
             statusInfo.TabIndex = 8;
             statusInfo.Text = "statusStrip1";
             // 
@@ -140,14 +141,14 @@
             panelLine.ForeColor = Color.Gray;
             panelLine.Location = new Point(11, 42);
             panelLine.Name = "panelLine";
-            panelLine.Size = new Size(766, 2);
+            panelLine.Size = new Size(561, 2);
             panelLine.TabIndex = 9;
             // 
             // KntServerCOMForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(789, 684);
+            ClientSize = new Size(584, 461);
             Controls.Add(panelLine);
             Controls.Add(statusInfo);
             Controls.Add(label2);
@@ -157,6 +158,7 @@
             Controls.Add(buttonSend);
             Controls.Add(buttonStart);
             Controls.Add(textBoxSend);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4, 3, 4, 3);
             Name = "KntServerCOMForm";
             Text = "KNote ServerCOM";

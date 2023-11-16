@@ -106,6 +106,7 @@
             tabSearch = new TabPage();
             imageTabExplorer = new ImageList(components);
             splitContainer2 = new SplitContainer();
+            menuCOMPortServer = new ToolStripMenuItem();
             menuMangment.SuspendLayout();
             statusBarManagment.SuspendLayout();
             toolBarManagment.SuspendLayout();
@@ -373,7 +374,7 @@
             // menuViewS1
             // 
             menuViewS1.Name = "menuViewS1";
-            menuViewS1.Size = new Size(228, 6);
+            menuViewS1.Size = new Size(234, 6);
             // 
             // menuVerticalPanelForNotes
             // 
@@ -411,13 +412,13 @@
             menuMainVisible.CheckState = CheckState.Checked;
             menuMainVisible.Name = "menuMainVisible";
             menuMainVisible.ShortcutKeys = Keys.Shift | Keys.F12;
-            menuMainVisible.Size = new Size(231, 22);
+            menuMainVisible.Size = new Size(237, 22);
             menuMainVisible.Text = "Show main menu";
             menuMainVisible.Click += menu_Click;
             // 
             // menuTools
             // 
-            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuChatGPT, menuKNoteLab, menuToolsS2, menuOptions });
+            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuChatGPT, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuOptions });
             menuTools.Name = "menuTools";
             menuTools.Size = new Size(46, 20);
             menuTools.Text = "&Tools";
@@ -745,6 +746,13 @@
             splitContainer2.SplitterWidth = 7;
             splitContainer2.TabIndex = 0;
             // 
+            // menuCOMPortServer
+            // 
+            menuCOMPortServer.Name = "menuCOMPortServer";
+            menuCOMPortServer.Size = new Size(185, 22);
+            menuCOMPortServer.Text = "COM port server ...";
+            menuCOMPortServer.Click += menu_Click;
+            // 
             // KNoteManagmentForm
             // 
             AutoScaleMode = AutoScaleMode.Inherit;
@@ -858,5 +866,6 @@
         private ToolStripMenuItem menuChat;
         private ToolStripMenuItem menuChatGPT;
         private ToolStripProgressBar progressBar;
+        private ToolStripMenuItem menuCOMPortServer;
     }
 }

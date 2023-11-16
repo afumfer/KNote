@@ -207,11 +207,15 @@ public class KntChatGPTComponent : ComponentBase
 
         stopwatch.Start();
 
-        _chatTextMessasges.Append($"**User:** \r\n{prompt}\r\n\r\n");
-        StreamToken?.Invoke(this, new ComponentEventArgs<string>($"**User:** \r\n{prompt}\r\n\r\n"));
-        _chatTextMessasges.Append($"**Assistant:** \r\n");
-        StreamToken?.Invoke(this, new ComponentEventArgs<string>($"**Assistant:** \r\n"));        
+        //_chatTextMessasges.Append($"**User:** \r\n{prompt}\r\n\r\n");
+        //StreamToken?.Invoke(this, new ComponentEventArgs<string>($"**User:** \r\n{prompt}\r\n\r\n"));
+        //_chatTextMessasges.Append($"**Assistant:** \r\n");
+        //StreamToken?.Invoke(this, new ComponentEventArgs<string>($"**Assistant:** \r\n"));
 
+        var intro = $"**User:** \r\n{prompt}\r\n\r\n**Assistant:** \r\n";
+        _chatTextMessasges.Append(intro);
+        StreamToken?.Invoke(this, new ComponentEventArgs<string>(intro));
+        
         await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
         {
             foreach (var choice in result.Choices.Where(choice => !string.IsNullOrEmpty(choice.Delta?.Content)))            

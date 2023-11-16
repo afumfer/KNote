@@ -311,6 +311,10 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             _com.ShowKntChatGPTConsole();
         }
+        else if (menuSel == menuCOMPortServer)
+        {
+            _com.ShowKntCOMPortServerConsole();
+        }
         else
             MessageBox.Show("In construction ... ");
     }
@@ -328,7 +332,6 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             await _com.DeleteNote();
         else if (menuSel == toolConfiguration)
             await _com.ManagmentRepository();
-
     }
 
     private async void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)

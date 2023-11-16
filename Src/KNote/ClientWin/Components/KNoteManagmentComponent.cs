@@ -588,6 +588,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         kntChatGPTComponent.ShowChatGPTView(true, true);
     }
 
+    public void ShowKntCOMPortServerConsole()
+    {
+        var kntServerCOMComponent = new KntServerCOMComponent(Store);
+        kntServerCOMComponent.Run();
+        kntServerCOMComponent.ShowServerCOMView(true);
+    }
+
+
     public async Task EditNote()
     {
         if (SelectedNoteInfo == null)

@@ -2,6 +2,7 @@
 using KNote.Model;
 using System.Collections;
 using System.IO.Ports;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace KNote.ClientWin.Components;
@@ -147,6 +148,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     public void Send(string message)
     {
         _messageQueue.Enqueue(message);
+        _messageQueue.Enqueue((char)26);
     }
 
     public void StopService()
@@ -255,8 +257,6 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     private void Read(CancellationToken cancellationToken)
     {
         string messageIn;
-        //string command = "";
-        //string body = "";
 
         while (RunningService)
         {
@@ -282,19 +282,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                
                 _statusInfo = $"Recived: {messageIn}";
                 ReceiveMessage?.Invoke(this, new ComponentEventArgs<string>(messageIn));
-
-                var req = GetKComRequest(messageIn);
                 
-                // Dispatch actions:
-                // TODO: Select the correct action, use the command pattern here.
-                if (req.Command == "#chatgpt")
-                    ExecuteChatGptRequest(req.Body);
-                else if (req.Command == "#restartchatgpt")
-                    ExecuteRestartChatGptRequest();
-                else if (req.Command == "#echo")
-                    ExecuteEchoRequest(req.Body);
-                else
-                    ExecuteEchoRequest(req.Body);
+                DispatchRequest(GetKComRequest(messageIn));
 
                 messageIn = "";
             }
@@ -355,6 +344,21 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         }
     }
 
+    private void DispatchRequest(KComRequest req)
+    {
+        // Dispatch actions:
+        // TODO: Select the correct action, use the command pattern here.
+
+        if (req.Command == "#chatgpt")
+            ExecuteChatGptRequest(req.Body);
+        else if (req.Command == "#restartchatgpt")
+            ExecuteRestartChatGptRequest();
+        else if (req.Command == "#echo")
+            ExecuteEchoRequest(req.Body);
+        else
+            ExecuteEchoRequest(req.Body);
+    }
+
     private void ExecuteEchoRequest(string request)
     {
         // TODO: In the future, add a header here for responses.
@@ -383,7 +387,8 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
     {
-        _messageQueue.Enqueue(e.Entity?.ToString()); 
+        _messageQueue.Enqueue(e.Entity?.ToString());
+        Thread.Sleep(20);
     }
 
     #endregion 
