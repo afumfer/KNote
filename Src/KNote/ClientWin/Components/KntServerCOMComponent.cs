@@ -1,7 +1,9 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Repository.EntityFramework.Entities;
 using Microsoft.AspNetCore.SignalR.Protocol;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO.Ports;
@@ -21,7 +23,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     private CancellationTokenSource _cancellationTokenSource;    
     private bool _showViewMessage;
     private readonly Dictionary<char, byte> _convTable;
-    private readonly KntChatGPTComponent _chatGPT;
+    private readonly KntChatGPTComponent _chatGPT;    
 
     #endregion
 
@@ -96,7 +98,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         AutoCloseComponentOnViewExit = false;
         ShowErrorMessagesOnInitialize = false;
         _showViewMessage = true;
-
+                
         _convTable = LoadQDOSCharacterSetTable();
 
         // ChatGPT included component
@@ -260,20 +262,17 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                 //    Thread.Sleep(20);
                 //}
 
-                // Option 2.
+                //Option 2. // This option not work in for QL/Q68
                 //_serialPort.Write(bMessage, 0, bMessage.Length);
 
                 // Option 3. // This option work fine in for QL/Q68
-                if (bMessage.Length < 64)
-                    _serialPort.Write(bMessage, 0, bMessage.Length);
-                else 
+                var chunkSize = 16;
+                for (var i = 0; i < bMessage.Length; i += chunkSize)
                 {
-                    List<byte[]> divided = DivideArray(bMessage, 16);
-                    foreach(var ab in divided)
-                    {
-                        _serialPort.Write(ab, 0, ab.Length);
-                        Thread.Sleep(40);
-                    }
+                    if (i + chunkSize > bMessage.Length)
+                        chunkSize = bMessage.Length - i;
+                    _serialPort.Write(bMessage, i, chunkSize);
+                    Thread.Sleep(20);
                 }
             }
         }
@@ -282,20 +281,6 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
         _statusInfo = "Sended ...";        
         MessageSending = false;
-    }
-
-    public List<byte[]> DivideArray(byte[] source, int chunkSize)
-    {
-        List<byte[]> list = new ();        
-        for (var i = 0; i < source.Length; i += chunkSize)
-        {            
-            if (i + chunkSize > source.Length) 
-                chunkSize = source.Length - i;
-            byte[] chunk = new byte[chunkSize];
-            Buffer.BlockCopy(source, i, chunk, 0, chunkSize);
-            list.Add(chunk);
-        }
-        return list;
     }
 
     private void Read(CancellationToken cancellationToken)

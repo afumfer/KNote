@@ -47,6 +47,7 @@
             textBoxSend.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textBoxSend.Location = new Point(9, 85);
             textBoxSend.Margin = new Padding(4, 3, 4, 3);
+            textBoxSend.MaxLength = 0;
             textBoxSend.Multiline = true;
             textBoxSend.Name = "textBoxSend";
             textBoxSend.ScrollBars = ScrollBars.Vertical;
