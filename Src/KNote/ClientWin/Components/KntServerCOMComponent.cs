@@ -1,16 +1,8 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
-using KNote.Repository.EntityFramework.Entities;
-using Microsoft.AspNetCore.SignalR.Protocol;
 using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing;
 using System.IO.Ports;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KNote.ClientWin.Components;
 
@@ -305,7 +297,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                         byte b = (byte)_serialPort.ReadByte();
                         if (b ==  26)  // 26=(EOF)
                             break;                                                 
-                        messageIn += ConvertByteToClientOSChar(b);                        
+                        messageIn += ConvertByteToClientCSChar(b);                        
                     }
                 }
                
@@ -440,21 +432,21 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             {
                 var c2 = charArray[++i];
                 if (c2 == '\n')                    
-                    outQDos.Add(ConvertCharToClientOSByte(c2));
+                    outQDos.Add(ConvertCharToClientCSByte(c2));
                 else
                 {
-                    outQDos.Add(ConvertCharToClientOSByte('\n'));
-                    outQDos.Add(ConvertCharToClientOSByte(c2));
+                    outQDos.Add(ConvertCharToClientCSByte('\n'));
+                    outQDos.Add(ConvertCharToClientCSByte(c2));
                 }
             }
             else
-                outQDos.Add(ConvertCharToClientOSByte(c));
+                outQDos.Add(ConvertCharToClientCSByte(c));
 
         }
         return outQDos.ToArray();
     }
 
-    private byte ConvertCharToClientOSByte(char c)
+    private byte ConvertCharToClientCSByte(char c)
     {
         if (_convTable.ContainsKey(c))
             return _convTable[c];
@@ -462,7 +454,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
             return (byte)c;
     }
 
-    private char ConvertByteToClientOSChar(byte b)
+    private char ConvertByteToClientCSChar(byte b)
     {
         if (b < 128)  // ASCII standard
             return (char)b;
