@@ -409,7 +409,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
     {
         _messageQueue.Enqueue(e.Entity?.ToString());
-        Thread.Sleep(20);
+        //Thread.Sleep(20);
     }
 
     #endregion 
