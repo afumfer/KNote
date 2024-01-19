@@ -4,20 +4,20 @@
     <TargetFramework>net8.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
     <Version>0.0.8</Version>
-    <AssemblyVersion>0.0.8.1</AssemblyVersion>
-    <FileVersion>0.0.8.1</FileVersion>
+    <AssemblyVersion>0.0.8.2</AssemblyVersion>
+    <FileVersion>0.0.8.2</FileVersion>
 	<Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.33.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0" />   
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.0" PrivateAssets="all" />   
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />   
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+    <PackageReference Include="Markdig" Version="0.34.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.1" />   
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.1" PrivateAssets="all" />   
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.1" />   
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.2.0" />
     <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.0" />
-	<PackageReference Include="Radzen.Blazor" Version="4.21.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.1" />
+	<PackageReference Include="Radzen.Blazor" Version="4.24.1" />
   </ItemGroup>
 
   <ItemGroup>
