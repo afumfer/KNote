@@ -161,7 +161,7 @@ public class KntChatGPTComponent : ComponentBase
                
         _chatMessages.Add(new ChatMessage
         {
-            Prompt = _prompt,
+            Prompt = prompt,
             Role = "user",
             Tokens = result.Usage.PromptTokens
         });
@@ -171,14 +171,15 @@ public class KntChatGPTComponent : ComponentBase
             Role = "assistant",
             Tokens = result.Usage.CompletionTokens
         });
-        
+
+        _prompt = prompt;
         _result = result.FirstChoice.Message.ToString().Replace("\n", "\r\n");
         _totalTokens += result.Usage.TotalTokens ?? 0;
         _totalProcessingTime += result.ProcessingTime;
         
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"**User:** \r\n");
-        _chatTextMessasges.Append($"{_prompt}\r\n");
+        _chatTextMessasges.Append($"{prompt}\r\n");
         _chatTextMessasges.Append($"(Tokens: {result.Usage.PromptTokens})\r\n");
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"**Assistant:** \r\n");
@@ -207,11 +208,6 @@ public class KntChatGPTComponent : ComponentBase
 
         stopwatch.Start();
 
-        //_chatTextMessasges.Append($"**User:** \r\n{prompt}\r\n\r\n");
-        //StreamToken?.Invoke(this, new ComponentEventArgs<string>($"**User:** \r\n{prompt}\r\n\r\n"));
-        //_chatTextMessasges.Append($"**Assistant:** \r\n");
-        //StreamToken?.Invoke(this, new ComponentEventArgs<string>($"**Assistant:** \r\n"));
-
         var intro = $"**User:** \r\n{prompt}\r\n\r\n**Assistant:** \r\n";
         _chatTextMessasges.Append(intro);
         StreamToken?.Invoke(this, new ComponentEventArgs<string>(intro));
@@ -227,14 +223,12 @@ public class KntChatGPTComponent : ComponentBase
         });
 
         stopwatch.Stop();
-
-        _totalProcessingTime += stopwatch.Elapsed;
-
+                
         _chatMessages.Add(new ChatMessage
         {
-            Prompt = _prompt,
+            Prompt = prompt,
             Role = "user",
-            Tokens = _prompt.Length / 4    // TODO: hack, refactor this
+            Tokens = prompt.Length / 4    // TODO: hack, refactor this
         });
         _chatMessages.Add(new ChatMessage
         {
@@ -243,12 +237,14 @@ public class KntChatGPTComponent : ComponentBase
             Tokens = tempResult.Length / 4    // TODO: hack, refactor this
         });
 
+        _prompt = prompt;
         _result = tempResult.ToString();
-        _totalTokens += (_prompt.Length + tempResult.Length) / 4;    // TODO: hack, refactor this
-        
-        _chatTextMessasges.Append(tempResult);
-        
+        _totalTokens += (prompt.Length + tempResult.Length) / 4;    // TODO: hack, refactor this
+        _totalProcessingTime += stopwatch.Elapsed;
+         
+        _chatTextMessasges.Append(tempResult);        
         _chatTextMessasges.Append($"\r\n\r\n");
+
         StreamToken?.Invoke(this, new ComponentEventArgs<string>($"\r\n\r\n"));
     }
 
@@ -270,9 +266,7 @@ public class KntChatGPTComponent : ComponentBase
     #region Private Methods
 
     private ChatRequest GetChatRequest(string prompt)
-    {
-        _prompt = prompt;
-
+    {        
         var chatPrompts = new List<OpenAI.Chat.Message>();
 
         // Add all existing messages to chatPrompts
@@ -282,7 +276,7 @@ public class KntChatGPTComponent : ComponentBase
             chatPrompts.Add(new OpenAI.Chat.Message(GetOpenAIRole(item.Role), item.Prompt));
         }
 
-        chatPrompts.Add(new OpenAI.Chat.Message(GetOpenAIRole("user"), _prompt));
+        chatPrompts.Add(new OpenAI.Chat.Message(GetOpenAIRole("user"), prompt));
 
         //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
 

@@ -11,13 +11,20 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     #region Private fields
 
     private SerialPort _serialPort;
-    private Queue _messageQueue;  
+    private Queue _messageQueue;
+    private readonly KntChatGPTComponent _chatGPT;
+
     private CancellationTokenSource _cancellationTokenSource;    
     private bool _showViewMessage;
     private readonly Dictionary<char, byte> _convTable;
-    private readonly KntChatGPTComponent _chatGPT;    
 
     #endregion
+
+    #region Constants
+
+    private const byte EofByte = 26;
+
+    #endregion 
 
     #region Properties 
 
@@ -147,7 +154,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
     public void Send(string message)
     {
         _messageQueue.Enqueue(message);
-        _messageQueue.Enqueue((char)26);
+        _messageQueue.Enqueue((char)EofByte);
     }
 
     public void StopService()
@@ -295,7 +302,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                     if(_serialPort.BytesToRead > 0)
                     {
                         byte b = (byte)_serialPort.ReadByte();
-                        if (b ==  26)  // 26=(EOF)
+                        if (b == EofByte)
                             break;                                                 
                         messageIn += ConvertByteToClientCSChar(b);                        
                     }
@@ -388,13 +395,13 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         _messageQueue.Enqueue($"Echo for request [{request}]");
 
         // Signal for end of stream.  
-        _messageQueue.Enqueue((char)26);  // byte #26 = EOF 
+        _messageQueue.Enqueue((char)EofByte);
     }
 
     private void ExecuteRestartChatGptRequest()
     {
         _chatGPT.RestartChatGPT();
-        _messageQueue.Enqueue((char)26);
+        _messageQueue.Enqueue((char)EofByte);
     }
 
     private async void ExecuteChatGptRequest(string request)
@@ -403,7 +410,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         await _chatGPT.StreamCompletionAsync(request);
         _chatGPT.StreamToken -= _chatGPT_StreamToken;
         
-        _messageQueue.Enqueue((char)26); 
+        _messageQueue.Enqueue((char)EofByte); 
     }
 
     private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
