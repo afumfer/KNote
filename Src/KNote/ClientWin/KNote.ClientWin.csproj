@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.34.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.2" />
     <PackageReference Include="NLog" Version="5.2.8" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.8" />
     <PackageReference Include="OpenAI-DotNet" Version="7.6.5" />
