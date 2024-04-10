@@ -55,7 +55,7 @@
             // labelProcess
             // 
             labelProcess.AutoSize = true;
-            labelProcess.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelProcess.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             labelProcess.Location = new Point(15, 18);
             labelProcess.Name = "labelProcess";
             labelProcess.Size = new Size(81, 15);
@@ -80,6 +80,7 @@
             Controls.Add(labelProcess);
             Controls.Add(progressProcess);
             Controls.Add(buttonCancel);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
@@ -88,7 +89,7 @@
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Processing task";
-            FormClosing += HeavyProcessForm_FormClosing;            
+            FormClosing += HeavyProcessForm_FormClosing;
             ResumeLayout(false);
             PerformLayout();
         }

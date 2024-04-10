@@ -50,8 +50,8 @@
                     <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
                 </RadzenSplitterPane>
                 <RadzenSplitterPane>                            
-                    <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
-                                HorizontalAlign="HorizontalAlign.Right" 
+                    <RadzenPager Density="Density.Compact" @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
+                                 HorizontalAlign="HorizontalAlign.Right" 
                                 Count="@((int)paginationContext.TotalCount)" 
                                 PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
                                 PageChanged=@PageChanged/>

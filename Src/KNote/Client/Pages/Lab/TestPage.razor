@@ -121,7 +121,7 @@
                 <RadzenButton Click="@RadzenButtonClicked" Text="Test go home"></RadzenButton>
                 <RadzenLink Icon="accessibility"  @onclick="ShowLink" Text="Go to index" />
                 <hr />
-                <RadzenPager Count="100" PageSize="10" PageNumbersCount="5" PageChanged=@(args => Console.WriteLine($"Skip: {args.Skip}, Top: {args.Top}")) />
+                <RadzenPager Density="Density.Compact" Count="100" PageSize="10" PageNumbersCount="5" PageChanged=@(args => Console.WriteLine($"Skip: {args.Skip}, Top: {args.Top}")) />
             </RadzenTabsItem>
 
             <RadzenTabsItem Text="&nbsp;Radzen lab 2" Icon="format_list_bulleted" >                

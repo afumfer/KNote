@@ -20,7 +20,7 @@
 
 <div class="col-12 pt-2">
     <div class="row">
-        <RadzenPager @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
+        <RadzenPager Density="Density.Compact"  @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" 
                 HorizontalAlign="HorizontalAlign.Right" 
                 Count="@((int)paginationContext.TotalCount)" 
                 PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
