@@ -1,0 +1,7 @@
+﻿@KNoteServer_HostAdress = https://localhost:44339/KNote/api
+
+### Test 
+
+GET {{KNoteServer_HostAdress}}/notes/homenotes
+Accept: application/json
+
