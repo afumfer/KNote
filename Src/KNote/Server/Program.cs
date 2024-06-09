@@ -43,8 +43,7 @@ try
 
     builder.Services.KntAddServices(appSettings, repositoryRef);
 
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+    builder.Services.AddAuthentication().AddJwtBearer(options =>
          options.TokenValidationParameters = new TokenValidationParameters
          {
              ValidateIssuer = false,
@@ -54,6 +53,7 @@ try
              IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.Secret)),
              ClockSkew = TimeSpan.Zero
          });
+    builder.Services.AddAuthorization();
 
     builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
     {

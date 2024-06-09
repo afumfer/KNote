@@ -261,7 +261,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
                 //    Thread.Sleep(20);
                 //}
 
-                //Option 2. // This option not work in for QL/Q68
+                //// Option 2. // This option not work in for QL/Q68
                 //_serialPort.Write(bMessage, 0, bMessage.Length);
 
                 // Option 3. // This option work fine in for QL/Q68
@@ -415,8 +415,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
     {
-        _messageQueue.Enqueue(e.Entity?.ToString());
-        //Thread.Sleep(20);
+        _messageQueue.Enqueue(e.Entity?.ToString());        
     }
 
     #endregion 
