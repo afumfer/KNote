@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using KNote.ClientWin.Components;
 using KNote.ClientWin.Core;
 using KNote.Model;
@@ -11,6 +12,8 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private readonly KntChatGPTComponent _com;
     private bool _viewFinalized = false;
+    private int _countNRres;
+    private StringBuilder _sbResult = new StringBuilder();
 
     #endregion
 
@@ -153,7 +156,8 @@ public partial class KntChatGPTForm : Form, IViewBase
         toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens} ";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";
         textResult.Text = _com.ChatTextMessasges.ToString();
-        textPrompt.Text = "";
+        _sbResult.Clear();
+        textPrompt.Text = "";        
     }
 
     private void StatusProcessing(bool processing = false)
@@ -188,10 +192,13 @@ public partial class KntChatGPTForm : Form, IViewBase
     }
 
     private async Task GoStreamCompletion(string prompt)
-    {
+    {        
+        _countNRres = 0;
         _com.StreamToken += _com_StreamToken;
 
         await _com.StreamCompletionAsync(prompt);
+
+        RefreshStreamResult();
 
         textPrompt.Text = "";
         toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens}";
@@ -217,7 +224,18 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private void UpdateTextResult(string text)
     {
-        textResult.Text += text;
+        _sbResult.Append(text);
+        _countNRres++;
+        if(_countNRres > 10)
+        {
+            RefreshStreamResult();
+            _countNRres = 0;
+        }
+    }
+
+    private void RefreshStreamResult()
+    {
+        textResult.Text = _sbResult.ToString();
         textResult.SelectionStart = textResult.Text.Length;
         textResult.ScrollToCaret();
         textResult.Update();
@@ -232,8 +250,7 @@ public partial class KntChatGPTForm : Form, IViewBase
         var result = await _com.CreateEmbeddingAsync(textPrompt.Text);
 
         if (result != null)
-        {
-            //textResult.Text = string.Join('|', result);
+        {            
             textResult.Text = JsonSerializer.Serialize(result);
         }
 
