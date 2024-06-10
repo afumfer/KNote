@@ -8,9 +8,6 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
-using KNote.Client.Shared;
-using KNote.Repository.EntityFramework.Entities;
-using NLog.Filters;
 
 namespace KNote.Server.Controllers;
 

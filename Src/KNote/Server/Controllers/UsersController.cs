@@ -14,7 +14,6 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
-using KNote.Repository.EntityFramework.Entities;
 
 namespace KNote.Server.Controllers;
 

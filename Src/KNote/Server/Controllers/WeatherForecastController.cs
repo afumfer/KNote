@@ -4,10 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Server.Helpers;
 using KNote.Service.Core;
 using Microsoft.AspNetCore.Authorization;
 
