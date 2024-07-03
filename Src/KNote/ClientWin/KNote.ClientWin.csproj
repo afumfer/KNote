@@ -22,8 +22,8 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.6" />
     <PackageReference Include="NLog" Version="5.3.2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
-    <PackageReference Include="OpenAI-DotNet" Version="8.0.1" />
-    <PackageReference Include="ReverseMarkdown" Version="4.4.0" />
+    <PackageReference Include="OpenAI-DotNet" Version="8.1.1" />
+    <PackageReference Include="ReverseMarkdown" Version="4.6.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
   </ItemGroup>
