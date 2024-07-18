@@ -95,7 +95,7 @@ public class KNoteScriptLibrary: Library
         return chatGPT.ChatTextMessasges.ToString();
     }
 
-    public KntChatComponent GetChatGPTComponent()
+    public KntChatComponent GetKntChatComponent()
     {
         return new KntChatComponent(_store);
     }
