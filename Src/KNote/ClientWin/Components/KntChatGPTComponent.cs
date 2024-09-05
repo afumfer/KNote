@@ -284,7 +284,7 @@ public class KntChatGPTComponent : ComponentBase
 
         return new ChatRequest(
             messages: chatPrompts,
-            model: OpenAI.Models.Model.GPT4o,
+            model: OpenAI.Models.Model.GPT4_Turbo,
             temperature: null,
             topP: null,
             number: null,
