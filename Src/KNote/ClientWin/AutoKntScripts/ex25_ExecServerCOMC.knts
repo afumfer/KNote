@@ -12,7 +12,7 @@ var serverCom = GetServerCOMComponent();
 '' For QL
 'serverCom.BaudRate = 19200;
 ' (HandShake: 2 (RequestToSend) or 3 (RequestToSendXOnXOff))
-'serverCom.HandShake = 2; 
+'serverCom.HandShake = 3; 
 
 
 serverCom.Run();

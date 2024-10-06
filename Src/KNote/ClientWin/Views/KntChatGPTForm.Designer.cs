@@ -140,8 +140,9 @@
             // textResult
             // 
             textResult.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textResult.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            textResult.Font = new Font("Segoe UI", 9.75F);
             textResult.Location = new Point(6, 28);
+            textResult.MaxLength = 0;
             textResult.Multiline = true;
             textResult.Name = "textResult";
             textResult.ScrollBars = ScrollBars.Vertical;
@@ -190,12 +191,13 @@
             // textPrompt
             // 
             textPrompt.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textPrompt.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            textPrompt.Font = new Font("Segoe UI", 9.75F);
             textPrompt.Location = new Point(65, 6);
+            textPrompt.MaxLength = 0;
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(553, 58);
+            textPrompt.Size = new Size(553, 56);
             textPrompt.TabIndex = 0;
             // 
             // buttonSend
