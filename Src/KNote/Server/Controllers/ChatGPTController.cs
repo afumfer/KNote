@@ -50,7 +50,7 @@ public class ChatGPTController : Controller
                 chatPrompts.Add(new Message(GetOpenAIRole(item.Role), item.Prompt));
             }
             
-            var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
+            var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4o);
             var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
            
             var kresApi = new Result<ChatMessageOutput>();

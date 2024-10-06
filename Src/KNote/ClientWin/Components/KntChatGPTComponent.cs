@@ -278,6 +278,18 @@ public class KntChatGPTComponent : ComponentBase
 
         chatPrompts.Add(new OpenAI.Chat.Message(GetOpenAIRole("user"), prompt));
 
+        //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
+
+        var xx = OpenAI.Models.Model.GPT4_Turbo;
+
+        //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
+
+        var xx = OpenAI.Models.Model.GPT4_Turbo;
+
+        //return new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4);
+
+        var xx = OpenAI.Models.Model.GPT4_Turbo;
+
         return new ChatRequest(
             messages: chatPrompts,
             model: OpenAI.Models.Model.GPT4o,
