@@ -17,7 +17,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2" />
     <PackageReference Include="System.Net.Http.Json" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.10" />
-	<PackageReference Include="Radzen.Blazor" Version="5.2.10" />
+	<PackageReference Include="Radzen.Blazor" Version="5.2.12" />
   </ItemGroup>
 
   <ItemGroup>
