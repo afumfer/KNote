@@ -85,12 +85,12 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         // --- BaudRate and HandShake
 
         // Q68            
-        //BaudRate = 115200;
-        //HandShake = (int)Handshake.None;  // 0
+        BaudRate = 115200;
+        HandShake = (int)Handshake.None;  // 0
 
         // QL             
-        BaudRate = 19200; //  4800;
-        HandShake = (int)Handshake.RequestToSendXOnXOff;
+        //BaudRate = 19200; //  4800; // 9600; // 19200; 
+        //HandShake = (int)Handshake.None;  // HandShake: => // 2 (RequestToSend) // 3 (RequestToSendXOnXOff ) // 0 (None)) ??
 
         PortName = "COM1";
         
