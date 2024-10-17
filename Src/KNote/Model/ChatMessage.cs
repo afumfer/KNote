@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace KNote.Model;
 
-public class ChatMessage
+public class KntChatMessage
 {
     public string Prompt { get; set; }
     public string Role { get; set; }
-    public int? Tokens { get; set; }    
+    public int? Tokens { get; set; }
 }
 
-public class ChatMessageOutput
+public class KntChatMessageOutput
 {
     public string Prompt { get; set; }
     public string Role { get; set; }

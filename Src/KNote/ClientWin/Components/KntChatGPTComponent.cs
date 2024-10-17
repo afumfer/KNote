@@ -1,7 +1,7 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
-using OpenAI;
 using OpenAI.Chat;
+using System.ClientModel;
 using System.Diagnostics;
 using System.Text;
 
@@ -11,7 +11,7 @@ public class KntChatGPTComponent : ComponentBase
 {
     #region Private fields
 
-    private OpenAIClient _openAIClient;
+    private ChatClient _openAIClient;
     
     #endregion
 
@@ -91,7 +91,9 @@ public class KntChatGPTComponent : ComponentBase
                 throw new Exception(message);
             }
 
-            _openAIClient = new OpenAIClient(new OpenAIAuthentication(apiKey, organization));
+            _openAIClient = new(model: "gpt-4o-mini", apiKey ?? "--");            
+            
+            RestartChatGPT();
 
             return new Result<EComponentResult>(EComponentResult.Executed);
         }
@@ -149,43 +151,43 @@ public class KntChatGPTComponent : ComponentBase
     {
         _prompt = "";
         _result = "";
-        _chatMessages = new List<ChatMessage>();
+                
+        _chatMessages.Clear();
+        _chatMessages.Add(new SystemChatMessage("Eres una asistente útil."));
+
         _chatTextMessasges.Clear();
         _totalTokens = 0;
         _totalProcessingTime = TimeSpan.Zero;
     }
 
     public async Task GetCompletionAsync(string prompt)
-    {        
-        var result = await _openAIClient.ChatEndpoint.GetCompletionAsync(GetChatRequest(prompt));
-               
-        _chatMessages.Add(new ChatMessage
-        {
-            Prompt = prompt,
-            Role = "user",
-            Tokens = result.Usage.PromptTokens
-        });
-        _chatMessages.Add(new ChatMessage
-        {
-            Prompt = result.FirstChoice.Message,
-            Role = "assistant",
-            Tokens = result.Usage.CompletionTokens
-        });
+    {       
+        Stopwatch stopwatch = new();
+
+        stopwatch.Start();
+
+        _chatMessages.Add(new UserChatMessage(prompt));
+
+        ChatCompletion completion = await _openAIClient.CompleteChatAsync(_chatMessages);
+     
+        _chatMessages.Add(new AssistantChatMessage(completion.Content[0].Text));
 
         _prompt = prompt;
-        _result = result.FirstChoice.Message.ToString().Replace("\n", "\r\n");
-        _totalTokens += result.Usage.TotalTokens ?? 0;
-        _totalProcessingTime += result.ProcessingTime;
+        _result = completion.Content[0].Text.Replace("\n", "\r\n");        
+        _totalTokens += completion.Usage.TotalTokenCount;        
+        _totalProcessingTime += stopwatch.Elapsed;
         
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"**User:** \r\n");
-        _chatTextMessasges.Append($"{prompt}\r\n");
-        _chatTextMessasges.Append($"(Tokens: {result.Usage.PromptTokens})\r\n");
+        _chatTextMessasges.Append($"{prompt}\r\n");        
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"**Assistant:** \r\n");
-        _chatTextMessasges.Append(result.FirstChoice.Message.ToString().Replace("\n", "\r\n"));
-        _chatTextMessasges.Append($"\r\n");
-        _chatTextMessasges.Append($"(Tokens: {result.Usage.CompletionTokens} tokens. Processing time: {result.ProcessingTime})\r\n");
+        _chatTextMessasges.Append(_result);
+        _chatTextMessasges.Append($"\r\n\r\n\r\n");
+        _chatTextMessasges.Append($"(Tokens: {completion.Usage.InputTokenCount} tokens.\r\n");
+        _chatTextMessasges.Append($"(Tokens: {completion.Usage.OutputTokenCount} tokens.\r\n");
+        _chatTextMessasges.Append($"(Tokens: {completion.Usage.TotalTokenCount} tokens.\r\n");
+        _chatTextMessasges.Append($"(Processing time: {stopwatch.Elapsed})\r\n");
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"\r\n");
     }
@@ -203,7 +205,7 @@ public class KntChatGPTComponent : ComponentBase
    
     public async Task StreamCompletionAsync(string prompt)
     {
-        StringBuilder tempResult = new();        
+        StringBuilder resAssistant = new();        
         Stopwatch stopwatch = new();
 
         stopwatch.Start();
@@ -211,101 +213,32 @@ public class KntChatGPTComponent : ComponentBase
         var intro = $"**User:** \r\n{prompt}\r\n\r\n**Assistant:** \r\n";
         _chatTextMessasges.Append(intro);
         StreamToken?.Invoke(this, new ComponentEventArgs<string>(intro));
-        
-        await _openAIClient.ChatEndpoint.StreamCompletionAsync(GetChatRequest(prompt), result =>
+
+        _chatMessages.Add(new UserChatMessage(prompt));
+
+        AsyncCollectionResult<StreamingChatCompletionUpdate> updates
+                    = _openAIClient.CompleteChatStreamingAsync(_chatMessages);
+        await foreach (StreamingChatCompletionUpdate update in updates)
         {
-            foreach (var choice in result.Choices.Where(choice => !string.IsNullOrEmpty(choice.Delta?.Content)))            
+            foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
             {
-                var res = choice.Delta.Content.ToString()?.Replace("\n", "\r\n");                
-                tempResult.Append(res);
+                var res = updatePart.Text?.Replace("\n", "\r\n");                
+                resAssistant.Append(res);
                 StreamToken?.Invoke(this, new ComponentEventArgs<string>(res));
             }
-        });
+        }
 
         stopwatch.Stop();
-                
-        _chatMessages.Add(new ChatMessage
-        {
-            Prompt = prompt,
-            Role = "user",
-            Tokens = prompt.Length / 4    // TODO: hack, refactor this
-        });
-        _chatMessages.Add(new ChatMessage
-        {
-            Prompt = tempResult.ToString(),
-            Role = "assistant",
-            Tokens = tempResult.Length / 4    // TODO: hack, refactor this
-        });
 
+        _chatMessages.Add(new AssistantChatMessage(resAssistant.ToString()));        
         _prompt = prompt;
-        _result = tempResult.ToString();
-        _totalTokens += (prompt.Length + tempResult.Length) / 4;    // TODO: hack, refactor this
-        _totalProcessingTime += stopwatch.Elapsed;
-         
-        _chatTextMessasges.Append(tempResult);        
+        _result = resAssistant.ToString();
+        _totalTokens += (prompt.Length + resAssistant.Length) / 4;    // TODO: hack, refactor this
+        _totalProcessingTime += stopwatch.Elapsed;         
+        _chatTextMessasges.Append(resAssistant.ToString());
         _chatTextMessasges.Append($"\r\n\r\n");
 
         StreamToken?.Invoke(this, new ComponentEventArgs<string>($"\r\n\r\n"));
-    }
-
-    // Demo...
-    public async Task<IReadOnlyList<double>> CreateEmbeddingAsync(string text)
-    {
-        var res = await _openAIClient.EmbeddingsEndpoint.CreateEmbeddingAsync(text);
-        //var x0 = res.Usage;
-        return res?.Data[0]?.Embedding;
-        //var x1a = res.Data[0].Embedding.GetType;
-        //var x2 = res.Organization;
-        //var x3 = res.Object;
-        //var x4 = res.RequestId;
-        //var x5 = res.Model;        
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    private ChatRequest GetChatRequest(string prompt)
-    {        
-        var chatPrompts = new List<OpenAI.Chat.Message>();
-
-        // Add all existing messages to chatPrompts
-        chatPrompts.Add(new OpenAI.Chat.Message(Role.System, "You are helpful Assistant"));
-        foreach (var item in _chatMessages)
-        {
-            chatPrompts.Add(new OpenAI.Chat.Message(GetOpenAIRole(item.Role), item.Prompt));
-        }
-
-        chatPrompts.Add(new OpenAI.Chat.Message(GetOpenAIRole("user"), prompt));
-
-        return new ChatRequest(
-            messages: chatPrompts,
-            model: OpenAI.Models.Model.GPT4o,
-            temperature: null,
-            topP: null,
-            number: null,
-            stops: null,
-            maxTokens: null,
-            presencePenalty: null,
-            frequencyPenalty: null,
-            logitBias: null,
-            user: null);
-    }
-
-    // TODO: Pending refactoring.
-    private Role GetOpenAIRole(string role)
-    {
-        switch (role)
-        {
-            case "user":
-                return Role.User;
-            case "system":
-                return Role.System;
-            case "assistant":
-                return Role.Assistant;
-            default:
-                return Role.User;
-        }        
     }
 
     #endregion

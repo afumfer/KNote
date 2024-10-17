@@ -47,7 +47,7 @@
             else
             {
                 <div style="float: left; margin-left: 20px; margin-top: 10px">
-                    <b>ChatGPT&nbsp;&nbsp;</b>
+                    <b>Assistant&nbsp;&nbsp;</b>
                 </div>
                 <div class="@item.Role rz-background-color-base-700 rz-color-base-100">
                     <div class="msg">
@@ -89,7 +89,7 @@ else
 
 @code
 {
-    private List<ChatMessage> messages = new List<ChatMessage>();
+    private List<KntChatMessage> messages = new List<KntChatMessage>();
     private string? userInput;
     private string? promptInput;
     string errorMessage = "";
@@ -131,7 +131,7 @@ else
         if (result.IsValid)
         {
             messages.Add(
-                new ChatMessage
+                new KntChatMessage
                 {
                     Prompt = result.Entity.Prompt,
                     Role = result.Entity.Role,
@@ -155,7 +155,7 @@ else
     void RestartChatGPT()
     {
         promptInput = "";
-        messages = new List<ChatMessage>();
+        messages = new List<KntChatMessage>();
         totalTokens = 0;
         errorMessage = "";
         StateHasChanged();

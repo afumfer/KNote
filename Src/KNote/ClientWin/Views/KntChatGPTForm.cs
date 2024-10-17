@@ -242,19 +242,4 @@ public partial class KntChatGPTForm : Form, IViewBase
     }
 
     #endregion
-
-    #region Test an debug code
-
-    private async void buttonTest_Click(object sender, EventArgs e)
-    {
-        var result = await _com.CreateEmbeddingAsync(textPrompt.Text);
-
-        if (result != null)
-        {            
-            textResult.Text = JsonSerializer.Serialize(result);
-        }
-
-    }
-
-    #endregion 
 }

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Chat;
-using OpenAI;
 using KNote.Model;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
@@ -31,36 +30,36 @@ public class ChatGPTController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] List<ChatMessage> chatMessages)
+    public async Task<IActionResult> Post([FromBody] List<KntChatMessage> chatMessages)
     {
         try
-        {
+        {            
             _logger.LogTrace("Post chatMessage {date}", DateTime.Now);
-
-            var Organization = _configuration["OpenAIServiceOptions:Organization"] ?? "";
-            var ApiKey = _configuration["OpenAIServiceOptions:ApiKey"] ?? "";
-
-            var api = new OpenAIClient(new OpenAIAuthentication(ApiKey, Organization));
-
-            var chatPrompts = new List<Message>();
             
-            chatPrompts.Add(new Message(Role.System, "You are helpful Assistant"));                
+            var apiKey = _configuration["OpenAIServiceOptions:ApiKey"] ?? "";
+            
+            ChatClient client = new(model: "gpt-4o-mini", apiKey);
+
+            List<ChatMessage> chatPrompts = new List<ChatMessage>()
+            {
+                new SystemChatMessage("You are a helpful assistant."),                
+            };
+            
             foreach (var item in chatMessages)
             {
-                chatPrompts.Add(new Message(GetOpenAIRole(item.Role), item.Prompt));
+                chatPrompts.Add(new UserChatMessage(item.Prompt));
             }
             
-            var chatRequest = new ChatRequest(chatPrompts, OpenAI.Models.Model.GPT4o);
-            var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
-           
-            var kresApi = new Result<ChatMessageOutput>();
-            kresApi.Entity = new ChatMessageOutput
+            ChatCompletion completion = await client.CompleteChatAsync(chatPrompts);
+
+            var kresApi = new Result<KntChatMessageOutput>();
+            kresApi.Entity = new KntChatMessageOutput
             {
-                Prompt = result.FirstChoice.Message,
+                Prompt = completion.Content[0].Text,
                 Role = "assistant",
-                PromptTokens = result.Usage.PromptTokens,
-                CompletionTokens = result.Usage.CompletionTokens,
-                TotalTokens = result.Usage.TotalTokens
+                PromptTokens = completion.Usage.InputTokenCount,
+                CompletionTokens = completion.Usage.OutputTokenCount,
+                TotalTokens = completion.Usage.TotalTokenCount
 
             };
             return Ok(kresApi);
@@ -73,21 +72,4 @@ public class ChatGPTController : Controller
             return BadRequest(kresApi);
         }
     }
-
-    // TODO: Pending refactoring.
-    private Role GetOpenAIRole(string role)
-    {
-        switch (role)
-        {
-            case "user":
-                return Role.User;
-            case "system":
-                return Role.System;
-            case "assistant":
-                return Role.Assistant;
-            default:
-                return Role.User;
-        }
-    }
-
 }

@@ -14,12 +14,12 @@ public class ChatGPTService : BaseService, IChatGPTService
 
     }
 
-    public async Task<Result<ChatMessageOutput>> PostAsync(List<ChatMessage> chatMessages, string prompt = "")
+    public async Task<Result<KntChatMessageOutput>> PostAsync(List<KntChatMessage> chatMessages, string prompt = "")
     {
-        chatMessages.Add(new ChatMessage { Role = "user", Prompt = prompt }); 
+        chatMessages.Add(new KntChatMessage { Role = "user", Prompt = prompt }); 
 
         var httpRes = await _httpClient.PostAsJsonAsync("api/chatgpt", chatMessages);
-        var res = await ProcessResultFromHttpResponse<ChatMessageOutput>(httpRes, "Get result from ChatGPT");
+        var res = await ProcessResultFromHttpResponse<KntChatMessageOutput>(httpRes, "Get result from ChatGPT");
         if (res.IsValid)
             chatMessages[chatMessages.Count - 1].Tokens = res.Entity.PromptTokens;
         return res;

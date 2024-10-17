@@ -39,7 +39,6 @@
             radioGetCompletion = new RadioButton();
             textResult = new TextBox();
             labelResult = new Label();
-            buttonTest = new Button();
             buttonRestart = new Button();
             labelPrompt = new Label();
             textPrompt = new TextBox();
@@ -102,7 +101,6 @@
             // 
             // splitChat.Panel2
             // 
-            splitChat.Panel2.Controls.Add(buttonTest);
             splitChat.Panel2.Controls.Add(buttonRestart);
             splitChat.Panel2.Controls.Add(labelPrompt);
             splitChat.Panel2.Controls.Add(textPrompt);
@@ -158,16 +156,6 @@
             labelResult.TabIndex = 25;
             labelResult.Text = "Result:";
             // 
-            // buttonTest
-            // 
-            buttonTest.Location = new Point(6, 22);
-            buttonTest.Name = "buttonTest";
-            buttonTest.Size = new Size(21, 23);
-            buttonTest.TabIndex = 25;
-            buttonTest.Text = "T";
-            buttonTest.UseVisualStyleBackColor = true;
-            buttonTest.Click += buttonTest_Click;
-            // 
             // buttonRestart
             // 
             buttonRestart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -197,7 +185,7 @@
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(553, 56);
+            textPrompt.Size = new Size(553, 54);
             textPrompt.TabIndex = 0;
             // 
             // buttonSend
@@ -250,6 +238,5 @@
         private Label labelPrompt;
         private TextBox textPrompt;
         private Button buttonSend;
-        private Button buttonTest;
     }
 }
