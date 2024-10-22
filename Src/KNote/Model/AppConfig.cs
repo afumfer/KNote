@@ -233,20 +233,6 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
-    private string _chatGPTOrganization;
-    public string ChatGPTOrganization
-    {
-        get { return _chatGPTOrganization; }
-        set
-        {
-            if (_chatGPTOrganization != value)
-            {
-                _chatGPTOrganization = value;
-                OnPropertyChanged("ChatGPTOrganization");
-            }
-        }
-    }
-
     private string _chatGPTApiKey;
     public string ChatGPTApiKey
     {

@@ -371,21 +371,25 @@ public class Store
         }
     }
 
-    public void RunScript(string code, bool newThread = true)
+    public void RunScript(string code)
+    {
+        if (string.IsNullOrEmpty(code))
+            return;
+
+        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this), false);
+        kntScript.Run(code);
+    }
+
+    public void RunScriptInNewThread(string code)
     {
         if (string.IsNullOrEmpty(code))
             return;
 
         var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this));
-                              
-        if (newThread)
-        {
-            var t = new Thread(() => kntScript.Run(code));
-            t.IsBackground = false;
-            t.Start();
-        }
-        else
-            kntScript.Run(code);
+                
+        var t = new Thread(() => kntScript.Run(code));
+        t.IsBackground = false;
+        t.Start();        
     }
 
     public string ExtensionFileToFileType(string extension)

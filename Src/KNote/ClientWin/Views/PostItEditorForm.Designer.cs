@@ -29,370 +29,342 @@ namespace KNote.ClientWin.Views
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
-            this.panelForm = new System.Windows.Forms.Panel();
-            this.webView2 = new KntWebView.KWebView();
-            this.htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
-            this.labelStatus = new System.Windows.Forms.LabelNoCopy();
-            this.picResize = new System.Windows.Forms.PictureBox();
-            this.picMenu = new System.Windows.Forms.PictureBox();
-            this.textDescription = new System.Windows.Forms.TextBox();
-            this.labelCaption = new System.Windows.Forms.LabelNoCopy();
-            this.menuPostIt = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.menuHide = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAlwaysFront = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuSaveNow = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuDelete = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuS1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuExtendedEdition = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuPostItProperties = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuS2 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuAlarmWithin = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm10m = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm30m = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm1h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm2h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm4h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm8h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm10h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm12h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm24h = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm1week = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm1month = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuFastAlarm1year = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuMoreActions = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuAddResolvedTask = new System.Windows.Forms.ToolStripMenuItem();
-            this.panelForm.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picResize)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picMenu)).BeginInit();
-            this.menuPostIt.SuspendLayout();
-            this.SuspendLayout();
+            panelForm = new Panel();
+            webView2 = new KntWebView.KWebView();
+            htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
+            labelStatus = new LabelNoCopy();
+            picResize = new PictureBox();
+            picMenu = new PictureBox();
+            textDescription = new TextBox();
+            labelCaption = new LabelNoCopy();
+            menuPostIt = new ContextMenuStrip(components);
+            menuHide = new ToolStripMenuItem();
+            menuAlwaysFront = new ToolStripMenuItem();
+            menuSaveNow = new ToolStripMenuItem();
+            menuDelete = new ToolStripMenuItem();
+            menuS1 = new ToolStripSeparator();
+            menuExtendedEdition = new ToolStripMenuItem();
+            menuPostItProperties = new ToolStripMenuItem();
+            menuS2 = new ToolStripSeparator();
+            menuAlarmWithin = new ToolStripMenuItem();
+            menuFastAlarm10m = new ToolStripMenuItem();
+            menuFastAlarm30m = new ToolStripMenuItem();
+            menuFastAlarm1h = new ToolStripMenuItem();
+            menuFastAlarm2h = new ToolStripMenuItem();
+            menuFastAlarm4h = new ToolStripMenuItem();
+            menuFastAlarm8h = new ToolStripMenuItem();
+            menuFastAlarm10h = new ToolStripMenuItem();
+            menuFastAlarm12h = new ToolStripMenuItem();
+            menuFastAlarm24h = new ToolStripMenuItem();
+            menuFastAlarm1week = new ToolStripMenuItem();
+            menuFastAlarm1month = new ToolStripMenuItem();
+            menuFastAlarm1year = new ToolStripMenuItem();
+            menuMoreActions = new ToolStripMenuItem();
+            menuAddResolvedTask = new ToolStripMenuItem();
+            panelForm.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picResize).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picMenu).BeginInit();
+            menuPostIt.SuspendLayout();
+            SuspendLayout();
             // 
             // panelForm
             // 
-            this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelForm.Controls.Add(this.webView2);
-            this.panelForm.Controls.Add(this.htmlDescription);
-            this.panelForm.Controls.Add(this.labelStatus);
-            this.panelForm.Controls.Add(this.picResize);
-            this.panelForm.Controls.Add(this.picMenu);
-            this.panelForm.Controls.Add(this.textDescription);
-            this.panelForm.Controls.Add(this.labelCaption);
-            this.panelForm.Location = new System.Drawing.Point(1, 1);
-            this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(479, 340);
-            this.panelForm.TabIndex = 3;
+            panelForm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelForm.Controls.Add(webView2);
+            panelForm.Controls.Add(htmlDescription);
+            panelForm.Controls.Add(labelStatus);
+            panelForm.Controls.Add(picResize);
+            panelForm.Controls.Add(picMenu);
+            panelForm.Controls.Add(textDescription);
+            panelForm.Controls.Add(labelCaption);
+            panelForm.Location = new Point(1, 1);
+            panelForm.Name = "panelForm";
+            panelForm.Size = new Size(479, 340);
+            panelForm.TabIndex = 3;
             // 
             // webView2
             // 
-            this.webView2.EnableUrlBox = true;
-            this.webView2.ForceHttps = false;
-            this.webView2.IsInitialized = false;
-            this.webView2.Location = new System.Drawing.Point(244, 91);
-            this.webView2.Name = "webView2";
-            this.webView2.ShowNavigationTools = true;
-            this.webView2.ShowStatusInfo = true;
-            this.webView2.Size = new System.Drawing.Size(215, 110);
-            this.webView2.TabIndex = 10;
-            this.webView2.TextUrl = "";
-            this.webView2.Visible = false;
+            webView2.EnableUrlBox = true;
+            webView2.ForceHttps = false;
+            webView2.IsInitialized = false;
+            webView2.Location = new Point(244, 91);
+            webView2.Name = "webView2";
+            webView2.ShowNavigationTools = true;
+            webView2.ShowStatusInfo = true;
+            webView2.Size = new Size(215, 110);
+            webView2.TabIndex = 10;
+            webView2.TextUrl = "";
+            webView2.Visible = false;
             // 
             // htmlDescription
             // 
-            this.htmlDescription.InnerText = null;
-            this.htmlDescription.Location = new System.Drawing.Point(238, 29);
-            this.htmlDescription.Name = "htmlDescription";
-            this.htmlDescription.Size = new System.Drawing.Size(215, 56);
-            this.htmlDescription.TabIndex = 9;
-            this.htmlDescription.ToolbarVisible = false;
-            this.htmlDescription.Visible = false;
+            htmlDescription.InnerText = null;
+            htmlDescription.Location = new Point(238, 29);
+            htmlDescription.Name = "htmlDescription";
+            htmlDescription.Size = new Size(215, 56);
+            htmlDescription.TabIndex = 9;
+            htmlDescription.ToolbarVisible = false;
+            htmlDescription.Visible = false;
             // 
             // labelStatus
             // 
-            this.labelStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.labelStatus.Location = new System.Drawing.Point(3, 322);
-            this.labelStatus.Name = "labelStatus";
-            this.labelStatus.Size = new System.Drawing.Size(456, 14);
-            this.labelStatus.TabIndex = 7;
-            this.labelStatus.Text = "...";
-            this.labelStatus.DoubleClick += new System.EventHandler(this.labelStatus_DoubleClick);
+            labelStatus.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            labelStatus.ForeColor = SystemColors.ControlDarkDark;
+            labelStatus.Location = new Point(3, 322);
+            labelStatus.Name = "labelStatus";
+            labelStatus.Size = new Size(456, 14);
+            labelStatus.TabIndex = 7;
+            labelStatus.Text = "...";
+            labelStatus.DoubleClick += labelStatus_DoubleClick;
             // 
             // picResize
             // 
-            this.picResize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.picResize.Cursor = System.Windows.Forms.Cursors.SizeNWSE;
-            this.picResize.Image = ((System.Drawing.Image)(resources.GetObject("picResize.Image")));
-            this.picResize.Location = new System.Drawing.Point(463, 324);
-            this.picResize.Name = "picResize";
-            this.picResize.Size = new System.Drawing.Size(16, 16);
-            this.picResize.TabIndex = 5;
-            this.picResize.TabStop = false;
-            this.picResize.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picResize_MouseDown);
-            this.picResize.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picResize_MouseMove);
+            picResize.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            picResize.Cursor = Cursors.SizeNWSE;
+            picResize.Image = (Image)resources.GetObject("picResize.Image");
+            picResize.Location = new Point(463, 324);
+            picResize.Name = "picResize";
+            picResize.Size = new Size(16, 16);
+            picResize.TabIndex = 5;
+            picResize.TabStop = false;
+            picResize.MouseDown += picResize_MouseDown;
+            picResize.MouseMove += picResize_MouseMove;
             // 
             // picMenu
             // 
-            this.picMenu.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picMenu.Image = ((System.Drawing.Image)(resources.GetObject("picMenu.Image")));
-            this.picMenu.Location = new System.Drawing.Point(5, 5);
-            this.picMenu.Name = "picMenu";
-            this.picMenu.Size = new System.Drawing.Size(16, 16);
-            this.picMenu.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.picMenu.TabIndex = 4;
-            this.picMenu.TabStop = false;
-            this.picMenu.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picMenu_MouseUp);
+            picMenu.Cursor = Cursors.Hand;
+            picMenu.Image = (Image)resources.GetObject("picMenu.Image");
+            picMenu.Location = new Point(5, 5);
+            picMenu.Name = "picMenu";
+            picMenu.Size = new Size(16, 16);
+            picMenu.SizeMode = PictureBoxSizeMode.StretchImage;
+            picMenu.TabIndex = 4;
+            picMenu.TabStop = false;
+            picMenu.MouseUp += picMenu_MouseUp;
             // 
             // textDescription
             // 
-            this.textDescription.BackColor = System.Drawing.Color.Beige;
-            this.textDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textDescription.Location = new System.Drawing.Point(14, 29);
-            this.textDescription.Margin = new System.Windows.Forms.Padding(6);
-            this.textDescription.MaxLength = 0;
-            this.textDescription.Multiline = true;
-            this.textDescription.Name = "textDescription";
-            this.textDescription.Size = new System.Drawing.Size(215, 70);
-            this.textDescription.TabIndex = 3;
+            textDescription.BackColor = Color.Beige;
+            textDescription.BorderStyle = BorderStyle.None;
+            textDescription.Location = new Point(14, 29);
+            textDescription.Margin = new Padding(6);
+            textDescription.MaxLength = 0;
+            textDescription.Multiline = true;
+            textDescription.Name = "textDescription";
+            textDescription.Size = new Size(215, 70);
+            textDescription.TabIndex = 3;
             // 
             // labelCaption
             // 
-            this.labelCaption.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelCaption.BackColor = System.Drawing.Color.PaleGoldenrod;
-            this.labelCaption.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelCaption.Location = new System.Drawing.Point(3, 3);
-            this.labelCaption.Name = "labelCaption";
-            this.labelCaption.Padding = new System.Windows.Forms.Padding(20, 2, 0, 0);
-            this.labelCaption.Size = new System.Drawing.Size(472, 20);
-            this.labelCaption.TabIndex = 6;
-            this.labelCaption.Text = "...";
-            this.labelCaption.DoubleClick += new System.EventHandler(this.labelCaption_DoubleClick);
-            this.labelCaption.MouseDown += new System.Windows.Forms.MouseEventHandler(this.labelCaption_MouseDown);
-            this.labelCaption.MouseMove += new System.Windows.Forms.MouseEventHandler(this.labelCaption_MouseMove);
+            labelCaption.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelCaption.BackColor = Color.PaleGoldenrod;
+            labelCaption.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            labelCaption.Location = new Point(3, 3);
+            labelCaption.Name = "labelCaption";
+            labelCaption.Padding = new Padding(20, 2, 0, 0);
+            labelCaption.Size = new Size(472, 20);
+            labelCaption.TabIndex = 6;
+            labelCaption.Text = "...";
+            labelCaption.DoubleClick += labelCaption_DoubleClick;
+            labelCaption.MouseDown += labelCaption_MouseDown;
+            labelCaption.MouseMove += labelCaption_MouseMove;
             // 
             // menuPostIt
             // 
-            this.menuPostIt.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuHide,
-            this.menuAlwaysFront,
-            this.menuSaveNow,
-            this.menuDelete,
-            this.menuS1,
-            this.menuExtendedEdition,
-            this.menuPostItProperties,
-            this.menuS2,
-            this.menuAlarmWithin,
-            this.menuMoreActions});
-            this.menuPostIt.Name = "menuPostIt";
-            this.menuPostIt.Size = new System.Drawing.Size(216, 192);
+            menuPostIt.Items.AddRange(new ToolStripItem[] { menuHide, menuAlwaysFront, menuSaveNow, menuDelete, menuS1, menuExtendedEdition, menuPostItProperties, menuS2, menuAlarmWithin, menuMoreActions });
+            menuPostIt.Name = "menuPostIt";
+            menuPostIt.Size = new Size(216, 214);
             // 
             // menuHide
             // 
-            this.menuHide.Name = "menuHide";
-            this.menuHide.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.menuHide.Size = new System.Drawing.Size(215, 22);
-            this.menuHide.Text = "Hide note";
-            this.menuHide.Click += new System.EventHandler(this.postItMenu_Click);
+            menuHide.Name = "menuHide";
+            menuHide.ShortcutKeys = Keys.Control | Keys.Q;
+            menuHide.Size = new Size(215, 22);
+            menuHide.Text = "Hide note";
+            menuHide.Click += postItMenu_Click;
             // 
             // menuAlwaysFront
             // 
-            this.menuAlwaysFront.Name = "menuAlwaysFront";
-            this.menuAlwaysFront.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.menuAlwaysFront.Size = new System.Drawing.Size(215, 22);
-            this.menuAlwaysFront.Text = "Always front";
-            this.menuAlwaysFront.Click += new System.EventHandler(this.postItMenu_Click);
+            menuAlwaysFront.Name = "menuAlwaysFront";
+            menuAlwaysFront.ShortcutKeys = Keys.Control | Keys.F;
+            menuAlwaysFront.Size = new Size(215, 22);
+            menuAlwaysFront.Text = "Always front";
+            menuAlwaysFront.Click += postItMenu_Click;
             // 
             // menuSaveNow
             // 
-            this.menuSaveNow.Name = "menuSaveNow";
-            this.menuSaveNow.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.menuSaveNow.Size = new System.Drawing.Size(215, 22);
-            this.menuSaveNow.Text = "Save now";
-            this.menuSaveNow.Click += new System.EventHandler(this.postItMenu_Click);
+            menuSaveNow.Name = "menuSaveNow";
+            menuSaveNow.ShortcutKeys = Keys.Control | Keys.S;
+            menuSaveNow.Size = new Size(215, 22);
+            menuSaveNow.Text = "Save now";
+            menuSaveNow.Click += postItMenu_Click;
             // 
             // menuDelete
             // 
-            this.menuDelete.Name = "menuDelete";
-            this.menuDelete.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.menuDelete.Size = new System.Drawing.Size(215, 22);
-            this.menuDelete.Text = "Delete";
-            this.menuDelete.Click += new System.EventHandler(this.postItMenu_Click);
+            menuDelete.Name = "menuDelete";
+            menuDelete.ShortcutKeys = Keys.Control | Keys.D;
+            menuDelete.Size = new Size(215, 22);
+            menuDelete.Text = "Delete";
+            menuDelete.Click += postItMenu_Click;
             // 
             // menuS1
             // 
-            this.menuS1.Name = "menuS1";
-            this.menuS1.Size = new System.Drawing.Size(212, 6);
+            menuS1.Name = "menuS1";
+            menuS1.Size = new Size(212, 6);
             // 
             // menuExtendedEdition
             // 
-            this.menuExtendedEdition.Name = "menuExtendedEdition";
-            this.menuExtendedEdition.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.menuExtendedEdition.Size = new System.Drawing.Size(215, 22);
-            this.menuExtendedEdition.Text = "Extended edition ...";
-            this.menuExtendedEdition.Click += new System.EventHandler(this.postItMenu_Click);
+            menuExtendedEdition.Name = "menuExtendedEdition";
+            menuExtendedEdition.ShortcutKeys = Keys.Control | Keys.E;
+            menuExtendedEdition.Size = new Size(215, 22);
+            menuExtendedEdition.Text = "Extended edition ...";
+            menuExtendedEdition.Click += postItMenu_Click;
             // 
             // menuPostItProperties
             // 
-            this.menuPostItProperties.Name = "menuPostItProperties";
-            this.menuPostItProperties.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.menuPostItProperties.Size = new System.Drawing.Size(215, 22);
-            this.menuPostItProperties.Text = "PostIt properties ...";
-            this.menuPostItProperties.Click += new System.EventHandler(this.postItMenu_Click);
+            menuPostItProperties.Name = "menuPostItProperties";
+            menuPostItProperties.ShortcutKeys = Keys.Control | Keys.P;
+            menuPostItProperties.Size = new Size(215, 22);
+            menuPostItProperties.Text = "PostIt properties ...";
+            menuPostItProperties.Click += postItMenu_Click;
             // 
             // menuS2
             // 
-            this.menuS2.Name = "menuS2";
-            this.menuS2.Size = new System.Drawing.Size(212, 6);
+            menuS2.Name = "menuS2";
+            menuS2.Size = new Size(212, 6);
             // 
             // menuAlarmWithin
             // 
-            this.menuAlarmWithin.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuFastAlarm10m,
-            this.menuFastAlarm30m,
-            this.menuFastAlarm1h,
-            this.menuFastAlarm2h,
-            this.menuFastAlarm4h,
-            this.menuFastAlarm8h,
-            this.menuFastAlarm10h,
-            this.menuFastAlarm12h,
-            this.menuFastAlarm24h,
-            this.menuFastAlarm1week,
-            this.menuFastAlarm1month,
-            this.menuFastAlarm1year});
-            this.menuAlarmWithin.Name = "menuAlarmWithin";
-            this.menuAlarmWithin.Size = new System.Drawing.Size(215, 22);
-            this.menuAlarmWithin.Text = "Activate note &alarm within";
+            menuAlarmWithin.DropDownItems.AddRange(new ToolStripItem[] { menuFastAlarm10m, menuFastAlarm30m, menuFastAlarm1h, menuFastAlarm2h, menuFastAlarm4h, menuFastAlarm8h, menuFastAlarm10h, menuFastAlarm12h, menuFastAlarm24h, menuFastAlarm1week, menuFastAlarm1month, menuFastAlarm1year });
+            menuAlarmWithin.Name = "menuAlarmWithin";
+            menuAlarmWithin.Size = new Size(215, 22);
+            menuAlarmWithin.Text = "Activate note &alarm within";
             // 
             // menuFastAlarm10m
             // 
-            this.menuFastAlarm10m.Name = "menuFastAlarm10m";
-            this.menuFastAlarm10m.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm10m.Text = "10 minutes";
-            this.menuFastAlarm10m.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm10m.Name = "menuFastAlarm10m";
+            menuFastAlarm10m.Size = new Size(132, 22);
+            menuFastAlarm10m.Text = "10 minutes";
+            menuFastAlarm10m.Click += postItMenu_Click;
             // 
             // menuFastAlarm30m
             // 
-            this.menuFastAlarm30m.Name = "menuFastAlarm30m";
-            this.menuFastAlarm30m.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm30m.Text = "30 minutes";
-            this.menuFastAlarm30m.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm30m.Name = "menuFastAlarm30m";
+            menuFastAlarm30m.Size = new Size(132, 22);
+            menuFastAlarm30m.Text = "30 minutes";
+            menuFastAlarm30m.Click += postItMenu_Click;
             // 
             // menuFastAlarm1h
             // 
-            this.menuFastAlarm1h.Name = "menuFastAlarm1h";
-            this.menuFastAlarm1h.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm1h.Text = "1 hour";
-            this.menuFastAlarm1h.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm1h.Name = "menuFastAlarm1h";
+            menuFastAlarm1h.Size = new Size(132, 22);
+            menuFastAlarm1h.Text = "1 hour";
+            menuFastAlarm1h.Click += postItMenu_Click;
             // 
             // menuFastAlarm2h
             // 
-            this.menuFastAlarm2h.Name = "menuFastAlarm2h";
-            this.menuFastAlarm2h.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm2h.Text = "2 hours";
-            this.menuFastAlarm2h.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm2h.Name = "menuFastAlarm2h";
+            menuFastAlarm2h.Size = new Size(132, 22);
+            menuFastAlarm2h.Text = "2 hours";
+            menuFastAlarm2h.Click += postItMenu_Click;
             // 
             // menuFastAlarm4h
             // 
-            this.menuFastAlarm4h.Name = "menuFastAlarm4h";
-            this.menuFastAlarm4h.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm4h.Text = "4 hours";
-            this.menuFastAlarm4h.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm4h.Name = "menuFastAlarm4h";
+            menuFastAlarm4h.Size = new Size(132, 22);
+            menuFastAlarm4h.Text = "4 hours";
+            menuFastAlarm4h.Click += postItMenu_Click;
             // 
             // menuFastAlarm8h
             // 
-            this.menuFastAlarm8h.Name = "menuFastAlarm8h";
-            this.menuFastAlarm8h.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm8h.Text = "8 hours";
-            this.menuFastAlarm8h.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm8h.Name = "menuFastAlarm8h";
+            menuFastAlarm8h.Size = new Size(132, 22);
+            menuFastAlarm8h.Text = "8 hours";
+            menuFastAlarm8h.Click += postItMenu_Click;
             // 
             // menuFastAlarm10h
             // 
-            this.menuFastAlarm10h.Name = "menuFastAlarm10h";
-            this.menuFastAlarm10h.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm10h.Text = "10 hours";
-            this.menuFastAlarm10h.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm10h.Name = "menuFastAlarm10h";
+            menuFastAlarm10h.Size = new Size(132, 22);
+            menuFastAlarm10h.Text = "10 hours";
+            menuFastAlarm10h.Click += postItMenu_Click;
             // 
             // menuFastAlarm12h
             // 
-            this.menuFastAlarm12h.Name = "menuFastAlarm12h";
-            this.menuFastAlarm12h.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm12h.Text = "12 hours";
-            this.menuFastAlarm12h.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm12h.Name = "menuFastAlarm12h";
+            menuFastAlarm12h.Size = new Size(132, 22);
+            menuFastAlarm12h.Text = "12 hours";
+            menuFastAlarm12h.Click += postItMenu_Click;
             // 
             // menuFastAlarm24h
             // 
-            this.menuFastAlarm24h.Name = "menuFastAlarm24h";
-            this.menuFastAlarm24h.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm24h.Text = "24 hours";
-            this.menuFastAlarm24h.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm24h.Name = "menuFastAlarm24h";
+            menuFastAlarm24h.Size = new Size(132, 22);
+            menuFastAlarm24h.Text = "24 hours";
+            menuFastAlarm24h.Click += postItMenu_Click;
             // 
             // menuFastAlarm1week
             // 
-            this.menuFastAlarm1week.Name = "menuFastAlarm1week";
-            this.menuFastAlarm1week.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm1week.Text = "1 week";
-            this.menuFastAlarm1week.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm1week.Name = "menuFastAlarm1week";
+            menuFastAlarm1week.Size = new Size(132, 22);
+            menuFastAlarm1week.Text = "1 week";
+            menuFastAlarm1week.Click += postItMenu_Click;
             // 
             // menuFastAlarm1month
             // 
-            this.menuFastAlarm1month.Name = "menuFastAlarm1month";
-            this.menuFastAlarm1month.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm1month.Text = "1 month";
-            this.menuFastAlarm1month.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm1month.Name = "menuFastAlarm1month";
+            menuFastAlarm1month.Size = new Size(132, 22);
+            menuFastAlarm1month.Text = "1 month";
+            menuFastAlarm1month.Click += postItMenu_Click;
             // 
             // menuFastAlarm1year
             // 
-            this.menuFastAlarm1year.Name = "menuFastAlarm1year";
-            this.menuFastAlarm1year.Size = new System.Drawing.Size(132, 22);
-            this.menuFastAlarm1year.Text = "1 year";
-            this.menuFastAlarm1year.Click += new System.EventHandler(this.postItMenu_Click);
+            menuFastAlarm1year.Name = "menuFastAlarm1year";
+            menuFastAlarm1year.Size = new Size(132, 22);
+            menuFastAlarm1year.Text = "1 year";
+            menuFastAlarm1year.Click += postItMenu_Click;
             // 
             // menuMoreActions
             // 
-            this.menuMoreActions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuAddResolvedTask});
-            this.menuMoreActions.Name = "menuMoreActions";
-            this.menuMoreActions.Size = new System.Drawing.Size(215, 22);
-            this.menuMoreActions.Text = "More actions";
+            menuMoreActions.DropDownItems.AddRange(new ToolStripItem[] { menuAddResolvedTask });
+            menuMoreActions.Name = "menuMoreActions";
+            menuMoreActions.Size = new Size(215, 22);
+            menuMoreActions.Text = "More actions";
             // 
             // menuAddResolvedTask
             // 
-            this.menuAddResolvedTask.Name = "menuAddResolvedTask";
-            this.menuAddResolvedTask.Size = new System.Drawing.Size(189, 22);
-            this.menuAddResolvedTask.Text = "Add fast resolved task";
-            this.menuAddResolvedTask.Click += new System.EventHandler(this.postItMenu_Click);
+            menuAddResolvedTask.Name = "menuAddResolvedTask";
+            menuAddResolvedTask.Size = new Size(224, 22);
+            menuAddResolvedTask.Text = "Add automatic resolved task";
+            menuAddResolvedTask.Click += postItMenu_Click;
             // 
             // PostItEditorForm
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
-            this.BackColor = System.Drawing.SystemColors.Info;
-            this.ClientSize = new System.Drawing.Size(481, 342);
-            this.ControlBox = false;
-            this.Controls.Add(this.panelForm);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.KeyPreview = true;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "PostItEditorForm";
-            this.ShowInTaskbar = false;
-            this.Text = "PostIt editor form";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PostItEditorForm_FormClosing);
-            this.Load += new System.EventHandler(this.PostItEditorForm_Load);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.PostItEditorForm_Paint);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PostItEditorForm_KeyUp);
-            this.panelForm.ResumeLayout(false);
-            this.panelForm.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picResize)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picMenu)).EndInit();
-            this.menuPostIt.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AutoScaleMode = AutoScaleMode.Inherit;
+            BackColor = SystemColors.Info;
+            ClientSize = new Size(481, 342);
+            ControlBox = false;
+            Controls.Add(panelForm);
+            FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            KeyPreview = true;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "PostItEditorForm";
+            ShowInTaskbar = false;
+            Text = "PostIt editor form";
+            FormClosing += PostItEditorForm_FormClosing;
+            Load += PostItEditorForm_Load;
+            Paint += PostItEditorForm_Paint;
+            KeyUp += PostItEditorForm_KeyUp;
+            panelForm.ResumeLayout(false);
+            panelForm.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picResize).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picMenu).EndInit();
+            menuPostIt.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion

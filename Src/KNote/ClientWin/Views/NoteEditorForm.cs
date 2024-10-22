@@ -292,7 +292,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         catch (Exception ex)
         {
-            _com.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
+            _com.ShowMessage($"You can not navigate to the indicated address in the description of this note. (The following error has occurred: {ex.Message})", "Note editor");
         }
     }
 

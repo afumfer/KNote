@@ -1,0 +1,22 @@
+﻿' Show outuput window and hide output window demo
+
+var i = 0;
+var text = "...";
+
+ShowOutWindow();
+
+for i = 1 to 100
+  printline i + " Hello world!";
+end for;
+
+HideOutWindow();
+
+readvar { 
+   "Type some text" : text 
+};
+
+ShowOutWindow();
+
+for i = 1 to 10
+  printline i + text;
+end for;

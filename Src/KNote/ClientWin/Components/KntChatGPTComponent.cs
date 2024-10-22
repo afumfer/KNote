@@ -11,7 +11,7 @@ public class KntChatGPTComponent : ComponentBase
 {
     #region Private fields
 
-    private ChatClient _openAIClient;
+    private ChatClient _chatClient;
     
     #endregion
 
@@ -81,17 +81,19 @@ public class KntChatGPTComponent : ComponentBase
     protected override Result<EComponentResult> OnInitialized()
     {
         try
-        {
-            var organization = Store.AppConfig.ChatGPTOrganization;
+        {            
             var apiKey = Store.AppConfig.ChatGPTApiKey;
 
-            if (string.IsNullOrEmpty(organization) || string.IsNullOrEmpty(apiKey))
-            {
-                var message = "It does not have an ApiKey or an IdOrganización of the OpenAI API defined. You must configure these values (ChatGPTApiKey and ChatGPTOrganization) in the program settings.";
+            if (string.IsNullOrEmpty(apiKey))
+                apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+
+            if (string.IsNullOrEmpty(apiKey))
+            {                
+                var message = "It does not have an ApiKey of the OpenAI API defined. You must configure these values (ChatGPTApiKey) in the program settings.";
                 throw new Exception(message);
             }
 
-            _openAIClient = new(model: "gpt-4o-mini", apiKey ?? "--");            
+            _chatClient = new (model: "gpt-4o-mini", apiKey ?? "--");            
             
             RestartChatGPT();
 
@@ -168,7 +170,7 @@ public class KntChatGPTComponent : ComponentBase
 
         _chatMessages.Add(new UserChatMessage(prompt));
 
-        ChatCompletion completion = await _openAIClient.CompleteChatAsync(_chatMessages);
+        ChatCompletion completion = await _chatClient.CompleteChatAsync(_chatMessages);
      
         _chatMessages.Add(new AssistantChatMessage(completion.Content[0].Text));
 
@@ -217,7 +219,7 @@ public class KntChatGPTComponent : ComponentBase
         _chatMessages.Add(new UserChatMessage(prompt));
 
         AsyncCollectionResult<StreamingChatCompletionUpdate> updates
-                    = _openAIClient.CompleteChatStreamingAsync(_chatMessages);
+                    = _chatClient.CompleteChatStreamingAsync(_chatMessages);
         await foreach (StreamingChatCompletionUpdate update in updates)
         {
             foreach (ChatMessageContentPart updatePart in update.ContentUpdate)

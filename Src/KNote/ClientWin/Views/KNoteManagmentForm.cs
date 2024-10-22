@@ -1,7 +1,6 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.ClientWin.Components;
 using KNote.Model;
-using static KNote.ClientWin.Components.KNoteManagmentComponent;
 
 namespace KNote.ClientWin.Views;
 

@@ -36,8 +36,11 @@ public class ChatGPTController : Controller
         {            
             _logger.LogTrace("Post chatMessage {date}", DateTime.Now);
             
-            var apiKey = _configuration["OpenAIServiceOptions:ApiKey"] ?? "";
-            
+            var apiKey = _configuration["OpenAIServiceOptions:ApiKey"];
+           
+            if (string.IsNullOrEmpty(apiKey))
+                apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+
             ChatClient client = new(model: "gpt-4o-mini", apiKey);
 
             List<ChatMessage> chatPrompts = new List<ChatMessage>()

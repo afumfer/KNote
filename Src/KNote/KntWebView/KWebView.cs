@@ -153,9 +153,9 @@ namespace KntWebView
                 if(webView2.CoreWebView2 != null)  // This patch is required when using sql server repositories 
                     webView2.CoreWebView2.Navigate(textUrl.Text);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"You can not navigate to the indicated address. ({ex.Message})");
+            catch
+            {                
+                throw;
             }
         }
 

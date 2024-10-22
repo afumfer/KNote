@@ -104,7 +104,10 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         View.ActivateWaitState();
 
         if (folderWithServideRef == null)
+        {
+            View.DeactivateWaitState();
             return;
+        }
 
         SelectMode = EnumSelectMode.Folders;
 
@@ -431,7 +434,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     {
         var service = e.Entity.Service;
         var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
-        Store.RunScript(note?.Script);
+        Store.RunScriptInNewThread(note?.Script);
     }
 
     private void _messagesManagment_AppAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
@@ -864,11 +867,6 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     public async Task GoActiveFilter()
     {            
         await RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
-    }
-
-    public void RunScriptSelectedNote()
-    {
-        Store.RunScript(SelectedNoteInfo.Script);
     }
 
     public async Task MoveSelectedNotes()
