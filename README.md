@@ -6,25 +6,18 @@ Two different database engines are supported, Sqlite for personal tasks and SQL 
 
 KaNote also has two different front-ends, an old-school Windows desktop application (WinForm app) and a Web application (Blazor app). 
 
+...
+
+(This program is under construction and the documentation isn't ready yet. Thanks for your patience!)
+
 
 ## Compilation and use 
-
-To compile and run KaNote you will need Visual Studio 2019 or higher, then you must load the KNote.sln solution located in the KNote_dev directory and set KNote.ClientWin for the desktop application or KNote.Server for the Web application as the startup project.
-
-TODO: Creating the database with the desktop application ...
-
-TODO: Creating the database with the Web application ... 
 
 
 ## Installation and deployment 
 
 
-TODO: ....
-
-
 ### Direct use of binaries 
-
-TODO: ....
 
 
 ## License
