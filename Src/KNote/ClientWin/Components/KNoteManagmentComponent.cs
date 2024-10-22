@@ -100,14 +100,11 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     }
 
     private async Task RefreshActiveFolderWithServiceRef(FolderWithServiceRef folderWithServideRef)
-    {
-        View.ActivateWaitState();
-
-        if (folderWithServideRef == null)
-        {
-            View.DeactivateWaitState();
+    {        
+        if (folderWithServideRef == null)               
             return;
-        }
+        
+        View.ActivateWaitState();
 
         SelectMode = EnumSelectMode.Folders;
 

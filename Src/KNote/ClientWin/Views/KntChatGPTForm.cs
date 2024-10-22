@@ -26,14 +26,6 @@ public partial class KntChatGPTForm : Form, IViewBase
         InitializeComponent();
 
         _com = com;
-
-
-#if RELEASE
-
-        // Button for debug. Ocult in release mode.
-        buttonTest.Visible = false;
-        
-#endif
     }
 
     #endregion
