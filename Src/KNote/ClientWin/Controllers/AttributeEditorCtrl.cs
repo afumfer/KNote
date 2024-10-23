@@ -2,31 +2,26 @@
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class PostItPropertiesComponent : ComponentEditorBase<IViewPostIt<WindowDto>, WindowDto>
+public class AttributeEditorCtrl : CtrlEditorBase<IViewEditor<KAttributeDto>, KAttributeDto>
 {
+    // TODO: .... for Attribute managment
+
     #region Constructor 
 
-    public PostItPropertiesComponent(Store store) : base(store)
+    public AttributeEditorCtrl(Store store) : base(store)
     {
-        ComponentName = "PostIt properties editor";
+        ComponentName = "Attribute editor";
     }
 
     #endregion
 
-    #region IEditorView implementation
+    #region Abstract member implementations 
 
-    protected override IViewPostIt<WindowDto> CreateView()
+    protected override IViewEditor<KAttributeDto> CreateView()
     {
         return Store.FactoryViews.View(this);
-    }        
-
-    public override Task<bool> NewModel(IKntService service)
-    {
-        Model = new WindowDto();
-
-        return Task.FromResult<bool>(true);
     }
 
     public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
@@ -34,12 +29,14 @@ public class PostItPropertiesComponent : ComponentEditorBase<IViewPostIt<WindowD
         throw new NotImplementedException();
     }
 
+    public override Task<bool> NewModel(IKntService service)
+    {
+        throw new NotImplementedException();
+    }
 
     public override Task<bool> SaveModel()
     {
-        View.RefreshModel();
-        Finalize();
-        return Task.FromResult<bool>(true);
+        throw new NotImplementedException();
     }
 
     public override Task<bool> DeleteModel(IKntService service, Guid id)
@@ -52,5 +49,6 @@ public class PostItPropertiesComponent : ComponentEditorBase<IViewPostIt<WindowD
         throw new NotImplementedException();
     }
 
-    #endregion
+
+    #endregion 
 }

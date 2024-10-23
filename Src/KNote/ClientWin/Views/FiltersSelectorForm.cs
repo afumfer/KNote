@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -10,7 +10,7 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
 {
     #region Private fields
 
-    private FiltersSelectorComponent _com;
+    private FiltersSelectorCtrl _ctrl;
     private bool _viewFinalized = false;
     //private bool _formIsDisty = false;
 
@@ -18,13 +18,13 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
 
     #region Constructor
 
-    public FiltersSelectorForm(FiltersSelectorComponent com)
+    public FiltersSelectorForm(FiltersSelectorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;            
+        _ctrl = com;            
     }
 
     #endregion 
@@ -43,7 +43,7 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
 
     public Result<EComponentResult> ShowModalView()
     {
-        var res = _com.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
         return res;
     }
 
@@ -114,7 +114,7 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
     private void FilterParamForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+            _ctrl.Finalize();
     }
 
     private void buttonClean_Click(object sender, EventArgs e)
@@ -135,18 +135,18 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
 
         filter.NotesFilter = new NotesFilterDto { TextSearch = textTextSearch.Text, SearchInDescription = checkSearchInDescription.Checked };
 
-        _com.SelectedEntity = filter;            
-        _com.NotifySelectedEntity();
+        _ctrl.SelectedEntity = filter;            
+        _ctrl.NotifySelectedEntity();
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)
     {
-        _com.Accept();
+        _ctrl.Accept();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        _com.Cancel();
+        _ctrl.Cancel();
     }
 
     #endregion
@@ -155,7 +155,7 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
 
     private void PersonalizeControls()
     {
-        foreach (var serviceRef in _com.Store.GetAllServiceRef())
+        foreach (var serviceRef in _ctrl.Store.GetAllServiceRef())
             comboRepositories.Items.Add(serviceRef);
         comboRepositories.ValueMember = "IdServiceRef";
         comboRepositories.DisplayMember = "Alias";
@@ -165,8 +165,8 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
     private void ModelToControls()
     {
         // TODO: ...
-        //if(_com.Store.ActiveFolderWithServiceRef != null)
-        //    comboRepositories.SelectedItem = _com.Store.ActiveFolderWithServiceRef.ServiceRef.IdServiceRef;
+        //if(_ctrl.Store.ActiveFolderWithServiceRef != null)
+        //    comboRepositories.SelectedItem = _ctrl.Store.ActiveFolderWithServiceRef.ServiceRef.IdServiceRef;
     }
 
     private void CleanView()

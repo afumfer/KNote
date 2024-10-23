@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using NLog;
 using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.Model;
 using KNote.Service.Core;
 using NLog.Extensions.Logging;
@@ -33,7 +33,7 @@ static class Program
         ApplicationConfiguration.Initialize();
         ApplicationContext applicationContext = new ApplicationContext();
         Store appStore = new Store(new FactoryViewsWinForms());
-        KNoteManagmentComponent knoteManagment;
+        KNoteManagmentCtrl knoteManagment;
         SplashForm splashForm = new SplashForm(appStore);
         
         splashForm.Show(); Application.DoEvents();
@@ -42,7 +42,7 @@ static class Program
 
         try
         {
-            knoteManagment = new KNoteManagmentComponent(appStore);
+            knoteManagment = new KNoteManagmentCtrl(appStore);
             knoteManagment.Run();
             applicationContext.MainForm = (Form)knoteManagment.View;
             splashForm.Close();

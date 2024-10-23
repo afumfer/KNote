@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -9,7 +9,7 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 {
     #region Private fields
 
-    private readonly NoteAttributeEditorComponent _com;
+    private readonly NoteAttributeEditorCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
@@ -17,13 +17,13 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     #region Constructor
 
-    public NoteAttributeEditorForm(NoteAttributeEditorComponent com)
+    public NoteAttributeEditorForm(NoteAttributeEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -37,7 +37,7 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     public Result<EComponentResult> ShowModalView()
     {            
-        var res = _com.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
         return res;
     }
 
@@ -90,7 +90,7 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {            
-        var res = await _com.SaveModel();
+        var res = await _ctrl.SaveModel();
         if (res)
         {
             _formIsDisty = false;
@@ -135,10 +135,10 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     private void ModelToControls()
     {
-        labelDescription.Text = "* " + _com.Model.Description;
-        labelAttribute.Text = _com.Model.Name;
+        labelDescription.Text = "* " + _ctrl.Model.Description;
+        labelAttribute.Text = _ctrl.Model.Name;
 
-        switch (_com.Model.KAttributeDataType)
+        switch (_ctrl.Model.KAttributeDataType)
         {
             case EnumKAttributeDataType.String:
                 ModelToControlText();
@@ -175,7 +175,7 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
             textValue.Size = new Size(200, 23);
         else
             textValue.Size = new Size(478, 23);
-        textValue.Text = _com.Model.Value?.ToString();
+        textValue.Text = _ctrl.Model.Value?.ToString();
         textValue.Visible = true;
         textValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
             | System.Windows.Forms.AnchorStyles.Left)
@@ -187,7 +187,7 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
         textValue.Location = new Point(10, 32);
         textValue.Multiline = true;
         textValue.Size = new Size(478, 140);
-        textValue.Text = _com.Model.Value;
+        textValue.Text = _ctrl.Model.Value;
         textValue.Visible = true;
         textValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)
@@ -198,8 +198,8 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
     {
         labelAttribute.Text = "Check option:";
         checkValue.Location = new Point(10, 32);
-        checkValue.Checked = bool.Parse(_com.Model.Value);
-        checkValue.Text = _com.Model.Name;
+        checkValue.Checked = bool.Parse(_ctrl.Model.Value);
+        checkValue.Text = _ctrl.Model.Name;
         checkValue.Visible = true;
         checkValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
             | System.Windows.Forms.AnchorStyles.Left)
@@ -215,14 +215,14 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     private async void ModelToControlCombo()
     {
-        var res = await _com.Service.KAttributes.GetKAttributeTabulatedValuesAsync(_com.Model.KAttributeId);
+        var res = await _ctrl.Service.KAttributes.GetKAttributeTabulatedValuesAsync(_ctrl.Model.KAttributeId);
         if (res.IsValid)
         {
             comboValue.Items.Add("");
             foreach (var atr in res.Entity)
                 comboValue.Items.Add(atr.Value);
         }
-        comboValue.SelectedItem = _com.Model.Value;
+        comboValue.SelectedItem = _ctrl.Model.Value;
         comboValue.Location = new Point(10, 32);
         comboValue.Size = new Size(478, 23);
         comboValue.Visible = true;
@@ -235,13 +235,13 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
     {
         PersonalizeListView(listViewValue);
         listViewValue.Columns.Add("Name", 450, HorizontalAlignment.Left);
-        var res = await _com.Service.KAttributes.GetKAttributeTabulatedValuesAsync(_com.Model.KAttributeId);
+        var res = await _ctrl.Service.KAttributes.GetKAttributeTabulatedValuesAsync(_ctrl.Model.KAttributeId);
         if (res.IsValid)
         {                
             foreach (var atr in res.Entity)
             {
                 var itemList = new ListViewItem(atr.Value);
-                if(_com.Model.Value.IndexOf(atr.Value) >= 0 )
+                if(_ctrl.Model.Value.IndexOf(atr.Value) >= 0 )
                     itemList.Checked = true;
                 else
                     itemList.Checked = false;
@@ -272,20 +272,20 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     private void ControlsToModel()
     {            
-        switch (_com.Model.KAttributeDataType)
+        switch (_ctrl.Model.KAttributeDataType)
         {
             case EnumKAttributeDataType.String:                    
             case EnumKAttributeDataType.Int:
             case EnumKAttributeDataType.Double:
             case EnumKAttributeDataType.TextArea:                    
             case EnumKAttributeDataType.DateTime:
-                _com.Model.Value = textValue.Text;
+                _ctrl.Model.Value = textValue.Text;
                 break;
             case EnumKAttributeDataType.Bool:
-                _com.Model.Value = checkValue.Checked.ToString();
+                _ctrl.Model.Value = checkValue.Checked.ToString();
                 break;
             case EnumKAttributeDataType.TabulatedValue:
-                _com.Model.Value = comboValue.SelectedItem.ToString();
+                _ctrl.Model.Value = comboValue.SelectedItem.ToString();
                 break;
             case EnumKAttributeDataType.TagsValue:
                 var newValue = "";
@@ -299,7 +299,7 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
                         newValue += item.Text;
                     }
                 }
-                _com.Model.Value = newValue;
+                _ctrl.Model.Value = newValue;
                 break;
             default:
                 break;
@@ -315,7 +315,7 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 

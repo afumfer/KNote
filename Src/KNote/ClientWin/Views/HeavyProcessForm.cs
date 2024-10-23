@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 
@@ -8,18 +8,18 @@ public partial class HeavyProcessForm : Form, IViewHeavyProcess
 {
     #region Private fields 
 
-    private readonly HeavyProcessComponent _com;
+    private readonly HeavyProcessCtrl _ctrl;
     private bool _viewFinalized = false;
 
     #endregion
 
     #region Constructor
 
-    public HeavyProcessForm(HeavyProcessComponent com)  // Func<Task> process
+    public HeavyProcessForm(HeavyProcessCtrl com)  // Func<Task> process
     {
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -34,7 +34,7 @@ public partial class HeavyProcessForm : Form, IViewHeavyProcess
     private void HeavyProcessForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+            _ctrl.Finalize();
     }
 
     #endregion 
@@ -68,7 +68,7 @@ public partial class HeavyProcessForm : Form, IViewHeavyProcess
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(ShowDialog());
+        return _ctrl.DialogResultToComponentResult(ShowDialog());
     }
 
     public void RefreshView()

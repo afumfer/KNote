@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -9,7 +9,7 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 {
     #region Private fields
 
-    private readonly MessageEditorComponent _com;
+    private readonly MessageEditorCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
@@ -17,14 +17,14 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 
     #region Constructor 
 
-    public MessageEditorForm(MessageEditorComponent com)
+    public MessageEditorForm(MessageEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
         PersonalizeControls();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -38,7 +38,7 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 
     public Result<EComponentResult> ShowModalView()
     {
-        var res = _com.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
         return res;
     }
 
@@ -89,7 +89,7 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {            
-        var res = await _com.SaveModel();
+        var res = await _ctrl.SaveModel();
         if (res)
         {
             _formIsDisty = false;
@@ -144,7 +144,7 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 
@@ -165,23 +165,23 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 
     private void ModelToControls()
     {
-        textUserFullName.Text = _com.Model.UserFullName?.ToString();
-        textAlarmDateTime.Text = _com.Model.AlarmDateTime.ToString();
-        comboAlarmPeriodicity.SelectedIndex = (int)_com.Model.AlarmType;
-        comboNotificationType.SelectedIndex = (int)_com.Model.NotificationType;
-        textContent.Text = _com.Model.Comment.ToString();
-        checkAlarmActivated.Checked = _com.Model.AlarmActivated ?? false;
-        textMinutes.Text = _com.Model.AlarmMinutes?.ToString();            
+        textUserFullName.Text = _ctrl.Model.UserFullName?.ToString();
+        textAlarmDateTime.Text = _ctrl.Model.AlarmDateTime.ToString();
+        comboAlarmPeriodicity.SelectedIndex = (int)_ctrl.Model.AlarmType;
+        comboNotificationType.SelectedIndex = (int)_ctrl.Model.NotificationType;
+        textContent.Text = _ctrl.Model.Comment.ToString();
+        checkAlarmActivated.Checked = _ctrl.Model.AlarmActivated ?? false;
+        textMinutes.Text = _ctrl.Model.AlarmMinutes?.ToString();            
     }
 
     private void ControlsToModel()
     {
-        _com.Model.AlarmDateTime = _com.TextToDateTime(textAlarmDateTime.Text);
-        _com.Model.AlarmType = (EnumAlarmType)comboAlarmPeriodicity.SelectedIndex;
-        _com.Model.NotificationType = (EnumNotificationType)comboNotificationType.SelectedIndex;
-        _com.Model.Comment = textContent.Text;
-        _com.Model.AlarmActivated = checkAlarmActivated.Checked;
-        _com.Model.AlarmMinutes = _com.TextToInt(textMinutes.Text);
+        _ctrl.Model.AlarmDateTime = _ctrl.TextToDateTime(textAlarmDateTime.Text);
+        _ctrl.Model.AlarmType = (EnumAlarmType)comboAlarmPeriodicity.SelectedIndex;
+        _ctrl.Model.NotificationType = (EnumNotificationType)comboNotificationType.SelectedIndex;
+        _ctrl.Model.Comment = textContent.Text;
+        _ctrl.Model.AlarmActivated = checkAlarmActivated.Checked;
+        _ctrl.Model.AlarmMinutes = _ctrl.TextToInt(textMinutes.Text);
     }
     private void comboAlarmPeriodicity_SelectedIndexChanged(object sender, EventArgs e)
     {

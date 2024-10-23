@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 
@@ -8,7 +8,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 {
     #region Fields
 
-    private readonly RepositoryEditorComponent _com;
+    private readonly RepositoryEditorCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
@@ -16,13 +16,13 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     #region Constructor 
 
-    public RepositoryEditorForm(RepositoryEditorComponent com)
+    public RepositoryEditorForm(RepositoryEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -36,7 +36,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public void RefreshView()
@@ -71,7 +71,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _com.SaveModel();
+        var res = await _ctrl.SaveModel();
         if (res)
         {
             _formIsDisty = false;
@@ -165,7 +165,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     private void ModelToControls()
     {
-        switch (_com.EditorMode)
+        switch (_ctrl.EditorMode)
         {
             case EnumRepositoryEditorMode.AddLink:
                 Text = "Add link to existing repository";
@@ -183,16 +183,16 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
                 break;
         }
 
-        textAliasName.Text = _com.Model.Alias;
-        textResourcesContainer.Text = _com.Model.ResourcesContainer;
-        checkResourceContentInDB.Checked = _com.Model.ResourceContentInDB;
-        textResourcesContainerRoot.Text = _com.Model.ResourcesContainerRootPath;
-        textResourcesContainerUrl.Text = _com.Model.ResourcesContainerRootUrl;
+        textAliasName.Text = _ctrl.Model.Alias;
+        textResourcesContainer.Text = _ctrl.Model.ResourcesContainer;
+        checkResourceContentInDB.Checked = _ctrl.Model.ResourceContentInDB;
+        textResourcesContainerRoot.Text = _ctrl.Model.ResourcesContainerRootPath;
+        textResourcesContainerUrl.Text = _ctrl.Model.ResourcesContainerRootUrl;
 
-        if (!string.IsNullOrEmpty(_com.Model.ConnectionString))
+        if (!string.IsNullOrEmpty(_ctrl.Model.ConnectionString))
         {                
-            var connecionValues = _com.Model.GetConnectionProperties();
-            if (_com.Model.Provider == "Microsoft.Data.Sqlite")
+            var connecionValues = _ctrl.Model.GetConnectionProperties();
+            if (_ctrl.Model.Provider == "Microsoft.Data.Sqlite")
             {                    
                 textSqLiteDirectory.Text = Path.GetDirectoryName(connecionValues["Data Source"]) ;
                 textSqLiteDataBase.Text = Path.GetFileName(connecionValues["Data Source"]);
@@ -212,25 +212,25 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     private void ControlsToModel()
     {
-        _com.Model.Alias = textAliasName.Text;
-        _com.Model.ResourcesContainer = textResourcesContainer.Text;
-        _com.Model.ResourceContentInDB = checkResourceContentInDB.Checked;
-        _com.Model.ResourcesContainerRootPath = textResourcesContainerRoot.Text;
-        _com.Model.ResourcesContainerRootUrl = textResourcesContainerUrl.Text;
+        _ctrl.Model.Alias = textAliasName.Text;
+        _ctrl.Model.ResourcesContainer = textResourcesContainer.Text;
+        _ctrl.Model.ResourceContentInDB = checkResourceContentInDB.Checked;
+        _ctrl.Model.ResourcesContainerRootPath = textResourcesContainerRoot.Text;
+        _ctrl.Model.ResourcesContainerRootUrl = textResourcesContainerUrl.Text;
         if (radioSqLite.Checked)
         {
-            _com.Model.Provider = "Microsoft.Data.Sqlite";
-            _com.Model.ConnectionString = $"Data Source={Path.Combine(textSqLiteDirectory.Text, textSqLiteDataBase.Text)}";
+            _ctrl.Model.Provider = "Microsoft.Data.Sqlite";
+            _ctrl.Model.ConnectionString = $"Data Source={Path.Combine(textSqLiteDirectory.Text, textSqLiteDataBase.Text)}";
         }
         else
         {
-            _com.Model.Provider = "Microsoft.Data.SqlClient";
-            _com.Model.ConnectionString = $"Data Source={textSQLServer.Text}; Initial Catalog={textSQLDataBase.Text}; Trusted_Connection=True; Connection Timeout=60; MultipleActiveResultSets=true;Encrypt=false";
+            _ctrl.Model.Provider = "Microsoft.Data.SqlClient";
+            _ctrl.Model.ConnectionString = $"Data Source={textSQLServer.Text}; Initial Catalog={textSQLDataBase.Text}; Trusted_Connection=True; Connection Timeout=60; MultipleActiveResultSets=true;Encrypt=false";
         }
 
         // TODO: hack, EntityFramework is default orm when repository is created. (Dapper version no suport create repository). 
-        if (_com.EditorMode == EnumRepositoryEditorMode.AddLink || _com.EditorMode == EnumRepositoryEditorMode.Create)
-            _com.Model.Orm = "EntityFramework";
+        if (_ctrl.EditorMode == EnumRepositoryEditorMode.AddLink || _ctrl.EditorMode == EnumRepositoryEditorMode.Create)
+            _ctrl.Model.Orm = "EntityFramework";
     }
 
     private bool OnCancelEdition()
@@ -242,7 +242,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 

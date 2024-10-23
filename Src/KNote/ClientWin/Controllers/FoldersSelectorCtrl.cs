@@ -3,9 +3,9 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class FoldersSelectorComponent : ComponentSelectorBase<IViewSelector<FolderWithServiceRef>, FolderWithServiceRef>
+public class FoldersSelectorCtrl : CtrlSelectorBase<IViewSelector<FolderWithServiceRef>, FolderWithServiceRef>
 {
     #region Properties
 
@@ -32,7 +32,7 @@ public class FoldersSelectorComponent : ComponentSelectorBase<IViewSelector<Fold
 
     #region Constructor
 
-    public FoldersSelectorComponent(Store store) : base(store)
+    public FoldersSelectorCtrl(Store store) : base(store)
     {
         ComponentName = "Folders selector";
         ListEntities = new List<FolderWithServiceRef>();

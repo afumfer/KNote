@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 
@@ -8,13 +8,13 @@ public partial class NotifyForm : Form, IViewBase
 {
     #region Private fields
 
-    private readonly KNoteManagmentComponent _com;
+    private readonly KNoteManagmentCtrl _ctrl;
 
     #endregion
 
     #region Constructor
 
-    public NotifyForm(KNoteManagmentComponent com)
+    public NotifyForm(KNoteManagmentCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
@@ -22,7 +22,7 @@ public partial class NotifyForm : Form, IViewBase
         notifyKNote.Text = KntConst.AppName;
         menuShowKNoteManagment.Text = $"Show {KntConst.AppName} managment ...";
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -36,7 +36,7 @@ public partial class NotifyForm : Form, IViewBase
 
     Result<EComponentResult> IViewBase.ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public DialogResult ShowInfo(string info, string caption = "KeyNotex", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -54,45 +54,45 @@ public partial class NotifyForm : Form, IViewBase
 
     private async void notifyKNote_DoubleClick(object sender, EventArgs e)
     {
-        await _com.AddDefaultNotePostIt();
+        await _ctrl.AddDefaultNotePostIt();
     }
 
     private async void menuNewNote_Click(object sender, EventArgs e)
     {
-        await _com.AddDefaultNotePostIt();
+        await _ctrl.AddDefaultNotePostIt();
     }
 
     private void menuShowKNoteManagment_Click(object sender, EventArgs e)
     {
-        _com.ShowKNoteManagment();
+        _ctrl.ShowKNoteManagment();
     }
 
     private void menuPostItsVisibles_Click(object sender, EventArgs e)
     {
         if (menuPostItsVisibles.Checked)
-            _com.Store.ActivatePostIts();
+            _ctrl.Store.ActivatePostIts();
         else
-            _com.Store.HidePostIts();
+            _ctrl.Store.HidePostIts();
     }
 
     private void menuKNoteOptions_Click(object sender, EventArgs e)
     {
-        _com.Options();
+        _ctrl.Options();
     }
 
     private void menuHelp_Click(object sender, EventArgs e)
     {
-        _com.Help();
+        _ctrl.Help();
     }
 
     private void menuAbout_Click(object sender, EventArgs e)
     {
-        _com.About();
+        _ctrl.About();
     }
 
     private void menuExit_Click(object sender, EventArgs e)
     {
-        _com?.FinalizeApp();
+        _ctrl?.FinalizeApp();
     }
 
     public void RefreshView()

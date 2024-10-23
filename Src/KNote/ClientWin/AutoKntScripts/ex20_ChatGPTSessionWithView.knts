@@ -1,6 +1,6 @@
 ﻿' ChatGPT example 3, use chat component view
 
-var chat = GetKntChatGPTComponent();
+var chat = GetKntChatGPTCtrl();
 chat.Run();
 chat.ShowChatGPTView();
 

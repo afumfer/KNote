@@ -4,9 +4,9 @@ using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Identity.Client;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, NoteDto>
+public class PostItEditorCtrl : CtrlEditorBase<IViewPostIt<NoteDto>, NoteDto>
 {
     #region Private fields
 
@@ -26,7 +26,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
 
     #region Constructor, Dispose, ...
 
-    public PostItEditorComponent(Store store): base(store)
+    public PostItEditorCtrl(Store store): base(store)
     {
         ComponentName = "PostIt editor";
         Store.DeletedNote += Store_DeletedNote;
@@ -386,7 +386,7 @@ public class PostItEditorComponent : ComponentEditorBase<IViewPostIt<NoteDto>, N
 
     public virtual WindowDto GetWindow()
     {
-        var window = new PostItPropertiesComponent(Store);
+        var window = new PostItPropertiesCtrl(Store);
         window.LoadModel(Service, WindowPostIt, false);
 
         var res = window.RunModal();

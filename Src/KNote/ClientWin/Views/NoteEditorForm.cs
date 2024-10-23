@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Diagnostics;
 
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -13,7 +13,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 {
     #region Private fields
 
-    private readonly NoteEditorComponent _com;
+    private readonly NoteEditorCtrl _ctrl;
     private bool _viewFinalized = false;
 
     private Guid _selectedFolderId;
@@ -23,13 +23,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     #region Constructor
 
-    public NoteEditorForm(NoteEditorComponent com)
+    public NoteEditorForm(NoteEditorCtrl com)
     {
         //AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
 
         // TODO: options for new versión
         buttonPrint.Visible = false;
@@ -56,7 +56,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -113,7 +113,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         Dock = DockStyle.Fill;
         FormBorderStyle = FormBorderStyle.None;
         toolBarNoteEditor.Visible = false;
-        _com.EditMode = false;
+        _ctrl.EditMode = false;
     }
 
     public void ConfigureWindowMode()
@@ -123,7 +123,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         FormBorderStyle = FormBorderStyle.Sizable;
         toolBarNoteEditor.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
-        _com.EditMode = true;
+        _ctrl.EditMode = true;
     }
 
     #endregion
@@ -144,7 +144,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             {
                 if (MessageBox.Show("Do yo want exit?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    _com.Finalize();
+                    _ctrl.Finalize();
                     return;
                 }
                 else
@@ -153,7 +153,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     return;
                 }
             }
-            _com.Finalize();
+            _ctrl.Finalize();
         }
     }
 
@@ -180,19 +180,19 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         else if (menuSel == buttonExecuteKntScript)
         {
-            _com.Model.Script = textScriptCode.Text;
-            _com.RunScript();
+            _ctrl.Model.Script = textScriptCode.Text;
+            _ctrl.RunScript();
         }
         else if (menuSel == buttonLockFormat)
         {
             if (buttonLockFormat.Checked)
             {
-                _com.Model.ContentType = _com.Model.ContentType.Replace("#", "");
+                _ctrl.Model.ContentType = _ctrl.Model.ContentType.Replace("#", "");
                 buttonLockFormat.Checked = false;
             }
             else
             {
-                _com.Model.ContentType = "#" + _com.Model.ContentType;
+                _ctrl.Model.ContentType = "#" + _ctrl.Model.ContentType;
                 buttonLockFormat.Checked = true;
             }
         }
@@ -215,7 +215,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             if (htmlDescription.Visible)
             {
-                if (_com.Model.ContentType.Contains('#'))
+                if (_ctrl.Model.ContentType.Contains('#'))
                 {
                     ShowInfo($"This note cannot be changed to another format, the format is locked.");
                     return;
@@ -238,13 +238,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 textDescription.Text = webView2.TextUrl;
             }
 
-            _com.Model.ContentType = "markdown";
+            _ctrl.Model.ContentType = "markdown";
 
             EnableMarkdownView();
         }
         catch (Exception ex)
         {
-            _com.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
+            _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
         }
     }
 
@@ -252,7 +252,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
-            if (_com.Model.ContentType.Contains('#'))
+            if (_ctrl.Model.ContentType.Contains('#'))
             {
                 ShowInfo($"This note cannot be changed to another format, the format is locked.");
                 return;
@@ -263,14 +263,14 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
 
             htmlDescription.BodyHtml = HtmlContent;
-            _com.Model.ContentType = "html";
+            _ctrl.Model.ContentType = "html";
 
             EnableHtmlView();
 
         }
         catch (Exception ex)
         {
-            _com.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
+            _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
         }
     }
 
@@ -278,7 +278,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
-            if (_com.Model.ContentType.Contains('#'))
+            if (_ctrl.Model.ContentType.Contains('#'))
             {
                 ShowInfo($"This note cannot be changed to another format, the format is locked.");
                 return;
@@ -286,13 +286,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
             webView2.TextUrl = textDescription.Text;
             await webView2.Navigate();
-            _com.Model.ContentType = "navigation";
+            _ctrl.Model.ContentType = "navigation";
 
             EnableWebView2View();
         }
         catch (Exception ex)
         {
-            _com.ShowMessage($"You can not navigate to the indicated address in the description of this note. (The following error has occurred: {ex.Message})", "Note editor");
+            _ctrl.ShowMessage($"You can not navigate to the indicated address in the description of this note. (The following error has occurred: {ex.Message})", "Note editor");
         }
     }
 
@@ -303,13 +303,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             if (listViewResources.SelectedItems.Count > 0)
             {
                 var idResource = (Guid.Parse(listViewResources.SelectedItems[0].Name));
-                var selRes = _com.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();
+                var selRes = _ctrl.Model.Resources.Where(_ => _.ResourceId == idResource).FirstOrDefault();
                 UpdatePreviewResource(selRes);
             }
         }
         catch (Exception ex)
         {
-            _com.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
+            _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
         }
     }
 
@@ -401,7 +401,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void buttonFolderSearch_Click(object sender, EventArgs e)
     {
-        var folder = _com.GetFolder();
+        var folder = _ctrl.GetFolder();
         if (folder != null)
         {
             _selectedFolderId = folder.FolderId;
@@ -414,21 +414,21 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void buttonNoteType_Click(object sender, EventArgs e)
     {
-        var changed = await _com.RequestChangeNoteType(_com.Model.NoteTypeId);
+        var changed = await _ctrl.RequestChangeNoteType(_ctrl.Model.NoteTypeId);
 
         if (changed)
         {
-            textNoteType.Text = _com.Model.NoteTypeDto?.Name;
+            textNoteType.Text = _ctrl.Model.NoteTypeDto?.Name;
             ModelToControlsAttributes();
         }
     }
 
     private async void buttonDeleteType_Click(object sender, EventArgs e)
     {
-        var changed = await _com.AplyChangeNoteType(null);
+        var changed = await _ctrl.AplyChangeNoteType(null);
         if (changed)
         {
-            textNoteType.Text = _com.Model.NoteTypeDto?.Name;
+            textNoteType.Text = _ctrl.Model.NoteTypeDto?.Name;
             ModelToControlsAttributes();
         }
     }
@@ -449,7 +449,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void buttonAddAlarm_Click(object sender, EventArgs e)
     {
-        var message = await _com.NewMessage();
+        var message = await _ctrl.NewMessage();
         if (message != null)
             listViewAlarms.Items.Add(MessageDtoToListViewItem(message));
 
@@ -468,7 +468,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
-        var res = await _com.DeleteMessage(messageId);
+        var res = await _ctrl.DeleteMessage(messageId);
         if (res)
         {
             listViewAlarms.Items[messageId.ToString()].Remove();
@@ -477,7 +477,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void listViewAlarms_DoubleClick(object sender, EventArgs e)
     {
-        if (_com.EditMode)
+        if (_ctrl.EditMode)
             EditAlarm();
     }
 
@@ -487,7 +487,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void buttonTaskAdd_Click(object sender, EventArgs e)
     {
-        NoteTaskDto task = await _com.NewTask();
+        NoteTaskDto task = await _ctrl.NewTask();
         if (task != null)
         {
             listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
@@ -510,7 +510,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         string delTsk = listViewTasks.SelectedItems[0].Name;
-        bool res = await _com.DeleteTask(Guid.Parse(delTsk));
+        bool res = await _ctrl.DeleteTask(Guid.Parse(delTsk));
         if (res)
         {
             textTaskDescription.Text = "";
@@ -521,7 +521,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void listViewTasks_DoubleClick(object sender, EventArgs e)
     {
-        if (_com.EditMode)
+        if (_ctrl.EditMode)
             EditTask();
     }
 
@@ -547,7 +547,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         var delRes = listViewResources.SelectedItems[0].Name;
-        var res = await _com.DeleteResource(Guid.Parse(delRes));
+        var res = await _ctrl.DeleteResource(Guid.Parse(delRes));
         if (res)
         {
             listViewResources.Items[delRes].Remove();
@@ -563,7 +563,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void listViewResources_DoubleClick(object sender, EventArgs e)
     {
-        if (_com.EditMode)
+        if (_ctrl.EditMode)
             await EditResource();
     }
 
@@ -615,7 +615,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     File.WriteAllBytes(fileName, _selectedResource.ContentArrayBytes);
                 else
                 {
-                    string fullPath = _com.Service.Notes.UtilGetResourcePath(_selectedResource);
+                    string fullPath = _ctrl.Service.Notes.UtilGetResourcePath(_selectedResource);
                     File.Copy(fullPath, fileName);
                 }
             }
@@ -647,7 +647,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             if (listViewTasks.SelectedItems.Count > 0)
             {
                 var idTask = (Guid.Parse(listViewTasks.SelectedItems[0].Name));
-                var selTask = _com.Model.Tasks.Where(_ => _.NoteTaskId == idTask).FirstOrDefault();
+                var selTask = _ctrl.Model.Tasks.Where(_ => _.NoteTaskId == idTask).FirstOrDefault();
                 textTaskDescription.Text = selTask.Description;
                 textTaskTags.Text = selTask.Tags;
             }
@@ -660,7 +660,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void listViewAttributes_DoubleClick(object sender, EventArgs e)
     {
-        if (_com.EditMode)
+        if (_ctrl.EditMode)
             EditNoteAttribute();
     }
 
@@ -672,23 +672,23 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void PersonalizeControls()
     {
-        if (_com.Model is null)
+        if (_ctrl.Model is null)
             return;
 
         textDescription.Dock = DockStyle.Fill;
         htmlDescription.Dock = DockStyle.Fill;
         webView2.Dock = DockStyle.Fill;
 
-        if (_com.Model.ContentType == null || _com.Model.ContentType.Contains("markdown"))
+        if (_ctrl.Model.ContentType == null || _ctrl.Model.ContentType.Contains("markdown"))
             EnableMarkdownView();
-        else if (_com.Model.ContentType.Contains("html"))
+        else if (_ctrl.Model.ContentType.Contains("html"))
             EnableHtmlView();
-        else if (_com.Model.ContentType.Contains("navigation"))
+        else if (_ctrl.Model.ContentType.Contains("navigation"))
             EnableWebView2View();
         else
             EnableMarkdownView();
 
-        if (!_com.EditMode)
+        if (!_ctrl.EditMode)
         {
             foreach (var tab in tabNoteData.TabPages)
             {
@@ -706,7 +706,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         webViewResource.Location = new Point(396, 36);
         panelPreview.Location = new Point(396, 36);
-        if (_com.EditMode)
+        if (_ctrl.EditMode)
         {
             webViewResource.Size = new Size(392, 464);
             panelPreview.Size = new Size(392, 464);
@@ -736,24 +736,24 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private async void ModelToControls()
     {
         // Basic data            
-        Text = $"Note editor [{_com.ServiceRef?.Alias}]";
-        textTopic.Text = _com.Model.Topic;
-        textNoteNumber.Text = "#" + _com.Model.NoteNumber.ToString();
-        textFolder.Text = _com.Model.FolderDto?.Name;
-        textFolderNumber.Text = "#" + _com.Model.FolderDto.FolderNumber.ToString();
-        _selectedFolderId = _com.Model.FolderId;
-        textTags.Text = _com.Model.Tags;
-        textStatus.Text = _com.Model.InternalTags;
-        textPriority.Text = _com.Model.Priority.ToString();
+        Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
+        textTopic.Text = _ctrl.Model.Topic;
+        textNoteNumber.Text = "#" + _ctrl.Model.NoteNumber.ToString();
+        textFolder.Text = _ctrl.Model.FolderDto?.Name;
+        textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
+        _selectedFolderId = _ctrl.Model.FolderId;
+        textTags.Text = _ctrl.Model.Tags;
+        textStatus.Text = _ctrl.Model.InternalTags;
+        textPriority.Text = _ctrl.Model.Priority.ToString();
 
-        if (_com.Model.ContentType is null || _com.Model.ContentType.Contains("markdown"))
+        if (_ctrl.Model.ContentType is null || _ctrl.Model.ContentType.Contains("markdown"))
         {
             htmlDescription.Visible = false;
             webView2.Visible = false;
-            textDescription.Text = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
+            textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
             textDescription.Visible = true;
         }
-        else if (_com.Model.ContentType.Contains("html"))
+        else if (_ctrl.Model.ContentType.Contains("html"))
         {
             labelLoadingHtml.Visible = true;
             labelLoadingHtml.Refresh();
@@ -761,17 +761,17 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             webView2.Visible = false;
             htmlDescription.Visible = true;
             htmlDescription.BodyHtml = "";
-            htmlDescription.BodyHtml = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
+            htmlDescription.BodyHtml = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
             htmlDescription.Refresh();
             labelLoadingHtml.Visible = false;
         }
-        else if (_com.Model.ContentType.Contains("navigation"))
+        else if (_ctrl.Model.ContentType.Contains("navigation"))
         {
             textDescription.Visible = false;
             htmlDescription.Visible = false;
             webView2.Visible = true;
-            webView2.TextUrl = _com.Model.Description;
-            if (!string.IsNullOrEmpty(_com.Model.Description))
+            webView2.TextUrl = _ctrl.Model.Description;
+            if (!string.IsNullOrEmpty(_ctrl.Model.Description))
             {
                 await webView2.Navigate();
             }
@@ -780,26 +780,26 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             htmlDescription.Visible = false;
             webView2.Visible = false;
-            textDescription.Text = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
+            textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
             textDescription.Visible = true;
         }
 
-        buttonLockFormat.Checked = _com.Model.ContentType != null && _com.Model.ContentType.Contains('#');
+        buttonLockFormat.Checked = _ctrl.Model.ContentType != null && _ctrl.Model.ContentType.Contains('#');
 
         // KAttributes           
-        textNoteType.Text = _com.Model.NoteTypeDto.Name;
+        textNoteType.Text = _ctrl.Model.NoteTypeDto.Name;
         ModelToControlsAttributes();
 
         // Resources 
         ModelToControlsResources();
-        if (_com.Model.Resources.Count > 0)
+        if (_ctrl.Model.Resources.Count > 0)
             listViewResources.Items[0].Selected = true;
         else
             UpdatePreviewResource(null);
 
         // Tasks
         ModelToControlsTasks();
-        if (_com.Model.Tasks.Count > 0)
+        if (_ctrl.Model.Tasks.Count > 0)
             listViewTasks.Items[0].Selected = true;
         else
         {
@@ -811,7 +811,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         ModelToControlsAlarms();
 
         // Script             
-        textScriptCode.Text = _com.Model.Script;
+        textScriptCode.Text = _ctrl.Model.Script;
                 
         this.Update();
         this.Refresh();
@@ -821,7 +821,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         listViewAttributes.Clear();
 
-        foreach (var atr in _com.Model.KAttributesDto)
+        foreach (var atr in _ctrl.Model.KAttributesDto)
         {
             var itemList = new ListViewItem(atr.Name);
             itemList.Name = atr.NoteKAttributeId.ToString();
@@ -844,7 +844,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         //picResource.Visible = false;
         webViewResource.Visible = false;
 
-        foreach (var res in _com.Model.Resources)
+        foreach (var res in _ctrl.Model.Resources)
         {
             if (!res.IsDeleted())
                 listViewResources.Items.Add(ResourceDtoToListViewItem(res));
@@ -859,7 +859,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         listViewTasks.Clear();
 
-        foreach (var task in _com.Model.Tasks)
+        foreach (var task in _ctrl.Model.Tasks)
         {
             if (!task.IsDeleted())
                 listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
@@ -882,7 +882,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         listViewAlarms.Clear();
 
-        foreach (var msg in _com.Model.Messages)
+        foreach (var msg in _ctrl.Model.Messages)
         {
             if (!msg.IsDeleted())
                 listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
@@ -911,7 +911,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         textDescriptionResource.Text = _selectedResource.Description;
 
-        if (_com.Store.IsSupportedFileTypeForPreview(_selectedResource.FileType))
+        if (_ctrl.Store.IsSupportedFileTypeForPreview(_selectedResource.FileType))
         {
             webViewResource.Visible = true;
             panelPreview.Visible = false;
@@ -919,7 +919,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         else
         {
-            _com.Service.Notes.UtilManageResourceContent(_selectedResource, false);
+            _ctrl.Service.Notes.UtilManageResourceContent(_selectedResource, false);
             webViewResource.Visible = false;
             panelPreview.Visible = true;
             linkViewFile.Visible = true;
@@ -929,41 +929,41 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private void ControlsToModel()
     {
         // Basic data
-        _com.Model.Topic = textTopic.Text;
-        _com.Model.FolderId = _selectedFolderId;
-        _com.Model.FolderDto.FolderId = _selectedFolderId;
-        _com.Model.FolderDto.Name = textFolder.Text;
-        _com.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
-        _com.Model.Tags = textTags.Text;
-        _com.Model.InternalTags = textStatus.Text;
+        _ctrl.Model.Topic = textTopic.Text;
+        _ctrl.Model.FolderId = _selectedFolderId;
+        _ctrl.Model.FolderDto.FolderId = _selectedFolderId;
+        _ctrl.Model.FolderDto.Name = textFolder.Text;
+        _ctrl.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
+        _ctrl.Model.Tags = textTags.Text;
+        _ctrl.Model.InternalTags = textStatus.Text;
 
-        if (_com.Model.ContentType is null || _com.Model.ContentType.Contains("markdown"))
-            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
-        else if (_com.Model.ContentType.Contains("html"))
-            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
-        else if (_com.Model.ContentType.Contains("navigation"))
-            _com.Model.Description = webView2.TextUrl;
+        if (_ctrl.Model.ContentType is null || _ctrl.Model.ContentType.Contains("markdown"))
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+        else if (_ctrl.Model.ContentType.Contains("html"))
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
+        else if (_ctrl.Model.ContentType.Contains("navigation"))
+            _ctrl.Model.Description = webView2.TextUrl;
         else
-            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
 
         int p;
         if (int.TryParse(textPriority.Text, out p))
-            _com.Model.Priority = p;
+            _ctrl.Model.Priority = p;
 
-        _com.Model.Script = textScriptCode.Text;
+        _ctrl.Model.Script = textScriptCode.Text;
     }
 
     private async Task<bool> SaveModel()
     {
         buttonUndo.Enabled = false;
-        return await _com.SaveModel();
+        return await _ctrl.SaveModel();
     }
 
     private async Task DeleteModel()
     {
-        var res = await _com.DeleteModel();
+        var res = await _ctrl.DeleteModel();
         if (res)
-            _com.Finalize();
+            _ctrl.Finalize();
     }
 
     private void UndoChanges()
@@ -979,7 +979,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private async Task<bool> PostItEdit()
     {
         var res = await SaveModel();
-        _com.FinalizeAndPostItEdit();
+        _ctrl.FinalizeAndPostItEdit();
         return res;
     }
 
@@ -1136,7 +1136,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
-        var message = _com.EditMessage(messageId);
+        var message = _ctrl.EditMessage(messageId);
         if (message != null)
             UpdateMessage(message);
     }
@@ -1160,7 +1160,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         var idTask = Guid.Parse(listViewTasks.SelectedItems[0].Name);
-        var task = _com.EditTask(idTask);
+        var task = _ctrl.EditTask(idTask);
         if (task != null)
             UpdateTask(task);
     }
@@ -1190,7 +1190,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         var idResource = _selectedResource.ResourceId;
-        var resource = await _com.EditResource(idResource);
+        var resource = await _ctrl.EditResource(idResource);
         if (resource != null)
         {
             _selectedResource = resource;
@@ -1207,8 +1207,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         var idAttribute = Guid.Parse(listViewAttributes.SelectedItems[0].Name);
-        var noteAttribute = _com.Model.KAttributesDto.Where(_ => _.NoteKAttributeId == idAttribute).SingleOrDefault();
-        var noteAttributeEdited = _com.EditAttribute(noteAttribute);
+        var noteAttribute = _ctrl.Model.KAttributesDto.Where(_ => _.NoteKAttributeId == idAttribute).SingleOrDefault();
+        var noteAttributeEdited = _ctrl.EditAttribute(noteAttribute);
         if (noteAttributeEdited != null)
         {
             // Refrescar listView
@@ -1219,7 +1219,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async Task<ResourceDto> AddResource()
     {
-        var resource = await _com.NewResource();
+        var resource = await _ctrl.NewResource();
         if (resource != null)
         {
             AddItemToListViewResources(resource);
@@ -1229,7 +1229,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private ResourceDto AddResourceFromClipboard()
     {
-        var resource = _com.NewResourceFromClipboard();
+        var resource = _ctrl.NewResourceFromClipboard();
         if (resource != null)
         {
             AddItemToListViewResources(resource);
@@ -1246,7 +1246,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void InsertLinkSelectedResource()
     {
-        var tmpFile = _com.Service.Notes.UtilUpdateResourceInDescriptionForRead(
+        var tmpFile = _ctrl.Service.Notes.UtilUpdateResourceInDescriptionForRead(
             Path.Combine(_selectedResource.Container, _selectedResource.Name), true);
 
         tabNoteData.SelectedIndex = 0;

@@ -2,7 +2,7 @@
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using KNote.Model;
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Views;
 using KNote.Model.Dto;
 using KNote.Service.Core;
@@ -16,7 +16,7 @@ public class Store
 
     private readonly List<ServiceRef> _servicesRefs;
 
-    private readonly List<ComponentBase> _listComponents;
+    private readonly List<CtrlBase> _listComponents;
 
     #endregion 
 
@@ -62,7 +62,7 @@ public class Store
         if (AppConfig == null)
             AppConfig = new AppConfig();
 
-        _listComponents = new List<ComponentBase>();
+        _listComponents = new List<CtrlBase>();
         _servicesRefs = new List<ServiceRef>();
         FactoryViews = factoryViews; //
     }
@@ -158,55 +158,55 @@ public class Store
     }
 
 
-    public event EventHandler<ComponentEventArgs<ComponentBase>> AddedComponent;
+    public event EventHandler<ComponentEventArgs<CtrlBase>> AddedComponent;
     public event EventHandler<ComponentEventArgs<EComponentState>> ComponentsStateChanged;
-    public void AddComponent(ComponentBase component)
+    public void AddComponent(CtrlBase component)
     {
         component.StateComponentChanged += Components_StateCtrlChanged;
         
-        if (component is PostItEditorComponent)
+        if (component is PostItEditorCtrl)
         {
-            ((PostItEditorComponent)component).AddedEntity += Store_AddedPostIt;
-            ((PostItEditorComponent)component).SavedEntity += Store_SavedPostIt;
-            ((PostItEditorComponent)component).DeletedEntity += Store_DeletedPostIt;
-            ((PostItEditorComponent)component).ExtendedEdit += Store_ExtendedEditPostIt;
+            ((PostItEditorCtrl)component).AddedEntity += Store_AddedPostIt;
+            ((PostItEditorCtrl)component).SavedEntity += Store_SavedPostIt;
+            ((PostItEditorCtrl)component).DeletedEntity += Store_DeletedPostIt;
+            ((PostItEditorCtrl)component).ExtendedEdit += Store_ExtendedEditPostIt;
         }
-        else if (component is NoteEditorComponent)
+        else if (component is NoteEditorCtrl)
         {
-            ((NoteEditorComponent)component).AddedEntity += Store_AddedNote;
-            ((NoteEditorComponent)component).SavedEntity += Store_SavedNote;
-            ((NoteEditorComponent)component).DeletedEntity += Store_DeletedNote;
-            ((NoteEditorComponent)component).PostItEdit += Store_EditedPostItNote;
+            ((NoteEditorCtrl)component).AddedEntity += Store_AddedNote;
+            ((NoteEditorCtrl)component).SavedEntity += Store_SavedNote;
+            ((NoteEditorCtrl)component).DeletedEntity += Store_DeletedNote;
+            ((NoteEditorCtrl)component).PostItEdit += Store_EditedPostItNote;
         }
 
         _listComponents.Add(component);
         Logger?.LogInformation("Added Component {component}", component.ToString());
-        AddedComponent?.Invoke(this, new ComponentEventArgs<ComponentBase>(component));
+        AddedComponent?.Invoke(this, new ComponentEventArgs<CtrlBase>(component));
     }
 
-    public event EventHandler<ComponentEventArgs<ComponentBase>> RemovedComponent;
-    public void RemoveComponent(ComponentBase component)
+    public event EventHandler<ComponentEventArgs<CtrlBase>> RemovedComponent;
+    public void RemoveComponent(CtrlBase component)
     {
         component.StateComponentChanged -= Components_StateCtrlChanged;
 
-        if (component is PostItEditorComponent)
+        if (component is PostItEditorCtrl)
         {
-            ((PostItEditorComponent)component).AddedEntity -= Store_AddedPostIt;
-            ((PostItEditorComponent)component).SavedEntity -= Store_SavedPostIt;
-            ((PostItEditorComponent)component).DeletedEntity -= Store_DeletedPostIt;
-            ((PostItEditorComponent)component).ExtendedEdit -= Store_ExtendedEditPostIt;
+            ((PostItEditorCtrl)component).AddedEntity -= Store_AddedPostIt;
+            ((PostItEditorCtrl)component).SavedEntity -= Store_SavedPostIt;
+            ((PostItEditorCtrl)component).DeletedEntity -= Store_DeletedPostIt;
+            ((PostItEditorCtrl)component).ExtendedEdit -= Store_ExtendedEditPostIt;
         }
-        else if (component is NoteEditorComponent)
+        else if (component is NoteEditorCtrl)
         {
-            ((NoteEditorComponent)component).AddedEntity += Store_AddedNote;
-            ((NoteEditorComponent)component).SavedEntity += Store_SavedNote;
-            ((NoteEditorComponent)component).DeletedEntity += Store_DeletedNote;
-            ((NoteEditorComponent)component).PostItEdit += Store_EditedPostItNote;
+            ((NoteEditorCtrl)component).AddedEntity += Store_AddedNote;
+            ((NoteEditorCtrl)component).SavedEntity += Store_SavedNote;
+            ((NoteEditorCtrl)component).DeletedEntity += Store_DeletedNote;
+            ((NoteEditorCtrl)component).PostItEdit += Store_EditedPostItNote;
         }
 
         _listComponents.Remove(component);
         Logger?.LogInformation("Removed Component {component}", component.ToString());
-        RemovedComponent?.Invoke(this, new ComponentEventArgs<ComponentBase>(component));
+        RemovedComponent?.Invoke(this, new ComponentEventArgs<CtrlBase>(component));
     }
 
     public void SaveConfig(string configFile = null)
@@ -252,9 +252,9 @@ public class Store
     {
         foreach(var com in _listComponents)
         {
-            if (com is NoteEditorComponent)
+            if (com is NoteEditorCtrl)
             {
-                var comNote = (NoteEditorComponent)com;
+                var comNote = (NoteEditorCtrl)com;
                 if (comNote.Model.NoteId == noteId && comNote.EditMode == true )
                     return Task.FromResult(true);
 
@@ -267,8 +267,8 @@ public class Store
     {
         foreach (var com in _listComponents)
         {
-            if (com is PostItEditorComponent)
-                if (((PostItEditorComponent)com).Model.NoteId == noteId)
+            if (com is PostItEditorCtrl)
+                if (((PostItEditorCtrl)com).Model.NoteId == noteId)
                     return Task.FromResult(true);
         }
         return Task.FromResult(false);
@@ -280,12 +280,12 @@ public class Store
         {
             foreach (var com in _listComponents)
             {
-                if (com is PostItEditorComponent)
-                    await ((PostItEditorComponent)com).SaveModel();
+                if (com is PostItEditorCtrl)
+                    await ((PostItEditorCtrl)com).SaveModel();
 
-                if (com is NoteEditorComponent)
+                if (com is NoteEditorCtrl)
                 {
-                    var comNote = (NoteEditorComponent)com;
+                    var comNote = (NoteEditorCtrl)com;
                     if (comNote.EditMode)
                         await comNote.SaveModel();
                 }
@@ -301,25 +301,25 @@ public class Store
 
     public async Task<bool> SaveAndCloseActiveNotes(Guid serviceId)
     {
-        var stackPostIts = new Stack<PostItEditorComponent>();
-        var stackNotes = new Stack<NoteEditorComponent>();
+        var stackPostIts = new Stack<PostItEditorCtrl>();
+        var stackNotes = new Stack<NoteEditorCtrl>();
 
         try
         {
             foreach (var com in _listComponents)
             {
-                if (com is PostItEditorComponent)
+                if (com is PostItEditorCtrl)
                 {                        
-                    var comNote = (PostItEditorComponent)com;
+                    var comNote = (PostItEditorCtrl)com;
                     if (comNote.ServiceRef.IdServiceRef == serviceId)
                     {
                         await comNote.SaveModel();                            
                         stackPostIts.Push(comNote);
                     }
                 }
-                if (com is NoteEditorComponent)
+                if (com is NoteEditorCtrl)
                 {
-                    var comNote = (NoteEditorComponent)com;
+                    var comNote = (NoteEditorCtrl)com;
                     if (comNote.ServiceRef.IdServiceRef == serviceId)
                     {
                         if (comNote.EditMode)
@@ -354,10 +354,10 @@ public class Store
     {
         foreach (var com in _listComponents)
         {
-            if (com is PostItEditorComponent)
+            if (com is PostItEditorCtrl)
             {
 
-                ((PostItEditorComponent)com).HidePostIt();
+                ((PostItEditorCtrl)com).HidePostIt();
             }
         }            
     }
@@ -366,8 +366,8 @@ public class Store
     {
         foreach (var com in _listComponents)
         {
-            if (com is PostItEditorComponent)
-                ((PostItEditorComponent)com).ActivatePostIt();
+            if (com is PostItEditorCtrl)
+                ((PostItEditorCtrl)com).ActivatePostIt();
         }
     }
 
@@ -546,7 +546,7 @@ public class Store
     }
 
     public event EventHandler<ComponentEventArgs<string>> ComponentNotification;
-    internal void OnComponentNotification(ComponentBase component, string message)
+    internal void OnComponentNotification(CtrlBase component, string message)
     {
         ComponentNotification?.Invoke(component, new ComponentEventArgs<string>(message));
     }

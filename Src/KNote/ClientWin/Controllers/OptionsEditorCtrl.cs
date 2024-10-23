@@ -2,13 +2,13 @@
 using KNote.Model;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class OptionsEditorComponent : ComponentEditorBase<IViewEditor<AppConfig>, AppConfig>
+public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfig>
 {
     #region Constructor 
 
-    public OptionsEditorComponent(Store store) : base(store)
+    public OptionsEditorCtrl(Store store) : base(store)
     {
         ComponentName = "Options editor";
     }

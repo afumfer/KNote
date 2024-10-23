@@ -1,6 +1,6 @@
 ﻿' ChatGPT example 2, use component with chat conversation
 
-var chat = GetKntChatGPTComponent();
+var chat = GetKntChatGPTCtrl();
 chat.Run();
 
 chat.GetCompletion("Hola.");

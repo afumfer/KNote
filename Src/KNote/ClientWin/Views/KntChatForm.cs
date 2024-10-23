@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 
@@ -8,20 +8,20 @@ public partial class KntChatForm : Form, IViewChat
 {
     #region Private fields
 
-    private readonly KntChatComponent _com;
+    private readonly KntChatCtrl _ctrl;
     private bool _viewFinalized = false;
 
     #endregion
 
     #region Constructor
 
-    public KntChatForm(KntChatComponent com)
+    public KntChatForm(KntChatCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -35,7 +35,7 @@ public partial class KntChatForm : Form, IViewChat
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(ShowDialog());
+        return _ctrl.DialogResultToComponentResult(ShowDialog());
     }
 
     public void OnClosingView()
@@ -69,15 +69,15 @@ public partial class KntChatForm : Form, IViewChat
 
     private void ChatForm_Load(object sender, EventArgs e)
     {
-        _com.ReceiveMessage += _com_ReceiveMessage;
+        _ctrl.ReceiveMessage += _com_ReceiveMessage;
 
-        Text += $" [{_com.Store.AppUserName}]";
-        labelServer.Text = _com.Store.AppConfig.ChatHubUrl;
+        Text += $" [{_ctrl.Store.AppUserName}]";
+        labelServer.Text = _ctrl.Store.AppConfig.ChatHubUrl;
     }
 
     private async void buttonSend_Click(object sender, EventArgs e)
     {
-        await _com.SendMessageAsync(textMessage.Text);
+        await _ctrl.SendMessageAsync(textMessage.Text);
         textMessage.Text = "";
     }
 
@@ -85,8 +85,8 @@ public partial class KntChatForm : Form, IViewChat
     {
         if (!_viewFinalized)
         {
-            if (_com.AutoCloseComponentOnViewExit)
-                _com.Finalize();
+            if (_ctrl.AutoCloseComponentOnViewExit)
+                _ctrl.Finalize();
             else
             {
                 Hide();

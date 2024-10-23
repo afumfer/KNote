@@ -4,7 +4,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Core;
 
-abstract public class ComponentBase : IDisposable
+abstract public class CtrlBase : IDisposable
 {
     #region Public properties
 
@@ -51,7 +51,7 @@ abstract public class ComponentBase : IDisposable
 
     #region Constructor
 
-    public ComponentBase(Store store)
+    public CtrlBase(Store store)
     {
         ComponentId = Guid.NewGuid();
         OnStateComponentChanged(EComponentState.NotStarted);           
@@ -157,8 +157,8 @@ abstract public class ComponentBase : IDisposable
 
     protected void FinalizeViewsComponent()
     {            
-        List<ComponentBase> lc = GetControllers(Fields);
-        foreach (ComponentBase c in lc)
+        List<CtrlBase> lc = GetControllers(Fields);
+        foreach (CtrlBase c in lc)
             c.Finalize();
 
         List<IViewBase> lv = GetViews(Fields);
@@ -169,7 +169,7 @@ abstract public class ComponentBase : IDisposable
         foreach (FieldInfo field in Fields)
         {
             object v = field.GetValue(this);
-            if ((v != null && v is ComponentBase) || ((v != null && v is IViewBase)))
+            if ((v != null && v is CtrlBase) || ((v != null && v is IViewBase)))
             {
                 field.SetValue(this, null);
             }
@@ -199,17 +199,17 @@ abstract public class ComponentBase : IDisposable
             | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
     }
 
-    protected List<ComponentBase> GetControllers(List<FieldInfo> fields)
+    protected List<CtrlBase> GetControllers(List<FieldInfo> fields)
     {
-        List<ComponentBase>
-            myList = new List<ComponentBase>();
+        List<CtrlBase>
+            myList = new List<CtrlBase>();
 
         foreach (FieldInfo field in fields)
         {
             object v = field.GetValue(this);
-            if (v != null && v is ComponentBase) 
+            if (v != null && v is CtrlBase) 
             {
-                myList.Add((ComponentBase)field.GetValue(this));
+                myList.Add((CtrlBase)field.GetValue(this));
             }
         }
 

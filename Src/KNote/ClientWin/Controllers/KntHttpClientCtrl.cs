@@ -2,9 +2,9 @@
 using KNote.Model;
 using System.Text;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class KntHttpClientComponent : ComponentBase
+public class KntHttpClientCtrl : CtrlBase
 {
     #region Private fields 
 
@@ -22,7 +22,7 @@ public class KntHttpClientComponent : ComponentBase
 
     #region Constructor 
 
-    public KntHttpClientComponent(Store store) : base(store)
+    public KntHttpClientCtrl(Store store) : base(store)
     {
         ComponentName = "KntHttpClient Component";
     }

@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -9,7 +9,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
 {
     #region Private fields
 
-    private readonly AttributeEditorComponent _com;
+    private readonly AttributeEditorCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
@@ -17,13 +17,13 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
 
     #region Constructor 
 
-    public AttributeEditorForm(AttributeEditorComponent com)
+    public AttributeEditorForm(AttributeEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -37,7 +37,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
 
     public Result<EComponentResult> ShowModalView()
     {
-        var res = _com.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
         return res;
     }
 
@@ -98,7 +98,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 

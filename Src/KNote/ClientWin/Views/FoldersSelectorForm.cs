@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -10,20 +10,20 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
 {
     #region Private fields
 
-    private readonly FoldersSelectorComponent _com;
+    private readonly FoldersSelectorCtrl _ctrl;
     private bool _viewFinalized = false;
 
     #endregion
 
     #region Constructor
 
-    public FoldersSelectorForm(FoldersSelectorComponent com)
+    public FoldersSelectorForm(FoldersSelectorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -42,7 +42,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
 
     Result<EComponentResult> IViewBase.ShowModalView()
     {            
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public async void RefreshView()
@@ -52,22 +52,22 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
             TreeNode rootRepNode;
                                    
             treeViewFolders.Nodes.Clear();
-            _com.ListEntities.Clear();                
+            _ctrl.ListEntities.Clear();                
 
-            foreach (var serviceRef in _com.ServicesRef)
+            foreach (var serviceRef in _ctrl.ServicesRef)
             {
-                _com.NotifyMessage($"Loading folderes in {serviceRef.Alias} ...");
+                _ctrl.NotifyMessage($"Loading folderes in {serviceRef.Alias} ...");
 
                 rootRepNode = new TreeNode("[" + serviceRef.Alias + "]", 2, 2);         
                 rootRepNode.Tag = serviceRef;                
                 treeViewFolders.Nodes.Add(rootRepNode);
                
-                LoadNodes(rootRepNode, serviceRef, await _com.LoadEntities(serviceRef));
+                LoadNodes(rootRepNode, serviceRef, await _ctrl.LoadEntities(serviceRef));
                 rootRepNode.Expand();
                 treeViewFolders.Refresh();
                 
             }
-            _com.NotifyMessage("");            
+            _ctrl.NotifyMessage("");            
         }
     }
 
@@ -132,7 +132,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
             treeViewFolders.SelectedNode = newNode;
         }
         else
-            _com.ShowMessage("KMSG: The parent node of the new node is not correct.", KntConst.AppName);
+            _ctrl.ShowMessage("KMSG: The parent node of the new node is not correct.", KntConst.AppName);
     }
 
     public void DeleteItem(FolderWithServiceRef item)
@@ -161,7 +161,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
         
         treeViewFolders.SelectedNode.Tag = newItem;
         treeViewFolders.SelectedNode.Text = newItem.FolderInfo.Name;
-        if (_com.OldParent == newItem.FolderInfo.ParentId)            
+        if (_ctrl.OldParent == newItem.FolderInfo.ParentId)            
             return;
                    
         TreeNode[] treeNodes;
@@ -219,9 +219,9 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
                 v = new FolderWithServiceRef() { ServiceRef = (ServiceRef)e.Node.Tag, FolderInfo = null };
             }
 
-            _com.SelectedEntity = v;
-            _com.Path = treeViewFolders.SelectedNode.FullPath;
-            _com.NotifySelectedEntity();                
+            _ctrl.SelectedEntity = v;
+            _ctrl.Path = treeViewFolders.SelectedNode.FullPath;
+            _ctrl.NotifySelectedEntity();                
         }
         catch (Exception)
         {            
@@ -231,18 +231,18 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
 
     private void buttonAccept_Click(object sender, EventArgs e)
     {            
-        _com.Accept();            
+        _ctrl.Accept();            
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        _com.Cancel();
+        _ctrl.Cancel();
     }
 
     private void FoldersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+            _ctrl.Finalize();
     }
 
     #endregion
@@ -261,7 +261,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
             nodeFolder.Name = f.FolderId.ToString();
             var folderWithServiceRef = new FolderWithServiceRef() { ServiceRef = service, FolderInfo = f };
             nodeFolder.Tag = folderWithServiceRef;
-            _com.ListEntities.Add(folderWithServiceRef);
+            _ctrl.ListEntities.Add(folderWithServiceRef);
             node.Nodes.Add(nodeFolder);
 
             LoadNodes(nodeFolder, service, f.ChildFolders);
@@ -279,8 +279,8 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
 
         this.SuspendLayout();
 
-        if (_com.Extensions.Keys.Count > 0)
-            foreach (string s in _com.Extensions.Keys)
+        if (_ctrl.Extensions.Keys.Count > 0)
+            foreach (string s in _ctrl.Extensions.Keys)
                 if (s.StartsWith("--"))
                     contextMenu.Items.Add("-", null, extension_Click);
                 else
@@ -294,7 +294,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
         ToolStripMenuItem menuSel;
         menuSel = (ToolStripMenuItem)sender;
 
-        _com.Extensions[menuSel.Text](this, new ComponentEventArgs<FolderWithServiceRef>(_com.SelectedEntity));
+        _ctrl.Extensions[menuSel.Text](this, new ComponentEventArgs<FolderWithServiceRef>(_ctrl.SelectedEntity));
     }
 
     #endregion

@@ -2,13 +2,13 @@
 using KNote.Model;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class MonitorComponent : ComponentViewBase<IViewBase>
+public class MonitorCtrl : CtrlViewBase<IViewBase>
 {
     #region Constructor 
 
-    public MonitorComponent(Store store) : base(store)
+    public MonitorCtrl(Store store) : base(store)
     {
         ComponentName = "KeyNote monitor";
     }
@@ -73,13 +73,13 @@ public class MonitorComponent : ComponentViewBase<IViewBase>
 
     private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
     {
-        var info = $"{((ComponentBase)sender).ComponentName} - {e.Entity.ToString()}";
+        var info = $"{((CtrlBase)sender).ComponentName} - {e.Entity.ToString()}";
         OnShowLog(info);
     }
 
     private void Store_ComponentsStateChanged(object sender, ComponentEventArgs<EComponentState> e)
     {
-        var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((ComponentBase)sender).ComponentId}";
+        var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((CtrlBase)sender).ComponentId}";
         OnShowLog(info);
     }
    

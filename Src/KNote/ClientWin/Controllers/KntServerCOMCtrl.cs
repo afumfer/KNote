@@ -4,15 +4,15 @@ using System.Collections;
 using System.IO.Ports;
 using System.Text;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class KntServerCOMComponent : ComponentBase, IDisposable
+public class KntServerCOMCtrl : CtrlBase, IDisposable
 {
     #region Private fields
 
     private SerialPort _serialPort;
     private Queue _messageQueue;
-    private readonly KntChatGPTComponent _chatGPT;
+    private readonly KntChatGPTCtrl _chatGPT;
 
     private CancellationTokenSource _cancellationTokenSource;    
     private bool _showViewMessage;
@@ -78,7 +78,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
 
     #region Constructor
 
-    public KntServerCOMComponent(Store store) : base(store)
+    public KntServerCOMCtrl(Store store) : base(store)
     {
         ComponentName = "KntServerCOM Component";
 
@@ -102,7 +102,7 @@ public class KntServerCOMComponent : ComponentBase, IDisposable
         _convTable = LoadQDOSCharacterSetTable();
 
         // ChatGPT included component
-        _chatGPT = new KntChatGPTComponent(store);
+        _chatGPT = new KntChatGPTCtrl(store);
         _chatGPT.Run();
     }
 

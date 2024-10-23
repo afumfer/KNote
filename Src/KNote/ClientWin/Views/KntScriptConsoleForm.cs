@@ -2,7 +2,7 @@
 
 using KNote.ClientWin.Core;
 using KNote.Model;
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KntScript;
 
 namespace KNote.ClientWin.Views;
@@ -11,7 +11,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 {
     #region Private fields
 
-    private readonly KntScriptConsoleComponent _com;
+    private readonly KntScriptConsoleCtrl _ctrl;
     private bool _viewFinalized = false;
 
     private string _sourceCodeDirWork;
@@ -26,16 +26,16 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     #region Constructor
 
-    public KntScriptConsoleForm(KntScriptConsoleComponent com)
+    public KntScriptConsoleForm(KntScriptConsoleCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
         PersonalizeTabStop();
 
-        _com = com;
-        _engine = _com.KntSEngine;
-        _sourceCodeFile = _com.CodeFile;            
+        _ctrl = com;
+        _engine = _ctrl.KntSEngine;
+        _sourceCodeFile = _ctrl.CodeFile;            
     }
 
     #endregion
@@ -131,7 +131,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     private void KntScriptConsoleForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+            _ctrl.Finalize();
     }
 
     #endregion
@@ -197,7 +197,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public void OnClosingView()

@@ -3,9 +3,9 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class NotesSelectorComponent : ComponentSelectorBase<IViewSelector<NoteInfoDto>, NoteInfoDto>
+public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, NoteInfoDto>
 {
     #region Properties
 
@@ -21,12 +21,11 @@ public class NotesSelectorComponent : ComponentSelectorBase<IViewSelector<NoteIn
         private set;
     }
 
-
     #endregion
 
     #region Constructor
 
-    public NotesSelectorComponent(Store store) : base(store)
+    public NotesSelectorCtrl(Store store) : base(store)
     {
         ComponentName = "Notes selector";
     }

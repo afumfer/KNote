@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using KNote.ClientWin.Core;
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
@@ -20,7 +20,7 @@ public partial class KntLabForm : Form, IViewBase
 {
     #region Private fields
 
-    private readonly KntLabComponent _com;
+    private readonly KntLabCtrl _ctrl;
     private bool _viewFinalized = false;
 
     private string _pathSampleScripts = @"..\..\..\AutoKntScripts\";
@@ -34,14 +34,14 @@ public partial class KntLabForm : Form, IViewBase
 
     #region Constructors and FormLoad
 
-    public KntLabForm(KntLabComponent com)
+    public KntLabForm(KntLabCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
-        _store = _com.Store;
+        _ctrl = com;
+        _store = _ctrl.Store;
         _service = _store.ActiveFolderWithServiceRef?.ServiceRef?.Service;
     }
 
@@ -67,7 +67,7 @@ public partial class KntLabForm : Form, IViewBase
     private void KntLabForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+            _ctrl.Finalize();
     }
 
     #endregion
@@ -81,7 +81,7 @@ public partial class KntLabForm : Form, IViewBase
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(ShowDialog());
+        return _ctrl.DialogResultToComponentResult(ShowDialog());
     }
 
     public void RefreshView()
@@ -184,7 +184,7 @@ public partial class KntLabForm : Form, IViewBase
     {
         var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
 
-        var com = new KntScriptConsoleComponent(_store);
+        var com = new KntScriptConsoleCtrl(_store);
         com.KntSEngine = kntEngine;
 
         com.Run();
@@ -202,7 +202,7 @@ public partial class KntLabForm : Form, IViewBase
 
         var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
 
-        var com = new KntScriptConsoleComponent(_store);
+        var com = new KntScriptConsoleCtrl(_store);
         com.KntSEngine = kntEngine;
         com.CodeFile = Path.Combine(_pathSampleScripts, _selectedFile);
 
@@ -380,7 +380,7 @@ public partial class KntLabForm : Form, IViewBase
 
     private void buttonRunMonitor_Click(object sender, EventArgs e)
     {
-        var monitor = new MonitorComponent(_store);
+        var monitor = new MonitorCtrl(_store);
         monitor.Run();
     }
 
@@ -1057,10 +1057,10 @@ public partial class KntLabForm : Form, IViewBase
 
     private void buttonServerCOMForm_Click(object sender, EventArgs e)
     {
-        //var qserver = new KntServerCOMForm(new KntServerCOMComponent(_com.Store));
+        //var qserver = new KntServerCOMForm(new KntServerCOMComponent(_ctrl.Store));
         //qserver.Show();
 
-        var kntServerCOMComponent = new KntServerCOMComponent(_com.Store);
+        var kntServerCOMComponent = new KntServerCOMCtrl(_ctrl.Store);
         kntServerCOMComponent.Run();
         kntServerCOMComponent.ShowServerCOMView(true);
     }

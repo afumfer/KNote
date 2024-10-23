@@ -5,9 +5,9 @@ using System.ClientModel;
 using System.Diagnostics;
 using System.Text;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class KntChatGPTComponent : ComponentBase
+public class KntChatGPTCtrl : CtrlBase
 {
     #region Private fields
 
@@ -63,7 +63,7 @@ public class KntChatGPTComponent : ComponentBase
 
     #region Constructor
 
-    public KntChatGPTComponent(Store store) : base(store)
+    public KntChatGPTCtrl(Store store) : base(store)
     {
         ComponentName = "KntChatGPT Component";        
     }

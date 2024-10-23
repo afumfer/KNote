@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -9,7 +9,7 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 {
     #region Private fields
 
-    private readonly TaskEditorComponent _com;
+    private readonly TaskEditorCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
@@ -17,13 +17,13 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 
     #region Constructor
 
-    public TaskEditorForm(TaskEditorComponent com)
+    public TaskEditorForm(TaskEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -37,7 +37,7 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 
     public Result<EComponentResult> ShowModalView()
     {
-        var res = _com.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
         return res;
     }
 
@@ -94,7 +94,7 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {            
-        var res = await _com.SaveModel();
+        var res = await _ctrl.SaveModel();
         if (res)
         {
             _formIsDisty = false;
@@ -161,43 +161,43 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 
     private void ModelToControls()
     {
-        textUser.Text = _com.Model.UserFullName;
-        textTags.Text = _com.Model.Tags;
-        textPriority.Text = _com.Model.Priority.ToString();
-        textEstimatedTime.Text = _com.Model.EstimatedTime?.ToString();
-        textSpendTime.Text = _com.Model.SpentTime?.ToString();
-        textExStartDate.Text = _com.Model.ExpectedStartDate?.ToString();
-        textExEndDate.Text = _com.Model.ExpectedEndDate?.ToString();
-        textDificultyLevel.Text = _com.Model.DifficultyLevel?.ToString();
-        textStartDate.Text = _com.Model.StartDate?.ToString();
-        textEndDate.Text = _com.Model.EndDate?.ToString();
-        checkResolved.Checked = _com.Model.Resolved;
-        textDescription.Text = _com.Model.Description;
+        textUser.Text = _ctrl.Model.UserFullName;
+        textTags.Text = _ctrl.Model.Tags;
+        textPriority.Text = _ctrl.Model.Priority.ToString();
+        textEstimatedTime.Text = _ctrl.Model.EstimatedTime?.ToString();
+        textSpendTime.Text = _ctrl.Model.SpentTime?.ToString();
+        textExStartDate.Text = _ctrl.Model.ExpectedStartDate?.ToString();
+        textExEndDate.Text = _ctrl.Model.ExpectedEndDate?.ToString();
+        textDificultyLevel.Text = _ctrl.Model.DifficultyLevel?.ToString();
+        textStartDate.Text = _ctrl.Model.StartDate?.ToString();
+        textEndDate.Text = _ctrl.Model.EndDate?.ToString();
+        checkResolved.Checked = _ctrl.Model.Resolved;
+        textDescription.Text = _ctrl.Model.Description;
     }
 
     private void ControlsToModel()
     {
-        _com.Model.UserFullName = textUser.Text;
-        _com.Model.Tags = textTags.Text;
-        _com.Model.Priority = _com.TextToInt(textPriority.Text);
+        _ctrl.Model.UserFullName = textUser.Text;
+        _ctrl.Model.Tags = textTags.Text;
+        _ctrl.Model.Priority = _ctrl.TextToInt(textPriority.Text);
 
-        _com.Model.EstimatedTime = _com.TextToDouble(textEstimatedTime.Text);
-        _com.Model.SpentTime = _com.TextToDouble(textSpendTime.Text);
-        _com.Model.DifficultyLevel = _com.TextToDouble(textDificultyLevel.Text);
+        _ctrl.Model.EstimatedTime = _ctrl.TextToDouble(textEstimatedTime.Text);
+        _ctrl.Model.SpentTime = _ctrl.TextToDouble(textSpendTime.Text);
+        _ctrl.Model.DifficultyLevel = _ctrl.TextToDouble(textDificultyLevel.Text);
 
-        _com.Model.ExpectedStartDate = _com.TextToDateTime(textExStartDate.Text);
-        _com.Model.ExpectedEndDate = _com.TextToDateTime(textExEndDate.Text);
-        _com.Model.StartDate = _com.TextToDateTime(textStartDate.Text);
-        _com.Model.EndDate = _com.TextToDateTime(textEndDate.Text);
+        _ctrl.Model.ExpectedStartDate = _ctrl.TextToDateTime(textExStartDate.Text);
+        _ctrl.Model.ExpectedEndDate = _ctrl.TextToDateTime(textExEndDate.Text);
+        _ctrl.Model.StartDate = _ctrl.TextToDateTime(textStartDate.Text);
+        _ctrl.Model.EndDate = _ctrl.TextToDateTime(textEndDate.Text);
 
-        _com.Model.Resolved = checkResolved.Checked;
-        _com.Model.Description = textDescription.Text;
+        _ctrl.Model.Resolved = checkResolved.Checked;
+        _ctrl.Model.Description = textDescription.Text;
     }
 
     private string SelDate(string date)

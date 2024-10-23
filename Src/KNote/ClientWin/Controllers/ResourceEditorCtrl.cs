@@ -3,24 +3,35 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDto>, KMessageDto>
+public class ResourceEditorCtrl : CtrlEditorBase<IViewEditor<ResourceDto>, ResourceDto>
 {
     #region Constructor 
 
-    public MessageEditorComponent(Store store): base(store)
+    public ResourceEditorCtrl(Store store): base(store)
     {
-        ComponentName = "Message / alarm editor";
+        ComponentName = "Resource editor";        
     }
 
     #endregion
 
-    #region Abstract member implementations 
+    #region Abstract members implementations
 
-    protected override IViewEditor<KMessageDto> CreateView()
+    protected override IViewEditor<ResourceDto> CreateView()
     {
         return Store.FactoryViews.View(this);
+    }
+
+    public override Task<bool> NewModel(IKntService service)
+    {
+        Service = service;
+
+        // TODO: call service for new model
+        Model = new ResourceDto();
+        Model.ResourceId = Guid.NewGuid();
+        Model.ContentInDB = false;
+        return Task.FromResult(true);
     }
 
     public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
@@ -29,7 +40,7 @@ public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDt
         {
             Service = service;
 
-            var res = await Service.Notes.GetMessageAsync(id);
+            var res = await Service.Notes.GetResourceAsync(id);
             if (!res.IsValid)
                 return false;
 
@@ -46,24 +57,14 @@ public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDt
         }
     }
 
-    public override Task<bool> NewModel(IKntService service)
+    public async override Task<bool> SaveModel()
     {
-        Service = service;
+        View.RefreshModel();            
 
-        // TODO: call service for new model
-        Model = new KMessageDto();
-        Model.KMessageId = Guid.NewGuid();
-        return Task.FromResult(true);
-    }
-
-    public override async Task<bool> SaveModel()
-    {
-        View.RefreshModel();
-        
         if (!Model.IsDirty())
             return true;
 
-        var isNew = (Model.KMessageId == Guid.Empty);
+        var isNew = (Model.ResourceId == Guid.Empty);
 
         var msgVal = Model.GetErrorMessage();
         if (!string.IsNullOrEmpty(msgVal))
@@ -74,22 +75,22 @@ public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDt
 
         try
         {
-            Result<KMessageDto> response;
+            Result<ResourceDto> response;
             if (AutoDBSave)
             {
-                response = await Service.Notes.SaveMessageAsync(Model, true);
+                response = await Service.Notes.SaveResourceAsync(Model, true);
                 Model = response.Entity;
                 Model.SetIsDirty(false);
             }
             else
             {
-                response = new Result<KMessageDto>();
+                response = new Result<ResourceDto>();
                 Model.SetIsDirty(true);
                 response.Entity = Model;
             }
 
             if (response.IsValid)
-            {                                        
+            {
                 if (!isNew)
                     OnSavedEntity(response.Entity);
                 else
@@ -111,26 +112,26 @@ public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDt
 
     public async override Task<bool> DeleteModel(IKntService service, Guid id)
     {
-        var result = View.ShowInfo("Are you sure you want to delete this alert/message?", "Delete message", MessageBoxButtons.YesNo);
+        var result = View.ShowInfo("Are you sure you want to delete this resource?", "Delete resource", MessageBoxButtons.YesNo);
         if (result == DialogResult.Yes || result == DialogResult.Yes)
         {
             try
             {
-                Result<KMessageDto> response;
+                Result<ResourceDto> response;
                 if (AutoDBSave)
-                    response = await service.Notes.DeleteMessageAsync(id);
+                    response = await service.Notes.DeleteResourceAsync(id);
                 else
-                {
-                    var resGet = await service.Notes.GetMessageAsync(id);
+                {                        
+                    var resGet = await service.Notes.GetResourceAsync(id);
                     if (!resGet.IsValid)
                     {
-                        response = new Result<KMessageDto>();
-                        response.Entity = new KMessageDto();
+                        response = new Result<ResourceDto>();
+                        response.Entity = new ResourceDto();
                     }
                     else
                         response = resGet;
-                }                  
-                
+                }
+
                 if (response.IsValid)
                 {
                     response.Entity.SetIsDeleted(true);
@@ -143,7 +144,7 @@ public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDt
             }
             catch (Exception ex)
             {
-                View.ShowInfo(ex.Message);                    
+                View.ShowInfo(ex.Message);
             }
         }
         return false;
@@ -151,7 +152,21 @@ public class MessageEditorComponent : ComponentEditorBase<IViewEditor<KMessageDt
 
     public async override Task<bool> DeleteModel()
     {
-        return await DeleteModel(Service, Model.KMessageId);
+        return await DeleteModel(Service, Model.ResourceId);
+    }
+
+    public string ExtensionFileToFileType(string extension)
+    {
+        return Store.ExtensionFileToFileType(extension);
+    }
+
+    #endregion
+
+    #region Utils
+
+    public void SaveResourceFileAndRefreshDto()
+    {
+        Service.Notes.UtilManageResourceContent(Model);
     }
 
     #endregion 

@@ -3,9 +3,9 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbeddable<NoteExtendedDto>, NoteExtendedDto>
+public class NoteEditorCtrl : CtrlEditorEmbeddableBase<IViewEditorEmbeddable<NoteExtendedDto>, NoteExtendedDto>
 {
     #region Properties
        
@@ -15,7 +15,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     #region Constructor, Dispose, ...
 
-    public NoteEditorComponent(Store store) : base(store)
+    public NoteEditorCtrl(Store store) : base(store)
     {
         ComponentName = "Note editor";
         Store.DeletedNote += Store_DeletedNote;
@@ -206,7 +206,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public NoteKAttributeDto EditAttribute(NoteKAttributeDto noteAttribute)
     {
-        var noteAttributeEditor = new NoteAttributeEditorComponent(Store);
+        var noteAttributeEditor = new NoteAttributeEditorCtrl(Store);
 
         noteAttributeEditor.AutoDBSave = false;  // don't save automatically
             
@@ -223,7 +223,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public async Task<bool> RequestChangeNoteType(Guid? oldSelectedId)
     {
-        var noteTypesSelector = new NoteTypesSelectorComponent(Store);
+        var noteTypesSelector = new NoteTypesSelectorCtrl(Store);
         var resCanLoadEntities = await noteTypesSelector.LoadEntities(Service, false);            
         if (resCanLoadEntities)
         {
@@ -267,7 +267,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public async Task<KMessageDto> NewMessage()
     {
-        var messageEditor = new MessageEditorComponent(Store);
+        var messageEditor = new MessageEditorCtrl(Store);
 
         messageEditor.AutoDBSave = false;  // don't save automatically
             
@@ -295,7 +295,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public KMessageDto EditMessage(Guid messageId)
     {
-        var messageEditor = new MessageEditorComponent(Store);
+        var messageEditor = new MessageEditorCtrl(Store);
 
         messageEditor.AutoDBSave = false;  // don't save automatically
             
@@ -313,7 +313,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public async Task<bool> DeleteMessage(Guid messageId)
     {
-        var messageEditor = new MessageEditorComponent(Store);
+        var messageEditor = new MessageEditorCtrl(Store);
         messageEditor.AutoDBSave = false;  // don't save automatically
 
         var res = await messageEditor.DeleteModel(Service, messageId);
@@ -343,7 +343,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public async Task<NoteTaskDto> NewTask()
     {
-        var taskEditor = new TaskEditorComponent(Store);
+        var taskEditor = new TaskEditorCtrl(Store);
 
         taskEditor.AutoDBSave = false;  // don't save automatically
 
@@ -369,7 +369,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public NoteTaskDto EditTask(Guid taskId)
     {
-        var taskEditor = new TaskEditorComponent(Store);
+        var taskEditor = new TaskEditorCtrl(Store);
 
         taskEditor.AutoDBSave = false;  // don't save automatically            
 
@@ -387,7 +387,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public async Task<bool> DeleteTask(Guid taskId)
     {
-        var taskEditor = new TaskEditorComponent(Store);
+        var taskEditor = new TaskEditorCtrl(Store);
         taskEditor.AutoDBSave = false;  // don't save automatically
 
         var res = await taskEditor.DeleteModel(Service, taskId);
@@ -418,7 +418,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public async Task<ResourceDto> NewResource()
     {
-        var resource = new ResourceEditorComponent(Store);
+        var resource = new ResourceEditorCtrl(Store);
         resource.AutoDBSave = false;  // don't save automatically
 
         await resource.NewModel(Service);
@@ -480,7 +480,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public Task<ResourceDto> EditResource(Guid resourceId)
     {
-        var resourceEditor = new ResourceEditorComponent(Store);
+        var resourceEditor = new ResourceEditorCtrl(Store);
         resourceEditor.AutoDBSave = false;  // don't save automatically
 
         var resource = Model.Resources.Where(_ => _.ResourceId == resourceId).SingleOrDefault();                     
@@ -498,7 +498,7 @@ public class NoteEditorComponent : ComponentEditorEmbeddableBase<IViewEditorEmbe
 
     public async Task<bool> DeleteResource(Guid resourceId)
     {
-        var resource = new ResourceEditorComponent(Store);
+        var resource = new ResourceEditorCtrl(Store);
         resource.AutoDBSave = false;  // don't save automatically
 
         var res = await resource.DeleteModel(Service, resourceId);

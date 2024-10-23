@@ -1,11 +1,11 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
 namespace KNote.ClientWin.Core;
 
-abstract public class ComponentViewBase<TView> : ComponentBase
+abstract public class CtrlViewBase<TView> : CtrlBase
     where TView : IViewBase
 {
     #region Properties
@@ -27,7 +27,7 @@ abstract public class ComponentViewBase<TView> : ComponentBase
 
     #region Constructor
 
-    public ComponentViewBase(Store store) : base(store)
+    public CtrlViewBase(Store store) : base(store)
     {
 
     }
@@ -78,10 +78,10 @@ abstract public class ComponentViewBase<TView> : ComponentBase
     #endregion 
 }
 
-abstract public class ComponentViewEmbeddableBase<TView> : ComponentViewBase<TView>
+abstract public class CtrlViewEmbeddableBase<TView> : CtrlViewBase<TView>
     where TView : IViewEmbeddable
 {
-    public ComponentViewEmbeddableBase(Store store) : base(store)
+    public CtrlViewEmbeddableBase(Store store) : base(store)
     {
 
     }
@@ -104,7 +104,7 @@ abstract public class ComponentViewEmbeddableBase<TView> : ComponentViewBase<TVi
 
 }
 
-abstract public class ComponentSelectorBase<TView, TEntity> : ComponentViewEmbeddableBase<TView>
+abstract public class CtrlSelectorBase<TView, TEntity> : CtrlViewEmbeddableBase<TView>
     where TView : IViewEmbeddable
 {
     #region Properties
@@ -122,7 +122,7 @@ abstract public class ComponentSelectorBase<TView, TEntity> : ComponentViewEmbed
 
     #region Constructor
 
-    public ComponentSelectorBase(Store store) : base(store)
+    public CtrlSelectorBase(Store store) : base(store)
     {
 
     }
@@ -196,7 +196,7 @@ abstract public class ComponentSelectorBase<TView, TEntity> : ComponentViewEmbed
     #endregion 
 }
 
-abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TView>
+abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
     where TView : IViewBase
     where TEntity : SmartModelDtoBase, new()        
 {
@@ -236,7 +236,7 @@ abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TV
 
     #region Constructor
 
-    public ComponentEditorBase(Store store) : base(store)
+    public CtrlEditorBase(Store store) : base(store)
     {
 
     }
@@ -318,7 +318,7 @@ abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TV
 
     public virtual FolderInfoDto GetFolder()
     {
-        var folderSelector = new FoldersSelectorComponent(Store);
+        var folderSelector = new FoldersSelectorCtrl(Store);
         var services = new List<ServiceRef>();
         services.Add(Store.GetServiceRef(Service.IdServiceRef));
         folderSelector.ServicesRef = services;
@@ -331,11 +331,11 @@ abstract public class ComponentEditorBase<TView, TEntity> : ComponentViewBase<TV
 
 }
 
-public abstract class ComponentEditorEmbeddableBase<TView, TEntity> : ComponentEditorBase<TView, TEntity>
+public abstract class CtrlEditorEmbeddableBase<TView, TEntity> : CtrlEditorBase<TView, TEntity>
     where TView : IViewEmbeddable
     where TEntity : SmartModelDtoBase, new()
 {
-    public ComponentEditorEmbeddableBase(Store store) : base(store)
+    public CtrlEditorEmbeddableBase(Store store) : base(store)
     {
 
     }

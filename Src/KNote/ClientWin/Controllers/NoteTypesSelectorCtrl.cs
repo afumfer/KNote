@@ -2,13 +2,13 @@
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class NoteTypesSelectorComponent : ComponentSelectorBase<IViewSelector<NoteTypeDto>, NoteTypeDto>
+public class NoteTypesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteTypeDto>, NoteTypeDto>
 {
     #region Constructor 
 
-    public NoteTypesSelectorComponent(Store store): base(store)
+    public NoteTypesSelectorCtrl(Store store): base(store)
     {
         ComponentName = "Note type selector";
     }

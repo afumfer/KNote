@@ -2,9 +2,9 @@
 using KNote.Model;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class KntChatComponent : ComponentBase, IDisposable
+public class KntChatCtrl : CtrlBase, IDisposable
 {
     #region Private fields
 
@@ -22,7 +22,7 @@ public class KntChatComponent : ComponentBase, IDisposable
 
     #region Constructor
 
-    public KntChatComponent(Store store) : base(store)
+    public KntChatCtrl(Store store) : base(store)
     {
         ComponentName = "KntChat Component";
     }

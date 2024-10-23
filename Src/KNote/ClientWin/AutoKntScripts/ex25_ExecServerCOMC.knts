@@ -1,6 +1,6 @@
 ﻿' Note: Only one instance of KntServerCOMComponent can be executed at a time.
 
-var serverCom = GetServerCOMComponent();
+var serverCom = GetServerCOMCtrl();
 
 ' (Default value for PortName: "COM1")
 'serverCom.PortName = "COM1"; 

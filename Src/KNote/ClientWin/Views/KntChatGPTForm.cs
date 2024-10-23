@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 
@@ -10,7 +10,7 @@ public partial class KntChatGPTForm : Form, IViewBase
 {
     #region Private fields
 
-    private readonly KntChatGPTComponent _com;
+    private readonly KntChatGPTCtrl _ctrl;
     private bool _viewFinalized = false;
     private int _countNRres;
     private StringBuilder _sbResult = new StringBuilder();
@@ -19,13 +19,13 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     #region Constructor
 
-    public KntChatGPTForm(KntChatGPTComponent com)
+    public KntChatGPTForm(KntChatGPTCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -39,7 +39,7 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public void OnClosingView()
@@ -55,12 +55,12 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public void RefreshView()
     {
-        textResult.Text = _com.ChatTextMessasges.ToString();
+        textResult.Text = _ctrl.ChatTextMessasges.ToString();
         textResult.SelectionStart = textResult.Text.Length;
         textResult.ScrollToCaret();
         textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens} ";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_com.TotalProcessingTime}";
+        toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
+        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_ctrl.TotalProcessingTime}";
     }
 
     #endregion
@@ -111,12 +111,12 @@ public partial class KntChatGPTForm : Form, IViewBase
     {
         if (!_viewFinalized)
         {
-            if (_com.AutoSaveChatMessagesOnViewExit && !string.IsNullOrEmpty(textResult.Text))
+            if (_ctrl.AutoSaveChatMessagesOnViewExit && !string.IsNullOrEmpty(textResult.Text))
             {
                 await SaveChatMessages();
             }
-            if (_com.AutoCloseComponentOnViewExit)
-                _com.Finalize();
+            if (_ctrl.AutoCloseComponentOnViewExit)
+                _ctrl.Finalize();
         }
     }
 
@@ -128,10 +128,10 @@ public partial class KntChatGPTForm : Form, IViewBase
     {
         try
         {
-            var noteEditor = new NoteEditorComponent(_com.Store);
-            await noteEditor.NewModel(_com.Store.GetActiveOrDefaultServide());
+            var noteEditor = new NoteEditorCtrl(_ctrl.Store);
+            await noteEditor.NewModel(_ctrl.Store.GetActiveOrDefaultServide());
             noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
-            noteEditor.Model.Description = _com.ChatTextMessasges.ToString();
+            noteEditor.Model.Description = _ctrl.ChatTextMessasges.ToString();
             noteEditor.Model.Tags = "[ChatGPT]";
             noteEditor.Run();
         }
@@ -143,11 +143,11 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private void RestartChatGPT()
     {
-        _com.RestartChatGPT();
+        _ctrl.RestartChatGPT();
 
-        toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens} ";
+        toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";
-        textResult.Text = _com.ChatTextMessasges.ToString();
+        textResult.Text = _ctrl.ChatTextMessasges.ToString();
         _sbResult.Clear();
         textPrompt.Text = "";        
     }
@@ -179,24 +179,24 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private async Task GoGetCompletion(string prompt)
     {
-        await _com.GetCompletionAsync(prompt);
+        await _ctrl.GetCompletionAsync(prompt);
         RefreshView();
     }
 
     private async Task GoStreamCompletion(string prompt)
     {        
         _countNRres = 0;
-        _com.StreamToken += _com_StreamToken;
+        _ctrl.StreamToken += _com_StreamToken;
 
-        await _com.StreamCompletionAsync(prompt);
+        await _ctrl.StreamCompletionAsync(prompt);
 
         RefreshStreamResult();
 
         textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_com.TotalTokens}";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_com.TotalProcessingTime}";
+        toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens}";
+        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_ctrl.TotalProcessingTime}";
 
-        _com.StreamToken -= _com_StreamToken;
+        _ctrl.StreamToken -= _com_StreamToken;
     }
 
     private void _com_StreamToken(object sender, ComponentEventArgs<string> e)

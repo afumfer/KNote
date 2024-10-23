@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 
@@ -8,20 +8,20 @@ public partial class KNoteAboutForm : Form, IViewBase
 {
     #region Private fields 
 
-    private readonly KNoteManagmentComponent _com;
+    private readonly KNoteManagmentCtrl _ctrl;
 
     #endregion
 
     #region Constructor
 
-    public KNoteAboutForm(KNoteManagmentComponent com)
+    public KNoteAboutForm(KNoteManagmentCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
         Text = KntConst.AppName;
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -35,7 +35,7 @@ public partial class KNoteAboutForm : Form, IViewBase
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
@@ -55,7 +55,7 @@ public partial class KNoteAboutForm : Form, IViewBase
     private void KNoteAboutForm_Load(object sender, EventArgs e)
     {
         labelRepository.Text = KntConst.GithubProject;
-        labelVersion.Text = $"Version: {_com.Store.AppVersion}";
+        labelVersion.Text = $"Version: {_ctrl.Store.AppVersion}";
         labelInfo.Text = KntConst.License;
     }
 

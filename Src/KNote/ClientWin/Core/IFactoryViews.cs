@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.Model;
 using KNote.Model.Dto;
 
@@ -6,29 +6,29 @@ namespace KNote.ClientWin.Core;
 
 public interface IFactoryViews
 {
-    IViewBase View(MonitorComponent component);
-    IViewBase View(KntScriptConsoleComponent component);
-    IViewSelector<FolderWithServiceRef> View(FoldersSelectorComponent component);
-    IViewSelector<NoteInfoDto> View(NotesSelectorComponent component);
-    IViewKNoteManagment View(KNoteManagmentComponent component);
-    IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorComponent component);
-    IViewPostIt<NoteDto> View(PostItEditorComponent component);
-    IViewPostIt<WindowDto> View(PostItPropertiesComponent component);
-    IViewEditor<FolderDto> View(FolderEditorComponent component);        
-    IViewEditor<KMessageDto> View(MessageEditorComponent component);        
-    IViewEditor<ResourceDto> View(ResourceEditorComponent component);        
-    IViewEditor<NoteTaskDto> View(TaskEditorComponent component);
-    IViewSelector<NoteTypeDto> View(NoteTypesSelectorComponent component);
-    IViewEditor<NoteKAttributeDto> View(NoteAttributeEditorComponent component);
-    IViewBase NotifyView(KNoteManagmentComponent component);
-    IViewBase AboutView(KNoteManagmentComponent component);
-    IViewEditor<KAttributeDto> View(AttributeEditorComponent component);
-    IViewSelector<NotesFilterWithServiceRef> View(FiltersSelectorComponent component);
-    IViewEditor<RepositoryRef> View(RepositoryEditorComponent component);
-    IViewEditor<AppConfig> View(OptionsEditorComponent component);
-    IViewBase View(KntChatGPTComponent component);
-    IViewChat View(KntChatComponent component);
-    IViewServerCOM View(KntServerCOMComponent component);
-    IViewBase View(KntLabComponent component);
-    IViewHeavyProcess View(HeavyProcessComponent component);
+    IViewBase View(MonitorCtrl component);
+    IViewBase View(KntScriptConsoleCtrl component);
+    IViewSelector<FolderWithServiceRef> View(FoldersSelectorCtrl component);
+    IViewSelector<NoteInfoDto> View(NotesSelectorCtrl component);
+    IViewKNoteManagment View(KNoteManagmentCtrl component);
+    IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorCtrl component);
+    IViewPostIt<NoteDto> View(PostItEditorCtrl component);
+    IViewPostIt<WindowDto> View(PostItPropertiesCtrl component);
+    IViewEditor<FolderDto> View(FolderEditorCtrl component);        
+    IViewEditor<KMessageDto> View(MessageEditorCtrl component);        
+    IViewEditor<ResourceDto> View(ResourceEditorCtrl component);        
+    IViewEditor<NoteTaskDto> View(TaskEditorCtrl component);
+    IViewSelector<NoteTypeDto> View(NoteTypesSelectorCtrl component);
+    IViewEditor<NoteKAttributeDto> View(NoteAttributeEditorCtrl component);
+    IViewBase NotifyView(KNoteManagmentCtrl component);
+    IViewBase AboutView(KNoteManagmentCtrl component);
+    IViewEditor<KAttributeDto> View(AttributeEditorCtrl component);
+    IViewSelector<NotesFilterWithServiceRef> View(FiltersSelectorCtrl component);
+    IViewEditor<RepositoryRef> View(RepositoryEditorCtrl component);
+    IViewEditor<AppConfig> View(OptionsEditorCtrl component);
+    IViewBase View(KntChatGPTCtrl component);
+    IViewChat View(KntChatCtrl component);
+    IViewServerCOM View(KntServerCOMCtrl component);
+    IViewBase View(KntLabCtrl component);
+    IViewHeavyProcess View(HeavyProcessCtrl component);
 }

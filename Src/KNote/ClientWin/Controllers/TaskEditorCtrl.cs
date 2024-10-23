@@ -3,22 +3,22 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceDto>, ResourceDto>
+public class TaskEditorCtrl : CtrlEditorBase<IViewEditor<NoteTaskDto>, NoteTaskDto>
 {
     #region Constructor 
 
-    public ResourceEditorComponent(Store store): base(store)
+    public TaskEditorCtrl(Store store) : base(store)
     {
-        ComponentName = "Resource editor";        
+        ComponentName = "Task / comment editor";
     }
 
     #endregion
 
-    #region Abstract members implementations
+    #region Abstract member implementations 
 
-    protected override IViewEditor<ResourceDto> CreateView()
+    protected override IViewEditor<NoteTaskDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }
@@ -28,9 +28,8 @@ public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceD
         Service = service;
 
         // TODO: call service for new model
-        Model = new ResourceDto();
-        Model.ResourceId = Guid.NewGuid();
-        Model.ContentInDB = false;
+        Model = new NoteTaskDto();
+        Model.NoteTaskId = Guid.NewGuid();
         return Task.FromResult(true);
     }
 
@@ -40,7 +39,7 @@ public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceD
         {
             Service = service;
 
-            var res = await Service.Notes.GetResourceAsync(id);
+            var res = await Service.Notes.GetNoteTaskAsync(id);
             if (!res.IsValid)
                 return false;
 
@@ -57,14 +56,14 @@ public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceD
         }
     }
 
-    public async override Task<bool> SaveModel()
+    public override async Task<bool> SaveModel()
     {
-        View.RefreshModel();            
+        View.RefreshModel();
 
         if (!Model.IsDirty())
             return true;
 
-        var isNew = (Model.ResourceId == Guid.Empty);
+        var isNew = (Model.NoteTaskId == Guid.Empty);
 
         var msgVal = Model.GetErrorMessage();
         if (!string.IsNullOrEmpty(msgVal))
@@ -75,16 +74,16 @@ public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceD
 
         try
         {
-            Result<ResourceDto> response;
+            Result<NoteTaskDto> response;
             if (AutoDBSave)
             {
-                response = await Service.Notes.SaveResourceAsync(Model, true);
+                response = await Service.Notes.SaveNoteTaskAsync(Model, true);
                 Model = response.Entity;
                 Model.SetIsDirty(false);
             }
             else
             {
-                response = new Result<ResourceDto>();
+                response = new Result<NoteTaskDto>();
                 Model.SetIsDirty(true);
                 response.Entity = Model;
             }
@@ -110,28 +109,28 @@ public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceD
         return true;
     }
 
-    public async override Task<bool> DeleteModel(IKntService service, Guid id)
+    public override async  Task<bool> DeleteModel(IKntService service, Guid id)
     {
-        var result = View.ShowInfo("Are you sure you want to delete this resource?", "Delete resource", MessageBoxButtons.YesNo);
+        var result = View.ShowInfo("Are you sure you want to delete this task?", "Delete message", MessageBoxButtons.YesNo);
         if (result == DialogResult.Yes || result == DialogResult.Yes)
         {
             try
             {
-                Result<ResourceDto> response;
+                Result<NoteTaskDto> response;
                 if (AutoDBSave)
-                    response = await service.Notes.DeleteResourceAsync(id);
+                    response = await service.Notes.DeleteNoteTaskAsync(id);
                 else
-                {                        
-                    var resGet = await service.Notes.GetResourceAsync(id);
+                {
+                    var resGet = await service.Notes.GetNoteTaskAsync(id);
                     if (!resGet.IsValid)
                     {
-                        response = new Result<ResourceDto>();
-                        response.Entity = new ResourceDto();
+                        response = new Result<NoteTaskDto>();
+                        response.Entity = new NoteTaskDto();
                     }
                     else
                         response = resGet;
                 }
-
+                    
                 if (response.IsValid)
                 {
                     response.Entity.SetIsDeleted(true);
@@ -152,21 +151,7 @@ public class ResourceEditorComponent : ComponentEditorBase<IViewEditor<ResourceD
 
     public async override Task<bool> DeleteModel()
     {
-        return await DeleteModel(Service, Model.ResourceId);
-    }
-
-    public string ExtensionFileToFileType(string extension)
-    {
-        return Store.ExtensionFileToFileType(extension);
-    }
-
-    #endregion
-
-    #region Utils
-
-    public void SaveResourceFileAndRefreshDto()
-    {
-        Service.Notes.UtilManageResourceContent(Model);
+        return await DeleteModel(Service, Model.NoteTaskId);
     }
 
     #endregion 

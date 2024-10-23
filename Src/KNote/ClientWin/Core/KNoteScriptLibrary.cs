@@ -3,13 +3,12 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Net.Mail;
 using System.Runtime.InteropServices;
-
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.Model.Dto;
 using KNote.Model;
 using KntScript;
 using KNote.Service.Core;
-using Microsoft.Identity.Client;
+
 
 namespace KNote.ClientWin.Core;
 
@@ -31,34 +30,34 @@ public class KNoteScriptLibrary: Library
         return _store;
     }
 
-    public FoldersSelectorComponent GetFoldersSelectorComponent()
+    public FoldersSelectorCtrl GetFoldersSelectorCtrl()
     {
-        return new FoldersSelectorComponent(_store);
+        return new FoldersSelectorCtrl(_store);
     }
 
-    public NotesSelectorComponent GetNotesSelectorComponent()
+    public NotesSelectorCtrl GetNotesSelectorCtrl()
     {
-        return new NotesSelectorComponent(_store);
+        return new NotesSelectorCtrl(_store);
     }
 
-    public KNoteManagmentComponent GetKNoteManagmentComponent()
+    public KNoteManagmentCtrl GetKNoteManagmentCtrl()
     {
-        return new KNoteManagmentComponent(_store);
+        return new KNoteManagmentCtrl(_store);
     }
 
-    public MonitorComponent GetMonitorComponent()
+    public MonitorCtrl GetMonitorCtrl()
     {
-        return new MonitorComponent(_store);
+        return new MonitorCtrl(_store);
     }
 
-    public NoteEditorComponent GetNewNoteEditorComponent()
+    public NoteEditorCtrl GetNewNoteEditorCtrl()
     {
-        var noteEditor = new NoteEditorComponent(_store);        
+        var noteEditor = new NoteEditorCtrl(_store);        
         Task.Run(() => noteEditor.NewModel(_store.GetActiveOrDefaultServide()).Wait());
         return noteEditor;
     }
 
-    public NoteEditorComponent GetNoteEditorComponent(int noteNumber)
+    public NoteEditorCtrl GetNoteEditorCtrl(int noteNumber)
     {
         var service = _store.GetActiveOrDefaultServide();
         NoteExtendedDto resNoteExt = null;
@@ -67,7 +66,7 @@ public class KNoteScriptLibrary: Library
         {
             resNoteExt = Task.Run(() => service.Notes.GetExtendedAsync(resNoteInfo.Entity.NoteId)).Result.Entity;
         }                
-        var noteEditor = new NoteEditorComponent(_store);
+        var noteEditor = new NoteEditorCtrl(_store);
 
         if(resNoteExt != null)
             noteEditor.LoadModel(service, resNoteExt);
@@ -77,52 +76,52 @@ public class KNoteScriptLibrary: Library
     }
 
 
-    public KntScriptConsoleComponent GetKntScriptConsoleComponent()
+    public KntScriptConsoleCtrl GetKntScriptConsoleCtrl()
     {
-        return new KntScriptConsoleComponent(_store);
+        return new KntScriptConsoleCtrl(_store);
     }
 
-    public KntChatGPTComponent GetKntChatGPTComponent()
+    public KntChatGPTCtrl GetKntChatGPTCtrl()
     {
-        return new KntChatGPTComponent(_store);
+        return new KntChatGPTCtrl(_store);
     }
 
     public string GetKntChatGPTMessage(string prompt)
     {
-        var chatGPT =  new KntChatGPTComponent(_store);
+        var chatGPT =  new KntChatGPTCtrl(_store);
         chatGPT.Run();
         Task.Run(() => chatGPT.GetCompletionAsync(prompt)).Wait();        
         return chatGPT.ChatTextMessasges.ToString();
     }
 
-    public KntChatComponent GetKntChatComponent()
+    public KntChatCtrl GetKntChatCtrl()
     {
-        return new KntChatComponent(_store);
+        return new KntChatCtrl(_store);
     }
 
     public void SendChatMessage(string message)
     {
-        var chat = new KntChatComponent(_store);
+        var chat = new KntChatCtrl(_store);
         var res = chat.Run();
         if(res.IsValid)
             Task.Run(() => chat.SendMessage(message)).Wait();        
     }
 
-    public KntServerCOMComponent GetServerCOMComponent()
+    public KntServerCOMCtrl GetServerCOMCtrl()
     {
-        return new KntServerCOMComponent(_store);
+        return new KntServerCOMCtrl(_store);
     }
 
-    public KntHttpClientComponent GetHttpClientComponent()
+    public KntHttpClientCtrl GetHttpClientCtrl()
     {
-        return new KntHttpClientComponent(_store);
+        return new KntHttpClientCtrl(_store);
     }
 
     public bool CheckHttpRequest(string url, int timeOut)
     {
         try
         {
-            var httpClient = new KntHttpClientComponent(_store);
+            var httpClient = new KntHttpClientCtrl(_store);
             httpClient.TimeOut = timeOut;
             httpClient.Run();
             var res = httpClient.Get(url);

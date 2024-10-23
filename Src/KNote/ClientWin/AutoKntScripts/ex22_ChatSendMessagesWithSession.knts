@@ -2,7 +2,7 @@
 
 var i = 0;
 
-var chat = GetKntChatComponent();
+var chat = GetKntChatCtrl();
 chat.Run();
 
 for i = 1 to 10

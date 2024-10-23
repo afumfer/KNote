@@ -3,13 +3,13 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class NoteAttributeEditorComponent : ComponentEditorBase<IViewEditor<NoteKAttributeDto>, NoteKAttributeDto>
+public class NoteAttributeEditorCtrl : CtrlEditorBase<IViewEditor<NoteKAttributeDto>, NoteKAttributeDto>
 {
     #region Constructor 
 
-    public NoteAttributeEditorComponent(Store store): base (store)
+    public NoteAttributeEditorCtrl(Store store): base (store)
     {
         ComponentName = "Note attribute editor";
     }

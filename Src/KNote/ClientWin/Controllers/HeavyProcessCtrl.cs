@@ -1,9 +1,9 @@
 ﻿using KNote.ClientWin.Core;
 using System;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class HeavyProcessComponent : ComponentBase
+public class HeavyProcessCtrl : CtrlBase
 {
     #region Fields
 
@@ -21,7 +21,7 @@ public class HeavyProcessComponent : ComponentBase
 
     #region  Constructor
 
-    public HeavyProcessComponent(Store store) : base(store)
+    public HeavyProcessCtrl(Store store) : base(store)
     {
         ComponentName = "KntLab Component";
         _processInExecution = false;
@@ -61,7 +61,7 @@ public class HeavyProcessComponent : ComponentBase
         HeavyProcessView.UpdateProcessInfo(info);
     }
 
-    public async Task Exec2<TParam1, TParam2>(Func<TParam1, TParam2, CancellationTokenSource, IProgress<KNoteProgress>, HeavyProcessComponent, Task> process, TParam1 param1, TParam2 param2)
+    public async Task Exec2<TParam1, TParam2>(Func<TParam1, TParam2, CancellationTokenSource, IProgress<KNoteProgress>, HeavyProcessCtrl, Task> process, TParam1 param1, TParam2 param2)
     {
         if (!await PrepareTask())
             return;
@@ -81,7 +81,7 @@ public class HeavyProcessComponent : ComponentBase
         }
     }
 
-    public async Task Exec3<TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, CancellationTokenSource, IProgress<KNoteProgress>, HeavyProcessComponent, Task> process, TParam1 param1, TParam2 param2, TParam3 param3)
+    public async Task Exec3<TParam1, TParam2, TParam3>(Func<TParam1, TParam2, TParam3, CancellationTokenSource, IProgress<KNoteProgress>, HeavyProcessCtrl, Task> process, TParam1 param1, TParam2 param2, TParam3 param3)
     {
         if (!await PrepareTask())
             return;
@@ -138,5 +138,5 @@ public class KNoteProgress
 {
     public int Progress { get; set; }
     public string Info { get; set; }    
-    public HeavyProcessComponent HeavyProcessComponent { get; set; }    
+    public HeavyProcessCtrl HeavyProcessComponent { get; set; }    
 }

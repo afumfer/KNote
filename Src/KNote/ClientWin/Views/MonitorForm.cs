@@ -1,5 +1,5 @@
 ﻿using KNote.ClientWin.Core;
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.Model;
 
 namespace KNote.ClientWin.Views;
@@ -8,20 +8,20 @@ public partial class MonitorForm : Form, IViewBase
 {
     #region Private fields 
 
-    private readonly MonitorComponent _com;
+    private readonly MonitorCtrl _ctrl;
     private bool _viewFinalized = false;
 
     #endregion
 
     #region Constructor
 
-    public MonitorForm(MonitorComponent com)
+    public MonitorForm(MonitorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -55,7 +55,7 @@ public partial class MonitorForm : Form, IViewBase
     private void MonitorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();           
+            _ctrl.Finalize();           
     }
 
     private void buttonClearMessages_Click(object sender, EventArgs e)

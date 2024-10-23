@@ -2,9 +2,9 @@
 using KNote.Model;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<RepositoryRef>, RepositoryRef>
+public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, RepositoryRef>
 {
     #region Properties 
 
@@ -14,7 +14,7 @@ public class RepositoryEditorComponent : ComponentEditorBase<IViewEditor<Reposit
 
     #region Constructor 
 
-    public RepositoryEditorComponent(Store store) : base(store)
+    public RepositoryEditorCtrl(Store store) : base(store)
     {
         ComponentName = "Repository editor";
     }

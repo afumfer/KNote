@@ -1,9 +1,9 @@
 ﻿using KNote.ClientWin.Core;
 using KntScript;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class KntScriptConsoleComponent : ComponentViewBase<IViewBase>
+public class KntScriptConsoleCtrl : CtrlViewBase<IViewBase>
 {
     #region Properties
 
@@ -15,7 +15,7 @@ public class KntScriptConsoleComponent : ComponentViewBase<IViewBase>
 
     #region Constructor 
 
-    public KntScriptConsoleComponent(Store store): base(store)
+    public KntScriptConsoleCtrl(Store store): base(store)
     {
         ComponentName = "KeyNote script console";
     }

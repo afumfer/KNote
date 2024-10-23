@@ -1,9 +1,9 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class MessagesManagmentComponent : ComponentBase
+public class MessagesManagmentCtrl : CtrlBase
 {
     #region Fields
 
@@ -14,7 +14,7 @@ public class MessagesManagmentComponent : ComponentBase
 
     #region Constructor 
 
-    public MessagesManagmentComponent(Store store): base(store)
+    public MessagesManagmentCtrl(Store store): base(store)
     {
         ComponentName = "Messages Managment Component";
     }

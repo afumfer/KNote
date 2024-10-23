@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -11,20 +11,20 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
 {
     #region Private fields
 
-    private readonly NoteTypesSelectorComponent _com;
+    private readonly NoteTypesSelectorCtrl _ctrl;
     private bool _viewFinalized = false;
 
     #endregion
 
     #region Constructor
 
-    public NoteTypesSelectorForm(NoteTypesSelectorComponent com)
+    public NoteTypesSelectorForm(NoteTypesSelectorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -38,7 +38,7 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public void OnClosingView()
@@ -49,13 +49,13 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
 
     public void RefreshView()
     {
-        if (_com.ListEntities == null)
+        if (_ctrl.ListEntities == null)
             return;
         else
         {
             listViewNoteTypes.Clear();
 
-            foreach (var type in _com.ListEntities)
+            foreach (var type in _ctrl.ListEntities)
             {
                 listViewNoteTypes.Items.Add(NoteTypeDtoToListViewItem(type));
             }
@@ -125,17 +125,17 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
     private void NoteTypesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+            _ctrl.Finalize();
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)
     {
-        _com.Accept();
+        _ctrl.Accept();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        _com.Cancel();
+        _ctrl.Cancel();
     }
 
     private void listViewNoteTypes_SelectedIndexChanged(object sender, EventArgs e)
@@ -171,14 +171,14 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
     {              
         try
         {
-            if (_com.ListEntities == null)
+            if (_ctrl.ListEntities == null)
                 return;
 
             if (listViewNoteTypes.SelectedItems.Count > 0)
             {                
                 var selectedItem = Guid.Parse(listViewNoteTypes.SelectedItems[0].Name);
-                _com.SelectedEntity = _com.ListEntities.Where(_ => _.NoteTypeId == selectedItem).SingleOrDefault();
-                _com.NotifySelectedEntity();
+                _ctrl.SelectedEntity = _ctrl.ListEntities.Where(_ => _.NoteTypeId == selectedItem).SingleOrDefault();
+                _ctrl.NotifySelectedEntity();
             }
         }
         catch (Exception ex)

@@ -1,9 +1,9 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class FiltersSelectorComponent : ComponentSelectorBase<IViewSelector<NotesFilterWithServiceRef>, NotesFilterWithServiceRef>
+public class FiltersSelectorCtrl : CtrlSelectorBase<IViewSelector<NotesFilterWithServiceRef>, NotesFilterWithServiceRef>
 {
     #region Properties
 
@@ -26,7 +26,7 @@ public class FiltersSelectorComponent : ComponentSelectorBase<IViewSelector<Note
 
     #region Constructor 
 
-    public FiltersSelectorComponent(Store store): base (store)
+    public FiltersSelectorCtrl(Store store): base (store)
     {
         ComponentName = "Filter param";
         

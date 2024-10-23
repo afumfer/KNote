@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -9,7 +9,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
 {
     #region Private fields
 
-    private readonly ResourceEditorComponent _com;
+    private readonly ResourceEditorCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
     
@@ -22,13 +22,13 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
 
     #region Constructor
 
-    public ResourceEditorForm(ResourceEditorComponent com)
+    public ResourceEditorForm(ResourceEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -42,7 +42,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
 
     public Result<EComponentResult> ShowModalView()
     {
-        var res = _com.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
         return res;
     }
 
@@ -102,7 +102,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {            
-        var res = await _com.SaveModel();
+        var res = await _ctrl.SaveModel();
         if (res)
         {                
             await htmlPreview.NavigateToString(" ");
@@ -126,8 +126,8 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
             varContentArrayBytes = File.ReadAllBytes(fileTmp);                
             textFileName.Text = Path.GetFileName(fileTmp);
             textDescription.Text = textFileName.Text;
-            varName = _com.Model.ResourceId.ToString() + "_" + textFileName.Text;                
-            varFileType = _com.ExtensionFileToFileType(Path.GetExtension(fileTmp));
+            varName = _ctrl.Model.ResourceId.ToString() + "_" + textFileName.Text;                
+            varFileType = _ctrl.ExtensionFileToFileType(Path.GetExtension(fileTmp));
             await ShowPreview(fileTmp);
         }
     }
@@ -145,42 +145,42 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 
     private async Task ModelToControls()
     {            
-        textFileName.Text = _com.Model.NameOut;
-        varName = _com.Model.Name;
-        textDescription.Text = _com.Model.Description;
-        textOrder.Text = _com.Model.Order.ToString();
-        varFileType = _com.Model.FileType;            
-        varContainer = _com.Model.Container;                  
+        textFileName.Text = _ctrl.Model.NameOut;
+        varName = _ctrl.Model.Name;
+        textDescription.Text = _ctrl.Model.Description;
+        textOrder.Text = _ctrl.Model.Order.ToString();
+        varFileType = _ctrl.Model.FileType;            
+        varContainer = _ctrl.Model.Container;                  
 
-        if (_com.Model.ContentInDB)             
-            varContentArrayBytes = _com.Model.ContentArrayBytes;            
+        if (_ctrl.Model.ContentInDB)             
+            varContentArrayBytes = _ctrl.Model.ContentArrayBytes;            
         else
         {
-            var file = _com.Service.Notes.UtilGetResourcePath(_com.Model);
+            var file = _ctrl.Service.Notes.UtilGetResourcePath(_ctrl.Model);
             if(!string.IsNullOrEmpty(file))
                 if(File.Exists(file))
                     varContentArrayBytes = File.ReadAllBytes(file);
         } 
         
-        await ShowPreview(_com.Model.FullUrl, false);
+        await ShowPreview(_ctrl.Model.FullUrl, false);
     }
 
     private void ControlsToModel()
     {
-        _com.Model.Name = varName;
-        _com.Model.Description = textDescription.Text;
-        _com.Model.Order = _com.TextToInt(textOrder.Text);
-        _com.Model.FileType = varFileType;
-        _com.Model.Container = varContainer;            
-        _com.Model.ContentArrayBytes = varContentArrayBytes;
+        _ctrl.Model.Name = varName;
+        _ctrl.Model.Description = textDescription.Text;
+        _ctrl.Model.Order = _ctrl.TextToInt(textOrder.Text);
+        _ctrl.Model.FileType = varFileType;
+        _ctrl.Model.Container = varContainer;            
+        _ctrl.Model.ContentArrayBytes = varContentArrayBytes;
 
-        _com.SaveResourceFileAndRefreshDto();            
+        _ctrl.SaveResourceFileAndRefreshDto();            
     }
 
     private async Task ShowPreview(string file, bool includePdf = true)  // !!!
@@ -192,7 +192,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         }
                         
         var ext = Path.GetExtension(file);          
-        if(_com.Store.ExtensionFileToFileType(ext) != "")
+        if(_ctrl.Store.ExtensionFileToFileType(ext) != "")
         {
             try
             {

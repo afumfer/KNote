@@ -1,12 +1,12 @@
 ﻿using KNote.ClientWin.Core;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class KntLabComponent : ComponentBase
+public class KntLabCtrl : CtrlBase
 {
     #region  Constructor
 
-    public KntLabComponent(Store store) : base(store)
+    public KntLabCtrl(Store store) : base(store)
     {
         ComponentName = "KntLab Component";
     }

@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -11,7 +11,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 {
     #region Private fields 
 
-    private readonly NotesSelectorComponent _com;
+    private readonly NotesSelectorCtrl _ctrl;
     private bool _viewFinalized = false;        
     private UInt32 _countRepetition = 0;
     private bool _skipSelectionChanged = false;        
@@ -24,27 +24,27 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     protected int OrderColNumber
     {
-        get { return _com.Store.AppConfig.ColOrderNotes; }
-        set { _com.Store.AppConfig.ColOrderNotes = value; }
+        get { return _ctrl.Store.AppConfig.ColOrderNotes; }
+        set { _ctrl.Store.AppConfig.ColOrderNotes = value; }
     }
 
     protected bool AscendigOrderNotes
     {
-        get { return _com.Store.AppConfig.AscendigOrderNotes; }
-        set { _com.Store.AppConfig.AscendigOrderNotes = value; }
+        get { return _ctrl.Store.AppConfig.AscendigOrderNotes; }
+        set { _ctrl.Store.AppConfig.AscendigOrderNotes = value; }
     }
 
     #endregion
 
     #region Constructor
 
-    public NotesSelectorForm(NotesSelectorComponent com)
+    public NotesSelectorForm(NotesSelectorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -63,12 +63,12 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     Result<EComponentResult> IViewBase.ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public void RefreshView()
     {
-        if (_com.ListEntities == null)
+        if (_ctrl.ListEntities == null)
             return;
         else
         {
@@ -129,11 +129,11 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         RefreshDataGridNotes();
 
         int index = 0;
-        if (_com.SelectedEntity != null)
+        if (_ctrl.SelectedEntity != null)
         {
             foreach (DataGridViewRow r in dataGridNotes.Rows)
             {
-                if (_com.SelectedEntity.NoteId == (Guid)r.Cells["NoteId"].Value)
+                if (_ctrl.SelectedEntity.NoteId == (Guid)r.Cells["NoteId"].Value)
                 {
                     index = r.Index;
                     break;
@@ -149,7 +149,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         // In this case item is not used, the update is resolved with databindig 
         RefreshDataGridNotes();
 
-        if (_com.ListEntities.Count == 0)
+        if (_ctrl.ListEntities.Count == 0)
             return;
 
         GridSelectFirstElement(false);
@@ -169,7 +169,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
     private void NotesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-            _com.Finalize();
+            _ctrl.Finalize();
     }
 
     private void dataGridNotes_SelectionChanged(object sender, EventArgs e)
@@ -180,7 +180,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
     private void dataGridNotes_DoubleClick(object sender, EventArgs e)
     {
         ActiveCurrentRow();
-        _com.NotifySelectedEntityDoubleClick();
+        _ctrl.NotifySelectedEntityDoubleClick();
     }
 
     private void dataGridNotes_KeyUp(object sender, KeyEventArgs e)
@@ -202,12 +202,12 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     private void buttonAccept_Click(object sender, EventArgs e)
     {
-        _com.Accept();
+        _ctrl.Accept();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        _com.Cancel();
+        _ctrl.Cancel();
     }
 
     #endregion
@@ -221,14 +221,14 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         CoonfigureGridStd();
 
         if (_sortOrder == SortOrder.Descending)
-            _source.DataSource = _com.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
+            _source.DataSource = _ctrl.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
         else if (_sortOrder == SortOrder.Ascending)
-            _source.DataSource = _com.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
+            _source.DataSource = _ctrl.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
 
         if (dataGridNotes.Columns.Count > 0)
             dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
 
-        if (_com.ListEntities.Count > 0)            
+        if (_ctrl.ListEntities.Count > 0)            
             ActiveCurrentRow();
             
         _skipSelectionChanged = false;            
@@ -240,7 +240,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
             return;
         try
         {
-            if (_com.ListEntities == null)
+            if (_ctrl.ListEntities == null)
                 return;            
             if (dataGridNotes.SelectedRows.Count > 0)                                    
                 ActiveCurrentRow();
@@ -255,8 +255,8 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
     private void ActiveCurrentRow()
     {
         var sr = dataGridNotes.SelectedRows[0];
-        _com.SelectedEntity = DataGridViewRowToNoteInfo(sr);
-        _com.NotifySelectedEntity();
+        _ctrl.SelectedEntity = DataGridViewRowToNoteInfo(sr);
+        _ctrl.NotifySelectedEntity();
     }
 
     private void CoonfigureGridStd()
@@ -274,7 +274,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         dataGridNotes.Columns[1].Width = 80;
         dataGridNotes.Columns[1].HeaderText = "Number";
         dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if(_com.Store.AppConfig.CompactViewNoteslist)
+        if(_ctrl.Store.AppConfig.CompactViewNoteslist)
             dataGridNotes.Columns[1].Visible = false;
 
         dataGridNotes.Columns[2].DataPropertyName = "Topic";
@@ -298,21 +298,21 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         dataGridNotes.Columns[6].Width = 130;
         dataGridNotes.Columns[6].HeaderText = "Modification date";
         dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if (_com.Store.AppConfig.CompactViewNoteslist)
+        if (_ctrl.Store.AppConfig.CompactViewNoteslist)
             dataGridNotes.Columns[6].Visible = false;
 
         dataGridNotes.Columns[7].DataPropertyName = "CreationDateTime";
         dataGridNotes.Columns[7].Width = 130;
         dataGridNotes.Columns[7].HeaderText = "Creation date";
         dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if (_com.Store.AppConfig.CompactViewNoteslist)
+        if (_ctrl.Store.AppConfig.CompactViewNoteslist)
             dataGridNotes.Columns[7].Visible = false;
 
         dataGridNotes.Columns[8].DataPropertyName = "Description";
         dataGridNotes.Columns[8].Visible = false;            
 
         dataGridNotes.Columns[9].DataPropertyName = "ContentType";
-        if (_com.Store.AppConfig.CompactViewNoteslist)
+        if (_ctrl.Store.AppConfig.CompactViewNoteslist)
             dataGridNotes.Columns[9].Visible = false;
 
         dataGridNotes.Columns[10].DataPropertyName = "Script";
@@ -413,8 +413,8 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
         this.SuspendLayout();
 
-        if (_com.Extensions.Keys.Count > 0)
-            foreach (string s in _com.Extensions.Keys)
+        if (_ctrl.Extensions.Keys.Count > 0)
+            foreach (string s in _ctrl.Extensions.Keys)
                 if (s.StartsWith("--"))
                     contextMenu.Items.Add("-", null, extension_Click);
                 else
@@ -428,7 +428,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         ToolStripMenuItem menuSel;
         menuSel = (ToolStripMenuItem)sender;
 
-        _com.Extensions[menuSel.Text](this, new ComponentEventArgs<NoteInfoDto>(_com.SelectedEntity));
+        _ctrl.Extensions[menuSel.Text](this, new ComponentEventArgs<NoteInfoDto>(_ctrl.SelectedEntity));
     }
 
     #endregion

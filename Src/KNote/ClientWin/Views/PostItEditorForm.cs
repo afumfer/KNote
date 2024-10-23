@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -9,7 +9,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 {
     #region Private fields
 
-    private readonly PostItEditorComponent _com;
+    private readonly PostItEditorCtrl _ctrl;
     private bool _viewFinalized = false;
 
     private int _leftPosition;
@@ -23,13 +23,13 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     #region Constructor
 
-    public PostItEditorForm(PostItEditorComponent com)
+    public PostItEditorForm(PostItEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -43,7 +43,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -89,15 +89,15 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     private void PostItEditorForm_Load(object sender, EventArgs e)
     {
         InitializeComponentEditor();
-        ModelToControlsPostIt(true, _com.ForceAlwaysTop);
+        ModelToControlsPostIt(true, _ctrl.ForceAlwaysTop);
     }
 
     private void InitializeComponentEditor()
     {
-        if (_com.Model is null)
+        if (_ctrl.Model is null)
             return;
 
-        if (_com.Model.ContentType.Contains("html"))
+        if (_ctrl.Model.ContentType.Contains("html"))
         {
             htmlDescription.Location = new System.Drawing.Point(3, 28);
             htmlDescription.Size = new System.Drawing.Size(472, 292);
@@ -105,7 +105,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right)));                
         }
-        else if (_com.Model.ContentType.Contains("navigation"))
+        else if (_ctrl.Model.ContentType.Contains("navigation"))
         {
             webView2.Location = new System.Drawing.Point(3, 28);
             webView2.Size = new System.Drawing.Size(472, 292);
@@ -127,11 +127,11 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     {
         if (!_viewFinalized)
         {
-            var savedOk = await _com.SaveModel();
+            var savedOk = await _ctrl.SaveModel();
             if (!savedOk)                
                 ShowInfo("The note could not be saved");                    
                 
-            _com.Finalize();
+            _ctrl.Finalize();
         }
     }
 
@@ -142,15 +142,15 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
         if (menuSel == menuHide)
         {
-            await _com.SaveAndHide();
+            await _ctrl.SaveAndHide();
         }
         else if (menuSel == menuSaveNow)
         {
-            await _com.SaveModel();
+            await _ctrl.SaveModel();
         }
         else if (menuSel == menuDelete)
         {
-            await _com.DeleteAndFinalize();
+            await _ctrl.DeleteAndFinalize();
         }
         else if (menuSel == menuAlwaysFront)
         {
@@ -158,7 +158,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         }
         else if (menuSel == menuExtendedEdition)
         {
-            await _com.ExtendedNoteEdit();
+            await _ctrl.ExtendedNoteEdit();
         }
         else if (menuSel == menuPostItProperties)
         {
@@ -166,55 +166,55 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         }
         else if (menuSel == menuAddResolvedTask)
         {
-            await _com.FastTaskAndHide();
+            await _ctrl.FastTaskAndHide();
         }
         else if (menuSel == menuFastAlarm10m)
         {
-            await _com.FastAlarmAndHide("m", 10);
+            await _ctrl.FastAlarmAndHide("m", 10);
         }
         else if (menuSel == menuFastAlarm30m)
         {
-            await _com.FastAlarmAndHide("m", 30);
+            await _ctrl.FastAlarmAndHide("m", 30);
         }
         else if (menuSel == menuFastAlarm1h)
         {
-            await _com.FastAlarmAndHide("h", 1);
+            await _ctrl.FastAlarmAndHide("h", 1);
         }
         else if (menuSel == menuFastAlarm2h)
         {
-            await _com.FastAlarmAndHide("h", 2);
+            await _ctrl.FastAlarmAndHide("h", 2);
         }
         else if (menuSel == menuFastAlarm4h)
         {
-            await _com.FastAlarmAndHide("h", 4);
+            await _ctrl.FastAlarmAndHide("h", 4);
         }
         else if (menuSel == menuFastAlarm8h)
         {
-            await _com.FastAlarmAndHide("h", 8);
+            await _ctrl.FastAlarmAndHide("h", 8);
         }
         else if (menuSel == menuFastAlarm10h)
         {
-            await _com.FastAlarmAndHide("h", 10);
+            await _ctrl.FastAlarmAndHide("h", 10);
         }
         else if (menuSel == menuFastAlarm12h)
         {
-            await _com.FastAlarmAndHide("h", 12);
+            await _ctrl.FastAlarmAndHide("h", 12);
         }
         else if (menuSel == menuFastAlarm24h)
         {
-            await _com.FastAlarmAndHide("h", 24);
+            await _ctrl.FastAlarmAndHide("h", 24);
         }
         else if (menuSel == menuFastAlarm1week)
         {
-            await _com.FastAlarmAndHide("week", 1);
+            await _ctrl.FastAlarmAndHide("week", 1);
         }
         else if (menuSel == menuFastAlarm1month)
         {
-            await _com.FastAlarmAndHide("month", 1);
+            await _ctrl.FastAlarmAndHide("month", 1);
         }
         else if (menuSel == menuFastAlarm1year)
         {
-            await _com.FastAlarmAndHide("year", 1);
+            await _ctrl.FastAlarmAndHide("year", 1);
         }
     }
 
@@ -225,19 +225,19 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             switch (e.KeyCode)
             {
                 case Keys.S:
-                    await _com.SaveModel();
+                    await _ctrl.SaveModel();
                     break;
                 case Keys.Q:
-                    await _com.SaveAndHide();
+                    await _ctrl.SaveAndHide();
                     break;
                 case Keys.D:
-                    await _com.DeleteAndFinalize();
+                    await _ctrl.DeleteAndFinalize();
                     break;
                 case Keys.F:
                     AlwaysFront();
                     break;
                 case Keys.E:
-                    await _com.ExtendedNoteEdit();
+                    await _ctrl.ExtendedNoteEdit();
                     break;
                 case Keys.P:
                     PostItPropertiesEdit();
@@ -303,7 +303,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private async void labelCaption_DoubleClick(object sender, EventArgs e)
     {
-        await _com.ExtendedNoteEdit();
+        await _ctrl.ExtendedNoteEdit();
     }
 
     private void labelStatus_DoubleClick(object sender, EventArgs e)
@@ -312,11 +312,11 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         TopMost = false;
         Refresh();
 
-        var folder = _com.GetFolder();
+        var folder = _ctrl.GetFolder();
         if (folder != null)
         {
             _selectedFolderId = folder.FolderId;
-            _com.Model.FolderDto = folder.GetSimpleDto<FolderDto>();
+            _ctrl.Model.FolderDto = folder.GetSimpleDto<FolderDto>();
             RefreshStatus();                
         }
 
@@ -329,119 +329,119 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private async void ModelToControls()
     {
-        if (_com.Model is null)
+        if (_ctrl.Model is null)
             return;
 
-        labelCaption.Text = _com.Model.Topic;
+        labelCaption.Text = _ctrl.Model.Topic;
         RefreshStatus();
-        _selectedFolderId = _com.Model.FolderId;
+        _selectedFolderId = _ctrl.Model.FolderId;
 
-        if (_com.Model.ContentType.Contains("html"))
-            htmlDescription.BodyHtml = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
-        else if (_com.Model.ContentType.Contains("navigation"))
+        if (_ctrl.Model.ContentType.Contains("html"))
+            htmlDescription.BodyHtml = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+        else if (_ctrl.Model.ContentType.Contains("navigation"))
         {
-            webView2.TextUrl = _com.Model.Description;            
-            if (!string.IsNullOrEmpty(_com.Model.Description))            
+            webView2.TextUrl = _ctrl.Model.Description;            
+            if (!string.IsNullOrEmpty(_ctrl.Model.Description))            
                 await webView2.Navigate();
             else
                 await webView2.NavigateToString(" ");
         }
         else
         {            
-            textDescription.Text = _com.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_com.Model?.Description, true);
+            textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
             textDescription.SelectionStart = 0;
         }
     }
 
     private void ControlsToModel()
     {
-        if (_com.Model is null)
+        if (_ctrl.Model is null)
             return;
 
-        if (_com.Model.ContentType.Contains("html"))
-            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
-        else if (_com.Model.ContentType.Contains("navigation"))
-            _com.Model.Description = webView2.TextUrl;
+        if (_ctrl.Model.ContentType.Contains("html"))
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
+        else if (_ctrl.Model.ContentType.Contains("navigation"))
+            _ctrl.Model.Description = webView2.TextUrl;
         else            
-            _com.Model.Description = _com.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
 
-        _com.Model.FolderId = _selectedFolderId;
-        _com.Model.Topic = labelCaption.Text;
+        _ctrl.Model.FolderId = _selectedFolderId;
+        _ctrl.Model.Topic = labelCaption.Text;
 
         ControlsToModelPostIt();
     }
 
     private void ModelToControlsPostIt(bool updateSizeAndLocation = true, bool forceAlwaysTop = false)
     {
-        if (_com.Model is null)
+        if (_ctrl.Model is null)
             return;
 
-        if (_com.Model.ContentType.Contains("html"))
+        if (_ctrl.Model.ContentType.Contains("html"))
         {
             htmlDescription.Visible = true;
         }
-        if (_com.Model.ContentType.Contains("navigation"))
+        if (_ctrl.Model.ContentType.Contains("navigation"))
         {
             webView2.Visible = true;
         }
         else
         {
             FontStyle style = new FontStyle();
-            if (_com.WindowPostIt.FontBold)
+            if (_ctrl.WindowPostIt.FontBold)
                 style = FontStyle.Bold;
-            if (_com.WindowPostIt.FontItalic)
+            if (_ctrl.WindowPostIt.FontItalic)
                 style = style | FontStyle.Italic;
-            if (_com.WindowPostIt.FontUnderline)
+            if (_ctrl.WindowPostIt.FontUnderline)
                 style = style | FontStyle.Underline;
-            if (_com.WindowPostIt.FontStrikethru)
+            if (_ctrl.WindowPostIt.FontStrikethru)
                 style = style | FontStyle.Strikeout;
-            Font font = new Font(_com.WindowPostIt.FontName, _com.WindowPostIt.FontSize, style);
+            Font font = new Font(_ctrl.WindowPostIt.FontName, _ctrl.WindowPostIt.FontSize, style);
             textDescription.Font = font;
-            textDescription.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
-            textDescription.ForeColor = ColorTranslator.FromHtml(_com.WindowPostIt.TextNoteColor);
+            textDescription.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
+            textDescription.ForeColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor);
             textDescription.Visible = true;
         }
 
         if (updateSizeAndLocation)
         {
             // Avoid positions outside the view zone
-            if (_com.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
-                _com.WindowPostIt.PosX = SystemInformation.VirtualScreen.Width - _com.WindowPostIt.Width;
-            if (_com.WindowPostIt.PosY > SystemInformation.VirtualScreen.Height - 50)
-                _com.WindowPostIt.PosY = SystemInformation.VirtualScreen.Height - _com.WindowPostIt.Height;
+            if (_ctrl.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
+                _ctrl.WindowPostIt.PosX = SystemInformation.VirtualScreen.Width - _ctrl.WindowPostIt.Width;
+            if (_ctrl.WindowPostIt.PosY > SystemInformation.VirtualScreen.Height - 50)
+                _ctrl.WindowPostIt.PosY = SystemInformation.VirtualScreen.Height - _ctrl.WindowPostIt.Height;
 
-            this.Location = new System.Drawing.Point(_com.WindowPostIt.PosX, _com.WindowPostIt.PosY);
-            this.Size = new System.Drawing.Size(_com.WindowPostIt.Width, _com.WindowPostIt.Height);
+            this.Location = new System.Drawing.Point(_ctrl.WindowPostIt.PosX, _ctrl.WindowPostIt.PosY);
+            this.Size = new System.Drawing.Size(_ctrl.WindowPostIt.Width, _ctrl.WindowPostIt.Height);
 
             if (forceAlwaysTop)
-                _com.WindowPostIt.AlwaysOnTop = true;
-            this.TopMost = menuAlwaysFront.Checked = _com.WindowPostIt.AlwaysOnTop;
+                _ctrl.WindowPostIt.AlwaysOnTop = true;
+            this.TopMost = menuAlwaysFront.Checked = _ctrl.WindowPostIt.AlwaysOnTop;
         }
 
-        labelCaption.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.TitleColor);
-        labelCaption.ForeColor = ColorTranslator.FromHtml(_com.WindowPostIt.TextTitleColor);
-        BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
-        labelStatus.BackColor = ColorTranslator.FromHtml(_com.WindowPostIt.NoteColor);
+        labelCaption.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.TitleColor);
+        labelCaption.ForeColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextTitleColor);
+        BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
+        labelStatus.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
     }
 
     private void ControlsToModelPostIt()
     {
-        _com.WindowPostIt.PosY = this.Top;
-        _com.WindowPostIt.PosX = this.Left;
-        _com.WindowPostIt.Width = this.Width;
-        _com.WindowPostIt.Height = this.Height;
+        _ctrl.WindowPostIt.PosY = this.Top;
+        _ctrl.WindowPostIt.PosX = this.Left;
+        _ctrl.WindowPostIt.Width = this.Width;
+        _ctrl.WindowPostIt.Height = this.Height;
 
-        _com.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
+        _ctrl.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
     }
 
     private void PostItPropertiesEdit()
     {
         var copyTopMost = TopMost;
         TopMost = false;
-        var window = _com.GetWindow();
+        var window = _ctrl.GetWindow();
         if (window != null)
         {
-            _com.WindowPostIt = window;
+            _ctrl.WindowPostIt = window;
             ModelToControlsPostIt(false);
         }
         TopMost = copyTopMost;
@@ -465,8 +465,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private void RefreshStatus()
     {
-        var status = string.IsNullOrEmpty(_com.Model.InternalTags) ? "" : $" - ({_com.Model.InternalTags})";
-        labelStatus.Text = $"{_com.ServiceRef?.Alias} >> [{_com.Model.FolderDto.Name}] {status}";
+        var status = string.IsNullOrEmpty(_ctrl.Model.InternalTags) ? "" : $" - ({_ctrl.Model.InternalTags})";
+        labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{_ctrl.Model.FolderDto.Name}] {status}";
     }
 
     #endregion 

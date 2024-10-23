@@ -7,9 +7,9 @@ using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
 
-namespace KNote.ClientWin.Components;
+namespace KNote.ClientWin.Controllers;
 
-public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
+public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 {
     #region Properties
 
@@ -73,7 +73,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region Constructor, Dispose, ...
 
-    public KNoteManagmentComponent(Store store) : base(store)
+    public KNoteManagmentCtrl(Store store) : base(store)
     {
         Store.ChangedActiveFolderWithServiceRef += Store_ChangedActiveFolderWithServiceRef;
         Store.ChangedActiveFilterWithServiceRef += Store_ChangedActiveFilterWithServiceRef;
@@ -244,14 +244,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region FoldersSelector component
 
-    private FoldersSelectorComponent _folderSelectorComponent;
-    public FoldersSelectorComponent FoldersSelectorComponent
+    private FoldersSelectorCtrl _folderSelectorComponent;
+    public FoldersSelectorCtrl FoldersSelectorComponent
     {
         get
         {
             if (_folderSelectorComponent == null)
             {
-                _folderSelectorComponent = new FoldersSelectorComponent(Store);
+                _folderSelectorComponent = new FoldersSelectorCtrl(Store);
                 _folderSelectorComponent.EmbededMode = true;                    
                 _folderSelectorComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
 
@@ -288,14 +288,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region NotesSelector component
 
-    private NotesSelectorComponent _notesSelectorComponent;
-    public NotesSelectorComponent NotesSelectorComponent
+    private NotesSelectorCtrl _notesSelectorComponent;
+    public NotesSelectorCtrl NotesSelectorComponent
     {
         get
         {
             if (_notesSelectorComponent == null)
             {
-                _notesSelectorComponent = new NotesSelectorComponent(Store);
+                _notesSelectorComponent = new NotesSelectorCtrl(Store);
                 _notesSelectorComponent.EmbededMode = true;                    
                 _notesSelectorComponent.EntitySelection += _notesSelectorComponent_EntitySelection;
                 _notesSelectorComponent.EntitySelectionDoubleClick += _notesSelectorComponent_EntitySelectionDoubleClick;
@@ -391,14 +391,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region NoteEditor component
 
-    private NoteEditorComponent _noteEditorComponent;
-    public NoteEditorComponent NoteEditorComponent
+    private NoteEditorCtrl _noteEditorComponent;
+    public NoteEditorCtrl NoteEditorComponent
     {
         get
         {
             if (_noteEditorComponent == null)
             {
-                _noteEditorComponent = new NoteEditorComponent(Store);
+                _noteEditorComponent = new NoteEditorCtrl(Store);
                 _noteEditorComponent.EmbededMode = true;
             }
             return _noteEditorComponent;
@@ -409,14 +409,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region Messages Managment component
 
-    private MessagesManagmentComponent _messagesManagmentComponent;
-    public MessagesManagmentComponent MessagesManagmentComponent
+    private MessagesManagmentCtrl _messagesManagmentComponent;
+    public MessagesManagmentCtrl MessagesManagmentComponent
     {
         get
         {
             if(_messagesManagmentComponent == null)
             {
-                _messagesManagmentComponent = new MessagesManagmentComponent(Store);
+                _messagesManagmentComponent = new MessagesManagmentCtrl(Store);
                 _messagesManagmentComponent.PostItVisible += _messagesManagment_PostItVisible;                    
                 _messagesManagmentComponent.PostItAlarm += _messagesManagment_PostItAlarm;
                 //_messagesManagmentComponent.EMailAlarm += _messagesManagment_EMailAlarm;
@@ -464,14 +464,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region FilterParam component
 
-    private FiltersSelectorComponent _filterParamComponent;
-    public FiltersSelectorComponent FilterParamComponent
+    private FiltersSelectorCtrl _filterParamComponent;
+    public FiltersSelectorCtrl FilterParamComponent
     {
         get
         {
             if (_filterParamComponent == null)
             {
-                _filterParamComponent = new FiltersSelectorComponent(Store);
+                _filterParamComponent = new FiltersSelectorCtrl(Store);
                 _filterParamComponent.EmbededMode = true;
                 _filterParamComponent.EntitySelection += _filterParamComponent_EntitySelection;                    
             }
@@ -488,14 +488,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region KntChat component 
     
-    private KntChatComponent _kntChatComponent;
-    public KntChatComponent KntChatComponent
+    private KntChatCtrl _kntChatComponent;
+    public KntChatCtrl KntChatComponent
     {
         get
         {
             if (_kntChatComponent == null)
             {
-                _kntChatComponent = new KntChatComponent(Store);
+                _kntChatComponent = new KntChatCtrl(Store);
                 _kntChatComponent.ReceiveMessage += _kntChatComponent_ReceiveMessage;
             }
             return _kntChatComponent;
@@ -512,14 +512,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     #region Heavy process component
 
-    private HeavyProcessComponent _heavyProcessComponent;
-    public HeavyProcessComponent HeavyProcessComponent
+    private HeavyProcessCtrl _heavyProcessComponent;
+    public HeavyProcessCtrl HeavyProcessComponent
     {
         get
         {
             if (_heavyProcessComponent == null)
             {
-                _heavyProcessComponent = new HeavyProcessComponent(Store);
+                _heavyProcessComponent = new HeavyProcessCtrl(Store);
                 _heavyProcessComponent.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
             }
             return _heavyProcessComponent;
@@ -563,7 +563,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     {
         var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(Store));
 
-        var kntScriptCom = new KntScriptConsoleComponent(Store);
+        var kntScriptCom = new KntScriptConsoleCtrl(Store);
         kntScriptCom.KntSEngine = kntEngine;
 
         kntScriptCom.Run();
@@ -583,14 +583,14 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     public void ShowKntChatGPTConsole()
     {
-        var kntChatGPTComponent = new KntChatGPTComponent(Store);
+        var kntChatGPTComponent = new KntChatGPTCtrl(Store);
         kntChatGPTComponent.Run();            
         kntChatGPTComponent.ShowChatGPTView(true, true);
     }
 
     public void ShowKntCOMPortServerConsole()
     {
-        var kntServerCOMComponent = new KntServerCOMComponent(Store);
+        var kntServerCOMComponent = new KntServerCOMCtrl(Store);
         kntServerCOMComponent.Run();
         kntServerCOMComponent.ShowServerCOMView(true);
     }
@@ -654,7 +654,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     public async Task<bool> EditNote(IKntService service, Guid noteId)
     {
-        var noteEditorComponent = new NoteEditorComponent(Store);
+        var noteEditorComponent = new NoteEditorCtrl(Store);
         var res = await noteEditorComponent.LoadModelById(service, noteId, false);
         noteEditorComponent.Run();            
         return res;
@@ -677,7 +677,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     
     public async Task<bool> EditNotePostIt(IKntService service, Guid noteId, bool alwaysTop = false)
     {            
-        var postItEditorComponent = new PostItEditorComponent(Store);
+        var postItEditorComponent = new PostItEditorCtrl(Store);
         var res = await postItEditorComponent.LoadModelById(service, noteId, false);
         if(alwaysTop)
             postItEditorComponent.ForceAlwaysTop = true;
@@ -697,7 +697,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     public async Task AddNote(IKntService service)
     {
-        var noteEditorComponent = new NoteEditorComponent(Store);
+        var noteEditorComponent = new NoteEditorCtrl(Store);
         await noteEditorComponent.NewModel(service);
         noteEditorComponent.Run();
     }
@@ -732,13 +732,13 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             return;
         }
 
-        var noteEditorComponent = new NoteEditorComponent(Store);            
+        var noteEditorComponent = new NoteEditorCtrl(Store);            
         await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
     }
 
     public void NewFolder()
     {
-        var folderEditorComponent = new FolderEditorComponent(Store);
+        var folderEditorComponent = new FolderEditorCtrl(Store);
         folderEditorComponent.NewModel(SelectedServiceRef.Service);
         folderEditorComponent.Model.ParentId = SelectedFolderInfo?.FolderId;
         folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo?.GetSimpleDto<FolderDto>();
@@ -758,7 +758,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             return;
         }
 
-        var folderEditorComponent = new FolderEditorComponent(Store);
+        var folderEditorComponent = new FolderEditorCtrl(Store);
         await folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
         FoldersSelectorComponent.OldParent = folderEditorComponent.Model.ParentId;
         var res = folderEditorComponent.RunModal();
@@ -777,7 +777,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             return;
         }
 
-        var folderEditorComponent = new FolderEditorComponent(Store);
+        var folderEditorComponent = new FolderEditorCtrl(Store);
         var res = await folderEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);
         if (res)
         {                
@@ -792,7 +792,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             View.ShowInfo("There is no repository selected to remove.");
             return;
         }            
-        var repositoryEditorComponent = new RepositoryEditorComponent(Store);            
+        var repositoryEditorComponent = new RepositoryEditorCtrl(Store);            
         var res = await repositoryEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef);
         if (res)
         {                
@@ -817,7 +817,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             View.ShowInfo("There is no repository selected to configure.");
             return;
         }                        
-        var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+        var repositoryEditorComponent = new RepositoryEditorCtrl(Store);
         repositoryEditorComponent.EditorMode = EnumRepositoryEditorMode.Managment;
         await repositoryEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef, false);
         var res = repositoryEditorComponent.RunModal();
@@ -875,7 +875,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
             return;
         }
 
-        var folderSelector = new FoldersSelectorComponent(Store);
+        var folderSelector = new FoldersSelectorCtrl(Store);
         var services = new List<ServiceRef>();
         services.Add(SelectedServiceRef);
         folderSelector.ServicesRef = services;
@@ -907,7 +907,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessComponent heavyProcessComponent = null)
+    public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessComponent = null)
     {
         var index = 0;
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
@@ -976,7 +976,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
                 var tag = listVars[0].VarNewValueText;
 
                 // --- Heavy process instance model
-                using var heavyProcessComponent = new HeavyProcessComponent(Store);
+                using var heavyProcessComponent = new HeavyProcessCtrl(Store);
                 heavyProcessComponent.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
                 heavyProcessComponent.UpdateProcessName($"Updating tags. {labelInput} {tag} .");
                 await heavyProcessComponent.Exec3(ChangeTagsAction, action, selectedNotes, tag);
@@ -997,7 +997,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessComponent heavyProcessComponent = null)
+    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessComponent = null)
     {
         var index = 0;
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
@@ -1043,7 +1043,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     public void Options()
     {
-        var optionsEditorComponent = new OptionsEditorComponent(Store);
+        var optionsEditorComponent = new OptionsEditorCtrl(Store);
         
         optionsEditorComponent.LoadModel(
             SelectedServiceRef?.Service,
@@ -1094,7 +1094,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     public void Lab()
     {
-        var kntLabComponent = new KntLabComponent(Store);
+        var kntLabComponent = new KntLabCtrl(Store);
         kntLabComponent.Run();
         kntLabComponent.ShowLabView();
     }
@@ -1194,7 +1194,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
 
     private async Task NewRepository(EnumRepositoryEditorMode mode)
     {
-        var repositoryEditorComponent = new RepositoryEditorComponent(Store);
+        var repositoryEditorComponent = new RepositoryEditorCtrl(Store);
         repositoryEditorComponent.EditorMode = mode;
         await repositoryEditorComponent.NewModel();
         var res = repositoryEditorComponent.RunModal();
@@ -1206,7 +1206,7 @@ public class KNoteManagmentComponent : ComponentViewBase<IViewKNoteManagment>
     
     private async Task AddNotePostIt(FolderWithServiceRef folderWithServiceRef)
     {
-        var postItEditorComponent = new PostItEditorComponent(Store);
+        var postItEditorComponent = new PostItEditorCtrl(Store);
         postItEditorComponent.FolderWithServiceRef = folderWithServiceRef;
         await postItEditorComponent.NewModel(folderWithServiceRef.ServiceRef.Service);
         postItEditorComponent.Run();

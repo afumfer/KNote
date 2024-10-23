@@ -1,5 +1,5 @@
 ﻿using KNote.ClientWin.Core;
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 using KNote.Model;
 
 namespace KNote.ClientWin.Views;
@@ -8,14 +8,14 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 {
     #region Private methods 
 
-    private readonly KNoteManagmentComponent _com;
+    private readonly KNoteManagmentCtrl _ctrl;
     private bool _viewFinalized = false;
 
     #endregion
 
     #region Constructor
 
-    public KNoteManagmentForm(KNoteManagmentComponent com)
+    public KNoteManagmentForm(KNoteManagmentCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
@@ -25,9 +25,9 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         menuKNoteLab.Text = $"{KntConst.AppName} &lab ...";
         Text = $"{KntConst.AppName} Managment";
 
-        _com = com;
+        _ctrl = com;
 
-        _com.Store.ComponentNotification += Store_ComponentNotification;
+        _ctrl.Store.ComponentNotification += Store_ComponentNotification;
 
         // TODO: options ... for next version
         menuReports.Visible = false;
@@ -67,7 +67,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
     {
         LinkComponents();
         Application.DoEvents();
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public void OnClosingView()
@@ -84,17 +84,17 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         string msg1;
         string msg2;
 
-        if (_com.SelectMode == EnumSelectMode.Folders)
+        if (_ctrl.SelectMode == EnumSelectMode.Folders)
         {
-            if (string.IsNullOrEmpty(_com.SelectedFolderInfo?.Name))
+            if (string.IsNullOrEmpty(_ctrl.SelectedFolderInfo?.Name))
                 msg1 = "(No folder selected)";
             else
-                msg1 = $"{_com.SelectedFolderInfo?.Name}";
+                msg1 = $"{_ctrl.SelectedFolderInfo?.Name}";
         }
         else
             msg1 = "(Filtered notes)";
 
-        msg2 = $"{_com.FolderPath?.ToString()}  [{_com.SelectedFolderInfo?.FolderNumber.ToString()}]";
+        msg2 = $"{_ctrl.FolderPath?.ToString()}  [{_ctrl.SelectedFolderInfo?.FolderNumber.ToString()}]";
 
         if (menuHeaderPanelVisible.Checked)
         {
@@ -102,7 +102,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             labelFolderDetail.Text = msg2;
         }
 
-        statusLabel1.Text = $"Notes: {_com.CountNotes.ToString()}";
+        statusLabel1.Text = $"Notes: {_ctrl.CountNotes.ToString()}";
 
         return DialogResult.OK;
     }
@@ -149,7 +149,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             if (e.CloseReason == CloseReason.WindowsShutDown)
             {
                 SaveViewSizeAndPosition();
-                await _com.FinalizeAppForce();
+                await _ctrl.FinalizeAppForce();
             }
             else
             {
@@ -165,96 +165,96 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
         if (menuSel == menuKNoteLab)
         {
-            _com.Lab();
+            _ctrl.Lab();
         }
         else if (menuSel == menuNewFolder)
         {
-            _com.NewFolder();
+            _ctrl.NewFolder();
         }
         else if (menuSel == menuEditFolder)
         {
-            await _com.EditFolder();
+            await _ctrl.EditFolder();
         }
         else if (menuSel == menuDeleteFolder)
         {
-            await _com.DeleteFolder();
+            await _ctrl.DeleteFolder();
         }
         else if (menuSel == menuRemoveRepositoryLink)
         {
-            await _com.RemoveRepositoryLink();
+            await _ctrl.RemoveRepositoryLink();
         }
         else if (menuSel == menuAddRepositoryLink)
         {
-            await _com.AddRepositoryLink();
+            await _ctrl.AddRepositoryLink();
         }
         else if (menuSel == menuCreateRepository)
         {
-            await _com.CreateRepository();
+            await _ctrl.CreateRepository();
         }
         else if (menuSel == menuManagmentRepository)
         {
-            await _com.ManagmentRepository();
+            await _ctrl.ManagmentRepository();
         }
         else if (menuSel == menuRefreshTreeFolders)
         {
             Text = $"{KntConst.AppName} Managment";
-            _com.RefreshRepositoryAndFolderTree();
+            _ctrl.RefreshRepositoryAndFolderTree();
         }
         else if (menuSel == menuEditNote)
         {
-            await _com.EditNote();
+            await _ctrl.EditNote();
         }
         else if (menuSel == menuEditNoteAsPostIt)
         {
-            await _com.EditNotePostIt();
+            await _ctrl.EditNotePostIt();
         }
         else if (menuSel == menuNewNote)
         {
-            await _com.AddNote();
+            await _ctrl.AddNote();
         }
         else if (menuSel == menuNewNoteAsPostIt)
         {
-            await _com.AddNotePostIt();
+            await _ctrl.AddNotePostIt();
         }
         else if (menuSel == menuDeleteNote)
         {
-            await _com.DeleteNote();
+            await _ctrl.DeleteNote();
         }
         else if (menuSel == menuKntScriptConsole)
         {
-            _com.ShowKntScriptConsole();
+            _ctrl.ShowKntScriptConsole();
         }
         else if (menuSel == menuHide)
         {
-            _com.HideKNoteManagment();
+            _ctrl.HideKNoteManagment();
         }
         else if (menuSel == menuAbout)
         {
-            _com.About();
+            _ctrl.About();
         }
         else if (menuSel == menuHelpDoc)
         {
-            _com.Help();
+            _ctrl.Help();
         }
         else if (menuSel == menuMoveSelectedNotes)
         {
-            await _com.MoveSelectedNotes();
+            await _ctrl.MoveSelectedNotes();
         }
         else if (menuSel == menuAddTags)
         {
-            await _com.ChangeTags(EnumChangeTag.Add);
+            await _ctrl.ChangeTags(EnumChangeTag.Add);
         }
         else if (menuSel == menuRemoveTags)
         {
-            await _com.ChangeTags(EnumChangeTag.Remove);
+            await _ctrl.ChangeTags(EnumChangeTag.Remove);
         }
         else if (menuSel == menuExecuteKntScript)
         {
-            _com.RunScriptSelectedNotes();
+            _ctrl.RunScriptSelectedNotes();
         }
         else if (menuSel == menuOptions)
         {
-            _com.Options();
+            _ctrl.Options();
         }
         else if (menuSel == menuFoldersExplorer)
         {
@@ -300,19 +300,19 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         else if (menuSel == menuExit)
         {
             SaveViewSizeAndPosition();
-            await _com.FinalizeApp();
+            await _ctrl.FinalizeApp();
         }
         else if (menuSel == menuChat)
         {
-            _com.ShowKntChatConsole();
+            _ctrl.ShowKntChatConsole();
         }
         else if (menuSel == menuChatGPT)
         {
-            _com.ShowKntChatGPTConsole();
+            _ctrl.ShowKntChatGPTConsole();
         }
         else if (menuSel == menuCOMPortServer)
         {
-            _com.ShowKntCOMPortServerConsole();
+            _ctrl.ShowKntCOMPortServerConsole();
         }
         else
             MessageBox.Show("In construction ... ");
@@ -324,13 +324,13 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         menuSel = (ToolStripItem)sender;
 
         if (menuSel == toolEditNote)
-            await _com.EditNote();
+            await _ctrl.EditNote();
         else if (menuSel == toolNewNote)
-            await _com.AddNote();
+            await _ctrl.AddNote();
         else if (menuSel == toolDeleteNote)
-            await _com.DeleteNote();
+            await _ctrl.DeleteNote();
         else if (menuSel == toolConfiguration)
-            await _com.ManagmentRepository();
+            await _ctrl.ManagmentRepository();
     }
 
     private async void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
@@ -342,7 +342,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
     {
         string comName;
         if (!string.IsNullOrEmpty(e?.Entity.ToString()))
-            comName = ((ComponentBase)sender)?.ComponentName + ": ";
+            comName = ((CtrlBase)sender)?.ComponentName + ": ";
         else
             comName = "";
         statusLabel2.Text = $" {comName} {e?.Entity.ToString()}";
@@ -360,23 +360,23 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             tabExplorers.SelectedTab = tabExplorers.TabPages[0];
             menuFoldersExplorer.Checked = true;
             menuSearchPanel.Checked = false;
-            await _com.GoActiveFolder();
+            await _ctrl.GoActiveFolder();
         }
         else if (tabIndex == 1)
         {
             tabExplorers.SelectedTab = tabExplorers.TabPages[1];
             menuFoldersExplorer.Checked = false;
             menuSearchPanel.Checked = true;
-            await _com.GoActiveFilter();
+            await _ctrl.GoActiveFilter();
         }
     }
 
     private void LinkComponents()
     {
-        tabTreeFolders.Controls.Add(_com.FoldersSelectorComponent.View.PanelView());
-        tabSearch.Controls.Add(_com.FilterParamComponent.View.PanelView());
-        splitContainer2.Panel1.Controls.Add(_com.NotesSelectorComponent.View.PanelView());
-        splitContainer2.Panel2.Controls.Add(_com.NoteEditorComponent.View.PanelView());
+        tabTreeFolders.Controls.Add(_ctrl.FoldersSelectorComponent.View.PanelView());
+        tabSearch.Controls.Add(_ctrl.FilterParamComponent.View.PanelView());
+        splitContainer2.Panel1.Controls.Add(_ctrl.NotesSelectorComponent.View.PanelView());
+        splitContainer2.Panel2.Controls.Add(_ctrl.NoteEditorComponent.View.PanelView());
     }
 
     private void SaveViewSizeAndPosition()
@@ -384,27 +384,27 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         if (WindowState == FormWindowState.Minimized)
             return;
 
-        _com.Store.AppConfig.ManagmentLocX = Location.X;
-        _com.Store.AppConfig.ManagmentLocY = Location.Y;
-        _com.Store.AppConfig.ManagmentWidth = Width;
-        _com.Store.AppConfig.ManagmentHeight = Height;
+        _ctrl.Store.AppConfig.ManagmentLocX = Location.X;
+        _ctrl.Store.AppConfig.ManagmentLocY = Location.Y;
+        _ctrl.Store.AppConfig.ManagmentWidth = Width;
+        _ctrl.Store.AppConfig.ManagmentHeight = Height;
     }
 
     private void SetViewPositionAndSize()
     {
-        if (_com.Store.AppConfig.ManagmentLocX > SystemInformation.VirtualScreen.Width - 100)
-            _com.Store.AppConfig.ManagmentLocX = 100;
-        if (_com.Store.AppConfig.ManagmentLocY > SystemInformation.VirtualScreen.Height - 100)
-            _com.Store.AppConfig.ManagmentLocY = 100;
+        if (_ctrl.Store.AppConfig.ManagmentLocX > SystemInformation.VirtualScreen.Width - 100)
+            _ctrl.Store.AppConfig.ManagmentLocX = 100;
+        if (_ctrl.Store.AppConfig.ManagmentLocY > SystemInformation.VirtualScreen.Height - 100)
+            _ctrl.Store.AppConfig.ManagmentLocY = 100;
 
-        if (_com.Store.AppConfig.ManagmentLocY > 0)
-            Top = _com.Store.AppConfig.ManagmentLocY;
-        if (_com.Store.AppConfig.ManagmentLocX > 0)
-            Left = _com.Store.AppConfig.ManagmentLocX;
-        if (_com.Store.AppConfig.ManagmentWidth > 0)
-            Width = _com.Store.AppConfig.ManagmentWidth;
-        if (_com.Store.AppConfig.ManagmentHeight > 0)
-            Height = _com.Store.AppConfig.ManagmentHeight;
+        if (_ctrl.Store.AppConfig.ManagmentLocY > 0)
+            Top = _ctrl.Store.AppConfig.ManagmentLocY;
+        if (_ctrl.Store.AppConfig.ManagmentLocX > 0)
+            Left = _ctrl.Store.AppConfig.ManagmentLocX;
+        if (_ctrl.Store.AppConfig.ManagmentWidth > 0)
+            Width = _ctrl.Store.AppConfig.ManagmentWidth;
+        if (_ctrl.Store.AppConfig.ManagmentHeight > 0)
+            Height = _ctrl.Store.AppConfig.ManagmentHeight;
     }
 
     #endregion

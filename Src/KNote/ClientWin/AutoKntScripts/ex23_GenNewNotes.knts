@@ -3,7 +3,7 @@
 var i = 0;
 var note = null;
 for i = 1 to 3 
-	note = GetNewNoteEditorComponent();
+	note = GetNewNoteEditorCtrl();
 	note.Run();
 	note.Model.Topic = "Hello world " + i.ToString();
 	note.Model.Description = "Hello world " + i.ToString();

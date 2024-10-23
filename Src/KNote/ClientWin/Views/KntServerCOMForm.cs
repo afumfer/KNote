@@ -1,6 +1,6 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
-using KNote.ClientWin.Components;
+using KNote.ClientWin.Controllers;
 
 namespace KNote.ClientWin.Views;
 
@@ -8,7 +8,7 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
 {
     #region Private members
 
-    private readonly KntServerCOMComponent _com;
+    private readonly KntServerCOMCtrl _ctrl;
     private bool _viewFinalized = false;
 
     #endregion
@@ -20,11 +20,11 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
         InitializeComponent();
     }
 
-    public KntServerCOMForm(KntServerCOMComponent com) : this()
+    public KntServerCOMForm(KntServerCOMCtrl com) : this()
     {
-        _com = com;
+        _ctrl = com;
 
-        _com.ReceiveMessage += _com_ReceiveMessage;
+        _ctrl.ReceiveMessage += _com_ReceiveMessage;
     }
 
     #endregion
@@ -38,13 +38,13 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(ShowDialog());
+        return _ctrl.DialogResultToComponentResult(ShowDialog());
     }
 
     public void OnClosingView()
     {
         _viewFinalized = true;
-        _com.ReceiveMessage -= _com_ReceiveMessage;
+        _ctrl.ReceiveMessage -= _com_ReceiveMessage;
         Close();
     }
 
@@ -72,7 +72,7 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
         statusInfo.Invoke((MethodInvoker)delegate
         {
             // Running on the UI thread                        
-            statusLabelInfo.Text = $"Runing service: {_com.RunningService} | Message sending: {_com.MessageSending}";
+            statusLabelInfo.Text = $"Runing service: {_ctrl.RunningService} | Message sending: {_ctrl.MessageSending}";
         });
 
     }
@@ -88,37 +88,37 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
 
     private void buttonStart_Click(object sender, EventArgs e)
     {
-        _com.StartService();
+        _ctrl.StartService();
     }
 
     private void buttonStop_Click(object sender, EventArgs e)
     {
-        _com.StopService();
+        _ctrl.StopService();
     }
 
     private void buttonSend_Click(object sender, EventArgs e)
     {
-        if (!_com.RunningService)
+        if (!_ctrl.RunningService)
         {
             MessageBox.Show("The service is not running. Press Start button.");
             return;
         }
 
-        if (_com.MessageSending)
+        if (_ctrl.MessageSending)
         {
             MessageBox.Show("Sending message now ... try later");
             return;
         }
 
-        _com.Send(textBoxSend.Text);
+        _ctrl.Send(textBoxSend.Text);
     }
 
     private void KntServerCOMForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
         {
-            if (_com.AutoCloseComponentOnViewExit)
-                _com.Finalize();
+            if (_ctrl.AutoCloseComponentOnViewExit)
+                _ctrl.Finalize();
             else
             {
                 Hide();

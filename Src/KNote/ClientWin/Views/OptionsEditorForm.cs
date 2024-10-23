@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 
@@ -8,7 +8,7 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
 {
     #region Privage Fields
 
-    private readonly OptionsEditorComponent _com;
+    private readonly OptionsEditorCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
@@ -16,14 +16,14 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
 
     #region Constructor 
 
-    public OptionsEditorForm(OptionsEditorComponent com)
+    public OptionsEditorForm(OptionsEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
         this.Text = $"{KntConst.AppName} options";
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion 
@@ -37,7 +37,7 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
 
     public void RefreshView()
@@ -72,7 +72,7 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _com.SaveModel();
+        var res = await _ctrl.SaveModel();
         if (res)
         {
             _formIsDisty = false;
@@ -119,31 +119,31 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 
     private void ModelToControls() 
     {
-        checkAlarmActivated.Checked = _com.Model.AlarmActivated;
-        textAlarmSeconds.Text = _com.Model.AlarmSeconds.ToString();
-        checkAutoSaveActivated.Checked = _com.Model.AutoSaveActivated;
-        textAutosaveSeconds.Text = _com.Model.AutoSaveSeconds.ToString();
-        checkCompactViewNotesList.Checked = _com.Model.CompactViewNoteslist;
-        textChatHubUrl.Text = _com.Model.ChatHubUrl;
+        checkAlarmActivated.Checked = _ctrl.Model.AlarmActivated;
+        textAlarmSeconds.Text = _ctrl.Model.AlarmSeconds.ToString();
+        checkAutoSaveActivated.Checked = _ctrl.Model.AutoSaveActivated;
+        textAutosaveSeconds.Text = _ctrl.Model.AutoSaveSeconds.ToString();
+        checkCompactViewNotesList.Checked = _ctrl.Model.CompactViewNoteslist;
+        textChatHubUrl.Text = _ctrl.Model.ChatHubUrl;
 
-        //var x5 = _com.Model.LogActivated;
-        //var x6 = _com.Model.LogFile;
+        //var x5 = _ctrl.Model.LogActivated;
+        //var x6 = _ctrl.Model.LogFile;
     }
 
     private void ControlsToModel() 
     {
-        _com.Model.AlarmActivated = checkAlarmActivated.Checked;
-        _com.Model.AlarmSeconds = int.Parse(textAlarmSeconds.Text);
-        _com.Model.AutoSaveActivated = checkAutoSaveActivated.Checked;
-        _com.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
-        _com.Model.CompactViewNoteslist = checkCompactViewNotesList.Checked;
-        _com.Model.ChatHubUrl = textChatHubUrl.Text;
+        _ctrl.Model.AlarmActivated = checkAlarmActivated.Checked;
+        _ctrl.Model.AlarmSeconds = int.Parse(textAlarmSeconds.Text);
+        _ctrl.Model.AutoSaveActivated = checkAutoSaveActivated.Checked;
+        _ctrl.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
+        _ctrl.Model.CompactViewNoteslist = checkCompactViewNotesList.Checked;
+        _ctrl.Model.ChatHubUrl = textChatHubUrl.Text;
     }
 
     #endregion

@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -9,7 +9,7 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
 {
     #region Private fields
 
-    private readonly PostItPropertiesComponent _com;
+    private readonly PostItPropertiesCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
@@ -17,13 +17,13 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
 
     #region Constructor
 
-    public PostItPropertiesForm(PostItPropertiesComponent com)
+    public PostItPropertiesForm(PostItPropertiesCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -37,7 +37,7 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
 
     public Result<EComponentResult> ShowModalView()
     {
-        return _com.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
     }
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
@@ -88,13 +88,13 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
             {
                 ShowInfo("The note could not be saved");
             }
-            _com.Finalize();
+            _ctrl.Finalize();
         }
     }
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {            
-        var res = await _com.SaveModel();
+        var res = await _ctrl.SaveModel();
         if (res)
         {
             _formIsDisty = false;
@@ -118,47 +118,47 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
 
     private async Task<bool> SaveModel()
     {
-        return await _com.SaveModel();
+        return await _ctrl.SaveModel();
     }
 
     private void ModelToControls()
     {
         FontStyle style = new FontStyle();
-        if (_com.Model.FontBold)
+        if (_ctrl.Model.FontBold)
             style = FontStyle.Bold;
-        if (_com.Model.FontItalic)
+        if (_ctrl.Model.FontItalic)
             style = style | FontStyle.Italic;
-        if (_com.Model.FontUnderline)
+        if (_ctrl.Model.FontUnderline)
             style = style | FontStyle.Underline;
-        if (_com.Model.FontStrikethru)
+        if (_ctrl.Model.FontStrikethru)
             style = style | FontStyle.Strikeout;
-        Font font = new Font(_com.Model.FontName, _com.Model.FontSize, style);
+        Font font = new Font(_ctrl.Model.FontName, _ctrl.Model.FontSize, style);
         labelText.Font = font;
         labelText.Text = font.OriginalFontName;
 
-        labelCaption.BackColor = ColorTranslator.FromHtml(_com.Model.TitleColor);
-        labelCaption.ForeColor = ColorTranslator.FromHtml(_com.Model.TextTitleColor);
-        labelNote.BackColor = ColorTranslator.FromHtml(_com.Model.NoteColor);
-        labelNote.ForeColor = ColorTranslator.FromHtml(_com.Model.TextNoteColor);
-        labelText.BackColor = ColorTranslator.FromHtml(_com.Model.NoteColor);
-        labelText.ForeColor = ColorTranslator.FromHtml(_com.Model.TextNoteColor);
+        labelCaption.BackColor = ColorTranslator.FromHtml(_ctrl.Model.TitleColor);
+        labelCaption.ForeColor = ColorTranslator.FromHtml(_ctrl.Model.TextTitleColor);
+        labelNote.BackColor = ColorTranslator.FromHtml(_ctrl.Model.NoteColor);
+        labelNote.ForeColor = ColorTranslator.FromHtml(_ctrl.Model.TextNoteColor);
+        labelText.BackColor = ColorTranslator.FromHtml(_ctrl.Model.NoteColor);
+        labelText.ForeColor = ColorTranslator.FromHtml(_ctrl.Model.TextNoteColor);
     }
 
     private void ControlsToModel()
     {
-        _com.Model.TitleColor = ColorTranslator.ToHtml(labelCaption.BackColor);
-        _com.Model.TextTitleColor = ColorTranslator.ToHtml(labelCaption.ForeColor);
+        _ctrl.Model.TitleColor = ColorTranslator.ToHtml(labelCaption.BackColor);
+        _ctrl.Model.TextTitleColor = ColorTranslator.ToHtml(labelCaption.ForeColor);
 
-        _com.Model.NoteColor = ColorTranslator.ToHtml(labelNote.BackColor);
-        _com.Model.TextNoteColor = ColorTranslator.ToHtml(labelText.ForeColor);
+        _ctrl.Model.NoteColor = ColorTranslator.ToHtml(labelNote.BackColor);
+        _ctrl.Model.TextNoteColor = ColorTranslator.ToHtml(labelText.ForeColor);
 
-        _com.Model.FontName = labelText.Font.Name;
-        _com.Model.FontSize = (byte)labelText.Font.Size;
-        _com.Model.FontBold = labelText.Font.Bold;
-        _com.Model.FontItalic = labelText.Font.Italic;
-        _com.Model.FontUnderline = labelText.Font.Underline;
-        _com.Model.FontStrikethru = labelText.Font.Strikeout;
-        _com.Model.ForeColor = ColorTranslator.ToHtml(labelText.ForeColor);
+        _ctrl.Model.FontName = labelText.Font.Name;
+        _ctrl.Model.FontSize = (byte)labelText.Font.Size;
+        _ctrl.Model.FontBold = labelText.Font.Bold;
+        _ctrl.Model.FontItalic = labelText.Font.Italic;
+        _ctrl.Model.FontUnderline = labelText.Font.Underline;
+        _ctrl.Model.FontStrikethru = labelText.Font.Strikeout;
+        _ctrl.Model.ForeColor = ColorTranslator.ToHtml(labelText.ForeColor);
     }
 
     private bool OnCancelEdition()
@@ -170,7 +170,7 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 

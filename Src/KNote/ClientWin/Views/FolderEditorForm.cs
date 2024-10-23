@@ -1,4 +1,4 @@
-﻿using KNote.ClientWin.Components;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -9,7 +9,7 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 {
     #region Private fields
 
-    private readonly FolderEditorComponent _com;
+    private readonly FolderEditorCtrl _ctrl;
     private Guid? _selectedParentFolderId;
     private FolderDto _selectedParentFolder;
     private bool _viewFinalized = false;
@@ -19,13 +19,13 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 
     #region Constructor 
 
-    public FolderEditorForm(FolderEditorComponent com)
+    public FolderEditorForm(FolderEditorCtrl com)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _com = com;
+        _ctrl = com;
     }
 
     #endregion
@@ -39,7 +39,7 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 
     public Result<EComponentResult> ShowModalView()
     {
-        var res = _com.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
         return res;
     }
 
@@ -90,7 +90,7 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {            
-        var res = await _com.SaveModel();
+        var res = await _ctrl.SaveModel();
         if (res)
         {
             _formIsDisty = false;
@@ -116,7 +116,7 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 
     private void buttonFolderSearch_Click(object sender, EventArgs e)
     {
-        var folder = _com.GetFolder();
+        var folder = _ctrl.GetFolder();
         if (folder != null)
         {
             _selectedParentFolderId = folder.FolderId;
@@ -148,33 +148,33 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
         }
 
         this.DialogResult = DialogResult.Cancel;
-        _com.CancelEdition();
+        _ctrl.CancelEdition();
         return true;
     }
 
     private void ModelToControls()
     {
-        textName.Text = _com.Model.Name;
-        textNumber.Text = "#" + _com.Model.FolderNumber.ToString();
-        textTags.Text = _com.Model.Tags;
-        textOrder.Text = _com.Model.Order.ToString();
-        textOrderNotes.Text = _com.Model.OrderNotes;
-        textParentFolder.Text = (_com.Model.ParentFolderDto?.Name == null) ? "(root)" : _com.Model.ParentFolderDto?.Name;
-        _selectedParentFolderId = _com.Model.ParentId;
-        _selectedParentFolder = _com.Model.ParentFolderDto;            
+        textName.Text = _ctrl.Model.Name;
+        textNumber.Text = "#" + _ctrl.Model.FolderNumber.ToString();
+        textTags.Text = _ctrl.Model.Tags;
+        textOrder.Text = _ctrl.Model.Order.ToString();
+        textOrderNotes.Text = _ctrl.Model.OrderNotes;
+        textParentFolder.Text = (_ctrl.Model.ParentFolderDto?.Name == null) ? "(root)" : _ctrl.Model.ParentFolderDto?.Name;
+        _selectedParentFolderId = _ctrl.Model.ParentId;
+        _selectedParentFolder = _ctrl.Model.ParentFolderDto;            
     }
 
     private void ControlsToModel()
     {
-        _com.Model.Name = textName.Text;
-        _com.Model.Tags = textTags.Text;            
+        _ctrl.Model.Name = textName.Text;
+        _ctrl.Model.Tags = textTags.Text;            
         int o;
         if (int.TryParse(textOrder.Text, out o))
-            _com.Model.Order = o;
+            _ctrl.Model.Order = o;
 
-        _com.Model.OrderNotes = textOrderNotes.Text;
-        _com.Model.ParentId = _selectedParentFolderId;
-        _com.Model.ParentFolderDto = _selectedParentFolder;            
+        _ctrl.Model.OrderNotes = textOrderNotes.Text;
+        _ctrl.Model.ParentId = _selectedParentFolderId;
+        _ctrl.Model.ParentFolderDto = _selectedParentFolder;            
     }
 
     #endregion
