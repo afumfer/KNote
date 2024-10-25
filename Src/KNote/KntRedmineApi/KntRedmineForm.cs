@@ -98,6 +98,7 @@ public partial class KntRedmineForm : Form
         {
             UseWaitCursor = true;
 
+
             if (_manager == null || _pluginCommand == null)
             {
                 MessageBox.Show("There is no correct context selected.", KntConst.AppName);

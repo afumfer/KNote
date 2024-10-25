@@ -114,7 +114,8 @@ public class KntRedmineManager
             if (noteDto == null)
                 throw new ArgumentException("Note and Manager cannot be null");
 
-            _manager = new RedmineManager(_host, _apiKey);
+            if(_manager == null)
+                _manager = new RedmineManager(_host, _apiKey);
 
             int rootFolNum = 1;
             if (!string.IsNullOrEmpty(_rootFolderForImport))
@@ -260,8 +261,8 @@ public class KntRedmineManager
 
             noteDto.Description = await TextToMarkdown(_toolsPath, noteDto.Description);
 
-            var xx = noteDto.IsValid();
-            var yy = noteDto.Messages;
+            //var xx = noteDto.IsValid();
+            //var yy = noteDto.Messages;
 
             // This pandoc code version has encoding issue ...
             //note.Description = await pandocEngine.ConvertToText<TextileIn, CommonMarkOut>(note.Description);                
