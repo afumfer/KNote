@@ -915,7 +915,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             webViewResource.Visible = true;
             panelPreview.Visible = false;
-            await webViewResource.Navigate(_selectedResource.FullUrl);
+            if(!string.IsNullOrEmpty(_selectedResource.FullUrl))
+                await webViewResource.Navigate(_selectedResource.FullUrl);
         }
         else
         {

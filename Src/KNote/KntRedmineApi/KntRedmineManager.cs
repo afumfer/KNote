@@ -9,6 +9,7 @@ using KNote.Repository.EntityFramework.Entities;
 using System.Globalization;
 using KNote.Service.Core;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 namespace KntRedmineApi;
 
@@ -107,10 +108,13 @@ public class KntRedmineManager
         }
     }
 
-    public async Task<bool> IssueToNoteDto(string id, NoteExtendedDto noteDto, bool loadAttachments = true)
+    public async Task<bool> IssueToNoteDto(string id, NoteExtendedDto noteDto, Guid userId, bool loadAttachments = true)
     {
         try
         {
+            int priority = 0;
+            string assignedTo = "";
+
             if (noteDto == null)
                 throw new ArgumentException("Note and Manager cannot be null");
 
@@ -132,6 +136,9 @@ public class KntRedmineManager
             noteDto.ContentType = "markdown";
             noteDto.Description = issue.Description;
             var customFields = issue?.CustomFields;
+
+            // TODO: xxxx
+            // --> issue.Relations
 
             if(noteDto.KAttributesDto.Count > 0)
             {
@@ -161,48 +168,93 @@ public class KntRedmineManager
                 noteDto.KAttributesDto[12].Value = issue?.ClosedOn.ToString();
                 noteDto.KAttributesDto[13].Value = issue?.DoneRatio.ToString();
                 noteDto.KAttributesDto[16].Value = issue?.FixedVersion?.Name;
+
+                if (issue?.AssignedTo != null)
+                    assignedTo = issue?.AssignedTo.Name;
+                else
+                    assignedTo = "-";
+                noteDto.KAttributesDto[17].Value = assignedTo;
             }
+
+            foreach (var n in noteDto.Tasks)
+                n.SetIsDeleted(true);
+            
+            var au = new NoteTaskDto();
+            au.CreationDateTime = (DateTime)issue?.CreatedOn;
+            au.ModificationDateTime = DateTime.Now;
+            au.Priority = priority++;
+            au.EndDate = issue?.ClosedOn;
+            au.Resolved = issue?.ClosedOn != null ? true : false;
+            au.Tags = issue?.Author.Name; 
+            au.UserId = (Guid)userId;
+            au.Description = $"Creación y redacción de la HU ({issue?.Author.Name}). ";
+            noteDto.Tasks.Add(au);
+
+            au = new NoteTaskDto();
+            au.CreationDateTime = (DateTime)issue?.CreatedOn;
+            au.ModificationDateTime = DateTime.Now;
+            au.Priority = priority++;
+            au.EndDate = issue?.ClosedOn;
+            au.Resolved = issue?.ClosedOn != null ? true : false; ;
+            au.Tags = assignedTo;
+            au.UserId = (Guid)userId;
+            au.Description = $"Tareas derivadas del seguimiento y supervisión de la HU ({assignedTo}).";
+            noteDto.Tasks.Add(au);
 
             var annotations = issue?.Journals;
             if (annotations != null)
-            {
-                var nl = $"{Environment.NewLine} ";
-                var annString = nl;
+            {            
                 foreach (var an in annotations)
                 {
                     if (!string.IsNullOrEmpty(an.Notes))
                     {
-                        annString += $"User: {an.User?.Name} {nl}";
-                        annString += $"Created on: {an.CreatedOn}{nl}{nl}";
-                        annString += $"{an.Notes}  {nl} {nl}";
-                        annString += $"----------------------------------{nl}{nl}";
+                        var n = new NoteTaskDto();
+                        n.CreationDateTime = (DateTime) an.CreatedOn;
+                        n.ModificationDateTime = DateTime.Now;
+                        n.Priority = priority++;
+                        n.EndDate = an.CreatedOn;                        
+                        n.Resolved = true;
+                        n.Tags = an.User?.Name;
+                        n.UserId = (Guid)userId;
+                        n.Description = an.Notes;
+                        noteDto.Tasks.Add(n);
                     }
                 }
-
-                var notes = $"{nl}{nl}{nl}{nl}{nl}///////////////////////////////////{nl}";
-                notes += $"  NOTES: {nl}";
-                notes += $"///////////////////////////////////{nl}";
-                notes += annString;
-                noteDto.Description += notes;
             }
 
             if (issue?.Attachments != null && loadAttachments)
-            {
+            {                
+                int resOrder = 0;
+
                 foreach (var atch in issue.Attachments)
                 {
-                    var findRes = noteDto.Resources.FirstOrDefault(r => r.Name.IndexOf(atch.FileName)>-1);
+                    var existRes = false;
 
-                    if (findRes == null)
+                    foreach (var res in noteDto.Resources)
                     {
-                        findRes = new ResourceDto();
-                        findRes.ResourceId = Guid.NewGuid();                        
-                        findRes.ContentInDB = false;
-                        findRes.Name = $"{findRes.ResourceId}_{atch.FileName}";
-                        findRes.Description = atch.Description;
-                        findRes.Order = 0;
-                        findRes.ContentArrayBytes = _manager.DownloadFile(atch.ContentUrl);                    
-                        noteDto.Resources.Add(findRes);                        
+                        if (res.Name.IndexOf(atch.FileName) > -1) 
+                        { 
+                            existRes = true;
+                            res.Description = atch.Description;
+                            res.Order = resOrder++;
+                            res.ContentArrayBytes = _manager.DownloadFile(atch.ContentUrl);
+                            break;
+                        }
                     }
+
+                    if (!existRes)
+                    {
+                        var newRes = new ResourceDto();
+                        newRes.ResourceId = Guid.NewGuid();
+                        newRes.ContentInDB = false;
+                        newRes.Name = $"{newRes.ResourceId}_{atch.FileName}";
+                        newRes.Description = atch.Description;
+                        newRes.Order = resOrder++;
+                        newRes.ContentArrayBytes = _manager.DownloadFile(atch.ContentUrl);
+                        noteDto.Resources.Add(newRes);
+                    }
+
+                    // TODO: Deleted resources need to be processed.
                 }
             }
             
@@ -257,17 +309,26 @@ public class KntRedmineManager
                 var dest = $"![alt text]({r.Container}/{r.Name})";
 
                 noteDto.Description = noteDto.Description.Replace(org, dest, true, CultureInfo.CurrentCulture);
+
+                foreach(var t in noteDto.Tasks)
+                {
+                    t.Description = t.Description.Replace(org, dest, true, CultureInfo.CurrentCulture);
+                }
+
             }
-
-            noteDto.Description = await TextToMarkdown(_toolsPath, noteDto.Description);
-
-            //var xx = noteDto.IsValid();
-            //var yy = noteDto.Messages;
 
             // This pandoc code version has encoding issue ...
             //note.Description = await pandocEngine.ConvertToText<TextileIn, CommonMarkOut>(note.Description);                
             //note.Description = note.Description.Replace("\\[", "[");
             //note.Description = note.Description.Replace("\\]", "]");
+
+            // Use this for now.
+            noteDto.Description = await TextToMarkdown(_toolsPath, noteDto.Description);
+
+            foreach (var t in noteDto.Tasks)
+            {
+                t.Description = await TextToMarkdown(_toolsPath, t.Description);
+            }
 
             return true;
         }

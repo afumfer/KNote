@@ -341,6 +341,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
             }
         }
 
+        // TODO: anotate this meesage in log, and throw exception !!! ???
         if (rootCacheResource == null || resource.Container == null || resource.Name == null)
             return false;
 
@@ -367,7 +368,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         }
         catch (Exception ex)
         {
-            // TODO: anotate this meesage in log
+            // TODO: anotate this meesage in log, and throw exception !!! ???
             var errMsg = ex.ToString();
             return false;
         }

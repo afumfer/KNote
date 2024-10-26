@@ -142,7 +142,7 @@ public partial class KntRedmineForm : Form
                         note = (await _manager.Service.Notes.GetExtendedAsync(notes[0].NoteId)).Entity;
                 }
 
-                var res = await _manager.IssueToNoteDto(hu, note);
+                var res = await _manager.IssueToNoteDto(hu, note, (Guid)userId);
 
                 if (res)
                 {
@@ -215,7 +215,7 @@ public partial class KntRedmineForm : Form
 
             NoteExtendedDto note = (await _manager.Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
 
-            var res = _manager.IssueToNoteDto(textPredictFindIssue.Text, note, false);
+            var res = _manager.IssueToNoteDto(textPredictFindIssue.Text, note, Guid.NewGuid(), false);
 
             textPredictSubject.Text = note.Topic;
             textPredictDescription.Text = note.Description;
