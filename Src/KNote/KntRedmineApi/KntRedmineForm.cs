@@ -98,7 +98,6 @@ public partial class KntRedmineForm : Form
         {
             UseWaitCursor = true;
 
-
             if (_manager == null || _pluginCommand == null)
             {
                 MessageBox.Show("There is no correct context selected.", KntConst.AppName);
@@ -121,30 +120,16 @@ public partial class KntRedmineForm : Form
                 MessageBox.Show("Issues ID not selected.");
                 return;
             }
-
-            var filter = new NotesFilterDto();
-
+            
             var hhuu = GetHUs(textIssuesId.Text);
             var i = 1;
             listInfoRedmine.Items.Clear();
 
             foreach (var hu in hhuu)
             {
-                NoteExtendedDto note = (await _manager.Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
+                var note = await _manager.IssueToNoteDto(hu, (Guid)userId);
 
-                filter.Tags = $"HU#{hu}";
-
-                var notes = (await _manager.Service.Notes.GetFilter(filter)).Entity;
-
-                if (notes != null)
-                {
-                    if (notes.Count > 0)
-                        note = (await _manager.Service.Notes.GetExtendedAsync(notes[0].NoteId)).Entity;
-                }
-
-                var res = await _manager.IssueToNoteDto(hu, note, (Guid)userId);
-
-                if (res)
+                if (note != null)
                 {
                     var resSaveNote = await _manager.Service.Notes.SaveExtendedAsync(note);
                     if(resSaveNote.IsValid)
@@ -198,76 +183,16 @@ public partial class KntRedmineForm : Form
 
     private async void buttonFindIssue_Click(object sender, EventArgs e)
     {
-        try
-        {
-            UseWaitCursor = true;
-            if (_manager == null)
-            {
-                MessageBox.Show("There is no archive selected ");
-                return;
-            }
-
-            textPredictSubject.Text = "";
-            textPredictDescription.Text = "";
-            textPredictCategory.Text = "";
-            textPredictionGestion.Text = "";
-            textPredictionPH.Text = "";
-
-            NoteExtendedDto note = (await _manager.Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
-
-            var res = _manager.IssueToNoteDto(textPredictFindIssue.Text, note, Guid.NewGuid(), false);
-
-            textPredictSubject.Text = note.Topic;
-            textPredictDescription.Text = note.Description;
-            textPredictCategory.Text = note.KAttributesDto[2].Value;
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
-        }
-        finally
-        {
-            UseWaitCursor = false;
-        }
     }
 
     private void buttonPredictGestion_Click(object sender, EventArgs e)
     {
-        try
-        {
-            UseWaitCursor = true;
-            Application.DoEvents();
-            textPredictionGestion.Text = "";
-            textPredictionGestion.Text = _manager?.PredictGestion(textPredictSubject.Text, textPredictDescription.Text);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
-        }
-        finally
-        {
-            UseWaitCursor = false;
-        }
     }
 
     private void buttonPredictPH_Click(object sender, EventArgs e)
     {
-        try
-        {
-            UseWaitCursor = true;
-            Application.DoEvents();
-            textPredictionPH.Text = "";
-            textPredictionPH.Text = _manager?.PredictPH(textPredictCategory.Text, textPredictSubject.Text, textPredictDescription.Text);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"The following error has occurred: {ex.Message}", KntConst.AppName);
-        }
-        finally
-        {
-            UseWaitCursor = false;
-        }
     }
+
     private async void buttonSaveParameters_Click(object sender, EventArgs e)
     {
         if (_manager == null)

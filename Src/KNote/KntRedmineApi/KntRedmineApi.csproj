@@ -4,11 +4,10 @@
 	<OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>    
-    <AssemblyVersion>0.0.8.1</AssemblyVersion>
-    <FileVersion>0.0.8.1</FileVersion>
+    <AssemblyVersion>0.0.8.2</AssemblyVersion>
+    <FileVersion>0.0.8.2</FileVersion>
 	<UseWindowsForms>true</UseWindowsForms>
-	<Version>0.0.8</Version>
-	
+	<Version>0.0.8</Version>	
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,14 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Service\KNote.Service.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="RedMineGestion.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="RedMinePunHis.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

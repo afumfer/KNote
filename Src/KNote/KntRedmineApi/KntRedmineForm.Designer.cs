@@ -41,22 +41,6 @@
             label5 = new Label();
             textIssuesId = new TextBox();
             buttonImportRedmineIssues = new Button();
-            tabPredict = new TabPage();
-            label12 = new Label();
-            textPredictCategory = new TextBox();
-            buttonFindIssue = new Button();
-            groupBox2 = new GroupBox();
-            buttonPredictPH = new Button();
-            textPredictionPH = new TextBox();
-            groupBox1 = new GroupBox();
-            buttonPredictGestion = new Button();
-            textPredictionGestion = new TextBox();
-            textPredictDescription = new TextBox();
-            textPredictSubject = new TextBox();
-            textPredictFindIssue = new TextBox();
-            label11 = new Label();
-            label10 = new Label();
-            label9 = new Label();
             tabOptions = new TabPage();
             buttonSaveParameters = new Button();
             textKNoteImportUser = new TextBox();
@@ -70,9 +54,6 @@
             openFileDialog = new OpenFileDialog();
             tabRedmineUtils.SuspendLayout();
             tabImport.SuspendLayout();
-            tabPredict.SuspendLayout();
-            groupBox2.SuspendLayout();
-            groupBox1.SuspendLayout();
             tabOptions.SuspendLayout();
             SuspendLayout();
             // 
@@ -80,7 +61,6 @@
             // 
             tabRedmineUtils.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabRedmineUtils.Controls.Add(tabImport);
-            tabRedmineUtils.Controls.Add(tabPredict);
             tabRedmineUtils.Controls.Add(tabOptions);
             tabRedmineUtils.Location = new Point(6, 6);
             tabRedmineUtils.Name = "tabRedmineUtils";
@@ -201,166 +181,6 @@
             buttonImportRedmineIssues.UseVisualStyleBackColor = true;
             buttonImportRedmineIssues.Click += buttonImportRedmineIssues_Click;
             // 
-            // tabPredict
-            // 
-            tabPredict.Controls.Add(label12);
-            tabPredict.Controls.Add(textPredictCategory);
-            tabPredict.Controls.Add(buttonFindIssue);
-            tabPredict.Controls.Add(groupBox2);
-            tabPredict.Controls.Add(groupBox1);
-            tabPredict.Controls.Add(textPredictDescription);
-            tabPredict.Controls.Add(textPredictSubject);
-            tabPredict.Controls.Add(textPredictFindIssue);
-            tabPredict.Controls.Add(label11);
-            tabPredict.Controls.Add(label10);
-            tabPredict.Controls.Add(label9);
-            tabPredict.Location = new Point(4, 24);
-            tabPredict.Name = "tabPredict";
-            tabPredict.Padding = new Padding(3);
-            tabPredict.Size = new Size(676, 566);
-            tabPredict.TabIndex = 1;
-            tabPredict.Text = "Predict";
-            tabPredict.UseVisualStyleBackColor = true;
-            // 
-            // label12
-            // 
-            label12.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            label12.AutoSize = true;
-            label12.Location = new Point(15, 307);
-            label12.Name = "label12";
-            label12.Size = new Size(58, 15);
-            label12.TabIndex = 32;
-            label12.Text = "Category:";
-            // 
-            // textPredictCategory
-            // 
-            textPredictCategory.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textPredictCategory.Location = new Point(94, 307);
-            textPredictCategory.Name = "textPredictCategory";
-            textPredictCategory.Size = new Size(566, 23);
-            textPredictCategory.TabIndex = 31;
-            // 
-            // buttonFindIssue
-            // 
-            buttonFindIssue.Location = new Point(187, 18);
-            buttonFindIssue.Name = "buttonFindIssue";
-            buttonFindIssue.Size = new Size(119, 23);
-            buttonFindIssue.TabIndex = 30;
-            buttonFindIssue.Text = "Find Issue";
-            buttonFindIssue.UseVisualStyleBackColor = true;
-            buttonFindIssue.Click += buttonFindIssue_Click;
-            // 
-            // groupBox2
-            // 
-            groupBox2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox2.Controls.Add(buttonPredictPH);
-            groupBox2.Controls.Add(textPredictionPH);
-            groupBox2.Location = new Point(9, 439);
-            groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(651, 98);
-            groupBox2.TabIndex = 29;
-            groupBox2.TabStop = false;
-            groupBox2.Text = "Predict -> PH";
-            // 
-            // buttonPredictPH
-            // 
-            buttonPredictPH.Location = new Point(6, 23);
-            buttonPredictPH.Name = "buttonPredictPH";
-            buttonPredictPH.Size = new Size(122, 22);
-            buttonPredictPH.TabIndex = 2;
-            buttonPredictPH.Text = "Predict";
-            buttonPredictPH.UseVisualStyleBackColor = true;
-            buttonPredictPH.Click += buttonPredictPH_Click;
-            // 
-            // textPredictionPH
-            // 
-            textPredictionPH.Location = new Point(134, 22);
-            textPredictionPH.Name = "textPredictionPH";
-            textPredictionPH.Size = new Size(163, 23);
-            textPredictionPH.TabIndex = 0;
-            // 
-            // groupBox1
-            // 
-            groupBox1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox1.Controls.Add(buttonPredictGestion);
-            groupBox1.Controls.Add(textPredictionGestion);
-            groupBox1.Location = new Point(9, 335);
-            groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(651, 98);
-            groupBox1.TabIndex = 28;
-            groupBox1.TabStop = false;
-            groupBox1.Text = "Predict -> Gestión";
-            // 
-            // buttonPredictGestion
-            // 
-            buttonPredictGestion.Location = new Point(6, 21);
-            buttonPredictGestion.Name = "buttonPredictGestion";
-            buttonPredictGestion.Size = new Size(122, 22);
-            buttonPredictGestion.TabIndex = 1;
-            buttonPredictGestion.Text = "Predict";
-            buttonPredictGestion.UseVisualStyleBackColor = true;
-            buttonPredictGestion.Click += buttonPredictGestion_Click;
-            // 
-            // textPredictionGestion
-            // 
-            textPredictionGestion.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textPredictionGestion.Location = new Point(134, 22);
-            textPredictionGestion.Name = "textPredictionGestion";
-            textPredictionGestion.Size = new Size(511, 23);
-            textPredictionGestion.TabIndex = 0;
-            // 
-            // textPredictDescription
-            // 
-            textPredictDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textPredictDescription.Location = new Point(94, 74);
-            textPredictDescription.Multiline = true;
-            textPredictDescription.Name = "textPredictDescription";
-            textPredictDescription.ScrollBars = ScrollBars.Vertical;
-            textPredictDescription.Size = new Size(566, 227);
-            textPredictDescription.TabIndex = 27;
-            // 
-            // textPredictSubject
-            // 
-            textPredictSubject.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textPredictSubject.Location = new Point(94, 45);
-            textPredictSubject.Name = "textPredictSubject";
-            textPredictSubject.Size = new Size(566, 23);
-            textPredictSubject.TabIndex = 26;
-            // 
-            // textPredictFindIssue
-            // 
-            textPredictFindIssue.Location = new Point(94, 18);
-            textPredictFindIssue.Name = "textPredictFindIssue";
-            textPredictFindIssue.Size = new Size(81, 23);
-            textPredictFindIssue.TabIndex = 25;
-            // 
-            // label11
-            // 
-            label11.AutoSize = true;
-            label11.Location = new Point(11, 74);
-            label11.Name = "label11";
-            label11.Size = new Size(70, 15);
-            label11.TabIndex = 24;
-            label11.Text = "Description:";
-            // 
-            // label10
-            // 
-            label10.AutoSize = true;
-            label10.Location = new Point(11, 48);
-            label10.Name = "label10";
-            label10.Size = new Size(49, 15);
-            label10.TabIndex = 23;
-            label10.Text = "Subject:";
-            // 
-            // label9
-            // 
-            label9.AutoSize = true;
-            label9.Location = new Point(11, 21);
-            label9.Name = "label9";
-            label9.Size = new Size(46, 15);
-            label9.TabIndex = 22;
-            label9.Text = "Issue #:";
-            // 
             // tabOptions
             // 
             tabOptions.Controls.Add(buttonSaveParameters);
@@ -472,12 +292,6 @@
             tabRedmineUtils.ResumeLayout(false);
             tabImport.ResumeLayout(false);
             tabImport.PerformLayout();
-            tabPredict.ResumeLayout(false);
-            tabPredict.PerformLayout();
-            groupBox2.ResumeLayout(false);
-            groupBox2.PerformLayout();
-            groupBox1.ResumeLayout(false);
-            groupBox1.PerformLayout();
             tabOptions.ResumeLayout(false);
             tabOptions.PerformLayout();
             ResumeLayout(false);
@@ -487,7 +301,6 @@
 
         private TabControl tabRedmineUtils;
         private TabPage tabImport;
-        private TabPage tabPredict;
         private Label label8;
         private Button buttonIssuesImportFile;
         private TextBox textIssuesImportFile;
@@ -498,21 +311,6 @@
         private Label label5;
         private TextBox textIssuesId;
         private Button buttonImportRedmineIssues;
-        private Label label12;
-        private TextBox textPredictCategory;
-        private Button buttonFindIssue;
-        private GroupBox groupBox2;
-        private Button buttonPredictPH;
-        private TextBox textPredictionPH;
-        private GroupBox groupBox1;
-        private Button buttonPredictGestion;
-        private TextBox textPredictionGestion;
-        private TextBox textPredictDescription;
-        private TextBox textPredictSubject;
-        private TextBox textPredictFindIssue;
-        private Label label11;
-        private Label label10;
-        private Label label9;
         private OpenFileDialog openFileDialog;
         private TabPage tabOptions;
         private TextBox textToolsPath;
