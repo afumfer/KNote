@@ -104,17 +104,6 @@ public partial class KntRedmineForm : Form
                 return;
             }
 
-            Guid? userId = null;
-            var userDto = (await _manager.Service.Users.GetByUserNameAsync(_manager.AppUserName)).Entity;
-            if (userDto != null)
-                userId = userDto.UserId;
-
-            if (userId == null)
-            {
-                MessageBox.Show("There is no valid user to import data ");
-                return;
-            }
-
             if (string.IsNullOrEmpty(textIssuesId.Text))
             {
                 MessageBox.Show("Issues ID not selected.");
@@ -127,7 +116,7 @@ public partial class KntRedmineForm : Form
 
             foreach (var hu in hhuu)
             {
-                var note = await _manager.IssueToNoteDto(hu, (Guid)userId);
+                var note = await _manager.IssueToNoteDto(hu);
 
                 if (note != null)
                 {

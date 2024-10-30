@@ -12,6 +12,8 @@ using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using System.Net.Mail;
 using NLog.Filters;
+using System.Text;
+using static Azure.Core.HttpHeader;
 
 namespace KntRedmineApi;
 
@@ -24,6 +26,9 @@ public class KntRedmineManager
     
     private List<FolderInfoDto> _folders = new();
     private FolderDto _parentFolder = new();
+
+    private Dictionary<string, Guid> _cacheUsers = new Dictionary<string, Guid>();
+    private Dictionary<string, FolderDto> _cacheFolders = new Dictionary<string, FolderDto>();
 
     #endregion
 
@@ -105,10 +110,10 @@ public class KntRedmineManager
 
             _folders = (await _service.Folders.GetAllAsync()).Entity;
 
-            //int rootFolNum = 1;
-            //if (!string.IsNullOrEmpty(_rootFolderForImport))
-            //    int.TryParse(_rootFolderForImport, out rootFolNum);
-            //_parentFolder = (await _service.Folders.GetAsync(rootFolNum)).Entity;
+            int rootFolNum = 1;
+            if (!string.IsNullOrEmpty(_rootFolderForImport))
+                int.TryParse(_rootFolderForImport, out rootFolNum);
+            _parentFolder = (await _service.Folders.GetAsync(rootFolNum)).Entity;
 
             //var pandocEngine = new PandocEngine($"{_store.AppConfig.ToolsPath}/pandoc.exe");        
             PandocInstance.SetPandocPath($"{_toolsPath}/pandoc.exe");
@@ -119,7 +124,7 @@ public class KntRedmineManager
         }
     }
 
-    public async Task<NoteExtendedDto> IssueToNoteDto(string id, Guid userId, bool loadAttachments = true)
+    public async Task<NoteExtendedDto> IssueToNoteDto(string id)
     {
         try
         {
@@ -138,10 +143,13 @@ public class KntRedmineManager
             #region  Issue basic data
 
             var filter = new NotesFilterDto();
+            filter.SearchInDescription = false;
             if (issue.Tracker.Id == 20)
                 filter.Tags = $"HU#{id}";
             else if (issue.Tracker.Id == 21)
                 filter.Tags = $"PS#{id}";
+            else if (issue.Tracker.Id == 23)
+                filter.Tags = $"INC#{id}";
 
             var notes = (await Service.Notes.GetFilter(filter)).Entity;
 
@@ -151,34 +159,28 @@ public class KntRedmineManager
                     noteDto = (await Service.Notes.GetExtendedAsync(notes[0].NoteId)).Entity;
                 else
                 {
-                    if (issue.Tracker.Id == 20)
+                    if (issue.Tracker.Id == 20)  // HU 
                     {
                         noteDto = (await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("4A3E0AE2-005D-44F0-8BF0-7E0D2A60F6C7") })).Entity;
-                        noteDto.Tags = $"HU#{issue.Id}";
+                        LoadKAttributesTrackerHU(noteDto, issue);
                     }
-                    else if (issue.Tracker.Id == 21)
+                    else if (issue.Tracker.Id == 21)  // PS 
                     {
                         noteDto = (await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("BB4930BD-7065-4A41-8A9A-E5854EDE5024") })).Entity;
-                        noteDto.Tags = $"PS#{issue.Id}";
+                        LoadKAttributesTrackerPS(noteDto, issue);
                     }
-                }                
+                    else if (issue.Tracker.Id == 23)  // INC
+                    {
+                        noteDto = (await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = Guid.Parse("63D8B399-D7F4-48D6-8CCE-228FEFEDE4F0") })).Entity;
+                        LoadKAttributesTrackerINC(noteDto, issue);
+                    }                    
+                }
             }
 
             noteDto.Topic = issue.Subject;
             noteDto.ContentType = "markdown";
             noteDto.Description = issue.Description;
-
-            #endregion
-
-            #region  Load KNote extender attributes
-
-            if (noteDto.KAttributesDto.Count > 0)
-            {
-                if (issue.Tracker.Id == 20)                                    
-                    LoadKAttributesTrackerHU(noteDto, issue);                 
-                else if (issue.Tracker.Id == 21)                                    
-                    LoadKAttributesTrackerPS(noteDto, issue);                
-            }
+            noteDto.Tags = filter.Tags;
 
             #endregion
 
@@ -192,10 +194,9 @@ public class KntRedmineManager
             au.ModificationDateTime = DateTime.Now;
             au.Priority = priority++;
             au.EndDate = issue?.ClosedOn;
-            au.Resolved = issue?.ClosedOn != null ? true : false;
-            au.Tags = issue?.Author.Name; 
-            au.UserId = (Guid)userId;
+            au.Resolved = issue?.ClosedOn != null ? true : false;            
             au.Description = $"Creación y redacción de la HU ({issue?.Author.Name}). ";
+            au.UserId = await GetKNoteUserId(issue?.Author.Name);
             noteDto.Tasks.Add(au);
 
             if (issue?.AssignedTo != null)
@@ -205,10 +206,9 @@ public class KntRedmineManager
                 au.ModificationDateTime = DateTime.Now;
                 au.Priority = priority++;
                 au.EndDate = issue?.ClosedOn;
-                au.Resolved = issue?.ClosedOn != null ? true : false; ;
-                au.Tags = issue?.AssignedTo.Name;
-                au.UserId = (Guid)userId;
+                au.Resolved = issue?.ClosedOn != null ? true : false; ;                
                 au.Description = $"Tareas derivadas del seguimiento y supervisión de la HU ({issue?.AssignedTo.Name}).";
+                au.UserId = await GetKNoteUserId(issue?.AssignedTo.Name);
                 noteDto.Tasks.Add(au);
             }
 
@@ -224,10 +224,9 @@ public class KntRedmineManager
                         n.ModificationDateTime = DateTime.Now;
                         n.Priority = priority++;
                         n.EndDate = an.CreatedOn;                        
-                        n.Resolved = true;
-                        n.Tags = an.User?.Name;
-                        n.UserId = (Guid)userId;
+                        n.Resolved = true;                        
                         n.Description = an.Notes;
+                        n.UserId = await GetKNoteUserId(an.User.Name);
                         noteDto.Tasks.Add(n);
                     }
                 }
@@ -237,7 +236,7 @@ public class KntRedmineManager
 
             #region  Attachments
 
-            if (issue?.Attachments != null && loadAttachments)
+            if (issue?.Attachments != null)
             {                
                 int resOrder = 0;
 
@@ -283,55 +282,29 @@ public class KntRedmineManager
             // TODO: ...
             var relations = issue?.Relations;
 
-            #endregion
+            if (relations != null)
+            {
+                StringBuilder sbRelations = new StringBuilder();
+                string strRelations = "";
+                foreach (var rel in relations) 
+                { 
+                    if(rel.Type == IssueRelationType.Blocks)
+                    {
+                        sbRelations.Append($"BID#{rel.IssueId}-BTOID#{rel.IssueToId};");
+                    }
+                }
+                strRelations = sbRelations.ToString() ?? "";
+                if(sbRelations.Length > 5) 
+                    noteDto.Tags += $"  [{strRelations.Substring(0,strRelations.Length - 1)}]";
+            }
 
-            // TODO: !!! Delete this 
-            //foreach (var r in noteDto.Resources)
-            //{
-            //    r.FileType = ExtensionFileToFileType(Path.GetExtension(r.Name));
-            //}
+            #endregion
 
             #region Folder
 
-            string folderName = "";
-            if (issue.Tracker.Id == 20)
-                folderName = noteDto.KAttributesDto[3].Value;
-            else if (issue.Tracker.Id == 21)
-                folderName = $"Peticiones de servicio {(noteDto.KAttributesDto[2].Value).Substring(0,5)}";
-
-            if (!string.IsNullOrEmpty(_rootFolderForImport))
-            int.TryParse(_rootFolderForImport, out rootFolNum);
-            _parentFolder = (await _service.Folders.GetAsync(rootFolNum)).Entity;
-
-            var folder = _folders.FirstOrDefault(f => f.Name == folderName);
-
-            if (folder != null)
-            {
-                noteDto.FolderId = folder.FolderId;
-                noteDto.FolderDto = folder.GetSimpleDto<FolderDto>();
-            }
-            else
-            {
-                FolderDto newFolder = new FolderDto
-                {
-                    Name = folderName,
-                    ParentId = _parentFolder.FolderId
-                };
-
-                var resSave = await _service.Folders.SaveAsync(newFolder);
-
-                if (resSave.IsValid)
-                {
-                    _folders = (await _service.Folders.GetAllAsync()).Entity;
-                    noteDto.FolderId = resSave.Entity.FolderId;
-                    noteDto.FolderDto = resSave.Entity;
-                }
-                else
-                {
-                    noteDto.FolderId = _parentFolder.FolderId;
-                    noteDto.FolderDto = _parentFolder;
-                }
-            }
+            var f = await GetKNoteFolderDto(issue, noteDto);
+            noteDto.FolderId = f.FolderId;
+            noteDto.FolderDto = f;
 
             #endregion
 
@@ -423,8 +396,99 @@ public class KntRedmineManager
 
     #region Private Methods
 
+    private async Task<FolderDto> GetKNoteFolderDto(Issue issue, NoteExtendedDto noteDto)
+    {
+        string folderName = "";
+
+        if (issue.Tracker.Id == 20)
+            folderName = noteDto.KAttributesDto[3].Value;
+        else if (issue.Tracker.Id == 21)
+            folderName = $"Peticiones de servicio {(noteDto.KAttributesDto[2].Value).Substring(0, 5)}";
+        else if (issue.Tracker.Id == 23)
+            folderName = $"Incidencias {(noteDto.KAttributesDto[2].Value).Substring(0, 5)}";
+
+        if (_cacheFolders.TryGetValue(folderName, out FolderDto folderDto))
+        {
+            return folderDto;
+        }
+        else
+        {
+            FolderDto newFolderDto;
+            var folder = _folders.FirstOrDefault(f => f.Name == folderName);
+
+            if (folder != null)
+            {
+                newFolderDto = folder.GetSimpleDto<FolderDto>();
+            }
+            else
+            {
+                FolderDto newFolder = new FolderDto
+                {
+                    Name = folderName,
+                    ParentId = _parentFolder.FolderId
+                };
+
+                var resSave = await _service.Folders.SaveAsync(newFolder);
+
+                if (resSave.IsValid)
+                    newFolderDto = resSave.Entity;                
+                else
+                    newFolderDto = _parentFolder;                 
+            }
+            _cacheFolders.Add(folderName, newFolderDto);
+            return newFolderDto;
+        }       
+    }
+
+    private async Task<Guid> GetKNoteUserId(string name)
+    {
+        string fullName = name;
+        if(name.Length > 32)
+            name = name.Substring(0, 32);
+
+        if (_cacheUsers.TryGetValue(name, out Guid userId))
+        {
+            return userId;
+        }
+        else
+        {
+            Guid newUserId;
+            var resGetUser = await _service.Users.GetByUserNameAsync(name);
+            if (!resGetUser.IsValid)
+            {
+                var resNewUser = await _service.Users.CreateAsync(
+                    new UserRegisterDto 
+                        { UserId = userId ,
+                         Disabled = false ,
+                         EMail = $"{fullName}@{fullName}.org", 
+                         FullName = fullName,
+                         Password = GetRandomString(10), 
+                         RoleDefinition = "Public",
+                         UserName = name 
+                    });
+                if (resNewUser.IsValid)
+                {
+                    newUserId = resNewUser.Entity.UserId;
+                }
+                else
+                {
+                    throw new Exception("Can't create new user");
+                }
+            }
+            else
+            {
+                newUserId = resGetUser.Entity.UserId;
+            }
+            _cacheUsers.Add(name, newUserId);
+            return newUserId;
+        }
+    }
+
     private void LoadKAttributesTrackerHU(NoteExtendedDto noteDto, Issue issue)
     {
+        if (noteDto.KAttributesDto.Count < 15)
+            return;
+
         var customFields = issue?.CustomFields;        
 
         noteDto.KAttributesDto[0].Value = issue?.Author.Name;                     // Añadido por 
@@ -445,7 +509,7 @@ public class KntRedmineManager
         noteDto.KAttributesDto[14].Value = issue?.FixedVersion?.Name;             // Versión prevista 
 
         // TODO: hack for extract folder name.
-        if (customFields != null)
+        if (customFields != null && (noteDto.KAttributesDto.Count > 19))
         {
             if (customFields[0]?.Values != null)  // Gestión 
                 noteDto.KAttributesDto[3].Value = customFields[0]?.Values[0]?.Info?.ToString();
@@ -464,6 +528,9 @@ public class KntRedmineManager
 
     private void LoadKAttributesTrackerPS(NoteExtendedDto noteDto, Issue issue)
     {
+        if (noteDto.KAttributesDto.Count < 14)
+            return;
+
         var customFields = issue?.CustomFields;
 
         noteDto.KAttributesDto[0].Value = issue?.Author.Name;                     // Añadido por 
@@ -483,7 +550,7 @@ public class KntRedmineManager
         noteDto.KAttributesDto[13].Value = issue?.FixedVersion?.Name;             // Versión prevista
 
         // TODO: hack for extract folder name.
-        if (customFields != null)
+        if (customFields != null && (noteDto.KAttributesDto.Count > 32))
         {
             if (customFields[0]?.Values != null)   // Código de usuario
                 noteDto.KAttributesDto[14].Value = customFields[0]?.Values[0]?.Info?.ToString();
@@ -523,6 +590,79 @@ public class KntRedmineManager
                 noteDto.KAttributesDto[31].Value = customFields[17]?.Values[0]?.Info?.ToString();
             if (customFields[18]?.Values != null)   // Observaciones
                 noteDto.KAttributesDto[32].Value = customFields[18]?.Values[0]?.Info?.ToString();
+        }
+    }
+
+    private void LoadKAttributesTrackerINC(NoteExtendedDto noteDto, Issue issue)
+    {
+        if (noteDto.KAttributesDto.Count < 14)
+            return;
+
+        var customFields = issue?.CustomFields;
+
+        noteDto.KAttributesDto[0].Value = issue?.Author.Name;                     // Añadido por 
+        if (issue?.AssignedTo != null)                                            // Asignado a 
+            noteDto.KAttributesDto[1].Value = issue?.AssignedTo.Name;
+        noteDto.KAttributesDto[2].Value = issue?.Project.Name;                    // Proyecto        
+        noteDto.KAttributesDto[3].Value = issue?.Priority.Name;                   // Prioridad
+        noteDto.KAttributesDto[4].Value = issue?.Status.Name;                     // Estado
+        noteDto.KAttributesDto[5].Value = issue?.TotalEstimatedHours.ToString();  // Tiempo estimado
+        noteDto.KAttributesDto[6].Value = issue?.TotalSpentHours.ToString();      // Tiempo dedicado
+        noteDto.KAttributesDto[7].Value = issue?.CreatedOn.ToString();            // Fecha creación
+        noteDto.KAttributesDto[8].Value = issue?.UpdatedOn.ToString();            // Fecha modificación
+        noteDto.KAttributesDto[9].Value = issue?.DueDate.ToString();              // Fecha vencimiento
+        noteDto.KAttributesDto[10].Value = issue?.StartDate.ToString();           // Fecha de inicio
+        noteDto.KAttributesDto[11].Value = issue?.ClosedOn.ToString();            // Fecha fin
+        noteDto.KAttributesDto[12].Value = issue?.DoneRatio.ToString();           // Porcentaje realizado
+        noteDto.KAttributesDto[13].Value = issue?.FixedVersion?.Name;             // Versión prevista
+
+        // TODO: hack for extract folder name.
+        if (customFields != null && (noteDto.KAttributesDto.Count > 35))
+        {
+            if (customFields[0]?.Values != null)   // Código de usuario
+                noteDto.KAttributesDto[14].Value = customFields[0]?.Values[0]?.Info?.ToString();
+            if (customFields[1]?.Values != null)   // Nombre y apellidos
+                noteDto.KAttributesDto[15].Value = customFields[1]?.Values[0]?.Info?.ToString();
+            if (customFields[2]?.Values != null)   // Correo electrónico
+                noteDto.KAttributesDto[16].Value = customFields[2]?.Values[0]?.Info?.ToString();
+            if (customFields[3]?.Values != null)   // Servicio
+                noteDto.KAttributesDto[17].Value = customFields[3]?.Values[0]?.Info?.ToString();
+            if (customFields[4]?.Values != null)   // Cargo
+                noteDto.KAttributesDto[18].Value = customFields[4]?.Values[0]?.Info?.ToString();
+            if (customFields[5]?.Values != null)   // Centro educativo
+                noteDto.KAttributesDto[19].Value = customFields[5]?.Values[0]?.Info?.ToString();
+            if (customFields[6]?.Values != null)   // Teléfono(s) de contacto
+                noteDto.KAttributesDto[20].Value = customFields[6]?.Values[0]?.Info?.ToString();
+            if (customFields[7]?.Values != null)   // Centro directivo
+                noteDto.KAttributesDto[21].Value = customFields[7]?.Values[0]?.Info?.ToString();
+            if (customFields[8]?.Values != null)   // Agrupación funcional
+                noteDto.KAttributesDto[22].Value = customFields[8]?.Values[0]?.Info?.ToString();
+            if (customFields[9]?.Values != null)   // Nº de ticket externo (OTRS)
+                noteDto.KAttributesDto[23].Value = customFields[9]?.Values[0]?.Info?.ToString();
+            if (customFields[10]?.Values != null)   // Nº de ticket externo (OTRS-ID)
+                noteDto.KAttributesDto[24].Value = customFields[10]?.Values[0]?.Info?.ToString();            
+            if (customFields[11]?.Values != null)   // Referencia origen del problema
+                noteDto.KAttributesDto[25].Value = customFields[11]?.Values[0]?.Info?.ToString();
+            if (customFields[12]?.Values != null)   // Gestión/Proceso
+                noteDto.KAttributesDto[26].Value = customFields[12]?.Values[0]?.Info?.ToString();
+            if (customFields[13]?.Values != null)   // Aplicación
+                noteDto.KAttributesDto[27].Value = customFields[13]?.Values[0]?.Info?.ToString();
+            if (customFields[14]?.Values != null)   // Fecha límite
+                noteDto.KAttributesDto[28].Value = customFields[14]?.Values[0]?.Info?.ToString();
+            if (customFields[15]?.Values != null)   // Comunicación a sistema externo
+                noteDto.KAttributesDto[29].Value = customFields[15]?.Values[0]?.Info?.ToString();
+            if (customFields[16]?.Values != null)   // Solución adoptada
+                noteDto.KAttributesDto[30].Value = customFields[16]?.Values[0]?.Info?.ToString();
+            if (customFields[17]?.Values != null)   // Comunicación al solicitante
+                noteDto.KAttributesDto[31].Value = customFields[17]?.Values[0]?.Info?.ToString();
+            if (customFields[18]?.Values != null)   // ANS_Man_TResp_Pdte
+                noteDto.KAttributesDto[32].Value = customFields[18]?.Values[0]?.Info?.ToString();
+            if (customFields[19]?.Values != null)   // ANS_Man_TResp_Fin
+                noteDto.KAttributesDto[33].Value = customFields[19]?.Values[0]?.Info?.ToString();
+            if (customFields[20]?.Values != null)   // ANS_Man_TResol_Pdte
+                noteDto.KAttributesDto[34].Value = customFields[20]?.Values[0]?.Info?.ToString();
+            if (customFields[21]?.Values != null)   // ANS_Man_TResol_Fin
+                noteDto.KAttributesDto[35].Value = customFields[21]?.Values[0]?.Info?.ToString();
         }
     }
 
@@ -582,6 +722,21 @@ public class KntRedmineManager
             return "text/plain";
         else
             return "";
+    }
+
+    private string GetRandomString(int size)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder result = new StringBuilder();
+        Random random = new Random();
+
+        for (int i = 0; i < size; i++)
+        {
+            int indice = random.Next(chars.Length);
+            result.Append(chars[indice]);
+        }
+
+        return result.ToString();
     }
 
     #endregion 
