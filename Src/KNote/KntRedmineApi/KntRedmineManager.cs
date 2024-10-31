@@ -129,8 +129,7 @@ public class KntRedmineManager
         try
         {
             NoteExtendedDto noteDto = null!;
-            int priority = 0;            
-            int rootFolNum = 1;
+            int priority = 0;                        
 
             if (_redMineManager == null)
                 throw new ArgumentException("Manager cannot be null");
@@ -181,6 +180,8 @@ public class KntRedmineManager
             noteDto.ContentType = "markdown";
             noteDto.Description = issue.Description;
             noteDto.Tags = filter.Tags;
+            noteDto.CreationDateTime = issue.CreatedOn ?? DateTime.Now;
+            noteDto.ModificationDateTime = issue.UpdatedOn ?? DateTime.Now;
 
             #endregion
 
@@ -193,8 +194,8 @@ public class KntRedmineManager
             au.CreationDateTime = (DateTime)issue?.CreatedOn;
             au.ModificationDateTime = DateTime.Now;
             au.Priority = priority++;
-            au.EndDate = issue?.ClosedOn;
-            au.Resolved = issue?.ClosedOn != null ? true : false;            
+            au.EndDate = issue?.CreatedOn;
+            au.Resolved = issue?.CreatedOn != null ? true : false;            
             au.Description = $"Creación y redacción de la HU ({issue?.Author.Name}). ";
             au.UserId = await GetKNoteUserId(issue?.Author.Name);
             noteDto.Tasks.Add(au);
