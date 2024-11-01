@@ -368,7 +368,7 @@ public class PostItEditorCtrl : CtrlEditorBase<IViewPostIt<NoteDto>, NoteDto>
             NoteId = Model.NoteId,
             UserId = await PostItGetUserId(),
             Description = Model.Topic,
-            Tags = "Fast task",
+            Tags = "Automatic  task",
             Resolved = true,
             EndDate = DateTime.Now
         };

@@ -122,7 +122,7 @@
             buttonResourceDelete = new Button();
             buttonResourceAdd = new Button();
             label12 = new Label();
-            tabTasks = new TabPage();
+            tabActivities = new TabPage();
             textTaskTags = new TextBox();
             label17 = new Label();
             textTaskDescription = new TextBox();
@@ -166,7 +166,7 @@
             tabAttributes.SuspendLayout();
             tabResources.SuspendLayout();
             panelPreview.SuspendLayout();
-            tabTasks.SuspendLayout();
+            tabActivities.SuspendLayout();
             tabAlarms.SuspendLayout();
             tabCode.SuspendLayout();
             tabTraceNotes.SuspendLayout();
@@ -346,7 +346,7 @@
             tabNoteData.Controls.Add(tabBasicData);
             tabNoteData.Controls.Add(tabAttributes);
             tabNoteData.Controls.Add(tabResources);
-            tabNoteData.Controls.Add(tabTasks);
+            tabNoteData.Controls.Add(tabActivities);
             tabNoteData.Controls.Add(tabAlarms);
             tabNoteData.Controls.Add(tabCode);
             tabNoteData.Controls.Add(tabTraceNotes);
@@ -462,7 +462,7 @@
             // 
             // textDescription
             // 
-            textDescription.Font = new Font("Courier New", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            textDescription.Font = new Font("Courier New", 9.75F);
             textDescription.Location = new Point(40, 14);
             textDescription.Margin = new Padding(4, 3, 4, 3);
             textDescription.MaxLength = 0;
@@ -686,7 +686,7 @@
             // labelLoadingHtml
             // 
             labelLoadingHtml.AutoSize = true;
-            labelLoadingHtml.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelLoadingHtml.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             labelLoadingHtml.Location = new Point(136, 112);
             labelLoadingHtml.Name = "labelLoadingHtml";
             labelLoadingHtml.Size = new Size(138, 15);
@@ -1044,7 +1044,7 @@
             // linkViewFile
             // 
             linkViewFile.AutoSize = true;
-            linkViewFile.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            linkViewFile.Font = new Font("Segoe UI", 10F);
             linkViewFile.Location = new Point(13, 14);
             linkViewFile.Name = "linkViewFile";
             linkViewFile.Size = new Size(128, 19);
@@ -1109,25 +1109,25 @@
             label12.TabIndex = 5;
             label12.Text = "Resources:";
             // 
-            // tabTasks
+            // tabActivities
             // 
-            tabTasks.Controls.Add(textTaskTags);
-            tabTasks.Controls.Add(label17);
-            tabTasks.Controls.Add(textTaskDescription);
-            tabTasks.Controls.Add(label16);
-            tabTasks.Controls.Add(listViewTasks);
-            tabTasks.Controls.Add(buttonTaskEdit);
-            tabTasks.Controls.Add(buttonTaskDelete);
-            tabTasks.Controls.Add(buttonTaskAdd);
-            tabTasks.Controls.Add(label11);
-            tabTasks.ImageIndex = 6;
-            tabTasks.Location = new Point(4, 30);
-            tabTasks.Margin = new Padding(4, 3, 4, 3);
-            tabTasks.Name = "tabTasks";
-            tabTasks.Size = new Size(794, 569);
-            tabTasks.TabIndex = 2;
-            tabTasks.Text = "Tasks  ";
-            tabTasks.UseVisualStyleBackColor = true;
+            tabActivities.Controls.Add(textTaskTags);
+            tabActivities.Controls.Add(label17);
+            tabActivities.Controls.Add(textTaskDescription);
+            tabActivities.Controls.Add(label16);
+            tabActivities.Controls.Add(listViewTasks);
+            tabActivities.Controls.Add(buttonTaskEdit);
+            tabActivities.Controls.Add(buttonTaskDelete);
+            tabActivities.Controls.Add(buttonTaskAdd);
+            tabActivities.Controls.Add(label11);
+            tabActivities.ImageIndex = 6;
+            tabActivities.Location = new Point(4, 30);
+            tabActivities.Margin = new Padding(4, 3, 4, 3);
+            tabActivities.Name = "tabActivities";
+            tabActivities.Size = new Size(794, 569);
+            tabActivities.TabIndex = 2;
+            tabActivities.Text = "Activities ";
+            tabActivities.UseVisualStyleBackColor = true;
             // 
             // textTaskTags
             // 
@@ -1141,7 +1141,7 @@
             // 
             label17.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             label17.AutoSize = true;
-            label17.Location = new Point(400, 504);
+            label17.Location = new Point(400, 508);
             label17.Name = "label17";
             label17.Size = new Size(33, 15);
             label17.TabIndex = 16;
@@ -1161,9 +1161,9 @@
             label16.AutoSize = true;
             label16.Location = new Point(400, 16);
             label16.Name = "label16";
-            label16.Size = new Size(94, 15);
+            label16.Size = new Size(134, 15);
             label16.TabIndex = 14;
-            label16.Text = "Task description:";
+            label16.Text = "Task/Action description:";
             // 
             // listViewTasks
             // 
@@ -1217,9 +1217,9 @@
             label11.Location = new Point(6, 16);
             label11.Margin = new Padding(4, 0, 4, 0);
             label11.Name = "label11";
-            label11.Size = new Size(37, 15);
+            label11.Size = new Size(82, 15);
             label11.TabIndex = 5;
-            label11.Text = "Tasks:";
+            label11.Text = "Tasks/Actions:";
             // 
             // tabAlarms
             // 
@@ -1312,7 +1312,7 @@
             // textScriptCode
             // 
             textScriptCode.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textScriptCode.Font = new Font("Courier New", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            textScriptCode.Font = new Font("Courier New", 9.75F);
             textScriptCode.Location = new Point(7, 34);
             textScriptCode.Margin = new Padding(4, 3, 4, 3);
             textScriptCode.Multiline = true;
@@ -1520,8 +1520,8 @@
             tabResources.PerformLayout();
             panelPreview.ResumeLayout(false);
             panelPreview.PerformLayout();
-            tabTasks.ResumeLayout(false);
-            tabTasks.PerformLayout();
+            tabActivities.ResumeLayout(false);
+            tabActivities.PerformLayout();
             tabAlarms.ResumeLayout(false);
             tabAlarms.PerformLayout();
             tabCode.ResumeLayout(false);
@@ -1562,7 +1562,7 @@
         private Label label2;
         private Label label1;
         private TabPage tabAlarms;
-        private TabPage tabTasks;
+        private TabPage tabActivities;
         private TabPage tabAttributes;
         private TabPage tabResources;
         private TabPage tabTraceNotes;
