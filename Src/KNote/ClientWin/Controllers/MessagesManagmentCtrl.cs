@@ -10,6 +10,9 @@ public class MessagesManagmentCtrl : CtrlBase
     static System.Windows.Forms.Timer kntTimerAlarms;
     static System.Windows.Forms.Timer kntTimerAutoSave;
 
+    private static readonly object _lockObject = new object();
+    static bool execAutoSave = true;
+
     #endregion
 
     #region Constructor 
@@ -68,8 +71,8 @@ public class MessagesManagmentCtrl : CtrlBase
     {
         if (!Store.AppConfig.AutoSaveActivated)
             return;
-        kntTimerAutoSave.Stop();                        
-        await SaveNotes();             
+        kntTimerAutoSave.Stop();
+        await SaveNotes();
         kntTimerAutoSave.Enabled = true;
     }
 
@@ -77,32 +80,38 @@ public class MessagesManagmentCtrl : CtrlBase
     {
         if (!Store.AppConfig.AlarmActivated)
             return;
-        kntTimerAlarms.Stop();                        
-        await AlarmsWindows();            
-        kntTimerAlarms.Enabled = true;            
+        kntTimerAlarms.Stop();
+        await AlarmsWindows();
+        kntTimerAlarms.Enabled = true;
     }
 
     private async void VisibleWindows()
     {
-        foreach(var store in Store.GetAllServiceRef())
+        lock (_lockObject)
+            execAutoSave = false;
+        foreach (var store in Store.GetAllServiceRef())
         {
             var service = store.Service;
             var res = await service.Notes.GetVisibleNotesIdAsync(Store.AppUserName);
             foreach(var id in res.Entity)                                    
                 PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
         }
+        lock (_lockObject)
+            execAutoSave = true;
     }
 
     private async Task AlarmsWindows()
     {
+        lock (_lockObject)
+            execAutoSave = false;
         foreach (var store in Store.GetAllServiceRef())
         {
             var service = store.Service;
 
             var resPostIt = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.PostIt);
-            foreach (var id in resPostIt.Entity)
+            foreach (var id in resPostIt.Entity)                            
                 PostItAlarm?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
-
+            
             //var resEMail = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.Email);
             //foreach (var id in resEMail.Entity)
             //    EMailAlarm?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
@@ -115,11 +124,14 @@ public class MessagesManagmentCtrl : CtrlBase
             foreach (var id in resKntScript.Entity)
                 ExecuteKntScript?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
         }
+        lock (_lockObject)
+            execAutoSave = true;
     }
 
     private async Task SaveNotes()
-    {
-        await Store.SaveActiveNotes();
+    {        
+        if (execAutoSave)
+            await Store.SaveActiveNotes();        
     }
 
     #endregion 
