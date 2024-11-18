@@ -71,7 +71,7 @@ public class MessagesManagmentCtrl : CtrlBase
     {
         if (!Store.AppConfig.AutoSaveActivated)
             return;
-        kntTimerAutoSave.Stop();
+        kntTimerAutoSave.Enabled = false; 
         await SaveNotes();
         kntTimerAutoSave.Enabled = true;
     }
@@ -80,7 +80,7 @@ public class MessagesManagmentCtrl : CtrlBase
     {
         if (!Store.AppConfig.AlarmActivated)
             return;
-        kntTimerAlarms.Stop();
+        kntTimerAlarms.Enabled = false;
         await AlarmsWindows();
         kntTimerAlarms.Enabled = true;
     }
@@ -131,7 +131,13 @@ public class MessagesManagmentCtrl : CtrlBase
     private async Task SaveNotes()
     {        
         if (execAutoSave)
-            await Store.SaveActiveNotes();        
+            await Store.SaveActiveNotes();
+        else
+        {
+            kntTimerAutoSave.Enabled = false;
+            Thread.Sleep(100);
+            kntTimerAutoSave.Enabled = true;
+        }
     }
 
     #endregion 
