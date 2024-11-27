@@ -6,11 +6,11 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-using ImageAlignOption = Pavonis.Html.Editor.ImageAlignOption;
+using ImageAlignOption = MSDN.Html.Editor.ImageAlignOption;
 
 #endregion
 
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
 
 	/// <summary>

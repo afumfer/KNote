@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
 
 	/// <summary>

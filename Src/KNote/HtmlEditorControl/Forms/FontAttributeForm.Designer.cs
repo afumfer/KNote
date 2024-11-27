@@ -1,4 +1,4 @@
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
     partial class FontAttributeForm
     {

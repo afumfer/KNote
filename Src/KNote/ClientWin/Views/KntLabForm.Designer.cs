@@ -37,7 +37,7 @@
             textStatusWebView2 = new TextBox();
             textUrlWebView2 = new TextBox();
             tabRichEditor = new TabPage();
-            htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
+            htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             tabKntScriptLab = new TabPage();
             groupSamples = new GroupBox();
             buttonSelectScriptDirectory = new Button();
@@ -490,7 +490,7 @@
         private ListBox listMessages;
         private Button buttonImportAnotasXML;
         private TabPage tabRichEditor;
-        private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
+        private MSDN.Html.Editor.HtmlEditorControl htmlDescription;
         private OpenFileDialog openFileDialog;
         private Label label1;
         private Label label2;

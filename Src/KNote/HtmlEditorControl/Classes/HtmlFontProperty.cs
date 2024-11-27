@@ -13,7 +13,7 @@ using System.ComponentModel.Design.Serialization;
 
 #endregion
 
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
 
 	#region HtmlFontSize enumeration

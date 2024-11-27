@@ -6,11 +6,11 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-using NavigateActionOption = Pavonis.Html.Editor.NavigateActionOption;
+using NavigateActionOption = MSDN.Html.Editor.NavigateActionOption;
 
 #endregion
 
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
 
 	/// <summary>

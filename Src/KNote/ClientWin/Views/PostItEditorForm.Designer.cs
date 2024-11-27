@@ -33,7 +33,7 @@ namespace KNote.ClientWin.Views
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             panelForm = new Panel();
             webView2 = new KntWebView.KWebView();
-            htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
+            htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             labelStatus = new LabelNoCopy();
             picResize = new PictureBox();
             picMenu = new PictureBox();
@@ -380,7 +380,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripSeparator menuS1;
         private System.Windows.Forms.ToolStripMenuItem menuExtendedEdition;
         private System.Windows.Forms.ToolStripMenuItem menuPostItProperties;
-        private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
+        private MSDN.Html.Editor.HtmlEditorControl htmlDescription;
         private System.Windows.Forms.ToolStripSeparator menuS2;
         private System.Windows.Forms.ToolStripMenuItem menuAlarmWithin;
         private System.Windows.Forms.ToolStripMenuItem menuFastAlarm10m;

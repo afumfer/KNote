@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace Pavonis.COM
+namespace MSDN.COM
 {
 	#region Enumeratons Constants and Struct Defintions
 	
@@ -90,7 +90,7 @@ namespace Pavonis.COM
 	#endregion
 }
 
-namespace Pavonis.COM.IOleCommandTarget
+namespace MSDN.COM.IOleCommandTarget
 {
 	#region COM Interop Interface Definitions
 

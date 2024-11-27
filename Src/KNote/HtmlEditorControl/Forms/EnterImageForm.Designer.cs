@@ -1,4 +1,4 @@
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
     partial class EnterImageForm
     {
@@ -45,7 +45,7 @@ namespace Pavonis.Html.Editor
             this.bInsert.Name = "bInsert";
             this.bInsert.Size = new System.Drawing.Size(108, 23);
             this.bInsert.TabIndex = 4;
-            this.bInsert.Text = "Insertar Imagen";
+            this.bInsert.Text = "Insert Image";
             // 
             // bCancel
             // 
@@ -55,7 +55,7 @@ namespace Pavonis.Html.Editor
             this.bCancel.Name = "bCancel";
             this.bCancel.Size = new System.Drawing.Size(75, 23);
             this.bCancel.TabIndex = 5;
-            this.bCancel.Text = "Cancelar";
+            this.bCancel.Text = "Cancel";
             // 
             // labelText
             // 
@@ -63,7 +63,7 @@ namespace Pavonis.Html.Editor
             this.labelText.Name = "labelText";
             this.labelText.Size = new System.Drawing.Size(51, 23);
             this.labelText.TabIndex = 3;
-            this.labelText.Text = "Texto:";
+            this.labelText.Text = "Text:";
             // 
             // labelHref
             // 
@@ -99,7 +99,7 @@ namespace Pavonis.Html.Editor
             this.labelAlign.Name = "labelAlign";
             this.labelAlign.Size = new System.Drawing.Size(51, 23);
             this.labelAlign.TabIndex = 7;
-            this.labelAlign.Text = "Ajuste:";
+            this.labelAlign.Text = "Align:";
             // 
             // listAlign
             // 

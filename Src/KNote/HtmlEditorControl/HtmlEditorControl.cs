@@ -44,12 +44,12 @@ using mshtmlTableColumn = mshtml.IHTMLTableCol;
 
 using mshtmlEventObject = mshtml.IHTMLEventObj;
 
-using Pavonis.COM;
-using Pavonis.COM.IOleCommandTarget;
+using MSDN.COM;
+using MSDN.COM.IOleCommandTarget;
 
 #endregion
 
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
 	/// <summary>
 	/// This is the main UserControl class that defines the Html Editor
@@ -209,22 +209,13 @@ namespace Pavonis.Html.Editor
 		private const string TARGET_WINDOW_SAME = "_SELF";
 
 		// constants for displaying the HTML dialog
-		//private const string HTML_TITLE_EDIT = "Edit Html";
-        //private const string HTML_TITLE_VIEW = "View Html";
-        //private const string PASTE_TITLE_HTML = "Enter Html";
-        //private const string PASTE_TITLE_TEXT = "Enter Text";
-        //private const string HTML_TITLE_OPENFILE = "Open Html File";
-        //private const string HTML_TITLE_SAVEFILE = "Save Html File";
-
-        
-        private const string HTML_TITLE_EDIT = "Editar Html";
-		private const string HTML_TITLE_VIEW = "Ver Html";
-		private const string PASTE_TITLE_HTML = "Añadir Html";
-		private const string PASTE_TITLE_TEXT = "Añadir Texto";
-		private const string HTML_TITLE_OPENFILE = "Abir Archivo Html";
-		private const string HTML_TITLE_SAVEFILE = "Grabar Archivo Html";
-
-        private const string HTML_FILTER = "Html files (*.html,*.htm)|*.html;*htm|All files (*.*)|*.*";
+		private const string HTML_TITLE_EDIT = "Edit Html";
+		private const string HTML_TITLE_VIEW = "View Html";
+		private const string PASTE_TITLE_HTML = "Enter Html";
+		private const string PASTE_TITLE_TEXT = "Enter Text";
+		private const string HTML_TITLE_OPENFILE = "Open Html File";
+		private const string HTML_TITLE_SAVEFILE = "Save Html File";
+		private const string HTML_FILTER = "Html files (*.html,*.htm)|*.html;*htm|All files (*.*)|*.*";
 		private const string HTML_EXTENSION = "html";
 		private const string CONTENT_EDITABLE_INHERIT = "inherit";
 		private const string DEFAULT_HTML_TEXT = "";

@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 #endregion
 
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
 
 	/// <summary>

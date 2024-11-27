@@ -7,14 +7,14 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-using HtmlTableProperty = Pavonis.Html.Editor.HtmlTableProperty;
-using MeasurementOption = Pavonis.Html.Editor.MeasurementOption;
-using HorizontalAlignOption = Pavonis.Html.Editor.HorizontalAlignOption;
-using VerticalAlignOption = Pavonis.Html.Editor.VerticalAlignOption;
+using HtmlTableProperty = MSDN.Html.Editor.HtmlTableProperty;
+using MeasurementOption = MSDN.Html.Editor.MeasurementOption;
+using HorizontalAlignOption = MSDN.Html.Editor.HorizontalAlignOption;
+using VerticalAlignOption = MSDN.Html.Editor.VerticalAlignOption;
 
 #endregion
 
-namespace Pavonis.Html.Editor
+namespace MSDN.Html.Editor
 {
 	/// <summary>
 	/// Form used to enter an Html Table structure

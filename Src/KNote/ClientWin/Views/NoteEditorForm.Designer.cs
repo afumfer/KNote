@@ -56,7 +56,7 @@
             label8 = new Label();
             panelDescription = new Panel();
             webView2 = new KntWebView.KWebView();
-            htmlDescription = new Pavonis.Html.Editor.HtmlEditorControl();
+            htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             textDescription = new TextBox();
             toolDescription = new ToolStrip();
             toolDescriptionHtml = new ToolStripDropDownButton();
@@ -1611,7 +1611,7 @@
         private ListView listViewTraceNoteFrom;
         private Label labelLoadingHtml;
         private Panel panelDescription;
-        private Pavonis.Html.Editor.HtmlEditorControl htmlDescription;
+        private MSDN.Html.Editor.HtmlEditorControl htmlDescription;
         private TextBox textDescription;
         private ToolStrip toolDescription;
         private ToolStripDropDownButton toolDescriptionHtml;
