@@ -1,9 +1,12 @@
-﻿namespace KNote.ClientWin.Views;
+﻿using System.ComponentModel;
+
+namespace KNote.ClientWin.Views;
 
 public partial class DateSelectorForm : Form
 {
     #region Public properties 
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]    
     public DateTime Date
     {
         get { return monthCalendar.SelectionStart; }

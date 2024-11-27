@@ -1,19 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>0.0.8.11</AssemblyVersion>
-    <FileVersion>0.0.8.11</FileVersion>
-    <Version>0.0.8</Version>
+    <Version>0.0.9</Version>
+    <AssemblyVersion>0.0.9.0</AssemblyVersion>
+    <FileVersion>0.0.9.0</FileVersion>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="8.0.100" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="9.0.10" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -21,12 +18,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
 </Project>

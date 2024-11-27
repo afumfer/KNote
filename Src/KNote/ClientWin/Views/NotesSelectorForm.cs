@@ -217,16 +217,16 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
     private void RefreshDataGridNotes()
     {
         _skipSelectionChanged = true;
-
-        CoonfigureGridStd();
-
+        
         if (_sortOrder == SortOrder.Descending)
             _source.DataSource = _ctrl.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
         else if (_sortOrder == SortOrder.Ascending)
             _source.DataSource = _ctrl.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
 
-        if (dataGridNotes.Columns.Count > 0)
-            dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
+        // DataSource has changed, so we need to refresh the grid definition
+        CoonfigureGridStd();
+
+        dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
 
         if (_ctrl.ListEntities.Count > 0)            
             ActiveCurrentRow();
@@ -261,7 +261,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     private void CoonfigureGridStd()
     {
-        if (dataGridNotes.Columns.Count > 0)
+        if (dataGridNotes.Columns.Count > 1)
             return;
 
         _source.DataSource = new List<NoteInfoDto>();

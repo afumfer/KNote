@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace System.Windows.Forms
 {
@@ -10,6 +11,7 @@ namespace System.Windows.Forms
     {
         private string text;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override string Text
         {
             get

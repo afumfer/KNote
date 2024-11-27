@@ -85,6 +85,7 @@ namespace KntWebView
         #region Public properties
 
         private bool _isInitialized = false;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsInitialized
         {
             get { return _isInitialized; }
@@ -92,6 +93,7 @@ namespace KntWebView
             set { _isInitialized = value; }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string TextUrl
         {
             get { return textUrl.Text; }
@@ -99,6 +101,7 @@ namespace KntWebView
             set { textUrl.Text = value; }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowNavigationTools
         {
             get { return panelToolBox.Visible; }
@@ -106,6 +109,7 @@ namespace KntWebView
             set { panelToolBox.Visible = value; }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool EnableUrlBox
         {
             get { return textUrl.Enabled; }
@@ -113,12 +117,14 @@ namespace KntWebView
             set { textUrl.Enabled = value; }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowStatusInfo
         {            
             get { return statusBar.Visible; }
             set { statusBar.Visible = value; }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ForceHttps { get; set; } = false;
 
         #endregion

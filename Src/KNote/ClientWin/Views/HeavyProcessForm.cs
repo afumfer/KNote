@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using System.ComponentModel;
 
 namespace KNote.ClientWin.Views;
 
@@ -41,7 +42,10 @@ public partial class HeavyProcessForm : Form, IViewHeavyProcess
 
     #region IView interface
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public CancellationTokenSource CancellationToken { get; set; }
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IProgress<KeyValuePair<int, string>> ReportProgress { get; set; }
 
     public void UpdateProgress(int progress)

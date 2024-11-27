@@ -1,52 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-	<ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>0.0.8.11</AssemblyVersion>
-    <FileVersion>0.0.8.11</FileVersion>
-    <Version>0.0.8</Version>
-    <ApplicationIcon>stickyyellow_32_icon.ico</ApplicationIcon>	
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>0.0.9</Version>
+    <AssemblyVersion>0.0.9.0</AssemblyVersion>
+    <FileVersion>0.0.9.0</FileVersion>
+    <ApplicationIcon>stickyyellow_32_icon.ico</ApplicationIcon>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Temp\**" />
     <EmbeddedResource Remove="Temp\**" />
     <None Remove="Temp\**" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.38.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
     <PackageReference Include="NLog" Version="5.3.4" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.14" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
     <PackageReference Include="OpenAI" Version="2.0.0" />
     <PackageReference Include="ReverseMarkdown" Version="4.6.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-    <PackageReference Include="System.Text.Json" Version="6.0.10" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
-
   <ItemGroup>
+    <ProjectReference Include="..\HtmlEditorControl\HTMLEditorControl.csproj" />
     <ProjectReference Include="..\KntScript\KntScript.csproj" />
     <ProjectReference Include="..\KntWebView\KntWebView.csproj" />
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
     <ProjectReference Include="..\Service\KNote.Service.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="HtmlEditorControl">
-      <HintPath>Lib\HtmlEditorControl.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="Microsoft.mshtml">
-      <HintPath>Lib\Microsoft.mshtml.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-  </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -54,18 +39,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
   <ItemGroup>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
 </Project>
