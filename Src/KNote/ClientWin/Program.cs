@@ -123,7 +123,7 @@ static class Program
             store.AppConfig.AlarmSeconds = 30;
             store.AppConfig.LastDateTimeStart = DateTime.Now;
             store.AppConfig.RunCounter = 1;
-            store.AppConfig.LogFile = pathApp + @"\KNoteWinApp.log";
+            store.AppConfig.LogFile = Path.Combine(pathApp, "KNoteWinApp.log");
             store.AppConfig.LogActivated = false;
         }
         // Load sevices references
