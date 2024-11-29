@@ -43,7 +43,7 @@ namespace KNote.ClientWin.Views
             // 
             // labelVersion
             // 
-            labelVersion.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelVersion.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             labelVersion.ForeColor = Color.Black;
             labelVersion.ImeMode = ImeMode.NoControl;
             labelVersion.Location = new Point(115, 45);
@@ -56,7 +56,7 @@ namespace KNote.ClientWin.Views
             // 
             // labelANotas
             // 
-            labelANotas.Font = new Font("Courier New", 18F, FontStyle.Bold, GraphicsUnit.Point);
+            labelANotas.Font = new Font("Courier New", 18F, FontStyle.Bold);
             labelANotas.ForeColor = Color.Black;
             labelANotas.ImeMode = ImeMode.NoControl;
             labelANotas.Location = new Point(112, 17);
@@ -64,7 +64,7 @@ namespace KNote.ClientWin.Views
             labelANotas.Name = "labelANotas";
             labelANotas.Size = new Size(190, 28);
             labelANotas.TabIndex = 16;
-            labelANotas.Text = KntConst.AppName;
+            labelANotas.Text = "KaNote";
             // 
             // iconoANotas
             // 
@@ -81,7 +81,7 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonAccept.Location = new Point(441, 355);
+            buttonAccept.Location = new Point(438, 388);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(81, 29);
             buttonAccept.TabIndex = 18;
@@ -97,7 +97,7 @@ namespace KNote.ClientWin.Views
             labelInfo.Location = new Point(116, 103);
             labelInfo.Margin = new Padding(4, 0, 4, 0);
             labelInfo.Name = "labelInfo";
-            labelInfo.Size = new Size(405, 238);
+            labelInfo.Size = new Size(389, 262);
             labelInfo.TabIndex = 19;
             labelInfo.Text = "Info ...";
             // 
@@ -118,7 +118,7 @@ namespace KNote.ClientWin.Views
             AcceptButton = buttonAccept;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(534, 396);
+            ClientSize = new Size(531, 429);
             Controls.Add(labelRepository);
             Controls.Add(labelInfo);
             Controls.Add(buttonAccept);
@@ -130,7 +130,7 @@ namespace KNote.ClientWin.Views
             MinimizeBox = false;
             Name = "KNoteAboutForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "About KNote";            
+            Text = "About KNote";
             Load += KNoteAboutForm_Load;
             ((System.ComponentModel.ISupportInitialize)iconoANotas).EndInit();
             ResumeLayout(false);

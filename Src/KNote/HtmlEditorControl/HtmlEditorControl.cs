@@ -44,8 +44,8 @@ using mshtmlTableColumn = mshtml.IHTMLTableCol;
 
 using mshtmlEventObject = mshtml.IHTMLEventObj;
 
-using MSDN.COM;
-using MSDN.COM.IOleCommandTarget;
+using Pavonis.COM;
+using Pavonis.COM.IOleCommandTarget;
 
 #endregion
 

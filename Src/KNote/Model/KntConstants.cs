@@ -79,15 +79,21 @@ public static class KntConst
         };
 
         StringBuilder info = new();
-        info.Append(@"Permission is hereby granted, free of charge, to any person obtaining a copy of this ");
-        info.Append("software and associated documentation files (the 'Software'), to deal in the Software without ");
-        info.Append("restriction, including without limitation the rights to use and copy.");
+        info.Append(@"Copyright (C) 2021-2024 Armando Fumero Fernández ");
         info.Append(Environment.NewLine + Environment.NewLine);
-        info.Append("THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, ");
-        info.Append("INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR ");
-        info.Append("PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE ");
-        info.Append("FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ");
-        info.Append("ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
+        info.Append(@"This program is free software; you can redistribute it and/or modify ");
+        info.Append(@"it under the terms of the GNU General Public License as published by ");
+        info.Append(@"the Free Software Foundation; either version 2 of the License, or ");
+        info.Append(@"(at your option) any later version. ");
+        info.Append(Environment.NewLine + Environment.NewLine);
+        info.Append(@"This program is distributed in the hope that it will be useful, ");
+        info.Append(@"but WITHOUT ANY WARRANTY; without even the implied warranty of ");
+        info.Append(@"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the ");
+        info.Append(@"GNU General Public License for more details. ");
+        info.Append(Environment.NewLine + Environment.NewLine);
+        info.Append(@"You should have received a copy of the GNU General Public License along ");
+        info.Append(@"with this program; if not, write to the Free Software Foundation, Inc., ");
+        info.Append(@"51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. ");
         License = info.ToString();
     }
 }
