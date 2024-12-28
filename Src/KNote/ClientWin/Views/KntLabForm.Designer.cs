@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntLabForm));
             openFileDialog = new OpenFileDialog();
             tabWebView2 = new TabPage();
+            textHtml = new TextBox();
+            btnNavToString = new Button();
             webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
             btnGoBack = new Button();
             btnNavigate = new Button();
@@ -76,6 +78,8 @@
             // 
             // tabWebView2
             // 
+            tabWebView2.Controls.Add(textHtml);
+            tabWebView2.Controls.Add(btnNavToString);
             tabWebView2.Controls.Add(webView2);
             tabWebView2.Controls.Add(btnGoBack);
             tabWebView2.Controls.Add(btnNavigate);
@@ -83,10 +87,30 @@
             tabWebView2.Controls.Add(textUrlWebView2);
             tabWebView2.Location = new Point(4, 24);
             tabWebView2.Name = "tabWebView2";
-            tabWebView2.Size = new Size(662, 549);
+            tabWebView2.Size = new Size(726, 597);
             tabWebView2.TabIndex = 3;
             tabWebView2.Text = "WebView2";
             tabWebView2.UseVisualStyleBackColor = true;
+            // 
+            // textHtml
+            // 
+            textHtml.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textHtml.Location = new Point(6, 451);
+            textHtml.Multiline = true;
+            textHtml.Name = "textHtml";
+            textHtml.Size = new Size(579, 143);
+            textHtml.TabIndex = 6;
+            // 
+            // btnNavToString
+            // 
+            btnNavToString.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnNavToString.Location = new Point(591, 451);
+            btnNavToString.Name = "btnNavToString";
+            btnNavToString.Size = new Size(132, 23);
+            btnNavToString.TabIndex = 5;
+            btnNavToString.Text = "Navigate to string";
+            btnNavToString.UseVisualStyleBackColor = true;
+            btnNavToString.Click += btnNavToString_Click;
             // 
             // webView2
             // 
@@ -96,14 +120,14 @@
             webView2.DefaultBackgroundColor = Color.White;
             webView2.Location = new Point(3, 32);
             webView2.Name = "webView2";
-            webView2.Size = new Size(656, 485);
+            webView2.Size = new Size(720, 372);
             webView2.TabIndex = 4;
             webView2.ZoomFactor = 1D;
             // 
             // btnGoBack
             // 
             btnGoBack.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnGoBack.Location = new Point(585, 3);
+            btnGoBack.Location = new Point(649, 3);
             btnGoBack.Name = "btnGoBack";
             btnGoBack.Size = new Size(74, 23);
             btnGoBack.TabIndex = 3;
@@ -114,7 +138,7 @@
             // btnNavigate
             // 
             btnNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnNavigate.Location = new Point(505, 3);
+            btnNavigate.Location = new Point(569, 3);
             btnNavigate.Name = "btnNavigate";
             btnNavigate.Size = new Size(74, 23);
             btnNavigate.TabIndex = 2;
@@ -125,9 +149,9 @@
             // textStatusWebView2
             // 
             textStatusWebView2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textStatusWebView2.Location = new Point(3, 523);
+            textStatusWebView2.Location = new Point(3, 410);
             textStatusWebView2.Name = "textStatusWebView2";
-            textStatusWebView2.Size = new Size(656, 23);
+            textStatusWebView2.Size = new Size(720, 23);
             textStatusWebView2.TabIndex = 1;
             // 
             // textUrlWebView2
@@ -135,7 +159,7 @@
             textUrlWebView2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textUrlWebView2.Location = new Point(3, 3);
             textUrlWebView2.Name = "textUrlWebView2";
-            textUrlWebView2.Size = new Size(496, 23);
+            textUrlWebView2.Size = new Size(560, 23);
             textUrlWebView2.TabIndex = 0;
             textUrlWebView2.Text = "https://www.gobiernodecanarias.org/educacion/9/pekweb/ekade";
             // 
@@ -144,7 +168,7 @@
             tabRichEditor.Controls.Add(htmlDescription);
             tabRichEditor.Location = new Point(4, 24);
             tabRichEditor.Name = "tabRichEditor";
-            tabRichEditor.Size = new Size(662, 549);
+            tabRichEditor.Size = new Size(726, 597);
             tabRichEditor.TabIndex = 2;
             tabRichEditor.Text = "Test rich editor";
             tabRichEditor.UseVisualStyleBackColor = true;
@@ -168,7 +192,7 @@
             tabKntScriptLab.Location = new Point(4, 24);
             tabKntScriptLab.Name = "tabKntScriptLab";
             tabKntScriptLab.Padding = new Padding(3);
-            tabKntScriptLab.Size = new Size(662, 549);
+            tabKntScriptLab.Size = new Size(726, 597);
             tabKntScriptLab.TabIndex = 1;
             tabKntScriptLab.Text = "KntScript lab";
             tabKntScriptLab.UseVisualStyleBackColor = true;
@@ -221,7 +245,6 @@
             // 
             listSamples.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             listSamples.FormattingEnabled = true;
-            listSamples.ItemHeight = 15;
             listSamples.Location = new Point(13, 64);
             listSamples.Name = "listSamples";
             listSamples.Size = new Size(269, 304);
@@ -288,7 +311,7 @@
             tabAppLab.Location = new Point(4, 24);
             tabAppLab.Name = "tabAppLab";
             tabAppLab.Padding = new Padding(3);
-            tabAppLab.Size = new Size(662, 549);
+            tabAppLab.Size = new Size(726, 597);
             tabAppLab.TabIndex = 0;
             tabAppLab.Text = "Lab app components";
             tabAppLab.UseVisualStyleBackColor = true;
@@ -412,7 +435,6 @@
             // 
             listMessages.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listMessages.FormattingEnabled = true;
-            listMessages.ItemHeight = 15;
             listMessages.Location = new Point(13, 254);
             listMessages.Name = "listMessages";
             listMessages.Size = new Size(636, 274);
@@ -448,14 +470,14 @@
             tabControlLab.Location = new Point(12, 12);
             tabControlLab.Name = "tabControlLab";
             tabControlLab.SelectedIndex = 0;
-            tabControlLab.Size = new Size(670, 577);
+            tabControlLab.Size = new Size(734, 625);
             tabControlLab.TabIndex = 4;
             // 
             // KntLabForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(690, 595);
+            ClientSize = new Size(754, 643);
             Controls.Add(tabControlLab);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "KntLabForm";
@@ -511,5 +533,7 @@
         private Button buttonConfigureMessageBroker;
         private Button buttonServerCOMForm;
         private Button buttonNLog;
+        private TextBox textHtml;
+        private Button btnNavToString;
     }
 }

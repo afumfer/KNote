@@ -984,6 +984,11 @@ public partial class KntLabForm : Form, IViewBase
         webView2.CoreWebView2.Navigate(textUrlWebView2.Text);
     }
 
+    private void btnNavToString_Click(object sender, EventArgs e)
+    {
+        webView2.CoreWebView2.NavigateToString(textHtml.Text);
+    }
+
     private void btnGoBack_Click(object sender, EventArgs e)
     {
         webView2.CoreWebView2.GoBack();
@@ -1140,5 +1145,6 @@ public partial class KntLabForm : Form, IViewBase
     //
 
     #endregion
+
 
 }

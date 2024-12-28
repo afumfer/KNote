@@ -2,6 +2,7 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using Markdig;
 
 namespace KNote.ClientWin.Views;
 
@@ -335,22 +336,45 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         labelCaption.Text = _ctrl.Model.Topic;
         RefreshStatus();
         _selectedFolderId = _ctrl.Model.FolderId;
+        textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+        textDescription.SelectionStart = 0;
 
         if (_ctrl.Model.ContentType.Contains("html"))
-            htmlDescription.BodyHtml = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+            //htmlDescription.BodyHtml = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+            htmlDescription.BodyHtml = textDescription.Text;
         else if (_ctrl.Model.ContentType.Contains("navigation"))
-        {
-            webView2.TextUrl = _ctrl.Model.Description;            
-            if (!string.IsNullOrEmpty(_ctrl.Model.Description))            
-                await webView2.Navigate();
-            else
-                await webView2.NavigateToString(" ");
-        }
-        else
         {            
-            textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
-            textDescription.SelectionStart = 0;
+            if (!string.IsNullOrEmpty(textDescription.Text))
+            {
+                if (IsValidUrl(textDescription.Text))
+                {
+                    webView2.TextUrl = textDescription.Text;
+                    await webView2.Navigate();
+                }
+                else
+                {
+                    webView2.TextUrl = "";
+                    webView2.ShowNavigationTools = false;
+                    webView2.ShowStatusInfo = false;
+                    var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+                    var HtmlContent = Markdig.Markdown.ToHtml(textDescription.Text, pipeline);
+                    await webView2.NavigateToString(HtmlContent);
+                }
+            }
+
         }
+    }
+
+    private bool IsValidUrl(string url)
+    {
+        if (string.IsNullOrEmpty(url))
+        {
+            return false;
+        }
+
+        Uri result;
+        return Uri.TryCreate(url, UriKind.Absolute, out result) &&
+               (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
     }
 
     private void ControlsToModel()
@@ -360,10 +384,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
         if (_ctrl.Model.ContentType.Contains("html"))
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
-        else if (_ctrl.Model.ContentType.Contains("navigation"))
-            _ctrl.Model.Description = webView2.TextUrl;
-        else            
+        else
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+
 
         _ctrl.Model.FolderId = _selectedFolderId;
         _ctrl.Model.Topic = labelCaption.Text;

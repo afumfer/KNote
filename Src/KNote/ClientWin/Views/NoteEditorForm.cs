@@ -233,10 +233,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 string result = converter.Convert(html);
                 textDescription.Text = result;
             }
-            else if (webView2.Visible)
-            {
-                textDescription.Text = webView2.TextUrl;
-            }
+            //else if (webView2.Visible)
+            //{
+            //    textDescription.Text = webView2.TextUrl;
+            //}
 
             _ctrl.Model.ContentType = "markdown";
 
@@ -284,8 +284,19 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 return;
             }
 
-            webView2.TextUrl = textDescription.Text;
-            await webView2.Navigate();
+            if (IsValidUrl(textDescription.Text))
+            {
+                webView2.TextUrl = textDescription.Text;
+                await webView2.Navigate();                
+            }
+            else
+            {
+                webView2.TextUrl = "";
+                var MarkdownContent = textDescription.Text;
+                var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+                var HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
+                await webView2.NavigateToString(HtmlContent);            
+            }
             _ctrl.Model.ContentType = "navigation";
 
             EnableWebView2View();
@@ -294,6 +305,18 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             _ctrl.ShowMessage($"You can not navigate to the indicated address in the description of this note. (The following error has occurred: {ex.Message})", "Note editor");
         }
+    }
+
+    private bool IsValidUrl(string url)
+    {        
+        if (string.IsNullOrEmpty(url))
+        {
+            return false;
+        }
+        
+        Uri result;
+        return Uri.TryCreate(url, UriKind.Absolute, out result) &&
+               (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
     }
 
     private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
@@ -678,13 +701,16 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textDescription.Dock = DockStyle.Fill;
         htmlDescription.Dock = DockStyle.Fill;
         webView2.Dock = DockStyle.Fill;
+        webView2.EnableUrlBox = false;
+        webView2.ShowNavigationTools = false;
+        webView2.ShowStatusInfo = false;
 
         if (_ctrl.Model.ContentType == null || _ctrl.Model.ContentType.Contains("markdown"))
             EnableMarkdownView();
         else if (_ctrl.Model.ContentType.Contains("html"))
             EnableHtmlView();
         else if (_ctrl.Model.ContentType.Contains("navigation"))
-            EnableWebView2View();
+            EnableWebView2View();        
         else
             EnableMarkdownView();
 
@@ -699,7 +725,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             }
             htmlDescription.ToolbarVisible = false;
             htmlDescription.ReadOnly = true;
-            webView2.EnableUrlBox = false;
         }
 
         panelDescription.Visible = true;
@@ -745,12 +770,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textTags.Text = _ctrl.Model.Tags;
         textStatus.Text = _ctrl.Model.InternalTags;
         textPriority.Text = _ctrl.Model.Priority.ToString();
-
+        textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+        
         if (_ctrl.Model.ContentType is null || _ctrl.Model.ContentType.Contains("markdown"))
         {
             htmlDescription.Visible = false;
             webView2.Visible = false;
-            textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
             textDescription.Visible = true;
         }
         else if (_ctrl.Model.ContentType.Contains("html"))
@@ -761,7 +786,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             webView2.Visible = false;
             htmlDescription.Visible = true;
             htmlDescription.BodyHtml = "";
-            htmlDescription.BodyHtml = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+            htmlDescription.BodyHtml = textDescription.Text;
             htmlDescription.Refresh();
             labelLoadingHtml.Visible = false;
         }
@@ -770,10 +795,21 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             textDescription.Visible = false;
             htmlDescription.Visible = false;
             webView2.Visible = true;
-            webView2.TextUrl = _ctrl.Model.Description;
-            if (!string.IsNullOrEmpty(_ctrl.Model.Description))
-            {
-                await webView2.Navigate();
+            
+            if (!string.IsNullOrEmpty(textDescription.Text))
+            {             
+                if (IsValidUrl(textDescription.Text))
+                {
+                    webView2.TextUrl = textDescription.Text;                    
+                    await webView2.Navigate();                    
+                }
+                else
+                {
+                    webView2.TextUrl = "";                    
+                    var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+                    var HtmlContent = Markdig.Markdown.ToHtml(textDescription.Text, pipeline);
+                    await webView2.NavigateToString(HtmlContent);                    
+                }
             }
         }
         else
@@ -938,12 +974,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         _ctrl.Model.Tags = textTags.Text;
         _ctrl.Model.InternalTags = textStatus.Text;
 
-        if (_ctrl.Model.ContentType is null || _ctrl.Model.ContentType.Contains("markdown"))
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
-        else if (_ctrl.Model.ContentType.Contains("html"))
+        if (_ctrl.Model.ContentType.Contains("html"))
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
-        else if (_ctrl.Model.ContentType.Contains("navigation"))
-            _ctrl.Model.Description = webView2.TextUrl;
         else
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
 
@@ -1124,10 +1156,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         buttonViewHtml.Enabled = true;
         buttonNavigate.Enabled = false;
         toolDescription.Visible = false;
-        //toolDescriptionHtml.Visible = false;
-        //toolDescriptionMarkdown.Visible = false;
     }
-
 
     private void EditAlarm()
     {

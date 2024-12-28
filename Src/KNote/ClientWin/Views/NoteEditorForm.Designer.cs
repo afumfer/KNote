@@ -393,11 +393,11 @@
             // buttonNavigate
             // 
             buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonNavigate.Location = new Point(706, 105);
+            buttonNavigate.Location = new Point(625, 105);
             buttonNavigate.Margin = new Padding(4, 3, 4, 3);
             buttonNavigate.Name = "buttonNavigate";
             buttonNavigate.Size = new Size(80, 24);
-            buttonNavigate.TabIndex = 57;
+            buttonNavigate.TabIndex = 6;
             buttonNavigate.Text = "Navigate";
             buttonNavigate.UseVisualStyleBackColor = true;
             buttonNavigate.Click += buttonNavigate_Click;
@@ -439,17 +439,12 @@
             // 
             // webView2
             // 
-            webView2.EnableUrlBox = true;
-            webView2.ForceHttps = false;
-            webView2.IsInitialized = false;
+            webView2.BorderStyle = BorderStyle.FixedSingle;
             webView2.Location = new Point(40, 127);
             webView2.Margin = new Padding(3, 4, 3, 4);
             webView2.Name = "webView2";
-            webView2.ShowNavigationTools = false;
-            webView2.ShowStatusInfo = false;
             webView2.Size = new Size(277, 166);
             webView2.TabIndex = 11;
-            webView2.TextUrl = "";
             webView2.Visible = false;
             // 
             // htmlDescription
@@ -709,7 +704,7 @@
             buttonEditMarkdown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonEditMarkdown.ImageAlign = ContentAlignment.MiddleLeft;
             buttonEditMarkdown.ImageList = imageListTabNoteData;
-            buttonEditMarkdown.Location = new Point(542, 105);
+            buttonEditMarkdown.Location = new Point(545, 105);
             buttonEditMarkdown.Margin = new Padding(4, 3, 4, 3);
             buttonEditMarkdown.Name = "buttonEditMarkdown";
             buttonEditMarkdown.Size = new Size(79, 24);
@@ -721,11 +716,11 @@
             // buttonViewHtml
             // 
             buttonViewHtml.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonViewHtml.Location = new Point(624, 105);
+            buttonViewHtml.Location = new Point(706, 105);
             buttonViewHtml.Margin = new Padding(4, 3, 4, 3);
             buttonViewHtml.Name = "buttonViewHtml";
             buttonViewHtml.Size = new Size(80, 24);
-            buttonViewHtml.TabIndex = 6;
+            buttonViewHtml.TabIndex = 7;
             buttonViewHtml.Text = "Html editor";
             buttonViewHtml.UseVisualStyleBackColor = true;
             buttonViewHtml.Click += buttonViewHtml_Click;
@@ -995,17 +990,11 @@
             // webViewResource
             // 
             webViewResource.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            webViewResource.EnableUrlBox = true;
-            webViewResource.ForceHttps = false;
-            webViewResource.IsInitialized = false;
             webViewResource.Location = new Point(392, 39);
             webViewResource.Margin = new Padding(3, 4, 3, 4);
             webViewResource.Name = "webViewResource";
-            webViewResource.ShowNavigationTools = false;
-            webViewResource.ShowStatusInfo = false;
             webViewResource.Size = new Size(392, 157);
             webViewResource.TabIndex = 21;
-            webViewResource.TextUrl = "";
             webViewResource.Visible = false;
             // 
             // buttonSaveResource
