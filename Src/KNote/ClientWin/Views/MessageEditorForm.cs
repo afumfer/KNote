@@ -176,12 +176,12 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 
     private void ControlsToModel()
     {
-        _ctrl.Model.AlarmDateTime = _ctrl.TextToDateTime(textAlarmDateTime.Text);
+        _ctrl.Model.AlarmDateTime = _ctrl.Store.TextToDateTime(textAlarmDateTime.Text);
         _ctrl.Model.AlarmType = (EnumAlarmType)comboAlarmPeriodicity.SelectedIndex;
         _ctrl.Model.NotificationType = (EnumNotificationType)comboNotificationType.SelectedIndex;
         _ctrl.Model.Comment = textContent.Text;
         _ctrl.Model.AlarmActivated = checkAlarmActivated.Checked;
-        _ctrl.Model.AlarmMinutes = _ctrl.TextToInt(textMinutes.Text);
+        _ctrl.Model.AlarmMinutes = _ctrl.Store.TextToInt(textMinutes.Text);
     }
     private void comboAlarmPeriodicity_SelectedIndexChanged(object sender, EventArgs e)
     {

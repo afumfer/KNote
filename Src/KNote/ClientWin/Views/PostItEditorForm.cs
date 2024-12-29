@@ -346,7 +346,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         {            
             if (!string.IsNullOrEmpty(textDescription.Text))
             {
-                if (IsValidUrl(textDescription.Text))
+                if (_ctrl.Store.IsValidUrl(textDescription.Text))
                 {
                     webView2.TextUrl = textDescription.Text;
                     await webView2.Navigate();
@@ -363,18 +363,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             }
 
         }
-    }
-
-    private bool IsValidUrl(string url)
-    {
-        if (string.IsNullOrEmpty(url))
-        {
-            return false;
-        }
-
-        Uri result;
-        return Uri.TryCreate(url, UriKind.Absolute, out result) &&
-               (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
     }
 
     private void ControlsToModel()

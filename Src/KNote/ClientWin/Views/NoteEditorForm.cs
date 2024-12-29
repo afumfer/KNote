@@ -6,6 +6,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using Markdig;
+using Microsoft.AspNetCore.Http;
 
 namespace KNote.ClientWin.Views;
 
@@ -284,7 +285,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 return;
             }
 
-            if (IsValidUrl(textDescription.Text))
+            var xx = _ctrl.Store;
+
+            if (_ctrl.Store.IsValidUrl(textDescription.Text))
             {
                 webView2.TextUrl = textDescription.Text;
                 await webView2.Navigate();                
@@ -305,18 +308,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             _ctrl.ShowMessage($"You can not navigate to the indicated address in the description of this note. (The following error has occurred: {ex.Message})", "Note editor");
         }
-    }
-
-    private bool IsValidUrl(string url)
-    {        
-        if (string.IsNullOrEmpty(url))
-        {
-            return false;
-        }
-        
-        Uri result;
-        return Uri.TryCreate(url, UriKind.Absolute, out result) &&
-               (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
     }
 
     private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
@@ -798,7 +789,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             
             if (!string.IsNullOrEmpty(textDescription.Text))
             {             
-                if (IsValidUrl(textDescription.Text))
+                if (_ctrl.Store.IsValidUrl(textDescription.Text))
                 {
                     webView2.TextUrl = textDescription.Text;                    
                     await webView2.Navigate();                    

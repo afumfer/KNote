@@ -17,7 +17,7 @@ namespace KntWebView
 
         public KWebView()
         {
-            InitializeComponent();            
+            InitializeComponent();
         }
 
         #endregion 
@@ -32,12 +32,12 @@ namespace KntWebView
             await InitializeAsync();           
         }
 
-        private void WebView2_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        private void webView2_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
             statusLabel.Text = webView2.Source.ToString();
         }
 
-        private void WebView_CoreWebView2InitializationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
+        private void webView2_CoreWebView2InitializationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
         {
             statusLabel.Text = "";
         }
@@ -134,13 +134,15 @@ namespace KntWebView
         public async Task InitializeAsync()
         {
             statusLabel.Text = "(Initializing ......)";
+
             await webView2.EnsureCoreWebView2Async(null);
+
             if ((webView2 != null) && (webView2.CoreWebView2 != null))
             {
                 _isInitialized = true;
-                webView2.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
+                webView2.CoreWebView2InitializationCompleted += webView2_CoreWebView2InitializationCompleted;
                 webView2.NavigationStarting += EnsureHttps;
-                webView2.NavigationCompleted += WebView2_NavigationCompleted;
+                webView2.NavigationCompleted += webView2_NavigationCompleted;
             }
             else
             {
@@ -153,10 +155,10 @@ namespace KntWebView
         {
             try
             {
-                if (!_isInitialized)            
-                   await InitializeAsync();
+                if (!_isInitialized)
+                    await InitializeAsync();
 
-                if(webView2.CoreWebView2 != null)  // This patch is required when using sql server repositories 
+                if (webView2.CoreWebView2 != null)  // This patch is required when using sql server repositories 
                     webView2.CoreWebView2.Navigate(textUrl.Text);
             }
             catch
@@ -198,6 +200,5 @@ namespace KntWebView
         }
 
         #endregion
-
     }
 }

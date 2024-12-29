@@ -175,7 +175,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     {
         _ctrl.Model.Name = varName;
         _ctrl.Model.Description = textDescription.Text;
-        _ctrl.Model.Order = _ctrl.TextToInt(textOrder.Text);
+        _ctrl.Model.Order = _ctrl.Store.TextToInt(textOrder.Text);
         _ctrl.Model.FileType = varFileType;
         _ctrl.Model.Container = varContainer;            
         _ctrl.Model.ContentArrayBytes = varContentArrayBytes;
