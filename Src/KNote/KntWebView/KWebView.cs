@@ -127,6 +127,11 @@ namespace KntWebView
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ForceHttps { get; set; } = false;
 
+        // TODO: Refactor this
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string FolderForVirtualHostNameMapping { get; set; } = @"C:\Tmp";   // Dummy, for test
+
+
         #endregion
 
         #region Public methods
@@ -136,6 +141,10 @@ namespace KntWebView
             statusLabel.Text = "(Initializing ......)";
 
             await webView2.EnsureCoreWebView2Async(null);
+
+            webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                "knote.resources", FolderForVirtualHostNameMapping,
+                CoreWebView2HostResourceAccessKind.Allow);
 
             if ((webView2 != null) && (webView2.CoreWebView2 != null))
             {
