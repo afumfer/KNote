@@ -129,7 +129,7 @@ namespace KntWebView
 
         // TODO: Refactor this
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string FolderForVirtualHostNameMapping { get; set; } = @"C:\Tmp";   // Dummy, for test
+        public string FolderForVirtualHostNameMapping { get; set; } = @"D:\Tmp";   // Dummy, for test
 
 
         #endregion

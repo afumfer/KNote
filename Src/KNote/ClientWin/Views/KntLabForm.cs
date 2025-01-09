@@ -12,6 +12,7 @@ using KntScript;
 using KNote.Service.Core;
 
 using NLog;
+using Microsoft.Web.WebView2.Core;
 
 
 namespace KNote.ClientWin.Views;
@@ -62,6 +63,39 @@ public partial class KntLabForm : Form, IViewBase
         {
             textStatusWebView2.Text = "webView2 not ready";
         }
+
+        webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
+            "knote.resources", @"D:\Tmp",
+            CoreWebView2HostResourceAccessKind.Allow);
+
+        webView2.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+
+        #region Demo content
+
+        textScript.Text = @"var header1 = document.querySelector('h1');
+header1.textContent += ' XXXX';
+
+var header2 = document.querySelector('h2');
+var retValue = header2.textContent + header1.textContent;
+window.chrome.webview.postMessage(retValue);";
+
+
+        textHtml.Text = @"<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>Simple Image Page</title>
+</head>
+<body>
+    <h1>Welcome to My Simple Image Page</h1>
+	<h2>.............</h1>
+	<img src=""https://knote.resources/img1.png"" alt=""Description of the image"" style=""max-width: 100%; height: auto;"" />    
+</body>
+</html>";
+
+        #endregion 
+
     }
 
     private void KntLabForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -979,14 +1013,18 @@ public partial class KntLabForm : Form, IViewBase
     #region WebView2
 
     private void btnNavigate_Click(object sender, EventArgs e)
-    {
-        //webView2.NavigateToString("https://www.elpais.es");
+    {        
         webView2.CoreWebView2.Navigate(textUrlWebView2.Text);
     }
 
     private void btnNavToString_Click(object sender, EventArgs e)
     {
         webView2.CoreWebView2.NavigateToString(textHtml.Text);
+    }
+
+    private void btnExecuteScript_Click(object sender, EventArgs e)
+    {
+        webView2.CoreWebView2.ExecuteScriptAsync(textScript.Text);
     }
 
     private void btnGoBack_Click(object sender, EventArgs e)
@@ -1014,6 +1052,12 @@ public partial class KntLabForm : Form, IViewBase
     private void WebView2_CoreWebView2InitializationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
     {
         textStatusWebView2.Text = "WebView_CoreWebView2InitializationCompleted";
+    }
+
+    private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+    {
+        var text = e.TryGetWebMessageAsString();
+        MessageBox.Show(text);
     }
 
     #endregion
@@ -1145,6 +1189,5 @@ public partial class KntLabForm : Form, IViewBase
     //
 
     #endregion
-
 
 }

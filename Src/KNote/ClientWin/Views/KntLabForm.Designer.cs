@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntLabForm));
             openFileDialog = new OpenFileDialog();
             tabWebView2 = new TabPage();
+            textScript = new TextBox();
+            btnExecuteScript = new Button();
             textHtml = new TextBox();
             btnNavToString = new Button();
             webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
@@ -78,6 +80,8 @@
             // 
             // tabWebView2
             // 
+            tabWebView2.Controls.Add(textScript);
+            tabWebView2.Controls.Add(btnExecuteScript);
             tabWebView2.Controls.Add(textHtml);
             tabWebView2.Controls.Add(btnNavToString);
             tabWebView2.Controls.Add(webView2);
@@ -92,19 +96,39 @@
             tabWebView2.Text = "WebView2";
             tabWebView2.UseVisualStyleBackColor = true;
             // 
+            // textScript
+            // 
+            textScript.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            textScript.Location = new Point(372, 390);
+            textScript.Multiline = true;
+            textScript.Name = "textScript";
+            textScript.Size = new Size(351, 204);
+            textScript.TabIndex = 8;
+            // 
+            // btnExecuteScript
+            // 
+            btnExecuteScript.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnExecuteScript.Location = new Point(374, 361);
+            btnExecuteScript.Name = "btnExecuteScript";
+            btnExecuteScript.Size = new Size(132, 23);
+            btnExecuteScript.TabIndex = 7;
+            btnExecuteScript.Text = "Execute Script";
+            btnExecuteScript.UseVisualStyleBackColor = true;
+            btnExecuteScript.Click += btnExecuteScript_Click;
+            // 
             // textHtml
             // 
-            textHtml.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textHtml.Location = new Point(6, 451);
+            textHtml.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            textHtml.Location = new Point(6, 390);
             textHtml.Multiline = true;
             textHtml.Name = "textHtml";
-            textHtml.Size = new Size(579, 143);
+            textHtml.Size = new Size(351, 204);
             textHtml.TabIndex = 6;
             // 
             // btnNavToString
             // 
-            btnNavToString.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnNavToString.Location = new Point(591, 451);
+            btnNavToString.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnNavToString.Location = new Point(6, 361);
             btnNavToString.Name = "btnNavToString";
             btnNavToString.Size = new Size(132, 23);
             btnNavToString.TabIndex = 5;
@@ -120,7 +144,7 @@
             webView2.DefaultBackgroundColor = Color.White;
             webView2.Location = new Point(3, 32);
             webView2.Name = "webView2";
-            webView2.Size = new Size(720, 372);
+            webView2.Size = new Size(720, 284);
             webView2.TabIndex = 4;
             webView2.ZoomFactor = 1D;
             // 
@@ -149,7 +173,7 @@
             // textStatusWebView2
             // 
             textStatusWebView2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textStatusWebView2.Location = new Point(3, 410);
+            textStatusWebView2.Location = new Point(3, 322);
             textStatusWebView2.Name = "textStatusWebView2";
             textStatusWebView2.Size = new Size(720, 23);
             textStatusWebView2.TabIndex = 1;
@@ -535,5 +559,7 @@
         private Button buttonNLog;
         private TextBox textHtml;
         private Button btnNavToString;
+        private TextBox textScript;
+        private Button btnExecuteScript;
     }
 }
