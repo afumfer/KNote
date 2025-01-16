@@ -24,13 +24,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     #region Constructor
 
-    public NoteEditorForm(NoteEditorCtrl com)
+    public NoteEditorForm(NoteEditorCtrl ctrl)
     {
         //AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
 
         // TODO: options for new versión
         buttonPrint.Visible = false;

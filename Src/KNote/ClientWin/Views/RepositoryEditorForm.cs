@@ -16,13 +16,13 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     #region Constructor 
 
-    public RepositoryEditorForm(RepositoryEditorCtrl com)
+    public RepositoryEditorForm(RepositoryEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 

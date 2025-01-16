@@ -17,13 +17,13 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 
     #region Constructor
 
-    public TaskEditorForm(TaskEditorCtrl com)
+    public TaskEditorForm(TaskEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

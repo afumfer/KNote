@@ -17,13 +17,13 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
 
     #region Constructor
 
-    public FoldersSelectorForm(FoldersSelectorCtrl com)
+    public FoldersSelectorForm(FoldersSelectorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 

@@ -24,13 +24,13 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     #region Constructor
 
-    public PostItEditorForm(PostItEditorCtrl com)
+    public PostItEditorForm(PostItEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 

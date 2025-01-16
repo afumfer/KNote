@@ -16,11 +16,11 @@ public partial class HeavyProcessForm : Form, IViewHeavyProcess
 
     #region Constructor
 
-    public HeavyProcessForm(HeavyProcessCtrl com)  // Func<Task> process
+    public HeavyProcessForm(HeavyProcessCtrl ctrl)  // Func<Task> process
     {
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

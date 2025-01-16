@@ -18,13 +18,13 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
 
     #region Constructor
 
-    public FiltersSelectorForm(FiltersSelectorCtrl com)
+    public FiltersSelectorForm(FiltersSelectorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;            
+        _ctrl = ctrl;            
     }
 
     #endregion 

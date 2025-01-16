@@ -14,14 +14,14 @@ public partial class KNoteAboutForm : Form, IViewBase
 
     #region Constructor
 
-    public KNoteAboutForm(KNoteManagmentCtrl com)
+    public KNoteAboutForm(KNoteManagmentCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
         Text = KntConst.AppName;
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 

@@ -15,14 +15,13 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
 
     #region Constructor
 
-    public KntServerCOMForm()
+    public KntServerCOMForm(KntServerCOMCtrl ctrl)
     {
-        InitializeComponent();
-    }
+        AutoScaleMode = AutoScaleMode.Dpi;
 
-    public KntServerCOMForm(KntServerCOMCtrl com) : this()
-    {
-        _ctrl = com;
+        InitializeComponent();
+
+        _ctrl = ctrl;
 
         _ctrl.ReceiveMessage += _com_ReceiveMessage;
     }

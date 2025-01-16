@@ -35,13 +35,13 @@ public partial class KntLabForm : Form, IViewBase
 
     #region Constructors and FormLoad
 
-    public KntLabForm(KntLabCtrl com)
+    public KntLabForm(KntLabCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
         _store = _ctrl.Store;
         _service = _store.ActiveFolderWithServiceRef?.ServiceRef?.Service;
     }

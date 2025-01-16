@@ -15,13 +15,13 @@ public partial class MonitorForm : Form, IViewBase
 
     #region Constructor
 
-    public MonitorForm(MonitorCtrl com)
+    public MonitorForm(MonitorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

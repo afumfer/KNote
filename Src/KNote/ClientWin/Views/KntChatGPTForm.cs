@@ -19,13 +19,13 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     #region Constructor
 
-    public KntChatGPTForm(KntChatGPTCtrl com)
+    public KntChatGPTForm(KntChatGPTCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

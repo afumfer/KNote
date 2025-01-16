@@ -18,13 +18,13 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
 
     #region Constructor
 
-    public NoteTypesSelectorForm(NoteTypesSelectorCtrl com)
+    public NoteTypesSelectorForm(NoteTypesSelectorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 

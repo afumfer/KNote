@@ -26,14 +26,14 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     #region Constructor
 
-    public KntScriptConsoleForm(KntScriptConsoleCtrl com)
+    public KntScriptConsoleForm(KntScriptConsoleCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
         PersonalizeTabStop();
 
-        _ctrl = com;
+        _ctrl = ctrl;
         _engine = _ctrl.KntSEngine;
         _sourceCodeFile = _ctrl.CodeFile;            
     }

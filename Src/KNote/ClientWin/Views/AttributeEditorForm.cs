@@ -17,13 +17,13 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
 
     #region Constructor 
 
-    public AttributeEditorForm(AttributeEditorCtrl com)
+    public AttributeEditorForm(AttributeEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

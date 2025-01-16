@@ -17,13 +17,13 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
 
     #region Constructor
 
-    public PostItPropertiesForm(PostItPropertiesCtrl com)
+    public PostItPropertiesForm(PostItPropertiesCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

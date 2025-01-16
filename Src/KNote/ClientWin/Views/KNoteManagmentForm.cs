@@ -15,7 +15,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
     #region Constructor
 
-    public KNoteManagmentForm(KNoteManagmentCtrl com)
+    public KNoteManagmentForm(KNoteManagmentCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
@@ -25,7 +25,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         menuKNoteLab.Text = $"{KntConst.AppName} &lab ...";
         Text = $"{KntConst.AppName} Managment";
 
-        _ctrl = com;
+        _ctrl = ctrl;
 
         _ctrl.Store.ComponentNotification += Store_ComponentNotification;
 

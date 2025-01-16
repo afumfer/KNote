@@ -15,13 +15,13 @@ public partial class KntChatForm : Form, IViewChat
 
     #region Constructor
 
-    public KntChatForm(KntChatCtrl com)
+    public KntChatForm(KntChatCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

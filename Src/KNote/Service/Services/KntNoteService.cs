@@ -398,7 +398,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         if (replaceString == null)
             return description;
         return description?
-            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString);
+            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString).Replace(Path.DirectorySeparatorChar, '/');
     }
 
     public string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false)

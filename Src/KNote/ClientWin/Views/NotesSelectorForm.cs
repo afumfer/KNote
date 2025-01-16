@@ -38,13 +38,13 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     #region Constructor
 
-    public NotesSelectorForm(NotesSelectorCtrl com)
+    public NotesSelectorForm(NotesSelectorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 

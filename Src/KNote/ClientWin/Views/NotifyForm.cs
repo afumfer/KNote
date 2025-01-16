@@ -14,7 +14,7 @@ public partial class NotifyForm : Form, IViewBase
 
     #region Constructor
 
-    public NotifyForm(KNoteManagmentCtrl com)
+    public NotifyForm(KNoteManagmentCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
@@ -22,7 +22,7 @@ public partial class NotifyForm : Form, IViewBase
         notifyKNote.Text = KntConst.AppName;
         menuShowKNoteManagment.Text = $"Show {KntConst.AppName} managment ...";
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 

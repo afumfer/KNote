@@ -17,14 +17,14 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 
     #region Constructor 
 
-    public MessageEditorForm(MessageEditorCtrl com)
+    public MessageEditorForm(MessageEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
         PersonalizeControls();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

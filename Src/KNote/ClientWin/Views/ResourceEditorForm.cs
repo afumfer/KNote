@@ -22,13 +22,13 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
 
     #region Constructor
 
-    public ResourceEditorForm(ResourceEditorCtrl com)
+    public ResourceEditorForm(ResourceEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

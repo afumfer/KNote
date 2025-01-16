@@ -19,13 +19,13 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 
     #region Constructor 
 
-    public FolderEditorForm(FolderEditorCtrl com)
+    public FolderEditorForm(FolderEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion

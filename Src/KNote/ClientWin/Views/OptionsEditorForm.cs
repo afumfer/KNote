@@ -16,14 +16,14 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
 
     #region Constructor 
 
-    public OptionsEditorForm(OptionsEditorCtrl com)
+    public OptionsEditorForm(OptionsEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
         this.Text = $"{KntConst.AppName} options";
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 

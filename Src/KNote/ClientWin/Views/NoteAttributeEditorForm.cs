@@ -17,13 +17,13 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     #region Constructor
 
-    public NoteAttributeEditorForm(NoteAttributeEditorCtrl com)
+    public NoteAttributeEditorForm(NoteAttributeEditorCtrl ctrl)
     {
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 
-        _ctrl = com;
+        _ctrl = ctrl;
     }
 
     #endregion 
