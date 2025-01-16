@@ -308,7 +308,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
         if (string.IsNullOrEmpty(resource.Container))
         {
-            resource.Container = Repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+            resource.Container = Repository.RespositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
             resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
         }
 
@@ -336,7 +336,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         {
             if (forceUpdateDto)
             {
-                resource.Container = Repository.RespositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+                resource.Container = Repository.RespositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
                 resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
             }
         }

@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntLabForm));
             openFileDialog = new OpenFileDialog();
             tabWebView2 = new TabPage();
+            textFolderForVirtualHostNameMapping = new TextBox();
+            label3 = new Label();
             textScript = new TextBox();
             btnExecuteScript = new Button();
             textHtml = new TextBox();
@@ -80,6 +82,8 @@
             // 
             // tabWebView2
             // 
+            tabWebView2.Controls.Add(textFolderForVirtualHostNameMapping);
+            tabWebView2.Controls.Add(label3);
             tabWebView2.Controls.Add(textScript);
             tabWebView2.Controls.Add(btnExecuteScript);
             tabWebView2.Controls.Add(textHtml);
@@ -95,6 +99,24 @@
             tabWebView2.TabIndex = 3;
             tabWebView2.Text = "WebView2";
             tabWebView2.UseVisualStyleBackColor = true;
+            // 
+            // textFolderForVirtualHostNameMapping
+            // 
+            textFolderForVirtualHostNameMapping.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            textFolderForVirtualHostNameMapping.Location = new Point(101, 567);
+            textFolderForVirtualHostNameMapping.Name = "textFolderForVirtualHostNameMapping";
+            textFolderForVirtualHostNameMapping.Size = new Size(256, 23);
+            textFolderForVirtualHostNameMapping.TabIndex = 10;
+            // 
+            // label3
+            // 
+            label3.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            label3.AutoSize = true;
+            label3.Location = new Point(6, 570);
+            label3.Name = "label3";
+            label3.Size = new Size(91, 15);
+            label3.TabIndex = 9;
+            label3.Text = "Vir. Host Folder:";
             // 
             // textScript
             // 
@@ -122,7 +144,7 @@
             textHtml.Location = new Point(6, 390);
             textHtml.Multiline = true;
             textHtml.Name = "textHtml";
-            textHtml.Size = new Size(351, 204);
+            textHtml.Size = new Size(351, 171);
             textHtml.TabIndex = 6;
             // 
             // btnNavToString
@@ -561,5 +583,7 @@
         private Button btnNavToString;
         private TextBox textScript;
         private Button btnExecuteScript;
+        private Label label3;
+        private TextBox textFolderForVirtualHostNameMapping;
     }
 }

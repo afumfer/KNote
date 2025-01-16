@@ -64,8 +64,9 @@ public partial class KntLabForm : Form, IViewBase
             textStatusWebView2.Text = "webView2 not ready";
         }
 
+        textFolderForVirtualHostNameMapping.Text = @"D:\Tmp";
         webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
-            "knote.resources", @"D:\Tmp",
+            "knote.resources", textFolderForVirtualHostNameMapping.Text,
             CoreWebView2HostResourceAccessKind.Allow);
 
         webView2.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
@@ -858,7 +859,7 @@ window.chrome.webview.postMessage(retValue);";
                     //        NoteId = Guid.Empty,
                     //        ContentInDB = true,
                     //        Order = 1,
-                    //        Container = service.RepositoryRef.ResourcesContainer + "\\" + DateTime.Now.Year.ToString(),
+                    //        Container = service.RepositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString(),
                     //        Name = $"{Guid.NewGuid()}_{Path.GetFileName(fileFullName)}",
                     //        Description = $"(ANotas import {n.NotaEx})",
                     //        ContentArrayBytes = fileArrayBytes,
@@ -1019,6 +1020,10 @@ window.chrome.webview.postMessage(retValue);";
 
     private void btnNavToString_Click(object sender, EventArgs e)
     {
+        webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
+            "knote.resources", textFolderForVirtualHostNameMapping.Text,
+            CoreWebView2HostResourceAccessKind.Allow);
+
         webView2.CoreWebView2.NavigateToString(textHtml.Text);
     }
 

@@ -30,382 +30,370 @@ namespace KNote.ClientWin.Views
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RepositoryEditorForm));
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonAccept = new System.Windows.Forms.Button();
-            this.panelForm = new System.Windows.Forms.Panel();
-            this.buttonSelectDirectoryResources = new System.Windows.Forms.Button();
-            this.textResourcesContainer = new System.Windows.Forms.TextBox();
-            this.textResourcesContainerUrl = new System.Windows.Forms.TextBox();
-            this.textResourcesContainerRoot = new System.Windows.Forms.TextBox();
-            this.labelContainerUrl = new System.Windows.Forms.Label();
-            this.labelContainerRoot = new System.Windows.Forms.Label();
-            this.labelContainer = new System.Windows.Forms.Label();
-            this.panelMSSqlServer = new System.Windows.Forms.Panel();
-            this.textSQLDataBase = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.textSQLServer = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.panelSqLite = new System.Windows.Forms.Panel();
-            this.buttonSelectFile = new System.Windows.Forms.Button();
-            this.buttonSelectDirectory = new System.Windows.Forms.Button();
-            this.textSqLiteDataBase = new System.Windows.Forms.TextBox();
-            this.labelSqLiteDataBase = new System.Windows.Forms.Label();
-            this.textSqLiteDirectory = new System.Windows.Forms.TextBox();
-            this.labelDirectory = new System.Windows.Forms.Label();
-            this.groupRepositoryType = new System.Windows.Forms.GroupBox();
-            this.radioMSSqlServer = new System.Windows.Forms.RadioButton();
-            this.radioSqLite = new System.Windows.Forms.RadioButton();
-            this.buttonFolderSearch = new System.Windows.Forms.Button();
-            this.labelAlias = new System.Windows.Forms.Label();
-            this.textAliasName = new System.Windows.Forms.TextBox();
-            this.checkResourceContentInDB = new System.Windows.Forms.CheckBox();
-            this.panelForm.SuspendLayout();
-            this.panelMSSqlServer.SuspendLayout();
-            this.panelSqLite.SuspendLayout();
-            this.groupRepositoryType.SuspendLayout();
-            this.SuspendLayout();
+            buttonCancel = new Button();
+            buttonAccept = new Button();
+            panelForm = new Panel();
+            checkResourceContentInDB = new CheckBox();
+            buttonSelectDirectoryResources = new Button();
+            textResourcesContainer = new TextBox();
+            textResourcesContainerUrl = new TextBox();
+            textResourcesContainerRoot = new TextBox();
+            labelContainerUrl = new Label();
+            labelContainerRoot = new Label();
+            labelContainer = new Label();
+            panelMSSqlServer = new Panel();
+            textSQLDataBase = new TextBox();
+            label1 = new Label();
+            textSQLServer = new TextBox();
+            label5 = new Label();
+            panelSqLite = new Panel();
+            buttonSelectFile = new Button();
+            buttonSelectDirectory = new Button();
+            textSqLiteDataBase = new TextBox();
+            labelSqLiteDataBase = new Label();
+            textSqLiteDirectory = new TextBox();
+            labelDirectory = new Label();
+            groupRepositoryType = new GroupBox();
+            radioMSSqlServer = new RadioButton();
+            radioSqLite = new RadioButton();
+            buttonFolderSearch = new Button();
+            labelAlias = new Label();
+            textAliasName = new TextBox();
+            panelForm.SuspendLayout();
+            panelMSSqlServer.SuspendLayout();
+            panelSqLite.SuspendLayout();
+            groupRepositoryType.SuspendLayout();
+            SuspendLayout();
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(563, 563);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(64, 29);
-            this.buttonCancel.TabIndex = 15;
-            this.buttonCancel.Text = "&Cancel";
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.Location = new Point(563, 563);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new Size(64, 29);
+            buttonCancel.TabIndex = 15;
+            buttonCancel.Text = "&Cancel";
+            buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += buttonCancel_Click;
             // 
             // buttonAccept
             // 
-            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(493, 563);
-            this.buttonAccept.Name = "buttonAccept";
-            this.buttonAccept.Size = new System.Drawing.Size(64, 29);
-            this.buttonAccept.TabIndex = 14;
-            this.buttonAccept.Text = "&Accept";
-            this.buttonAccept.UseVisualStyleBackColor = true;
-            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
+            buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonAccept.Location = new Point(493, 563);
+            buttonAccept.Name = "buttonAccept";
+            buttonAccept.Size = new Size(64, 29);
+            buttonAccept.TabIndex = 14;
+            buttonAccept.Text = "&Accept";
+            buttonAccept.UseVisualStyleBackColor = true;
+            buttonAccept.Click += buttonAccept_Click;
             // 
             // panelForm
             // 
-            this.panelForm.Controls.Add(this.checkResourceContentInDB);
-            this.panelForm.Controls.Add(this.buttonSelectDirectoryResources);
-            this.panelForm.Controls.Add(this.textResourcesContainer);
-            this.panelForm.Controls.Add(this.textResourcesContainerUrl);
-            this.panelForm.Controls.Add(this.textResourcesContainerRoot);
-            this.panelForm.Controls.Add(this.labelContainerUrl);
-            this.panelForm.Controls.Add(this.labelContainerRoot);
-            this.panelForm.Controls.Add(this.labelContainer);
-            this.panelForm.Controls.Add(this.panelMSSqlServer);
-            this.panelForm.Controls.Add(this.panelSqLite);
-            this.panelForm.Controls.Add(this.groupRepositoryType);
-            this.panelForm.Controls.Add(this.buttonFolderSearch);
-            this.panelForm.Controls.Add(this.labelAlias);
-            this.panelForm.Controls.Add(this.textAliasName);
-            this.panelForm.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelForm.Location = new System.Drawing.Point(0, 0);
-            this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(639, 567);
-            this.panelForm.TabIndex = 3;
-            // 
-            // buttonSelectDirectoryResources
-            // 
-            this.buttonSelectDirectoryResources.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectDirectoryResources.Location = new System.Drawing.Point(597, 198);
-            this.buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
-            this.buttonSelectDirectoryResources.Size = new System.Drawing.Size(24, 23);
-            this.buttonSelectDirectoryResources.TabIndex = 6;
-            this.buttonSelectDirectoryResources.Text = "...";
-            this.buttonSelectDirectoryResources.UseVisualStyleBackColor = true;
-            this.buttonSelectDirectoryResources.Click += new System.EventHandler(this.buttonSelectDirectoryResources_Click);
-            // 
-            // textResourcesContainer
-            // 
-            this.textResourcesContainer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textResourcesContainer.Location = new System.Drawing.Point(10, 148);
-            this.textResourcesContainer.Name = "textResourcesContainer";
-            this.textResourcesContainer.Size = new System.Drawing.Size(277, 23);
-            this.textResourcesContainer.TabIndex = 3;
-            // 
-            // textResourcesContainerUrl
-            // 
-            this.textResourcesContainerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textResourcesContainerUrl.Location = new System.Drawing.Point(8, 248);
-            this.textResourcesContainerUrl.Name = "textResourcesContainerUrl";
-            this.textResourcesContainerUrl.Size = new System.Drawing.Size(613, 23);
-            this.textResourcesContainerUrl.TabIndex = 7;
-            // 
-            // textResourcesContainerRoot
-            // 
-            this.textResourcesContainerRoot.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textResourcesContainerRoot.Location = new System.Drawing.Point(8, 198);
-            this.textResourcesContainerRoot.Name = "textResourcesContainerRoot";
-            this.textResourcesContainerRoot.Size = new System.Drawing.Size(583, 23);
-            this.textResourcesContainerRoot.TabIndex = 5;
-            // 
-            // labelContainerUrl
-            // 
-            this.labelContainerUrl.AutoSize = true;
-            this.labelContainerUrl.Location = new System.Drawing.Point(8, 230);
-            this.labelContainerUrl.Name = "labelContainerUrl";
-            this.labelContainerUrl.Size = new System.Drawing.Size(140, 15);
-            this.labelContainerUrl.TabIndex = 17;
-            this.labelContainerUrl.Text = "Resources container URL:";
-            // 
-            // labelContainerRoot
-            // 
-            this.labelContainerRoot.AutoSize = true;
-            this.labelContainerRoot.Location = new System.Drawing.Point(8, 180);
-            this.labelContainerRoot.Name = "labelContainerRoot";
-            this.labelContainerRoot.Size = new System.Drawing.Size(175, 15);
-            this.labelContainerRoot.TabIndex = 16;
-            this.labelContainerRoot.Text = "Resources container root folder:";
-            // 
-            // labelContainer
-            // 
-            this.labelContainer.AutoSize = true;
-            this.labelContainer.Location = new System.Drawing.Point(8, 130);
-            this.labelContainer.Name = "labelContainer";
-            this.labelContainer.Size = new System.Drawing.Size(149, 15);
-            this.labelContainer.TabIndex = 15;
-            this.labelContainer.Text = "Resources container name:";
-            // 
-            // panelMSSqlServer
-            // 
-            this.panelMSSqlServer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelMSSqlServer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelMSSqlServer.Controls.Add(this.textSQLDataBase);
-            this.panelMSSqlServer.Controls.Add(this.label1);
-            this.panelMSSqlServer.Controls.Add(this.textSQLServer);
-            this.panelMSSqlServer.Controls.Add(this.label5);
-            this.panelMSSqlServer.Location = new System.Drawing.Point(6, 404);
-            this.panelMSSqlServer.Name = "panelMSSqlServer";
-            this.panelMSSqlServer.Size = new System.Drawing.Size(624, 117);
-            this.panelMSSqlServer.TabIndex = 14;
-            // 
-            // textSQLDataBase
-            // 
-            this.textSQLDataBase.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textSQLDataBase.Location = new System.Drawing.Point(1, 83);
-            this.textSQLDataBase.Name = "textSQLDataBase";
-            this.textSQLDataBase.Size = new System.Drawing.Size(613, 23);
-            this.textSQLDataBase.TabIndex = 13;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(1, 65);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(61, 15);
-            this.label1.TabIndex = 11;
-            this.label1.Text = "Data base:";
-            // 
-            // textSQLServer
-            // 
-            this.textSQLServer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textSQLServer.Location = new System.Drawing.Point(1, 28);
-            this.textSQLServer.Name = "textSQLServer";
-            this.textSQLServer.Size = new System.Drawing.Size(613, 23);
-            this.textSQLServer.TabIndex = 12;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(1, 10);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(115, 15);
-            this.label5.TabIndex = 8;
-            this.label5.Text = "SQL Server\\instance:";
-            // 
-            // panelSqLite
-            // 
-            this.panelSqLite.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelSqLite.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelSqLite.Controls.Add(this.buttonSelectFile);
-            this.panelSqLite.Controls.Add(this.buttonSelectDirectory);
-            this.panelSqLite.Controls.Add(this.textSqLiteDataBase);
-            this.panelSqLite.Controls.Add(this.labelSqLiteDataBase);
-            this.panelSqLite.Controls.Add(this.textSqLiteDirectory);
-            this.panelSqLite.Controls.Add(this.labelDirectory);
-            this.panelSqLite.Location = new System.Drawing.Point(6, 277);
-            this.panelSqLite.Name = "panelSqLite";
-            this.panelSqLite.Size = new System.Drawing.Size(624, 121);
-            this.panelSqLite.TabIndex = 13;
-            // 
-            // buttonSelectFile
-            // 
-            this.buttonSelectFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectFile.Location = new System.Drawing.Point(590, 82);
-            this.buttonSelectFile.Name = "buttonSelectFile";
-            this.buttonSelectFile.Size = new System.Drawing.Size(24, 23);
-            this.buttonSelectFile.TabIndex = 11;
-            this.buttonSelectFile.Text = "...";
-            this.buttonSelectFile.UseVisualStyleBackColor = true;
-            this.buttonSelectFile.Visible = false;
-            this.buttonSelectFile.Click += new System.EventHandler(this.buttonSelectFile_Click);
-            // 
-            // buttonSelectDirectory
-            // 
-            this.buttonSelectDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectDirectory.Location = new System.Drawing.Point(590, 28);
-            this.buttonSelectDirectory.Name = "buttonSelectDirectory";
-            this.buttonSelectDirectory.Size = new System.Drawing.Size(24, 23);
-            this.buttonSelectDirectory.TabIndex = 9;
-            this.buttonSelectDirectory.Text = "...";
-            this.buttonSelectDirectory.UseVisualStyleBackColor = true;
-            this.buttonSelectDirectory.Click += new System.EventHandler(this.buttonSelectDirectory_Click);
-            // 
-            // textSqLiteDataBase
-            // 
-            this.textSqLiteDataBase.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textSqLiteDataBase.Location = new System.Drawing.Point(1, 83);
-            this.textSqLiteDataBase.Name = "textSqLiteDataBase";
-            this.textSqLiteDataBase.Size = new System.Drawing.Size(613, 23);
-            this.textSqLiteDataBase.TabIndex = 10;
-            // 
-            // labelSqLiteDataBase
-            // 
-            this.labelSqLiteDataBase.AutoSize = true;
-            this.labelSqLiteDataBase.Location = new System.Drawing.Point(1, 65);
-            this.labelSqLiteDataBase.Name = "labelSqLiteDataBase";
-            this.labelSqLiteDataBase.Size = new System.Drawing.Size(80, 15);
-            this.labelSqLiteDataBase.TabIndex = 10;
-            this.labelSqLiteDataBase.Text = "Data base file:";
-            // 
-            // textSqLiteDirectory
-            // 
-            this.textSqLiteDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textSqLiteDirectory.Location = new System.Drawing.Point(1, 28);
-            this.textSqLiteDirectory.Name = "textSqLiteDirectory";
-            this.textSqLiteDirectory.Size = new System.Drawing.Size(583, 23);
-            this.textSqLiteDirectory.TabIndex = 8;
-            // 
-            // labelDirectory
-            // 
-            this.labelDirectory.AutoSize = true;
-            this.labelDirectory.Location = new System.Drawing.Point(1, 10);
-            this.labelDirectory.Name = "labelDirectory";
-            this.labelDirectory.Size = new System.Drawing.Size(108, 15);
-            this.labelDirectory.TabIndex = 8;
-            this.labelDirectory.Text = "Database directory:";
-            // 
-            // groupRepositoryType
-            // 
-            this.groupRepositoryType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupRepositoryType.Controls.Add(this.radioMSSqlServer);
-            this.groupRepositoryType.Controls.Add(this.radioSqLite);
-            this.groupRepositoryType.Location = new System.Drawing.Point(8, 7);
-            this.groupRepositoryType.Name = "groupRepositoryType";
-            this.groupRepositoryType.Size = new System.Drawing.Size(615, 61);
-            this.groupRepositoryType.TabIndex = 12;
-            this.groupRepositoryType.TabStop = false;
-            this.groupRepositoryType.Text = "Reposoty database type";
-            // 
-            // radioMSSqlServer
-            // 
-            this.radioMSSqlServer.AutoSize = true;
-            this.radioMSSqlServer.Location = new System.Drawing.Point(156, 22);
-            this.radioMSSqlServer.Name = "radioMSSqlServer";
-            this.radioMSSqlServer.Size = new System.Drawing.Size(135, 19);
-            this.radioMSSqlServer.TabIndex = 1;
-            this.radioMSSqlServer.TabStop = true;
-            this.radioMSSqlServer.Text = "Microsoft SQL Server";
-            this.radioMSSqlServer.UseVisualStyleBackColor = true;
-            this.radioMSSqlServer.CheckedChanged += new System.EventHandler(this.radioDataBase_CheckedChanged);
-            // 
-            // radioSqLite
-            // 
-            this.radioSqLite.AutoSize = true;
-            this.radioSqLite.Location = new System.Drawing.Point(35, 22);
-            this.radioSqLite.Name = "radioSqLite";
-            this.radioSqLite.Size = new System.Drawing.Size(57, 19);
-            this.radioSqLite.TabIndex = 0;
-            this.radioSqLite.TabStop = true;
-            this.radioSqLite.Text = "SqLite";
-            this.radioSqLite.UseVisualStyleBackColor = true;
-            this.radioSqLite.CheckedChanged += new System.EventHandler(this.radioDataBase_CheckedChanged);
-            // 
-            // buttonFolderSearch
-            // 
-            this.buttonFolderSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonFolderSearch.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonFolderSearch.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.buttonFolderSearch.Location = new System.Drawing.Point(899, 199);
-            this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.buttonFolderSearch.Name = "buttonFolderSearch";
-            this.buttonFolderSearch.Size = new System.Drawing.Size(27, 25);
-            this.buttonFolderSearch.TabIndex = 11;
-            this.buttonFolderSearch.Text = "...";
-            this.buttonFolderSearch.UseVisualStyleBackColor = false;
-            // 
-            // labelAlias
-            // 
-            this.labelAlias.AutoSize = true;
-            this.labelAlias.Location = new System.Drawing.Point(8, 80);
-            this.labelAlias.Name = "labelAlias";
-            this.labelAlias.Size = new System.Drawing.Size(68, 15);
-            this.labelAlias.TabIndex = 6;
-            this.labelAlias.Text = "Alias name:";
-            // 
-            // textAliasName
-            // 
-            this.textAliasName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textAliasName.Location = new System.Drawing.Point(10, 98);
-            this.textAliasName.Name = "textAliasName";
-            this.textAliasName.Size = new System.Drawing.Size(613, 23);
-            this.textAliasName.TabIndex = 2;
+            panelForm.Controls.Add(checkResourceContentInDB);
+            panelForm.Controls.Add(buttonSelectDirectoryResources);
+            panelForm.Controls.Add(textResourcesContainer);
+            panelForm.Controls.Add(textResourcesContainerUrl);
+            panelForm.Controls.Add(textResourcesContainerRoot);
+            panelForm.Controls.Add(labelContainerUrl);
+            panelForm.Controls.Add(labelContainerRoot);
+            panelForm.Controls.Add(labelContainer);
+            panelForm.Controls.Add(panelMSSqlServer);
+            panelForm.Controls.Add(panelSqLite);
+            panelForm.Controls.Add(groupRepositoryType);
+            panelForm.Controls.Add(buttonFolderSearch);
+            panelForm.Controls.Add(labelAlias);
+            panelForm.Controls.Add(textAliasName);
+            panelForm.Dock = DockStyle.Top;
+            panelForm.Location = new Point(0, 0);
+            panelForm.Name = "panelForm";
+            panelForm.Size = new Size(639, 567);
+            panelForm.TabIndex = 3;
             // 
             // checkResourceContentInDB
             // 
-            this.checkResourceContentInDB.AutoSize = true;
-            this.checkResourceContentInDB.Location = new System.Drawing.Point(314, 150);
-            this.checkResourceContentInDB.Name = "checkResourceContentInDB";
-            this.checkResourceContentInDB.Size = new System.Drawing.Size(277, 19);
-            this.checkResourceContentInDB.TabIndex = 4;
-            this.checkResourceContentInDB.Text = "Save a copy of the resource content in database";
-            this.checkResourceContentInDB.UseVisualStyleBackColor = true;
+            checkResourceContentInDB.AutoSize = true;
+            checkResourceContentInDB.Location = new Point(314, 150);
+            checkResourceContentInDB.Name = "checkResourceContentInDB";
+            checkResourceContentInDB.Size = new Size(277, 19);
+            checkResourceContentInDB.TabIndex = 4;
+            checkResourceContentInDB.Text = "Save a copy of the resource content in database";
+            checkResourceContentInDB.UseVisualStyleBackColor = true;
+            // 
+            // buttonSelectDirectoryResources
+            // 
+            buttonSelectDirectoryResources.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonSelectDirectoryResources.Location = new Point(597, 198);
+            buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
+            buttonSelectDirectoryResources.Size = new Size(24, 23);
+            buttonSelectDirectoryResources.TabIndex = 6;
+            buttonSelectDirectoryResources.Text = "...";
+            buttonSelectDirectoryResources.UseVisualStyleBackColor = true;
+            buttonSelectDirectoryResources.Click += buttonSelectDirectoryResources_Click;
+            // 
+            // textResourcesContainer
+            // 
+            textResourcesContainer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textResourcesContainer.Location = new Point(10, 148);
+            textResourcesContainer.Name = "textResourcesContainer";
+            textResourcesContainer.Size = new Size(277, 23);
+            textResourcesContainer.TabIndex = 3;
+            // 
+            // textResourcesContainerUrl
+            // 
+            textResourcesContainerUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textResourcesContainerUrl.Location = new Point(8, 248);
+            textResourcesContainerUrl.Name = "textResourcesContainerUrl";
+            textResourcesContainerUrl.Size = new Size(613, 23);
+            textResourcesContainerUrl.TabIndex = 7;
+            // 
+            // textResourcesContainerRoot
+            // 
+            textResourcesContainerRoot.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textResourcesContainerRoot.Location = new Point(8, 198);
+            textResourcesContainerRoot.Name = "textResourcesContainerRoot";
+            textResourcesContainerRoot.Size = new Size(583, 23);
+            textResourcesContainerRoot.TabIndex = 5;
+            // 
+            // labelContainerUrl
+            // 
+            labelContainerUrl.AutoSize = true;
+            labelContainerUrl.Location = new Point(8, 230);
+            labelContainerUrl.Name = "labelContainerUrl";
+            labelContainerUrl.Size = new Size(184, 15);
+            labelContainerUrl.TabIndex = 17;
+            labelContainerUrl.Text = "Resources container root file URL:";
+            // 
+            // labelContainerRoot
+            // 
+            labelContainerRoot.AutoSize = true;
+            labelContainerRoot.Location = new Point(8, 180);
+            labelContainerRoot.Name = "labelContainerRoot";
+            labelContainerRoot.Size = new Size(175, 15);
+            labelContainerRoot.TabIndex = 16;
+            labelContainerRoot.Text = "Resources container root folder:";
+            // 
+            // labelContainer
+            // 
+            labelContainer.AutoSize = true;
+            labelContainer.Location = new Point(8, 130);
+            labelContainer.Name = "labelContainer";
+            labelContainer.Size = new Size(149, 15);
+            labelContainer.TabIndex = 15;
+            labelContainer.Text = "Resources container name:";
+            // 
+            // panelMSSqlServer
+            // 
+            panelMSSqlServer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panelMSSqlServer.BorderStyle = BorderStyle.FixedSingle;
+            panelMSSqlServer.Controls.Add(textSQLDataBase);
+            panelMSSqlServer.Controls.Add(label1);
+            panelMSSqlServer.Controls.Add(textSQLServer);
+            panelMSSqlServer.Controls.Add(label5);
+            panelMSSqlServer.Location = new Point(6, 404);
+            panelMSSqlServer.Name = "panelMSSqlServer";
+            panelMSSqlServer.Size = new Size(624, 117);
+            panelMSSqlServer.TabIndex = 14;
+            // 
+            // textSQLDataBase
+            // 
+            textSQLDataBase.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textSQLDataBase.Location = new Point(1, 83);
+            textSQLDataBase.Name = "textSQLDataBase";
+            textSQLDataBase.Size = new Size(613, 23);
+            textSQLDataBase.TabIndex = 13;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(1, 65);
+            label1.Name = "label1";
+            label1.Size = new Size(61, 15);
+            label1.TabIndex = 11;
+            label1.Text = "Data base:";
+            // 
+            // textSQLServer
+            // 
+            textSQLServer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textSQLServer.Location = new Point(1, 28);
+            textSQLServer.Name = "textSQLServer";
+            textSQLServer.Size = new Size(613, 23);
+            textSQLServer.TabIndex = 12;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(1, 10);
+            label5.Name = "label5";
+            label5.Size = new Size(115, 15);
+            label5.TabIndex = 8;
+            label5.Text = "SQL Server\\instance:";
+            // 
+            // panelSqLite
+            // 
+            panelSqLite.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panelSqLite.BorderStyle = BorderStyle.FixedSingle;
+            panelSqLite.Controls.Add(buttonSelectFile);
+            panelSqLite.Controls.Add(buttonSelectDirectory);
+            panelSqLite.Controls.Add(textSqLiteDataBase);
+            panelSqLite.Controls.Add(labelSqLiteDataBase);
+            panelSqLite.Controls.Add(textSqLiteDirectory);
+            panelSqLite.Controls.Add(labelDirectory);
+            panelSqLite.Location = new Point(6, 277);
+            panelSqLite.Name = "panelSqLite";
+            panelSqLite.Size = new Size(624, 121);
+            panelSqLite.TabIndex = 13;
+            // 
+            // buttonSelectFile
+            // 
+            buttonSelectFile.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonSelectFile.Location = new Point(590, 82);
+            buttonSelectFile.Name = "buttonSelectFile";
+            buttonSelectFile.Size = new Size(24, 23);
+            buttonSelectFile.TabIndex = 11;
+            buttonSelectFile.Text = "...";
+            buttonSelectFile.UseVisualStyleBackColor = true;
+            buttonSelectFile.Visible = false;
+            buttonSelectFile.Click += buttonSelectFile_Click;
+            // 
+            // buttonSelectDirectory
+            // 
+            buttonSelectDirectory.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonSelectDirectory.Location = new Point(590, 28);
+            buttonSelectDirectory.Name = "buttonSelectDirectory";
+            buttonSelectDirectory.Size = new Size(24, 23);
+            buttonSelectDirectory.TabIndex = 9;
+            buttonSelectDirectory.Text = "...";
+            buttonSelectDirectory.UseVisualStyleBackColor = true;
+            buttonSelectDirectory.Click += buttonSelectDirectory_Click;
+            // 
+            // textSqLiteDataBase
+            // 
+            textSqLiteDataBase.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textSqLiteDataBase.Location = new Point(1, 83);
+            textSqLiteDataBase.Name = "textSqLiteDataBase";
+            textSqLiteDataBase.Size = new Size(613, 23);
+            textSqLiteDataBase.TabIndex = 10;
+            // 
+            // labelSqLiteDataBase
+            // 
+            labelSqLiteDataBase.AutoSize = true;
+            labelSqLiteDataBase.Location = new Point(1, 65);
+            labelSqLiteDataBase.Name = "labelSqLiteDataBase";
+            labelSqLiteDataBase.Size = new Size(80, 15);
+            labelSqLiteDataBase.TabIndex = 10;
+            labelSqLiteDataBase.Text = "Data base file:";
+            // 
+            // textSqLiteDirectory
+            // 
+            textSqLiteDirectory.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textSqLiteDirectory.Location = new Point(1, 28);
+            textSqLiteDirectory.Name = "textSqLiteDirectory";
+            textSqLiteDirectory.Size = new Size(583, 23);
+            textSqLiteDirectory.TabIndex = 8;
+            // 
+            // labelDirectory
+            // 
+            labelDirectory.AutoSize = true;
+            labelDirectory.Location = new Point(1, 10);
+            labelDirectory.Name = "labelDirectory";
+            labelDirectory.Size = new Size(108, 15);
+            labelDirectory.TabIndex = 8;
+            labelDirectory.Text = "Database directory:";
+            // 
+            // groupRepositoryType
+            // 
+            groupRepositoryType.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupRepositoryType.Controls.Add(radioMSSqlServer);
+            groupRepositoryType.Controls.Add(radioSqLite);
+            groupRepositoryType.Location = new Point(8, 7);
+            groupRepositoryType.Name = "groupRepositoryType";
+            groupRepositoryType.Size = new Size(615, 61);
+            groupRepositoryType.TabIndex = 12;
+            groupRepositoryType.TabStop = false;
+            groupRepositoryType.Text = "Reposoty database type";
+            // 
+            // radioMSSqlServer
+            // 
+            radioMSSqlServer.AutoSize = true;
+            radioMSSqlServer.Location = new Point(156, 22);
+            radioMSSqlServer.Name = "radioMSSqlServer";
+            radioMSSqlServer.Size = new Size(135, 19);
+            radioMSSqlServer.TabIndex = 1;
+            radioMSSqlServer.TabStop = true;
+            radioMSSqlServer.Text = "Microsoft SQL Server";
+            radioMSSqlServer.UseVisualStyleBackColor = true;
+            radioMSSqlServer.CheckedChanged += radioDataBase_CheckedChanged;
+            // 
+            // radioSqLite
+            // 
+            radioSqLite.AutoSize = true;
+            radioSqLite.Location = new Point(35, 22);
+            radioSqLite.Name = "radioSqLite";
+            radioSqLite.Size = new Size(57, 19);
+            radioSqLite.TabIndex = 0;
+            radioSqLite.TabStop = true;
+            radioSqLite.Text = "SqLite";
+            radioSqLite.UseVisualStyleBackColor = true;
+            radioSqLite.CheckedChanged += radioDataBase_CheckedChanged;
+            // 
+            // buttonFolderSearch
+            // 
+            buttonFolderSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonFolderSearch.BackColor = SystemColors.Control;
+            buttonFolderSearch.FlatStyle = FlatStyle.System;
+            buttonFolderSearch.Location = new Point(899, 199);
+            buttonFolderSearch.Margin = new Padding(4, 3, 4, 3);
+            buttonFolderSearch.Name = "buttonFolderSearch";
+            buttonFolderSearch.Size = new Size(27, 25);
+            buttonFolderSearch.TabIndex = 11;
+            buttonFolderSearch.Text = "...";
+            buttonFolderSearch.UseVisualStyleBackColor = false;
+            // 
+            // labelAlias
+            // 
+            labelAlias.AutoSize = true;
+            labelAlias.Location = new Point(8, 80);
+            labelAlias.Name = "labelAlias";
+            labelAlias.Size = new Size(68, 15);
+            labelAlias.TabIndex = 6;
+            labelAlias.Text = "Alias name:";
+            // 
+            // textAliasName
+            // 
+            textAliasName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textAliasName.Location = new Point(10, 98);
+            textAliasName.Name = "textAliasName";
+            textAliasName.Size = new Size(613, 23);
+            textAliasName.TabIndex = 2;
             // 
             // RepositoryEditorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(639, 604);
-            this.Controls.Add(this.buttonCancel);
-            this.Controls.Add(this.buttonAccept);
-            this.Controls.Add(this.panelForm);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.KeyPreview = true;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "RepositoryEditorForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Repository editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RepositoryEditorForm_FormClosing);
-            this.Load += new System.EventHandler(this.RepositoryEditorForm_Load);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.RepositoryEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.RepositoryEditorForm_KeyUp);
-            this.panelForm.ResumeLayout(false);
-            this.panelForm.PerformLayout();
-            this.panelMSSqlServer.ResumeLayout(false);
-            this.panelMSSqlServer.PerformLayout();
-            this.panelSqLite.ResumeLayout(false);
-            this.panelSqLite.PerformLayout();
-            this.groupRepositoryType.ResumeLayout(false);
-            this.groupRepositoryType.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(639, 604);
+            Controls.Add(buttonCancel);
+            Controls.Add(buttonAccept);
+            Controls.Add(panelForm);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            KeyPreview = true;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "RepositoryEditorForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Repository editor";
+            FormClosing += RepositoryEditorForm_FormClosing;
+            Load += RepositoryEditorForm_Load;
+            KeyPress += RepositoryEditorForm_KeyPress;
+            KeyUp += RepositoryEditorForm_KeyUp;
+            panelForm.ResumeLayout(false);
+            panelForm.PerformLayout();
+            panelMSSqlServer.ResumeLayout(false);
+            panelMSSqlServer.PerformLayout();
+            panelSqLite.ResumeLayout(false);
+            panelSqLite.PerformLayout();
+            groupRepositoryType.ResumeLayout(false);
+            groupRepositoryType.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion

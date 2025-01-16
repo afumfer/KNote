@@ -720,6 +720,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         panelDescription.Visible = true;
 
+        webViewResource.ShowNavigationTools = false;
         webViewResource.Location = new Point(396, 36);
         panelPreview.Location = new Point(396, 36);
         if (_ctrl.EditMode)
@@ -807,7 +808,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             htmlDescription.Visible = false;
             webView2.Visible = false;
-            textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+            // TODO: !!!
+            //textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
             textDescription.Visible = true;
         }
 

@@ -461,7 +461,7 @@ public class NoteEditorCtrl : CtrlEditorEmbeddableBase<IViewEditorEmbeddable<Not
             newResource.Order = 0;
             newResource.Name = "ClipboardImg_" + newResource.ResourceId.ToString() + ".png";
             newResource.FileType = Store.ExtensionFileToFileType(".png");
-            newResource.Container = Service.RepositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+            newResource.Container = Service.RepositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
 
             newResource.ContentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));
 

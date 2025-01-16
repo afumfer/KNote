@@ -473,7 +473,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             newEntity.SetSimpleDto(entity);
             // TODO: refactor this line (generalize)
             if (string.IsNullOrEmpty(entity.Container))
-                newEntity.Container = _repositoryRef.ResourcesContainer + @"\" + DateTime.Now.Year.ToString();
+                newEntity.Container = _repositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
             if (!string.IsNullOrEmpty(entity.ContentBase64))
                 newEntity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
             else

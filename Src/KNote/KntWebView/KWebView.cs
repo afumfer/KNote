@@ -106,7 +106,7 @@ namespace KntWebView
         {
             get { return panelToolBox.Visible; }
 
-            set { panelToolBox.Visible = value; }
+            set { panelToolBox.Visible = value; statusBar.Visible = value; }
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -129,8 +129,7 @@ namespace KntWebView
 
         // TODO: Refactor this
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string FolderForVirtualHostNameMapping { get; set; } = @"D:\Tmp";   // Dummy, for test
-
+        public string FolderForVirtualHostNameMapping { get; private set; }    // Dummy, for test   = @"D:\Tmp";
 
         #endregion
 
@@ -141,10 +140,6 @@ namespace KntWebView
             statusLabel.Text = "(Initializing ......)";
 
             await webView2.EnsureCoreWebView2Async(null);
-
-            webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
-                "knote.resources", FolderForVirtualHostNameMapping,
-                CoreWebView2HostResourceAccessKind.Allow);
 
             if ((webView2 != null) && (webView2.CoreWebView2 != null))
             {
@@ -158,6 +153,14 @@ namespace KntWebView
                 _isInitialized = false;                
             }
             statusLabel.Text = "";
+        }
+
+        public void SetVirtualHostNameToFolderMapping(string folder)
+        {
+            FolderForVirtualHostNameMapping = folder;
+            webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                "knote.resources", FolderForVirtualHostNameMapping,
+                CoreWebView2HostResourceAccessKind.Allow);
         }
 
         public async Task Navigate()
@@ -197,6 +200,24 @@ namespace KntWebView
                 MessageBox.Show($"You can not navigate to the indicated string. ({ex.Message})");
             }
         }
+
+        public async Task ExecuteScriptAsync(string script)
+        {
+            try
+            {
+                if (!_isInitialized)
+                    await InitializeAsync();
+
+                if (webView2.CoreWebView2 != null)  // This patch is required when using sql server repositories                    
+                    await webView2.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"You can not execute to the indicated script. ({ex.Message})");
+            }
+        }
+
+
 
         public void GoBack()
         {

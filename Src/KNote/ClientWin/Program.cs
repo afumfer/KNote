@@ -102,7 +102,7 @@ static class Program
                 ConnectionString = $"Data Source={dbFile}",
                 Provider = "Microsoft.Data.Sqlite",
                 Orm = "EntityFramework",
-                ResourcesContainer = "NotesResources",
+                ResourcesContainer = "KntCntResources",
                 ResourcesContainerRootPath = pathResourcesCache,
                 ResourcesContainerRootUrl = @"file:///" + pathResourcesCache.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             };
