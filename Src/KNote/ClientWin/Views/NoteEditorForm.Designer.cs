@@ -723,7 +723,7 @@
             buttonViewHtml.TabIndex = 7;
             buttonViewHtml.Text = "Html editor";
             buttonViewHtml.UseVisualStyleBackColor = true;
-            buttonViewHtml.Click += buttonViewHtml_Click;
+            buttonViewHtml.Click += buttonEditHtml_Click;
             // 
             // textPriority
             // 

@@ -155,9 +155,13 @@ namespace KntWebView
             statusLabel.Text = "";
         }
 
-        public void SetVirtualHostNameToFolderMapping(string folder)
+        public async Task SetVirtualHostNameToFolderMapping(string folder)
         {
+            if (!_isInitialized)
+                await InitializeAsync();
+
             FolderForVirtualHostNameMapping = folder;
+            // TODO: !!! replace this magic "knote.resources" string for a app param. 
             webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
                 "knote.resources", FolderForVirtualHostNameMapping,
                 CoreWebView2HostResourceAccessKind.Allow);

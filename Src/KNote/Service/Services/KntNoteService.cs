@@ -391,9 +391,9 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return fullPath;
     }
 
-    public string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false)
+    public string UtilUpdateResourceInDescriptionForRead(string description, ReplacementType replacementType, bool considerRootPath = false)    
     {
-        var replaceString = UtilGetReplaceResourceString(considerRootPath);
+        var replaceString = UtilGetReplaceResourceString(replacementType, considerRootPath);
 
         if (replaceString == null)
             return description;
@@ -401,9 +401,9 @@ public class KntNoteService : KntServiceBase, IKntNoteService
             .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString).Replace(Path.DirectorySeparatorChar, '/');
     }
 
-    public string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false)
+    public string UtilUpdateResourceInDescriptionForWrite(string description, ReplacementType replacementType, bool considerRootPath = false)
     {
-        var replaceString = UtilGetReplaceResourceString(considerRootPath);
+        var replaceString = UtilGetReplaceResourceString(replacementType, considerRootPath);
 
         if (replaceString == null)
             return description;
@@ -412,7 +412,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
                 .Replace(replaceString, Repository.RespositoryRef.ResourcesContainer);
     }
 
-    private string UtilGetReplaceResourceString(bool considerRootPath = false)
+    private string UtilGetReplaceResourceString(ReplacementType replacementType, bool considerRootPath = false)
     {
         if (Repository.RespositoryRef == null || string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainer))
             return null;
@@ -420,10 +420,15 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         string replaceString = null;
 
         if (!string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootUrl))
-        {
-            replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
-            // Replace @"\" with @"/"
-            replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        {            
+            if (replacementType == ReplacementType.WebView)
+                // TODO: !!! replace this magic string for a app param. 
+                replaceString = "https://knote.resources/" + Repository.RespositoryRef?.ResourcesContainer;
+            else
+            {
+                replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
+                replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
         }
         else
         {
@@ -438,4 +443,5 @@ public class KntNoteService : KntServiceBase, IKntNoteService
     }
 
     #endregion
+
 }

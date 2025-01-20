@@ -2,6 +2,7 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Service.Core;
 using Markdig;
 
 namespace KNote.ClientWin.Views;
@@ -336,7 +337,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         labelCaption.Text = _ctrl.Model.Topic;
         RefreshStatus();
         _selectedFolderId = _ctrl.Model.FolderId;
-        textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+        textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, ReplacementType.HtmlEditor, true);
         textDescription.SelectionStart = 0;
 
         if (_ctrl.Model.ContentType.Contains("html"))
@@ -371,9 +372,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             return;
 
         if (_ctrl.Model.ContentType.Contains("html"))
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, ReplacementType.HtmlEditor, true);
         else
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, ReplacementType.HtmlEditor, true);
 
 
         _ctrl.Model.FolderId = _selectedFolderId;

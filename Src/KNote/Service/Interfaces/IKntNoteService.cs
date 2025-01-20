@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Service.Core;
 
 namespace KNote.Service.Interfaces;
 
@@ -52,8 +53,8 @@ public interface IKntNoteService
     (string, string) UtilGetResourceUrls(ResourceDto resource);
     bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);
     string UtilGetResourcePath(ResourceDto resource);
-    string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false);
-    string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false);
+    string UtilUpdateResourceInDescriptionForRead(string description, ReplacementType replacementType, bool considerRootPath = false);
+    string UtilUpdateResourceInDescriptionForWrite(string description, ReplacementType replacementType, bool considerRootPath = false);
 
     #endregion
 }

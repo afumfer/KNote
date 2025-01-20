@@ -80,4 +80,6 @@ public abstract class KntServiceBase
             throw new KntServiceException($"KNote service error.  ({MethodBase.GetCurrentMethod().DeclaringType}). ", ex);
         }        
     }
+      
 }
+
