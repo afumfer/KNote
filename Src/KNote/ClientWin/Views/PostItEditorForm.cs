@@ -337,11 +337,10 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         labelCaption.Text = _ctrl.Model.Topic;
         RefreshStatus();
         _selectedFolderId = _ctrl.Model.FolderId;
-        textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, ReplacementType.HtmlEditor, true);
+        textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
         textDescription.SelectionStart = 0;
 
-        if (_ctrl.Model.ContentType.Contains("html"))
-            //htmlDescription.BodyHtml = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+        if (_ctrl.Model.ContentType.Contains("html"))            
             htmlDescription.BodyHtml = textDescription.Text;
         else if (_ctrl.Model.ContentType.Contains("navigation"))
         {            
@@ -356,13 +355,14 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 {
                     webView2.TextUrl = "";
                     webView2.ShowNavigationTools = false;
-                    webView2.ShowStatusInfo = false;
-                    var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-                    var HtmlContent = Markdig.Markdown.ToHtml(textDescription.Text, pipeline);
-                    await webView2.NavigateToString(HtmlContent);
+                    webView2.ShowStatusInfo = false;                    
+
+                    var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+
+                    await webView2.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
+                    await webView2.NavigateToString(htmlContent);
                 }
             }
-
         }
     }
 
@@ -372,9 +372,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             return;
 
         if (_ctrl.Model.ContentType.Contains("html"))
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, ReplacementType.HtmlEditor, true);
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
         else
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, ReplacementType.HtmlEditor, true);
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
 
 
         _ctrl.Model.FolderId = _selectedFolderId;

@@ -9,6 +9,7 @@ using KNote.Model.Dto;
 using KNote.Service.Interfaces;
 using KNote.Service.Core;
 using KNote.Service.ServicesCommands;
+using Markdig;
 
 namespace KNote.Service.Services;
 
@@ -391,9 +392,9 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return fullPath;
     }
 
-    public string UtilUpdateResourceInDescriptionForRead(string description, ReplacementType replacementType, bool considerRootPath = false)    
+    public string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false)    
     {
-        var replaceString = UtilGetReplaceResourceString(replacementType, considerRootPath);
+        var replaceString = GetReplaceResourceString(considerRootPath);
 
         if (replaceString == null)
             return description;
@@ -401,9 +402,9 @@ public class KntNoteService : KntServiceBase, IKntNoteService
             .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString).Replace(Path.DirectorySeparatorChar, '/');
     }
 
-    public string UtilUpdateResourceInDescriptionForWrite(string description, ReplacementType replacementType, bool considerRootPath = false)
+    public string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false)
     {
-        var replaceString = UtilGetReplaceResourceString(replacementType, considerRootPath);
+        var replaceString = GetReplaceResourceString(considerRootPath);
 
         if (replaceString == null)
             return description;
@@ -412,7 +413,33 @@ public class KntNoteService : KntServiceBase, IKntNoteService
                 .Replace(replaceString, Repository.RespositoryRef.ResourcesContainer);
     }
 
-    private string UtilGetReplaceResourceString(ReplacementType replacementType, bool considerRootPath = false)
+    public string UtilHtmlToMarkdown(string html)
+    {
+        var config = new ReverseMarkdown.Config
+        {
+            UnknownTags = ReverseMarkdown.Config.UnknownTagsOption.PassThrough, // Include the unknown tag completely in the result (default as well)
+            GithubFlavored = true, // generate GitHub flavoured markdown, supported for BR, PRE and table tags
+            RemoveComments = false, // will ignore all comments
+            SmartHrefHandling = true // remove markdown output for links where appropriate
+        };
+        var converter = new ReverseMarkdown.Converter(config);
+        string result = converter.Convert(html);
+        return result;
+    }
+
+    public string UtilMarkdownToHtml(string markdown)
+    {        
+        var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+        var htmlContent = Markdig.Markdown.ToHtml(markdown, pipeline);
+
+        return htmlContent;
+    }
+
+    #endregion
+
+    #region Private methods 
+
+    private string GetReplaceResourceString(bool considerRootPath = false)
     {
         if (Repository.RespositoryRef == null || string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainer))
             return null;
@@ -420,15 +447,9 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         string replaceString = null;
 
         if (!string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootUrl))
-        {            
-            if (replacementType == ReplacementType.WebView)
-                // TODO: !!! replace this magic string for a app param. 
-                replaceString = "https://knote.resources/" + Repository.RespositoryRef?.ResourcesContainer;
-            else
-            {
-                replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
-                replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            }
+        {
+            replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
+            replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
         else
         {
@@ -438,10 +459,10 @@ public class KntNoteService : KntServiceBase, IKntNoteService
                     replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootPath, Repository.RespositoryRef?.ResourcesContainer);
             }
         }
-        
-        return replaceString;                
+
+        return replaceString;
     }
 
-    #endregion
+    #endregion 
 
 }

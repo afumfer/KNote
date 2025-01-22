@@ -53,8 +53,10 @@ public interface IKntNoteService
     (string, string) UtilGetResourceUrls(ResourceDto resource);
     bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);
     string UtilGetResourcePath(ResourceDto resource);
-    string UtilUpdateResourceInDescriptionForRead(string description, ReplacementType replacementType, bool considerRootPath = false);
-    string UtilUpdateResourceInDescriptionForWrite(string description, ReplacementType replacementType, bool considerRootPath = false);
+    string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false);
+    string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false);
+    string UtilHtmlToMarkdown(string html);
+    string UtilMarkdownToHtml(string markdown);
 
     #endregion
 }

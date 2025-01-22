@@ -168,7 +168,7 @@ public class NotesController : ControllerBase
             if (resApi.IsValid)
             {
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
-                resApi.Entity.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(resApi.Entity.Description, ReplacementType.HtmlEditor); 
+                resApi.Entity.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(resApi.Entity.Description); 
                 // ---
                 return Ok(resApi);
             }
@@ -221,7 +221,7 @@ public class NotesController : ControllerBase
             _logger.LogTrace("Post/Put {topic} at {dateTime}.", note.Topic?.ToString(), DateTime.Now);
 
             // Hack to make it compatible with the desktop application. ----------------------------------
-            note.Description = _service.Notes.UtilUpdateResourceInDescriptionForWrite(note.Description, ReplacementType.HtmlEditor);
+            note.Description = _service.Notes.UtilUpdateResourceInDescriptionForWrite(note.Description);
             if(note.Description != null)
             {
                 var blockingContentType = note.ContentType.Contains('#');
@@ -243,7 +243,7 @@ public class NotesController : ControllerBase
             var resApi = await _service.Notes.SaveAsync(note);
             if (resApi.IsValid)
             {      
-                resApi.Entity.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(resApi.Entity.Description, ReplacementType.HtmlEditor);
+                resApi.Entity.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(resApi.Entity.Description);
                 return Ok(resApi);
             }
 
@@ -485,7 +485,7 @@ public class NotesController : ControllerBase
     {
         foreach(var n in notes)
         {
-            n.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(n.Description, ReplacementType.HtmlEditor );
+            n.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(n.Description);
         }
     }
 

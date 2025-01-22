@@ -157,8 +157,13 @@ namespace KntWebView
 
         public async Task SetVirtualHostNameToFolderMapping(string folder)
         {
+            if (webView2.IsDisposed == true)
+                return;
+
             if (!_isInitialized)
                 await InitializeAsync();
+
+            //await webView2.EnsureCoreWebView2Async(null);
 
             FolderForVirtualHostNameMapping = folder;
             // TODO: !!! replace this magic "knote.resources" string for a app param. 
