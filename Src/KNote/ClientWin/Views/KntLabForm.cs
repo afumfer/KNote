@@ -859,7 +859,7 @@ window.chrome.webview.postMessage(retValue);";
                     //        NoteId = Guid.Empty,
                     //        ContentInDB = true,
                     //        Order = 1,
-                    //        Container = service.RepositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString(),
+                    //        Container = service.Notes.UtilGetDefaultNewResourceContainer(),
                     //        Name = $"{Guid.NewGuid()}_{Path.GetFileName(fileFullName)}",
                     //        Description = $"(ANotas import {n.NotaEx})",
                     //        ContentArrayBytes = fileArrayBytes,

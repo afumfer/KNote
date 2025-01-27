@@ -177,7 +177,7 @@ public class KntRedmineManager
             }
 
             noteDto.Topic = issue.Subject;
-            noteDto.ContentType = "markdown";
+            noteDto.ContentType = "navigation";
             noteDto.Description = issue.Description;
             noteDto.Tags = filter.Tags;
             noteDto.CreationDateTime = issue.CreatedOn ?? DateTime.Now;

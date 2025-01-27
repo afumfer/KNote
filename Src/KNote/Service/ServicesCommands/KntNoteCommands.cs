@@ -457,7 +457,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
 
                 if (oldResource.Name != Param.Name && oldResource.ContentInDB == false)
                 {
-                    var oldFile = Service.Notes.UtilGetResourcePath(oldResource);
+                    var oldFile = Service.Notes.UtilGetResourceFilePath(oldResource);
                     try
                     {
                         if (File.Exists(oldFile))

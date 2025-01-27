@@ -614,7 +614,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     File.WriteAllBytes(fileName, _selectedResource.ContentArrayBytes);
                 else
                 {
-                    string fullPath = _ctrl.Service.Notes.UtilGetResourcePath(_selectedResource);
+                    string fullPath = _ctrl.Service.Notes.UtilGetResourceFilePath(_selectedResource);
                     File.Copy(fullPath, fileName);
                 }
             }
@@ -848,8 +848,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listViewResources.Clear();
         panelPreview.Visible = true;
         linkViewFile.Visible = false;
-        // !!!
-        //picResource.Visible = false;
         webViewResource.Visible = false;
 
         foreach (var res in _ctrl.Model.Resources)

@@ -162,7 +162,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
             varContentArrayBytes = _ctrl.Model.ContentArrayBytes;            
         else
         {
-            var file = _ctrl.Service.Notes.UtilGetResourcePath(_ctrl.Model);
+            var file = _ctrl.Service.Notes.UtilGetResourceFilePath(_ctrl.Model);
             if(!string.IsNullOrEmpty(file))
                 if(File.Exists(file))
                     varContentArrayBytes = File.ReadAllBytes(file);
@@ -183,7 +183,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         _ctrl.SaveResourceFileAndRefreshDto();            
     }
 
-    private async Task ShowPreview(string file, bool includePdf = true)  // !!!
+    private async Task ShowPreview(string file, bool includePdf = true) 
     {
         if (file == null)
         {                

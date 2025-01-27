@@ -451,12 +451,6 @@ public class PostItEditorCtrl : CtrlEditorBase<IViewPostIt<NoteDto>, NoteDto>
             return (Guid)userId;
         else
             return _userId;
-
-        // TODO: !!! Eliminar esto
-        //var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
-        //if(userDto != null)
-        //    _userId = userDto.UserId;
-        //return _userId;
     }
 
     #endregion 

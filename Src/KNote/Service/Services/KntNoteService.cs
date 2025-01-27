@@ -301,29 +301,8 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return status;
     }
 
-    public (string, string) UtilGetResourceUrls(ResourceDto resource)
-    {
-        string rootUrl = Repository.RespositoryRef.ResourcesContainerRootUrl;
-        string relativeUrl;
-        string fullUrl;
-
-        if (string.IsNullOrEmpty(resource.Container))
-        {
-            resource.Container = Repository.RespositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
-            resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
-        }
-
-        if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
-            return (null, null);
-
-        relativeUrl = (Path.Combine(resource.Container, resource.Name)).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        fullUrl = (Path.Combine(rootUrl, relativeUrl)).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-
-        return (relativeUrl, fullUrl);
-    }
-
     public async Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
-    {     
+    {
         return await Repository.Notes.CompleteNoteAttributes(attributesNotes, noteId, noteTypeId);
     }
 
@@ -337,19 +316,20 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         {
             if (forceUpdateDto)
             {
-                resource.Container = Repository.RespositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
+                resource.Container = UtilGetDefaultNewResourceContainer();
                 resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
             }
         }
-
-        // TODO: anotate this meesage in log, and throw exception !!! ???
-        if (rootCacheResource == null || resource.Container == null || resource.Name == null)
-            return false;
-
+        
         try
-        {
-            string dirPath = Path.Combine(new string[] { rootCacheResource, resource.Container });
-            string file = UtilGetResourcePath(resource);
+        {        
+            var file = UtilGetResourceFilePath(resource);
+    
+            // TODO: anotate this meesage in log, and throw exception 
+            if (string.IsNullOrEmpty(file))
+                return false;
+
+            var dirPath = Path.GetDirectoryName(file);
 
             if (resource.ContentArrayBytes != null)
             {
@@ -369,7 +349,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         }
         catch (Exception ex)
         {
-            // TODO: anotate this meesage in log, and throw exception !!! ???
+            // TODO: anotate this meesage in log, and throw exception 
             var errMsg = ex.ToString();
             return false;
         }
@@ -377,19 +357,50 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return true;
     }
 
-    public string UtilGetResourcePath(ResourceDto resource)
+    public (string, string) UtilGetResourceUrls(ResourceDto resource)
+    {
+        string rootUrl = Repository.RespositoryRef.ResourcesContainerRootUrl;
+        string relativeUrl;
+        string fullUrl;
+
+        if (string.IsNullOrEmpty(resource.Container))
+        {
+            resource.Container = UtilGetDefaultNewResourceContainer();
+            resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
+        }
+
+        if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
+            return (null, null);
+
+        relativeUrl = (Path.Combine(resource.Container, resource.Name)).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        fullUrl = (Path.Combine(rootUrl, relativeUrl)).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        return (relativeUrl, fullUrl);
+    }
+
+    public string UtilGetResourceDirPath(ResourceDto resource)
+    {
+        string rootPath = Repository.RespositoryRef.ResourcesContainerRootPath;        
+
+        if (string.IsNullOrEmpty(rootPath) || string.IsNullOrEmpty(resource.Container))
+            return "";
+
+        return Path.Combine(rootPath, resource.Container.Replace(@"/", @"\"));        
+    }
+
+    public string UtilGetResourceFilePath(ResourceDto resource)
     {        
-        string rootPath = Repository.RespositoryRef.ResourcesContainerRootPath;
-        string relativePath;
-        string fullPath;
+        var dirPath = UtilGetResourceDirPath(resource);
 
-        if (string.IsNullOrEmpty(rootPath) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
-            return null;
+        if (string.IsNullOrEmpty(dirPath) || string.IsNullOrEmpty(resource.Name))
+            return "";
 
-        relativePath = Path.Combine(resource.Container, resource.Name);
-        fullPath = Path.Combine(rootPath, relativePath);
+        return Path.Combine(dirPath, resource.Name.Replace(@"/", @"\"));
+    }
 
-        return fullPath;
+    public string UtilGetDefaultNewResourceContainer()
+    {
+        return Repository.RespositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
     }
 
     public string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false)    

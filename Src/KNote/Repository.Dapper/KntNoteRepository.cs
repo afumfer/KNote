@@ -671,8 +671,6 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             var db = GetOpenConnection();
                                 
-            if(string.IsNullOrEmpty(entity.Container))
-                entity.Container = _repositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
             if (!string.IsNullOrEmpty(entity.ContentBase64))
                 entity.ContentArrayBytes = Convert.FromBase64String(entity.ContentBase64);
             else

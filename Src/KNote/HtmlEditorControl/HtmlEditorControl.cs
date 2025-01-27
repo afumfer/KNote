@@ -1000,7 +1000,7 @@ namespace MSDN.Html.Editor
 				//{
 				//	throw new HtmlEditorException("Outer Html for the body cannot be set.", "SetBodyHtml", ex);
 				//}
-				// !!! hack afumfer
+				// TODO: Review this. hack afumfer
 				catch (Exception)
 				{
 					

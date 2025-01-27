@@ -52,7 +52,8 @@ public interface IKntNoteService
     string UtilGetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages);
     (string, string) UtilGetResourceUrls(ResourceDto resource);
     bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);
-    string UtilGetResourcePath(ResourceDto resource);
+    string UtilGetResourceFilePath(ResourceDto resource);
+    string UtilGetDefaultNewResourceContainer();
     string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false);
     string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false);
     string UtilHtmlToMarkdown(string html);
