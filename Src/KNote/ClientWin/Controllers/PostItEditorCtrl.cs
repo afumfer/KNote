@@ -6,7 +6,7 @@ using Microsoft.Identity.Client;
 
 namespace KNote.ClientWin.Controllers;
 
-public class PostItEditorCtrl : CtrlEditorBase<IViewPostIt<NoteDto>, NoteDto>
+public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto>
 {
     #region Private fields
 

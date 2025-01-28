@@ -315,6 +315,21 @@ abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
     }
 
     #endregion 
+}
+
+abstract public class CtrlNoteEditorBase<TView, TEntity> : CtrlEditorBase<TView, TEntity>
+    where TView : IViewBase
+    where TEntity : SmartModelDtoBase, new()
+{
+
+    #region Constructor
+
+    public CtrlNoteEditorBase(Store store) : base(store)
+    {
+
+    }
+
+    #endregion 
 
     public virtual FolderInfoDto GetFolder()
     {
@@ -324,18 +339,18 @@ abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
         folderSelector.ServicesRef = services;
         var res = folderSelector.RunModal();
         if (res.Entity == EComponentResult.Executed)
-            return folderSelector.SelectedEntity.FolderInfo;
+            return folderSelector.SelectedEntity?.FolderInfo;
 
         return null;
     }
-
 }
 
-public abstract class CtrlEditorEmbeddableBase<TView, TEntity> : CtrlEditorBase<TView, TEntity>
+
+public abstract class CtrlNoteEditorEmbeddableBase<TView, TEntity> : CtrlNoteEditorBase<TView, TEntity>
     where TView : IViewEmbeddable
     where TEntity : SmartModelDtoBase, new()
 {
-    public CtrlEditorEmbeddableBase(Store store) : base(store)
+    public CtrlNoteEditorEmbeddableBase(Store store) : base(store)
     {
 
     }
@@ -355,5 +370,4 @@ public abstract class CtrlEditorEmbeddableBase<TView, TEntity> : CtrlEditorBase<
 
         return result;
     }
-
 }

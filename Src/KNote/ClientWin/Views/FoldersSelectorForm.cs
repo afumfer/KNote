@@ -210,6 +210,9 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
     {
         try
         {
+            if (!buttonAccept.Enabled)
+                buttonAccept.Enabled = true;
+
             FolderWithServiceRef v = null;
 
             if (e.Node.Tag is FolderWithServiceRef)
@@ -230,8 +233,17 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)
-    {            
-        _ctrl.Accept();            
+    {
+        if (_ctrl.SelectedEntity != null)
+        {
+            _ctrl.Accept();
+            this.DialogResult = DialogResult.OK;
+        }
+        else
+        {
+            _ctrl.ShowMessage("You have not selected a folder. Select a folder and click 'Accept' button or press 'Cancel' button to abort the folder selection..", KntConst.AppName);
+            this.DialogResult = DialogResult.None;
+        }
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)

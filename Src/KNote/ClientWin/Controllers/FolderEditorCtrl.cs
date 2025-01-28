@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class FolderEditorCtrl : CtrlEditorBase<IViewEditor<FolderDto>, FolderDto>
+public class FolderEditorCtrl : CtrlNoteEditorBase<IViewEditor<FolderDto>, FolderDto>
 {
     #region Constructor 
 

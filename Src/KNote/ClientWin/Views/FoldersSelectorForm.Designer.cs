@@ -28,105 +28,105 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FoldersSelectorForm));
-            this.imageListFolders = new System.Windows.Forms.ImageList(this.components);
-            this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.panelForm = new System.Windows.Forms.Panel();
-            this.treeViewFolders = new System.Windows.Forms.TreeView();
-            this.panelBottom = new System.Windows.Forms.Panel();
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonAccept = new System.Windows.Forms.Button();
-            this.panelForm.SuspendLayout();
-            this.panelBottom.SuspendLayout();
-            this.SuspendLayout();
+            imageListFolders = new ImageList(components);
+            contextMenu = new ContextMenuStrip(components);
+            panelForm = new Panel();
+            treeViewFolders = new TreeView();
+            panelBottom = new Panel();
+            buttonCancel = new Button();
+            buttonAccept = new Button();
+            panelForm.SuspendLayout();
+            panelBottom.SuspendLayout();
+            SuspendLayout();
             // 
             // imageListFolders
             // 
-            this.imageListFolders.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageListFolders.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageListFolders.ImageStream")));
-            this.imageListFolders.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageListFolders.Images.SetKeyName(0, "folderOpene_16.png");
-            this.imageListFolders.Images.SetKeyName(1, "folderLight_16.png");
-            this.imageListFolders.Images.SetKeyName(2, "database_16.png");
+            imageListFolders.ColorDepth = ColorDepth.Depth8Bit;
+            imageListFolders.ImageStream = (ImageListStreamer)resources.GetObject("imageListFolders.ImageStream");
+            imageListFolders.TransparentColor = Color.Transparent;
+            imageListFolders.Images.SetKeyName(0, "folderOpene_16.png");
+            imageListFolders.Images.SetKeyName(1, "folderLight_16.png");
+            imageListFolders.Images.SetKeyName(2, "database_16.png");
             // 
             // contextMenu
             // 
-            this.contextMenu.Name = "contextMenuFolders";
-            this.contextMenu.Size = new System.Drawing.Size(61, 4);
+            contextMenu.Name = "contextMenuFolders";
+            contextMenu.Size = new Size(61, 4);
             // 
             // panelForm
             // 
-            this.panelForm.Controls.Add(this.treeViewFolders);
-            this.panelForm.Controls.Add(this.panelBottom);
-            this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelForm.Location = new System.Drawing.Point(0, 0);
-            this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(460, 468);
-            this.panelForm.TabIndex = 2;
+            panelForm.Controls.Add(treeViewFolders);
+            panelForm.Controls.Add(panelBottom);
+            panelForm.Dock = DockStyle.Fill;
+            panelForm.Location = new Point(0, 0);
+            panelForm.Name = "panelForm";
+            panelForm.Size = new Size(460, 468);
+            panelForm.TabIndex = 2;
             // 
             // treeViewFolders
             // 
-            this.treeViewFolders.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.treeViewFolders.ContextMenuStrip = this.contextMenu;
-            this.treeViewFolders.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeViewFolders.ImageIndex = 0;
-            this.treeViewFolders.ImageList = this.imageListFolders;
-            this.treeViewFolders.Location = new System.Drawing.Point(0, 0);
-            this.treeViewFolders.Name = "treeViewFolders";
-            this.treeViewFolders.SelectedImageIndex = 0;
-            this.treeViewFolders.Size = new System.Drawing.Size(460, 424);
-            this.treeViewFolders.TabIndex = 1;
-            this.treeViewFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewFolders_AfterSelect);
+            treeViewFolders.BorderStyle = BorderStyle.None;
+            treeViewFolders.ContextMenuStrip = contextMenu;
+            treeViewFolders.Dock = DockStyle.Fill;
+            treeViewFolders.ImageIndex = 0;
+            treeViewFolders.ImageList = imageListFolders;
+            treeViewFolders.Location = new Point(0, 0);
+            treeViewFolders.Name = "treeViewFolders";
+            treeViewFolders.SelectedImageIndex = 0;
+            treeViewFolders.Size = new Size(460, 424);
+            treeViewFolders.TabIndex = 1;
+            treeViewFolders.AfterSelect += treeViewFolders_AfterSelect;
             // 
             // panelBottom
             // 
-            this.panelBottom.Controls.Add(this.buttonCancel);
-            this.panelBottom.Controls.Add(this.buttonAccept);
-            this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 424);
-            this.panelBottom.Name = "panelBottom";
-            this.panelBottom.Size = new System.Drawing.Size(460, 44);
-            this.panelBottom.TabIndex = 0;
+            panelBottom.Controls.Add(buttonCancel);
+            panelBottom.Controls.Add(buttonAccept);
+            panelBottom.Dock = DockStyle.Bottom;
+            panelBottom.Location = new Point(0, 424);
+            panelBottom.Name = "panelBottom";
+            panelBottom.Size = new Size(460, 44);
+            panelBottom.TabIndex = 0;
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(362, 8);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(86, 24);
-            this.buttonCancel.TabIndex = 1;
-            this.buttonCancel.Text = "&Cancel";
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+            buttonCancel.Location = new Point(362, 8);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new Size(86, 24);
+            buttonCancel.TabIndex = 1;
+            buttonCancel.Text = "&Cancel";
+            buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += buttonCancel_Click;
             // 
             // buttonAccept
             // 
-            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonAccept.Location = new System.Drawing.Point(273, 8);
-            this.buttonAccept.Name = "buttonAccept";
-            this.buttonAccept.Size = new System.Drawing.Size(83, 24);
-            this.buttonAccept.TabIndex = 0;
-            this.buttonAccept.Text = "&Accept";
-            this.buttonAccept.UseVisualStyleBackColor = true;
-            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
+            buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonAccept.DialogResult = DialogResult.OK;
+            buttonAccept.Enabled = false;
+            buttonAccept.Location = new Point(273, 8);
+            buttonAccept.Name = "buttonAccept";
+            buttonAccept.Size = new Size(83, 24);
+            buttonAccept.TabIndex = 0;
+            buttonAccept.Text = "&Accept";
+            buttonAccept.UseVisualStyleBackColor = true;
+            buttonAccept.Click += buttonAccept_Click;
             // 
             // FoldersSelectorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(460, 468);
-            this.Controls.Add(this.panelForm);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "FoldersSelectorForm";
-            this.Text = "Folders selector";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FoldersSelectorForm_FormClosing);
-            this.panelForm.ResumeLayout(false);
-            this.panelBottom.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(460, 468);
+            Controls.Add(panelForm);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Name = "FoldersSelectorForm";
+            Text = "Folders selector";
+            FormClosing += FoldersSelectorForm_FormClosing;
+            panelForm.ResumeLayout(false);
+            panelBottom.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion
