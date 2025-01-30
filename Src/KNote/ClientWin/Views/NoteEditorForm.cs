@@ -1253,8 +1253,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
 
-        var tmpFile = _ctrl.Service.Notes.UtilUpdateResourceInDescriptionForRead(
-        Path.Combine(_selectedResource.Container, _selectedResource.Name), true);
+        var tmpFile = _ctrl.Service.Notes.UtilGetResourceFileUrl(_selectedResource.Container, _selectedResource.Name);
 
         tabNoteData.SelectedIndex = 0;
 

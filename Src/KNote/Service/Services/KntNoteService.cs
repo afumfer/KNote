@@ -398,19 +398,31 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return Path.Combine(dirPath, resource.Name.Replace(@"/", @"\"));
     }
 
+    public string UtilGetResourceFileUrl(string container, string fileName)
+    {
+        var replaceString = GetReplaceResourceString(true);
+
+        var fileUrl = Path.Combine(container, fileName);
+
+        if (replaceString == null)
+            return fileUrl;
+        return fileUrl?
+            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString).Replace(@"\", @"/");
+    }
+
     public string UtilGetDefaultNewResourceContainer()
     {
         return Repository.RespositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
     }
 
-    public string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false)    
+    public string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false)
     {
         var replaceString = GetReplaceResourceString(considerRootPath);
 
         if (replaceString == null)
             return description;
         return description?
-            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString).Replace(Path.DirectorySeparatorChar, '/');
+            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString);
     }
 
     public string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false)
