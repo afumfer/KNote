@@ -12,7 +12,7 @@ using Microsoft.Web.WebView2.Core;
 namespace KntWebView
 {
     public partial class KWebView : UserControl
-    {        
+    {
         #region Constructor
 
         public KWebView()
@@ -29,7 +29,7 @@ namespace KntWebView
             if (_isInitialized)
                 return;
 
-            await InitializeAsync();           
+            await InitializeAsync();
         }
 
         private void webView2_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
@@ -62,13 +62,13 @@ namespace KntWebView
         }
 
         private async void btnNavigate_Click(object sender, EventArgs e)
-        {                        
+        {
             await Navigate();
         }
 
         private void btnBack_Click(object sender, EventArgs e)
         {
-            GoBack();            
+            GoBack();
         }
 
         private void btnForward_Click(object sender, EventArgs e)
@@ -119,7 +119,7 @@ namespace KntWebView
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowStatusInfo
-        {            
+        {
             get { return statusBar.Visible; }
             set { statusBar.Visible = value; }
         }
@@ -150,7 +150,7 @@ namespace KntWebView
             }
             else
             {
-                _isInitialized = false;                
+                _isInitialized = false;
             }
             statusLabel.Text = "";
         }
@@ -183,7 +183,7 @@ namespace KntWebView
                     webView2.CoreWebView2.Navigate(textUrl.Text);
             }
             catch
-            {                
+            {
                 throw;
             }
         }
@@ -239,5 +239,6 @@ namespace KntWebView
         }
 
         #endregion
+
     }
 }

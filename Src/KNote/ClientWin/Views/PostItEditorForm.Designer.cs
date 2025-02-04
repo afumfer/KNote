@@ -47,6 +47,7 @@ namespace KNote.ClientWin.Views
             menuS1 = new ToolStripSeparator();
             menuExtendedEdition = new ToolStripMenuItem();
             menuPostItProperties = new ToolStripMenuItem();
+            menuWindowsFormView = new ToolStripMenuItem();
             menuS2 = new ToolStripSeparator();
             menuAlarmWithin = new ToolStripMenuItem();
             menuFastAlarm10m = new ToolStripMenuItem();
@@ -86,16 +87,10 @@ namespace KNote.ClientWin.Views
             // 
             // webView2
             // 
-            webView2.EnableUrlBox = true;
-            webView2.ForceHttps = false;
-            webView2.IsInitialized = false;
             webView2.Location = new Point(244, 91);
             webView2.Name = "webView2";
-            webView2.ShowNavigationTools = true;
-            webView2.ShowStatusInfo = true;
             webView2.Size = new Size(215, 110);
             webView2.TabIndex = 10;
-            webView2.TextUrl = "";
             webView2.Visible = false;
             // 
             // htmlDescription
@@ -116,7 +111,6 @@ namespace KNote.ClientWin.Views
             labelStatus.Name = "labelStatus";
             labelStatus.Size = new Size(456, 14);
             labelStatus.TabIndex = 7;
-            labelStatus.Text = "...";
             labelStatus.DoubleClick += labelStatus_DoubleClick;
             // 
             // picResize
@@ -166,14 +160,13 @@ namespace KNote.ClientWin.Views
             labelCaption.Padding = new Padding(20, 2, 0, 0);
             labelCaption.Size = new Size(472, 20);
             labelCaption.TabIndex = 6;
-            labelCaption.Text = "...";
             labelCaption.DoubleClick += labelCaption_DoubleClick;
             labelCaption.MouseDown += labelCaption_MouseDown;
             labelCaption.MouseMove += labelCaption_MouseMove;
             // 
             // menuPostIt
             // 
-            menuPostIt.Items.AddRange(new ToolStripItem[] { menuHide, menuAlwaysFront, menuSaveNow, menuDelete, menuS1, menuExtendedEdition, menuPostItProperties, menuS2, menuAlarmWithin, menuMoreActions });
+            menuPostIt.Items.AddRange(new ToolStripItem[] { menuHide, menuAlwaysFront, menuSaveNow, menuDelete, menuS1, menuExtendedEdition, menuPostItProperties, menuWindowsFormView, menuS2, menuAlarmWithin, menuMoreActions });
             menuPostIt.Name = "menuPostIt";
             menuPostIt.Size = new Size(216, 214);
             // 
@@ -229,6 +222,13 @@ namespace KNote.ClientWin.Views
             menuPostItProperties.Size = new Size(215, 22);
             menuPostItProperties.Text = "PostIt properties ...";
             menuPostItProperties.Click += postItMenu_Click;
+            // 
+            // menuWindowsFormView
+            // 
+            menuWindowsFormView.Name = "menuWindowsFormView";
+            menuWindowsFormView.Size = new Size(215, 22);
+            menuWindowsFormView.Text = "Windows Form View ";
+            menuWindowsFormView.Click += postItMenu_Click;
             // 
             // menuS2
             // 
@@ -348,13 +348,12 @@ namespace KNote.ClientWin.Views
             ControlBox = false;
             Controls.Add(panelForm);
             FormBorderStyle = FormBorderStyle.None;
-            Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "PostItEditorForm";
             ShowInTaskbar = false;
-            Text = "PostIt editor form";
+            Text = "Post It View";
             FormClosing += PostItEditorForm_FormClosing;
             Load += PostItEditorForm_Load;
             Paint += PostItEditorForm_Paint;
@@ -400,5 +399,6 @@ namespace KNote.ClientWin.Views
         private LabelNoCopy labelStatus;
         private LabelNoCopy labelCaption;
         private KntWebView.KWebView webView2;
+        private ToolStripMenuItem menuWindowsFormView;
     }
 }

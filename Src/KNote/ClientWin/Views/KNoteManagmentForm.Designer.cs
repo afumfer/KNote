@@ -77,6 +77,7 @@
             menuKntScriptConsole = new ToolStripMenuItem();
             menuChat = new ToolStripMenuItem();
             menuChatGPT = new ToolStripMenuItem();
+            menuCOMPortServer = new ToolStripMenuItem();
             menuKNoteLab = new ToolStripMenuItem();
             menuToolsS2 = new ToolStripSeparator();
             menuOptions = new ToolStripMenuItem();
@@ -106,7 +107,6 @@
             tabSearch = new TabPage();
             imageTabExplorer = new ImageList(components);
             splitContainer2 = new SplitContainer();
-            menuCOMPortServer = new ToolStripMenuItem();
             menuMangment.SuspendLayout();
             statusBarManagment.SuspendLayout();
             toolBarManagment.SuspendLayout();
@@ -284,6 +284,7 @@
             // menuEditNoteAsPostIt
             // 
             menuEditNoteAsPostIt.Name = "menuEditNoteAsPostIt";
+            menuEditNoteAsPostIt.ShortcutKeys = Keys.F4;
             menuEditNoteAsPostIt.Size = new Size(261, 22);
             menuEditNoteAsPostIt.Text = "Edit note as PostI&t";
             menuEditNoteAsPostIt.Click += menu_Click;
@@ -457,6 +458,13 @@
             menuChatGPT.Size = new Size(185, 22);
             menuChatGPT.Text = "ChatGPT ...";
             menuChatGPT.Click += menu_Click;
+            // 
+            // menuCOMPortServer
+            // 
+            menuCOMPortServer.Name = "menuCOMPortServer";
+            menuCOMPortServer.Size = new Size(185, 22);
+            menuCOMPortServer.Text = "COM port server ...";
+            menuCOMPortServer.Click += menu_Click;
             // 
             // menuKNoteLab
             // 
@@ -634,7 +642,7 @@
             // labelFolder
             // 
             labelFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            labelFolder.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
+            labelFolder.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold);
             labelFolder.ForeColor = Color.White;
             labelFolder.Location = new Point(55, 3);
             labelFolder.Margin = new Padding(4, 0, 4, 0);
@@ -745,13 +753,6 @@
             splitContainer2.SplitterDistance = 192;
             splitContainer2.SplitterWidth = 7;
             splitContainer2.TabIndex = 0;
-            // 
-            // menuCOMPortServer
-            // 
-            menuCOMPortServer.Name = "menuCOMPortServer";
-            menuCOMPortServer.Size = new Size(185, 22);
-            menuCOMPortServer.Text = "COM port server ...";
-            menuCOMPortServer.Click += menu_Click;
             // 
             // KNoteManagmentForm
             // 

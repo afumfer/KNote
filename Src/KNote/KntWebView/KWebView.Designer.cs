@@ -29,133 +29,128 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KWebView));
-            this.panelToolBox = new System.Windows.Forms.Panel();
-            this.btnForward = new System.Windows.Forms.Button();
-            this.btnBack = new System.Windows.Forms.Button();
-            this.btnNavigate = new System.Windows.Forms.Button();
-            this.textUrl = new System.Windows.Forms.TextBox();
-            this.panelWebView = new System.Windows.Forms.Panel();
-            this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
-            this.statusBar = new System.Windows.Forms.StatusStrip();
-            this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.panelToolBox.SuspendLayout();
-            this.panelWebView.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.webView2)).BeginInit();
-            this.statusBar.SuspendLayout();
-            this.SuspendLayout();
+            panelToolBox = new Panel();
+            btnForward = new Button();
+            btnBack = new Button();
+            btnNavigate = new Button();
+            textUrl = new TextBox();
+            panelWebView = new Panel();
+            webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            statusBar = new StatusStrip();
+            statusLabel = new ToolStripStatusLabel();
+            panelToolBox.SuspendLayout();
+            panelWebView.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
+            statusBar.SuspendLayout();
+            SuspendLayout();
             // 
             // panelToolBox
             // 
-            this.panelToolBox.Controls.Add(this.btnForward);
-            this.panelToolBox.Controls.Add(this.btnBack);
-            this.panelToolBox.Controls.Add(this.btnNavigate);
-            this.panelToolBox.Controls.Add(this.textUrl);
-            this.panelToolBox.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelToolBox.Location = new System.Drawing.Point(0, 0);
-            this.panelToolBox.Name = "panelToolBox";
-            this.panelToolBox.Size = new System.Drawing.Size(867, 30);
-            this.panelToolBox.TabIndex = 13;
+            panelToolBox.Controls.Add(btnForward);
+            panelToolBox.Controls.Add(btnBack);
+            panelToolBox.Controls.Add(btnNavigate);
+            panelToolBox.Controls.Add(textUrl);
+            panelToolBox.Dock = DockStyle.Top;
+            panelToolBox.Location = new Point(0, 0);
+            panelToolBox.Name = "panelToolBox";
+            panelToolBox.Size = new Size(867, 30);
+            panelToolBox.TabIndex = 13;
             // 
             // btnForward
             // 
-            this.btnForward.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnForward.Image = ((System.Drawing.Image)(resources.GetObject("btnForward.Image")));
-            this.btnForward.Location = new System.Drawing.Point(842, 2);
-            this.btnForward.Name = "btnForward";
-            this.btnForward.Size = new System.Drawing.Size(25, 25);
-            this.btnForward.TabIndex = 3;
-            this.btnForward.UseVisualStyleBackColor = true;
-            this.btnForward.Click += new System.EventHandler(this.btnForward_Click);
+            btnForward.Image = (Image)resources.GetObject("btnForward.Image");
+            btnForward.Location = new Point(28, 2);
+            btnForward.Name = "btnForward";
+            btnForward.Size = new Size(25, 25);
+            btnForward.TabIndex = 1;
+            btnForward.UseVisualStyleBackColor = true;
+            btnForward.Click += btnForward_Click;
             // 
             // btnBack
             // 
-            this.btnBack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBack.Image = ((System.Drawing.Image)(resources.GetObject("btnBack.Image")));
-            this.btnBack.Location = new System.Drawing.Point(817, 2);
-            this.btnBack.Name = "btnBack";
-            this.btnBack.Size = new System.Drawing.Size(25, 25);
-            this.btnBack.TabIndex = 2;
-            this.btnBack.UseVisualStyleBackColor = true;
-            this.btnBack.Click += new System.EventHandler(this.btnBack_Click);
+            btnBack.Image = (Image)resources.GetObject("btnBack.Image");
+            btnBack.Location = new Point(3, 2);
+            btnBack.Name = "btnBack";
+            btnBack.Size = new Size(25, 25);
+            btnBack.TabIndex = 0;
+            btnBack.UseVisualStyleBackColor = true;
+            btnBack.Click += btnBack_Click;
             // 
             // btnNavigate
             // 
-            this.btnNavigate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnNavigate.Image = ((System.Drawing.Image)(resources.GetObject("btnNavigate.Image")));
-            this.btnNavigate.Location = new System.Drawing.Point(792, 2);
-            this.btnNavigate.Name = "btnNavigate";
-            this.btnNavigate.Size = new System.Drawing.Size(25, 25);
-            this.btnNavigate.TabIndex = 1;
-            this.btnNavigate.UseVisualStyleBackColor = true;
-            this.btnNavigate.Click += new System.EventHandler(this.btnNavigate_Click);
+            btnNavigate.Image = (Image)resources.GetObject("btnNavigate.Image");
+            btnNavigate.Location = new Point(53, 2);
+            btnNavigate.Name = "btnNavigate";
+            btnNavigate.Size = new Size(25, 25);
+            btnNavigate.TabIndex = 2;
+            btnNavigate.UseVisualStyleBackColor = true;
+            btnNavigate.Click += btnNavigate_Click;
             // 
             // textUrl
             // 
-            this.textUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textUrl.Location = new System.Drawing.Point(1, 3);
-            this.textUrl.Name = "textUrl";
-            this.textUrl.Size = new System.Drawing.Size(786, 23);
-            this.textUrl.TabIndex = 0;
-            this.textUrl.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textUrl_KeyUp);
+            textUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textUrl.Location = new Point(80, 3);
+            textUrl.Name = "textUrl";
+            textUrl.Size = new Size(784, 23);
+            textUrl.TabIndex = 3;
+            textUrl.KeyUp += textUrl_KeyUp;
             // 
             // panelWebView
             // 
-            this.panelWebView.Controls.Add(this.webView2);
-            this.panelWebView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelWebView.Location = new System.Drawing.Point(0, 30);
-            this.panelWebView.Name = "panelWebView";
-            this.panelWebView.Size = new System.Drawing.Size(867, 493);
-            this.panelWebView.TabIndex = 14;
+            panelWebView.Controls.Add(webView2);
+            panelWebView.Dock = DockStyle.Fill;
+            panelWebView.Location = new Point(0, 30);
+            panelWebView.Name = "panelWebView";
+            panelWebView.Size = new Size(867, 493);
+            panelWebView.TabIndex = 14;
             // 
             // webView2
             // 
-            this.webView2.CreationProperties = null;
-            this.webView2.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webView2.Location = new System.Drawing.Point(0, 0);
-            this.webView2.Name = "webView2";
-            this.webView2.Size = new System.Drawing.Size(867, 493);
-            this.webView2.TabIndex = 1;
-            this.webView2.ZoomFactor = 1D;
+            webView2.AllowExternalDrop = true;
+            webView2.CreationProperties = null;
+            webView2.DefaultBackgroundColor = Color.White;
+            webView2.Dock = DockStyle.Fill;
+            webView2.Location = new Point(0, 0);
+            webView2.Name = "webView2";
+            webView2.Size = new Size(867, 493);
+            webView2.TabIndex = 5;
+            webView2.ZoomFactor = 1D;
             // 
             // statusBar
             // 
-            this.statusBar.BackColor = System.Drawing.SystemColors.Control;
-            this.statusBar.GripMargin = new System.Windows.Forms.Padding(0);
-            this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.statusLabel});
-            this.statusBar.Location = new System.Drawing.Point(0, 523);
-            this.statusBar.Name = "statusBar";
-            this.statusBar.Size = new System.Drawing.Size(867, 22);
-            this.statusBar.SizingGrip = false;
-            this.statusBar.TabIndex = 15;
+            statusBar.BackColor = SystemColors.Control;
+            statusBar.GripMargin = new Padding(0);
+            statusBar.Items.AddRange(new ToolStripItem[] { statusLabel });
+            statusBar.Location = new Point(0, 523);
+            statusBar.Name = "statusBar";
+            statusBar.Size = new Size(867, 22);
+            statusBar.SizingGrip = false;
+            statusBar.TabIndex = 15;
             // 
             // statusLabel
             // 
-            this.statusLabel.BackColor = System.Drawing.SystemColors.Control;
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(0, 17);
+            statusLabel.BackColor = SystemColors.Control;
+            statusLabel.Name = "statusLabel";
+            statusLabel.Size = new Size(0, 17);
             // 
             // KWebView
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.panelWebView);
-            this.Controls.Add(this.panelToolBox);
-            this.Controls.Add(this.statusBar);
-            this.Name = "KWebView";
-            this.Size = new System.Drawing.Size(867, 545);
-            this.Load += new System.EventHandler(this.KNoteWebView_Load);
-            this.panelToolBox.ResumeLayout(false);
-            this.panelToolBox.PerformLayout();
-            this.panelWebView.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.webView2)).EndInit();
-            this.statusBar.ResumeLayout(false);
-            this.statusBar.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(panelWebView);
+            Controls.Add(panelToolBox);
+            Controls.Add(statusBar);
+            Name = "KWebView";
+            Size = new Size(867, 545);
+            Load += KNoteWebView_Load;
+            panelToolBox.ResumeLayout(false);
+            panelToolBox.PerformLayout();
+            panelWebView.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)webView2).EndInit();
+            statusBar.ResumeLayout(false);
+            statusBar.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

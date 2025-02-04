@@ -91,7 +91,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     private void PostItEditorForm_Load(object sender, EventArgs e)
     {
         InitializeComponentEditor();
-        ModelToControlsPostIt(true, _ctrl.ForceAlwaysTop);
+        ModelToControlsPostIt(true, _ctrl.ForceAlwaysTop);        
     }
 
     private void InitializeComponentEditor()
@@ -105,7 +105,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             htmlDescription.Size = new System.Drawing.Size(472, 292);
             htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                 | System.Windows.Forms.AnchorStyles.Left)
-                | System.Windows.Forms.AnchorStyles.Right)));                
+                | System.Windows.Forms.AnchorStyles.Right)));
+            Text = KntConst.AppName + " Html editor";
         }
         else if (_ctrl.Model.ContentType.Contains("navigation"))
         {
@@ -114,6 +115,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                 | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right)));
+            Text = KntConst.AppName + " Web view";
         }
         else
         {
@@ -121,8 +123,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             textDescription.Size = new System.Drawing.Size(472, 292);
             textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                 | System.Windows.Forms.AnchorStyles.Left)
-                | System.Windows.Forms.AnchorStyles.Right)));                
-        }
+                | System.Windows.Forms.AnchorStyles.Right)));
+            Text = KntConst.AppName + " markdown editor";
+        }        
     }
 
     private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -165,6 +168,10 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         else if (menuSel == menuPostItProperties)
         {
             PostItPropertiesEdit();
+        }
+        else if (menuSel == menuWindowsFormView)
+        {
+            WindowsFormView();
         }
         else if (menuSel == menuAddResolvedTask)
         {
@@ -350,6 +357,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 {
                     webView2.TextUrl = textDescription.Text;
                     await webView2.Navigate();
+                    menuWindowsFormView.Checked = true;
+                    ShowPostItInWindowsFormView(menuWindowsFormView.Checked);
                 }
                 else
                 {
@@ -362,6 +371,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                     await webView2.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
                     await webView2.NavigateToString(htmlContent);
                 }
+
             }
         }
     }
@@ -457,6 +467,32 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             ModelToControlsPostIt(false);
         }
         TopMost = copyTopMost;
+    }
+
+    private void WindowsFormView()
+    {
+        menuWindowsFormView.Checked = !menuWindowsFormView.Checked;
+        ShowPostItInWindowsFormView(menuWindowsFormView.Checked);
+    }
+
+    private void ShowPostItInWindowsFormView(bool showInWindowsFormView)
+    {
+        if (showInWindowsFormView)
+        {
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.ControlBox = true;
+            this.MaximizeBox = true;
+            this.MinimizeBox = true;
+            this.ShowInTaskbar = true;
+        }
+        else
+        {
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.ControlBox = false;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.ShowInTaskbar = false;
+        }
     }
 
     public void AlwaysFront()
