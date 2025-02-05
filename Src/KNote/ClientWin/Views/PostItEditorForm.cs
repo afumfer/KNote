@@ -131,8 +131,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-        {
-            var savedOk = await _ctrl.SaveModel();
+        {            
+            var savedOk = await _ctrl.SaveAndHide();
             if (!savedOk)                
                 ShowInfo("The note could not be saved");                    
                 
