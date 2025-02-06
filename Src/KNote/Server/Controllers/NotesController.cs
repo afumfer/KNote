@@ -10,6 +10,7 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
+using KNote.Repository.EntityFramework.Entities;
 
 namespace KNote.Server.Controllers;
 
@@ -291,6 +292,8 @@ public class NotesController : ControllerBase
         {
             _logger.LogTrace("Resources(post/put) {dateTime}.", DateTime.Now);
 
+            entity.Name = _service.ReplaceSpecialCharacters(entity.Name);
+
             var resApi = await _service.Notes.SaveResourceAsync(entity);
             if (resApi.IsValid)                                    
                 return Ok(resApi);                                                              
@@ -352,6 +355,7 @@ public class NotesController : ControllerBase
         }
     }
 
+    // TODO: !!!  deprecated... 
     [HttpPost("[action]")]
     [HttpPut("[action]")]
     [Authorize(Roles = "Admin, Staff, ProjecManager")]
@@ -364,6 +368,7 @@ public class NotesController : ControllerBase
 
             if (!string.IsNullOrWhiteSpace(resource.ContentBase64))
             {
+                resource.Name = _service.ReplaceSpecialCharacters(resource.Name);
                 resource.FullUrl = await _fileStore.SaveFile(resource.ContentBase64, resource.Name, resource.Container);
             }
             resApi.Entity = resource;
@@ -373,7 +378,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "SaveFile at {dateTime}.", DateTime.Now);
             resApi.AddErrorMessage("Generic error: " + ex.Message);
-            return BadRequest(resApi);                
+            return BadRequest(resApi);
         }
     }
 

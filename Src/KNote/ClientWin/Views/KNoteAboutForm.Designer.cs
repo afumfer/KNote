@@ -33,7 +33,7 @@ namespace KNote.ClientWin.Views
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KNoteAboutForm));
             labelVersion = new Label();
-            labelANotas = new Label();
+            labelAppName = new Label();
             iconoANotas = new PictureBox();
             buttonAccept = new Button();
             labelInfo = new Label();
@@ -54,17 +54,17 @@ namespace KNote.ClientWin.Views
             labelVersion.Text = "Versión: ";
             labelVersion.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // labelANotas
+            // labelAppName
             // 
-            labelANotas.Font = new Font("Courier New", 18F, FontStyle.Bold);
-            labelANotas.ForeColor = Color.Black;
-            labelANotas.ImeMode = ImeMode.NoControl;
-            labelANotas.Location = new Point(112, 17);
-            labelANotas.Margin = new Padding(4, 0, 4, 0);
-            labelANotas.Name = "labelANotas";
-            labelANotas.Size = new Size(190, 28);
-            labelANotas.TabIndex = 16;
-            labelANotas.Text = "KaNote";
+            labelAppName.Font = new Font("Courier New", 18F, FontStyle.Bold);
+            labelAppName.ForeColor = Color.Black;
+            labelAppName.ImeMode = ImeMode.NoControl;
+            labelAppName.Location = new Point(112, 17);
+            labelAppName.Margin = new Padding(4, 0, 4, 0);
+            labelAppName.Name = "labelAppName";
+            labelAppName.Size = new Size(190, 28);
+            labelAppName.TabIndex = 16;
+            labelAppName.Text = "App name ...";
             // 
             // iconoANotas
             // 
@@ -123,7 +123,7 @@ namespace KNote.ClientWin.Views
             Controls.Add(labelInfo);
             Controls.Add(buttonAccept);
             Controls.Add(labelVersion);
-            Controls.Add(labelANotas);
+            Controls.Add(labelAppName);
             Controls.Add(iconoANotas);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -139,7 +139,7 @@ namespace KNote.ClientWin.Views
         #endregion
 
         private System.Windows.Forms.Label labelVersion;
-        private System.Windows.Forms.Label labelANotas;
+        private System.Windows.Forms.Label labelAppName;
         private System.Windows.Forms.PictureBox iconoANotas;
         private System.Windows.Forms.Button buttonAccept;
         private System.Windows.Forms.Label labelInfo;

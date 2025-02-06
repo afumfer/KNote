@@ -15,6 +15,9 @@ using System.Xml.XPath;
 using System.IO;
 
 using Microsoft.Extensions.Logging;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using System.Text;
 //using NLog;
 
 namespace KNote.Service.Core;
@@ -230,6 +233,29 @@ public class KntService : IKntService, IDisposable
         var res = Task.Run(() => SystemValues.SaveAsync(new SystemValueDto { SystemValueId = id, Scope = scope, Key = key, Value = resNextNoteNumber.ToString() }));
         return resNextNoteNumber;
 
+    }
+
+    public string ReplaceSpecialCharacters(string text)
+    {
+        // Normalize and remove accents
+        string normalized = text.Normalize(NormalizationForm.FormD);
+        StringBuilder sb = new StringBuilder();
+
+        foreach (char c in normalized)
+        {
+            UnicodeCategory category = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (category != UnicodeCategory.NonSpacingMark) // Exclude accent marks
+            {
+                sb.Append(c);
+            }
+        }
+
+        string withoutAccents = sb.ToString().Normalize(NormalizationForm.FormC);
+
+        // Convert to ASCII 127 by replacing spaces and special characters
+        string result = Regex.Replace(withoutAccents, @"[^a-zA-Z0-9.]", "_");
+
+        return result;
     }
 
     #endregion

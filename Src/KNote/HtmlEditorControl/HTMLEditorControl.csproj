@@ -120,7 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.mshtml">
-      <HintPath>..\ClientWin\Lib\Microsoft.mshtml.dll</HintPath>
+      <HintPath>Lib\Microsoft.mshtml.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

@@ -31,4 +31,5 @@ public interface IKntService : IDisposable
     string GetSystemVariable(string scope, string variable);
     void SaveSystemVariable(string scope, string key, string value);
     void PublishNoteInMessageBroker(NoteExtendedDto noteInfo);
+    string ReplaceSpecialCharacters(string text);
 }

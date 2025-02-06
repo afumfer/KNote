@@ -123,8 +123,8 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         if (openFileDialog.ShowDialog() == DialogResult.OK)
         {
             var fileTmp = openFileDialog.FileName;
-            varContentArrayBytes = File.ReadAllBytes(fileTmp);                
-            textFileName.Text = Path.GetFileName(fileTmp);
+            varContentArrayBytes = File.ReadAllBytes(fileTmp);           
+            textFileName.Text = _ctrl.Service.ReplaceSpecialCharacters(Path.GetFileName(fileTmp));
             textDescription.Text = textFileName.Text;
             varName = _ctrl.Model.ResourceId.ToString() + "_" + textFileName.Text;                
             varFileType = _ctrl.ExtensionFileToFileType(Path.GetExtension(fileTmp));

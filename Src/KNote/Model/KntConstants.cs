@@ -7,7 +7,7 @@ namespace KNote.Model;
 
 public static class KntConst
 {
-    public static string AppName { get; } = "KaNote";
+    public static string AppName { get; } = "KNote";
     public static string AppDescription { get; } = "Another keynotes managment";
     public static int DefaultFolderNumber { get; } = 1;
     public static string SupportedMimeTypes { get; } = @"image/jpeg;image/png;application/pdf;video/mp4;audio/mp3;text/plain";
@@ -80,7 +80,7 @@ public static class KntConst
         };
 
         StringBuilder info = new();
-        info.Append(@"Copyright (C) 2021-2024 Armando Fumero Fernández ");
+        info.Append(@"Copyright (C) 2021-2025 Armando Fumero Fernández ");
         info.Append(Environment.NewLine + Environment.NewLine);
         info.Append(@"This program is free software; you can redistribute it and/or modify ");
         info.Append(@"it under the terms of the GNU General Public License as published by ");

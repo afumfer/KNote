@@ -20,6 +20,7 @@ public partial class KNoteAboutForm : Form, IViewBase
 
         InitializeComponent();
         Text = KntConst.AppName;
+        labelAppName.Text = KntConst.AppName;
 
         _ctrl = ctrl;
     }
