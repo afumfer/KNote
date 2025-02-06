@@ -2,8 +2,12 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
 using Markdig;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Hosting;
+using System.Net.NetworkInformation;
 
 namespace KNote.ClientWin.Views;
 
@@ -32,6 +36,13 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         InitializeComponent();
 
         _ctrl = ctrl;
+
+        // These lines are here to avoid the sensation of double visual refresh
+        // when the posit is activated in navigation mode
+        if (_ctrl.Model != null )
+            if (_ctrl.Model.ContentType.Contains("navigation"))
+                ShowPostItInWindowsFormView(true);
+        //---
     }
 
     #endregion 
@@ -357,8 +368,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 {
                     webView2.TextUrl = textDescription.Text;
                     await webView2.Navigate();
-                    menuWindowsFormView.Checked = true;
-                    ShowPostItInWindowsFormView(menuWindowsFormView.Checked);
+                    menuWindowsFormView.Checked = true;                    
+                    // In the constructor, the activation of Windows Form Web View is being forced,
+                    // it is not necessary to do it here
                 }
                 else
                 {
@@ -371,7 +383,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                     await webView2.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
                     await webView2.NavigateToString(htmlContent);
                 }
-
             }
         }
     }
@@ -445,13 +456,17 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
         labelStatus.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
     }
-
     private void ControlsToModelPostIt()
     {
-        _ctrl.WindowPostIt.PosY = this.Top;
-        _ctrl.WindowPostIt.PosX = this.Left;
-        _ctrl.WindowPostIt.Width = this.Width;
-        _ctrl.WindowPostIt.Height = this.Height;
+        // Top and Left are shifted to -32000 when the post - it in navigation mode is minimized.
+        // So we need to prevent those incorrect values ​​from being saved.
+        if (this.Top >= 0 && this.Left >= 0)
+        {
+            _ctrl.WindowPostIt.PosY = this.Top;
+            _ctrl.WindowPostIt.PosX = this.Left;
+            _ctrl.WindowPostIt.Width = this.Width;
+            _ctrl.WindowPostIt.Height = this.Height;
+        }
 
         _ctrl.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
     }
