@@ -26,8 +26,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HtmlEditorControl\HTMLEditorControl.csproj" />
+    <ProjectReference Include="..\KntEditViewControl\KntEditViewControl.csproj" />
     <ProjectReference Include="..\KntScript\KntScript.csproj" />
-    <ProjectReference Include="..\KntWebView\KntEditViewControl.csproj" />
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
     <ProjectReference Include="..\Service\KNote.Service.csproj" />
   </ItemGroup>
