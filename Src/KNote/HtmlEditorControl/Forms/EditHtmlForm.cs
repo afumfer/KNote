@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Runtime.Versioning;
 
 #endregion
 
@@ -26,10 +27,11 @@ namespace MSDN.Html.Editor
 		private const string editCommand = "Cancel";
 		private const string viewCommand = "Close";
 
-		/// <summary>
+        /// <summary>
         /// Public Form constructor
         /// </summary>
-		public EditHtmlForm()
+        [SupportedOSPlatform("windows")]
+        public EditHtmlForm()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -42,10 +44,11 @@ namespace MSDN.Html.Editor
 
 		} //EditHtmlForm
 
-		/// <summary>
+        /// <summary>
         /// Property to modify the caption of the display
         /// </summary>
-		public void SetCaption(string caption)
+        [SupportedOSPlatform("windows")]
+        public void SetCaption(string caption)
 		{
 			this.Text = caption;
 		}
@@ -54,6 +57,7 @@ namespace MSDN.Html.Editor
         /// Property to set and get the HTML contents
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public string HTML
 		{
 			get
@@ -73,6 +77,7 @@ namespace MSDN.Html.Editor
         /// Property that determines if the html is editable
         /// </summary>        
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public bool ReadOnly
 		{
 			get

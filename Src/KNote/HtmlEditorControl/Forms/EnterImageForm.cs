@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 
 using ImageAlignOption = MSDN.Html.Editor.ImageAlignOption;
+using System.Runtime.Versioning;
 
 #endregion
 
@@ -23,7 +24,8 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Public form constructor
         /// </summary>
-		public EnterImageForm()
+		[SupportedOSPlatform("windows")]
+        public EnterImageForm()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -43,6 +45,7 @@ namespace MSDN.Html.Editor
         /// Property for the text to display
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public string ImageText
 		{
 			get
@@ -60,6 +63,7 @@ namespace MSDN.Html.Editor
         /// Property for the href for the image
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public string ImageLink
 		{
 			get
@@ -77,6 +81,7 @@ namespace MSDN.Html.Editor
         /// Property for the image align
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public ImageAlignOption ImageAlign
 		{
 			get

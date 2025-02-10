@@ -11,6 +11,7 @@ using HtmlTableProperty = MSDN.Html.Editor.HtmlTableProperty;
 using MeasurementOption = MSDN.Html.Editor.MeasurementOption;
 using HorizontalAlignOption = MSDN.Html.Editor.HorizontalAlignOption;
 using VerticalAlignOption = MSDN.Html.Editor.VerticalAlignOption;
+using System.Runtime.Versioning;
 
 #endregion
 
@@ -36,10 +37,11 @@ namespace MSDN.Html.Editor
 		private const ushort WIDTH_INC_DIV = 20;
 
 
-		/// <summary>
+        /// <summary>
         /// Default form constructor
         /// </summary>
-		public TablePropertyForm()
+        [SupportedOSPlatform("windows")]
+        public TablePropertyForm()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -76,6 +78,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         /// <value></value>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public HtmlTableProperty TableProperties
 		{
 			get
@@ -121,10 +124,11 @@ namespace MSDN.Html.Editor
 		} //TableProperties
 
 
-		/// <summary>
+        /// <summary>
         /// Property for the measurement values based on the selected mesaurment
         /// </summary>
-		private void MeasurementOptionChanged(object sender, System.EventArgs e)
+        [SupportedOSPlatform("windows")]
+        private void MeasurementOptionChanged(object sender, System.EventArgs e)
 		{
 			// define a dialog for a percentage change
 			if (this.radioWidthPercent.Checked)

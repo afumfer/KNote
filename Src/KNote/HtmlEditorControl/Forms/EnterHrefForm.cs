@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 
 using NavigateActionOption = MSDN.Html.Editor.NavigateActionOption;
+using System.Runtime.Versioning;
 
 #endregion
 
@@ -23,6 +24,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Public form constructor
         /// </summary>
+		[SupportedOSPlatform("windows")]
 		public EnterHrefForm()
 		{
 			//
@@ -43,6 +45,7 @@ namespace MSDN.Html.Editor
         /// Property for the text to display
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public string HrefText
 		{
 			get
@@ -56,10 +59,11 @@ namespace MSDN.Html.Editor
 
 		} //HrefText
 
-		/// <summary>
+        /// <summary>
         /// Property for the href target
         /// </summary>
-		public NavigateActionOption HrefTarget
+        [SupportedOSPlatform("windows")]
+        public NavigateActionOption HrefTarget
 		{
 			get
 			{
@@ -71,6 +75,7 @@ namespace MSDN.Html.Editor
         /// Property for the href for the text
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public string HrefLink
 		{
 			get

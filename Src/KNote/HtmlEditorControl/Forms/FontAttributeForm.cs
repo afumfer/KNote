@@ -6,6 +6,7 @@ using System.Drawing.Text;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Runtime.Versioning;
 
 #endregion
 
@@ -25,6 +26,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Public form constructor
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public FontAttributeForm()
         {
             //
@@ -43,6 +45,7 @@ namespace MSDN.Html.Editor
         /// Uses the HtmlFontProperty class
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [SupportedOSPlatform("windows")]
         public HtmlFontProperty HtmlFont
 		{
 			get
@@ -81,11 +84,12 @@ namespace MSDN.Html.Editor
 		} //HtmlFont
 
 
-		/// <summary>
+        /// <summary>
         /// Loads into the list of font names a series of font objects
         /// These represent the available fonts
         /// </summary>
-		private void LoadFonts()
+        [SupportedOSPlatform("windows")]
+        private void LoadFonts()
 		{
 			// suspend drawing
 			this.listFontName.SuspendLayout();
@@ -108,21 +112,23 @@ namespace MSDN.Html.Editor
 		} //LoadFonts
 
 
-		/// <summary>
+        /// <summary>
         /// Event handler for all functions that affect font sample
         /// Font name list and checkboxes for bold, itaic, underline
-        /// </summary>
-		private void FontSelectionChanged(object sender, System.EventArgs e)
+        /// </summary>	
+        [SupportedOSPlatform("windows")]
+        private void FontSelectionChanged(object sender, System.EventArgs e)
 		{
 			SetFontTextSample();
 
 		} //FontSelectionChanged
 
 
-		/// <summary>
+        /// <summary>
         /// Sets the sample font text based on the user selection
         /// </summary>
-		private void SetFontTextSample()
+        [SupportedOSPlatform("windows")]        
+        private void SetFontTextSample()
 		{
 			string fontName = ((string)this.listFontName.SelectedItem);
 			float fontSize = this.Font.Size + 2;

@@ -10,6 +10,7 @@ using System.Reflection;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.ComponentModel.Design.Serialization;
+using System.Runtime.Versioning;
 
 #endregion
 
@@ -252,10 +253,11 @@ namespace MSDN.Html.Editor
 
 		} //HtmlFontProperty
 
-		/// <summary>
+        /// <summary>
         /// Public constructor given a system Font
         /// </summary>
-		public HtmlFontProperty(System.Drawing.Font font)
+        [SupportedOSPlatform("windows")]
+        public HtmlFontProperty(System.Drawing.Font font)
 		{
 			_name = font.Name;
 			_size = HtmlFontConversion.FontSizeToHtml(font.SizeInPoints);

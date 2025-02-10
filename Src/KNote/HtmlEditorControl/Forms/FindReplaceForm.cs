@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Runtime.Versioning;
 
 #endregion
 
@@ -37,11 +38,12 @@ namespace MSDN.Html.Editor
 		private FindNextDelegate FindNext;
 
 
-		/// <summary>
+        /// <summary>
         /// Public constructor that defines the required delegates
         /// Delegates must be defined for the find and replace to operate
         /// </summary>
-		public FindReplaceForm(string initText, FindReplaceResetDelegate resetDelegate, FindFirstDelegate findFirstDelegate, FindNextDelegate findNextDelegate, FindReplaceOneDelegate replaceOneDelegate, FindReplaceAllDelegate replaceAllDelegate)
+        [SupportedOSPlatform("windows")]
+        public FindReplaceForm(string initText, FindReplaceResetDelegate resetDelegate, FindFirstDelegate findFirstDelegate, FindNextDelegate findNextDelegate, FindReplaceOneDelegate replaceOneDelegate, FindReplaceAllDelegate replaceAllDelegate)
 		{
 			//
 			// Required for Windows Form Designer support
@@ -70,10 +72,11 @@ namespace MSDN.Html.Editor
 		} //FindReplaceForm
 
 
-		/// <summary>
+        /// <summary>
         /// Setup the properties based on the find or repalce functionality
         /// </summary>
-		private void DefineFindWindow(bool find)
+        [SupportedOSPlatform("windows")]
+        private void DefineFindWindow(bool find)
 		{
 			this.textReplace.Visible = !find;
 			this.labelReplace.Visible = !find;
@@ -87,7 +90,8 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Defines if the options dialog is shown
         /// </summary>
-		private void DefineOptionsWindow(bool options)
+		[SupportedOSPlatform("windows")]
+        private void DefineOptionsWindow(bool options)
 		{
 			if (options)
 			{
@@ -111,11 +115,12 @@ namespace MSDN.Html.Editor
 		} //DefineOptionsWindow
 
 
-		/// <summary>
+        /// <summary>
         /// Event defining the visibility of the options
         /// Based on the user clicking the options button
         /// </summary>
-		private void bOptions_Click(object sender, System.EventArgs e)
+        [SupportedOSPlatform("windows")]
+        private void bOptions_Click(object sender, System.EventArgs e)
 		{
 			options = !options;
 			DefineOptionsWindow(options);
@@ -123,11 +128,12 @@ namespace MSDN.Html.Editor
 		} //OptionsClick
 
 
-		/// <summary>
+        /// <summary>
         /// Event setting the state of the form
         /// Based on the user clicking a new form tab
         /// </summary>
-		private void tabControl_SelectedIndexChanged(object sender, System.EventArgs e)
+        [SupportedOSPlatform("windows")]
+        private void tabControl_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
 			if (this.tabControl.SelectedIndex == 0)
 			{
@@ -142,11 +148,12 @@ namespace MSDN.Html.Editor
 		} //SelectedIndexChanged
 
 
-		/// <summary>
+        /// <summary>
         /// Event replacing a single occurrence of a given text with another
         /// Based on the user clicking the replace button
         /// </summary>
-		private void bReplace_Click(object sender, System.EventArgs e)
+        [SupportedOSPlatform("windows")]
+        private void bReplace_Click(object sender, System.EventArgs e)
 		{
 			// find and replace the given text
 			if (!this.FindReplaceOne(findText, replaceText, this.optionMatchWhole.Checked, this.optionMatchCase.Checked)) 
@@ -157,10 +164,11 @@ namespace MSDN.Html.Editor
 		} //ReplaceClick
 
 
-		/// <summary>
+        /// <summary>
         /// Event replacing all the occurrences of a given text with another
         /// Based on the user clicking the replace all button
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private void bReplaceAll_Click(object sender, System.EventArgs e)
 		{
 			int found = this.FindReplaceAll(findText, replaceText, this.optionMatchWhole.Checked, this.optionMatchCase.Checked);
@@ -171,10 +179,11 @@ namespace MSDN.Html.Editor
 		} // ReplaceAllClick
 
 
-		/// <summary>
+        /// <summary>
         /// Event finding the next occurrences of a given text
         /// Based on the user clicking the find next button
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private void bFindNext_Click(object sender, System.EventArgs e)
 		{
 			// once find has completed indicate to the user success or failure
@@ -186,32 +195,35 @@ namespace MSDN.Html.Editor
 		} //FindNextClick
 
 
-		/// <summary>
+        /// <summary>
         /// Once the text has been changed reset the ranges to be worked with
         /// Initially defined by the set in the constructor
         /// </summary>
-		private void textFind_TextChanged(object sender, System.EventArgs e)
+        [SupportedOSPlatform("windows")]
+        private void textFind_TextChanged(object sender, System.EventArgs e)
 		{
 			ResetTextState();
 
 		} //FindTextChanged
 
 
-		/// <summary>
+        /// <summary>
         /// Once the text has been changed reset the ranges to be worked with
         /// Initially defined by the set in the constructor
         /// </summary>
-		private void textReplace_TextChanged(object sender, System.EventArgs e)
+        [SupportedOSPlatform("windows")]
+        private void textReplace_TextChanged(object sender, System.EventArgs e)
 		{
 			ResetTextState();
 
 		} //TextChanged
 
 
-		/// <summary>
+        /// <summary>
         /// Sets the form state based on user input for Replace
         /// </summary>
-		private void ResetTextState()
+        [SupportedOSPlatform("windows")]
+        private void ResetTextState()
 		{
 			// reset the range being worked with
 			this.FindReplaceReset();

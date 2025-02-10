@@ -42,11 +42,11 @@
             <input type="text" disabled class="form-control" @bind="@nameParent" />
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" @onclick="@OnResetParentFolder"
-                        data-toggle="tooltip" title="Reset parent folder">
+                data-toggle="tooltip" title="Reset parent folder">
                     X
                 </button>
                 <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
-                        data-toggle="tooltip" title="Select folder">
+                data-toggle="tooltip" title="Select folder">
                     ...&nbsp;<i class="fa fa-folder" aria-hidden="true"></i>
                 </button>
             </div>
@@ -66,7 +66,7 @@
 </EditForm>
 
 @code {
-    [Parameter] [EditorRequired] public FolderDto Folder { get; set; }
+    [Parameter][EditorRequired] public FolderDto Folder { get; set; } = null!;
     [Parameter] public string Title { get; set; } = "...";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }

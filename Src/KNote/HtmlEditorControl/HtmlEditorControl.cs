@@ -46,6 +46,7 @@ using mshtmlEventObject = mshtml.IHTMLEventObj;
 
 using Pavonis.COM;
 using Pavonis.COM.IOleCommandTarget;
+using System.Runtime.Versioning;
 
 #endregion
 
@@ -289,7 +290,8 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Private control constructor defining all default values
         /// </summary>
-		public HtmlEditorControl()
+		[SupportedOSPlatform("windows")]
+        public HtmlEditorControl()
 		{
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
@@ -340,10 +342,11 @@ namespace MSDN.Html.Editor
         } //HtmlEditorControl
 
 
-		/// <summary>
-		/// Defines all the body attributes once a document has been loaded
-		/// </summary>
-		private void DefineBodyAttributes()
+        /// <summary>
+        /// Defines all the body attributes once a document has been loaded
+        /// </summary>
+        [SupportedOSPlatform("windows")]
+        private void DefineBodyAttributes()
 		{
 			// define the body colors based on the new body html
 			if (body.bgColor == null)
@@ -391,13 +394,14 @@ namespace MSDN.Html.Editor
 
 		} //DefineBodyAttributes
 
-		#endregion
-		
-		#region Control Methods and Events
-	
-		/// <summary>
+        #endregion
+
+        #region Control Methods and Events
+
+        /// <summary>
         /// Method to perform the process of showing the context menus
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private void DocumentContextMenu(object sender, HtmlElementEventArgs e)
         {
             // if in readonly mode display the standard context menu
@@ -428,6 +432,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to perform the process of selection change
         /// </summary>
+		[SupportedOSPlatform("windows")]
         private void DocumentSelectionChange(object sender, EventArgs e)
         {
             // if not in readonly mode process the selection change
@@ -442,6 +447,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to perform the process of key being pressed
         /// </summary>
+		[SupportedOSPlatform("windows")]
         private void DocumentKeyPress(object sender, EventArgs e)
         {
             // define the event object being processes and review the key being pressed
@@ -468,7 +474,8 @@ namespace MSDN.Html.Editor
         /// Method used to navigate to the required page
         /// Call made sync using a loading variable
         /// </summary>
-		private void BrowserCodeNavigate(string url)
+		[SupportedOSPlatform("windows")]
+        private void BrowserCodeNavigate(string url)
 		{
 			// once navigated to the href page wait until successful
 			// need to do this to ensure properties are all correctly set
@@ -489,10 +496,11 @@ namespace MSDN.Html.Editor
 		} //BrowserCodeNavigate
 
 
-		/// <summary>
+        /// <summary>
         /// Event can be used to canel the navigation and open a new window
         /// If window set to same then nothing happens
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private void BrowserBeforeNavigate(object sender, WebBrowserNavigatingEventArgs e)
         {
             string url = e.Url.ToString();
@@ -548,11 +556,12 @@ namespace MSDN.Html.Editor
 
 		} //OnHtmlNavigation
 
-		
-		/// <summary>
+
+        /// <summary>
         /// Document complete method for the web browser
         /// Initiated by navigating to the about:blank page (EMPTY_PARAMETER HTML document)
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private void BrowserDocumentComplete(object sender, WebBrowserDocumentCompletedEventArgs e)
         {			
             // Parche para que el control no falle cuando se 
@@ -614,11 +623,12 @@ namespace MSDN.Html.Editor
 		} //BrowserDocumentComplete
 
 
-		/// <summary>
+        /// <summary>
         /// Create a new focus method that ensure the body gets the focus
         /// Should be called when text processing command are called
         /// </summary>
-		public new bool Focus()
+        [SupportedOSPlatform("windows")]
+        public new bool Focus()
 		{
 			// have the return value be the focus return from the user control
 			bool focus = base.Focus();
@@ -636,14 +646,15 @@ namespace MSDN.Html.Editor
 
 		} //Focus
 
-		#endregion
+        #endregion
 
-		#region Runtime Display Properties
+        #region Runtime Display Properties
 
         /// <summary>
         /// Defines the base back color of the control
         /// Will override the base back color to alter the default
         /// </summary>
+        [SupportedOSPlatform("windows")]
         public override Color BackColor
         {
             get
@@ -662,6 +673,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Determines if the property should be serialized
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public bool ShouldSerializeBackColor()
         {
             return (base.BackColor != _defaultBackColor);
@@ -671,6 +683,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Resets the property
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public override void ResetBackColor()
         {
             base.BackColor = _defaultBackColor;
@@ -684,6 +697,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         [Category("RuntimeDisplay"), Description("Controls the Width of the Display Border")]
         [DefaultValue(DEFAULT_BORDER_SIZE)]
+        [SupportedOSPlatform("windows")]
         public byte BorderSize
         {
             get
@@ -704,7 +718,8 @@ namespace MSDN.Html.Editor
         /// </summary>
 		[Category("RuntimeDisplay"), Description("Controls the Display of Scrolls Bars")]
 		[DefaultValue(DisplayScrollBarOption.Auto)]
-		public DisplayScrollBarOption ScrollBars
+        [SupportedOSPlatform("windows")]
+        public DisplayScrollBarOption ScrollBars
 		{
 			get
 			{
@@ -727,7 +742,8 @@ namespace MSDN.Html.Editor
         /// </summary>
 		[Category("RuntimeDisplay"), Description("Controls the auto wrapping of content")]
 		[DefaultValue(true)]
-		public bool AutoWordWrap
+        [SupportedOSPlatform("windows")]
+        public bool AutoWordWrap
 		{
 			get
 			{
@@ -769,7 +785,8 @@ namespace MSDN.Html.Editor
         /// </summary>
 		[Category("RuntimeDisplay"), Description("Marks the content as ReadOnly")]
 		[DefaultValue(false)]
-		public bool ReadOnly
+        [SupportedOSPlatform("windows")]
+        public bool ReadOnly
 		{
 			get
 			{
@@ -794,7 +811,8 @@ namespace MSDN.Html.Editor
         /// </summary>
 		[Category("RuntimeDisplay"), Description("Marks the toolbar as Visible")]
 		[DefaultValue(true)]
-		public bool ToolbarVisible
+        [SupportedOSPlatform("windows")]
+        public bool ToolbarVisible
 		{
 			get
 			{
@@ -816,7 +834,8 @@ namespace MSDN.Html.Editor
         /// </summary>
 		[Category("RuntimeDisplay"), Description("Defines the docking location of the toolbar")]
 		[DefaultValue(DockStyle.Bottom)]
-		public DockStyle ToolbarDock
+        [SupportedOSPlatform("windows")]
+        public DockStyle ToolbarDock
 		{
 			get
 			{
@@ -926,7 +945,8 @@ namespace MSDN.Html.Editor
         /// </summary>
 		[Category("Textual"), Description("Complete Document including Body Tag")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-		public string BodyHtml
+        [SupportedOSPlatform("windows")]
+        public string BodyHtml
 		{
 			get
 			{
@@ -1340,14 +1360,15 @@ namespace MSDN.Html.Editor
 
         } //ScriptSource
 
-		#endregion
+        #endregion
 
-		#region Document Processing Operations
+        #region Document Processing Operations
 
-		/// <summary>
+        /// <summary>
         /// Method to allow the user to load a document by navigation
         /// </summary>
-		public void NavigateToUrl(string url)
+        [SupportedOSPlatform("windows")]
+        public void NavigateToUrl(string url)
 		{
 			// load the requested use Url
 			BrowserCodeNavigate(url);
@@ -1365,6 +1386,7 @@ namespace MSDN.Html.Editor
         /// Method to allow the user to load a document by navigation
         /// A new window can optionally be specified
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public void NavigateToUrl(string url, bool newWindow)
 		{
 			if (newWindow)
@@ -1381,11 +1403,12 @@ namespace MSDN.Html.Editor
 		} //NavigateToUrl
 
 
-		/// <summary>
+        /// <summary>
         /// Method to allow the user to load a document from a Url
         /// The body tag is used and loaded
         /// </summary>
-		public void LoadFromUrl(string url)
+        [SupportedOSPlatform("windows")]
+        public void LoadFromUrl(string url)
 		{
 
 			HttpWebRequest webRqst = null;
@@ -1458,10 +1481,10 @@ namespace MSDN.Html.Editor
 					throw new HtmlEditorException(string.Format("Not a Html Document: {0}", url), "LoadFromUrl");
 				}    
 			}
-			catch (HtmlEditorException ex)
+			catch (HtmlEditorException)
 			{
 				// cannot load so throw an exception
-				throw ex;
+				throw;
 			}
 			catch (WebException ex)
 			{
@@ -1484,10 +1507,11 @@ namespace MSDN.Html.Editor
 		} //LoadFromUrl
 
 
-		/// <summary>
+        /// <summary>
         /// Method to allow a user to load a file given a file name
         /// </summary>
-		public void LoadFromFile(string filename)
+        [SupportedOSPlatform("windows")]
+        public void LoadFromFile(string filename)
 		{
 			// init the container for the Html
 			string contents = string.Empty;
@@ -1512,11 +1536,12 @@ namespace MSDN.Html.Editor
 
 		} //LoadFromFile
 
-		
-		/// <summary>
+
+        /// <summary>
         /// Method to allow the user to select a file and read the contents into the Html stream
         /// </summary>
-		public void OpenFilePrompt()
+        [SupportedOSPlatform("windows")]
+        public void OpenFilePrompt()
 		{
 			// init the container for the Html
 			string contents = string.Empty;
@@ -1561,10 +1586,11 @@ namespace MSDN.Html.Editor
 		} //OpenFilePrompt
 
 
-		/// <summary>
+        /// <summary>
         /// Method to allow the user to persist the Html stream to a file
         /// </summary>
-		public void SaveFilePrompt()
+        [SupportedOSPlatform("windows")]
+        public void SaveFilePrompt()
 		{
 			// obtain the html contents
 			string contents = this.BodyHtml;
@@ -1604,12 +1630,13 @@ namespace MSDN.Html.Editor
 
 		} //SaveFilePrompt
 
-		
-		/// <summary>
+
+        /// <summary>
         /// Method to allow the user to edit the raw HTML
         /// Dialog presented and the body contents set
         /// </summary>
-		public void HtmlContentsEdit()
+        [SupportedOSPlatform("windows")]
+        public void HtmlContentsEdit()
 		{
 			using (EditHtmlForm dialog = new EditHtmlForm())
 			{
@@ -1625,11 +1652,12 @@ namespace MSDN.Html.Editor
 
 		} //HtmlContentsEdit
 
-		/// <summary>
+        /// <summary>
         /// Method to allow the user to view the html contents
         /// The complete Html markup is presented
         /// </summary>
-		public void HtmlContentsView()
+        [SupportedOSPlatform("windows")]
+        public void HtmlContentsView()
 		{
 			using (EditHtmlForm dialog = new EditHtmlForm())
 			{
@@ -1749,13 +1777,14 @@ namespace MSDN.Html.Editor
 
 		} //EditRedo
 
-		#endregion
+        #endregion
 
-		#region Selected Text Formatting Operations
+        #region Selected Text Formatting Operations
 
         /// <summary>
         /// Ensures the toolbar is correctly displaying state
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private void FormatSelectionChange()
         {
             // review the bold state of the selected text
@@ -1844,6 +1873,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method using the document to toggle the selection with a bold tag
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public void FormatBold()
 		{
 			ExecuteCommandRange(HTML_COMMAND_BOLD, null);
@@ -1854,6 +1884,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method using the document to toggle the selection with a underline tag
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public void FormatUnderline()
 		{
 			ExecuteCommandRange(HTML_COMMAND_UNDERLINE, null);
@@ -1864,6 +1895,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method using the document to toggle the selection with a italic tag
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public void FormatItalic()
 		{
 			ExecuteCommandRange(HTML_COMMAND_ITALIC, null);
@@ -1874,6 +1906,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method using the document to toggle the selection with a Subscript tag
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public void FormatSubscript()
 		{
 			ExecuteCommandRange(HTML_COMMAND_SUBSCRIPT, null);
@@ -1884,6 +1917,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method using the document to toggle the selection with a Superscript tag
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public void FormatSuperscript()
 		{
 			ExecuteCommandRange(HTML_COMMAND_SUPERSCRIPT, null);
@@ -1894,6 +1928,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method using the document to toggle the selection with a Strikeout tag
         /// </summary>
+		[SupportedOSPlatform("windows")]
         public void FormatStrikeout()
 		{
 			ExecuteCommandRange(HTML_COMMAND_STRIKE_THROUGH, null);
@@ -2046,11 +2081,12 @@ namespace MSDN.Html.Editor
 
 		} //InsertImage
 
-		/// <summary>
+        /// <summary>
         /// Method to insert a image and prompt a user for the link
         /// Calls the public InsertImage method
         /// </summary>
-		public void InsertImagePrompt()
+        [SupportedOSPlatform("windows")]
+        public void InsertImagePrompt()
 		{
 			// set default image and text tags
 			string imageText = string.Empty;
@@ -2121,11 +2157,12 @@ namespace MSDN.Html.Editor
 
 		} //InsertLink
 
-		/// <summary>
+        /// <summary>
         /// Method to insert a link and prompt a user for the href
         /// Calls the public InsertLink method
         /// </summary>
-		public void InsertLinkPrompt()
+        [SupportedOSPlatform("windows")]
+        public void InsertLinkPrompt()
 		{
 			// get the text range working with
 			mshtmlTextRange range = GetTextRange();
@@ -2250,14 +2287,15 @@ namespace MSDN.Html.Editor
 
         } //InsertScriptSource
 
-		#endregion
+        #endregion
 
-		#region Text Insert Operations
+        #region Text Insert Operations
 
-		/// <summary>
+        /// <summary>
         /// Method to insert the given HTML into the selected range
         /// </summary>
-		public void InsertHtmlPrompt()
+        [SupportedOSPlatform("windows")]
+        public void InsertHtmlPrompt()
 		{
 			// display the dialog to obtain the Html to enter
 			using (EditHtmlForm dialog = new EditHtmlForm())
@@ -2275,10 +2313,11 @@ namespace MSDN.Html.Editor
 		} //InsertHtmlPrompt
 
 
-		/// <summary>
+        /// <summary>
         /// Method to insert the given Text into the selected range
         /// </summary>
-		public void InsertTextPrompt()
+        [SupportedOSPlatform("windows")]
+        public void InsertTextPrompt()
 		{
 			// display the dialog to obtain the Html to enter
 			using (EditHtmlForm dialog = new EditHtmlForm())
@@ -2445,11 +2484,12 @@ namespace MSDN.Html.Editor
 		} //FormatFontColor
 
 
-		/// <summary>
+        /// <summary>
         /// Method to display the defined font dialog
         /// Use to set the selected text Font
         /// </summary>
-		public void FormatFontAttributesPrompt()
+        [SupportedOSPlatform("windows")]
+        public void FormatFontAttributesPrompt()
 		{
 			using (FontAttributeForm dialog = new FontAttributeForm())
 			{
@@ -2465,11 +2505,12 @@ namespace MSDN.Html.Editor
 		} //FormatFontAttributesPrompt
 
 
-		/// <summary>
+        /// <summary>
         /// Method to display the system color dialog
         /// Use use to set the selected text Color
         /// </summary>
-		public void FormatFontColorPrompt()
+        [SupportedOSPlatform("windows")]
+        public void FormatFontColorPrompt()
 		{
 			// display the Color dialog and use the selected color to modify text
 			using (ColorDialog colorDialog = new ColorDialog())
@@ -2685,14 +2726,15 @@ namespace MSDN.Html.Editor
 
 		} //GetFontColor
 
-		#endregion
+        #endregion
 
-		#region Find and Replace Operations
+        #region Find and Replace Operations
 
-		/// <summary>
+        /// <summary>
         /// Dialog to allow the user to perform a find and replace
         /// </summary>
-		public void FindReplacePrompt()
+        [SupportedOSPlatform("windows")]
+        public void FindReplacePrompt()
 		{
 
 			// define a default value for the text to find
@@ -2916,11 +2958,12 @@ namespace MSDN.Html.Editor
 
 		} //TableModify
 
-		/// <summary>
+        /// <summary>
         /// Method to present to the user the table properties dialog
         /// Uses all the default properties for the table based on an insert operation
         /// </summary>
-		public void TableInsertPrompt()
+        [SupportedOSPlatform("windows")]
+        public void TableInsertPrompt()
 		{
 			// if user has selected a table create a reference
 			mshtmlTable table = GetFirstControl() as mshtmlTable;
@@ -2929,11 +2972,12 @@ namespace MSDN.Html.Editor
 		} //TableInsertPrompt
 
 
-		/// <summary>
+        /// <summary>
         /// Method to present to the user the table properties dialog
         /// Ensure a table is currently selected or insertion point is within a table
         /// </summary>
-		public bool TableModifyPrompt()
+        [SupportedOSPlatform("windows")]
+        public bool TableModifyPrompt()
 		{
 			// define the Html Table element
 			mshtmlTable table = GetTableElement();
@@ -3024,11 +3068,12 @@ namespace MSDN.Html.Editor
 		} //TableDeleteRow
 
 
-		/// <summary>
+        /// <summary>
         /// Method to present to the user the table properties dialog
         /// Uses all the default properties for the table based on an insert operation
         /// </summary>
-		private void ProcessTablePrompt(mshtmlTable table)
+        [SupportedOSPlatform("windows")]
+        private void ProcessTablePrompt(mshtmlTable table)
 		{
 			using (TablePropertyForm dialog = new TablePropertyForm())
 			{
@@ -3775,10 +3820,11 @@ namespace MSDN.Html.Editor
 		} //TryParseEnum
 
 
-		/// <summary>
+        /// <summary>
         /// Method to ensure dialog resembles the user form characteristics
         /// </summary>
-		private void DefineDialogProperties(Form dialog)
+        [SupportedOSPlatform("windows")]
+        private void DefineDialogProperties(Form dialog)
 		{
 			// set ambient control properties
 			dialog.Font = this.ParentForm.Font;
@@ -3844,13 +3890,14 @@ namespace MSDN.Html.Editor
 			
 		} //RebaseAnchorUrl
 
-		#endregion
+        #endregion
 
-		#region Internal Event Processing
+        #region Internal Event Processing
 
         /// <summary>
         /// Control the sizing of the browser control
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private void browserPanelResize(object sender, EventArgs e)
         {
             SetBrowserPanelSize();
@@ -3859,6 +3906,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to perform the sizing of the control panel
         /// </summary>
+		[SupportedOSPlatform("windows")]
         private void SetBrowserPanelSize()
         {
             // define the browser panel to fill the remaining space
@@ -3889,6 +3937,7 @@ namespace MSDN.Html.Editor
         /// General Tool Strip processing method
         /// Calls the ProcessCommand with the selected command Tag Text
         /// </summary>
+		[SupportedOSPlatform("windows")]
         private void toolstripEditorClick(object sender, EventArgs e)
         {
             ToolStripButton button = (ToolStripButton)sender;
@@ -3901,6 +3950,7 @@ namespace MSDN.Html.Editor
         /// General Context Meun processing method
         /// Calls the ProcessCommand with the selected command Tag Text
         /// </summary>
+		[SupportedOSPlatform("windows")]
         private void contextEditorClick(object sender, EventArgs e)
         {
             ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
@@ -3913,6 +3963,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to process the toolbar command and handle error exception
         /// </summary>
+		[SupportedOSPlatform("windows")]
         private void ProcessCommand(string command)
 		{
 			try
@@ -4141,10 +4192,11 @@ namespace MSDN.Html.Editor
 		} //ProcessCommand
 
 
-		/// <summary>
+        /// <summary>
         /// Method to process the format block command and handle error exception
         /// </summary>
-		private void ProcessFormatBlock(string command)
+        [SupportedOSPlatform("windows")]
+        private void ProcessFormatBlock(string command)
 		{
 			try
 			{
@@ -4170,6 +4222,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to raise an event if a delegeate is assigned for handling exceptions
         /// </summary>
+		[SupportedOSPlatform("windows")]
         private void OnHtmlException(HtmlExceptionEventArgs args)
         {
             if (HtmlException == null)
