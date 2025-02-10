@@ -76,6 +76,14 @@ namespace KntWebView
             GoForward();
         }
 
+        private void btnNavigate_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                statusBar.Visible = !statusBar.Visible;
+            }
+        }
+
         #endregion
 
         #region Private methods
@@ -125,11 +133,19 @@ namespace KntWebView
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string StatusInfoBackcolor
+        {
+            get { return ColorTranslator.ToHtml(statusBar.BackColor); }
+            set { statusBar.BackColor = ColorTranslator.FromHtml(value); }
+        }
+
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ForceHttps { get; set; } = false;
 
         // TODO: Refactor this
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string FolderForVirtualHostNameMapping { get; private set; }    // Dummy, for test   = @"D:\Tmp";
+        public string FolderForVirtualHostNameMapping { get; private set; }
 
         #endregion
 
@@ -239,6 +255,5 @@ namespace KntWebView
         }
 
         #endregion
-
     }
 }

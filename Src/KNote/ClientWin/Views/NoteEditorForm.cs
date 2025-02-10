@@ -267,11 +267,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 ShowInfo($"This note cannot be changed to another format, the format is locked.");
                 return;
             }
-            
 
-            if (_ctrl.Store.IsValidUrl(textDescription.Text))
+            var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+            if (!string.IsNullOrEmpty(url))
             {
-                webView2.TextUrl = textDescription.Text;
+                webView2.TextUrl = url;
                 await webView2.Navigate();                
             }
             else
@@ -769,10 +769,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             webView2.Visible = true;
             
             if (!string.IsNullOrEmpty(textDescription.Text))
-            {             
-                if (_ctrl.Store.IsValidUrl(textDescription.Text))
+            {
+                var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+                if (!string.IsNullOrEmpty(url))
                 {
-                    webView2.TextUrl = textDescription.Text;                    
+                    webView2.TextUrl = url;
                     await webView2.Navigate();                    
                 }
                 else

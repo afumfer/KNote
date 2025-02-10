@@ -59,7 +59,7 @@
             // btnForward
             // 
             btnForward.Image = (Image)resources.GetObject("btnForward.Image");
-            btnForward.Location = new Point(28, 2);
+            btnForward.Location = new Point(26, 2);
             btnForward.Name = "btnForward";
             btnForward.Size = new Size(25, 25);
             btnForward.TabIndex = 1;
@@ -69,7 +69,7 @@
             // btnBack
             // 
             btnBack.Image = (Image)resources.GetObject("btnBack.Image");
-            btnBack.Location = new Point(3, 2);
+            btnBack.Location = new Point(1, 2);
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(25, 25);
             btnBack.TabIndex = 0;
@@ -79,24 +79,26 @@
             // btnNavigate
             // 
             btnNavigate.Image = (Image)resources.GetObject("btnNavigate.Image");
-            btnNavigate.Location = new Point(53, 2);
+            btnNavigate.Location = new Point(51, 2);
             btnNavigate.Name = "btnNavigate";
             btnNavigate.Size = new Size(25, 25);
             btnNavigate.TabIndex = 2;
             btnNavigate.UseVisualStyleBackColor = true;
             btnNavigate.Click += btnNavigate_Click;
+            btnNavigate.MouseDown += btnNavigate_MouseDown;
             // 
             // textUrl
             // 
             textUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textUrl.Location = new Point(80, 3);
+            textUrl.Location = new Point(77, 3);
             textUrl.Name = "textUrl";
-            textUrl.Size = new Size(784, 23);
+            textUrl.Size = new Size(788, 23);
             textUrl.TabIndex = 3;
             textUrl.KeyUp += textUrl_KeyUp;
             // 
             // panelWebView
             // 
+            panelWebView.BackColor = SystemColors.Control;
             panelWebView.Controls.Add(webView2);
             panelWebView.Dock = DockStyle.Fill;
             panelWebView.Location = new Point(0, 30);
@@ -130,6 +132,7 @@
             // statusLabel
             // 
             statusLabel.BackColor = SystemColors.Control;
+            statusLabel.ForeColor = SystemColors.ControlDarkDark;
             statusLabel.Name = "statusLabel";
             statusLabel.Size = new Size(0, 17);
             // 

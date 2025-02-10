@@ -18,6 +18,8 @@ public class Store
 
     private readonly List<CtrlBase> _listComponents;
 
+    private readonly char[] newLine = { '\r', '\n' };
+
     #endregion 
 
     #region Public properties, application state 
@@ -582,16 +584,22 @@ public class Store
             return null;
     }
 
-    public bool IsValidUrl(string url)
-    {
-        if (string.IsNullOrEmpty(url))
-        {
-            return false;
-        }
+    public string ExtractUrlFromText(string text)
+    {      
+        if (string.IsNullOrEmpty(text))        
+            return null;
+        
+        int indexJump = text.IndexOfAny(newLine);
+        var urlFistLine =  (indexJump >= 0) ? text.Substring(0, indexJump) : text;
 
-        Uri result;
-        return Uri.TryCreate(url, UriKind.Absolute, out result) &&
-               (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps || result.Scheme == Uri.UriSchemeFile);
+        Uri resultUri;
+        var validResult = Uri.TryCreate(urlFistLine, UriKind.Absolute, out resultUri) &&
+               (resultUri.Scheme == Uri.UriSchemeHttp || resultUri.Scheme == Uri.UriSchemeHttps || resultUri.Scheme == Uri.UriSchemeFile);
+
+        if (validResult)
+            return urlFistLine;
+        else
+            return null;
     }
 
     #endregion 

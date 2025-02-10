@@ -168,13 +168,13 @@ namespace KNote.ClientWin.Views
             // 
             menuPostIt.Items.AddRange(new ToolStripItem[] { menuHide, menuAlwaysFront, menuSaveNow, menuDelete, menuS1, menuExtendedEdition, menuPostItProperties, menuWindowsFormView, menuS2, menuAlarmWithin, menuMoreActions });
             menuPostIt.Name = "menuPostIt";
-            menuPostIt.Size = new Size(216, 214);
+            menuPostIt.Size = new Size(231, 236);
             // 
             // menuHide
             // 
             menuHide.Name = "menuHide";
             menuHide.ShortcutKeys = Keys.Control | Keys.Q;
-            menuHide.Size = new Size(215, 22);
+            menuHide.Size = new Size(230, 22);
             menuHide.Text = "Hide note";
             menuHide.Click += postItMenu_Click;
             // 
@@ -182,7 +182,7 @@ namespace KNote.ClientWin.Views
             // 
             menuAlwaysFront.Name = "menuAlwaysFront";
             menuAlwaysFront.ShortcutKeys = Keys.Control | Keys.F;
-            menuAlwaysFront.Size = new Size(215, 22);
+            menuAlwaysFront.Size = new Size(230, 22);
             menuAlwaysFront.Text = "Always front";
             menuAlwaysFront.Click += postItMenu_Click;
             // 
@@ -190,7 +190,7 @@ namespace KNote.ClientWin.Views
             // 
             menuSaveNow.Name = "menuSaveNow";
             menuSaveNow.ShortcutKeys = Keys.Control | Keys.S;
-            menuSaveNow.Size = new Size(215, 22);
+            menuSaveNow.Size = new Size(230, 22);
             menuSaveNow.Text = "Save now";
             menuSaveNow.Click += postItMenu_Click;
             // 
@@ -198,20 +198,20 @@ namespace KNote.ClientWin.Views
             // 
             menuDelete.Name = "menuDelete";
             menuDelete.ShortcutKeys = Keys.Control | Keys.D;
-            menuDelete.Size = new Size(215, 22);
+            menuDelete.Size = new Size(230, 22);
             menuDelete.Text = "Delete";
             menuDelete.Click += postItMenu_Click;
             // 
             // menuS1
             // 
             menuS1.Name = "menuS1";
-            menuS1.Size = new Size(212, 6);
+            menuS1.Size = new Size(227, 6);
             // 
             // menuExtendedEdition
             // 
             menuExtendedEdition.Name = "menuExtendedEdition";
             menuExtendedEdition.ShortcutKeys = Keys.Control | Keys.E;
-            menuExtendedEdition.Size = new Size(215, 22);
+            menuExtendedEdition.Size = new Size(230, 22);
             menuExtendedEdition.Text = "Extended edition ...";
             menuExtendedEdition.Click += postItMenu_Click;
             // 
@@ -219,27 +219,28 @@ namespace KNote.ClientWin.Views
             // 
             menuPostItProperties.Name = "menuPostItProperties";
             menuPostItProperties.ShortcutKeys = Keys.Control | Keys.P;
-            menuPostItProperties.Size = new Size(215, 22);
+            menuPostItProperties.Size = new Size(230, 22);
             menuPostItProperties.Text = "PostIt properties ...";
             menuPostItProperties.Click += postItMenu_Click;
             // 
             // menuWindowsFormView
             // 
             menuWindowsFormView.Name = "menuWindowsFormView";
-            menuWindowsFormView.Size = new Size(215, 22);
+            menuWindowsFormView.ShortcutKeys = Keys.Control | Keys.W;
+            menuWindowsFormView.Size = new Size(230, 22);
             menuWindowsFormView.Text = "Windows Form View ";
             menuWindowsFormView.Click += postItMenu_Click;
             // 
             // menuS2
             // 
             menuS2.Name = "menuS2";
-            menuS2.Size = new Size(212, 6);
+            menuS2.Size = new Size(227, 6);
             // 
             // menuAlarmWithin
             // 
             menuAlarmWithin.DropDownItems.AddRange(new ToolStripItem[] { menuFastAlarm10m, menuFastAlarm30m, menuFastAlarm1h, menuFastAlarm2h, menuFastAlarm4h, menuFastAlarm8h, menuFastAlarm10h, menuFastAlarm12h, menuFastAlarm24h, menuFastAlarm1week, menuFastAlarm1month, menuFastAlarm1year });
             menuAlarmWithin.Name = "menuAlarmWithin";
-            menuAlarmWithin.Size = new Size(215, 22);
+            menuAlarmWithin.Size = new Size(230, 22);
             menuAlarmWithin.Text = "Activate note &alarm within";
             // 
             // menuFastAlarm10m
@@ -330,7 +331,7 @@ namespace KNote.ClientWin.Views
             // 
             menuMoreActions.DropDownItems.AddRange(new ToolStripItem[] { menuAddResolvedTask });
             menuMoreActions.Name = "menuMoreActions";
-            menuMoreActions.Size = new Size(215, 22);
+            menuMoreActions.Size = new Size(230, 22);
             menuMoreActions.Text = "More actions";
             // 
             // menuAddResolvedTask

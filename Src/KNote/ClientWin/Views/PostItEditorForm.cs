@@ -41,7 +41,10 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         // when the posit is activated in navigation mode
         if (_ctrl.Model != null )
             if (_ctrl.Model.ContentType.Contains("navigation"))
+            {
                 ShowPostItInWindowsFormView(true);
+                webView2.ShowStatusInfo = false;
+            }                            
         //---
     }
 
@@ -121,11 +124,11 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         }
         else if (_ctrl.Model.ContentType.Contains("navigation"))
         {
-            webView2.Location = new System.Drawing.Point(3, 28);
+            webView2.Location = new System.Drawing.Point(3, 24);
             webView2.Size = new System.Drawing.Size(472, 292);
             webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                 | System.Windows.Forms.AnchorStyles.Left)
-                | System.Windows.Forms.AnchorStyles.Right)));
+                | System.Windows.Forms.AnchorStyles.Right)));                     
             Text = KntConst.AppName + " Web view";
         }
         else
@@ -262,6 +265,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 case Keys.P:
                     PostItPropertiesEdit();
                     break;
+                case Keys.W:
+                    WindowsFormView();
+                    break;
             }
         }
     }
@@ -364,9 +370,10 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         {            
             if (!string.IsNullOrEmpty(textDescription.Text))
             {
-                if (_ctrl.Store.IsValidUrl(textDescription.Text))
+                var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+                if (!string.IsNullOrEmpty(url))
                 {
-                    webView2.TextUrl = textDescription.Text;
+                    webView2.TextUrl = url;
                     await webView2.Navigate();
                     menuWindowsFormView.Checked = true;                    
                     // In the constructor, the activation of Windows Form Web View is being forced,
@@ -416,6 +423,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         if (_ctrl.Model.ContentType.Contains("navigation"))
         {
             webView2.Visible = true;
+            webView2.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
         }
         else
         {
@@ -432,7 +440,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             textDescription.Font = font;
             textDescription.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
             textDescription.ForeColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor);
-            textDescription.Visible = true;
+            textDescription.Visible = true;            
         }
 
         if (updateSizeAndLocation)

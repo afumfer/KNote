@@ -264,7 +264,7 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
                 labelText.BackColor = ColorTranslator.FromHtml("#EBEBEB");
 
                 style = new FontStyle();
-                font = new Font("Times New Roman", 12, style);
+                font = new Font("Courier New", 11, style);
                 break;
 
             case 2:
