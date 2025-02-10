@@ -1,6 +1,6 @@
 ﻿namespace KntWebView
 {
-    partial class KWebView
+    partial class KntEditView
     {
         /// <summary> 
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KWebView));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntEditView));
             panelToolBox = new Panel();
             btnForward = new Button();
             btnBack = new Button();

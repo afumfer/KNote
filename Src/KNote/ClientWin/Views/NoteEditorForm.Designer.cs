@@ -55,7 +55,7 @@
             textStatus = new TextBox();
             label8 = new Label();
             panelDescription = new Panel();
-            webView2 = new KntWebView.KWebView();
+            webView2 = new KntWebView.KntEditView();
             htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             textDescription = new TextBox();
             toolDescription = new ToolStrip();
@@ -112,7 +112,7 @@
             tabResources = new TabPage();
             labelPreview = new Label();
             textDescriptionResource = new TextBox();
-            webViewResource = new KntWebView.KWebView();
+            webViewResource = new KntWebView.KntEditView();
             buttonSaveResource = new Button();
             buttonInsertLink = new Button();
             panelPreview = new Panel();
@@ -1643,8 +1643,8 @@
         private Button buttonSaveResource;
         private SaveFileDialog saveFileDialog;
         private Button buttonNavigate;
-        private KntWebView.KWebView webView2;
-        private KntWebView.KWebView webViewResource;
+        private KntWebView.KntEditView webView2;
+        private KntWebView.KntEditView webViewResource;
         private TextBox textDescriptionResource;
         private TextBox textTaskTags;
         private Label labelPreview;

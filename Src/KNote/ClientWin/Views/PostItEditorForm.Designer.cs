@@ -32,7 +32,7 @@ namespace KNote.ClientWin.Views
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             panelForm = new Panel();
-            webView2 = new KntWebView.KWebView();
+            webView2 = new KntWebView.KntEditView();
             htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             labelStatus = new LabelNoCopy();
             picResize = new PictureBox();
@@ -399,7 +399,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripMenuItem menuAddResolvedTask;
         private LabelNoCopy labelStatus;
         private LabelNoCopy labelCaption;
-        private KntWebView.KWebView webView2;
+        private KntWebView.KntEditView webView2;
         private ToolStripMenuItem menuWindowsFormView;
     }
 }

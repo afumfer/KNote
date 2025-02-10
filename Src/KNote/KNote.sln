@@ -26,7 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KntWebView", "KntWebView\KntWebView.csproj", "{DFD92433-B13E-4966-B74C-5C70E6C608D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KntEditViewControl", "KntWebView\KntEditViewControl.csproj", "{DFD92433-B13E-4966-B74C-5C70E6C608D5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KNote.MessageBroker", "MessageBroker\KNote.MessageBroker.csproj", "{2AB16603-5C31-42BE-B7E7-B19AA1198017}"
 EndProject

@@ -33,7 +33,7 @@ namespace KNote.ClientWin.Views
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.panelForm = new System.Windows.Forms.Panel();
-            this.htmlPreview = new KntWebView.KWebView();
+            this.htmlPreview = new KntWebView.KntEditView();
             this.textFileName = new System.Windows.Forms.TextBox();
             this.labelPreview = new System.Windows.Forms.Label();
             this.textDescription = new System.Windows.Forms.TextBox();
@@ -222,6 +222,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelFileName;
         private System.Windows.Forms.TextBox textFileName;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
-        private KntWebView.KWebView htmlPreview;
+        private KntWebView.KntEditView htmlPreview;
     }
 }

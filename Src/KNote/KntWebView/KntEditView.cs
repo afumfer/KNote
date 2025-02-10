@@ -11,11 +11,11 @@ using Microsoft.Web.WebView2.Core;
 
 namespace KntWebView
 {
-    public partial class KWebView : UserControl
+    public partial class KntEditView : UserControl
     {
         #region Constructor
 
-        public KWebView()
+        public KntEditView()
         {
             InitializeComponent();
         }
