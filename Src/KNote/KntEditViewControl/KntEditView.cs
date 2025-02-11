@@ -13,22 +13,88 @@ namespace KntWebView
 {
     public partial class KntEditView : UserControl
     {
+        #region Public properties
+
+        private bool _isInitialized = false;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+
+            set { _isInitialized = value; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string TextUrl
+        {
+            get { return textUrl.Text; }
+
+            set { textUrl.Text = value; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowNavigationTools
+        {
+            get { return panelToolBox.Visible; }
+
+            set { panelToolBox.Visible = value; statusBar.Visible = value; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool EnableUrlBox
+        {
+            get { return textUrl.Enabled; }
+
+            set { textUrl.Enabled = value; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowStatusInfo
+        {
+            get { return statusBar.Visible; }
+            set { statusBar.Visible = value; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string StatusInfoBackcolor
+        {
+            get { return ColorTranslator.ToHtml(statusBar.BackColor); }
+            set { statusBar.BackColor = ColorTranslator.FromHtml(value); }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ForceHttps { get; set; } = false;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string FolderForVirtualHostNameMapping { get; private set; }
+
+        private string _contentType = "navigation";
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string ContentType {
+            get { return _contentType; }
+            set { _contentType = value; } 
+        }
+
+        #endregion
+
+
         #region Constructor
 
         public KntEditView()
         {
             InitializeComponent();
+            InitializeEditorsComponent();
         }
 
         #endregion 
 
         #region Form events managment 
 
-        private async void KNoteWebView_Load(object sender, EventArgs e)
+        private async void KntEditView_Load(object sender, EventArgs e)
         {
             if (_isInitialized)
-                return;
-
+                return;                       
+            
             await InitializeAsync();
         }
 
@@ -86,90 +152,7 @@ namespace KntWebView
 
         #endregion
 
-        #region Private methods
-
-        #endregion
-
-        #region Public properties
-
-        private bool _isInitialized = false;
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool IsInitialized
-        {
-            get { return _isInitialized; }
-
-            set { _isInitialized = value; }
-        }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string TextUrl
-        {
-            get { return textUrl.Text; }
-
-            set { textUrl.Text = value; }
-        }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool ShowNavigationTools
-        {
-            get { return panelToolBox.Visible; }
-
-            set { panelToolBox.Visible = value; statusBar.Visible = value; }
-        }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool EnableUrlBox
-        {
-            get { return textUrl.Enabled; }
-
-            set { textUrl.Enabled = value; }
-        }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool ShowStatusInfo
-        {
-            get { return statusBar.Visible; }
-            set { statusBar.Visible = value; }
-        }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string StatusInfoBackcolor
-        {
-            get { return ColorTranslator.ToHtml(statusBar.BackColor); }
-            set { statusBar.BackColor = ColorTranslator.FromHtml(value); }
-        }
-
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool ForceHttps { get; set; } = false;
-
-        // TODO: Refactor this
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string FolderForVirtualHostNameMapping { get; private set; }
-
-        #endregion
-
         #region Public methods
-
-        public async Task InitializeAsync()
-        {
-            statusLabel.Text = "(Initializing ......)";
-
-            await webView2.EnsureCoreWebView2Async(null);
-
-            if ((webView2 != null) && (webView2.CoreWebView2 != null))
-            {
-                _isInitialized = true;
-                webView2.CoreWebView2InitializationCompleted += webView2_CoreWebView2InitializationCompleted;
-                webView2.NavigationStarting += EnsureHttps;
-                webView2.NavigationCompleted += webView2_NavigationCompleted;
-            }
-            else
-            {
-                _isInitialized = false;
-            }
-            statusLabel.Text = "";
-        }
 
         public async Task SetVirtualHostNameToFolderMapping(string folder)
         {
@@ -178,11 +161,9 @@ namespace KntWebView
 
             if (!_isInitialized)
                 await InitializeAsync();
-
-            //await webView2.EnsureCoreWebView2Async(null);
-
+            
             FolderForVirtualHostNameMapping = folder;
-            // TODO: !!! replace this magic "knote.resources" string for a app param. 
+            
             webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
                 "knote.resources", FolderForVirtualHostNameMapping,
                 CoreWebView2HostResourceAccessKind.Allow);
@@ -242,8 +223,6 @@ namespace KntWebView
             }
         }
 
-
-
         public void GoBack()
         {
             webView2.CoreWebView2.GoBack();
@@ -252,6 +231,55 @@ namespace KntWebView
         public void GoForward()
         {
             webView2.CoreWebView2.GoForward();
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private async Task InitializeAsync()
+        {
+            statusLabel.Text = "(Initializing ......)";
+
+            await webView2.EnsureCoreWebView2Async(null);
+
+            if ((webView2 != null) && (webView2.CoreWebView2 != null))
+            {
+                _isInitialized = true;
+                webView2.CoreWebView2InitializationCompleted += webView2_CoreWebView2InitializationCompleted;
+                webView2.NavigationStarting += EnsureHttps;
+                webView2.NavigationCompleted += webView2_NavigationCompleted;
+            }
+            else
+            {
+                _isInitialized = false;
+            }
+            statusLabel.Text = "";
+        }
+
+        private void InitializeEditorsComponent()
+        {
+            webView2.Dock = DockStyle.Fill;
+            textContent.Dock = DockStyle.Fill;
+
+            if (_contentType.Contains("navigation"))
+                EnableNavigationView();
+            else if (_contentType.Contains("markdown"))
+                EnableMarkdownView();
+
+        }
+
+        private void EnableMarkdownView()
+        {
+            webView2.Visible = false;
+            textContent.Visible = true;
+
+        }
+
+        private void EnableNavigationView()
+        {
+            textContent.Visible = false;
+            webView2.Visible = true;
         }
 
         #endregion

@@ -35,6 +35,7 @@
             btnNavigate = new Button();
             textUrl = new TextBox();
             panelWebView = new Panel();
+            textContent = new TextBox();
             webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
             statusBar = new StatusStrip();
             statusLabel = new ToolStripStatusLabel();
@@ -53,7 +54,7 @@
             panelToolBox.Dock = DockStyle.Top;
             panelToolBox.Location = new Point(0, 0);
             panelToolBox.Name = "panelToolBox";
-            panelToolBox.Size = new Size(867, 30);
+            panelToolBox.Size = new Size(743, 30);
             panelToolBox.TabIndex = 13;
             // 
             // btnForward
@@ -92,30 +93,41 @@
             textUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textUrl.Location = new Point(77, 3);
             textUrl.Name = "textUrl";
-            textUrl.Size = new Size(788, 23);
+            textUrl.Size = new Size(664, 23);
             textUrl.TabIndex = 3;
             textUrl.KeyUp += textUrl_KeyUp;
             // 
             // panelWebView
             // 
             panelWebView.BackColor = SystemColors.Control;
+            panelWebView.Controls.Add(textContent);
             panelWebView.Controls.Add(webView2);
             panelWebView.Dock = DockStyle.Fill;
             panelWebView.Location = new Point(0, 30);
             panelWebView.Name = "panelWebView";
-            panelWebView.Size = new Size(867, 493);
+            panelWebView.Size = new Size(743, 383);
             panelWebView.TabIndex = 14;
+            // 
+            // textContent
+            // 
+            textContent.Location = new Point(375, 6);
+            textContent.Multiline = true;
+            textContent.Name = "textContent";
+            textContent.Size = new Size(352, 366);
+            textContent.TabIndex = 6;
+            textContent.Text = "textContent";
+            textContent.Visible = false;
             // 
             // webView2
             // 
             webView2.AllowExternalDrop = true;
             webView2.CreationProperties = null;
             webView2.DefaultBackgroundColor = Color.White;
-            webView2.Dock = DockStyle.Fill;
-            webView2.Location = new Point(0, 0);
+            webView2.Location = new Point(17, 6);
             webView2.Name = "webView2";
-            webView2.Size = new Size(867, 493);
+            webView2.Size = new Size(352, 366);
             webView2.TabIndex = 5;
+            webView2.Visible = false;
             webView2.ZoomFactor = 1D;
             // 
             // statusBar
@@ -123,9 +135,9 @@
             statusBar.BackColor = SystemColors.Control;
             statusBar.GripMargin = new Padding(0);
             statusBar.Items.AddRange(new ToolStripItem[] { statusLabel });
-            statusBar.Location = new Point(0, 523);
+            statusBar.Location = new Point(0, 413);
             statusBar.Name = "statusBar";
-            statusBar.Size = new Size(867, 22);
+            statusBar.Size = new Size(743, 22);
             statusBar.SizingGrip = false;
             statusBar.TabIndex = 15;
             // 
@@ -136,19 +148,20 @@
             statusLabel.Name = "statusLabel";
             statusLabel.Size = new Size(0, 17);
             // 
-            // KWebView
+            // KntEditView
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(panelWebView);
             Controls.Add(panelToolBox);
             Controls.Add(statusBar);
-            Name = "KWebView";
-            Size = new Size(867, 545);
-            Load += KNoteWebView_Load;
+            Name = "KntEditView";
+            Size = new Size(743, 435);
+            Load += KntEditView_Load;
             panelToolBox.ResumeLayout(false);
             panelToolBox.PerformLayout();
             panelWebView.ResumeLayout(false);
+            panelWebView.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).EndInit();
             statusBar.ResumeLayout(false);
             statusBar.PerformLayout();
@@ -168,5 +181,6 @@
         private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
         private StatusStrip statusBar;
         private ToolStripStatusLabel statusLabel;
+        private TextBox textContent;
     }
 }

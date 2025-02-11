@@ -43,7 +43,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             if (_ctrl.Model.ContentType.Contains("navigation"))
             {
                 ShowPostItInWindowsFormView(true);
-                webView2.ShowStatusInfo = false;
+                kntEditView.ShowStatusInfo = false;
             }                            
         //---
     }
@@ -124,9 +124,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         }
         else if (_ctrl.Model.ContentType.Contains("navigation"))
         {
-            webView2.Location = new System.Drawing.Point(3, 24);
-            webView2.Size = new System.Drawing.Size(472, 292);
-            webView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            kntEditView.Location = new System.Drawing.Point(3, 24);
+            kntEditView.Size = new System.Drawing.Size(472, 292);
+            kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                 | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right)));                     
             Text = KntConst.AppName + " Web view";
@@ -373,22 +373,22 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
                 if (!string.IsNullOrEmpty(url))
                 {
-                    webView2.TextUrl = url;
-                    await webView2.Navigate();
+                    kntEditView.TextUrl = url;
+                    await kntEditView.Navigate();
                     menuWindowsFormView.Checked = true;                    
                     // In the constructor, the activation of Windows Form Web View is being forced,
                     // it is not necessary to do it here
                 }
                 else
                 {
-                    webView2.TextUrl = "";
-                    webView2.ShowNavigationTools = false;
-                    webView2.ShowStatusInfo = false;                    
+                    kntEditView.TextUrl = "";
+                    kntEditView.ShowNavigationTools = false;
+                    kntEditView.ShowStatusInfo = false;                    
 
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
 
-                    await webView2.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await webView2.NavigateToString(htmlContent);
+                    await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
+                    await kntEditView.NavigateToString(htmlContent);
                 }
             }
         }
@@ -422,8 +422,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         }
         if (_ctrl.Model.ContentType.Contains("navigation"))
         {
-            webView2.Visible = true;
-            webView2.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
+            kntEditView.Visible = true;
+            kntEditView.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
         }
         else
         {

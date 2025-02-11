@@ -55,7 +55,7 @@
             textStatus = new TextBox();
             label8 = new Label();
             panelDescription = new Panel();
-            webView2 = new KntWebView.KntEditView();
+            kntEditView = new KntWebView.KntEditView();
             htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             textDescription = new TextBox();
             toolDescription = new ToolStrip();
@@ -427,7 +427,7 @@
             // panelDescription
             // 
             panelDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panelDescription.Controls.Add(webView2);
+            panelDescription.Controls.Add(kntEditView);
             panelDescription.Controls.Add(htmlDescription);
             panelDescription.Controls.Add(textDescription);
             panelDescription.Controls.Add(toolDescription);
@@ -437,15 +437,15 @@
             panelDescription.TabIndex = 55;
             panelDescription.Visible = false;
             // 
-            // webView2
+            // kntEditView
             // 
-            webView2.BorderStyle = BorderStyle.FixedSingle;
-            webView2.Location = new Point(40, 127);
-            webView2.Margin = new Padding(3, 4, 3, 4);
-            webView2.Name = "webView2";
-            webView2.Size = new Size(277, 166);
-            webView2.TabIndex = 11;
-            webView2.Visible = false;
+            kntEditView.BorderStyle = BorderStyle.FixedSingle;
+            kntEditView.Location = new Point(40, 127);
+            kntEditView.Margin = new Padding(3, 4, 3, 4);
+            kntEditView.Name = "kntEditView";
+            kntEditView.Size = new Size(277, 166);
+            kntEditView.TabIndex = 11;
+            kntEditView.Visible = false;
             // 
             // htmlDescription
             // 
@@ -1643,7 +1643,7 @@
         private Button buttonSaveResource;
         private SaveFileDialog saveFileDialog;
         private Button buttonNavigate;
-        private KntWebView.KntEditView webView2;
+        private KntWebView.KntEditView kntEditView;
         private KntWebView.KntEditView webViewResource;
         private TextBox textDescriptionResource;
         private TextBox textTaskTags;

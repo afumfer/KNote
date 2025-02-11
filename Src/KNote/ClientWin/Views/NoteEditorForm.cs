@@ -78,8 +78,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textStatus.Text = "";
         textDescription.Text = "";
         htmlDescription.BodyHtml = "";
-        if (webView2.Visible)
-            await webView2.NavigateToString(" ");
+        if (kntEditView.Visible)
+            await kntEditView.NavigateToString(" ");
         textPriority.Text = "";
         textDescriptionResource.Text = "";
         if (webViewResource.Visible)
@@ -271,23 +271,23 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
             if (!string.IsNullOrEmpty(url))
             {
-                webView2.TextUrl = url;
-                await webView2.Navigate();                
+                kntEditView.TextUrl = url;
+                await kntEditView.Navigate();                
             }
             else
             {
-                webView2.TextUrl = "";                
+                kntEditView.TextUrl = "";                
                 if( htmlDescription.Visible == true)                
                     textDescription.Text = _ctrl.Service.Notes.UtilHtmlToMarkdown(htmlDescription.BodyHtml);                    
                                 
                 var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
 
-                await webView2.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);                
-                await webView2.NavigateToString(htmlContent);            
+                await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);                
+                await kntEditView.NavigateToString(htmlContent);            
             }
             _ctrl.Model.ContentType = "navigation";
 
-            EnableWebView2View();
+            EnableNavigationView();
         }
         catch (Exception ex)
         {
@@ -676,17 +676,17 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         textDescription.Dock = DockStyle.Fill;
         htmlDescription.Dock = DockStyle.Fill;
-        webView2.Dock = DockStyle.Fill;
-        webView2.EnableUrlBox = false;
-        webView2.ShowNavigationTools = false;
-        webView2.ShowStatusInfo = false;
+        kntEditView.Dock = DockStyle.Fill;
+        kntEditView.EnableUrlBox = false;
+        kntEditView.ShowNavigationTools = false;
+        kntEditView.ShowStatusInfo = false;
 
         if (_ctrl.Model.ContentType == null || _ctrl.Model.ContentType.Contains("markdown"))
             EnableMarkdownView();
         else if (_ctrl.Model.ContentType.Contains("html"))
             EnableHtmlView();
         else if (_ctrl.Model.ContentType.Contains("navigation"))
-            EnableWebView2View();        
+            EnableNavigationView();        
         else
             EnableMarkdownView();
 
@@ -755,7 +755,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             labelLoadingHtml.Visible = true;
             labelLoadingHtml.Refresh();
             textDescription.Visible = false;
-            webView2.Visible = false;
+            kntEditView.Visible = false;
             htmlDescription.Visible = true;
             htmlDescription.BodyHtml = "";
             htmlDescription.BodyHtml = textDescription.Text;
@@ -766,30 +766,30 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {            
             textDescription.Visible = false;
             htmlDescription.Visible = false;            
-            webView2.Visible = true;
+            kntEditView.Visible = true;
             
             if (!string.IsNullOrEmpty(textDescription.Text))
             {
                 var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
                 if (!string.IsNullOrEmpty(url))
                 {
-                    webView2.TextUrl = url;
-                    await webView2.Navigate();                    
+                    kntEditView.TextUrl = url;
+                    await kntEditView.Navigate();                    
                 }
                 else
                 {
-                    webView2.TextUrl = "";
+                    kntEditView.TextUrl = "";
 
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
-                    await webView2.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await webView2.NavigateToString(htmlContent);                    
+                    await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
+                    await kntEditView.NavigateToString(htmlContent);                    
                 }
             }
         }
         else
         {            
             htmlDescription.Visible = false;
-            webView2.Visible = false;            
+            kntEditView.Visible = false;            
             textDescription.Visible = true;
         }
 
@@ -1095,7 +1095,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private void EnableHtmlView()
     {
         textDescription.Visible = false;
-        webView2.Visible = false;
+        kntEditView.Visible = false;
         htmlDescription.Visible = true;
         buttonEditMarkdown.Enabled = true;
         buttonViewHtml.Enabled = false;
@@ -1108,7 +1108,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private void EnableMarkdownView()
     {
         htmlDescription.Visible = false;
-        webView2.Visible = false;
+        kntEditView.Visible = false;
         textDescription.Visible = true;
         buttonEditMarkdown.Enabled = false;
         buttonViewHtml.Enabled = true;
@@ -1118,11 +1118,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         toolDescriptionMarkdown.Visible = true;
     }
 
-    private void EnableWebView2View()
+    private void EnableNavigationView()
     {
         textDescription.Visible = false;
         htmlDescription.Visible = false;
-        webView2.Visible = true;
+        kntEditView.Visible = true;
         buttonEditMarkdown.Enabled = true;
         buttonViewHtml.Enabled = true;
         buttonNavigate.Enabled = false;
@@ -1294,6 +1294,5 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     #endregion
-
 }
 

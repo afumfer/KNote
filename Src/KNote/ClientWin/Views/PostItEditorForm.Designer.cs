@@ -32,7 +32,7 @@ namespace KNote.ClientWin.Views
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             panelForm = new Panel();
-            webView2 = new KntWebView.KntEditView();
+            kntEditView = new KntWebView.KntEditView();
             htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             labelStatus = new LabelNoCopy();
             picResize = new PictureBox();
@@ -73,7 +73,7 @@ namespace KNote.ClientWin.Views
             // panelForm
             // 
             panelForm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panelForm.Controls.Add(webView2);
+            panelForm.Controls.Add(kntEditView);
             panelForm.Controls.Add(htmlDescription);
             panelForm.Controls.Add(labelStatus);
             panelForm.Controls.Add(picResize);
@@ -85,13 +85,13 @@ namespace KNote.ClientWin.Views
             panelForm.Size = new Size(479, 340);
             panelForm.TabIndex = 3;
             // 
-            // webView2
+            // kntEditView
             // 
-            webView2.Location = new Point(244, 91);
-            webView2.Name = "webView2";
-            webView2.Size = new Size(215, 110);
-            webView2.TabIndex = 10;
-            webView2.Visible = false;
+            kntEditView.Location = new Point(244, 91);
+            kntEditView.Name = "kntEditView";
+            kntEditView.Size = new Size(215, 110);
+            kntEditView.TabIndex = 10;
+            kntEditView.Visible = false;
             // 
             // htmlDescription
             // 
@@ -168,7 +168,7 @@ namespace KNote.ClientWin.Views
             // 
             menuPostIt.Items.AddRange(new ToolStripItem[] { menuHide, menuAlwaysFront, menuSaveNow, menuDelete, menuS1, menuExtendedEdition, menuPostItProperties, menuWindowsFormView, menuS2, menuAlarmWithin, menuMoreActions });
             menuPostIt.Name = "menuPostIt";
-            menuPostIt.Size = new Size(231, 236);
+            menuPostIt.Size = new Size(231, 214);
             // 
             // menuHide
             // 
@@ -399,7 +399,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripMenuItem menuAddResolvedTask;
         private LabelNoCopy labelStatus;
         private LabelNoCopy labelCaption;
-        private KntWebView.KntEditView webView2;
+        private KntWebView.KntEditView kntEditView;
         private ToolStripMenuItem menuWindowsFormView;
     }
 }
