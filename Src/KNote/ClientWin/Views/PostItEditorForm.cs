@@ -372,9 +372,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             {
                 var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
                 if (!string.IsNullOrEmpty(url))
-                {
-                    kntEditView.TextUrl = url;
-                    await kntEditView.Navigate();
+                {                    
+                    await kntEditView.Navigate(url);
                     menuWindowsFormView.Checked = true;                    
                     // In the constructor, the activation of Windows Form Web View is being forced,
                     // it is not necessary to do it here

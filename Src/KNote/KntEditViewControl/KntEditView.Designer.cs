@@ -35,13 +35,14 @@
             btnNavigate = new Button();
             textUrl = new TextBox();
             panelWebView = new Panel();
+            htmlContent = new MSDN.Html.Editor.HtmlEditorControl();
             textContent = new TextBox();
-            webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            webView = new Microsoft.Web.WebView2.WinForms.WebView2();
             statusBar = new StatusStrip();
             statusLabel = new ToolStripStatusLabel();
             panelToolBox.SuspendLayout();
             panelWebView.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             statusBar.SuspendLayout();
             SuspendLayout();
             // 
@@ -100,35 +101,44 @@
             // panelWebView
             // 
             panelWebView.BackColor = SystemColors.Control;
+            panelWebView.Controls.Add(htmlContent);
             panelWebView.Controls.Add(textContent);
-            panelWebView.Controls.Add(webView2);
+            panelWebView.Controls.Add(webView);
             panelWebView.Dock = DockStyle.Fill;
             panelWebView.Location = new Point(0, 30);
             panelWebView.Name = "panelWebView";
             panelWebView.Size = new Size(743, 383);
             panelWebView.TabIndex = 14;
             // 
+            // htmlContent
+            // 
+            htmlContent.InnerText = null;
+            htmlContent.Location = new Point(403, 209);
+            htmlContent.Name = "htmlContent";
+            htmlContent.Size = new Size(315, 144);
+            htmlContent.TabIndex = 7;
+            // 
             // textContent
             // 
-            textContent.Location = new Point(375, 6);
+            textContent.Location = new Point(82, 75);
             textContent.Multiline = true;
             textContent.Name = "textContent";
-            textContent.Size = new Size(352, 366);
+            textContent.Size = new Size(315, 128);
             textContent.TabIndex = 6;
             textContent.Text = "textContent";
             textContent.Visible = false;
             // 
-            // webView2
+            // webView
             // 
-            webView2.AllowExternalDrop = true;
-            webView2.CreationProperties = null;
-            webView2.DefaultBackgroundColor = Color.White;
-            webView2.Location = new Point(17, 6);
-            webView2.Name = "webView2";
-            webView2.Size = new Size(352, 366);
-            webView2.TabIndex = 5;
-            webView2.Visible = false;
-            webView2.ZoomFactor = 1D;
+            webView.AllowExternalDrop = true;
+            webView.CreationProperties = null;
+            webView.DefaultBackgroundColor = Color.White;
+            webView.Location = new Point(403, 75);
+            webView.Name = "webView";
+            webView.Size = new Size(315, 128);
+            webView.TabIndex = 5;
+            webView.Visible = false;
+            webView.ZoomFactor = 1D;
             // 
             // statusBar
             // 
@@ -162,7 +172,7 @@
             panelToolBox.PerformLayout();
             panelWebView.ResumeLayout(false);
             panelWebView.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)webView2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)webView).EndInit();
             statusBar.ResumeLayout(false);
             statusBar.PerformLayout();
             ResumeLayout(false);
@@ -178,9 +188,10 @@
         private Panel panelWebView;
         private Panel panelStatus;
         private Label statusInfo;
-        private Microsoft.Web.WebView2.WinForms.WebView2 webView2;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView;
         private StatusStrip statusBar;
         private ToolStripStatusLabel statusLabel;
         private TextBox textContent;
+        private MSDN.Html.Editor.HtmlEditorControl htmlContent;
     }
 }

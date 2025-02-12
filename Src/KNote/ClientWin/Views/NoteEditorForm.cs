@@ -78,12 +78,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textStatus.Text = "";
         textDescription.Text = "";
         htmlDescription.BodyHtml = "";
-        if (kntEditView.Visible)
-            await kntEditView.NavigateToString(" ");
+        if (kntEditView.Visible)            
+            await kntEditView.ClearWebView();
         textPriority.Text = "";
         textDescriptionResource.Text = "";
-        if (webViewResource.Visible)
-            await webViewResource.NavigateToString(" ");
+        if (webViewResource.Visible)            
+            await webViewResource.ClearWebView();
         webViewResource.Visible = true;
         panelPreview.Visible = false;
         textTaskDescription.Text = "";
@@ -237,27 +237,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
     }
     
-    private void buttonEditHtml_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            if (_ctrl.Model.ContentType.Contains('#'))
-            {
-                ShowInfo($"This note cannot be changed to another format, the format is locked.");
-                return;
-            }
-
-            htmlDescription.BodyHtml =  _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text);
-            _ctrl.Model.ContentType = "html";
-
-            EnableHtmlView();
-        }
-        catch (Exception ex)
-        {
-            _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
-        }
-    }
-
     private async void buttonNavigate_Click(object sender, EventArgs e)
     {
         try
@@ -270,9 +249,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
             var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
             if (!string.IsNullOrEmpty(url))
-            {
-                kntEditView.TextUrl = url;
-                await kntEditView.Navigate();                
+            {                
+                await kntEditView.Navigate(url);                
             }
             else
             {
@@ -292,6 +270,27 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         catch (Exception ex)
         {
             _ctrl.ShowMessage($"You can not navigate to the indicated address in the description of this note. (The following error has occurred: {ex.Message})", "Note editor");
+        }
+    }
+
+    private void buttonEditHtml_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (_ctrl.Model.ContentType.Contains('#'))
+            {
+                ShowInfo($"This note cannot be changed to another format, the format is locked.");
+                return;
+            }
+
+            htmlDescription.BodyHtml = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text);
+            _ctrl.Model.ContentType = "html";
+
+            EnableHtmlView();
+        }
+        catch (Exception ex)
+        {
+            _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
         }
     }
 
@@ -551,7 +550,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             listViewResources.Items[delRes].Remove();
             _selectedResource = null;
-            await webViewResource.NavigateToString(" ");
+            await webViewResource.ClearWebView();
             webViewResource.Visible = false;
             panelPreview.Visible = true;
             textDescriptionResource.Text = "";
@@ -772,9 +771,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             {
                 var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
                 if (!string.IsNullOrEmpty(url))
-                {
-                    kntEditView.TextUrl = url;
-                    await kntEditView.Navigate();                    
+                {                    
+                    await kntEditView.Navigate(url);
                 }
                 else
                 {
@@ -910,7 +908,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         _selectedResource = resource;
 
         if (webViewResource.Visible)
-            await webViewResource.NavigateToString(" ");
+            await webViewResource.ClearWebView();
         textDescriptionResource.Text = "";
 
         if (_selectedResource == null)

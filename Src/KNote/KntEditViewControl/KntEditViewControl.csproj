@@ -12,6 +12,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="9.0.40" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HtmlEditorControl\HTMLEditorControl.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

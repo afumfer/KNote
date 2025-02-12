@@ -65,7 +65,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     {
         textDescription.Text = "";
         textOrder.Text = "";            
-        await htmlPreview.NavigateToString(" ");
+        await htmlPreview.ClearWebView();
         textFileName.Text = "";
     }
 
@@ -105,7 +105,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         var res = await _ctrl.SaveModel();
         if (res)
         {                
-            await htmlPreview.NavigateToString(" ");
+            await htmlPreview.ClearWebView();
             htmlPreview.Refresh();
             _formIsDisty = false;
             this.DialogResult = DialogResult.OK;
@@ -187,7 +187,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     {
         if (file == null)
         {                
-            await htmlPreview.NavigateToString(" ");
+            await htmlPreview.ClearWebView();
             return;
         }
                         
@@ -196,7 +196,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         {
             try
             {
-                await htmlPreview.NavigateToString(" ");
+                await htmlPreview.ClearWebView();
                 await htmlPreview.Navigate(file);
             }
             catch (Exception ex)
@@ -205,7 +205,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
             }
         }
         else
-            await htmlPreview.NavigateToString(" ");
+            await htmlPreview.ClearWebView();
     }
 
     #endregion

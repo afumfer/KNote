@@ -29,7 +29,7 @@ namespace KntWebView
         {
             get { return textUrl.Text; }
 
-            set { textUrl.Text = value; }
+            set { textUrl.Text = value; }  // !!! private o sólo lectura
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -77,7 +77,6 @@ namespace KntWebView
 
         #endregion
 
-
         #region Constructor
 
         public KntEditView()
@@ -100,7 +99,7 @@ namespace KntWebView
 
         private void webView2_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
-            statusLabel.Text = webView2.Source.ToString();
+            statusLabel.Text = webView.Source.ToString();
         }
 
         private void webView2_CoreWebView2InitializationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
@@ -108,7 +107,7 @@ namespace KntWebView
             statusLabel.Text = "";
         }
 
-        void EnsureHttps(object? sender, CoreWebView2NavigationStartingEventArgs args)
+        private void EnsureHttps(object? sender, CoreWebView2NavigationStartingEventArgs args)
         {
             if (!ForceHttps)
                 return;
@@ -116,7 +115,7 @@ namespace KntWebView
             String uri = args.Uri;
             if (!uri.StartsWith("https://"))
             {
-                webView2.CoreWebView2.ExecuteScriptAsync($"alert('{uri} is not safe, try an https link')");
+                webView.CoreWebView2.ExecuteScriptAsync($"alert('{uri} is not safe, try an https link')");
                 args.Cancel = true;
             }
         }
@@ -154,9 +153,22 @@ namespace KntWebView
 
         #region Public methods
 
+        // Public params:
+        //Content
+        //ResourcesContainer
+        //ResourcesContainerRootPath
+        //ResourcesContainerRootUrl
+
+        // Private fields 
+        //"knote.resources"
+        //KntConst.VirtualHostNameToFolderMapping
+
+
+
+
         public async Task SetVirtualHostNameToFolderMapping(string folder)
         {
-            if (webView2.IsDisposed == true)
+            if (webView.IsDisposed == true)
                 return;
 
             if (!_isInitialized)
@@ -164,27 +176,11 @@ namespace KntWebView
             
             FolderForVirtualHostNameMapping = folder;
             
-            webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
+            webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
                 "knote.resources", FolderForVirtualHostNameMapping,
                 CoreWebView2HostResourceAccessKind.Allow);
         }
-
-        public async Task Navigate()
-        {
-            try
-            {
-                if (!_isInitialized)
-                    await InitializeAsync();
-
-                if (webView2.CoreWebView2 != null)  // This patch is required when using sql server repositories 
-                    webView2.CoreWebView2.Navigate(textUrl.Text);
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
+        
         public async Task Navigate(string url)
         {
             textUrl.Text = url;
@@ -198,13 +194,18 @@ namespace KntWebView
                 if (!_isInitialized)
                     await InitializeAsync();
 
-                if (webView2.CoreWebView2 != null)  // This patch is required when using sql server repositories
-                    webView2.NavigateToString(contentString);
+                if (webView.CoreWebView2 != null)  
+                    webView.NavigateToString(contentString);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"You can not navigate to the indicated string. ({ex.Message})");
             }
+        }
+
+        public async Task ClearWebView()
+        {
+            await NavigateToString(" ");
         }
 
         public async Task ExecuteScriptAsync(string script)
@@ -214,8 +215,8 @@ namespace KntWebView
                 if (!_isInitialized)
                     await InitializeAsync();
 
-                if (webView2.CoreWebView2 != null)  // This patch is required when using sql server repositories                    
-                    await webView2.CoreWebView2.ExecuteScriptAsync(script);
+                if (webView.CoreWebView2 != null) 
+                    await webView.CoreWebView2.ExecuteScriptAsync(script);
             }
             catch (Exception ex)
             {
@@ -225,12 +226,12 @@ namespace KntWebView
 
         public void GoBack()
         {
-            webView2.CoreWebView2.GoBack();
+            webView.CoreWebView2.GoBack();
         }
 
         public void GoForward()
         {
-            webView2.CoreWebView2.GoForward();
+            webView.CoreWebView2.GoForward();
         }
 
         #endregion
@@ -241,14 +242,14 @@ namespace KntWebView
         {
             statusLabel.Text = "(Initializing ......)";
 
-            await webView2.EnsureCoreWebView2Async(null);
+            await webView.EnsureCoreWebView2Async(null);
 
-            if ((webView2 != null) && (webView2.CoreWebView2 != null))
+            if ((webView != null) && (webView.CoreWebView2 != null))
             {
                 _isInitialized = true;
-                webView2.CoreWebView2InitializationCompleted += webView2_CoreWebView2InitializationCompleted;
-                webView2.NavigationStarting += EnsureHttps;
-                webView2.NavigationCompleted += webView2_NavigationCompleted;
+                webView.CoreWebView2InitializationCompleted += webView2_CoreWebView2InitializationCompleted;
+                webView.NavigationStarting += EnsureHttps;
+                webView.NavigationCompleted += webView2_NavigationCompleted;
             }
             else
             {
@@ -259,19 +260,22 @@ namespace KntWebView
 
         private void InitializeEditorsComponent()
         {
-            webView2.Dock = DockStyle.Fill;
+            webView.Dock = DockStyle.Fill;
             textContent.Dock = DockStyle.Fill;
+            htmlContent.Dock = DockStyle.Fill;
 
             if (_contentType.Contains("navigation"))
                 EnableNavigationView();
             else if (_contentType.Contains("markdown"))
                 EnableMarkdownView();
-
+            else if (_contentType.Contains("html"))
+                EnableHtmlView();
         }
 
         private void EnableMarkdownView()
         {
-            webView2.Visible = false;
+            webView.Visible = false;
+            htmlContent.Visible = false;
             textContent.Visible = true;
 
         }
@@ -279,8 +283,33 @@ namespace KntWebView
         private void EnableNavigationView()
         {
             textContent.Visible = false;
-            webView2.Visible = true;
+            htmlContent.Visible = false;
+            webView.Visible = true;
         }
+
+        private void EnableHtmlView()
+        {
+            textContent.Visible = false;            
+            webView.Visible = false;
+            htmlContent.Visible = true;
+        }
+
+        private async Task Navigate()
+        {
+            try
+            {
+                if (!_isInitialized)
+                    await InitializeAsync();
+
+                if (webView.CoreWebView2 != null)  // This patch is required when using sql server repositories 
+                    webView.CoreWebView2.Navigate(textUrl.Text);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
 
         #endregion
     }
