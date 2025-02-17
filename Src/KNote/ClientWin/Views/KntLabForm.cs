@@ -48,11 +48,15 @@ public partial class KntLabForm : Form, IViewBase
 
     private async void LabForm_Load(object sender, EventArgs e)
     {
-        // KntScript
+        #region  KntScript
+        
         if (Directory.Exists(_pathSampleScripts))
             LoadListScripts(_pathSampleScripts);
 
-        // WebView2
+        #endregion
+
+        #region WebView2
+
         webView2.CoreWebView2InitializationCompleted += WebView2_CoreWebView2InitializationCompleted;
         webView2.NavigationStarting += WebView2_NavigationStarting;
         webView2.NavigationCompleted += WebView2_NavigationCompleted;
@@ -70,7 +74,7 @@ public partial class KntLabForm : Form, IViewBase
             CoreWebView2HostResourceAccessKind.Allow);
 
         webView2.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-
+        
         #region Demo content
 
         textScript.Text = @"var header1 = document.querySelector('h1');
@@ -95,8 +99,15 @@ window.chrome.webview.postMessage(retValue);";
 </body>
 </html>";
 
-        #endregion 
+        #endregion
 
+        #endregion
+
+        #region KntEditView
+
+        kntEditView.Dock = DockStyle.Fill;
+
+        #endregion 
     }
 
     private void KntLabForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -1014,7 +1025,7 @@ window.chrome.webview.postMessage(retValue);";
     #region WebView2
 
     private void btnNavigate_Click(object sender, EventArgs e)
-    {        
+    {
         webView2.CoreWebView2.Navigate(textUrlWebView2.Text);
     }
 
@@ -1195,4 +1206,18 @@ window.chrome.webview.postMessage(retValue);";
 
     #endregion
 
+    private void btnKntEditViewMarkdown_Click(object sender, EventArgs e)
+    {
+        kntEditView.ShowMarkdownContent(textForKntEditView.Text);
+    }
+
+    private async void btnKntEditViewNavigation_Click(object sender, EventArgs e)
+    {
+        await kntEditView.ShowNavigationContent(textForKntEditView.Text);
+    }
+
+    private void btnKntEditViewHtml_Click(object sender, EventArgs e)
+    {
+        kntEditView.ShowHtmlContent(textForKntEditView.Text);
+    }
 }

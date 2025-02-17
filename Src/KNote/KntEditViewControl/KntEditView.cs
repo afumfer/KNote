@@ -13,6 +13,27 @@ namespace KntWebView
 {
     public partial class KntEditView : UserControl
     {
+        #region Fields
+
+        // TODO: !!! remove this.
+        //public readonly string webViewVirtualHostName = @"knote.resources";
+        //public readonly string virtualHostNameToFolderMapping;
+
+        //private readonly char[] newLine = { '\r', '\n' };
+
+        #endregion
+
+        #region Constructor
+
+        public KntEditView()
+        {
+            InitializeComponent();
+            InitializeEditorsComponent();
+            //virtualHostNameToFolderMapping = $"https://{webViewVirtualHostName}";  // !!!
+        }
+
+        #endregion 
+
         #region Public properties
 
         private bool _isInitialized = false;
@@ -72,20 +93,61 @@ namespace KntWebView
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ContentType {
             get { return _contentType; }
-            set { _contentType = value; } 
+            set 
+            { 
+                _contentType = value; 
+
+                if(_contentType == "markdown")
+                {
+                    EnableMarkdownView();
+                }
+                else if (_contentType == "navigation")
+                {
+                    EnableNavigationView();
+                }
+                else if (_contentType == "html")
+                {
+                    EnableHtmlView();
+                }
+            } 
         }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string BodyHtml
+        {
+            get { return htmlContent.BodyHtml; }            
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string? MarkdownText
+        {
+            get { return textContent.Text; }
+        }
+
+
+        private bool _htmlEditorEditMode;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool HtmlEditorEditMode 
+        {
+            get { return _htmlEditorEditMode; }
+            set 
+            {
+                _htmlEditorEditMode = value;
+                if (_htmlEditorEditMode)
+                {
+                    htmlContent.ToolbarVisible = true;
+                    htmlContent.ReadOnly = false;
+                }
+                else
+                {
+                    htmlContent.ToolbarVisible = false;
+                    htmlContent.ReadOnly = true;
+                }
+            }
+        }
+
 
         #endregion
-
-        #region Constructor
-
-        public KntEditView()
-        {
-            InitializeComponent();
-            InitializeEditorsComponent();
-        }
-
-        #endregion 
 
         #region Form events managment 
 
@@ -153,6 +215,8 @@ namespace KntWebView
 
         #region Public methods
 
+        #region API v2
+
         // Public params:
         //Content
         //ResourcesContainer
@@ -160,11 +224,68 @@ namespace KntWebView
         //ResourcesContainerRootUrl
 
         // Private fields 
-        //"knote.resources"
-        //KntConst.VirtualHostNameToFolderMapping
+        // "knote.resources"
+        // KntConst.VirtualHostNameToFolderMapping
+
+        public void SetMarkdownContent(string content)
+        {            
+            textContent.Text = content;            
+        }
+
+        public void ShowMarkdownContent(string? content = null)
+        {            
+            if(content != null)
+                textContent.Text = content;
+
+            ContentType = "markdown";            
+        }
+
+        public async Task ShowNavigationContent(string content)
+        {
+            //textContent.Text = content;
+
+            ShowNavigationTools = false;
+            ShowStatusInfo = false;
+
+            await NavigateToString(content);
+
+            //var url = ExtractUrlFromText(content);
+            //if (!string.IsNullOrEmpty(url))
+            //    await Navigate(url);            
+            //else                           
+            //    await NavigateToString(content);
+            
+            ContentType = "navigation";
+        }
+
+        public async Task ShowNavigationUrlContent(string content)
+        {
+            //textContent.Text = content;
+
+            //ShowNavigationTools = true;
+            ShowStatusInfo = false;
+
+            await Navigate(content);
+            
+            ContentType = "navigation";
+        }
+
+        public void ShowHtmlContent(string content)
+        {
+            //textContent.Text = content;
+
+            htmlContent.BodyHtml = "";
+            htmlContent.BodyHtml = content;            
+
+            ContentType = "html";
+
+            htmlContent.Refresh();
+        }
 
 
+        #endregion 
 
+        #region API v1
 
         public async Task SetVirtualHostNameToFolderMapping(string folder)
         {
@@ -191,6 +312,8 @@ namespace KntWebView
         {
             try
             {
+                TextUrl = "";
+
                 if (!_isInitialized)
                     await InitializeAsync();
 
@@ -206,6 +329,8 @@ namespace KntWebView
         public async Task ClearWebView()
         {
             await NavigateToString(" ");
+            textContent.Text = "";
+            htmlContent.BodyHtml = "";
         }
 
         public async Task ExecuteScriptAsync(string script)
@@ -233,6 +358,8 @@ namespace KntWebView
         {
             webView.CoreWebView2.GoForward();
         }
+
+        #endregion 
 
         #endregion
 
@@ -275,22 +402,29 @@ namespace KntWebView
         private void EnableMarkdownView()
         {
             webView.Visible = false;
+            ShowNavigationTools = false;
+            ShowStatusInfo = false;
+            BorderStyle = BorderStyle.None;
             htmlContent.Visible = false;
             textContent.Visible = true;
-
         }
 
         private void EnableNavigationView()
         {
             textContent.Visible = false;
             htmlContent.Visible = false;
+            BorderStyle = BorderStyle.FixedSingle;
             webView.Visible = true;
         }
 
+        
         private void EnableHtmlView()
         {
-            textContent.Visible = false;            
+            textContent.Visible = false;
+            ShowNavigationTools = false;
+            ShowStatusInfo = false;
             webView.Visible = false;
+            BorderStyle = BorderStyle.None;
             htmlContent.Visible = true;
         }
 
@@ -310,6 +444,23 @@ namespace KntWebView
             }
         }
 
+        //public string? ExtractUrlFromText(string text)
+        //{
+        //    if (string.IsNullOrEmpty(text))
+        //        return null;
+
+        //    int indexJump = text.IndexOfAny(newLine);
+        //    var urlFistLine = (indexJump >= 0) ? text.Substring(0, indexJump) : text;
+
+        //    Uri? resultUri;
+        //    var validResult = Uri.TryCreate(urlFistLine, UriKind.Absolute, out resultUri) &&
+        //           (resultUri.Scheme == Uri.UriSchemeHttp || resultUri.Scheme == Uri.UriSchemeHttps || resultUri.Scheme == Uri.UriSchemeFile);
+
+        //    if (validResult)
+        //        return urlFistLine;
+        //    else
+        //        return null;
+        //}
 
         #endregion
     }

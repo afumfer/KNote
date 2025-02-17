@@ -584,6 +584,7 @@ public class Store
             return null;
     }
 
+    //TODO: !!! Delete form here (tralated to KntEditViewControl 
     public string ExtractUrlFromText(string text)
     {      
         if (string.IsNullOrEmpty(text))        

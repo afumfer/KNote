@@ -6,6 +6,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KntWebView;
 using Markdig;
 using Microsoft.AspNetCore.Http;
 using SQLitePCL;
@@ -76,10 +77,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textFolderNumber.Text = "";
         textTags.Text = "";
         textStatus.Text = "";
-        textDescription.Text = "";
-        htmlDescription.BodyHtml = "";
-        if (kntEditView.Visible)            
-            await kntEditView.ClearWebView();
+        await kntEditView.ClearWebView();
         textPriority.Text = "";
         textDescriptionResource.Text = "";
         if (webViewResource.Visible)            
@@ -214,9 +212,32 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void buttonEditMarkdown_Click(object sender, EventArgs e)
     {
+        // TODO: remove in this version
+        //try
+        //{
+        //    if (htmlDescription.Visible)
+        //    {
+        //        if (_ctrl.Model.ContentType.Contains('#'))
+        //        {
+        //            ShowInfo($"This note cannot be changed to another format, the format is locked.");
+        //            return;
+        //        }
+
+        //        textDescription.Text = _ctrl.Service.Notes.UtilHtmlToMarkdown(htmlDescription.BodyHtml);
+        //    }
+
+        //    _ctrl.Model.ContentType = "markdown";
+
+        //    EnableMarkdownView();
+        //}
+        //catch (Exception ex)
+        //{
+        //    _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
+        //}
+
         try
         {
-            if (htmlDescription.Visible)
+            if (kntEditView.ContentType == "html")
             {
                 if (_ctrl.Model.ContentType.Contains('#'))
                 {
@@ -224,8 +245,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     return;
                 }
 
-                textDescription.Text = _ctrl.Service.Notes.UtilHtmlToMarkdown(htmlDescription.BodyHtml);
+                kntEditView.ShowMarkdownContent(_ctrl.Service.Notes.UtilHtmlToMarkdown(kntEditView.BodyHtml));
             }
+            else
+                kntEditView.ShowMarkdownContent();
 
             _ctrl.Model.ContentType = "markdown";
 
@@ -235,10 +258,44 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
         }
+
     }
     
     private async void buttonNavigate_Click(object sender, EventArgs e)
     {
+        //try
+        //{
+        //    if (_ctrl.Model.ContentType.Contains('#'))
+        //    {
+        //        ShowInfo($"This note cannot be changed to another format, the format is locked.");
+        //        return;
+        //    }
+
+        //    var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+        //    if (!string.IsNullOrEmpty(url))
+        //    {                
+        //        await kntEditView.Navigate(url);                
+        //    }
+        //    else
+        //    {
+        //        kntEditView.TextUrl = "";                
+        //        if( htmlDescription.Visible == true)                
+        //            textDescription.Text = _ctrl.Service.Notes.UtilHtmlToMarkdown(htmlDescription.BodyHtml);                    
+
+        //        var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+
+        //        await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);                
+        //        await kntEditView.NavigateToString(htmlContent);            
+        //    }
+        //    _ctrl.Model.ContentType = "navigation";
+
+        //    EnableNavigationView();
+        //}
+        //catch (Exception ex)
+        //{
+        //    _ctrl.ShowMessage($"You can not navigate to the indicated address in the description of this note. (The following error has occurred: {ex.Message})", "Note editor");
+        //}
+
         try
         {
             if (_ctrl.Model.ContentType.Contains('#'))
@@ -247,24 +304,27 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 return;
             }
 
-            var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+            var url = _ctrl.Store.ExtractUrlFromText(kntEditView.MarkdownText);
             if (!string.IsNullOrEmpty(url))
-            {                
-                await kntEditView.Navigate(url);                
+            {
+                await kntEditView.ShowNavigationUrlContent(url);
             }
             else
             {
-                kntEditView.TextUrl = "";                
-                if( htmlDescription.Visible == true)                
-                    textDescription.Text = _ctrl.Service.Notes.UtilHtmlToMarkdown(htmlDescription.BodyHtml);                    
-                                
-                var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+                string content;
+                if (kntEditView.ContentType == "html")
+                    content = (_ctrl.Service.Notes.UtilHtmlToMarkdown(kntEditView.BodyHtml));
+                else
+                    content = kntEditView.MarkdownText;
 
-                await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);                
-                await kntEditView.NavigateToString(htmlContent);            
+                var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(content.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+
+                await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
+                await kntEditView.ShowNavigationContent(htmlContent);
             }
+            
             _ctrl.Model.ContentType = "navigation";
-
+            
             EnableNavigationView();
         }
         catch (Exception ex)
@@ -275,6 +335,25 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void buttonEditHtml_Click(object sender, EventArgs e)
     {
+        // TODO: remove in this version
+        //try
+        //{
+        //    if (_ctrl.Model.ContentType.Contains('#'))
+        //    {
+        //        ShowInfo($"This note cannot be changed to another format, the format is locked.");
+        //        return;
+        //    }
+
+        //    htmlDescription.BodyHtml = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text);
+        //    _ctrl.Model.ContentType = "html";
+
+        //    EnableHtmlView();
+        //}
+        //catch (Exception ex)
+        //{
+        //    _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
+        //}
+
         try
         {
             if (_ctrl.Model.ContentType.Contains('#'))
@@ -282,8 +361,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 ShowInfo($"This note cannot be changed to another format, the format is locked.");
                 return;
             }
+            
+            kntEditView.ShowHtmlContent(_ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText));
 
-            htmlDescription.BodyHtml = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text);
             _ctrl.Model.ContentType = "html";
 
             EnableHtmlView();
@@ -292,6 +372,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             _ctrl.ShowMessage($"The following error has occurred: {ex.Message}", "Note editor");
         }
+
     }
 
     private void listViewResources_SelectedIndexChanged(object sender, EventArgs e)
@@ -318,34 +399,34 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void toolDescriptionHtml_Click(object sender, EventArgs e)
     {
-        ToolStripItem menuSel;
-        menuSel = (ToolStripItem)sender;
+        //ToolStripItem menuSel;
+        //menuSel = (ToolStripItem)sender;
 
-        if (menuSel == toolDescriptionHtmlTitle1)
-        {
-            htmlDescription.SelectedHtml = "<h1>Título 1</h1>";
-            htmlDescription.Focus();
-        }
-        if (menuSel == toolDescriptionHtmlTitle2)
-        {
-            htmlDescription.SelectedHtml = "<h2>Título 1</h2>";
-            htmlDescription.Focus();
-        }
-        if (menuSel == toolDescriptionHtmlTitle3)
-        {
-            htmlDescription.SelectedHtml = "<h3>Título 1</h3>";
-            htmlDescription.Focus();
-        }
-        if (menuSel == toolDescriptionHtmlTitle4)
-        {
-            htmlDescription.SelectedHtml = "<h4>Título 1</h4>";
-            htmlDescription.Focus();
-        }
-        if (menuSel == toolDescriptionHtmlEdit)
-        {
-            htmlDescription.HtmlContentsEdit();
-            htmlDescription.Focus();
-        }
+        //if (menuSel == toolDescriptionHtmlTitle1)
+        //{
+        //    htmlDescription.SelectedHtml = "<h1>Título 1</h1>";
+        //    htmlDescription.Focus();
+        //}
+        //if (menuSel == toolDescriptionHtmlTitle2)
+        //{
+        //    htmlDescription.SelectedHtml = "<h2>Título 1</h2>";
+        //    htmlDescription.Focus();
+        //}
+        //if (menuSel == toolDescriptionHtmlTitle3)
+        //{
+        //    htmlDescription.SelectedHtml = "<h3>Título 1</h3>";
+        //    htmlDescription.Focus();
+        //}
+        //if (menuSel == toolDescriptionHtmlTitle4)
+        //{
+        //    htmlDescription.SelectedHtml = "<h4>Título 1</h4>";
+        //    htmlDescription.Focus();
+        //}
+        //if (menuSel == toolDescriptionHtmlEdit)
+        //{
+        //    htmlDescription.HtmlContentsEdit();
+        //    htmlDescription.Focus();
+        //}
     }
 
     private void toolDescriptionMarkdown_Click(object sender, EventArgs e)
@@ -391,10 +472,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             tag += "|   |   |" + nl;
         }
 
-        var selStart = textDescription.SelectionStart;
-        textDescription.Text = textDescription.Text.Insert(selStart, tag);
-        textDescription.Focus();
-        textDescription.SelectionStart = selStart;
+        //var selStart = textDescription.SelectionStart;
+        //textDescription.Text = textDescription.Text.Insert(selStart, tag);
+        //textDescription.Focus();
+        //textDescription.SelectionStart = selStart;
     }
 
     private void buttonFolderSearch_Click(object sender, EventArgs e)
@@ -673,21 +754,50 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (_ctrl.Model is null)
             return;
 
-        textDescription.Dock = DockStyle.Fill;
-        htmlDescription.Dock = DockStyle.Fill;
-        kntEditView.Dock = DockStyle.Fill;
-        kntEditView.EnableUrlBox = false;
-        kntEditView.ShowNavigationTools = false;
-        kntEditView.ShowStatusInfo = false;
+        //textDescription.Dock = DockStyle.Fill;
+        //htmlDescription.Dock = DockStyle.Fill;
+        //kntEditView.Dock = DockStyle.Fill;
+        //kntEditView.EnableUrlBox = false;
+        //kntEditView.ShowNavigationTools = false;
+        //kntEditView.ShowStatusInfo = false;
+
+        //if (_ctrl.Model.ContentType == null || _ctrl.Model.ContentType.Contains("markdown"))
+        //    EnableMarkdownView();
+        //else if (_ctrl.Model.ContentType.Contains("html"))
+        //    EnableHtmlView();
+        //else if (_ctrl.Model.ContentType.Contains("navigation"))
+        //    EnableNavigationView();        
+        //else
+        //    EnableMarkdownView();
+
+        //if (!_ctrl.EditMode)
+        //{
+        //    foreach (var tab in tabNoteData.TabPages)
+        //    {
+        //        foreach (Control conTmp in ((TabPage)tab).Controls)
+        //        {
+        //            BlockControl(conTmp);
+        //        }
+        //    }
+        //    htmlDescription.ToolbarVisible = false;
+        //    htmlDescription.ReadOnly = true;
+        //}
 
         if (_ctrl.Model.ContentType == null || _ctrl.Model.ContentType.Contains("markdown"))
             EnableMarkdownView();
         else if (_ctrl.Model.ContentType.Contains("html"))
             EnableHtmlView();
         else if (_ctrl.Model.ContentType.Contains("navigation"))
-            EnableNavigationView();        
+            EnableNavigationView();
         else
             EnableMarkdownView();
+
+        kntEditView.Dock = DockStyle.Fill;
+        kntEditView.EnableUrlBox = false;
+        kntEditView.ShowNavigationTools = false;
+        kntEditView.ShowStatusInfo = false;
+
+        kntEditView.ContentType = _ctrl.Model.ContentType;
 
         if (!_ctrl.EditMode)
         {
@@ -698,8 +808,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     BlockControl(conTmp);
                 }
             }
-            htmlDescription.ToolbarVisible = false;
-            htmlDescription.ReadOnly = true;
+            kntEditView.HtmlEditorEditMode = false;
         }
 
         panelDescription.Visible = true;
@@ -747,49 +856,101 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textStatus.Text = _ctrl.Model.InternalTags;
         textPriority.Text = _ctrl.Model.Priority.ToString();
 
-        textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+
+        // --------------------------
+
+        //textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        //{            
+        //    labelLoadingHtml.Visible = true;
+        //    labelLoadingHtml.Refresh();
+        //    textDescription.Visible = false;
+        //    kntEditView.Visible = false;
+        //    htmlDescription.Visible = true;
+        //    htmlDescription.BodyHtml = "";
+        //    htmlDescription.BodyHtml = textDescription.Text;
+        //    htmlDescription.Refresh();
+        //    labelLoadingHtml.Visible = false;
+        //}
+        //else if (_ctrl.Model.ContentType.Contains("navigation"))
+        //{            
+        //    textDescription.Visible = false;
+        //    htmlDescription.Visible = false;            
+        //    kntEditView.Visible = true;
+
+        //    if (!string.IsNullOrEmpty(textDescription.Text))
+        //    {
+        //        var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+        //        if (!string.IsNullOrEmpty(url))
+        //        {                    
+        //            await kntEditView.Navigate(url);
+        //        }
+        //        else
+        //        {
+        //            kntEditView.TextUrl = "";
+
+        //            var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+        //            await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
+        //            await kntEditView.NavigateToString(htmlContent);                    
+        //        }
+        //    }
+        //}
+        //else
+        //{            
+        //    htmlDescription.Visible = false;
+        //    kntEditView.Visible = false;            
+        //    textDescription.Visible = true;
+        //}
+
+        kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
 
         if (_ctrl.Model.ContentType.Contains("html"))
-        {            
+        {
             labelLoadingHtml.Visible = true;
             labelLoadingHtml.Refresh();
-            textDescription.Visible = false;
-            kntEditView.Visible = false;
-            htmlDescription.Visible = true;
-            htmlDescription.BodyHtml = "";
-            htmlDescription.BodyHtml = textDescription.Text;
-            htmlDescription.Refresh();
+            
+            //textDescription.Visible = false;
+            //kntEditView.Visible = false;
+            //htmlDescription.Visible = true;
+            //htmlDescription.BodyHtml = "";
+            //htmlDescription.BodyHtml = textDescription.Text;
+            //htmlDescription.Refresh();
+            kntEditView.ShowHtmlContent(kntEditView.MarkdownText);
+
             labelLoadingHtml.Visible = false;
         }
         else if (_ctrl.Model.ContentType.Contains("navigation"))
-        {            
-            textDescription.Visible = false;
-            htmlDescription.Visible = false;            
-            kntEditView.Visible = true;
-            
-            if (!string.IsNullOrEmpty(textDescription.Text))
+        {
+            //textDescription.Visible = false;
+            //htmlDescription.Visible = false;
+            //kntEditView.Visible = true;
+
+            if (!string.IsNullOrEmpty(kntEditView.MarkdownText))
             {
-                var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+                var url = _ctrl.Store.ExtractUrlFromText(kntEditView.MarkdownText);
                 if (!string.IsNullOrEmpty(url))
-                {                    
-                    await kntEditView.Navigate(url);
+                {
+                    await kntEditView.ShowNavigationUrlContent(url);
                 }
                 else
-                {
-                    kntEditView.TextUrl = "";
-
-                    var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+                {                    
+                    var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await kntEditView.NavigateToString(htmlContent);                    
+                    await kntEditView.ShowNavigationContent(htmlContent);
                 }
             }
         }
         else
-        {            
-            htmlDescription.Visible = false;
-            kntEditView.Visible = false;            
-            textDescription.Visible = true;
+        {
+            //htmlDescription.Visible = false;
+            //kntEditView.Visible = false;
+            //textDescription.Visible = true;
+
+            kntEditView.ShowMarkdownContent();
         }
+
+        //--------------------
 
         buttonLockFormat.Checked = _ctrl.Model.ContentType != null && _ctrl.Model.ContentType.Contains('#');
 
@@ -935,6 +1096,27 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private void ControlsToModel()
     {
         // Basic data
+
+        //_ctrl.Model.Topic = textTopic.Text;
+        //_ctrl.Model.FolderId = _selectedFolderId;
+        //_ctrl.Model.FolderDto.FolderId = _selectedFolderId;
+        //_ctrl.Model.FolderDto.Name = textFolder.Text;
+        //_ctrl.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
+        //_ctrl.Model.Tags = textTags.Text;
+        //_ctrl.Model.InternalTags = textStatus.Text;
+
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        //    _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
+        //else
+        //    _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+
+        //int p;
+        //if (int.TryParse(textPriority.Text, out p))
+        //    _ctrl.Model.Priority = p;
+
+        //_ctrl.Model.Script = textScriptCode.Text;
+
+        // Basic data
         _ctrl.Model.Topic = textTopic.Text;
         _ctrl.Model.FolderId = _selectedFolderId;
         _ctrl.Model.FolderDto.FolderId = _selectedFolderId;
@@ -944,15 +1126,16 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         _ctrl.Model.InternalTags = textStatus.Text;
 
         if (_ctrl.Model.ContentType.Contains("html"))
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
         else
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
 
         int p;
         if (int.TryParse(textPriority.Text, out p))
             _ctrl.Model.Priority = p;
 
         _ctrl.Model.Script = textScriptCode.Text;
+
     }
 
     private async Task<bool> SaveModel()
@@ -1089,12 +1272,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
         }
     }
-
+    
     private void EnableHtmlView()
     {
-        textDescription.Visible = false;
-        kntEditView.Visible = false;
-        htmlDescription.Visible = true;
         buttonEditMarkdown.Enabled = true;
         buttonViewHtml.Enabled = false;
         buttonNavigate.Enabled = true;
@@ -1105,9 +1285,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void EnableMarkdownView()
     {
-        htmlDescription.Visible = false;
-        kntEditView.Visible = false;
-        textDescription.Visible = true;
         buttonEditMarkdown.Enabled = false;
         buttonViewHtml.Enabled = true;
         buttonNavigate.Enabled = true;
@@ -1118,9 +1295,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void EnableNavigationView()
     {
-        textDescription.Visible = false;
-        htmlDescription.Visible = false;
-        kntEditView.Visible = true;
         buttonEditMarkdown.Enabled = true;
         buttonViewHtml.Enabled = true;
         buttonNavigate.Enabled = false;
@@ -1245,34 +1419,36 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void InsertLinkSelectedResource()
     {
-        // If navigate mode then msgbox and return
-        if (!buttonNavigate.Enabled) 
-        {
-            _ctrl.ShowMessage("Cannot insert a resource into the text when editing mode (markdown or html) is not active", KntConst.AppName);
-            return;
-        }
+        //TODO: ....
 
-        var tmpFile = _ctrl.Service.Notes.UtilGetResourceFileUrl(_selectedResource.Container, _selectedResource.Name);
+        //// If navigate mode then msgbox and return
+        //if (!buttonNavigate.Enabled) 
+        //{
+        //    _ctrl.ShowMessage("Cannot insert a resource into the text when editing mode (markdown or html) is not active", KntConst.AppName);
+        //    return;
+        //}
 
-        tabNoteData.SelectedIndex = 0;
+        //var tmpFile = _ctrl.Service.Notes.UtilGetResourceFileUrl(_selectedResource.Container, _selectedResource.Name);
 
-        if (!buttonViewHtml.Enabled)
-        {
-            string strLink = (_selectedResource.FileType.Contains("image")) ?
-                $"<img src='{tmpFile}' alt='{_selectedResource.Description}'/>" :
-                $"<a href='{tmpFile}' target='_blank'>{_selectedResource.NameOut}</a>";
-            htmlDescription.SelectedHtml = strLink;
-            htmlDescription.Focus();
-        }
-        else
-        {            
-            string strLink = (_selectedResource.FileType.Contains("image")) ?
-                $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
-            var selStart = textDescription.SelectionStart;
-            textDescription.Text = textDescription.Text.Insert(selStart, strLink);                        
-            textDescription.Focus();
-            textDescription.Select(selStart + strLink.Length, 0);
-        }
+        //tabNoteData.SelectedIndex = 0;
+
+        //if (!buttonViewHtml.Enabled)
+        //{
+        //    string strLink = (_selectedResource.FileType.Contains("image")) ?
+        //        $"<img src='{tmpFile}' alt='{_selectedResource.Description}'/>" :
+        //        $"<a href='{tmpFile}' target='_blank'>{_selectedResource.NameOut}</a>";
+        //    htmlDescription.SelectedHtml = strLink;
+        //    htmlDescription.Focus();
+        //}
+        //else
+        //{            
+        //    string strLink = (_selectedResource.FileType.Contains("image")) ?
+        //        $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
+        //    var selStart = textDescription.SelectionStart;
+        //    textDescription.Text = textDescription.Text.Insert(selStart, strLink);                        
+        //    textDescription.Focus();
+        //    textDescription.Select(selStart + strLink.Length, 0);
+        //}
     }
 
     private void UpdateResource(ResourceDto resource)

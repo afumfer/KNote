@@ -179,7 +179,9 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     private void dataGridNotes_DoubleClick(object sender, EventArgs e)
     {
-        ActiveCurrentRow();
+        //ActiveCurrentRow();
+        var sr = dataGridNotes.SelectedRows[0];
+        _ctrl.SelectedEntity = DataGridViewRowToNoteInfo(sr);
         _ctrl.NotifySelectedEntityDoubleClick();
     }
 

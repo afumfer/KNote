@@ -56,8 +56,6 @@
             label8 = new Label();
             panelDescription = new Panel();
             kntEditView = new KntWebView.KntEditView();
-            htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
-            textDescription = new TextBox();
             toolDescription = new ToolStrip();
             toolDescriptionHtml = new ToolStripDropDownButton();
             toolDescriptionHtmlTitle1 = new ToolStripMenuItem();
@@ -428,8 +426,6 @@
             // 
             panelDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panelDescription.Controls.Add(kntEditView);
-            panelDescription.Controls.Add(htmlDescription);
-            panelDescription.Controls.Add(textDescription);
             panelDescription.Controls.Add(toolDescription);
             panelDescription.Location = new Point(4, 132);
             panelDescription.Name = "panelDescription";
@@ -440,33 +436,11 @@
             // kntEditView
             // 
             kntEditView.BorderStyle = BorderStyle.FixedSingle;
-            kntEditView.Location = new Point(40, 127);
+            kntEditView.Location = new Point(43, 17);
             kntEditView.Margin = new Padding(3, 4, 3, 4);
             kntEditView.Name = "kntEditView";
             kntEditView.Size = new Size(277, 166);
             kntEditView.TabIndex = 11;
-            kntEditView.Visible = false;
-            // 
-            // htmlDescription
-            // 
-            htmlDescription.InnerText = null;
-            htmlDescription.Location = new Point(324, 14);
-            htmlDescription.Name = "htmlDescription";
-            htmlDescription.Size = new Size(277, 88);
-            htmlDescription.TabIndex = 8;
-            // 
-            // textDescription
-            // 
-            textDescription.Font = new Font("Courier New", 9.75F);
-            textDescription.Location = new Point(40, 14);
-            textDescription.Margin = new Padding(4, 3, 4, 3);
-            textDescription.MaxLength = 0;
-            textDescription.Multiline = true;
-            textDescription.Name = "textDescription";
-            textDescription.ScrollBars = ScrollBars.Both;
-            textDescription.Size = new Size(277, 88);
-            textDescription.TabIndex = 7;
-            textDescription.Enter += textDescription_Enter;
             // 
             // toolDescription
             // 
@@ -990,6 +964,7 @@
             // webViewResource
             // 
             webViewResource.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            webViewResource.BorderStyle = BorderStyle.FixedSingle;
             webViewResource.Location = new Point(392, 39);
             webViewResource.Margin = new Padding(3, 4, 3, 4);
             webViewResource.Name = "webViewResource";
@@ -1600,8 +1575,6 @@
         private ListView listViewTraceNoteFrom;
         private Label labelLoadingHtml;
         private Panel panelDescription;
-        private MSDN.Html.Editor.HtmlEditorControl htmlDescription;
-        private TextBox textDescription;
         private ToolStrip toolDescription;
         private ToolStripDropDownButton toolDescriptionHtml;
         private ToolStripMenuItem toolDescriptionHtmlTitle1;

@@ -71,6 +71,13 @@
             buttonImportAnotasXML = new Button();
             buttonRunMonitor = new Button();
             tabControlLab = new TabControl();
+            tabKntEditView = new TabPage();
+            textForKntEditView = new TextBox();
+            btnKntEditViewHtml = new Button();
+            btnKntEditViewNavigation = new Button();
+            btnKntEditViewMarkdown = new Button();
+            panel1 = new Panel();
+            kntEditView = new KntWebView.KntEditView();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
             tabRichEditor.SuspendLayout();
@@ -78,6 +85,8 @@
             groupSamples.SuspendLayout();
             tabAppLab.SuspendLayout();
             tabControlLab.SuspendLayout();
+            tabKntEditView.SuspendLayout();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // tabWebView2
@@ -509,15 +518,86 @@
             // tabControlLab
             // 
             tabControlLab.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tabControlLab.Controls.Add(tabAppLab);
-            tabControlLab.Controls.Add(tabKntScriptLab);
-            tabControlLab.Controls.Add(tabRichEditor);
+            tabControlLab.Controls.Add(tabKntEditView);
             tabControlLab.Controls.Add(tabWebView2);
+            tabControlLab.Controls.Add(tabRichEditor);
+            tabControlLab.Controls.Add(tabKntScriptLab);
+            tabControlLab.Controls.Add(tabAppLab);
             tabControlLab.Location = new Point(12, 12);
             tabControlLab.Name = "tabControlLab";
             tabControlLab.SelectedIndex = 0;
             tabControlLab.Size = new Size(734, 625);
             tabControlLab.TabIndex = 4;
+            // 
+            // tabKntEditView
+            // 
+            tabKntEditView.Controls.Add(panel1);
+            tabKntEditView.Controls.Add(textForKntEditView);
+            tabKntEditView.Controls.Add(btnKntEditViewHtml);
+            tabKntEditView.Controls.Add(btnKntEditViewNavigation);
+            tabKntEditView.Controls.Add(btnKntEditViewMarkdown);
+            tabKntEditView.Location = new Point(4, 24);
+            tabKntEditView.Name = "tabKntEditView";
+            tabKntEditView.Size = new Size(726, 597);
+            tabKntEditView.TabIndex = 4;
+            tabKntEditView.Text = "KntEditView";
+            tabKntEditView.UseVisualStyleBackColor = true;
+            // 
+            // textForKntEditView
+            // 
+            textForKntEditView.Location = new Point(218, 12);
+            textForKntEditView.Multiline = true;
+            textForKntEditView.Name = "textForKntEditView";
+            textForKntEditView.Size = new Size(313, 103);
+            textForKntEditView.TabIndex = 4;
+            textForKntEditView.Text = "Test";
+            // 
+            // btnKntEditViewHtml
+            // 
+            btnKntEditViewHtml.Location = new Point(17, 78);
+            btnKntEditViewHtml.Name = "btnKntEditViewHtml";
+            btnKntEditViewHtml.Size = new Size(181, 26);
+            btnKntEditViewHtml.TabIndex = 3;
+            btnKntEditViewHtml.Text = "KntEditView html";
+            btnKntEditViewHtml.UseVisualStyleBackColor = true;
+            btnKntEditViewHtml.Click += btnKntEditViewHtml_Click;
+            // 
+            // btnKntEditViewNavigation
+            // 
+            btnKntEditViewNavigation.Location = new Point(17, 46);
+            btnKntEditViewNavigation.Name = "btnKntEditViewNavigation";
+            btnKntEditViewNavigation.Size = new Size(181, 26);
+            btnKntEditViewNavigation.TabIndex = 2;
+            btnKntEditViewNavigation.Text = "KntEditView navigation";
+            btnKntEditViewNavigation.UseVisualStyleBackColor = true;
+            btnKntEditViewNavigation.Click += btnKntEditViewNavigation_Click;
+            // 
+            // btnKntEditViewMarkdown
+            // 
+            btnKntEditViewMarkdown.Location = new Point(17, 14);
+            btnKntEditViewMarkdown.Name = "btnKntEditViewMarkdown";
+            btnKntEditViewMarkdown.Size = new Size(181, 26);
+            btnKntEditViewMarkdown.TabIndex = 1;
+            btnKntEditViewMarkdown.Text = "KntEditView markdown";
+            btnKntEditViewMarkdown.UseVisualStyleBackColor = true;
+            btnKntEditViewMarkdown.Click += btnKntEditViewMarkdown_Click;
+            // 
+            // panel1
+            // 
+            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panel1.Controls.Add(kntEditView);
+            panel1.Location = new Point(17, 139);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(693, 439);
+            panel1.TabIndex = 5;
+            // 
+            // kntEditView
+            // 
+            kntEditView.BorderStyle = BorderStyle.FixedSingle;
+            kntEditView.Location = new Point(40, 44);
+            kntEditView.Name = "kntEditView";
+            kntEditView.Size = new Size(281, 148);
+            kntEditView.TabIndex = 1;
             // 
             // KntLabForm
             // 
@@ -539,6 +619,9 @@
             tabAppLab.ResumeLayout(false);
             tabAppLab.PerformLayout();
             tabControlLab.ResumeLayout(false);
+            tabKntEditView.ResumeLayout(false);
+            tabKntEditView.PerformLayout();
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -585,5 +668,12 @@
         private Button btnExecuteScript;
         private Label label3;
         private TextBox textFolderForVirtualHostNameMapping;
+        private TabPage tabKntEditView;
+        private Button btnKntEditViewNavigation;
+        private Button btnKntEditViewMarkdown;
+        private Button btnKntEditViewHtml;
+        private TextBox textForKntEditView;
+        private Panel panel1;
+        private KntWebView.KntEditView kntEditView;
     }
 }

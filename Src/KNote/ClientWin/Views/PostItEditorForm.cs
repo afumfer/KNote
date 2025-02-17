@@ -527,6 +527,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private void DrawFormBorder()
     {
+        if (menuWindowsFormView.Checked)
+            return;
+
         Graphics grfx = this.CreateGraphics();
         Pen pn = new Pen(Color.Black);
         grfx.Clear(this.BackColor);

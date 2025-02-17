@@ -120,6 +120,7 @@
             // 
             // textContent
             // 
+            textContent.Font = new Font("Courier New", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textContent.Location = new Point(82, 75);
             textContent.Multiline = true;
             textContent.Name = "textContent";

@@ -359,10 +359,6 @@ public abstract class CtrlNoteEditorEmbeddableBase<TView, TEntity> : CtrlNoteEdi
     {
         var result = base.OnInitialized();
 
-        // TODO: pending check result correctrly
-
-        View.RefreshView();
-
         if (!EmbededMode)
             View.ConfigureWindowMode();
         else
