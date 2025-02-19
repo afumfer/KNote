@@ -156,8 +156,9 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
                 else
                     OnAddedEntity(response.Entity);
 
-                View.RefreshView();
-                    
+                // TODO: deprecated in 0.0.9.8 version !!!
+                // View.RefreshView();
+
                 // TODO: future version ... notify actions.
                 // NotifyMessage($"Note {Model?.NoteNumber.ToString()} saved");
             }

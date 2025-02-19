@@ -32,13 +32,11 @@ namespace KNote.ClientWin.Views
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             panelForm = new Panel();
+            labelCaption = new LabelNoCopy();
             kntEditView = new KntWebView.KntEditView();
-            htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             labelStatus = new LabelNoCopy();
             picResize = new PictureBox();
             picMenu = new PictureBox();
-            textDescription = new TextBox();
-            labelCaption = new LabelNoCopy();
             menuPostIt = new ContextMenuStrip(components);
             menuHide = new ToolStripMenuItem();
             menuAlwaysFront = new ToolStripMenuItem();
@@ -73,35 +71,38 @@ namespace KNote.ClientWin.Views
             // panelForm
             // 
             panelForm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelForm.Controls.Add(picMenu);
             panelForm.Controls.Add(kntEditView);
-            panelForm.Controls.Add(htmlDescription);
             panelForm.Controls.Add(labelStatus);
             panelForm.Controls.Add(picResize);
-            panelForm.Controls.Add(picMenu);
-            panelForm.Controls.Add(textDescription);
             panelForm.Controls.Add(labelCaption);
             panelForm.Location = new Point(1, 1);
             panelForm.Name = "panelForm";
             panelForm.Size = new Size(479, 340);
             panelForm.TabIndex = 3;
             // 
+            // labelCaption
+            // 
+            labelCaption.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelCaption.BackColor = Color.PaleGoldenrod;
+            labelCaption.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            labelCaption.Location = new Point(3, 3);
+            labelCaption.Name = "labelCaption";
+            labelCaption.Padding = new Padding(20, 2, 0, 0);
+            labelCaption.Size = new Size(472, 20);
+            labelCaption.TabIndex = 6;
+            labelCaption.DoubleClick += labelCaption_DoubleClick;
+            labelCaption.MouseDown += labelCaption_MouseDown;
+            labelCaption.MouseMove += labelCaption_MouseMove;
+            // 
             // kntEditView
             // 
-            kntEditView.Location = new Point(244, 91);
+            kntEditView.BorderStyle = BorderStyle.FixedSingle;
+            kntEditView.Location = new Point(101, 87);
+            kntEditView.Margin = new Padding(3, 4, 3, 4);
             kntEditView.Name = "kntEditView";
-            kntEditView.Size = new Size(215, 110);
-            kntEditView.TabIndex = 10;
-            kntEditView.Visible = false;
-            // 
-            // htmlDescription
-            // 
-            htmlDescription.InnerText = null;
-            htmlDescription.Location = new Point(238, 29);
-            htmlDescription.Name = "htmlDescription";
-            htmlDescription.Size = new Size(215, 56);
-            htmlDescription.TabIndex = 9;
-            htmlDescription.ToolbarVisible = false;
-            htmlDescription.Visible = false;
+            kntEditView.Size = new Size(277, 166);
+            kntEditView.TabIndex = 13;
             // 
             // labelStatus
             // 
@@ -137,32 +138,6 @@ namespace KNote.ClientWin.Views
             picMenu.TabIndex = 4;
             picMenu.TabStop = false;
             picMenu.MouseUp += picMenu_MouseUp;
-            // 
-            // textDescription
-            // 
-            textDescription.BackColor = Color.Beige;
-            textDescription.BorderStyle = BorderStyle.None;
-            textDescription.Location = new Point(14, 29);
-            textDescription.Margin = new Padding(6);
-            textDescription.MaxLength = 0;
-            textDescription.Multiline = true;
-            textDescription.Name = "textDescription";
-            textDescription.Size = new Size(215, 70);
-            textDescription.TabIndex = 3;
-            // 
-            // labelCaption
-            // 
-            labelCaption.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            labelCaption.BackColor = Color.PaleGoldenrod;
-            labelCaption.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelCaption.Location = new Point(3, 3);
-            labelCaption.Name = "labelCaption";
-            labelCaption.Padding = new Padding(20, 2, 0, 0);
-            labelCaption.Size = new Size(472, 20);
-            labelCaption.TabIndex = 6;
-            labelCaption.DoubleClick += labelCaption_DoubleClick;
-            labelCaption.MouseDown += labelCaption_MouseDown;
-            labelCaption.MouseMove += labelCaption_MouseMove;
             // 
             // menuPostIt
             // 
@@ -360,7 +335,6 @@ namespace KNote.ClientWin.Views
             Paint += PostItEditorForm_Paint;
             KeyUp += PostItEditorForm_KeyUp;
             panelForm.ResumeLayout(false);
-            panelForm.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)picResize).EndInit();
             ((System.ComponentModel.ISupportInitialize)picMenu).EndInit();
             menuPostIt.ResumeLayout(false);
@@ -369,7 +343,6 @@ namespace KNote.ClientWin.Views
 
         #endregion
         private System.Windows.Forms.Panel panelForm;
-        private System.Windows.Forms.TextBox textDescription;
         private System.Windows.Forms.PictureBox picMenu;
         private System.Windows.Forms.PictureBox picResize;
         private System.Windows.Forms.ContextMenuStrip menuPostIt;
@@ -380,7 +353,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripSeparator menuS1;
         private System.Windows.Forms.ToolStripMenuItem menuExtendedEdition;
         private System.Windows.Forms.ToolStripMenuItem menuPostItProperties;
-        private MSDN.Html.Editor.HtmlEditorControl htmlDescription;
         private System.Windows.Forms.ToolStripSeparator menuS2;
         private System.Windows.Forms.ToolStripMenuItem menuAlarmWithin;
         private System.Windows.Forms.ToolStripMenuItem menuFastAlarm10m;
@@ -399,7 +371,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ToolStripMenuItem menuAddResolvedTask;
         private LabelNoCopy labelStatus;
         private LabelNoCopy labelCaption;
-        private KntWebView.KntEditView kntEditView;
         private ToolStripMenuItem menuWindowsFormView;
+        private KntWebView.KntEditView kntEditView;
     }
 }

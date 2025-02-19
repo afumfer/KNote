@@ -197,7 +197,8 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
             try
             {
                 await htmlPreview.ClearWebView();
-                await htmlPreview.Navigate(file);
+                //await htmlPreview.Navigate(file);
+                await htmlPreview.ShowNavigationUrlContent(file);
             }
             catch (Exception ex)
             {

@@ -4,6 +4,7 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
+using KntWebView;
 using Markdig;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Hosting;
@@ -106,40 +107,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     {
         InitializeComponentEditor();
         ModelToControlsPostIt(true, _ctrl.ForceAlwaysTop);        
-    }
-
-    private void InitializeComponentEditor()
-    {
-        if (_ctrl.Model is null)
-            return;
-
-        if (_ctrl.Model.ContentType.Contains("html"))
-        {
-            htmlDescription.Location = new System.Drawing.Point(3, 28);
-            htmlDescription.Size = new System.Drawing.Size(472, 292);
-            htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                | System.Windows.Forms.AnchorStyles.Left)
-                | System.Windows.Forms.AnchorStyles.Right)));
-            Text = KntConst.AppName + " Html editor";
-        }
-        else if (_ctrl.Model.ContentType.Contains("navigation"))
-        {
-            kntEditView.Location = new System.Drawing.Point(3, 24);
-            kntEditView.Size = new System.Drawing.Size(472, 292);
-            kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                | System.Windows.Forms.AnchorStyles.Left)
-                | System.Windows.Forms.AnchorStyles.Right)));                     
-            Text = KntConst.AppName + " Web view";
-        }
-        else
-        {
-            textDescription.Location = new System.Drawing.Point(3, 28);
-            textDescription.Size = new System.Drawing.Size(472, 292);
-            textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                | System.Windows.Forms.AnchorStyles.Left)
-                | System.Windows.Forms.AnchorStyles.Right)));
-            Text = KntConst.AppName + " markdown editor";
-        }        
     }
 
     private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -353,28 +320,118 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     #region Private Methods
 
+    private void InitializeComponentEditor()
+    {
+        if (_ctrl.Model is null)
+            return;
+
+        //kntEditView.Dock = DockStyle.Fill;
+
+        kntEditView.Location = new System.Drawing.Point(3, 24);
+        kntEditView.Size = new System.Drawing.Size(472, 292);
+        kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+
+        //kntEditView.EnableUrlBox = false;
+        //kntEditView.ShowNavigationTools = false;
+        kntEditView.ShowStatusInfo = false;
+
+        if (_ctrl.Model.ContentType.Contains("html"))
+        {
+            // TODO: !!! Delete this code in this version
+            //htmlDescription.Location = new System.Drawing.Point(3, 28);
+            //htmlDescription.Size = new System.Drawing.Size(472, 292);
+            //htmlDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            //    | System.Windows.Forms.AnchorStyles.Left)
+            //    | System.Windows.Forms.AnchorStyles.Right)));
+            Text = KntConst.AppName + " Html editor";
+        }
+        else if (_ctrl.Model.ContentType.Contains("navigation"))
+        {
+            // TODO: !!! Delete this code in this version
+            //kntEditView.Location = new System.Drawing.Point(3, 24);
+            //kntEditView.Size = new System.Drawing.Size(472, 292);
+            //kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            //    | System.Windows.Forms.AnchorStyles.Left)
+            //    | System.Windows.Forms.AnchorStyles.Right)));                     
+            Text = KntConst.AppName + " Web view";
+        }
+        else
+        {
+            // TODO: !!! Delete this code in this version
+            //textDescription.Location = new System.Drawing.Point(3, 28);
+            //textDescription.Size = new System.Drawing.Size(472, 292);
+            //textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            //    | System.Windows.Forms.AnchorStyles.Left)
+            //    | System.Windows.Forms.AnchorStyles.Right)));
+            Text = KntConst.AppName + " markdown editor";
+        }
+    }
+
     private async void ModelToControls()
     {
+        // TODO: !!! Delete this code in this version
+        //if (_ctrl.Model is null)
+        //    return;
+
+        //labelCaption.Text = _ctrl.Model.Topic;
+        //RefreshStatus();
+        //_selectedFolderId = _ctrl.Model.FolderId;
+        //textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
+        //textDescription.SelectionStart = 0;
+
+        //if (_ctrl.Model.ContentType.Contains("html"))            
+        //    htmlDescription.BodyHtml = textDescription.Text;
+        //else if (_ctrl.Model.ContentType.Contains("navigation"))
+        //{            
+        //    if (!string.IsNullOrEmpty(textDescription.Text))
+        //    {
+        //        var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+        //        if (!string.IsNullOrEmpty(url))
+        //        {                    
+        //            await kntEditView.Navigate(url);
+        //            menuWindowsFormView.Checked = true;                    
+        //            // In the constructor, the activation of Windows Form Web View is being forced,
+        //            // it is not necessary to do it here
+        //        }
+        //        else
+        //        {
+        //            kntEditView.TextUrl = "";
+        //            kntEditView.ShowNavigationTools = false;
+        //            kntEditView.ShowStatusInfo = false;                    
+
+        //            var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+
+        //            await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
+        //            await kntEditView.NavigateToString(htmlContent);
+        //        }
+        //    }
+        //}
+
         if (_ctrl.Model is null)
             return;
 
         labelCaption.Text = _ctrl.Model.Topic;
         RefreshStatus();
         _selectedFolderId = _ctrl.Model.FolderId;
-        textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
-        textDescription.SelectionStart = 0;
 
-        if (_ctrl.Model.ContentType.Contains("html"))            
-            htmlDescription.BodyHtml = textDescription.Text;
+        kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
+
+        kntEditView.MarkdownContentControl.SelectionStart = 0;
+
+        if (_ctrl.Model.ContentType.Contains("html"))
+            kntEditView.ShowHtmlContent(kntEditView.MarkdownText);
         else if (_ctrl.Model.ContentType.Contains("navigation"))
-        {            
-            if (!string.IsNullOrEmpty(textDescription.Text))
+        {
+            if (!string.IsNullOrEmpty(kntEditView.MarkdownText))
             {
-                var url = _ctrl.Store.ExtractUrlFromText(textDescription.Text);
+                var url = _ctrl.Store.ExtractUrlFromText(kntEditView.MarkdownText);
                 if (!string.IsNullOrEmpty(url))
                 {                    
-                    await kntEditView.Navigate(url);
-                    menuWindowsFormView.Checked = true;                    
+                    menuWindowsFormView.Checked = true;
+                    kntEditView.ShowNavigationTools = true;
+                    await kntEditView.ShowNavigationUrlContent(url);
                     // In the constructor, the activation of Windows Form Web View is being forced,
                     // it is not necessary to do it here
                 }
@@ -382,32 +439,15 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 {
                     kntEditView.TextUrl = "";
                     kntEditView.ShowNavigationTools = false;
-                    kntEditView.ShowStatusInfo = false;                    
-
-                    var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(textDescription.Text.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
-
+                    
+                    var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await kntEditView.NavigateToString(htmlContent);
+                    await kntEditView.ShowNavigationContent(htmlContent);
                 }
             }
-        }
-    }
-
-    private void ControlsToModel()
-    {
-        if (_ctrl.Model is null)
-            return;
-
-        if (_ctrl.Model.ContentType.Contains("html"))
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
-        else
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
-
-
-        _ctrl.Model.FolderId = _selectedFolderId;
-        _ctrl.Model.Topic = labelCaption.Text;
-
-        ControlsToModelPostIt();
+            kntEditView.ShowStatusInfo = false;
+            kntEditView.BorderStyle = BorderStyle.None;
+        }        
     }
 
     private void ModelToControlsPostIt(bool updateSizeAndLocation = true, bool forceAlwaysTop = false)
@@ -415,16 +455,47 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         if (_ctrl.Model is null)
             return;
 
-        if (_ctrl.Model.ContentType.Contains("html"))
-        {
-            htmlDescription.Visible = true;
-        }
-        if (_ctrl.Model.ContentType.Contains("navigation"))
-        {
-            kntEditView.Visible = true;
-            kntEditView.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
-        }
-        else
+        // TODO: !!! Delete this code in this version
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        //{
+        //    htmlDescription.Visible = true;
+        //}
+        //if (_ctrl.Model.ContentType.Contains("navigation"))
+        //{
+        //    kntEditView.Visible = true;
+        //    kntEditView.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
+        //}
+        //else
+        //{
+        //    FontStyle style = new FontStyle();
+        //    if (_ctrl.WindowPostIt.FontBold)
+        //        style = FontStyle.Bold;
+        //    if (_ctrl.WindowPostIt.FontItalic)
+        //        style = style | FontStyle.Italic;
+        //    if (_ctrl.WindowPostIt.FontUnderline)
+        //        style = style | FontStyle.Underline;
+        //    if (_ctrl.WindowPostIt.FontStrikethru)
+        //        style = style | FontStyle.Strikeout;
+        //    Font font = new Font(_ctrl.WindowPostIt.FontName, _ctrl.WindowPostIt.FontSize, style);
+        //    textDescription.Font = font;
+        //    textDescription.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
+        //    textDescription.ForeColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor);
+        //    textDescription.Visible = true;            
+        //}
+
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        //{
+        //    htmlDescription.Visible = true;
+        //}
+        //if (_ctrl.Model.ContentType.Contains("navigation"))
+        //{
+        //    //kntEditView.Visible = true;
+        //    kntEditView.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
+        //}
+
+        kntEditView.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
+
+        if (_ctrl.Model.ContentType.Contains("markdown"))
         {
             FontStyle style = new FontStyle();
             if (_ctrl.WindowPostIt.FontBold)
@@ -436,10 +507,10 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             if (_ctrl.WindowPostIt.FontStrikethru)
                 style = style | FontStyle.Strikeout;
             Font font = new Font(_ctrl.WindowPostIt.FontName, _ctrl.WindowPostIt.FontSize, style);
-            textDescription.Font = font;
-            textDescription.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
-            textDescription.ForeColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor);
-            textDescription.Visible = true;            
+            kntEditView.MarkdownContentControl.Font = font;
+            kntEditView.MarkdownContentControl.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
+            kntEditView.MarkdownContentControl.ForeColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor);
+            kntEditView.MarkdownContentControl.Visible = true;
         }
 
         if (updateSizeAndLocation)
@@ -463,6 +534,29 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
         labelStatus.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
     }
+
+    private void ControlsToModel()
+    {
+        if (_ctrl.Model is null)
+            return;
+
+        // TODO: !!! Delete this code in this version
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        //    _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(htmlDescription.BodyHtml, true);
+        //else
+        //    _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(textDescription.Text, true);
+
+        if (_ctrl.Model.ContentType.Contains("html"))
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
+        else
+            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
+
+        _ctrl.Model.FolderId = _selectedFolderId;
+        _ctrl.Model.Topic = labelCaption.Text;
+
+        ControlsToModelPostIt();
+    }
+
     private void ControlsToModelPostIt()
     {
         // Top and Left are shifted to -32000 when the post - it in navigation mode is minimized.
@@ -492,9 +586,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     }
 
     private void WindowsFormView()
-    {
-        menuWindowsFormView.Checked = !menuWindowsFormView.Checked;
-        ShowPostItInWindowsFormView(menuWindowsFormView.Checked);
+    {        
+        ShowPostItInWindowsFormView(!menuWindowsFormView.Checked);
     }
 
     private void ShowPostItInWindowsFormView(bool showInWindowsFormView)
@@ -506,6 +599,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             this.MaximizeBox = true;
             this.MinimizeBox = true;
             this.ShowInTaskbar = true;
+            menuWindowsFormView.Checked = true;
         }
         else
         {
@@ -514,6 +608,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.ShowInTaskbar = false;
+            menuWindowsFormView.Checked = false;
         }
     }
 
@@ -522,7 +617,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         menuAlwaysFront.Checked = !menuAlwaysFront.Checked;
         TopMost = menuAlwaysFront.Checked;
         // It is necessary set focus or select this form
-        textDescription.Focus();
+        kntEditView.MarkdownContentControl.Focus();
     }
 
     private void DrawFormBorder()

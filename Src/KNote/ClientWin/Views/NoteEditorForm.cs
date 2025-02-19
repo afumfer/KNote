@@ -212,7 +212,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void buttonEditMarkdown_Click(object sender, EventArgs e)
     {
-        // TODO: remove in this version
+        // TODO: remove in this version !!!
         //try
         //{
         //    if (htmlDescription.Visible)
@@ -263,6 +263,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     
     private async void buttonNavigate_Click(object sender, EventArgs e)
     {
+        // TODO: remove in this version !!!
         //try
         //{
         //    if (_ctrl.Model.ContentType.Contains('#'))
@@ -335,7 +336,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void buttonEditHtml_Click(object sender, EventArgs e)
     {
-        // TODO: remove in this version
+        // TODO: remove in this version !!!        
         //try
         //{
         //    if (_ctrl.Model.ContentType.Contains('#'))
@@ -399,6 +400,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void toolDescriptionHtml_Click(object sender, EventArgs e)
     {
+        // TODO: remove in this version !!!
         //ToolStripItem menuSel;
         //menuSel = (ToolStripItem)sender;
 
@@ -427,6 +429,37 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         //    htmlDescription.HtmlContentsEdit();
         //    htmlDescription.Focus();
         //}
+        // ------------------
+
+        ToolStripItem menuSel;
+        menuSel = (ToolStripItem)sender;
+
+        if (menuSel == toolDescriptionHtmlTitle1)
+        {
+            kntEditView.HtmlContentControl.SelectedHtml = "<h1>Title 1</h1>";
+            kntEditView.HtmlContentControl.Focus();
+        }
+        if (menuSel == toolDescriptionHtmlTitle2)
+        {
+            kntEditView.HtmlContentControl.SelectedHtml = "<h2>Title 2</h2>";
+            kntEditView.HtmlContentControl.Focus();
+        }
+        if (menuSel == toolDescriptionHtmlTitle3)
+        {
+            kntEditView.HtmlContentControl.SelectedHtml = "<h3>Title 3</h3>";
+            kntEditView.HtmlContentControl.Focus();
+        }
+        if (menuSel == toolDescriptionHtmlTitle4)
+        {
+            kntEditView.HtmlContentControl.SelectedHtml = "<h4>Title 4</h4>";
+            kntEditView.HtmlContentControl.Focus();
+        }
+        if (menuSel == toolDescriptionHtmlEdit)
+        {
+            kntEditView.HtmlContentControl.HtmlContentsEdit();
+            kntEditView.HtmlContentControl.Focus();
+        }
+
     }
 
     private void toolDescriptionMarkdown_Click(object sender, EventArgs e)
@@ -438,11 +471,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         var nl = System.Environment.NewLine;
 
         if (menuSel == toolDescriptionMarkdownBold)
-            tag = " **_**";
+            tag = " **text**";
         else if (menuSel == toolDescriptionMarkdownStrikethrough)
-            tag = " ~~_~~";
+            tag = " ~~text~~";
         else if (menuSel == toolDescriptionMarkdownItalic)
-            tag = " *_*";
+            tag = " *text*";
         else if (menuSel == toolDescriptionMarkdownH1)
             tag = nl + "# ";
         else if (menuSel == toolDescriptionMarkdownH2)
@@ -452,17 +485,17 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else if (menuSel == toolDescriptionMarkdownH4)
             tag = nl + "#### ";
         else if (menuSel == toolDescriptionMarkdownList)
-            tag = "-_";
+            tag = "- text";
         else if (menuSel == toolDescriptionMarkdownListOrdered)
-            tag = nl + "1._";
+            tag = nl + "1. text";
         else if (menuSel == toolDescriptionMarkdownLine)
             tag = nl + "------------";
         else if (menuSel == toolDescriptionMarkdownLink)
-            tag = nl + "[xx](http://xx 'xx')";
+            tag = nl + "[xx](http://xx 'text info')";
         else if (menuSel == toolDescriptionMarkdownImage)
-            tag = nl + "![Title](Address 'Title')](http://url 'Title')";
+            tag = nl + "![alt_title)](http://url 'Img description')";
         else if (menuSel == toolDescriptionMarkdownCode)
-            tag = nl + "```_```";
+            tag = nl + $"```{nl}text code{nl}```";
         else if (menuSel == toolDescriptionMarkdownTable)
         {
             tag = nl + nl;
@@ -472,10 +505,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             tag += "|   |   |" + nl;
         }
 
-        //var selStart = textDescription.SelectionStart;
-        //textDescription.Text = textDescription.Text.Insert(selStart, tag);
-        //textDescription.Focus();
-        //textDescription.SelectionStart = selStart;
+        var selStart = kntEditView.MarkdownContentControl.SelectionStart;
+        kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, tag);
+        kntEditView.MarkdownContentControl.Focus();
+        kntEditView.MarkdownContentControl.SelectionStart = selStart;
     }
 
     private void buttonFolderSearch_Click(object sender, EventArgs e)
@@ -754,6 +787,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (_ctrl.Model is null)
             return;
 
+        // TODO: !!! Delete this code in this version
         //textDescription.Dock = DockStyle.Fill;
         //htmlDescription.Dock = DockStyle.Fill;
         //kntEditView.Dock = DockStyle.Fill;
@@ -782,6 +816,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         //    htmlDescription.ToolbarVisible = false;
         //    htmlDescription.ReadOnly = true;
         //}
+        // ------------------------
 
         if (_ctrl.Model.ContentType == null || _ctrl.Model.ContentType.Contains("markdown"))
             EnableMarkdownView();
@@ -857,6 +892,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textPriority.Text = _ctrl.Model.Priority.ToString();
 
 
+        // TODO: Remove this !!!
         // --------------------------
 
         //textDescription.Text = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true);
@@ -909,7 +945,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             labelLoadingHtml.Visible = true;
             labelLoadingHtml.Refresh();
-            
+
+            // TODO: Remove this !!!
             //textDescription.Visible = false;
             //kntEditView.Visible = false;
             //htmlDescription.Visible = true;
@@ -922,6 +959,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         else if (_ctrl.Model.ContentType.Contains("navigation"))
         {
+            // TODO: Remove this !!!
             //textDescription.Visible = false;
             //htmlDescription.Visible = false;
             //kntEditView.Visible = true;
@@ -943,6 +981,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         else
         {
+            // TODO: Remove this !!!
             //htmlDescription.Visible = false;
             //kntEditView.Visible = false;
             //textDescription.Visible = true;
@@ -1082,7 +1121,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             webViewResource.Visible = true;
             panelPreview.Visible = false;
             if(!string.IsNullOrEmpty(_selectedResource.FullUrl))
-                await webViewResource.Navigate(_selectedResource.FullUrl);
+                await webViewResource.ShowNavigationUrlContent(_selectedResource.FullUrl);
+                // TODO: Remove this !!!
+                //await webViewResource.Navigate(_selectedResource.FullUrl);            
         }
         else
         {
@@ -1095,6 +1136,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void ControlsToModel()
     {
+        // TODO: Remove this !!!
         // Basic data
 
         //_ctrl.Model.Topic = textTopic.Text;
@@ -1115,6 +1157,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         //    _ctrl.Model.Priority = p;
 
         //_ctrl.Model.Script = textScriptCode.Text;
+        // ------------------------
 
         // Basic data
         _ctrl.Model.Topic = textTopic.Text;
@@ -1419,7 +1462,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void InsertLinkSelectedResource()
     {
-        //TODO: ....
+        //TODO: !!! Delete this code in this version
 
         //// If navigate mode then msgbox and return
         //if (!buttonNavigate.Enabled) 
@@ -1449,6 +1492,43 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         //    textDescription.Focus();
         //    textDescription.Select(selStart + strLink.Length, 0);
         //}
+        // ------------------------
+
+        // If navigate mode then msgbox and return
+        if (!buttonNavigate.Enabled)
+        {
+            _ctrl.ShowMessage("Cannot insert a resource into the text when editing mode (markdown or html) is not active", KntConst.AppName);
+            return;
+        }
+
+        var tmpFile = _ctrl.Service.Notes.UtilGetResourceFileUrl(_selectedResource.Container, _selectedResource.Name);
+
+        tabNoteData.SelectedIndex = 0;
+
+        if (!buttonViewHtml.Enabled)
+        {
+            string strLink = (_selectedResource.FileType.Contains("image")) ?
+                $"<img src='{tmpFile}' alt='{_selectedResource.Description}'/>" :
+                $"<a href='{tmpFile}' target='_blank'>{_selectedResource.NameOut}</a>";
+            kntEditView.HtmlContentControl.SelectedHtml = strLink;
+            kntEditView.HtmlContentControl.Focus();
+        }
+        else
+        {
+            string strLink = (_selectedResource.FileType.Contains("image")) ?
+                $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
+            // TODO: Delete this code in this version !!!
+            //var selStart = textDescription.SelectionStart;
+            //textDescription.Text = textDescription.Text.Insert(selStart, strLink);
+            //textDescription.Focus();
+            //textDescription.Select(selStart + strLink.Length, 0);
+
+            var selStart = kntEditView.MarkdownContentControl.SelectionStart;
+            kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, strLink);
+            kntEditView.MarkdownContentControl.Focus();
+            kntEditView.MarkdownContentControl.Select(selStart + strLink.Length, 0);
+
+        }
     }
 
     private void UpdateResource(ResourceDto resource)

@@ -8,18 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
+using MSDN.Html.Editor;
 
 namespace KntWebView
 {
     public partial class KntEditView : UserControl
     {
         #region Fields
-
-        // TODO: !!! remove this.
-        //public readonly string webViewVirtualHostName = @"knote.resources";
-        //public readonly string virtualHostNameToFolderMapping;
-
-        //private readonly char[] newLine = { '\r', '\n' };
 
         #endregion
 
@@ -29,7 +25,6 @@ namespace KntWebView
         {
             InitializeComponent();
             InitializeEditorsComponent();
-            //virtualHostNameToFolderMapping = $"https://{webViewVirtualHostName}";  // !!!
         }
 
         #endregion 
@@ -50,7 +45,7 @@ namespace KntWebView
         {
             get { return textUrl.Text; }
 
-            set { textUrl.Text = value; }  // !!! private o sólo lectura
+            set { textUrl.Text = value; }  
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -145,7 +140,24 @@ namespace KntWebView
                 }
             }
         }
+        
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public HtmlEditorControl HtmlContentControl
+        {
+            get { return htmlContent; }
+        }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public TextBox MarkdownContentControl 
+        {
+            get { return textContent; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public WebView2 WebViewControl
+        {
+            get { return webView; }
+        }
 
         #endregion
 
@@ -216,16 +228,6 @@ namespace KntWebView
         #region Public methods
 
         #region API v2
-
-        // Public params:
-        //Content
-        //ResourcesContainer
-        //ResourcesContainerRootPath
-        //ResourcesContainerRootUrl
-
-        // Private fields 
-        // "knote.resources"
-        // KntConst.VirtualHostNameToFolderMapping
 
         public void SetMarkdownContent(string content)
         {            
@@ -302,28 +304,10 @@ namespace KntWebView
                 CoreWebView2HostResourceAccessKind.Allow);
         }
         
-        public async Task Navigate(string url)
+        private async Task Navigate(string url)
         {
             textUrl.Text = url;
             await Navigate();
-        }
-
-        public async Task NavigateToString(string contentString)
-        {
-            try
-            {
-                TextUrl = "";
-
-                if (!_isInitialized)
-                    await InitializeAsync();
-
-                if (webView.CoreWebView2 != null)  
-                    webView.NavigateToString(contentString);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"You can not navigate to the indicated string. ({ex.Message})");
-            }
         }
 
         public async Task ClearWebView()
@@ -416,7 +400,6 @@ namespace KntWebView
             BorderStyle = BorderStyle.FixedSingle;
             webView.Visible = true;
         }
-
         
         private void EnableHtmlView()
         {
@@ -444,23 +427,23 @@ namespace KntWebView
             }
         }
 
-        //public string? ExtractUrlFromText(string text)
-        //{
-        //    if (string.IsNullOrEmpty(text))
-        //        return null;
+        private async Task NavigateToString(string contentString)
+        {
+            try
+            {
+                TextUrl = "";
 
-        //    int indexJump = text.IndexOfAny(newLine);
-        //    var urlFistLine = (indexJump >= 0) ? text.Substring(0, indexJump) : text;
+                if (!_isInitialized)
+                    await InitializeAsync();
 
-        //    Uri? resultUri;
-        //    var validResult = Uri.TryCreate(urlFistLine, UriKind.Absolute, out resultUri) &&
-        //           (resultUri.Scheme == Uri.UriSchemeHttp || resultUri.Scheme == Uri.UriSchemeHttps || resultUri.Scheme == Uri.UriSchemeFile);
-
-        //    if (validResult)
-        //        return urlFistLine;
-        //    else
-        //        return null;
-        //}
+                if (webView.CoreWebView2 != null)
+                    webView.NavigateToString(contentString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"You can not navigate to the indicated string. ({ex.Message})");
+            }
+        }
 
         #endregion
     }

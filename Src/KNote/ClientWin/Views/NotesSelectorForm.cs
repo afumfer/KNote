@@ -179,9 +179,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     private void dataGridNotes_DoubleClick(object sender, EventArgs e)
     {
-        //ActiveCurrentRow();
-        var sr = dataGridNotes.SelectedRows[0];
-        _ctrl.SelectedEntity = DataGridViewRowToNoteInfo(sr);
+        ActiveCurrentRow(false);
         _ctrl.NotifySelectedEntityDoubleClick();
     }
 
@@ -254,11 +252,12 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         }
     }
 
-    private void ActiveCurrentRow()
+    private void ActiveCurrentRow(bool notifySelectedEntity = true)
     {
         var sr = dataGridNotes.SelectedRows[0];
         _ctrl.SelectedEntity = DataGridViewRowToNoteInfo(sr);
-        _ctrl.NotifySelectedEntity();
+        if(notifySelectedEntity)            
+            _ctrl.NotifySelectedEntity();
     }
 
     private void CoonfigureGridStd()

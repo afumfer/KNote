@@ -120,25 +120,25 @@
   <metadata name="panelForm.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="labelStatus.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <metadata name="picResize.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
   <metadata name="picMenu.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="labelCaption.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="picMenu.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAAMZJREFUWEdj
+        +HiEXwGIXwPxfzrjg0DMDnLAdSRBeuN0kAOwSdALt446YNQBow4YdcCoA0YdMOqAUQeMOoBWDtgCxLxA
+        zEQAM9LKAUIMxAIsmqmBWaFmMwKxCB4MbpZjM4BSDHMAD5o4OtYaSAecB2KapQFCDvgIxAIgNQPhAJDl
+        ImDLQQBNkloYlwNQLQcBoMBvJAXUwtgcgGk5CAAFpyApohZGd8ApIOYHW4gOgBKgEskLiDOpiJmgZrMA
+        sTwQM4ItwwAMDACoEFgX7MEogwAAAABJRU5ErkJggg==
+</value>
+  </data>
   <metadata name="labelStatus.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <metadata name="picResize.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="picResize.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         R0lGODlhDgAOAIcAAAAAAP//////////////////////////////////////////////////////////
@@ -156,18 +156,6 @@
         ////////////////////////////////////////////////////////////////////////////////
         /yH/C05FVFNDQVBFMi4wAwEBAAAh+QQBAAABACwAAAAADgAOAAAIMQADCBxIsKDBggAOIkyoUCCAhw0D
         PISocCJFgxYvEsyo0SFHhgM/ahR5kWRJkxELBgQAOw==
-</value>
-  </data>
-  <metadata name="picMenu.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <data name="picMenu.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAAMZJREFUWEdj
-        +HiEXwGIXwPxfzrjg0DMDnLAdSRBeuN0kAOwSdALt446YNQBow4YdcCoA0YdMOqAUQeMOoBWDtgCxLxA
-        zEQAM9LKAUIMxAIsmqmBWaFmMwKxCB4MbpZjM4BSDHMAD5o4OtYaSAecB2KapQFCDvgIxAIgNQPhAJDl
-        ImDLQQBNkloYlwNQLQcBoMBvJAXUwtgcgGk5CAAFpyApohZGd8ApIOYHW4gOgBKgEskLiDOpiJmgZrMA
-        sTwQM4ItwwAMDACoEFgX7MEogwAAAABJRU5ErkJggg==
 </value>
   </data>
   <metadata name="labelCaption.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
