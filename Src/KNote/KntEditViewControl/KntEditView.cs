@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.ComponentModel;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using MSDN.Html.Editor;
@@ -15,10 +7,6 @@ namespace KntWebView
 {
     public partial class KntEditView : UserControl
     {
-        #region Fields
-
-        #endregion
-
         #region Constructor
 
         public KntEditView()
@@ -226,9 +214,7 @@ namespace KntWebView
         #endregion
 
         #region Public methods
-
-        #region API v2
-
+        
         public void SetMarkdownContent(string content)
         {            
             textContent.Text = content;            
@@ -238,56 +224,31 @@ namespace KntWebView
         {            
             if(content != null)
                 textContent.Text = content;
-
             ContentType = "markdown";            
         }
 
         public async Task ShowNavigationContent(string content)
         {
-            //textContent.Text = content;
-
             ShowNavigationTools = false;
             ShowStatusInfo = false;
-
-            await NavigateToString(content);
-
-            //var url = ExtractUrlFromText(content);
-            //if (!string.IsNullOrEmpty(url))
-            //    await Navigate(url);            
-            //else                           
-            //    await NavigateToString(content);
-            
+            await NavigateToString(content);            
             ContentType = "navigation";
         }
 
         public async Task ShowNavigationUrlContent(string content)
         {
-            //textContent.Text = content;
-
-            //ShowNavigationTools = true;
             ShowStatusInfo = false;
-
-            await Navigate(content);
-            
+            await Navigate(content);            
             ContentType = "navigation";
         }
 
         public void ShowHtmlContent(string content)
-        {
-            //textContent.Text = content;
-
+        {            
             htmlContent.BodyHtml = "";
             htmlContent.BodyHtml = content;            
-
             ContentType = "html";
-
             htmlContent.Refresh();
         }
-
-
-        #endregion 
-
-        #region API v1
 
         public async Task SetVirtualHostNameToFolderMapping(string folder)
         {
@@ -304,12 +265,6 @@ namespace KntWebView
                 CoreWebView2HostResourceAccessKind.Allow);
         }
         
-        private async Task Navigate(string url)
-        {
-            textUrl.Text = url;
-            await Navigate();
-        }
-
         public async Task ClearWebView()
         {
             await NavigateToString(" ");
@@ -342,8 +297,6 @@ namespace KntWebView
         {
             webView.CoreWebView2.GoForward();
         }
-
-        #endregion 
 
         #endregion
 
@@ -387,8 +340,7 @@ namespace KntWebView
         {
             webView.Visible = false;
             ShowNavigationTools = false;
-            ShowStatusInfo = false;
-            BorderStyle = BorderStyle.None;
+            ShowStatusInfo = false;            
             htmlContent.Visible = false;
             textContent.Visible = true;
         }
@@ -396,8 +348,7 @@ namespace KntWebView
         private void EnableNavigationView()
         {
             textContent.Visible = false;
-            htmlContent.Visible = false;
-            BorderStyle = BorderStyle.FixedSingle;
+            htmlContent.Visible = false;            
             webView.Visible = true;
         }
         
@@ -406,8 +357,7 @@ namespace KntWebView
             textContent.Visible = false;
             ShowNavigationTools = false;
             ShowStatusInfo = false;
-            webView.Visible = false;
-            BorderStyle = BorderStyle.None;
+            webView.Visible = false;            
             htmlContent.Visible = true;
         }
 
@@ -443,6 +393,12 @@ namespace KntWebView
             {
                 MessageBox.Show($"You can not navigate to the indicated string. ({ex.Message})");
             }
+        }
+
+        private async Task Navigate(string url)
+        {
+            textUrl.Text = url;
+            await Navigate();
         }
 
         #endregion
