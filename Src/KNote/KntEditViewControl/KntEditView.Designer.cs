@@ -55,7 +55,7 @@
             panelToolBox.Dock = DockStyle.Top;
             panelToolBox.Location = new Point(0, 0);
             panelToolBox.Name = "panelToolBox";
-            panelToolBox.Size = new Size(743, 30);
+            panelToolBox.Size = new Size(348, 30);
             panelToolBox.TabIndex = 13;
             // 
             // btnForward
@@ -94,7 +94,7 @@
             textUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textUrl.Location = new Point(77, 3);
             textUrl.Name = "textUrl";
-            textUrl.Size = new Size(664, 23);
+            textUrl.Size = new Size(269, 23);
             textUrl.TabIndex = 3;
             textUrl.KeyUp += textUrl_KeyUp;
             // 
@@ -107,13 +107,13 @@
             panelWebView.Dock = DockStyle.Fill;
             panelWebView.Location = new Point(0, 30);
             panelWebView.Name = "panelWebView";
-            panelWebView.Size = new Size(743, 383);
+            panelWebView.Size = new Size(348, 455);
             panelWebView.TabIndex = 14;
             // 
             // htmlContent
             // 
             htmlContent.InnerText = null;
-            htmlContent.Location = new Point(403, 209);
+            htmlContent.Location = new Point(14, 286);
             htmlContent.Name = "htmlContent";
             htmlContent.Size = new Size(315, 144);
             htmlContent.TabIndex = 7;
@@ -121,7 +121,7 @@
             // textContent
             // 
             textContent.Font = new Font("Courier New", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            textContent.Location = new Point(82, 75);
+            textContent.Location = new Point(14, 18);
             textContent.Multiline = true;
             textContent.Name = "textContent";
             textContent.Size = new Size(315, 128);
@@ -134,7 +134,7 @@
             webView.AllowExternalDrop = true;
             webView.CreationProperties = null;
             webView.DefaultBackgroundColor = Color.White;
-            webView.Location = new Point(403, 75);
+            webView.Location = new Point(14, 152);
             webView.Name = "webView";
             webView.Size = new Size(315, 128);
             webView.TabIndex = 5;
@@ -146,9 +146,9 @@
             statusBar.BackColor = SystemColors.Control;
             statusBar.GripMargin = new Padding(0);
             statusBar.Items.AddRange(new ToolStripItem[] { statusLabel });
-            statusBar.Location = new Point(0, 413);
+            statusBar.Location = new Point(0, 485);
             statusBar.Name = "statusBar";
-            statusBar.Size = new Size(743, 22);
+            statusBar.Size = new Size(348, 22);
             statusBar.SizingGrip = false;
             statusBar.TabIndex = 15;
             // 
@@ -167,7 +167,7 @@
             Controls.Add(panelToolBox);
             Controls.Add(statusBar);
             Name = "KntEditView";
-            Size = new Size(743, 435);
+            Size = new Size(348, 507);
             Load += KntEditView_Load;
             panelToolBox.ResumeLayout(false);
             panelToolBox.PerformLayout();

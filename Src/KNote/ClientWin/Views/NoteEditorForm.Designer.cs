@@ -439,7 +439,7 @@
             kntEditView.Location = new Point(43, 17);
             kntEditView.Margin = new Padding(3, 4, 3, 4);
             kntEditView.Name = "kntEditView";
-            kntEditView.Size = new Size(277, 166);
+            kntEditView.Size = new Size(709, 391);
             kntEditView.TabIndex = 11;
             // 
             // toolDescription
