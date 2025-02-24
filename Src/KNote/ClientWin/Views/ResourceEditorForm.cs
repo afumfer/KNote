@@ -12,8 +12,8 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     private readonly ResourceEditorCtrl _ctrl;
     private bool _viewFinalized = false;
     private bool _formIsDisty = false;
-    
-    private string varFileType;        
+
+    private string varFileType;
     private byte[] varContentArrayBytes;
     private string varName;
     private string varContainer;
@@ -64,8 +64,8 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     public async void CleanView()
     {
         textDescription.Text = "";
-        textOrder.Text = "";            
-        await htmlPreview.ClearWebView();
+        textOrder.Text = "";
+        await kntView.ClearWebView();
         textFileName.Text = "";
     }
 
@@ -78,6 +78,11 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     #endregion
 
     #region Form event handlers
+
+    private void ResourceEditorForm_Load(object sender, EventArgs e)
+    {
+        PersonalizeControls();
+    }
 
     private void ResourceEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -101,12 +106,12 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     }
 
     private async void buttonAccept_Click(object sender, EventArgs e)
-    {            
+    {
         var res = await _ctrl.SaveModel();
         if (res)
-        {                
-            await htmlPreview.ClearWebView();
-            htmlPreview.Refresh();
+        {
+            await kntView.ClearWebView();
+            kntView.Refresh();
             _formIsDisty = false;
             this.DialogResult = DialogResult.OK;
         }
@@ -123,10 +128,10 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         if (openFileDialog.ShowDialog() == DialogResult.OK)
         {
             var fileTmp = openFileDialog.FileName;
-            varContentArrayBytes = File.ReadAllBytes(fileTmp);           
+            varContentArrayBytes = File.ReadAllBytes(fileTmp);
             textFileName.Text = _ctrl.Service.ReplaceSpecialCharacters(Path.GetFileName(fileTmp));
             textDescription.Text = textFileName.Text;
-            varName = _ctrl.Model.ResourceId.ToString() + "_" + textFileName.Text;                
+            varName = _ctrl.Model.ResourceId.ToString() + "_" + textFileName.Text;
             varFileType = _ctrl.ExtensionFileToFileType(Path.GetExtension(fileTmp));
             await ShowPreview(fileTmp);
         }
@@ -135,6 +140,12 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     #endregion
 
     #region Private methods
+
+    private void PersonalizeControls()
+    {
+        kntView.ShowStatusInfo = false;
+        kntView.ShowNavigationTools = false;
+    }
 
     private bool OnCandelEdition()
     {
@@ -150,24 +161,24 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     }
 
     private async Task ModelToControls()
-    {            
+    {
         textFileName.Text = _ctrl.Model.NameOut;
         varName = _ctrl.Model.Name;
         textDescription.Text = _ctrl.Model.Description;
         textOrder.Text = _ctrl.Model.Order.ToString();
-        varFileType = _ctrl.Model.FileType;            
-        varContainer = _ctrl.Model.Container;                  
+        varFileType = _ctrl.Model.FileType;
+        varContainer = _ctrl.Model.Container;
 
-        if (_ctrl.Model.ContentInDB)             
-            varContentArrayBytes = _ctrl.Model.ContentArrayBytes;            
+        if (_ctrl.Model.ContentInDB)
+            varContentArrayBytes = _ctrl.Model.ContentArrayBytes;
         else
         {
             var file = _ctrl.Service.Notes.UtilGetResourceFilePath(_ctrl.Model);
-            if(!string.IsNullOrEmpty(file))
-                if(File.Exists(file))
+            if (!string.IsNullOrEmpty(file))
+                if (File.Exists(file))
                     varContentArrayBytes = File.ReadAllBytes(file);
-        } 
-        
+        }
+
         await ShowPreview(_ctrl.Model.FullUrl, false);
     }
 
@@ -177,28 +188,28 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         _ctrl.Model.Description = textDescription.Text;
         _ctrl.Model.Order = _ctrl.Store.TextToInt(textOrder.Text);
         _ctrl.Model.FileType = varFileType;
-        _ctrl.Model.Container = varContainer;            
+        _ctrl.Model.Container = varContainer;
         _ctrl.Model.ContentArrayBytes = varContentArrayBytes;
 
-        _ctrl.SaveResourceFileAndRefreshDto();            
+        _ctrl.SaveResourceFileAndRefreshDto();
     }
 
-    private async Task ShowPreview(string file, bool includePdf = true) 
+    private async Task ShowPreview(string file, bool includePdf = true)
     {
         if (file == null)
-        {                
-            await htmlPreview.ClearWebView();
+        {
+            await kntView.ClearWebView();
             return;
         }
-                        
-        var ext = Path.GetExtension(file);          
-        if(_ctrl.Store.ExtensionFileToFileType(ext) != "")
+
+        var ext = Path.GetExtension(file);
+        if (_ctrl.Store.ExtensionFileToFileType(ext) != "")
         {
             try
             {
-                await htmlPreview.ClearWebView();
+                await kntView.ClearWebView();
                 //await htmlPreview.Navigate(file);
-                await htmlPreview.ShowNavigationUrlContent(file);
+                await kntView.ShowNavigationUrlContent(file);
             }
             catch (Exception ex)
             {
@@ -206,7 +217,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
             }
         }
         else
-            await htmlPreview.ClearWebView();
+            await kntView.ClearWebView();
     }
 
     #endregion

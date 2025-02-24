@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
@@ -78,7 +79,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             await webViewResource.ClearWebView();
         webViewResource.Visible = true;
         panelPreview.Visible = false;
-        textTaskDescription.Text = "";
+        //textTaskDescription.Text = "";  // !!!
+        await kntEditViewTask.ClearWebView();
         textTaskTags.Text = "";
         listViewAttributes.Clear();
         listViewResources.Clear();
@@ -490,7 +492,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
             listViewTasks.Items[listViewTasks.Items.Count - 1].Selected = true;
-            textTaskDescription.Text = task.Description;
+
+            await UpdateTaskDescription(task.Description);
+
             textTaskTags.Text = task.Tags;
         }
     }
@@ -511,7 +515,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         bool res = await _ctrl.DeleteTask(Guid.Parse(delTsk));
         if (res)
         {
-            textTaskDescription.Text = "";
+            //textTaskDescription.Text = ""; // !!!
+            await kntEditViewTask.ClearWebView();
             textTaskTags.Text = "";
             listViewTasks.Items[delTsk].Remove();
         }
@@ -638,7 +643,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             InsertLinkSelectedResource();
     }
 
-    private void listViewTasks_SelectedIndexChanged(object sender, EventArgs e)
+    private async void listViewTasks_SelectedIndexChanged(object sender, EventArgs e)
     {
         try
         {
@@ -646,7 +651,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             {
                 var idTask = (Guid.Parse(listViewTasks.SelectedItems[0].Name));
                 var selTask = _ctrl.Model.Tasks.Where(_ => _.NoteTaskId == idTask).FirstOrDefault();
-                textTaskDescription.Text = selTask.Description;
+
+                await UpdateTaskDescription(selTask.Description);
+
                 textTaskTags.Text = selTask.Tags;
             }
         }
@@ -713,8 +720,16 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         textDescriptionResource.ReadOnly = true;
         textDescriptionResource.BackColor = Color.White;
-        textTaskDescription.ReadOnly = true;
-        textTaskDescription.BackColor = Color.White;
+        
+        // TODO: !!! refactor this
+        //textTaskDescription.ReadOnly = true;
+        //textTaskDescription.BackColor = Color.White;
+        kntEditViewTask.ShowStatusInfo = false;
+        kntEditViewTask.EnableUrlBox = false;
+        kntEditViewTask.ShowNavigationTools = false;
+        kntEditViewTask.BorderStyle = BorderStyle.FixedSingle;
+
+
         textTaskTags.ReadOnly = true;
         textTaskTags.BackColor = Color.White;
 
@@ -793,7 +808,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             listViewTasks.Items[0].Selected = true;
         else
         {
-            textTaskDescription.Text = "";
+            //textTaskDescription.Text = "";  // !!!
+            await kntEditViewTask.ClearWebView(); 
             textTaskTags.Text = "";
         }
 
@@ -1137,7 +1153,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         item.SubItems[6].Text = message.Comment.ToString();
     }
 
-    private void EditTask()
+    private async void EditTask()
     {
         if (listViewTasks.SelectedItems.Count == 0)
         {
@@ -1147,10 +1163,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         var idTask = Guid.Parse(listViewTasks.SelectedItems[0].Name);
         var task = _ctrl.EditTask(idTask);
         if (task != null)
-            UpdateTask(task);
+            await UpdateTask(task);
     }
 
-    private void UpdateTask(NoteTaskDto task)
+    private async Task UpdateTask(NoteTaskDto task)
     {
         var item = listViewTasks.Items[task.NoteTaskId.ToString()];
         item.SubItems[1].Text = task.Priority.ToString();
@@ -1162,8 +1178,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         item.SubItems[7].Text = task.DifficultyLevel.ToString();
         item.SubItems[8].Text = task.ExpectedStartDate.ToString();
         item.SubItems[9].Text = task.ExpectedEndDate.ToString();
+        listViewTasks.Scrollable = true;
 
-        textTaskDescription.Text = task.Description;
+        await UpdateTaskDescription(task.Description);
+
         textTaskTags.Text = task.Tags;
     }
 
@@ -1258,7 +1276,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, strLink);
             kntEditView.MarkdownContentControl.Focus();
             kntEditView.MarkdownContentControl.Select(selStart + strLink.Length, 0);
-
         }
     }
 
@@ -1276,6 +1293,14 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         var item = listViewAttributes.Items[noteAttribute.NoteKAttributeId.ToString()];
         item.Text = noteAttribute.Name;
         item.SubItems[1].Text = noteAttribute.Value;
+    }
+
+    private async Task UpdateTaskDescription(string description)
+    {
+        kntEditViewTask.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(description, true));
+        var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditViewTask.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+        await kntEditViewTask.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
+        await kntEditViewTask.ShowNavigationContent(htmlContent);
     }
 
     #endregion

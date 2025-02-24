@@ -121,9 +121,9 @@
             buttonResourceAdd = new Button();
             label12 = new Label();
             tabActivities = new TabPage();
+            kntEditViewTask = new KntWebView.KntEditView();
             textTaskTags = new TextBox();
             label17 = new Label();
-            textTaskDescription = new TextBox();
             label16 = new Label();
             listViewTasks = new ListView();
             buttonTaskEdit = new Button();
@@ -1075,9 +1075,9 @@
             // 
             // tabActivities
             // 
+            tabActivities.Controls.Add(kntEditViewTask);
             tabActivities.Controls.Add(textTaskTags);
             tabActivities.Controls.Add(label17);
-            tabActivities.Controls.Add(textTaskDescription);
             tabActivities.Controls.Add(label16);
             tabActivities.Controls.Add(listViewTasks);
             tabActivities.Controls.Add(buttonTaskEdit);
@@ -1092,6 +1092,14 @@
             tabActivities.TabIndex = 2;
             tabActivities.Text = "Activities ";
             tabActivities.UseVisualStyleBackColor = true;
+            // 
+            // kntEditViewTask
+            // 
+            kntEditViewTask.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            kntEditViewTask.Location = new Point(400, 34);
+            kntEditViewTask.Name = "kntEditViewTask";
+            kntEditViewTask.Size = new Size(388, 462);
+            kntEditViewTask.TabIndex = 17;
             // 
             // textTaskTags
             // 
@@ -1110,15 +1118,6 @@
             label17.Size = new Size(33, 15);
             label17.TabIndex = 16;
             label17.Text = "Tags:";
-            // 
-            // textTaskDescription
-            // 
-            textTaskDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textTaskDescription.Location = new Point(400, 36);
-            textTaskDescription.Multiline = true;
-            textTaskDescription.Name = "textTaskDescription";
-            textTaskDescription.Size = new Size(388, 465);
-            textTaskDescription.TabIndex = 15;
             // 
             // label16
             // 
@@ -1611,7 +1610,6 @@
         private TextBox textStatus;
         private Label label8;
         private Label label17;
-        private TextBox textTaskDescription;
         private Label label16;
         private Button buttonSaveResource;
         private SaveFileDialog saveFileDialog;
@@ -1623,5 +1621,6 @@
         private Label labelPreview;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem buttonLockFormat;
+        private KntWebView.KntEditView kntEditViewTask;
     }
 }

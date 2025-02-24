@@ -51,7 +51,7 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
         _viewFinalized = true;
         this.Close();
     }
-   
+
     public void RefreshView()
     {
         ModelToControls();
@@ -93,7 +93,7 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
     }
 
     private async void buttonAccept_Click(object sender, EventArgs e)
-    {            
+    {
         var res = await _ctrl.SaveModel();
         if (res)
         {
@@ -217,5 +217,5 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
         return selDate;
     }
 
-    #endregion
+#endregion
 }

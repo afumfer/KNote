@@ -30,182 +30,169 @@ namespace KNote.ClientWin.Views
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ResourceEditorForm));
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonAccept = new System.Windows.Forms.Button();
-            this.panelForm = new System.Windows.Forms.Panel();
-            this.htmlPreview = new KntWebView.KntEditView();
-            this.textFileName = new System.Windows.Forms.TextBox();
-            this.labelPreview = new System.Windows.Forms.Label();
-            this.textDescription = new System.Windows.Forms.TextBox();
-            this.textOrder = new System.Windows.Forms.TextBox();
-            this.labelDescription = new System.Windows.Forms.Label();
-            this.labelOrder = new System.Windows.Forms.Label();
-            this.buttonSelectFile = new System.Windows.Forms.Button();
-            this.labelFileName = new System.Windows.Forms.Label();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.panelForm.SuspendLayout();
-            this.SuspendLayout();
+            buttonCancel = new Button();
+            buttonAccept = new Button();
+            panelForm = new Panel();
+            kntView = new KntWebView.KntEditView();
+            textFileName = new TextBox();
+            labelPreview = new Label();
+            textDescription = new TextBox();
+            textOrder = new TextBox();
+            labelDescription = new Label();
+            labelOrder = new Label();
+            buttonSelectFile = new Button();
+            labelFileName = new Label();
+            openFileDialog = new OpenFileDialog();
+            panelForm.SuspendLayout();
+            SuspendLayout();
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(493, 452);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(81, 29);
-            this.buttonCancel.TabIndex = 6;
-            this.buttonCancel.Text = "&Cancel";
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.Location = new Point(586, 588);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new Size(81, 29);
+            buttonCancel.TabIndex = 5;
+            buttonCancel.Text = "&Cancel";
+            buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += buttonCancel_Click;
             // 
             // buttonAccept
             // 
-            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(406, 452);
-            this.buttonAccept.Name = "buttonAccept";
-            this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 5;
-            this.buttonAccept.Text = "&Accept";
-            this.buttonAccept.UseVisualStyleBackColor = true;
-            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
+            buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonAccept.Location = new Point(499, 588);
+            buttonAccept.Name = "buttonAccept";
+            buttonAccept.Size = new Size(81, 29);
+            buttonAccept.TabIndex = 4;
+            buttonAccept.Text = "&Accept";
+            buttonAccept.UseVisualStyleBackColor = true;
+            buttonAccept.Click += buttonAccept_Click;
             // 
             // panelForm
             // 
-            this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelForm.Controls.Add(this.htmlPreview);
-            this.panelForm.Controls.Add(this.textFileName);
-            this.panelForm.Controls.Add(this.labelPreview);
-            this.panelForm.Controls.Add(this.textDescription);
-            this.panelForm.Controls.Add(this.textOrder);
-            this.panelForm.Controls.Add(this.labelDescription);
-            this.panelForm.Controls.Add(this.labelOrder);
-            this.panelForm.Controls.Add(this.buttonSelectFile);
-            this.panelForm.Controls.Add(this.labelFileName);
-            this.panelForm.Location = new System.Drawing.Point(1, 3);
-            this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(583, 443);
-            this.panelForm.TabIndex = 5;
+            panelForm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelForm.Controls.Add(kntView);
+            panelForm.Controls.Add(textFileName);
+            panelForm.Controls.Add(labelPreview);
+            panelForm.Controls.Add(textDescription);
+            panelForm.Controls.Add(textOrder);
+            panelForm.Controls.Add(labelDescription);
+            panelForm.Controls.Add(labelOrder);
+            panelForm.Controls.Add(buttonSelectFile);
+            panelForm.Controls.Add(labelFileName);
+            panelForm.Location = new Point(1, 3);
+            panelForm.Name = "panelForm";
+            panelForm.Size = new Size(676, 579);
+            panelForm.TabIndex = 5;
             // 
-            // htmlPreview
+            // kntView
             // 
-            this.htmlPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.htmlPreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.htmlPreview.EnableUrlBox = true;
-            this.htmlPreview.ForceHttps = false;
-            this.htmlPreview.IsInitialized = false;
-            this.htmlPreview.Location = new System.Drawing.Point(288, 73);
-            this.htmlPreview.Name = "htmlPreview";            
-            this.htmlPreview.ShowNavigationTools = false;
-            this.htmlPreview.ShowStatusInfo = false;
-            this.htmlPreview.Size = new System.Drawing.Size(285, 361);
-            this.htmlPreview.TabIndex = 17;
-            this.htmlPreview.TextUrl = "";
+            kntView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            kntView.BorderStyle = BorderStyle.FixedSingle;
+            kntView.Location = new Point(11, 93);
+            kntView.Name = "kntView";
+            kntView.Size = new Size(655, 477);
+            kntView.TabIndex = 17;
             // 
             // textFileName
             // 
-            this.textFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFileName.Enabled = false;
-            this.textFileName.Location = new System.Drawing.Point(78, 14);
-            this.textFileName.Name = "textFileName";
-            this.textFileName.Size = new System.Drawing.Size(378, 23);
-            this.textFileName.TabIndex = 0;
+            textFileName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textFileName.Enabled = false;
+            textFileName.Location = new Point(89, 14);
+            textFileName.Name = "textFileName";
+            textFileName.Size = new Size(460, 23);
+            textFileName.TabIndex = 0;
             // 
             // labelPreview
             // 
-            this.labelPreview.AutoSize = true;
-            this.labelPreview.Location = new System.Drawing.Point(288, 55);
-            this.labelPreview.Name = "labelPreview";
-            this.labelPreview.Size = new System.Drawing.Size(51, 15);
-            this.labelPreview.TabIndex = 16;
-            this.labelPreview.Text = "Preview:";
+            labelPreview.AutoSize = true;
+            labelPreview.Location = new Point(11, 75);
+            labelPreview.Name = "labelPreview";
+            labelPreview.Size = new Size(51, 15);
+            labelPreview.TabIndex = 16;
+            labelPreview.Text = "Preview:";
             // 
             // textDescription
             // 
-            this.textDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.textDescription.Location = new System.Drawing.Point(11, 73);
-            this.textDescription.MaxLength = 3332767;
-            this.textDescription.Multiline = true;
-            this.textDescription.Name = "textDescription";
-            this.textDescription.Size = new System.Drawing.Size(271, 327);
-            this.textDescription.TabIndex = 2;
+            textDescription.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textDescription.Location = new Point(89, 43);
+            textDescription.MaxLength = 3332767;
+            textDescription.Name = "textDescription";
+            textDescription.Size = new Size(346, 23);
+            textDescription.TabIndex = 2;
             // 
             // textOrder
             // 
-            this.textOrder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textOrder.Location = new System.Drawing.Point(57, 411);
-            this.textOrder.Name = "textOrder";
-            this.textOrder.Size = new System.Drawing.Size(62, 23);
-            this.textOrder.TabIndex = 4;
+            textOrder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            textOrder.Location = new Point(487, 42);
+            textOrder.Name = "textOrder";
+            textOrder.Size = new Size(62, 23);
+            textOrder.TabIndex = 3;
             // 
             // labelDescription
             // 
-            this.labelDescription.AutoSize = true;
-            this.labelDescription.Location = new System.Drawing.Point(11, 55);
-            this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(70, 15);
-            this.labelDescription.TabIndex = 13;
-            this.labelDescription.Text = "Description:";
+            labelDescription.AutoSize = true;
+            labelDescription.Location = new Point(11, 47);
+            labelDescription.Name = "labelDescription";
+            labelDescription.Size = new Size(70, 15);
+            labelDescription.TabIndex = 13;
+            labelDescription.Text = "Description:";
             // 
             // labelOrder
             // 
-            this.labelOrder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.labelOrder.AutoSize = true;
-            this.labelOrder.Location = new System.Drawing.Point(11, 414);
-            this.labelOrder.Name = "labelOrder";
-            this.labelOrder.Size = new System.Drawing.Size(40, 15);
-            this.labelOrder.TabIndex = 12;
-            this.labelOrder.Text = "Order:";
+            labelOrder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            labelOrder.AutoSize = true;
+            labelOrder.Location = new Point(441, 46);
+            labelOrder.Name = "labelOrder";
+            labelOrder.Size = new Size(40, 15);
+            labelOrder.TabIndex = 12;
+            labelOrder.Text = "Order:";
             // 
             // buttonSelectFile
             // 
-            this.buttonSelectFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSelectFile.Location = new System.Drawing.Point(462, 14);
-            this.buttonSelectFile.Name = "buttonSelectFile";
-            this.buttonSelectFile.Size = new System.Drawing.Size(111, 25);
-            this.buttonSelectFile.TabIndex = 1;
-            this.buttonSelectFile.Text = "Select file";
-            this.buttonSelectFile.UseVisualStyleBackColor = true;
-            this.buttonSelectFile.Click += new System.EventHandler(this.buttonSelectFile_Click);
+            buttonSelectFile.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonSelectFile.Location = new Point(555, 14);
+            buttonSelectFile.Name = "buttonSelectFile";
+            buttonSelectFile.Size = new Size(111, 25);
+            buttonSelectFile.TabIndex = 1;
+            buttonSelectFile.Text = "Select file";
+            buttonSelectFile.UseVisualStyleBackColor = true;
+            buttonSelectFile.Click += buttonSelectFile_Click;
             // 
             // labelFileName
             // 
-            this.labelFileName.AutoSize = true;
-            this.labelFileName.Location = new System.Drawing.Point(11, 17);
-            this.labelFileName.Name = "labelFileName";
-            this.labelFileName.Size = new System.Drawing.Size(61, 15);
-            this.labelFileName.TabIndex = 10;
-            this.labelFileName.Text = "File name:";
+            labelFileName.AutoSize = true;
+            labelFileName.Location = new Point(11, 17);
+            labelFileName.Name = "labelFileName";
+            labelFileName.Size = new Size(61, 15);
+            labelFileName.TabIndex = 10;
+            labelFileName.Text = "File name:";
             // 
             // openFileDialog
             // 
-            this.openFileDialog.FileName = "openFileDialog1";
+            openFileDialog.FileName = "openFileDialog1";
             // 
             // ResourceEditorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(586, 493);
-            this.Controls.Add(this.buttonCancel);
-            this.Controls.Add(this.buttonAccept);
-            this.Controls.Add(this.panelForm);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "ResourceEditorForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Resource editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ResourceEditorForm_FormClosing);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ResourceEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ResourceEditorForm_KeyUp);
-            this.panelForm.ResumeLayout(false);
-            this.panelForm.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(679, 629);
+            Controls.Add(buttonCancel);
+            Controls.Add(buttonAccept);
+            Controls.Add(panelForm);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "ResourceEditorForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Resource editor";
+            FormClosing += ResourceEditorForm_FormClosing;
+            Load += ResourceEditorForm_Load;
+            KeyPress += ResourceEditorForm_KeyPress;
+            KeyUp += ResourceEditorForm_KeyUp;
+            panelForm.ResumeLayout(false);
+            panelForm.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -222,6 +209,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelFileName;
         private System.Windows.Forms.TextBox textFileName;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
-        private KntWebView.KntEditView htmlPreview;
+        private KntWebView.KntEditView kntView;
     }
 }
