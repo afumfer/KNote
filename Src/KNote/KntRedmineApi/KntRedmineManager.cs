@@ -179,6 +179,8 @@ public class KntRedmineManager
             noteDto.Topic = issue.Subject;
             noteDto.ContentType = "navigation";
             noteDto.Description = issue.Description;
+            var linkIssue = $"{Environment.NewLine}{Environment.NewLine}---{Environment.NewLine}{Environment.NewLine}[Redmine issue: #{id}](https://www3.gobiernodecanarias.org/aplicaciones/educacion/rm/issues/{id})";
+            noteDto.Description += linkIssue;
             noteDto.Tags = filter.Tags;
             noteDto.CreationDateTime = issue.CreatedOn ?? DateTime.Now;
             noteDto.ModificationDateTime = issue.UpdatedOn ?? DateTime.Now;
