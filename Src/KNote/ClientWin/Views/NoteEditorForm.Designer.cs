@@ -1228,7 +1228,7 @@
             // buttonDeleteAlarm
             // 
             buttonDeleteAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonDeleteAlarm.Location = new Point(725, 10);
+            buttonDeleteAlarm.Location = new Point(730, 10);
             buttonDeleteAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteAlarm.Name = "buttonDeleteAlarm";
             buttonDeleteAlarm.Size = new Size(27, 23);
@@ -1240,7 +1240,7 @@
             // buttonAddAlarm
             // 
             buttonAddAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonAddAlarm.Location = new Point(690, 10);
+            buttonAddAlarm.Location = new Point(700, 10);
             buttonAddAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonAddAlarm.Name = "buttonAddAlarm";
             buttonAddAlarm.Size = new Size(27, 23);

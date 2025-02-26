@@ -155,9 +155,8 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
                     OnSavedEntity(response.Entity);
                 else
                     OnAddedEntity(response.Entity);
-
-                // TODO: deprecated in 0.0.9.8 version !!!
-                // View.RefreshView();
+                
+                View.RefreshView();
 
                 // TODO: future version ... notify actions.
                 // NotifyMessage($"Note {Model?.NoteNumber.ToString()} saved");
@@ -312,31 +311,27 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             return null;
     }
 
-    public async Task<bool> DeleteMessage(Guid messageId)
+    public bool DeleteMessage(Guid messageId)
     {
-        var messageEditor = new MessageEditorCtrl(Store);
-        messageEditor.AutoDBSave = false;  // don't save automatically
+        bool res = false;
 
-        var res = await messageEditor.DeleteModel(Service, messageId);
-        if (res)
+        KMessageDto msgDel = null;
+        foreach (var item in Model.Messages)
         {
-            KMessageDto msgDel = null;
-            foreach (var item in Model.Messages)
+            if (item.KMessageId == messageId)
             {
-                if (item.KMessageId == messageId)
-                {
-                    msgDel = item;
-                    break;
-                }
+                msgDel = item;
+                break;
             }
+        }
 
-            if (msgDel != null)
-            {
-                if (msgDel.IsNew())
-                    Model.Messages.Remove(msgDel);
-                else
-                    msgDel.SetIsDeleted(true);
-            }
+        if (msgDel != null)
+        {
+            if (msgDel.IsNew())
+                Model.Messages.Remove(msgDel);
+            else
+                msgDel.SetIsDeleted(true);
+            res = true;
         }
 
         return res;
@@ -386,31 +381,27 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             return null;
     }
 
-    public async Task<bool> DeleteTask(Guid taskId)
+    public bool DeleteTask(Guid taskId)
     {
-        var taskEditor = new TaskEditorCtrl(Store);
-        taskEditor.AutoDBSave = false;  // don't save automatically
+        bool res = false;
 
-        var res = await taskEditor.DeleteModel(Service, taskId);
-        if (res)
+        NoteTaskDto tskDel = null;
+        foreach (var item in Model.Tasks)
         {
-            NoteTaskDto tskDel = null;
-            foreach(var item in Model.Tasks)
+            if (item.NoteTaskId == taskId)
             {
-                if(item.NoteTaskId == taskId)
-                {
-                    tskDel = item;
-                    break;
-                }
+                tskDel = item;
+                break;
             }
+        }
 
-            if(tskDel != null)
-            {
-                if (tskDel.IsNew())
-                    Model.Tasks.Remove(tskDel);
-                else
-                    tskDel.SetIsDeleted(true);
-            }
+        if (tskDel != null)
+        {
+            if (tskDel.IsNew())
+                Model.Tasks.Remove(tskDel);
+            else
+                tskDel.SetIsDeleted(true);
+            res = true;
         }
 
         return res;
@@ -455,6 +446,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             var converter = new ImageConverter();
 
             var newResource = new ResourceDto();
+            newResource.SetIsNew(true);
             newResource.ResourceId = Guid.NewGuid();
             newResource.NoteId = Model.NoteId;
             newResource.ContentInDB = contentInDB;
@@ -466,7 +458,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             newResource.ContentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));
 
             Service.Notes.UtilManageResourceContent(newResource);
-
+            
             Model.Resources.Add(newResource);
             return newResource;
         }
@@ -496,33 +488,34 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             return Task.FromResult<ResourceDto>(null);
     }
 
-    public async Task<bool> DeleteResource(Guid resourceId)
+    public bool DeleteResource(Guid resourceId)
     {
-        var resource = new ResourceEditorCtrl(Store);
-        resource.AutoDBSave = false;  // don't save automatically
+        bool res = false;
 
-        var res = await resource.DeleteModel(Service, resourceId);
-        if (res)
+        ResourceDto resDel = null;
+        foreach (var item in Model.Resources)
         {
-            ResourceDto resDel = null;
-            foreach(var item in Model.Resources)
+            if (item.ResourceId == resourceId)
             {
-                if(item.ResourceId == resourceId)
-                {
-                    resDel = item;
-                    break;
-                }
-            }
-
-            if(resDel != null)
-            {
-                if (resDel.IsNew())
-                    Model.Resources.Remove(resDel);
-                else
-                    resDel.SetIsDeleted(true);
+                resDel = item;
+                break;
             }
         }
 
+        if (resDel != null)
+        {
+            if (resDel.IsNew())
+            {
+                Model.Resources.Remove(resDel);                
+                var fullPathRec = Path.Combine(Service.RepositoryRef.ResourcesContainerRootPath, resDel.Container, resDel.Name);
+                if (File.Exists(fullPathRec))
+                    File.Delete(fullPathRec);
+            }
+            else
+                resDel.SetIsDeleted(true);
+            res = true;
+        }
+ 
         return res;
     }
 

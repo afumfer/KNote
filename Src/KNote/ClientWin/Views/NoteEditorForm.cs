@@ -460,7 +460,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         EditAlarm();
     }
 
-    private async void buttonDeleteAlarm_Click(object sender, EventArgs e)
+    private void buttonDeleteAlarm_Click(object sender, EventArgs e)
     {
         if (listViewAlarms.SelectedItems.Count == 0)
         {
@@ -468,7 +468,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
-        var res = await _ctrl.DeleteMessage(messageId);
+        var res = _ctrl.DeleteMessage(messageId);
         if (res)
         {
             listViewAlarms.Items[messageId.ToString()].Remove();
@@ -512,7 +512,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         string delTsk = listViewTasks.SelectedItems[0].Name;
-        bool res = await _ctrl.DeleteTask(Guid.Parse(delTsk));
+        bool res = _ctrl.DeleteTask(Guid.Parse(delTsk));
         if (res)
         {
             //textTaskDescription.Text = ""; // !!!
@@ -550,7 +550,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
         var delRes = listViewResources.SelectedItems[0].Name;
-        var res = await _ctrl.DeleteResource(Guid.Parse(delRes));
+        var res = _ctrl.DeleteResource(Guid.Parse(delRes));
         if (res)
         {
             listViewResources.Items[delRes].Remove();
@@ -572,7 +572,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void linkViewFile_Click(object sender, EventArgs e)
     {
-
         if (_selectedResource.FullUrl == null)
             return;
 
@@ -1242,9 +1241,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void AddItemToListViewResources(ResourceDto resource)
     {
-        listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
-        listViewResources.Items[0].Selected = true;
-        _selectedResource = resource;
+        listViewResources.Items.Add(ResourceDtoToListViewItem(resource));        
+        _selectedResource = resource;        
+        listViewResources.Items[resource.ResourceId.ToString()].Selected = true;        
     }
 
     private void InsertLinkSelectedResource()
