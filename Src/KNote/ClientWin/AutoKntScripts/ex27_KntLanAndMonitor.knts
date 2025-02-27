@@ -1,0 +1,8 @@
+﻿' --- KntLab
+var lab = GetKntLabCtrl();
+lab.Run();
+lab.ShowLabView();
+
+' --- Monitor
+var monitor = GetKntMoniotorCtrl();
+monitor.Run();

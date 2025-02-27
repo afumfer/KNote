@@ -22,19 +22,12 @@ public interface IViewEmbeddable : IViewBase
     void ConfigureWindowMode();   
 }
 
-public interface IViewIViewEmbeddableExt : IViewEmbeddable
-{
-    void HideView();
-    void ActivateView();
-}
-
 #endregion
 
 #region Generals views
 
 public interface IViewEditor<T> : IViewBase
-{
-    //void RefreshView();
+{    
     void CleanView();
     void RefreshModel();
 }
@@ -42,13 +35,8 @@ public interface IViewEditor<T> : IViewBase
 public interface IViewEditorEmbeddable<T> : IViewEmbeddable
 {
     void CleanView();
-    void RefreshModel();                
-}
-
-public interface IViewEditorEmbeddableExt<T> : IViewIViewEmbeddableExt
-{
-    void CleanView();
     void RefreshModel();
+    void RefreshViewOnlyRequiredComponents();
 }
 
 public interface IViewSelector<TItem> : IViewEmbeddable

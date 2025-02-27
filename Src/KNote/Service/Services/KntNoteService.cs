@@ -263,7 +263,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         bool allTaskResolved = true;
         if (tasksValid?.Count > 0)
         {
-            foreach (var item in tasks)
+            foreach (var item in tasksValid)
             {
                 if (item.Resolved == false)
                 {

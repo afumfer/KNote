@@ -9,7 +9,7 @@ namespace KntScript
 {
     public class Library
     {
-        public static string AnTS_Version = "0.0.1.5";
+        public static string KnsLib_Version = "0.0.1.6";
 
         internal IInOutDevice InOutDevice { get; set; }
         

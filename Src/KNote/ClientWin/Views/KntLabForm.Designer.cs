@@ -72,12 +72,12 @@
             buttonRunMonitor = new Button();
             tabControlLab = new TabControl();
             tabKntEditView = new TabPage();
+            panel1 = new Panel();
+            kntEditView = new KntWebView.KntEditView();
             textForKntEditView = new TextBox();
             btnKntEditViewHtml = new Button();
             btnKntEditViewNavigation = new Button();
             btnKntEditViewMarkdown = new Button();
-            panel1 = new Panel();
-            kntEditView = new KntWebView.KntEditView();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
             tabRichEditor.SuspendLayout();
@@ -234,7 +234,7 @@
             htmlDescription.InnerText = null;
             htmlDescription.Location = new Point(14, 15);
             htmlDescription.Name = "htmlDescription";
-            htmlDescription.Size = new Size(634, 520);
+            htmlDescription.Size = new Size(697, 566);
             htmlDescription.TabIndex = 10;
             // 
             // tabKntScriptLab
@@ -543,6 +543,23 @@
             tabKntEditView.Text = "KntEditView";
             tabKntEditView.UseVisualStyleBackColor = true;
             // 
+            // panel1
+            // 
+            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panel1.Controls.Add(kntEditView);
+            panel1.Location = new Point(17, 139);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(693, 439);
+            panel1.TabIndex = 5;
+            // 
+            // kntEditView
+            // 
+            kntEditView.BorderStyle = BorderStyle.FixedSingle;
+            kntEditView.Location = new Point(40, 44);
+            kntEditView.Name = "kntEditView";
+            kntEditView.Size = new Size(281, 148);
+            kntEditView.TabIndex = 1;
+            // 
             // textForKntEditView
             // 
             textForKntEditView.Location = new Point(218, 12);
@@ -581,23 +598,6 @@
             btnKntEditViewMarkdown.Text = "KntEditView markdown";
             btnKntEditViewMarkdown.UseVisualStyleBackColor = true;
             btnKntEditViewMarkdown.Click += btnKntEditViewMarkdown_Click;
-            // 
-            // panel1
-            // 
-            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panel1.Controls.Add(kntEditView);
-            panel1.Location = new Point(17, 139);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(693, 439);
-            panel1.TabIndex = 5;
-            // 
-            // kntEditView
-            // 
-            kntEditView.BorderStyle = BorderStyle.FixedSingle;
-            kntEditView.Location = new Point(40, 44);
-            kntEditView.Name = "kntEditView";
-            kntEditView.Size = new Size(281, 148);
-            kntEditView.TabIndex = 1;
             // 
             // KntLabForm
             // 

@@ -112,6 +112,16 @@ public class KNoteScriptLibrary: Library
         return new KntServerCOMCtrl(_store);
     }
 
+    public MonitorCtrl GetKntMoniotorCtrl()
+    {
+        return new MonitorCtrl(_store);
+    }
+
+    public KntLabCtrl GetKntLabCtrl()
+    {
+        return new KntLabCtrl(_store);
+    }
+
     public KntHttpClientCtrl GetHttpClientCtrl()
     {
         return new KntHttpClientCtrl(_store);

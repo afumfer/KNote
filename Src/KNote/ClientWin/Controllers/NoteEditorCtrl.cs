@@ -155,8 +155,10 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
                     OnSavedEntity(response.Entity);
                 else
                     OnAddedEntity(response.Entity);
-                
-                View.RefreshView();
+
+                // Experimental
+                //View.RefreshView();
+                View.RefreshViewOnlyRequiredComponents();
 
                 // TODO: future version ... notify actions.
                 // NotifyMessage($"Note {Model?.NoteNumber.ToString()} saved");

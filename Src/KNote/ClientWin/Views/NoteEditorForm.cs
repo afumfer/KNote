@@ -93,6 +93,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         ModelToControls();
     }
 
+    public void RefreshViewOnlyRequiredComponents()
+    {
+        ModelToControlsOnlyRequiredComponents();
+    }
+
+
     public void RefreshModel()
     {
         ControlsToModel();
@@ -514,8 +520,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         string delTsk = listViewTasks.SelectedItems[0].Name;
         bool res = _ctrl.DeleteTask(Guid.Parse(delTsk));
         if (res)
-        {
-            //textTaskDescription.Text = ""; // !!!
+        {            
             await kntEditViewTask.ClearWebView();
             textTaskTags.Text = "";
             listViewTasks.Items[delTsk].Remove();
@@ -739,6 +744,17 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // TODO: remove in this version
         tabNoteData.TabPages.Remove(tabTraceNotes);
+    }
+
+    private void ModelToControlsOnlyRequiredComponents()
+    {
+        textNoteNumber.Text = "#" + _ctrl.Model.NoteNumber.ToString();
+        textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
+        textStatus.Text = _ctrl.Model.InternalTags;
+        buttonLockFormat.Checked = _ctrl.Model.ContentType != null && _ctrl.Model.ContentType.Contains('#');
+
+        this.Update();
+        this.Refresh();
     }
 
     private async void ModelToControls()
