@@ -369,11 +369,13 @@ namespace KntWebView
                     await InitializeAsync();
 
                 if (webView.CoreWebView2 != null)  // This patch is required when using sql server repositories 
-                    webView.CoreWebView2.Navigate(textUrl.Text);
+                    if(!string.IsNullOrEmpty(textUrl.Text))
+                        webView.CoreWebView2.Navigate(textUrl.Text);
             }
             catch
             {
-                throw;
+                // TODO: hack, for test in slow local network 
+                //throw;
             }
         }
 
