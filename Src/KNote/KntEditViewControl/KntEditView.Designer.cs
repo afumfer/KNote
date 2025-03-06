@@ -120,10 +120,11 @@
             // 
             // textContent
             // 
-            textContent.Font = new Font("Courier New", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textContent.Font = new Font("Courier New", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textContent.Location = new Point(14, 18);
             textContent.Multiline = true;
             textContent.Name = "textContent";
+            textContent.ScrollBars = ScrollBars.Vertical;
             textContent.Size = new Size(315, 128);
             textContent.TabIndex = 6;
             textContent.Text = "textContent";

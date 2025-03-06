@@ -391,10 +391,11 @@
             // buttonNavigate
             // 
             buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonNavigate.Location = new Point(625, 105);
+            buttonNavigate.Font = new Font("Segoe UI", 8.25F);
+            buttonNavigate.Location = new Point(593, 104);
             buttonNavigate.Margin = new Padding(4, 3, 4, 3);
             buttonNavigate.Name = "buttonNavigate";
-            buttonNavigate.Size = new Size(80, 24);
+            buttonNavigate.Size = new Size(96, 26);
             buttonNavigate.TabIndex = 6;
             buttonNavigate.Text = "Navigate";
             buttonNavigate.UseVisualStyleBackColor = true;
@@ -676,12 +677,13 @@
             // buttonEditMarkdown
             // 
             buttonEditMarkdown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonEditMarkdown.Font = new Font("Segoe UI", 8.25F);
             buttonEditMarkdown.ImageAlign = ContentAlignment.MiddleLeft;
             buttonEditMarkdown.ImageList = imageListTabNoteData;
-            buttonEditMarkdown.Location = new Point(545, 105);
+            buttonEditMarkdown.Location = new Point(496, 104);
             buttonEditMarkdown.Margin = new Padding(4, 3, 4, 3);
             buttonEditMarkdown.Name = "buttonEditMarkdown";
-            buttonEditMarkdown.Size = new Size(79, 24);
+            buttonEditMarkdown.Size = new Size(96, 26);
             buttonEditMarkdown.TabIndex = 5;
             buttonEditMarkdown.Text = "Markdown";
             buttonEditMarkdown.UseVisualStyleBackColor = true;
@@ -690,10 +692,11 @@
             // buttonViewHtml
             // 
             buttonViewHtml.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonViewHtml.Location = new Point(706, 105);
+            buttonViewHtml.Font = new Font("Segoe UI", 8.25F);
+            buttonViewHtml.Location = new Point(690, 104);
             buttonViewHtml.Margin = new Padding(4, 3, 4, 3);
             buttonViewHtml.Name = "buttonViewHtml";
-            buttonViewHtml.Size = new Size(80, 24);
+            buttonViewHtml.Size = new Size(96, 26);
             buttonViewHtml.TabIndex = 7;
             buttonViewHtml.Text = "Html editor";
             buttonViewHtml.UseVisualStyleBackColor = true;
@@ -752,10 +755,11 @@
             buttonFolderSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonFolderSearch.BackColor = SystemColors.Control;
             buttonFolderSearch.FlatStyle = FlatStyle.System;
-            buttonFolderSearch.Location = new Point(760, 38);
+            buttonFolderSearch.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonFolderSearch.Location = new Point(760, 36);
             buttonFolderSearch.Margin = new Padding(4, 3, 4, 3);
             buttonFolderSearch.Name = "buttonFolderSearch";
-            buttonFolderSearch.Size = new Size(27, 23);
+            buttonFolderSearch.Size = new Size(27, 26);
             buttonFolderSearch.TabIndex = 2;
             buttonFolderSearch.Text = "...";
             buttonFolderSearch.UseVisualStyleBackColor = false;
@@ -838,10 +842,11 @@
             buttonDeleteType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonDeleteType.BackColor = SystemColors.Control;
             buttonDeleteType.FlatStyle = FlatStyle.System;
-            buttonDeleteType.Location = new Point(730, 16);
+            buttonDeleteType.Font = new Font("Segoe UI", 8.25F);
+            buttonDeleteType.Location = new Point(730, 14);
             buttonDeleteType.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteType.Name = "buttonDeleteType";
-            buttonDeleteType.Size = new Size(27, 23);
+            buttonDeleteType.Size = new Size(27, 26);
             buttonDeleteType.TabIndex = 47;
             buttonDeleteType.Text = "X";
             toolTipHelps.SetToolTip(buttonDeleteType, "Delete type");
@@ -877,10 +882,11 @@
             buttonNoteType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonNoteType.BackColor = SystemColors.Control;
             buttonNoteType.FlatStyle = FlatStyle.System;
-            buttonNoteType.Location = new Point(758, 16);
+            buttonNoteType.Font = new Font("Segoe UI", 8.25F);
+            buttonNoteType.Location = new Point(758, 14);
             buttonNoteType.Margin = new Padding(4, 3, 4, 3);
             buttonNoteType.Name = "buttonNoteType";
-            buttonNoteType.Size = new Size(27, 23);
+            buttonNoteType.Size = new Size(27, 26);
             buttonNoteType.TabIndex = 45;
             buttonNoteType.Text = "...";
             toolTipHelps.SetToolTip(buttonNoteType, "Select new type");
@@ -900,10 +906,11 @@
             // buttonAttributeEdit
             // 
             buttonAttributeEdit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonAttributeEdit.Location = new Point(758, 54);
+            buttonAttributeEdit.Font = new Font("Segoe UI", 8.25F);
+            buttonAttributeEdit.Location = new Point(758, 52);
             buttonAttributeEdit.Margin = new Padding(4, 3, 4, 3);
             buttonAttributeEdit.Name = "buttonAttributeEdit";
-            buttonAttributeEdit.Size = new Size(27, 23);
+            buttonAttributeEdit.Size = new Size(27, 26);
             buttonAttributeEdit.TabIndex = 12;
             buttonAttributeEdit.Text = "...";
             buttonAttributeEdit.UseVisualStyleBackColor = true;
@@ -965,7 +972,7 @@
             // 
             webViewResource.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             webViewResource.BorderStyle = BorderStyle.FixedSingle;
-            webViewResource.Location = new Point(392, 39);
+            webViewResource.Location = new Point(392, 36);
             webViewResource.Margin = new Padding(3, 4, 3, 4);
             webViewResource.Name = "webViewResource";
             webViewResource.Size = new Size(392, 157);
@@ -974,9 +981,10 @@
             // 
             // buttonSaveResource
             // 
-            buttonSaveResource.Location = new Point(434, 10);
+            buttonSaveResource.Font = new Font("Segoe UI", 8.25F);
+            buttonSaveResource.Location = new Point(426, 8);
             buttonSaveResource.Name = "buttonSaveResource";
-            buttonSaveResource.Size = new Size(32, 23);
+            buttonSaveResource.Size = new Size(32, 26);
             buttonSaveResource.TabIndex = 20;
             buttonSaveResource.Text = "S";
             toolTipHelps.SetToolTip(buttonSaveResource, "Save resource");
@@ -985,9 +993,10 @@
             // 
             // buttonInsertLink
             // 
-            buttonInsertLink.Location = new Point(396, 10);
+            buttonInsertLink.Font = new Font("Segoe UI", 8.25F);
+            buttonInsertLink.Location = new Point(392, 8);
             buttonInsertLink.Name = "buttonInsertLink";
-            buttonInsertLink.Size = new Size(32, 23);
+            buttonInsertLink.Size = new Size(32, 26);
             buttonInsertLink.TabIndex = 19;
             buttonInsertLink.Text = "<>";
             toolTipHelps.SetToolTip(buttonInsertLink, "Insert resouce link in note description ");
@@ -1031,10 +1040,11 @@
             // 
             // buttonResourceEdit
             // 
-            buttonResourceEdit.Location = new Point(360, 10);
+            buttonResourceEdit.Font = new Font("Segoe UI", 8.25F);
+            buttonResourceEdit.Location = new Point(360, 8);
             buttonResourceEdit.Margin = new Padding(4, 3, 4, 3);
             buttonResourceEdit.Name = "buttonResourceEdit";
-            buttonResourceEdit.Size = new Size(27, 23);
+            buttonResourceEdit.Size = new Size(27, 26);
             buttonResourceEdit.TabIndex = 12;
             buttonResourceEdit.Text = "...";
             buttonResourceEdit.UseVisualStyleBackColor = true;
@@ -1042,10 +1052,11 @@
             // 
             // buttonResourceDelete
             // 
-            buttonResourceDelete.Location = new Point(330, 10);
+            buttonResourceDelete.Font = new Font("Segoe UI", 8.25F);
+            buttonResourceDelete.Location = new Point(330, 8);
             buttonResourceDelete.Margin = new Padding(4, 3, 4, 3);
             buttonResourceDelete.Name = "buttonResourceDelete";
-            buttonResourceDelete.Size = new Size(27, 23);
+            buttonResourceDelete.Size = new Size(27, 26);
             buttonResourceDelete.TabIndex = 11;
             buttonResourceDelete.Text = "-";
             buttonResourceDelete.UseVisualStyleBackColor = true;
@@ -1053,10 +1064,11 @@
             // 
             // buttonResourceAdd
             // 
-            buttonResourceAdd.Location = new Point(300, 10);
+            buttonResourceAdd.Font = new Font("Segoe UI", 8.25F);
+            buttonResourceAdd.Location = new Point(300, 8);
             buttonResourceAdd.Margin = new Padding(4, 3, 4, 3);
             buttonResourceAdd.Name = "buttonResourceAdd";
-            buttonResourceAdd.Size = new Size(27, 23);
+            buttonResourceAdd.Size = new Size(27, 26);
             buttonResourceAdd.TabIndex = 10;
             buttonResourceAdd.Text = "+";
             toolTipHelps.SetToolTip(buttonResourceAdd, "Add resource");
@@ -1143,10 +1155,11 @@
             // 
             // buttonTaskEdit
             // 
-            buttonTaskEdit.Location = new Point(360, 10);
+            buttonTaskEdit.Font = new Font("Segoe UI", 8.25F);
+            buttonTaskEdit.Location = new Point(366, 8);
             buttonTaskEdit.Margin = new Padding(4, 3, 4, 3);
             buttonTaskEdit.Name = "buttonTaskEdit";
-            buttonTaskEdit.Size = new Size(27, 23);
+            buttonTaskEdit.Size = new Size(27, 26);
             buttonTaskEdit.TabIndex = 12;
             buttonTaskEdit.Text = "...";
             buttonTaskEdit.UseVisualStyleBackColor = true;
@@ -1154,10 +1167,11 @@
             // 
             // buttonTaskDelete
             // 
-            buttonTaskDelete.Location = new Point(330, 10);
+            buttonTaskDelete.Font = new Font("Segoe UI", 8.25F);
+            buttonTaskDelete.Location = new Point(336, 8);
             buttonTaskDelete.Margin = new Padding(4, 3, 4, 3);
             buttonTaskDelete.Name = "buttonTaskDelete";
-            buttonTaskDelete.Size = new Size(27, 23);
+            buttonTaskDelete.Size = new Size(27, 26);
             buttonTaskDelete.TabIndex = 11;
             buttonTaskDelete.Text = "-";
             buttonTaskDelete.UseVisualStyleBackColor = true;
@@ -1165,10 +1179,11 @@
             // 
             // buttonTaskAdd
             // 
-            buttonTaskAdd.Location = new Point(300, 10);
+            buttonTaskAdd.Font = new Font("Segoe UI", 8.25F);
+            buttonTaskAdd.Location = new Point(306, 8);
             buttonTaskAdd.Margin = new Padding(4, 3, 4, 3);
             buttonTaskAdd.Name = "buttonTaskAdd";
-            buttonTaskAdd.Size = new Size(27, 23);
+            buttonTaskAdd.Size = new Size(27, 26);
             buttonTaskAdd.TabIndex = 10;
             buttonTaskAdd.Text = "+";
             buttonTaskAdd.UseVisualStyleBackColor = true;
@@ -1204,10 +1219,10 @@
             // listViewAlarms
             // 
             listViewAlarms.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            listViewAlarms.Location = new Point(6, 34);
+            listViewAlarms.Location = new Point(6, 36);
             listViewAlarms.MultiSelect = false;
             listViewAlarms.Name = "listViewAlarms";
-            listViewAlarms.Size = new Size(781, 532);
+            listViewAlarms.Size = new Size(781, 530);
             listViewAlarms.TabIndex = 11;
             listViewAlarms.UseCompatibleStateImageBehavior = false;
             listViewAlarms.DoubleClick += listViewAlarms_DoubleClick;
@@ -1216,10 +1231,11 @@
             // buttonEditAlarm
             // 
             buttonEditAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonEditAlarm.Location = new Point(760, 10);
+            buttonEditAlarm.Font = new Font("Segoe UI", 8.25F);
+            buttonEditAlarm.Location = new Point(760, 8);
             buttonEditAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonEditAlarm.Name = "buttonEditAlarm";
-            buttonEditAlarm.Size = new Size(27, 23);
+            buttonEditAlarm.Size = new Size(27, 26);
             buttonEditAlarm.TabIndex = 11;
             buttonEditAlarm.Text = "...";
             buttonEditAlarm.UseVisualStyleBackColor = true;
@@ -1228,10 +1244,11 @@
             // buttonDeleteAlarm
             // 
             buttonDeleteAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonDeleteAlarm.Location = new Point(730, 10);
+            buttonDeleteAlarm.Font = new Font("Segoe UI", 8.25F);
+            buttonDeleteAlarm.Location = new Point(730, 8);
             buttonDeleteAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteAlarm.Name = "buttonDeleteAlarm";
-            buttonDeleteAlarm.Size = new Size(27, 23);
+            buttonDeleteAlarm.Size = new Size(27, 26);
             buttonDeleteAlarm.TabIndex = 10;
             buttonDeleteAlarm.Text = "-";
             buttonDeleteAlarm.UseVisualStyleBackColor = true;
@@ -1240,10 +1257,11 @@
             // buttonAddAlarm
             // 
             buttonAddAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonAddAlarm.Location = new Point(700, 10);
+            buttonAddAlarm.Font = new Font("Segoe UI", 8.25F);
+            buttonAddAlarm.Location = new Point(700, 8);
             buttonAddAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonAddAlarm.Name = "buttonAddAlarm";
-            buttonAddAlarm.Size = new Size(27, 23);
+            buttonAddAlarm.Size = new Size(27, 26);
             buttonAddAlarm.TabIndex = 9;
             buttonAddAlarm.Text = "+";
             buttonAddAlarm.UseVisualStyleBackColor = true;
@@ -1322,19 +1340,19 @@
             // listViewTraceNoteTo
             // 
             listViewTraceNoteTo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            listViewTraceNoteTo.Location = new Point(395, 89);
+            listViewTraceNoteTo.Location = new Point(406, 71);
             listViewTraceNoteTo.Name = "listViewTraceNoteTo";
-            listViewTraceNoteTo.Size = new Size(393, 477);
+            listViewTraceNoteTo.Size = new Size(382, 495);
             listViewTraceNoteTo.TabIndex = 44;
             listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
             // 
             // listViewTraceNoteFrom
             // 
             listViewTraceNoteFrom.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            listViewTraceNoteFrom.Location = new Point(11, 89);
+            listViewTraceNoteFrom.Location = new Point(6, 71);
             listViewTraceNoteFrom.MultiSelect = false;
             listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
-            listViewTraceNoteFrom.Size = new Size(378, 477);
+            listViewTraceNoteFrom.Size = new Size(383, 495);
             listViewTraceNoteFrom.TabIndex = 43;
             listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
             // 
@@ -1342,7 +1360,7 @@
             // 
             textTraceNodeType.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textTraceNodeType.Enabled = false;
-            textTraceNodeType.Location = new Point(135, 22);
+            textTraceNodeType.Location = new Point(135, 8);
             textTraceNodeType.Margin = new Padding(4, 3, 4, 3);
             textTraceNodeType.MaxLength = 255;
             textTraceNodeType.Name = "textTraceNodeType";
@@ -1354,80 +1372,87 @@
             buttonTraceNodeTypes.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonTraceNodeTypes.BackColor = SystemColors.Control;
             buttonTraceNodeTypes.FlatStyle = FlatStyle.System;
-            buttonTraceNodeTypes.Location = new Point(760, 22);
+            buttonTraceNodeTypes.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceNodeTypes.Location = new Point(760, 8);
             buttonTraceNodeTypes.Margin = new Padding(4, 3, 4, 3);
             buttonTraceNodeTypes.Name = "buttonTraceNodeTypes";
-            buttonTraceNodeTypes.Size = new Size(24, 23);
+            buttonTraceNodeTypes.Size = new Size(24, 26);
             buttonTraceNodeTypes.TabIndex = 42;
             buttonTraceNodeTypes.Text = "...";
             buttonTraceNodeTypes.UseVisualStyleBackColor = false;
             // 
             // label5
             // 
-            label5.Location = new Point(9, 22);
+            label5.Location = new Point(11, 12);
             label5.Margin = new Padding(4, 0, 4, 0);
             label5.Name = "label5";
-            label5.Size = new Size(131, 18);
+            label5.Size = new Size(122, 18);
             label5.TabIndex = 40;
             label5.Text = "Trace node types:";
             label5.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // buttonTraceToEdit
             // 
-            buttonTraceToEdit.Location = new Point(566, 60);
+            buttonTraceToEdit.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceToEdit.Location = new Point(757, 42);
             buttonTraceToEdit.Margin = new Padding(4, 3, 4, 3);
             buttonTraceToEdit.Name = "buttonTraceToEdit";
-            buttonTraceToEdit.Size = new Size(27, 23);
+            buttonTraceToEdit.Size = new Size(27, 26);
             buttonTraceToEdit.TabIndex = 15;
             buttonTraceToEdit.Text = "...";
             buttonTraceToEdit.UseVisualStyleBackColor = true;
             // 
             // buttonTraceToRemove
             // 
-            buttonTraceToRemove.Location = new Point(531, 60);
+            buttonTraceToRemove.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceToRemove.Location = new Point(722, 42);
             buttonTraceToRemove.Margin = new Padding(4, 3, 4, 3);
             buttonTraceToRemove.Name = "buttonTraceToRemove";
-            buttonTraceToRemove.Size = new Size(27, 23);
+            buttonTraceToRemove.Size = new Size(27, 26);
             buttonTraceToRemove.TabIndex = 14;
             buttonTraceToRemove.Text = "-";
             buttonTraceToRemove.UseVisualStyleBackColor = true;
             // 
             // buttonTraceToAdd
             // 
-            buttonTraceToAdd.Location = new Point(498, 60);
+            buttonTraceToAdd.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceToAdd.Location = new Point(687, 42);
             buttonTraceToAdd.Margin = new Padding(4, 3, 4, 3);
             buttonTraceToAdd.Name = "buttonTraceToAdd";
-            buttonTraceToAdd.Size = new Size(27, 23);
+            buttonTraceToAdd.Size = new Size(27, 26);
             buttonTraceToAdd.TabIndex = 13;
             buttonTraceToAdd.Text = "+";
             buttonTraceToAdd.UseVisualStyleBackColor = true;
             // 
             // buttonTraceFromEdit
             // 
-            buttonTraceFromEdit.Location = new Point(196, 60);
+            buttonTraceFromEdit.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceFromEdit.Location = new Point(362, 42);
             buttonTraceFromEdit.Margin = new Padding(4, 3, 4, 3);
             buttonTraceFromEdit.Name = "buttonTraceFromEdit";
-            buttonTraceFromEdit.Size = new Size(27, 23);
+            buttonTraceFromEdit.Size = new Size(27, 26);
             buttonTraceFromEdit.TabIndex = 12;
             buttonTraceFromEdit.Text = "...";
             buttonTraceFromEdit.UseVisualStyleBackColor = true;
             // 
             // buttonTraceFromRemove
             // 
-            buttonTraceFromRemove.Location = new Point(162, 60);
+            buttonTraceFromRemove.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceFromRemove.Location = new Point(327, 42);
             buttonTraceFromRemove.Margin = new Padding(4, 3, 4, 3);
             buttonTraceFromRemove.Name = "buttonTraceFromRemove";
-            buttonTraceFromRemove.Size = new Size(27, 23);
+            buttonTraceFromRemove.Size = new Size(27, 26);
             buttonTraceFromRemove.TabIndex = 11;
             buttonTraceFromRemove.Text = "-";
             buttonTraceFromRemove.UseVisualStyleBackColor = true;
             // 
             // buttonTraceFromAdd
             // 
-            buttonTraceFromAdd.Location = new Point(128, 60);
+            buttonTraceFromAdd.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceFromAdd.Location = new Point(292, 42);
             buttonTraceFromAdd.Margin = new Padding(4, 3, 4, 3);
             buttonTraceFromAdd.Name = "buttonTraceFromAdd";
-            buttonTraceFromAdd.Size = new Size(27, 23);
+            buttonTraceFromAdd.Size = new Size(27, 26);
             buttonTraceFromAdd.TabIndex = 10;
             buttonTraceFromAdd.Text = "+";
             buttonTraceFromAdd.UseVisualStyleBackColor = true;
@@ -1435,7 +1460,7 @@
             // label13
             // 
             label13.AutoSize = true;
-            label13.Location = new Point(397, 64);
+            label13.Location = new Point(406, 48);
             label13.Margin = new Padding(4, 0, 4, 0);
             label13.Name = "label13";
             label13.Size = new Size(81, 15);
@@ -1445,7 +1470,7 @@
             // label14
             // 
             label14.AutoSize = true;
-            label14.Location = new Point(13, 64);
+            label14.Location = new Point(6, 48);
             label14.Margin = new Padding(4, 0, 4, 0);
             label14.Name = "label14";
             label14.Size = new Size(99, 15);

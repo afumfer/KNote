@@ -75,13 +75,14 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         await kntEditView.ClearWebView();
         textPriority.Text = "";
         textDescriptionResource.Text = "";
-        if (webViewResource.Visible)            
+        if (webViewResource.Visible)
             await webViewResource.ClearWebView();
         webViewResource.Visible = true;
         panelPreview.Visible = false;
         //textTaskDescription.Text = "";  // !!!
         await kntEditViewTask.ClearWebView();
         textTaskTags.Text = "";
+        textScriptCode.Text = "";
         listViewAttributes.Clear();
         listViewResources.Clear();
         listViewTasks.Clear();
@@ -135,7 +136,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void NoteEditorForm_Load(object sender, EventArgs e)
     {
-        PersonalizeControls();        
+        PersonalizeControls();
     }
 
     private async void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -239,7 +240,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
 
     }
-    
+
     private async void buttonNavigate_Click(object sender, EventArgs e)
     {
         try
@@ -268,9 +269,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
                 await kntEditView.ShowNavigationContent(htmlContent);
             }
-            
+
             _ctrl.Model.ContentType = "navigation";
-            
+
             EnableNavigationView();
         }
         catch (Exception ex)
@@ -288,7 +289,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 ShowInfo($"This note cannot be changed to another format, the format is locked.");
                 return;
             }
-            
+
             kntEditView.ShowHtmlContent(_ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText));
 
             _ctrl.Model.ContentType = "html";
@@ -520,7 +521,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         string delTsk = listViewTasks.SelectedItems[0].Name;
         bool res = _ctrl.DeleteTask(Guid.Parse(delTsk));
         if (res)
-        {            
+        {
             await kntEditViewTask.ClearWebView();
             textTaskTags.Text = "";
             listViewTasks.Items[delTsk].Remove();
@@ -693,7 +694,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.FixedSingle;
 
         kntEditView.ContentType = _ctrl.Model.ContentType;
-       
+
         if (!_ctrl.EditMode)
         {
             foreach (var tab in tabNoteData.TabPages)
@@ -724,7 +725,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         textDescriptionResource.ReadOnly = true;
         textDescriptionResource.BackColor = Color.White;
-        
+
         // TODO: !!! refactor this
         //textTaskDescription.ReadOnly = true;
         //textTaskDescription.BackColor = Color.White;
@@ -790,7 +791,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     await kntEditView.ShowNavigationUrlContent(url);
                 }
                 else
-                {                    
+                {
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
                     await kntEditView.ShowNavigationContent(htmlContent);
@@ -802,7 +803,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             kntEditView.ShowMarkdownContent();
             EnableMarkdownView();
-        }                    
+        }
 
         buttonLockFormat.Checked = _ctrl.Model.ContentType != null && _ctrl.Model.ContentType.Contains('#');
 
@@ -824,7 +825,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else
         {
             //textTaskDescription.Text = "";  // !!!
-            await kntEditViewTask.ClearWebView(); 
+            await kntEditViewTask.ClearWebView();
             textTaskTags.Text = "";
         }
 
@@ -833,7 +834,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // Script             
         textScriptCode.Text = _ctrl.Model.Script;
-                
+
         this.Update();
         this.Refresh();
     }
@@ -934,7 +935,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             webViewResource.Visible = true;
             panelPreview.Visible = false;
-            if(!string.IsNullOrEmpty(_selectedResource.FullUrl))
+            if (!string.IsNullOrEmpty(_selectedResource.FullUrl))
                 await webViewResource.ShowNavigationUrlContent(_selectedResource.FullUrl);
         }
         else
@@ -1103,7 +1104,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
         }
     }
-    
+
     private void EnableHtmlView()
     {
         buttonEditMarkdown.Enabled = true;
@@ -1127,7 +1128,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             toolDescription.Visible = true;
             toolDescriptionHtml.Visible = false;
-            toolDescriptionMarkdown.Visible = true;        
+            toolDescriptionMarkdown.Visible = true;
         }
         kntEditView.BorderStyle = BorderStyle.None;
     }
@@ -1257,9 +1258,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void AddItemToListViewResources(ResourceDto resource)
     {
-        listViewResources.Items.Add(ResourceDtoToListViewItem(resource));        
-        _selectedResource = resource;        
-        listViewResources.Items[resource.ResourceId.ToString()].Selected = true;        
+        listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
+        _selectedResource = resource;
+        listViewResources.Items[resource.ResourceId.ToString()].Selected = true;
     }
 
     private void InsertLinkSelectedResource()
@@ -1319,4 +1320,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     #endregion
+
+    private void tabAttributes_Click(object sender, EventArgs e)
+    {
+
+    }
 }
