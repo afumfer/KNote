@@ -320,8 +320,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-
         kntEditView.ShowStatusInfo = false;
+        kntEditView.MarkdownContentControl.ScrollBars = ScrollBars.None;        
     }
 
     private async void ModelToControls()
