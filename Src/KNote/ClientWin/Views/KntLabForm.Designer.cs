@@ -78,6 +78,7 @@
             btnKntEditViewHtml = new Button();
             btnKntEditViewNavigation = new Button();
             btnKntEditViewMarkdown = new Button();
+            buttonTestNoteList = new Button();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
             tabRichEditor.SuspendLayout();
@@ -348,6 +349,7 @@
             // 
             // tabAppLab
             // 
+            tabAppLab.Controls.Add(buttonTestNoteList);
             tabAppLab.Controls.Add(buttonNLog);
             tabAppLab.Controls.Add(buttonServerCOMForm);
             tabAppLab.Controls.Add(buttonMessageBrokerSendMessage);
@@ -518,11 +520,11 @@
             // tabControlLab
             // 
             tabControlLab.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControlLab.Controls.Add(tabAppLab);
             tabControlLab.Controls.Add(tabKntEditView);
             tabControlLab.Controls.Add(tabWebView2);
             tabControlLab.Controls.Add(tabRichEditor);
             tabControlLab.Controls.Add(tabKntScriptLab);
-            tabControlLab.Controls.Add(tabAppLab);
             tabControlLab.Location = new Point(12, 12);
             tabControlLab.Name = "tabControlLab";
             tabControlLab.SelectedIndex = 0;
@@ -598,6 +600,16 @@
             btnKntEditViewMarkdown.Text = "KntEditView markdown";
             btnKntEditViewMarkdown.UseVisualStyleBackColor = true;
             btnKntEditViewMarkdown.Click += btnKntEditViewMarkdown_Click;
+            // 
+            // buttonTestNoteList
+            // 
+            buttonTestNoteList.Location = new Point(349, 205);
+            buttonTestNoteList.Name = "buttonTestNoteList";
+            buttonTestNoteList.Size = new Size(127, 28);
+            buttonTestNoteList.TabIndex = 19;
+            buttonTestNoteList.Text = "Test note list";
+            buttonTestNoteList.UseVisualStyleBackColor = true;
+            buttonTestNoteList.Click += buttonTestNoteList_Click;
             // 
             // KntLabForm
             // 
@@ -675,5 +687,6 @@
         private TextBox textForKntEditView;
         private Panel panel1;
         private KntWebView.KntEditView kntEditView;
+        private Button buttonTestNoteList;
     }
 }

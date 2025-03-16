@@ -49,7 +49,7 @@ public partial class KntLabForm : Form, IViewBase
     private async void LabForm_Load(object sender, EventArgs e)
     {
         #region  KntScript
-        
+
         if (Directory.Exists(_pathSampleScripts))
             LoadListScripts(_pathSampleScripts);
 
@@ -74,7 +74,7 @@ public partial class KntLabForm : Form, IViewBase
             CoreWebView2HostResourceAccessKind.Allow);
 
         webView2.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-        
+
         #region Demo content
 
         textScript.Text = @"var header1 = document.querySelector('h1');
@@ -1206,6 +1206,8 @@ window.chrome.webview.postMessage(retValue);";
 
     #endregion
 
+    #region KntEditView
+
     private void btnKntEditViewMarkdown_Click(object sender, EventArgs e)
     {
         kntEditView.ShowMarkdownContent(textForKntEditView.Text);
@@ -1219,5 +1221,29 @@ window.chrome.webview.postMessage(retValue);";
     private void btnKntEditViewHtml_Click(object sender, EventArgs e)
     {
         kntEditView.ShowHtmlContent(textForKntEditView.Text);
+    }
+
+    #endregion 
+
+    private NotesSelectorCtrl _notesSelectorComponent = null;
+    private async void buttonTestNoteList_Click(object sender, EventArgs e)
+    {
+        if (_notesSelectorComponent == null)
+        {
+            _notesSelectorComponent = new NotesSelectorCtrl(_ctrl.Store);
+            _notesSelectorComponent.EmbededMode = false;
+        }
+
+
+        NotesFilterWithServiceRef notesFilter = new NotesFilterWithServiceRef();
+
+        var nf = new NotesFilterDto();
+        nf.Tags = "@Prompt";
+        nf.TextSearch = "@Prompt";
+
+        await _notesSelectorComponent.LoadFilteredEntities(_ctrl.Store.GetFirstServiceRef().Service, nf);
+
+        _notesSelectorComponent.Run();
+
     }
 }

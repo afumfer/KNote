@@ -114,6 +114,7 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
             else
             {
                 response = await Service.Notes.GetSearch(notesFilter);
+                //response = await Service.Notes.GetFilter(notesFilter);
             }
 
             if (response.IsValid)

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace KNote.Model.Dto;
 
-public class NotesSearchDto : SmartModelDtoBase // PaginationBase
+public class NotesSearchDto : SmartModelDtoBase
 {
     public string TextSearch { get; set; }
 
@@ -18,7 +18,7 @@ public class NotesSearchDto : SmartModelDtoBase // PaginationBase
         var results = new List<ValidationResult>();
 
         return results;
-    }
+    }    
 }
 
 // TODO: tmp class, refactor
