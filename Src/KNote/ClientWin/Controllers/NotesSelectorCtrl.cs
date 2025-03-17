@@ -21,6 +21,17 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
         private set;
     }
 
+    public NotesSearchDto NotesSearch
+    {
+        get;
+        private set;
+    }
+
+    public string HiddenColumns
+    {
+        get; set;
+    }
+
     #endregion
 
     #region Constructor
@@ -28,6 +39,7 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
     public NotesSelectorCtrl(Store store) : base(store)
     {
         ComponentName = "Notes selector";
+        HiddenColumns = "";
     }
 
     #endregion
@@ -95,7 +107,7 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
         return true;
     }
 
-    public async Task<bool> LoadFilteredEntities(IKntService service, NotesFilterDto notesFilter, bool refreshView = true)
+    public async Task<bool> LoadSearchEntities(IKntService service, NotesSearchDto notesSearch, bool refreshView = true)
     {
         bool resLoad = false;
         try
@@ -106,15 +118,67 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
             Folder = null;
 
             Result<List<NoteInfoDto>> response;
-            if (string.IsNullOrEmpty(notesFilter?.TextSearch.Trim()) || service == null || notesFilter == null)
+            if (string.IsNullOrEmpty(notesSearch?.TextSearch.Trim()) || service == null || notesSearch == null)
             {
                 response = new Result<List<NoteInfoDto>>();
                 response.Entity = new List<NoteInfoDto>();                    
             }
             else
             {
-                response = await Service.Notes.GetSearch(notesFilter);
-                //response = await Service.Notes.GetFilter(notesFilter);
+                response = await Service.Notes.GetSearch(notesSearch);                
+            }
+
+            if (response.IsValid)
+            {
+                ListEntities = response.Entity;
+                NotesSearch = notesSearch;
+
+                if (refreshView)
+                    View.RefreshView();
+
+                if (ListEntities?.Count > 0)
+                    SelectedEntity = ListEntities[0];
+                else
+                    SelectedEntity = null;
+            }
+            else
+            {
+                View.ShowInfo(response.ErrorMessage);
+                resLoad = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            View.ShowInfo(ex.Message);
+            resLoad = false;
+        }
+        finally
+        {
+            Cursor.Current = Cursors.Default;
+        }
+
+        return resLoad;
+    }
+
+    public async Task<bool> LoadFilteredEntities(IKntService service, NotesFilterDto notesFilter, bool refreshView = true)
+    {
+        bool resLoad = false;
+        try
+        {
+            Cursor.Current = Cursors.WaitCursor;
+
+            Service = service;
+            Folder = null;
+
+            Result<List<NoteInfoDto>> response;
+            if (service == null || notesFilter == null)
+            {
+                response = new Result<List<NoteInfoDto>>();
+                response.Entity = new List<NoteInfoDto>();
+            }
+            else
+            {
+                response = await Service.Notes.GetFilter(notesFilter);
             }
 
             if (response.IsValid)

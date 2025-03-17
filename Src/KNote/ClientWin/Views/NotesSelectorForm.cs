@@ -109,6 +109,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         FormBorderStyle = FormBorderStyle.Sizable;
         panelBottom.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
+        dataGridNotes.Dock = DockStyle.Fill;
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -270,12 +271,16 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
         dataGridNotes.Columns[0].DataPropertyName = "NoteId";
         dataGridNotes.Columns[0].Visible = false;
+        // Hack for modal view 
+        dataGridNotes.Columns[0].Width = 0;
+        dataGridNotes.Columns[0].Resizable = DataGridViewTriState.False;
+        //--
 
         dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
         dataGridNotes.Columns[1].Width = 80;
         dataGridNotes.Columns[1].HeaderText = "Number";
         dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if(_ctrl.Store.AppConfig.CompactViewNoteslist)
+        if(_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("NoteNumber"))
             dataGridNotes.Columns[1].Visible = false;
 
         dataGridNotes.Columns[2].DataPropertyName = "Topic";
@@ -286,34 +291,40 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         dataGridNotes.Columns[3].Width = 70;
         dataGridNotes.Columns[3].HeaderText = "Priority";
         dataGridNotes.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        if (_ctrl.HiddenColumns.Contains("Priority"))
+            dataGridNotes.Columns[3].Visible = false;
 
         dataGridNotes.Columns[4].DataPropertyName = "Tags";
         dataGridNotes.Columns[4].Width = 160;
         dataGridNotes.Columns[4].HeaderText = "Tags";
+        if (_ctrl.HiddenColumns.Contains("Tags"))
+            dataGridNotes.Columns[4].Visible = false;
 
         dataGridNotes.Columns[5].DataPropertyName = "InternalTags";
         dataGridNotes.Columns[5].Width = 150;
         dataGridNotes.Columns[5].HeaderText = "Status";
+        if (_ctrl.HiddenColumns.Contains("InternalTags"))
+            dataGridNotes.Columns[5].Visible = false;
 
         dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
         dataGridNotes.Columns[6].Width = 130;
         dataGridNotes.Columns[6].HeaderText = "Modification date";
         dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if (_ctrl.Store.AppConfig.CompactViewNoteslist)
+        if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("ModificationDateTime"))
             dataGridNotes.Columns[6].Visible = false;
 
         dataGridNotes.Columns[7].DataPropertyName = "CreationDateTime";
         dataGridNotes.Columns[7].Width = 130;
         dataGridNotes.Columns[7].HeaderText = "Creation date";
         dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if (_ctrl.Store.AppConfig.CompactViewNoteslist)
+        if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("CreationDateTime"))
             dataGridNotes.Columns[7].Visible = false;
 
         dataGridNotes.Columns[8].DataPropertyName = "Description";
         dataGridNotes.Columns[8].Visible = false;            
 
         dataGridNotes.Columns[9].DataPropertyName = "ContentType";
-        if (_ctrl.Store.AppConfig.CompactViewNoteslist)
+        if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("ContentType"))
             dataGridNotes.Columns[9].Visible = false;
 
         dataGridNotes.Columns[10].DataPropertyName = "Script";

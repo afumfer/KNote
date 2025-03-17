@@ -6,7 +6,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views;
 
-public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithServiceRef>
+public partial class FiltersSelectorForm : Form, IViewSelector<SelectedNotesInServiceRef>
 {
     #region Private fields
 
@@ -82,27 +82,27 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
         return MessageBox.Show(info, caption, buttons, icon);
     }
 
-    public void RefreshItem(NotesFilterWithServiceRef item)
+    public void RefreshItem(SelectedNotesInServiceRef item)
     {
         throw new NotImplementedException();
     }
 
-    public void DeleteItem(NotesFilterWithServiceRef item)
+    public void DeleteItem(SelectedNotesInServiceRef item)
     {
         throw new NotImplementedException();
     }
 
-    public void AddItem(NotesFilterWithServiceRef item)
+    public void AddItem(SelectedNotesInServiceRef item)
     {
         throw new NotImplementedException();
     }
 
-    public object SelectItem(NotesFilterWithServiceRef item)
+    public object SelectItem(SelectedNotesInServiceRef item)
     {
         throw new NotImplementedException();
     }
 
-    public List<NotesFilterWithServiceRef> GetSelectedListItem()
+    public List<SelectedNotesInServiceRef> GetSelectedListItem()
     {
         throw new NotImplementedException();
     }
@@ -125,7 +125,7 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
 
     private void buttonSearch_Click(object sender, EventArgs e)
     {
-        var filter = new NotesFilterWithServiceRef();
+        var filter = new SelectedNotesInServiceRef();
         filter.ServiceRef = (ServiceRef)comboRepositories.SelectedItem;
 
         //if(!checkSearchInDescription.Checked)
@@ -133,7 +133,7 @@ public partial class FiltersSelectorForm : Form, IViewSelector<NotesFilterWithSe
         //else
         //    filter.NotesFilter = new NotesFilterDto { TextSearch = $"*** {textTextSearch.Text}"  };
 
-        filter.NotesFilter = new NotesFilterDto { TextSearch = textTextSearch.Text, SearchInDescription = checkSearchInDescription.Checked };
+        filter.NotesSearch = new NotesSearchDto { TextSearch = textTextSearch.Text, SearchInDescription = checkSearchInDescription.Checked };
 
         _ctrl.SelectedEntity = filter;            
         _ctrl.NotifySelectedEntity();

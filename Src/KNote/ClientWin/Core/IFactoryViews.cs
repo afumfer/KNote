@@ -23,7 +23,7 @@ public interface IFactoryViews
     IViewBase NotifyView(KNoteManagmentCtrl component);
     IViewBase AboutView(KNoteManagmentCtrl component);
     IViewEditor<KAttributeDto> View(AttributeEditorCtrl component);
-    IViewSelector<NotesFilterWithServiceRef> View(FiltersSelectorCtrl component);
+    IViewSelector<SelectedNotesInServiceRef> View(FiltersSelectorCtrl component);
     IViewEditor<RepositoryRef> View(RepositoryEditorCtrl component);
     IViewEditor<AppConfig> View(OptionsEditorCtrl component);
     IViewBase View(KntChatGPTCtrl component);

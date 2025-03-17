@@ -47,8 +47,8 @@ public class Store
         get { return _activeFolderWithServiceRef; }            
     }
 
-    public NotesFilterWithServiceRef _activeFilterWithServiceRef;
-    public NotesFilterWithServiceRef ActiveFilterWithServiceRef
+    public SelectedNotesInServiceRef _activeFilterWithServiceRef;
+    public SelectedNotesInServiceRef ActiveFilterWithServiceRef
     {            
         get { return _activeFilterWithServiceRef; }
     }
@@ -89,14 +89,14 @@ public class Store
         }
     }
 
-    public event EventHandler<ComponentEventArgs<NotesFilterWithServiceRef>> ChangedActiveFilterWithServiceRef;
-    public void ChangeActiveFilterWithServiceRef(NotesFilterWithServiceRef activeFilterWithServiceRef)
+    public event EventHandler<ComponentEventArgs<SelectedNotesInServiceRef>> ChangedActiveFilterWithServiceRef;
+    public void ChangeActiveFilterWithServiceRef(SelectedNotesInServiceRef activeFilterWithServiceRef)
     {
         if (_activeFilterWithServiceRef != activeFilterWithServiceRef)
         {
             _activeFilterWithServiceRef = activeFilterWithServiceRef;
             Logger?.LogTrace("ChangeActiveFilterWithServiceRef {message}", activeFilterWithServiceRef?.ToString());
-            ChangedActiveFilterWithServiceRef?.Invoke(this, new ComponentEventArgs<NotesFilterWithServiceRef>(activeFilterWithServiceRef));
+            ChangedActiveFilterWithServiceRef?.Invoke(this, new ComponentEventArgs<SelectedNotesInServiceRef>(activeFilterWithServiceRef));
         }
     }
   

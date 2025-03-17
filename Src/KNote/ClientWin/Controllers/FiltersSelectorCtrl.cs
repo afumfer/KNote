@@ -3,7 +3,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class FiltersSelectorCtrl : CtrlSelectorBase<IViewSelector<NotesFilterWithServiceRef>, NotesFilterWithServiceRef>
+public class FiltersSelectorCtrl : CtrlSelectorBase<IViewSelector<SelectedNotesInServiceRef>, SelectedNotesInServiceRef>
 {
     #region Properties
 
@@ -37,7 +37,7 @@ public class FiltersSelectorCtrl : CtrlSelectorBase<IViewSelector<NotesFilterWit
 
     #region ComponentEditorBase implementation 
 
-    protected override IViewSelector<NotesFilterWithServiceRef> CreateView()
+    protected override IViewSelector<SelectedNotesInServiceRef> CreateView()
     {
         return Store.FactoryViews.View(this);
     }
@@ -47,22 +47,22 @@ public class FiltersSelectorCtrl : CtrlSelectorBase<IViewSelector<NotesFilterWit
         throw new NotImplementedException();
     }
 
-    public override void SelectItem(NotesFilterWithServiceRef item)
+    public override void SelectItem(SelectedNotesInServiceRef item)
     {
         throw new NotImplementedException();
     }
 
-    public override void RefreshItem(NotesFilterWithServiceRef item)
+    public override void RefreshItem(SelectedNotesInServiceRef item)
     {
         throw new NotImplementedException();
     }
 
-    public override void AddItem(NotesFilterWithServiceRef item)
+    public override void AddItem(SelectedNotesInServiceRef item)
     {
         throw new NotImplementedException();
     }
 
-    public override void DeleteItem(NotesFilterWithServiceRef item)
+    public override void DeleteItem(SelectedNotesInServiceRef item)
     {
         throw new NotImplementedException();
     }

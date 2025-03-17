@@ -22,7 +22,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         } 
     }
 
-    public NotesFilterWithServiceRef SelectedFilterWithServiceRef
+    public SelectedNotesInServiceRef SelectedFilterWithServiceRef
     {
         get { return Store.ActiveFilterWithServiceRef; }
         set 
@@ -36,10 +36,11 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         get { return SelectedFolderWithServiceRef?.FolderInfo; }
     }
 
-    public NotesFilterDto SelectedNotesFilter
-    {
-        get { return SelectedFilterWithServiceRef?.NotesFilter; }
-    }
+    // TODO: !!! 
+    //public NotesFilterDto SelectedNotesFilter
+    //{
+    //    get { return SelectedFilterWithServiceRef?.NotesFilter; }
+    //}
 
     public ServiceRef SelectedServiceRef
     {
@@ -94,7 +95,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await RefreshActiveFolderWithServiceRef(e.Entity);            
     }
 
-    private async void Store_ChangedActiveFilterWithServiceRef(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
+    private async void Store_ChangedActiveFilterWithServiceRef(object sender, ComponentEventArgs<SelectedNotesInServiceRef> e)
     {
         await RefreshActiveFilterWithServiceRef(e.Entity);
     }
@@ -123,23 +124,23 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         View.DeactivateWaitState();
     }
 
-    private async Task RefreshActiveFilterWithServiceRef(NotesFilterWithServiceRef notesFilterWithServiceRef)
+    private async Task RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef selectedNotesInServiceRef)
     {
         View.ActivateWaitState();
 
         SelectMode = EnumSelectMode.Filters;
 
-        NotifyMessage($"Loading notes filter: {notesFilterWithServiceRef?.NotesFilter?.TextSearch}");
+        NotifyMessage($"Loading notes filter: {selectedNotesInServiceRef?.NotesSearch?.TextSearch}");
         
-        FolderPath = $"Notes filter: {notesFilterWithServiceRef?.NotesFilter?.TextSearch}";
+        FolderPath = $"Notes filter: {selectedNotesInServiceRef?.NotesSearch?.TextSearch}";
 
         _selectedNoteInfo = null;
         NoteEditorComponent.View.CleanView();
-        await NotesSelectorComponent.LoadFilteredEntities(notesFilterWithServiceRef?.ServiceRef?.Service, notesFilterWithServiceRef?.NotesFilter);
+        await NotesSelectorComponent.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, selectedNotesInServiceRef?.NotesSearch);
         CountNotes = NotesSelectorComponent.ListEntities?.Count;
 
         View.ShowInfo(null);
-        NotifyMessage($"Loaded notes filter {notesFilterWithServiceRef?.NotesFilter?.TextSearch}");
+        NotifyMessage($"Loaded notes filter {selectedNotesInServiceRef?.NotesSearch?.TextSearch}");
 
         View.DeactivateWaitState();
     }
@@ -479,7 +480,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    private void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<NotesFilterWithServiceRef> e)
+    private void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<SelectedNotesInServiceRef> e)
     {            
         SelectedFilterWithServiceRef = e.Entity;
     }

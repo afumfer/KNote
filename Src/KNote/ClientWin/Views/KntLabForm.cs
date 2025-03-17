@@ -1225,25 +1225,23 @@ window.chrome.webview.postMessage(retValue);";
 
     #endregion 
 
-    private NotesSelectorCtrl _notesSelectorComponent = null;
+    private NotesSelectorCtrl _notesSelector = null;
     private async void buttonTestNoteList_Click(object sender, EventArgs e)
     {
-        if (_notesSelectorComponent == null)
+        if (_notesSelector == null)
         {
-            _notesSelectorComponent = new NotesSelectorCtrl(_ctrl.Store);
-            _notesSelectorComponent.EmbededMode = false;
-        }
+            _notesSelector = new NotesSelectorCtrl(_ctrl.Store);
+            _notesSelector.EmbededMode = false;
+            _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime, ContentType";            
+        }        
 
+        await _notesSelector.LoadFilteredEntities(_ctrl.Store.GetFirstServiceRef().Service, new NotesFilterDto { Tags = "@Prompt" });
 
-        NotesFilterWithServiceRef notesFilter = new NotesFilterWithServiceRef();
+        var res = _notesSelector.RunModal();
 
-        var nf = new NotesFilterDto();
-        nf.Tags = "@Prompt";
-        nf.TextSearch = "@Prompt";
-
-        await _notesSelectorComponent.LoadFilteredEntities(_ctrl.Store.GetFirstServiceRef().Service, nf);
-
-        _notesSelectorComponent.Run();
-
+        if (res.Entity == EComponentResult.Executed)
+            MessageBox.Show(_notesSelector.SelectedEntity.Description);
+        else
+            MessageBox.Show("not selected");
     }
 }

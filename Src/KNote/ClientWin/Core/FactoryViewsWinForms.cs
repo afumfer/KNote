@@ -97,7 +97,7 @@ public class FactoryViewsWinForms : IFactoryViews
         return new NoteAttributeEditorForm(component);
     }
 
-    public IViewSelector<NotesFilterWithServiceRef> View(FiltersSelectorCtrl component)
+    public IViewSelector<SelectedNotesInServiceRef> View(FiltersSelectorCtrl component)
     {
         return new FiltersSelectorForm(component);
     }
