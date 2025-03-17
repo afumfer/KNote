@@ -180,11 +180,14 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
                     ListEntities.Add(note);
                     View.AddItem(note);
                 }
-            }                
+            }
             else
             {
-                ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
-                View.DeleteItem(note);
+                if(updateNote != null)
+                {
+                    ListEntities.RemoveAll(_ => _.NoteId == note.NoteId);
+                    View.DeleteItem(note);
+                }
             }
         }
     }

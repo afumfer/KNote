@@ -68,7 +68,9 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public int BaudRate { get; set; }
 
-    public int HandShake { get; set; }        
+    public int HandShake { get; set; }
+
+    public int RetroDelay { get; set; }
 
     public bool AutoCloseComponentOnViewExit { get; set; }
 
@@ -93,6 +95,9 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         //HandShake = (int)Handshake.None;  // HandShake: => // 2 (RequestToSend) // 3 (RequestToSendXOnXOff ) // 0 (None)) ??
 
         PortName = "COM1";
+
+        // Delay for retrocomputers (in miliseconds)
+        RetroDelay = 20;
         
         // --- Control flags
         AutoCloseComponentOnViewExit = false;
@@ -237,7 +242,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
                 }
             }
             else
-                Thread.Sleep(40);
+                Thread.Sleep(RetroDelay);
         }        
     }
 
@@ -259,7 +264,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
                 //        break;
                 //    _serialPort.Write(bMessage, i, 1);
                 //    // This is necesary for QL/Q68
-                //    Thread.Sleep(20);
+                //    Thread.Sleep(RetroDelay);
                 //}
 
                 //// Option 2. // This option not work in for QL/Q68
@@ -272,7 +277,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
                     if (i + chunkSize > bMessage.Length)
                         chunkSize = bMessage.Length - i;
                     _serialPort.Write(bMessage, i, chunkSize);
-                    Thread.Sleep(20);
+                    Thread.Sleep(RetroDelay);
                 }
             }
         }
