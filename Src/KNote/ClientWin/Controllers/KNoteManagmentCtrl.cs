@@ -22,12 +22,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         } 
     }
 
-    public SelectedNotesInServiceRef SelectedFilterWithServiceRef
+    public SelectedNotesInServiceRef SelectedNotesInServiceRef
     {
         get { return Store.ActiveFilterWithServiceRef; }
         set 
         {                
-            Store.ChangeActiveFilterWithServiceRef(value);
+            Store.ChangeSelectedNotesInServiceRef(value);
         }
     }
 
@@ -36,17 +36,11 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         get { return SelectedFolderWithServiceRef?.FolderInfo; }
     }
 
-    // TODO: !!! 
-    //public NotesFilterDto SelectedNotesFilter
-    //{
-    //    get { return SelectedFilterWithServiceRef?.NotesFilter; }
-    //}
-
     public ServiceRef SelectedServiceRef
     {
         get {
             if(SelectMode == EnumSelectMode.Filters)
-                return SelectedFilterWithServiceRef?.ServiceRef;
+                return SelectedNotesInServiceRef?.ServiceRef;
             else
                 return SelectedFolderWithServiceRef?.ServiceRef;
         }
@@ -482,7 +476,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     private void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<SelectedNotesInServiceRef> e)
     {            
-        SelectedFilterWithServiceRef = e.Entity;
+        SelectedNotesInServiceRef = e.Entity;
     }
 
     #endregion
@@ -833,7 +827,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     {
         View.ActivateWaitState();
         NotifyMessage("Refreshing tree folder ...");
-        SelectedFilterWithServiceRef = null;
+        SelectedNotesInServiceRef = null;
         SelectedFolderWithServiceRef = null;
         SelectedNoteInfo = null;
         FolderPath = "";
@@ -864,7 +858,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public async Task GoActiveFilter()
     {            
-        await RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
+        await RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef);
     }
 
     public async Task MoveSelectedNotes()
@@ -1190,7 +1184,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         if (SelectMode == EnumSelectMode.Folders)
             await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);
         else if (SelectMode == EnumSelectMode.Filters)                
-            await RefreshActiveFilterWithServiceRef(SelectedFilterWithServiceRef);
+            await RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef);
     }
 
     private async Task NewRepository(EnumRepositoryEditorMode mode)

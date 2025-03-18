@@ -55,6 +55,7 @@
             buttonShowConsole = new Button();
             buttonRunScript = new Button();
             tabAppLab = new TabPage();
+            buttonTestNoteList = new Button();
             buttonNLog = new Button();
             buttonServerCOMForm = new Button();
             buttonMessageBrokerSendMessage = new Button();
@@ -78,7 +79,6 @@
             btnKntEditViewHtml = new Button();
             btnKntEditViewNavigation = new Button();
             btnKntEditViewMarkdown = new Button();
-            buttonTestNoteList = new Button();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
             tabRichEditor.SuspendLayout();
@@ -373,6 +373,16 @@
             tabAppLab.Text = "Lab app components";
             tabAppLab.UseVisualStyleBackColor = true;
             // 
+            // buttonTestNoteList
+            // 
+            buttonTestNoteList.Location = new Point(349, 205);
+            buttonTestNoteList.Name = "buttonTestNoteList";
+            buttonTestNoteList.Size = new Size(127, 28);
+            buttonTestNoteList.TabIndex = 19;
+            buttonTestNoteList.Text = "Test note list";
+            buttonTestNoteList.UseVisualStyleBackColor = true;
+            buttonTestNoteList.Click += buttonTestNoteList_Click;
+            // 
             // buttonNLog
             // 
             buttonNLog.Location = new Point(349, 164);
@@ -601,16 +611,6 @@
             btnKntEditViewMarkdown.UseVisualStyleBackColor = true;
             btnKntEditViewMarkdown.Click += btnKntEditViewMarkdown_Click;
             // 
-            // buttonTestNoteList
-            // 
-            buttonTestNoteList.Location = new Point(349, 205);
-            buttonTestNoteList.Name = "buttonTestNoteList";
-            buttonTestNoteList.Size = new Size(127, 28);
-            buttonTestNoteList.TabIndex = 19;
-            buttonTestNoteList.Text = "Test note list";
-            buttonTestNoteList.UseVisualStyleBackColor = true;
-            buttonTestNoteList.Click += buttonTestNoteList_Click;
-            // 
             // KntLabForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -619,6 +619,7 @@
             Controls.Add(tabControlLab);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "KntLabForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "KNote Lab";
             FormClosing += KntLabForm_FormClosing;
             Load += LabForm_Load;

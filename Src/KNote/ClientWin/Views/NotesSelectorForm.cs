@@ -44,7 +44,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
         InitializeComponent();
 
-        _ctrl = ctrl;
+        _ctrl = ctrl;        
     }
 
     #endregion 
@@ -70,19 +70,20 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
     {
         if (_ctrl.ListEntities == null)
             return;
-        else
+
+        CoonfigureGridStd();
+
+        if (OrderColNumber == 0)
         {
-            CoonfigureGridStd();
+            OrderColNumber = 1;
+            AscendigOrderNotes = true;                    
+        }                
+        _sortOrder = getDefaultSortOrder();
 
-            if (OrderColNumber == 0)
-            {
-                OrderColNumber = 1;
-                AscendigOrderNotes = true;                    
-            }                
-            _sortOrder = getDefaultSortOrder();
+        RefreshDataGridNotes();
 
-            RefreshDataGridNotes();                
-        }
+        // Hack for refresh column 0 in modal form.
+        dataGridNotes.Columns[0].Visible = false;
     }
 
     public void OnClosingView()
@@ -109,7 +110,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         FormBorderStyle = FormBorderStyle.Sizable;
         panelBottom.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
-        dataGridNotes.Dock = DockStyle.Fill;
+        dataGridNotes.Dock = DockStyle.Fill;        
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -269,13 +270,9 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         _source.DataSource = new List<NoteInfoDto>();
         dataGridNotes.DataSource = _source;
 
-        dataGridNotes.Columns[0].DataPropertyName = "NoteId";
+        dataGridNotes.Columns[0].DataPropertyName = "NoteId";       
         dataGridNotes.Columns[0].Visible = false;
-        // Hack for modal view 
-        dataGridNotes.Columns[0].Width = 0;
-        dataGridNotes.Columns[0].Resizable = DataGridViewTriState.False;
-        //--
-
+        
         dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
         dataGridNotes.Columns[1].Width = 80;
         dataGridNotes.Columns[1].HeaderText = "Number";

@@ -47,10 +47,10 @@ public class Store
         get { return _activeFolderWithServiceRef; }            
     }
 
-    public SelectedNotesInServiceRef _activeFilterWithServiceRef;
+    public SelectedNotesInServiceRef _selectedNotesInServiceRef;
     public SelectedNotesInServiceRef ActiveFilterWithServiceRef
     {            
-        get { return _activeFilterWithServiceRef; }
+        get { return _selectedNotesInServiceRef; }
     }
 
     public ILogger Logger { get; set; }
@@ -90,13 +90,13 @@ public class Store
     }
 
     public event EventHandler<ComponentEventArgs<SelectedNotesInServiceRef>> ChangedActiveFilterWithServiceRef;
-    public void ChangeActiveFilterWithServiceRef(SelectedNotesInServiceRef activeFilterWithServiceRef)
+    public void ChangeSelectedNotesInServiceRef(SelectedNotesInServiceRef selectedNotesInServiceRef)
     {
-        if (_activeFilterWithServiceRef != activeFilterWithServiceRef)
+        if (_selectedNotesInServiceRef != selectedNotesInServiceRef)
         {
-            _activeFilterWithServiceRef = activeFilterWithServiceRef;
-            Logger?.LogTrace("ChangeActiveFilterWithServiceRef {message}", activeFilterWithServiceRef?.ToString());
-            ChangedActiveFilterWithServiceRef?.Invoke(this, new ComponentEventArgs<SelectedNotesInServiceRef>(activeFilterWithServiceRef));
+            _selectedNotesInServiceRef = selectedNotesInServiceRef;
+            Logger?.LogTrace("ChangeActiveFilterWithServiceRef {message}", selectedNotesInServiceRef?.ToString());
+            ChangedActiveFilterWithServiceRef?.Invoke(this, new ComponentEventArgs<SelectedNotesInServiceRef>(selectedNotesInServiceRef));
         }
     }
   

@@ -50,7 +50,7 @@
             panelForm.Dock = DockStyle.Fill;
             panelForm.Location = new Point(0, 0);
             panelForm.Name = "panelForm";
-            panelForm.Size = new Size(465, 488);
+            panelForm.Size = new Size(456, 488);
             panelForm.TabIndex = 0;
             // 
             // panelDataGridNotes
@@ -59,7 +59,7 @@
             panelDataGridNotes.Controls.Add(dataGridNotes);
             panelDataGridNotes.Location = new Point(1, 1);
             panelDataGridNotes.Name = "panelDataGridNotes";
-            panelDataGridNotes.Size = new Size(464, 445);
+            panelDataGridNotes.Size = new Size(455, 445);
             panelDataGridNotes.TabIndex = 2;
             // 
             // dataGridNotes
@@ -79,7 +79,7 @@
             dataGridNotes.RowHeadersVisible = false;
             dataGridNotes.RowHeadersWidth = 25;
             dataGridNotes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridNotes.Size = new Size(463, 443);
+            dataGridNotes.Size = new Size(454, 443);
             dataGridNotes.TabIndex = 3;
             dataGridNotes.Text = "dataGridView1";
             dataGridNotes.ColumnHeaderMouseClick += dataGridNotes_ColumnHeaderMouseClick;
@@ -100,14 +100,14 @@
             panelBottom.Dock = DockStyle.Bottom;
             panelBottom.Location = new Point(0, 444);
             panelBottom.Name = "panelBottom";
-            panelBottom.Size = new Size(465, 44);
+            panelBottom.Size = new Size(456, 44);
             panelBottom.TabIndex = 1;
             // 
             // buttonCancel
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(374, 8);
+            buttonCancel.Location = new Point(365, 8);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(79, 24);
             buttonCancel.TabIndex = 5;
@@ -119,7 +119,7 @@
             // 
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonAccept.DialogResult = DialogResult.OK;
-            buttonAccept.Location = new Point(289, 8);
+            buttonAccept.Location = new Point(280, 8);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(79, 24);
             buttonAccept.TabIndex = 4;
@@ -131,7 +131,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(465, 488);
+            ClientSize = new Size(456, 488);
             Controls.Add(panelForm);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "NotesSelectorForm";

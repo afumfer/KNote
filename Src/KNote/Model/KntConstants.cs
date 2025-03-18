@@ -16,7 +16,6 @@ public static class KntConst
     public static string License { get; private set; }
     public static string TagForMerging { get; private set; } = "[@NoteMerging]";    
     public static int MaxLenResourceFile { get; private set; } = 5120000;
-    // TODO: !!!! delete this property
     public static string VirtualHostNameToFolderMapping = @"https://knote.resources";
     public static Dictionary<EnumKAttributeDataType, string> KAttributes { get; private set; }
     public static Dictionary<EnumAlarmType, string> AlarmType { get; private set; }   
@@ -24,7 +23,11 @@ public static class KntConst
     public static Dictionary<EnumActionType, string> ActionType { get; private set; }
     public static Dictionary<EnumRoles, string> Roles { get; private set; }
     public static Dictionary<EnumStatus, string> Status { get; private set; }
-    
+
+    public static string TemplateTag { get; private set; } = "@Template";
+    public static string PromptTag { get; private set; } = "@Prompt";
+    public static string CodeTag { get; private set; } = "@Code";
+
     static KntConst()
     {
         KAttributes = new Dictionary<EnumKAttributeDataType, string>
@@ -81,7 +84,7 @@ public static class KntConst
         };
 
         StringBuilder info = new();
-        info.Append(@"Copyright (C) 2021-2025 Armando Fumero Fernández ");
+        info.Append(@"Copyright (C) 2021-2025 Armando Fumero ");
         info.Append(Environment.NewLine + Environment.NewLine);
         info.Append(@"This program is free software; you can redistribute it and/or modify ");
         info.Append(@"it under the terms of the GNU General Public License as published by ");
