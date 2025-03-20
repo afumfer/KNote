@@ -37,9 +37,9 @@ public partial class KntChatGPTForm : Form, IViewBase
         this.Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public void OnClosingView()
@@ -199,7 +199,7 @@ public partial class KntChatGPTForm : Form, IViewBase
         _ctrl.StreamToken -= _com_StreamToken;
     }
 
-    private void _com_StreamToken(object sender, ComponentEventArgs<string> e)
+    private void _com_StreamToken(object sender, ControllerEventArgs<string> e)
     {
         if (textResult.InvokeRequired)
         {

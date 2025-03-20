@@ -11,7 +11,7 @@ public class MessageEditorCtrl : CtrlEditorBase<IViewEditor<KMessageDto>, KMessa
 
     public MessageEditorCtrl(Store store): base(store)
     {
-        ComponentName = "Message / alarm editor";
+        ControllerName = "Message / alarm editor";
     }
 
     #endregion

@@ -8,7 +8,7 @@ public class KntLabCtrl : CtrlBase
 
     public KntLabCtrl(Store store) : base(store)
     {
-        ComponentName = "KntLab Component";
+        ControllerName = "KntLab Component";
     }
 
     #endregion

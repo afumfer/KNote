@@ -10,7 +10,7 @@ public class NoteTypesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteTypeDto>
 
     public NoteTypesSelectorCtrl(Store store): base(store)
     {
-        ComponentName = "Note type selector";
+        ControllerName = "Note type selector";
     }
 
     #endregion

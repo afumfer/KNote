@@ -27,7 +27,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
         _ctrl = ctrl;
 
-        _ctrl.Store.ComponentNotification += Store_ComponentNotification;
+        _ctrl.Store.ControllerNotification += Store_ComponentNotification;
 
         // TODO: options ... for next version
         menuReports.Visible = false;
@@ -63,11 +63,11 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             this.WindowState = FormWindowState.Normal;
     }
 
-    Result<EComponentResult> IViewBase.ShowModalView()
+    Result<EControllerResult> IViewBase.ShowModalView()
     {
         LinkComponents();
         Application.DoEvents();
-        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public void OnClosingView()
@@ -338,11 +338,11 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         await SelectTab(tabExplorers.SelectedIndex);
     }
 
-    private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
+    private void Store_ComponentNotification(object sender, ControllerEventArgs<string> e)
     {
         string comName;
         if (!string.IsNullOrEmpty(e?.Entity.ToString()))
-            comName = ((CtrlBase)sender)?.ComponentName + ": ";
+            comName = ((CtrlBase)sender)?.ControllerName + ": ";
         else
             comName = "";
         statusLabel2.Text = $" {comName} {e?.Entity.ToString()}";

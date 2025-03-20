@@ -11,7 +11,7 @@ public class TaskEditorCtrl : CtrlEditorBase<IViewEditor<NoteTaskDto>, NoteTaskD
 
     public TaskEditorCtrl(Store store) : base(store)
     {
-        ComponentName = "Task / comment editor";
+        ControllerName = "Task / comment editor";
     }
 
     #endregion

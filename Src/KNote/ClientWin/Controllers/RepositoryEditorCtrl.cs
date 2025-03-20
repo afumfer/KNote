@@ -16,7 +16,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
 
     public RepositoryEditorCtrl(Store store) : base(store)
     {
-        ComponentName = "Repository editor";
+        ControllerName = "Repository editor";
     }
 
     #endregion

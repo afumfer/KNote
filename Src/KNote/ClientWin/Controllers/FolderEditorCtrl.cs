@@ -11,7 +11,7 @@ public class FolderEditorCtrl : CtrlNoteEditorBase<IViewEditor<FolderDto>, Folde
 
     public FolderEditorCtrl(Store store): base(store)
     {
-        ComponentName = "Folder editor";
+        ControllerName = "Folder editor";
     }
 
     #endregion

@@ -10,7 +10,7 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
     public MonitorCtrl(Store store) : base(store)
     {
-        ComponentName = "KeyNote monitor";
+        ControllerName = "KeyNote monitor";
     }
 
     #endregion
@@ -26,7 +26,7 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
     #region Component override methods
 
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
         var result = base.OnInitialized();
 
@@ -34,10 +34,10 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
         try
         {                                                
-            Store.ComponentsStateChanged += Store_ComponentsStateChanged;
+            Store.ControllerStateChanged += Store_ComponentsStateChanged;
             Store.AddedServiceRef += Store_AddedServiceRef;                
             Store.RemovedServiceRef += Store_RemovedServiceRef;
-            Store.ComponentNotification += Store_ComponentNotification;
+            Store.ControllerNotification += Store_ComponentNotification;
         }
         catch (Exception ex)
         {                
@@ -47,20 +47,20 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
         return result;
     }
 
-    protected override Result<EComponentResult> OnFinalized()
+    protected override Result<EControllerResult> OnFinalized()
     {
-        Result<EComponentResult> result;
+        Result<EControllerResult> result;
 
         try
         {
             result = base.OnFinalized();
-            Store.ComponentsStateChanged -= Store_ComponentsStateChanged;
+            Store.ControllerStateChanged -= Store_ComponentsStateChanged;
             Store.AddedServiceRef -= Store_AddedServiceRef;                
             Store.RemovedServiceRef -= Store_RemovedServiceRef;                
         }
         catch (Exception ex)
         {
-            result = new Result<EComponentResult>(EComponentResult.Error);
+            result = new Result<EControllerResult>(EControllerResult.Error);
             result.AddErrorMessage(ex.Message);                
         }
 
@@ -71,25 +71,25 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
     #region Store events handlers
 
-    private void Store_ComponentNotification(object sender, ComponentEventArgs<string> e)
+    private void Store_ComponentNotification(object sender, ControllerEventArgs<string> e)
     {
-        var info = $"{((CtrlBase)sender).ComponentName} - {e.Entity.ToString()}";
+        var info = $"{((CtrlBase)sender).ControllerName} - {e.Entity.ToString()}";
         OnShowLog(info);
     }
 
-    private void Store_ComponentsStateChanged(object sender, ComponentEventArgs<EComponentState> e)
+    private void Store_ComponentsStateChanged(object sender, ControllerEventArgs<EControllerState> e)
     {
-        var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((CtrlBase)sender).ComponentId}";
+        var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((CtrlBase)sender).ControllerId}";
         OnShowLog(info);
     }
    
-    private void Store_RemovedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
+    private void Store_RemovedServiceRef(object sender, ControllerEventArgs<ServiceRef> e)
     {
         var info = $"{DateTime.Now} - [RemovedServiceRef] - {sender.ToString()} - {e.Entity.Alias.ToString()}";
         OnShowLog(info);
     }
 
-    private void Store_AddedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
+    private void Store_AddedServiceRef(object sender, ControllerEventArgs<ServiceRef> e)
     {
         var info = $"{DateTime.Now} - [AddedServiceRef] - {sender.ToString()} - {e.Entity.Alias.ToString()}";
         OnShowLog(info);

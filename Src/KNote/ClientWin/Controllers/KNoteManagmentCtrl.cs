@@ -84,12 +84,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         Store.EditedPostItNote += NoteEditorComponent_PostItEdit;
     }
 
-    private async void Store_ChangedActiveFolderWithServiceRef(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+    private async void Store_ChangedActiveFolderWithServiceRef(object sender, ControllerEventArgs<FolderWithServiceRef> e)
     {            
         await RefreshActiveFolderWithServiceRef(e.Entity);            
     }
 
-    private async void Store_ChangedActiveFilterWithServiceRef(object sender, ComponentEventArgs<SelectedNotesInServiceRef> e)
+    private async void Store_ChangedActiveFilterWithServiceRef(object sender, ControllerEventArgs<SelectedNotesInServiceRef> e)
     {
         await RefreshActiveFilterWithServiceRef(e.Entity);
     }
@@ -197,9 +197,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #region Component override methods
 
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
-        ComponentName = $"{KntConst.AppName} managment";
+        ControllerName = $"{KntConst.AppName} managment";
 
         var result = base.OnInitialized();
 
@@ -259,22 +259,22 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    private void _folderSelectorComponent_EntitySelection(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+    private void _folderSelectorComponent_EntitySelection(object sender, ControllerEventArgs<FolderWithServiceRef> e)
     {
         SelectedFolderWithServiceRef = e.Entity;            
     }
 
-    private void ExtendNewFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+    private void ExtendNewFolder(object sender, ControllerEventArgs<FolderWithServiceRef> e)
     {
         NewFolder();
     }
 
-    private async void ExtendEditFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+    private async void ExtendEditFolder(object sender, ControllerEventArgs<FolderWithServiceRef> e)
     {
         await EditFolder();
     }
 
-    private async void ExtendDeleteFolder(object sender, ComponentEventArgs<FolderWithServiceRef> e)
+    private async void ExtendDeleteFolder(object sender, ControllerEventArgs<FolderWithServiceRef> e)
     {
         await DeleteFolder();
     }
@@ -311,7 +311,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    private async void _notesSelectorComponent_EntitySelectionDoubleClick(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void _notesSelectorComponent_EntitySelectionDoubleClick(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         if (e.Entity == null)
             return;
@@ -319,7 +319,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await EditNote();
     }
 
-    private async void _notesSelectorComponent_EntitySelection(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void _notesSelectorComponent_EntitySelection(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         if (e.Entity == null || SelectedServiceRef == null)
             return;
@@ -332,52 +332,52 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         NotifyMessage($"Loaded note details for note {e.Entity.NoteNumber}");
     }
 
-    private async void ExtendAddNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendAddNote(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         await AddNote();
     }
 
-    private async void ExtendAddNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendAddNoteAsPostIt(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         await AddNotePostIt();
     }
 
-    private async void ExtendEditNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendEditNote(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         await EditNote();
     }
 
-    private async void AddFastResolvedTask(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void AddFastResolvedTask(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         await AddFastResolvedTask();
     }
    
-    private async void ExtendEditNoteAsPostIt(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendEditNoteAsPostIt(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         await EditNotePostIt();
     }
 
-    private async void ExtendDeleteNote(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendDeleteNote(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         await DeleteNote();
     }
 
-    private async void ExtendMoveSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendMoveSelectedNotes(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         await MoveSelectedNotes();
     }
 
-    private void ExtendNull(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private void ExtendNull(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         
     }
 
-    private async void ExtendAddTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendAddTagSelectedNotes(object sender, ControllerEventArgs<NoteInfoDto> e)
     {            
         await ChangeTags(EnumChangeTag.Add);
     }
 
-    private async void ExtendRemoveTagSelectedNotes(object sender, ComponentEventArgs<NoteInfoDto> e)
+    private async void ExtendRemoveTagSelectedNotes(object sender, ControllerEventArgs<NoteInfoDto> e)
     {            
         await ChangeTags(EnumChangeTag.Remove);
     }
@@ -422,33 +422,33 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    private async void _messagesManagmentComponent_ExecuteKntScript(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagmentComponent_ExecuteKntScript(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         var service = e.Entity.Service;
         var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
         Store.RunScriptInNewThread(note?.Script);
     }
 
-    private void _messagesManagment_AppAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    private void _messagesManagment_AppAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         // TODO: ... for next major version 
         throw new NotImplementedException();
     }
 
-    private void _messagesManagment_EMailAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    private void _messagesManagment_EMailAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         // TODO: ... for next major version 
         throw new NotImplementedException();
     }
 
-    private async void _messagesManagment_PostItAlarm(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagment_PostItAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {                        
         if (await Store.CheckPostItIsActive(e.Entity.NoteId) || await Store.CheckNoteIsActive(e.Entity.NoteId))
             return;
         await EditNotePostIt(e.Entity.Service, e.Entity.NoteId, true);
     }
 
-    private async void _messagesManagment_PostItVisible(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagment_PostItVisible(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         if (await Store.CheckPostItIsActive(e.Entity.NoteId))
             return;
@@ -474,7 +474,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    private void _filterParamComponent_EntitySelection(object sender, ComponentEventArgs<SelectedNotesInServiceRef> e)
+    private void _filterParamComponent_EntitySelection(object sender, ControllerEventArgs<SelectedNotesInServiceRef> e)
     {            
         SelectedNotesInServiceRef = e.Entity;
     }
@@ -498,7 +498,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         protected set { _kntChatComponent = value; }
     }
 
-    private void _kntChatComponent_ReceiveMessage(object sender, ComponentEventArgs<string> e)
+    private void _kntChatComponent_ReceiveMessage(object sender, ControllerEventArgs<string> e)
     {
         KntChatComponent.VisibleView(true);
     }
@@ -738,7 +738,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         folderEditorComponent.Model.ParentId = SelectedFolderInfo?.FolderId;
         folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo?.GetSimpleDto<FolderDto>();
         var res = folderEditorComponent.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {                
             var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>() };
             FoldersSelectorComponent.AddItem(fs);
@@ -757,7 +757,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
         FoldersSelectorComponent.OldParent = folderEditorComponent.Model.ParentId;
         var res = folderEditorComponent.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {                
             SelectedFolderWithServiceRef.FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>();
             FoldersSelectorComponent.RefreshItem(SelectedFolderWithServiceRef);
@@ -816,7 +816,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         repositoryEditorComponent.EditorMode = EnumRepositoryEditorMode.Managment;
         await repositoryEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef, false);
         var res = repositoryEditorComponent.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {
             // Do action 
             RefreshRepositoryAndFolderTree();
@@ -875,7 +875,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         services.Add(SelectedServiceRef);
         folderSelector.ServicesRef = services;
         var res = folderSelector.RunModal();
-        if (res.Entity != EComponentResult.Executed)
+        if (res.Entity != EControllerResult.Executed)
             return;
 
         try
@@ -1045,7 +1045,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             Store.AppConfig.GetSimpleDto<AppConfig>(), 
             true);
         var res = optionsEditorComponent.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {
             // TODO: refresh context managment
             
@@ -1098,12 +1098,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #region Events handlers for extension components 
 
-    private async void PostItEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteDto> e)
+    private async void PostItEditorComponent_AddedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
         await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private async void NoteEditorComponent_AddedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    private async void NoteEditorComponent_AddedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
@@ -1121,22 +1121,22 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         NotesSelectorComponent.AddItem(noteInfo);
     }
 
-    private async void PostItEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteDto> e)
+    private async void PostItEditorComponent_SavedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
         await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private async void NoteEditorComponent_SavedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    private async void NoteEditorComponent_SavedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>()); 
     }
 
-    private async void PostItEditorComponent_ExtendedEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    private async void PostItEditorComponent_ExtendedEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         await EditNote(e.Entity.Service, e.Entity.NoteId);
     }
 
-    private async void NoteEditorComponent_PostItEdit(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    private async void NoteEditorComponent_PostItEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
     }
@@ -1155,12 +1155,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }                            
     }
 
-    private void PostItEditorComponent_DeletedEntity(object sender, ComponentEventArgs<NoteDto> e)
+    private void PostItEditorComponent_DeletedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
         OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private void NoteEditorComponent_DeletedEntity(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    private void NoteEditorComponent_DeletedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
@@ -1193,7 +1193,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         repositoryEditorComponent.EditorMode = mode;
         await repositoryEditorComponent.NewModel();
         var res = repositoryEditorComponent.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {
             RefreshRepositoryAndFolderTree();
         }
@@ -1210,7 +1210,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     private void RunKntChatComponent(bool visibleView = true)
     {
         var chatCanRun = KntChatComponent.Run();
-        if (chatCanRun.Entity == EComponentResult.Executed)
+        if (chatCanRun.Entity == EControllerResult.Executed)
         {
             KntChatComponent.ShowChatView(false);
             KntChatComponent.VisibleView(visibleView);

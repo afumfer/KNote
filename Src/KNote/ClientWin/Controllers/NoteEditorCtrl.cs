@@ -17,7 +17,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     public NoteEditorCtrl(Store store) : base(store)
     {
-        ComponentName = "Note editor";
+        ControllerName = "Note editor";
         Store.DeletedNote += Store_DeletedNote;
     }
 
@@ -31,7 +31,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     #region Store events 
 
-    private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    private void Store_DeletedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         if (EmbededMode)        
             return;
@@ -43,10 +43,10 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     #region Controller specific events 
 
-    public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItEdit;
+    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> PostItEdit;
     protected virtual void OnPostItEdit()
     {
-        PostItEdit?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId }));
+        PostItEdit?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId }));
     }
 
     #endregion
@@ -215,7 +215,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         noteAttributeEditor.LoadModel(Service, noteAttribute, false);
 
         var res = noteAttributeEditor.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {
             return noteAttributeEditor.Model;
         }
@@ -230,7 +230,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         if (resCanLoadEntities)
         {
             var res = noteTypesSelector.RunModal();
-            if (res.Entity == EComponentResult.Executed)
+            if (res.Entity == EControllerResult.Executed)
             {
                 if (oldSelectedId == noteTypesSelector.SelectedEntity.NoteTypeId)
                     return false;
@@ -285,7 +285,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
         var res = messageEditor.RunModal();
 
-        if(res.Entity == EComponentResult.Executed)
+        if(res.Entity == EControllerResult.Executed)
         {                
             Model.Messages.Add(messageEditor.Model);
             return messageEditor.Model;
@@ -305,7 +305,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         messageEditor.LoadModel(Service, message, false);
 
         var res = messageEditor.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {                
             return messageEditor.Model;
         }
@@ -355,7 +355,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         taskEditor.Model.SetIsNew(true);
 
         var res = taskEditor.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {
             Model.Tasks.Add(taskEditor.Model);
             return taskEditor.Model;
@@ -375,7 +375,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         taskEditor.LoadModel(Service, task, false);
 
         var res = taskEditor.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {
             return taskEditor.Model;
         }
@@ -421,12 +421,12 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             
         var res = resource.RunModal();
 
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {
             Model.Resources.Add(resource.Model);
             return resource.Model;
         }
-        else if (res.Entity == EComponentResult.Error)
+        else if (res.Entity == EControllerResult.Error)
         {
             View.ShowInfo($"Error: {res.ErrorMessage}");
             return null;
@@ -482,7 +482,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         resourceEditor.LoadModel(Service, resource, false);
         
         var res = resourceEditor.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
         {
             return Task.FromResult(resourceEditor.Model);
         }

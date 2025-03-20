@@ -11,7 +11,7 @@ public class NoteAttributeEditorCtrl : CtrlEditorBase<IViewEditor<NoteKAttribute
 
     public NoteAttributeEditorCtrl(Store store): base (store)
     {
-        ComponentName = "Note attribute editor";
+        ControllerName = "Note attribute editor";
     }
 
     #endregion

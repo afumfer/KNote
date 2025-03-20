@@ -10,7 +10,7 @@ public class PostItPropertiesCtrl : CtrlEditorBase<IViewPostIt<WindowDto>, Windo
 
     public PostItPropertiesCtrl(Store store) : base(store)
     {
-        ComponentName = "PostIt properties editor";
+        ControllerName = "PostIt properties editor";
     }
 
     #endregion

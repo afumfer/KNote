@@ -24,26 +24,26 @@ public class KntHttpClientCtrl : CtrlBase
 
     public KntHttpClientCtrl(Store store) : base(store)
     {
-        ComponentName = "KntHttpClient Component";
+        ControllerName = "KntHttpClient Component";
     }
 
     #endregion
 
     #region Protected override methods 
 
-    public event EventHandler<ComponentEventArgs<HttpResponseMessage>> ReceiveResponse;
-    protected override Result<EComponentResult> OnInitialized()
+    public event EventHandler<ControllerEventArgs<HttpResponseMessage>> ReceiveResponse;
+    protected override Result<EControllerResult> OnInitialized()
     {
         try
         {                
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromMilliseconds(TimeOut);
 
-            return new Result<EComponentResult>(EComponentResult.Executed);
+            return new Result<EControllerResult>(EControllerResult.Executed);
         }
         catch (Exception ex)
         {
-            var res = new Result<EComponentResult>(EComponentResult.Error);
+            var res = new Result<EControllerResult>(EControllerResult.Error);
             var resMessage = $"KntHttpClient component. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(resMessage);                
             return res;
@@ -75,7 +75,7 @@ public class KntHttpClientCtrl : CtrlBase
             {
                 res = false;
             }
-            ReceiveResponse?.Invoke(this, new ComponentEventArgs<HttpResponseMessage>(httpResponseMessage));
+            ReceiveResponse?.Invoke(this, new ControllerEventArgs<HttpResponseMessage>(httpResponseMessage));
         }
         //catch (TaskCanceledException ex)
         //{

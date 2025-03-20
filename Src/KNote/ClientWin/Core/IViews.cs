@@ -9,7 +9,7 @@ namespace KNote.ClientWin.Core;
 public interface IViewBase
 {        
     void ShowView();
-    Result<EComponentResult> ShowModalView();
+    Result<EControllerResult> ShowModalView();
     void RefreshView();
     void OnClosingView();        
     DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information);

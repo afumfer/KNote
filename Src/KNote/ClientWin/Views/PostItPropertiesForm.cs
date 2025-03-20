@@ -35,9 +35,9 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
         this.Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {

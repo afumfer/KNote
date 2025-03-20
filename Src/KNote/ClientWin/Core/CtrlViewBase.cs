@@ -34,13 +34,13 @@ abstract public class CtrlViewBase<TView> : CtrlBase
 
     #endregion
 
-    #region Component methods
+    #region Controller methods
 
     protected abstract TView CreateView();
 
-    public override Result<EComponentResult> Run()
+    public override Result<EControllerResult> Run()
     {
-        Result<EComponentResult> result;
+        Result<EControllerResult> result;
 
         try
         {
@@ -49,16 +49,16 @@ abstract public class CtrlViewBase<TView> : CtrlBase
         }
         catch (Exception ex)
         {
-            result = new Result<EComponentResult>(EComponentResult.Error);
+            result = new Result<EControllerResult>(EControllerResult.Error);
             result.AddErrorMessage(ex.Message);
         }
 
         return result;
     }
 
-    public virtual Result<EComponentResult> RunModal()
+    public virtual Result<EControllerResult> RunModal()
     {
-        Result<EComponentResult> result;
+        Result<EControllerResult> result;
 
         try
         {
@@ -68,7 +68,7 @@ abstract public class CtrlViewBase<TView> : CtrlBase
         }
         catch (Exception ex)
         {
-            result = new Result<EComponentResult>(EComponentResult.Error);
+            result = new Result<EControllerResult>(EControllerResult.Error);
             result.AddErrorMessage(ex.Message);
         }
 
@@ -86,7 +86,7 @@ abstract public class CtrlViewEmbeddableBase<TView> : CtrlViewBase<TView>
 
     }
    
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
         var result = base.OnInitialized();
 
@@ -129,7 +129,7 @@ abstract public class CtrlSelectorBase<TView, TEntity> : CtrlViewEmbeddableBase<
 
     #endregion
 
-    #region Component virtual / abstract methods
+    #region Controller virtual / abstract methods
 
     public abstract Task<bool> LoadEntities(IKntService service, bool refreshView = true);
 
@@ -143,7 +143,7 @@ abstract public class CtrlSelectorBase<TView, TEntity> : CtrlViewEmbeddableBase<
         }
         catch (Exception)
         {
-            OnStateComponentChanged(EComponentState.Error);
+            OnStateControllerChanged(EControllerState.Error);
         }
     }
 
@@ -175,22 +175,22 @@ abstract public class CtrlSelectorBase<TView, TEntity> : CtrlViewEmbeddableBase<
 
     #region Component events 
 
-    public event EventHandler<ComponentEventArgs<TEntity>> EntitySelection;
+    public event EventHandler<ControllerEventArgs<TEntity>> EntitySelection;
     protected virtual void OnEntitySelection(TEntity entity)
     {
-        EntitySelection?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+        EntitySelection?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
     }
 
-    public event EventHandler<ComponentEventArgs<TEntity>> EntitySelectionDoubleClick;
+    public event EventHandler<ControllerEventArgs<TEntity>> EntitySelectionDoubleClick;
     protected virtual void OnEntitySelectionDoubleClick(TEntity entity)
     {
-        EntitySelectionDoubleClick?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+        EntitySelectionDoubleClick?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
     }
 
-    public event EventHandler<ComponentEventArgs<TEntity>> EntitySelectionCanceled;
+    public event EventHandler<ControllerEventArgs<TEntity>> EntitySelectionCanceled;
     protected virtual void OnEntitySelectionCanceled(TEntity entity)
     {
-        EntitySelectionCanceled?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+        EntitySelectionCanceled?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
     }
 
     #endregion 
@@ -243,7 +243,7 @@ abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
 
     #endregion 
 
-    #region Component virtual / abstract methods
+    #region Controller virtual / abstract methods
 
     public abstract Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true);
 
@@ -277,7 +277,7 @@ abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
         Finalize();
     }
 
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
         var result = base.OnInitialized();
         
@@ -288,30 +288,30 @@ abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
 
     #endregion 
 
-    #region Component events
+    #region Controller events
 
-    public event EventHandler<ComponentEventArgs<TEntity>> SavedEntity;
+    public event EventHandler<ControllerEventArgs<TEntity>> SavedEntity;
     protected virtual void OnSavedEntity(TEntity entity)
     {
-        SavedEntity?.Invoke(this, new ComponentEventArgs<TEntity>(entity));            
+        SavedEntity?.Invoke(this, new ControllerEventArgs<TEntity>(entity));            
     }
 
-    public event EventHandler<ComponentEventArgs<TEntity>> AddedEntity;
+    public event EventHandler<ControllerEventArgs<TEntity>> AddedEntity;
     protected virtual void OnAddedEntity(TEntity entity)
     {
-        AddedEntity?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+        AddedEntity?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
     }
 
-    public event EventHandler<ComponentEventArgs<TEntity>> DeletedEntity;
+    public event EventHandler<ControllerEventArgs<TEntity>> DeletedEntity;
     protected virtual void OnDeletedEntity(TEntity entity)
     {
-        DeletedEntity?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+        DeletedEntity?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
     }
 
-    public event EventHandler<ComponentEventArgs<TEntity>> EditionCanceled;
+    public event EventHandler<ControllerEventArgs<TEntity>> EditionCanceled;
     protected virtual void OnEditionCanceled(TEntity entity)
     {
-        EditionCanceled?.Invoke(this, new ComponentEventArgs<TEntity>(entity));
+        EditionCanceled?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
     }
 
     #endregion 
@@ -338,7 +338,7 @@ abstract public class CtrlNoteEditorBase<TView, TEntity> : CtrlEditorBase<TView,
         services.Add(Store.GetServiceRef(Service.IdServiceRef));
         folderSelector.ServicesRef = services;
         var res = folderSelector.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
             return folderSelector.SelectedEntity?.FolderInfo;
 
         return null;
@@ -355,7 +355,7 @@ public abstract class CtrlNoteEditorEmbeddableBase<TView, TEntity> : CtrlNoteEdi
 
     }
 
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
         var result = base.OnInitialized();
 

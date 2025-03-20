@@ -16,7 +16,7 @@ public class Store
 
     private readonly List<ServiceRef> _servicesRefs;
 
-    private readonly List<CtrlBase> _listComponents;
+    private readonly List<CtrlBase> _listControllers;
 
     private readonly char[] newLine = { '\r', '\n' };
 
@@ -64,7 +64,7 @@ public class Store
         if (AppConfig == null)
             AppConfig = new AppConfig();
 
-        _listComponents = new List<CtrlBase>();
+        _listControllers = new List<CtrlBase>();
         _servicesRefs = new List<ServiceRef>();
         FactoryViews = factoryViews; //
     }
@@ -78,29 +78,29 @@ public class Store
 
     #region Actions    
 
-    public event EventHandler<ComponentEventArgs<FolderWithServiceRef>> ChangedActiveFolderWithServiceRef;
+    public event EventHandler<ControllerEventArgs<FolderWithServiceRef>> ChangedActiveFolderWithServiceRef;
     public void ChangeActiveFolderWithServiceRef(FolderWithServiceRef activeFolderWithServiceRef)
     {
         if(_activeFolderWithServiceRef != activeFolderWithServiceRef)
         {
             _activeFolderWithServiceRef = activeFolderWithServiceRef;
             Logger?.LogTrace("ChangeActiveFolderWithServiceRef {message}", activeFolderWithServiceRef?.ToString());
-            ChangedActiveFolderWithServiceRef?.Invoke(this, new ComponentEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
+            ChangedActiveFolderWithServiceRef?.Invoke(this, new ControllerEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
         }
     }
 
-    public event EventHandler<ComponentEventArgs<SelectedNotesInServiceRef>> ChangedActiveFilterWithServiceRef;
+    public event EventHandler<ControllerEventArgs<SelectedNotesInServiceRef>> ChangedActiveFilterWithServiceRef;
     public void ChangeSelectedNotesInServiceRef(SelectedNotesInServiceRef selectedNotesInServiceRef)
     {
         if (_selectedNotesInServiceRef != selectedNotesInServiceRef)
         {
             _selectedNotesInServiceRef = selectedNotesInServiceRef;
             Logger?.LogTrace("ChangeActiveFilterWithServiceRef {message}", selectedNotesInServiceRef?.ToString());
-            ChangedActiveFilterWithServiceRef?.Invoke(this, new ComponentEventArgs<SelectedNotesInServiceRef>(selectedNotesInServiceRef));
+            ChangedActiveFilterWithServiceRef?.Invoke(this, new ControllerEventArgs<SelectedNotesInServiceRef>(selectedNotesInServiceRef));
         }
     }
   
-    public event EventHandler<ComponentEventArgs<ServiceRef>> AddedServiceRef;
+    public event EventHandler<ControllerEventArgs<ServiceRef>> AddedServiceRef;
     public void AddServiceRef(ServiceRef serviceRef)
     {
         if(serviceRef is null)
@@ -108,7 +108,7 @@ public class Store
 
         _servicesRefs.Add(serviceRef);
         Logger?.LogInformation("Added ServiceRef {component}", serviceRef.ToString());
-        AddedServiceRef?.Invoke(this, new ComponentEventArgs<ServiceRef>(serviceRef));
+        AddedServiceRef?.Invoke(this, new ControllerEventArgs<ServiceRef>(serviceRef));
     }
 
     public void AddServiceRefInAppConfig(ServiceRef serviceRef)
@@ -119,7 +119,7 @@ public class Store
         AppConfig.RespositoryRefs.Add(serviceRef.RepositoryRef);
     }
 
-    public event EventHandler<ComponentEventArgs<ServiceRef>> RemovedServiceRef;
+    public event EventHandler<ControllerEventArgs<ServiceRef>> RemovedServiceRef;
     public void RemoveServiceRef(ServiceRef serviceRef)
     {
         if (serviceRef is null)
@@ -128,7 +128,7 @@ public class Store
         _servicesRefs.Remove(serviceRef);
         Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
         AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);            
-        RemovedServiceRef?.Invoke(this, new ComponentEventArgs<ServiceRef>(serviceRef));
+        RemovedServiceRef?.Invoke(this, new ControllerEventArgs<ServiceRef>(serviceRef));
     }
 
     public List<ServiceRef> GetAllServiceRef()
@@ -159,56 +159,55 @@ public class Store
             return GetFirstServiceRef().Service;
     }
 
-
-    public event EventHandler<ComponentEventArgs<CtrlBase>> AddedComponent;
-    public event EventHandler<ComponentEventArgs<EComponentState>> ComponentsStateChanged;
-    public void AddComponent(CtrlBase component)
+    public event EventHandler<ControllerEventArgs<CtrlBase>> AddedController;
+    public event EventHandler<ControllerEventArgs<EControllerState>> ControllerStateChanged;
+    public void AddController(CtrlBase controller)
     {
-        component.StateComponentChanged += Components_StateCtrlChanged;
+        controller.StateControllerChanged += Controller_StateCtrlChanged;
         
-        if (component is PostItEditorCtrl)
+        if (controller is PostItEditorCtrl)
         {
-            ((PostItEditorCtrl)component).AddedEntity += Store_AddedPostIt;
-            ((PostItEditorCtrl)component).SavedEntity += Store_SavedPostIt;
-            ((PostItEditorCtrl)component).DeletedEntity += Store_DeletedPostIt;
-            ((PostItEditorCtrl)component).ExtendedEdit += Store_ExtendedEditPostIt;
+            ((PostItEditorCtrl)controller).AddedEntity += Store_AddedPostIt;
+            ((PostItEditorCtrl)controller).SavedEntity += Store_SavedPostIt;
+            ((PostItEditorCtrl)controller).DeletedEntity += Store_DeletedPostIt;
+            ((PostItEditorCtrl)controller).ExtendedEdit += Store_ExtendedEditPostIt;
         }
-        else if (component is NoteEditorCtrl)
+        else if (controller is NoteEditorCtrl)
         {
-            ((NoteEditorCtrl)component).AddedEntity += Store_AddedNote;
-            ((NoteEditorCtrl)component).SavedEntity += Store_SavedNote;
-            ((NoteEditorCtrl)component).DeletedEntity += Store_DeletedNote;
-            ((NoteEditorCtrl)component).PostItEdit += Store_EditedPostItNote;
+            ((NoteEditorCtrl)controller).AddedEntity += Store_AddedNote;
+            ((NoteEditorCtrl)controller).SavedEntity += Store_SavedNote;
+            ((NoteEditorCtrl)controller).DeletedEntity += Store_DeletedNote;
+            ((NoteEditorCtrl)controller).PostItEdit += Store_EditedPostItNote;
         }
 
-        _listComponents.Add(component);
-        Logger?.LogInformation("Added Component {component}", component.ToString());
-        AddedComponent?.Invoke(this, new ComponentEventArgs<CtrlBase>(component));
+        _listControllers.Add(controller);
+        Logger?.LogInformation("Added Component {component}", controller.ToString());
+        AddedController?.Invoke(this, new ControllerEventArgs<CtrlBase>(controller));
     }
 
-    public event EventHandler<ComponentEventArgs<CtrlBase>> RemovedComponent;
-    public void RemoveComponent(CtrlBase component)
+    public event EventHandler<ControllerEventArgs<CtrlBase>> RemovedController;
+    public void RemoveController(CtrlBase controller)
     {
-        component.StateComponentChanged -= Components_StateCtrlChanged;
+        controller.StateControllerChanged -= Controller_StateCtrlChanged;
 
-        if (component is PostItEditorCtrl)
+        if (controller is PostItEditorCtrl)
         {
-            ((PostItEditorCtrl)component).AddedEntity -= Store_AddedPostIt;
-            ((PostItEditorCtrl)component).SavedEntity -= Store_SavedPostIt;
-            ((PostItEditorCtrl)component).DeletedEntity -= Store_DeletedPostIt;
-            ((PostItEditorCtrl)component).ExtendedEdit -= Store_ExtendedEditPostIt;
+            ((PostItEditorCtrl)controller).AddedEntity -= Store_AddedPostIt;
+            ((PostItEditorCtrl)controller).SavedEntity -= Store_SavedPostIt;
+            ((PostItEditorCtrl)controller).DeletedEntity -= Store_DeletedPostIt;
+            ((PostItEditorCtrl)controller).ExtendedEdit -= Store_ExtendedEditPostIt;
         }
-        else if (component is NoteEditorCtrl)
+        else if (controller is NoteEditorCtrl)
         {
-            ((NoteEditorCtrl)component).AddedEntity += Store_AddedNote;
-            ((NoteEditorCtrl)component).SavedEntity += Store_SavedNote;
-            ((NoteEditorCtrl)component).DeletedEntity += Store_DeletedNote;
-            ((NoteEditorCtrl)component).PostItEdit += Store_EditedPostItNote;
+            ((NoteEditorCtrl)controller).AddedEntity += Store_AddedNote;
+            ((NoteEditorCtrl)controller).SavedEntity += Store_SavedNote;
+            ((NoteEditorCtrl)controller).DeletedEntity += Store_DeletedNote;
+            ((NoteEditorCtrl)controller).PostItEdit += Store_EditedPostItNote;
         }
 
-        _listComponents.Remove(component);
-        Logger?.LogInformation("Removed Component {component}", component.ToString());
-        RemovedComponent?.Invoke(this, new ComponentEventArgs<CtrlBase>(component));
+        _listControllers.Remove(controller);
+        Logger?.LogInformation("Removed Component {component}", controller.ToString());
+        RemovedController?.Invoke(this, new ControllerEventArgs<CtrlBase>(controller));
     }
 
     public void SaveConfig(string configFile = null)
@@ -252,7 +251,7 @@ public class Store
 
     public Task<bool> CheckNoteIsActive(Guid noteId)
     {
-        foreach(var com in _listComponents)
+        foreach(var com in _listControllers)
         {
             if (com is NoteEditorCtrl)
             {
@@ -267,7 +266,7 @@ public class Store
 
     public Task<bool> CheckPostItIsActive(Guid noteId)
     {
-        foreach (var com in _listComponents)
+        foreach (var com in _listControllers)
         {
             if (com is PostItEditorCtrl)
                 if (((PostItEditorCtrl)com).Model.NoteId == noteId)
@@ -280,7 +279,7 @@ public class Store
     {
         try
         {
-            foreach (var com in _listComponents)
+            foreach (var com in _listControllers)
             {
                 if (com is PostItEditorCtrl)
                     await ((PostItEditorCtrl)com).SaveModel();
@@ -308,7 +307,7 @@ public class Store
 
         try
         {
-            foreach (var com in _listComponents)
+            foreach (var com in _listControllers)
             {
                 if (com is PostItEditorCtrl)
                 {                        
@@ -354,7 +353,7 @@ public class Store
 
     public void HidePostIts()
     {
-        foreach (var com in _listComponents)
+        foreach (var com in _listControllers)
         {
             if (com is PostItEditorCtrl)
             {
@@ -366,7 +365,7 @@ public class Store
 
     public void ActivatePostIts()
     {
-        foreach (var com in _listComponents)
+        foreach (var com in _listControllers)
         {
             if (com is PostItEditorCtrl)
                 ((PostItEditorCtrl)com).ActivatePostIt();
@@ -513,63 +512,63 @@ public class Store
 
     #region Helper event handlers 
 
-    public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> EditedPostItNote;
-    private void Store_EditedPostItNote(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> EditedPostItNote;
+    private void Store_EditedPostItNote(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         EditedPostItNote?.Invoke(sender, e);
     }
 
-    public event EventHandler<ComponentEventArgs<NoteExtendedDto>> DeletedNote;
-    private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)  
+    public event EventHandler<ControllerEventArgs<NoteExtendedDto>> DeletedNote;
+    private void Store_DeletedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)  
     {
         DeletedNote?.Invoke(sender, e);
     }
 
-    public event EventHandler<ComponentEventArgs<NoteExtendedDto>> SavedNote;
-    private void Store_SavedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    public event EventHandler<ControllerEventArgs<NoteExtendedDto>> SavedNote;
+    private void Store_SavedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         SavedNote?.Invoke(sender, e);
     }
 
-    public event EventHandler<ComponentEventArgs<NoteExtendedDto>> AddedNote;
-    private void Store_AddedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    public event EventHandler<ControllerEventArgs<NoteExtendedDto>> AddedNote;
+    private void Store_AddedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         AddedNote?.Invoke(sender, e);
     }
 
-    public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> ExtendedEditPostIt;
-    private void Store_ExtendedEditPostIt(object sender, ComponentEventArgs<ServiceWithNoteId> e)
+    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> ExtendedEditPostIt;
+    private void Store_ExtendedEditPostIt(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         ExtendedEditPostIt?.Invoke(sender, e);
     }
 
-    public event EventHandler<ComponentEventArgs<NoteDto>> DeletedPostIt;
-    private void Store_DeletedPostIt(object sender, ComponentEventArgs<NoteDto> e)
+    public event EventHandler<ControllerEventArgs<NoteDto>> DeletedPostIt;
+    private void Store_DeletedPostIt(object sender, ControllerEventArgs<NoteDto> e)
     {
         DeletedPostIt?.Invoke(sender, e);
     }
 
-    public event EventHandler<ComponentEventArgs<NoteDto>> SavedPostIt;
-    private void Store_SavedPostIt(object sender, ComponentEventArgs<NoteDto> e)
+    public event EventHandler<ControllerEventArgs<NoteDto>> SavedPostIt;
+    private void Store_SavedPostIt(object sender, ControllerEventArgs<NoteDto> e)
     {
         SavedPostIt?.Invoke(sender, e);
     }
 
-    public event EventHandler<ComponentEventArgs<NoteDto>> AddedPostIt;
-    private void Store_AddedPostIt(object sender, ComponentEventArgs<NoteDto> e)
+    public event EventHandler<ControllerEventArgs<NoteDto>> AddedPostIt;
+    private void Store_AddedPostIt(object sender, ControllerEventArgs<NoteDto> e)
     {
         AddedPostIt?.Invoke(sender, e);
     }
 
-    private void Components_StateCtrlChanged(object sender, ComponentEventArgs<EComponentState> e)
+    private void Controller_StateCtrlChanged(object sender, ControllerEventArgs<EControllerState> e)
     {
-        ComponentsStateChanged?.Invoke(sender, e);
+        ControllerStateChanged?.Invoke(sender, e);
     }
 
-    public event EventHandler<ComponentEventArgs<string>> ComponentNotification;
-    internal void OnComponentNotification(CtrlBase component, string message)
+    public event EventHandler<ControllerEventArgs<string>> ControllerNotification;
+    internal void OnControllerNotification(CtrlBase controller, string message)
     {
-        ComponentNotification?.Invoke(component, new ComponentEventArgs<string>(message));
+        ControllerNotification?.Invoke(controller, new ControllerEventArgs<string>(message));
     }
 
     #endregion
@@ -628,7 +627,7 @@ public class Store
         
         var res = NotesSelector.RunModal();
 
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
             return NotesSelector.SelectedEntity.Description;
         else
             return null;

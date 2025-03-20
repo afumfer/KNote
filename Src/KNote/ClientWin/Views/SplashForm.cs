@@ -29,7 +29,7 @@ public partial class SplashForm : Form
 
     #region Form events handlers
 
-    private void AppContext_AddedServiceRef(object sender, ComponentEventArgs<ServiceRef> e)
+    private void AppContext_AddedServiceRef(object sender, ControllerEventArgs<ServiceRef> e)
     {
         labelMessage.Text = "Loading " + e.Entity.Alias + "...";
         labelMessage.Refresh();

@@ -61,9 +61,9 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         this.Show();
     }
 
-    Result<EComponentResult> IViewBase.ShowModalView()
+    Result<EControllerResult> IViewBase.ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public void RefreshView()
@@ -440,7 +440,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         ToolStripMenuItem menuSel;
         menuSel = (ToolStripMenuItem)sender;
 
-        _ctrl.Extensions[menuSel.Text](this, new ComponentEventArgs<NoteInfoDto>(_ctrl.SelectedEntity));
+        _ctrl.Extensions[menuSel.Text](this, new ControllerEventArgs<NoteInfoDto>(_ctrl.SelectedEntity));
     }
 
     #endregion

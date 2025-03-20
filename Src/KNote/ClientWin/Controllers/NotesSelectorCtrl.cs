@@ -43,7 +43,7 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
 
     public NotesSelectorCtrl(Store store) : base(store)
     {
-        ComponentName = "Notes selector";
+        ControllerName = "Notes selector";
         HiddenColumns = "";
     }
 

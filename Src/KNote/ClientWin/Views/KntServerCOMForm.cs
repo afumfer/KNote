@@ -35,9 +35,9 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
         Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(ShowDialog());
+        return _ctrl.DialogResultToControllerResult(ShowDialog());
     }
 
     public void OnClosingView()
@@ -126,7 +126,7 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
         }
     }
 
-    private void _com_ReceiveMessage(object sender, ComponentEventArgs<string> e)
+    private void _com_ReceiveMessage(object sender, ControllerEventArgs<string> e)
     {
         listBoxEcho.Invoke((MethodInvoker)delegate
         {

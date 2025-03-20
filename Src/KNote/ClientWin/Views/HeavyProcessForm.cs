@@ -70,9 +70,9 @@ public partial class HeavyProcessForm : Form, IViewHeavyProcess
         Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(ShowDialog());
+        return _ctrl.DialogResultToControllerResult(ShowDialog());
     }
 
     public void RefreshView()

@@ -47,7 +47,7 @@ public partial class MonitorForm : Form, IViewBase
         this.Show();
     }
 
-    Result<EComponentResult> IViewBase.ShowModalView()
+    Result<EControllerResult> IViewBase.ShowModalView()
     {
         return null;
     }

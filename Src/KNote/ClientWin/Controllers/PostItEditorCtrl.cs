@@ -28,7 +28,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     public PostItEditorCtrl(Store store): base(store)
     {
-        ComponentName = "PostIt editor";
+        ControllerName = "PostIt editor";
         Store.DeletedNote += Store_DeletedNote;
     }
 
@@ -42,7 +42,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     #region Store events 
 
-    private void Store_DeletedNote(object sender, ComponentEventArgs<NoteExtendedDto> e)
+    private void Store_DeletedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         if (e.Entity.NoteId == this.Model.NoteId)
             this.Finalize();
@@ -52,10 +52,10 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     #region Component specific events 
 
-    public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> ExtendedEdit;
+    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> ExtendedEdit;
     protected virtual void OnExtendedEdit()
     {
-        ExtendedEdit?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId }));
+        ExtendedEdit?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId }));
     }
 
     #endregion
@@ -390,7 +390,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
         window.LoadModel(Service, WindowPostIt, false);
 
         var res = window.RunModal();
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
             return window.Model;
 
         return null;

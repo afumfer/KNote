@@ -40,9 +40,9 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
         this.Show();
     }
 
-    Result<EComponentResult> IViewBase.ShowModalView()
+    Result<EControllerResult> IViewBase.ShowModalView()
     {            
-        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public async void RefreshView()
@@ -306,7 +306,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
         ToolStripMenuItem menuSel;
         menuSel = (ToolStripMenuItem)sender;
 
-        _ctrl.Extensions[menuSel.Text](this, new ComponentEventArgs<FolderWithServiceRef>(_ctrl.SelectedEntity));
+        _ctrl.Extensions[menuSel.Text](this, new ControllerEventArgs<FolderWithServiceRef>(_ctrl.SelectedEntity));
     }
 
     #endregion

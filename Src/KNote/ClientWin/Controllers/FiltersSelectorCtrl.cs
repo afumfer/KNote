@@ -28,7 +28,7 @@ public class FiltersSelectorCtrl : CtrlSelectorBase<IViewSelector<SelectedNotesI
 
     public FiltersSelectorCtrl(Store store): base (store)
     {
-        ComponentName = "Filter param";
+        ControllerName = "Filter param";
         
         // ListEntities == TODO: ... load all stores filters 
     }

@@ -11,7 +11,7 @@ public class ResourceEditorCtrl : CtrlEditorBase<IViewEditor<ResourceDto>, Resou
 
     public ResourceEditorCtrl(Store store): base(store)
     {
-        ComponentName = "Resource editor";        
+        ControllerName = "Resource editor";        
     }
 
     #endregion

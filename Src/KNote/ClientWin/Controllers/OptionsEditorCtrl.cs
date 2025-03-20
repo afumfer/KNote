@@ -10,7 +10,7 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfi
 
     public OptionsEditorCtrl(Store store) : base(store)
     {
-        ComponentName = "Options editor";
+        ControllerName = "Options editor";
     }
 
     #endregion 

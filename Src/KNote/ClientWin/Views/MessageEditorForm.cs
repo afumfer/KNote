@@ -36,9 +36,9 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
         this.Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
         return res;
     }
 

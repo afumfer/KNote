@@ -40,9 +40,9 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         this.Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        var res = _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
         return res;
     }
 

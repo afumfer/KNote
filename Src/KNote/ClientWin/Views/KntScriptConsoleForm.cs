@@ -195,9 +195,9 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         this.Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public void OnClosingView()

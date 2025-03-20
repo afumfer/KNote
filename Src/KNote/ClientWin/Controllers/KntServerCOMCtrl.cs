@@ -82,7 +82,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public KntServerCOMCtrl(Store store) : base(store)
     {
-        ComponentName = "KntServerCOM Component";
+        ControllerName = "KntServerCOM Component";
 
         // --- BaudRate and HandShake
 
@@ -115,28 +115,28 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     #region Events
 
-    public event EventHandler<ComponentEventArgs<string>> ReceiveMessage;
+    public event EventHandler<ControllerEventArgs<string>> ReceiveMessage;
 
     #endregion 
 
     #region Protected methods 
 
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
         try
         {            
             StartService();            
-            return new Result<EComponentResult>(EComponentResult.Executed);
+            return new Result<EControllerResult>(EControllerResult.Executed);
         }
         catch (OperationCanceledException)
         {
             // not doing anything
-            var res = new Result<EComponentResult>(EComponentResult.Error);
+            var res = new Result<EControllerResult>(EControllerResult.Error);
             return res;
         }
         catch (Exception ex)
         {
-            var res = new Result<EComponentResult>(EComponentResult.Error);
+            var res = new Result<EControllerResult>(EControllerResult.Error);
             var _statusInfo = $"KntServerCOM component. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(_statusInfo);            
             if (ShowErrorMessagesOnInitialize)
@@ -145,7 +145,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         }
     }
     
-    protected override Result<EComponentResult> OnFinalized()
+    protected override Result<EControllerResult> OnFinalized()
     {
         var res = base.OnFinalized();
         _showViewMessage = false;  // for hide show info in view.
@@ -315,7 +315,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
                 }
                
                 _statusInfo = $"Recived: {messageIn}";
-                ReceiveMessage?.Invoke(this, new ComponentEventArgs<string>(messageIn));
+                ReceiveMessage?.Invoke(this, new ControllerEventArgs<string>(messageIn));
                 
                 DispatchRequest(GetKComRequest(messageIn));
 
@@ -419,7 +419,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         _messageQueue.Enqueue((char)EofByte); 
     }
 
-    private void _chatGPT_StreamToken(object sender, ComponentEventArgs<string> e)
+    private void _chatGPT_StreamToken(object sender, ControllerEventArgs<string> e)
     {
         _messageQueue.Enqueue(e.Entity?.ToString());        
     }
@@ -668,7 +668,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
     public void ShowServerCOMView()
     {
 
-        if (ComponentState == EComponentState.Started)
+        if (ControllerState == EControllerState.Started)
         {
             ServerCOMView.ShowView();
         }

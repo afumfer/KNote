@@ -34,9 +34,9 @@ public partial class NotifyForm : Form, IViewBase
         this.Show();
     }
 
-    Result<EComponentResult> IViewBase.ShowModalView()
+    Result<EControllerResult> IViewBase.ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public DialogResult ShowInfo(string info, string caption = "KeyNotex", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)

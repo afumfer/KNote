@@ -12,7 +12,7 @@ public class AttributeEditorCtrl : CtrlEditorBase<IViewEditor<KAttributeDto>, KA
 
     public AttributeEditorCtrl(Store store) : base(store)
     {
-        ComponentName = "Attribute editor";
+        ControllerName = "Attribute editor";
     }
 
     #endregion

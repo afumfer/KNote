@@ -34,7 +34,7 @@ public class FoldersSelectorCtrl : CtrlSelectorBase<IViewSelector<FolderWithServ
 
     public FoldersSelectorCtrl(Store store) : base(store)
     {
-        ComponentName = "Folders selector";
+        ControllerName = "Folders selector";
         ListEntities = new List<FolderWithServiceRef>();
     }
 

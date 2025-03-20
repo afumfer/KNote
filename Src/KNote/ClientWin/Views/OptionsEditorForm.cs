@@ -35,9 +35,9 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
         this.Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(this.ShowDialog());
+        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public void RefreshView()

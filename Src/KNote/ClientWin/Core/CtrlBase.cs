@@ -8,13 +8,13 @@ abstract public class CtrlBase : IDisposable
 {
     #region Public properties
 
-    public readonly Guid ComponentId;
+    public readonly Guid ControllerId;
 
-    public string ComponentName { get; protected set; }
+    public string ControllerName { get; protected set; }
 
     public Store Store { get; protected set; }
 
-    public EComponentState ComponentState { get; protected set; } = EComponentState.NotStarted;
+    public EControllerState ControllerState { get; protected set; } = EControllerState.NotStarted;
             
     public bool EmbededMode { get; set; } = false;
     
@@ -39,12 +39,12 @@ abstract public class CtrlBase : IDisposable
 
     #region Standard events for base controller
     
-    public event EventHandler<ComponentEventArgs<EComponentState>> StateComponentChanged;
+    public event EventHandler<ControllerEventArgs<EControllerState>> StateControllerChanged;
 
-    protected void OnStateComponentChanged(EComponentState state)
+    protected void OnStateControllerChanged(EControllerState state)
     {
-        ComponentState = state;
-        StateComponentChanged?.Invoke(this, new ComponentEventArgs<EComponentState>(state));
+        ControllerState = state;
+        StateControllerChanged?.Invoke(this, new ControllerEventArgs<EControllerState>(state));
     }
     
     #endregion
@@ -53,81 +53,81 @@ abstract public class CtrlBase : IDisposable
 
     public CtrlBase(Store store)
     {
-        ComponentId = Guid.NewGuid();
-        OnStateComponentChanged(EComponentState.NotStarted);           
+        ControllerId = Guid.NewGuid();
+        OnStateControllerChanged(EControllerState.NotStarted);           
         Store = store;
-        Store.AddComponent(this);
+        Store.AddController(this);
     }
 
     #endregion
 
-    protected virtual Result<EComponentResult> OnInitialized()
+    protected virtual Result<EControllerResult> OnInitialized()
     {
-        return new Result<EComponentResult>(EComponentResult.Executed);
+        return new Result<EControllerResult>(EControllerResult.Executed);
     } 
 
-    protected virtual Result<EComponentResult> CheckPreconditions()
+    protected virtual Result<EControllerResult> CheckPreconditions()
     {
         // TODO: In the future, generic rules will be implemented for all controllers.
         //       These rules can be overwritten or supplemented in derived classes.
         //       For now, the base class preconditions always return success.
                 
-        return new Result<EComponentResult>(EComponentResult.Executed); 
+        return new Result<EControllerResult>(EControllerResult.Executed); 
     }
 
-    protected virtual Result<EComponentResult> OnFinalized() 
+    protected virtual Result<EControllerResult> OnFinalized() 
     {
-        return new Result<EComponentResult>(EComponentResult.Executed);
+        return new Result<EControllerResult>(EControllerResult.Executed);
     }
 
-    public virtual Result<EComponentResult> Run() 
+    public virtual Result<EControllerResult> Run() 
     {        
         var result = CheckPreconditions();
         if (result.IsValid) 
         {
-            OnStateComponentChanged(EComponentState.PreconditionsOvercome);
+            OnStateControllerChanged(EControllerState.PreconditionsOvercome);
             result = OnInitialized();
             if(result.IsValid)
-                OnStateComponentChanged(EComponentState.Initialized);
+                OnStateControllerChanged(EControllerState.Initialized);
             else
             {
-                OnStateComponentChanged(EComponentState.Error);
+                OnStateControllerChanged(EControllerState.Error);
                 return result;
             }
         }
         else
         {                
-            OnStateComponentChanged(EComponentState.Error);
+            OnStateControllerChanged(EControllerState.Error);
             return result;
         }
 
-        OnStateComponentChanged(EComponentState.Started);
+        OnStateControllerChanged(EControllerState.Started);
         return result;
     }
 
-    public Result<EComponentResult> Finalize()
+    public Result<EControllerResult> Finalize()
     {
-        Result<EComponentResult> result;
+        Result<EControllerResult> result;
         
-        if (ComponentState == EComponentState.Finalized)
+        if (ControllerState == EControllerState.Finalized)
         {
-            result = new Result<EComponentResult>(EComponentResult.Error);
-            result.AddErrorMessage("The component is already finalized.");
+            result = new Result<EControllerResult>(EControllerResult.Error);
+            result.AddErrorMessage("The controller is already finalized.");
             return result;
         }
 
         try
         {
             result = OnFinalized();
-            OnStateComponentChanged(EComponentState.Finalized);
-            FinalizeViewsComponent();
-            Store.RemoveComponent(this);
+            OnStateControllerChanged(EControllerState.Finalized);
+            FinalizeViewsController();
+            Store.RemoveController(this);
         }
         catch (Exception ex)
         {
-            result = new Result<EComponentResult>(EComponentResult.Error);
+            result = new Result<EControllerResult>(EControllerResult.Error);
             result.AddErrorMessage(ex.Message);
-            OnStateComponentChanged(EComponentState.Error);
+            OnStateControllerChanged(EControllerState.Error);
         }
        
         return result;
@@ -135,16 +135,16 @@ abstract public class CtrlBase : IDisposable
 
     public virtual void NotifyMessage(string message)
     {
-        Store.OnComponentNotification(this, message);
+        Store.OnControllerNotification(this, message);
     }
 
-    public virtual Result<EComponentResult> DialogResultToComponentResult(DialogResult dialogResult)
+    public virtual Result<EControllerResult> DialogResultToControllerResult(DialogResult dialogResult)
     {
-        var result = new Result<EComponentResult>();
+        var result = new Result<EControllerResult>();
         if (dialogResult == DialogResult.OK || dialogResult == DialogResult.Yes)
-            result.Entity = EComponentResult.Executed;
+            result.Entity = EControllerResult.Executed;
         else
-            result.Entity = EComponentResult.Canceled;
+            result.Entity = EControllerResult.Canceled;
         return result;
     }
 
@@ -155,7 +155,7 @@ abstract public class CtrlBase : IDisposable
 
     #region Utils protected methods
 
-    protected void FinalizeViewsComponent()
+    protected void FinalizeViewsController()
     {            
         List<CtrlBase> lc = GetControllers(Fields);
         foreach (CtrlBase c in lc)
@@ -183,9 +183,9 @@ abstract public class CtrlBase : IDisposable
 
                 foreach (Attribute attribute in attributes)
                 {
-                    if (attribute is ResetComponentFieldAttribute)
+                    if (attribute is ResetControllerFieldAttribute)
                     {
-                        field.SetValue(this, ((ResetComponentFieldAttribute)attribute).ValueReset);
+                        field.SetValue(this, ((ResetControllerFieldAttribute)attribute).ValueReset);
                         break;
                     }
                 }
@@ -254,7 +254,7 @@ abstract public class CtrlBase : IDisposable
 
 #region  Controller typos 
 
-public enum EComponentState
+public enum EControllerState
 {
     NotStarted,
     PreconditionsOvercome,
@@ -264,7 +264,7 @@ public enum EComponentState
     Error
 }
 
-public enum EComponentResult
+public enum EControllerResult
 {
     Null,
     Executed,
@@ -272,24 +272,24 @@ public enum EComponentResult
     Error
 }
 
-public class ComponentEventArgs<T> : EventArgs
+public class ControllerEventArgs<T> : EventArgs
 {
     public T Entity { get; set; }
 
-    public ComponentEventArgs(T entity)
+    public ControllerEventArgs(T entity)
         : base()
     {
         this.Entity = entity;
     }
 }
 
-public delegate void ExtensionsEventHandler<T>(object sender, ComponentEventArgs<T> e);
+public delegate void ExtensionsEventHandler<T>(object sender, ControllerEventArgs<T> e);
 
 /// <summary>
 /// Attribute to identify the variables of the controller that you want to reset
 /// </summary>
 [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = true)]
-public class ResetComponentFieldAttribute : Attribute
+public class ResetControllerFieldAttribute : Attribute
 {                
     private object _valueReset;
     
@@ -305,7 +305,7 @@ public class ResetComponentFieldAttribute : Attribute
     /// Attribute to identify the variables of the controller that you want to reset
     /// </summary>
     /// <param name="valueReset">Value to be assigned to perform a reset</param>
-    public ResetComponentFieldAttribute(object valueReset)
+    public ResetControllerFieldAttribute(object valueReset)
         : base()
     {
         this._valueReset = valueReset;
@@ -314,7 +314,7 @@ public class ResetComponentFieldAttribute : Attribute
     /// <summary>
     /// Attribute to identify the variables of the controller that you want to reset (overload 2)
     /// </summary>
-    public ResetComponentFieldAttribute(Type typeValueReset, object valueReset)
+    public ResetControllerFieldAttribute(Type typeValueReset, object valueReset)
         : base()
     {
         try

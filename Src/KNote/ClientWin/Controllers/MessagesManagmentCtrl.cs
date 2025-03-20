@@ -19,24 +19,24 @@ public class MessagesManagmentCtrl : CtrlBase
 
     public MessagesManagmentCtrl(Store store): base(store)
     {
-        ComponentName = "Messages Managment Component";
+        ControllerName = "Messages Managment Component";
     }
 
     #endregion
 
     #region Events handlers
 
-    public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItVisible;
-    public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> PostItAlarm;
+    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> PostItVisible;
+    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> PostItAlarm;
     //public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> EMailAlarm;
     //public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> AppAlarm;
-    public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> ExecuteKntScript;
+    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> ExecuteKntScript;
 
     #endregion
 
     #region Component override methods
 
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
         try
         {
@@ -53,11 +53,11 @@ public class MessagesManagmentCtrl : CtrlBase
             kntTimerAutoSave.Interval = Store.AppConfig.AutoSaveSeconds * 1000; 
             kntTimerAutoSave.Start();
 
-            return new Result<EComponentResult>(EComponentResult.Executed);
+            return new Result<EControllerResult>(EControllerResult.Executed);
         }
         catch (Exception ex)
         {
-            var res = new Result<EComponentResult>(EComponentResult.Error);            
+            var res = new Result<EControllerResult>(EControllerResult.Error);            
             res.AddErrorMessage(ex.Message);            
             return res;            
         }
@@ -94,7 +94,7 @@ public class MessagesManagmentCtrl : CtrlBase
             var service = store.Service;
             var res = await service.Notes.GetVisibleNotesIdAsync(Store.AppUserName);
             foreach(var id in res.Entity)                                    
-                PostItVisible?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+                PostItVisible?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
         }
         lock (_lockObject)
             execAutoSave = true;
@@ -110,7 +110,7 @@ public class MessagesManagmentCtrl : CtrlBase
 
             var resPostIt = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.PostIt);
             foreach (var id in resPostIt.Entity)                            
-                PostItAlarm?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+                PostItAlarm?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
             
             //var resEMail = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.Email);
             //foreach (var id in resEMail.Entity)
@@ -122,7 +122,7 @@ public class MessagesManagmentCtrl : CtrlBase
 
             var resKntScript = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.ExecuteKntScript);
             foreach (var id in resKntScript.Entity)
-                ExecuteKntScript?.Invoke(this, new ComponentEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+                ExecuteKntScript?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
         }
         lock (_lockObject)
             execAutoSave = true;

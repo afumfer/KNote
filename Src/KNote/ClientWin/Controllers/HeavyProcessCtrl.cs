@@ -23,7 +23,7 @@ public class HeavyProcessCtrl : CtrlBase
 
     public HeavyProcessCtrl(Store store) : base(store)
     {
-        ComponentName = "KntLab Component";
+        ControllerName = "KntLab Component";
         _processInExecution = false;
     }
 

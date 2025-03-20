@@ -17,7 +17,7 @@ public class KntScriptConsoleCtrl : CtrlViewBase<IViewBase>
 
     public KntScriptConsoleCtrl(Store store): base(store)
     {
-        ComponentName = "KeyNote script console";
+        ControllerName = "KeyNote script console";
     }
 
     #endregion

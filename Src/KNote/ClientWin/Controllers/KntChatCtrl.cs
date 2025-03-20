@@ -24,26 +24,26 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     public KntChatCtrl(Store store) : base(store)
     {
-        ComponentName = "KntChat Component";
+        ControllerName = "KntChat Component";
     }
 
     #endregion
 
     #region Events 
 
-    public event EventHandler<ComponentEventArgs<string>> ReceiveMessage;
+    public event EventHandler<ControllerEventArgs<string>> ReceiveMessage;
 
     #endregion 
 
     #region Protected methods 
 
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
         try
         {
             if (string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
             {
-                var res = new Result<EComponentResult>(EComponentResult.Error);
+                var res = new Result<EControllerResult>(EControllerResult.Error);
                 var message = "Chat hub url is not defined. Set the chat hub url y Options menú.";
                 res.AddErrorMessage(message);
                 return res;
@@ -56,16 +56,16 @@ public class KntChatCtrl : CtrlBase, IDisposable
             _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
             {
                 var encodeMessage = $"{user}: {message}";
-                ReceiveMessage?.Invoke(this, new ComponentEventArgs<string>(encodeMessage));
+                ReceiveMessage?.Invoke(this, new ControllerEventArgs<string>(encodeMessage));
             });
 
             StartHubConnection();
 
-            return new Result<EComponentResult>(EComponentResult.Executed);
+            return new Result<EControllerResult>(EControllerResult.Executed);
         }
         catch (Exception ex)
         {
-            var res = new Result<EComponentResult>(EComponentResult.Error);
+            var res = new Result<EControllerResult>(EControllerResult.Error);
             var resMessage = $"KntChat component. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(resMessage);
             if(ShowErrorMessagesOnInitialize)
@@ -157,7 +157,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
     public void ShowChatView()
     {
         
-        if (ComponentState == EComponentState.Started)
+        if (ControllerState == EControllerState.Started)
         {
             ChatView.ShowView();
         }

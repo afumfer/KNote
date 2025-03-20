@@ -125,9 +125,9 @@ window.chrome.webview.postMessage(retValue);";
         Show();
     }
 
-    public Result<EComponentResult> ShowModalView()
+    public Result<EControllerResult> ShowModalView()
     {
-        return _ctrl.DialogResultToComponentResult(ShowDialog());
+        return _ctrl.DialogResultToControllerResult(ShowDialog());
     }
 
     public void RefreshView()
@@ -1223,7 +1223,9 @@ window.chrome.webview.postMessage(retValue);";
         kntEditView.ShowHtmlContent(textForKntEditView.Text);
     }
 
-    #endregion 
+    #endregion
+
+    #region Notes selector
 
     private NotesSelectorCtrl _notesSelector = null;
     private async void buttonTestNoteList_Click(object sender, EventArgs e)
@@ -1239,9 +1241,11 @@ window.chrome.webview.postMessage(retValue);";
 
         var res = _notesSelector.RunModal();
 
-        if (res.Entity == EComponentResult.Executed)
+        if (res.Entity == EControllerResult.Executed)
             MessageBox.Show(_notesSelector.SelectedEntity.Description);
         else
             MessageBox.Show("not selected");
     }
+
+    #endregion 
 }

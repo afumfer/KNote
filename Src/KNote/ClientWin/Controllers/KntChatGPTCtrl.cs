@@ -65,20 +65,20 @@ public class KntChatGPTCtrl : CtrlBase
 
     public KntChatGPTCtrl(Store store) : base(store)
     {
-        ComponentName = "KntChatGPT Component";        
+        ControllerName = "KntChatGPT Component";        
     }
 
     #endregion
 
     #region Events
 
-    public event EventHandler<ComponentEventArgs<string>> StreamToken;
+    public event EventHandler<ControllerEventArgs<string>> StreamToken;
 
     #endregion 
 
     #region Protected methods 
 
-    protected override Result<EComponentResult> OnInitialized()
+    protected override Result<EControllerResult> OnInitialized()
     {
         try
         {            
@@ -97,11 +97,11 @@ public class KntChatGPTCtrl : CtrlBase
             
             RestartChatGPT();
 
-            return new Result<EComponentResult>(EComponentResult.Executed);
+            return new Result<EControllerResult>(EControllerResult.Executed);
         }
         catch (Exception ex)
         {
-            var res = new Result<EComponentResult>(EComponentResult.Error);
+            var res = new Result<EControllerResult>(EControllerResult.Error);
             var resMessage = $"OnInitialized KntChatGPTComponent error: {ex.Message}";
             res.AddErrorMessage(resMessage);
             ChatGPTView.ShowInfo(resMessage);
@@ -135,7 +135,7 @@ public class KntChatGPTCtrl : CtrlBase
     // For use in KntScript
     public void ShowChatGPTView()
     {
-        if(ComponentState == EComponentState.Started)
+        if(ControllerState == EControllerState.Started)
         {
             ChatGPTView.ShowView();
         }
@@ -214,7 +214,7 @@ public class KntChatGPTCtrl : CtrlBase
 
         var intro = $"**User:** \r\n{prompt}\r\n\r\n**Assistant:** \r\n";
         _chatTextMessasges.Append(intro);
-        StreamToken?.Invoke(this, new ComponentEventArgs<string>(intro));
+        StreamToken?.Invoke(this, new ControllerEventArgs<string>(intro));
 
         _chatMessages.Add(new UserChatMessage(prompt));
 
@@ -226,7 +226,7 @@ public class KntChatGPTCtrl : CtrlBase
             {
                 var res = updatePart.Text?.Replace("\n", "\r\n");                
                 resAssistant.Append(res);
-                StreamToken?.Invoke(this, new ComponentEventArgs<string>(res));
+                StreamToken?.Invoke(this, new ControllerEventArgs<string>(res));
             }
         }
 
@@ -240,7 +240,7 @@ public class KntChatGPTCtrl : CtrlBase
         _chatTextMessasges.Append(resAssistant.ToString());
         _chatTextMessasges.Append($"\r\n\r\n");
 
-        StreamToken?.Invoke(this, new ComponentEventArgs<string>($"\r\n\r\n"));
+        StreamToken?.Invoke(this, new ControllerEventArgs<string>($"\r\n\r\n"));
     }
 
     #endregion
