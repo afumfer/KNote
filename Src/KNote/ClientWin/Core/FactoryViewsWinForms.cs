@@ -2,133 +2,134 @@
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
+using System.ComponentModel;
 
 namespace KNote.ClientWin.Core;
 
 public class FactoryViewsWinForms : IFactoryViews
 {
-    public IViewBase View(MonitorCtrl component)
+    public IViewBase View(MonitorCtrl controller)
     {
-        return new MonitorForm(component);
+        return new MonitorForm(controller);
     }
 
-    public IViewBase View(KntScriptConsoleCtrl component)
+    public IViewBase View(KntScriptConsoleCtrl controller)
     {
-        return new KntScriptConsoleForm(component);
+        return new KntScriptConsoleForm(controller);
     }
     
-    public IViewSelector<FolderWithServiceRef> View(FoldersSelectorCtrl component)
+    public IViewSelector<FolderWithServiceRef> View(FoldersSelectorCtrl controller)
     {
-        return new FoldersSelectorForm(component);
+        return new FoldersSelectorForm(controller);
     }
 
-    public IViewSelector<NoteInfoDto> View(NotesSelectorCtrl component)
+    public IViewSelector<NoteInfoDto> View(NotesSelectorCtrl controller)
     {
-        return new NotesSelectorForm(component);
+        return new NotesSelectorForm(controller);
     }
 
-    public IViewKNoteManagment View(KNoteManagmentCtrl component)
+    public IViewKNoteManagment View(KNoteManagmentCtrl controller)
     {
-        return new KNoteManagmentForm(component);
+        return new KNoteManagmentForm(controller);
     }
 
-    public IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorCtrl component)
+    public IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorCtrl controller)
     {
-        return new NoteEditorForm(component);
+        return new NoteEditorForm(controller);
     }
 
-    public IViewPostIt<NoteDto> View(PostItEditorCtrl component)
+    public IViewPostIt<NoteDto> View(PostItEditorCtrl controller)
     {
-        return new PostItEditorForm(component);
+        return new PostItEditorForm(controller);
     }
 
-    public IViewPostIt<WindowDto> View(PostItPropertiesCtrl component)
+    public IViewPostIt<WindowDto> View(PostItPropertiesCtrl controller)
     {
-        return new PostItPropertiesForm(component);
+        return new PostItPropertiesForm(controller);
     }
 
-    public IViewEditor<FolderDto> View(FolderEditorCtrl component)
+    public IViewEditor<FolderDto> View(FolderEditorCtrl controller)
     {
-        return new FolderEditorForm(component);
+        return new FolderEditorForm(controller);
     }
 
-    public IViewEditor<RepositoryRef> View(RepositoryEditorCtrl component)
+    public IViewEditor<RepositoryRef> View(RepositoryEditorCtrl controller)
     {
-        return new RepositoryEditorForm(component);
+        return new RepositoryEditorForm(controller);
     }
 
-    public IViewBase NotifyView(KNoteManagmentCtrl component)
+    public IViewBase NotifyView(KNoteManagmentCtrl controller)
     {
-        return new NotifyForm(component);
+        return new NotifyForm(controller);
     }
 
-    public IViewBase AboutView(KNoteManagmentCtrl component)
+    public IViewBase AboutView(KNoteManagmentCtrl controller)
     {
-        return new KNoteAboutForm(component);
+        return new KNoteAboutForm(controller);
     }
 
-    public IViewEditor<KMessageDto> View(MessageEditorCtrl component)
+    public IViewEditor<KMessageDto> View(MessageEditorCtrl controller)
     {
-        return new MessageEditorForm(component);
+        return new MessageEditorForm(controller);
     }
 
-    public IViewEditor<ResourceDto> View(ResourceEditorCtrl component)
+    public IViewEditor<ResourceDto> View(ResourceEditorCtrl controller)
     {
-        return new ResourceEditorForm(component);
+        return new ResourceEditorForm(controller);
     }
 
-    public IViewEditor<KAttributeDto> View(AttributeEditorCtrl component)
+    public IViewEditor<KAttributeDto> View(AttributeEditorCtrl controller)
     {
-        return new AttributeEditorForm(component);
+        return new AttributeEditorForm(controller);
     }
 
-    public IViewEditor<NoteTaskDto> View(TaskEditorCtrl component)
+    public IViewEditor<NoteTaskDto> View(TaskEditorCtrl controller)
     {
-        return new TaskEditorForm(component);
+        return new TaskEditorForm(controller);
     }
 
-    public IViewSelector<NoteTypeDto> View(NoteTypesSelectorCtrl component)
+    public IViewSelector<NoteTypeDto> View(NoteTypesSelectorCtrl controller)
     {
-        return new NoteTypesSelectorForm(component);
+        return new NoteTypesSelectorForm(controller);
     }
 
-    public IViewEditor<NoteKAttributeDto> View(NoteAttributeEditorCtrl component)
+    public IViewEditor<NoteKAttributeDto> View(NoteAttributeEditorCtrl controller)
     {
-        return new NoteAttributeEditorForm(component);
+        return new NoteAttributeEditorForm(controller);
     }
 
-    public IViewSelector<SelectedNotesInServiceRef> View(FiltersSelectorCtrl component)
+    public IViewSelector<SelectedNotesInServiceRef> View(FiltersSelectorCtrl controller)
     {
-        return new FiltersSelectorForm(component);
+        return new FiltersSelectorForm(controller);
     }
 
-    public IViewEditor<AppConfig> View(OptionsEditorCtrl component)
+    public IViewEditor<AppConfig> View(OptionsEditorCtrl controller)
     {
-        return new OptionsEditorForm(component);
+        return new OptionsEditorForm(controller);
     }
 
-    public IViewBase View(KntChatGPTCtrl component)
+    public IViewBase View(KntChatGPTCtrl controller)
     {
-        return new KntChatGPTForm(component);
+        return new KntChatGPTForm(controller);
     }
 
-    public IViewChat View(KntChatCtrl component)
+    public IViewChat View(KntChatCtrl controller)
     {
-        return new KntChatForm(component);
+        return new KntChatForm(controller);
     }
 
-    public IViewServerCOM View(KntServerCOMCtrl component)
+    public IViewServerCOM View(KntServerCOMCtrl controller)
     {
-        return new KntServerCOMForm(component);
+        return new KntServerCOMForm(controller);
     }
 
-    public IViewBase View(KntLabCtrl component)
+    public IViewBase View(KntLabCtrl controller)
     {
-        return new KntLabForm(component);
+        return new KntLabForm(controller);
     }
-
-    public IViewHeavyProcess View(HeavyProcessCtrl component)
+    
+    public IViewHeavyProcess View(HeavyProcessCtrl controller)
     {
-        return new HeavyProcessForm(component);
+        return new HeavyProcessForm(controller);
     }
 }

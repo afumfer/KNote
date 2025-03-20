@@ -24,7 +24,7 @@ public class NoteTypesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteTypeDto>
 
     #endregion
 
-    #region Componente override
+    #region Controller override
 
     public async override Task<bool> LoadEntities(IKntService service, bool refreshView = true)
     {

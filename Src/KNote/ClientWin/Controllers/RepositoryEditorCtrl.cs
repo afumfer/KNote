@@ -21,7 +21,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
 
     #endregion
 
-    #region ComponentEditor implementation 
+    #region Controller editor implementation 
 
     protected override IViewEditor<RepositoryRef> CreateView()
     {

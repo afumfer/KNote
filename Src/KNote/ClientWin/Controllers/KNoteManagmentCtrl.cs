@@ -73,15 +73,15 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         Store.ChangedActiveFolderWithServiceRef += Store_ChangedActiveFolderWithServiceRef;
         Store.ChangedActiveFilterWithServiceRef += Store_ChangedActiveFilterWithServiceRef;
 
-        Store.AddedPostIt += PostItEditorComponent_AddedEntity;
-        Store.SavedPostIt += PostItEditorComponent_SavedEntity;            
-        Store.DeletedPostIt += PostItEditorComponent_DeletedEntity;            
-        Store.ExtendedEditPostIt += PostItEditorComponent_ExtendedEdit;
+        Store.AddedPostIt += PostItEditorCtrl_AddedEntity;
+        Store.SavedPostIt += PostItEditorCtrl_SavedEntity;            
+        Store.DeletedPostIt += PostItEditorCtrl_DeletedEntity;            
+        Store.ExtendedEditPostIt += PostItEditorCtrl_ExtendedEdit;
 
-        Store.AddedNote += NoteEditorComponent_AddedEntity;
-        Store.SavedNote += NoteEditorComponent_SavedEntity;
-        Store.DeletedNote += NoteEditorComponent_DeletedEntity;
-        Store.EditedPostItNote += NoteEditorComponent_PostItEdit;
+        Store.AddedNote += NoteEditorCtrl_AddedEntity;
+        Store.SavedNote += NoteEditorCtrl_SavedEntity;
+        Store.DeletedNote += NoteEditorCtrl_DeletedEntity;
+        Store.EditedPostItNote += NoteEditorCtrl_PostItEdit;
     }
 
     private async void Store_ChangedActiveFolderWithServiceRef(object sender, ControllerEventArgs<FolderWithServiceRef> e)
@@ -105,12 +105,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
         NotifyMessage($"Loading notes list for folder {folderWithServideRef.FolderInfo?.FolderNumber}");
 
-        FolderPath = FoldersSelectorComponent.Path;
+        FolderPath = FoldersSelectorCtrl.Path;
 
         _selectedNoteInfo = null;
-        NoteEditorComponent.CleanView();
-        await NotesSelectorComponent.LoadEntities(folderWithServideRef.ServiceRef.Service, folderWithServideRef.FolderInfo);
-        CountNotes = NotesSelectorComponent.ListEntities?.Count;
+        NoteEditorCtrl.CleanView();
+        await NotesSelectorCtrl.LoadEntities(folderWithServideRef.ServiceRef.Service, folderWithServideRef.FolderInfo);
+        CountNotes = NotesSelectorCtrl.ListEntities?.Count;
 
         View.ShowInfo(null);
         NotifyMessage($"Loaded notes list for folder {folderWithServideRef.FolderInfo?.FolderNumber}");
@@ -129,9 +129,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         FolderPath = $"Notes filter: {selectedNotesInServiceRef?.NotesSearch?.TextSearch}";
 
         _selectedNoteInfo = null;
-        NoteEditorComponent.View.CleanView();
-        await NotesSelectorComponent.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, selectedNotesInServiceRef?.NotesSearch);
-        CountNotes = NotesSelectorComponent.ListEntities?.Count;
+        NoteEditorCtrl.View.CleanView();
+        await NotesSelectorCtrl.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, selectedNotesInServiceRef?.NotesSearch);
+        CountNotes = NotesSelectorCtrl.ListEntities?.Count;
 
         View.ShowInfo(null);
         NotifyMessage($"Loaded notes filter {selectedNotesInServiceRef?.NotesSearch?.TextSearch}");
@@ -144,15 +144,15 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         Store.ChangedActiveFolderWithServiceRef -= Store_ChangedActiveFolderWithServiceRef;
         Store.ChangedActiveFilterWithServiceRef -= Store_ChangedActiveFilterWithServiceRef;
 
-        Store.AddedPostIt -= PostItEditorComponent_AddedEntity;
-        Store.SavedPostIt -= PostItEditorComponent_SavedEntity;
-        Store.DeletedPostIt -= PostItEditorComponent_DeletedEntity;
-        Store.ExtendedEditPostIt -= PostItEditorComponent_ExtendedEdit;
+        Store.AddedPostIt -= PostItEditorCtrl_AddedEntity;
+        Store.SavedPostIt -= PostItEditorCtrl_SavedEntity;
+        Store.DeletedPostIt -= PostItEditorCtrl_DeletedEntity;
+        Store.ExtendedEditPostIt -= PostItEditorCtrl_ExtendedEdit;
 
-        Store.AddedNote -= NoteEditorComponent_AddedEntity;
-        Store.SavedNote -= NoteEditorComponent_SavedEntity;
-        Store.DeletedNote -= NoteEditorComponent_DeletedEntity;
-        Store.EditedPostItNote -= NoteEditorComponent_PostItEdit;
+        Store.AddedNote -= NoteEditorCtrl_AddedEntity;
+        Store.SavedNote -= NoteEditorCtrl_SavedEntity;
+        Store.DeletedNote -= NoteEditorCtrl_DeletedEntity;
+        Store.EditedPostItNote -= NoteEditorCtrl_PostItEdit;
 
         base.Dispose();
     }
@@ -195,7 +195,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #endregion
 
-    #region Component override methods
+    #region Controller override methods
 
     protected override Result<EControllerResult> OnInitialized()
     {
@@ -209,18 +209,18 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         {                
             using (new WaitCursor())
             {
-                NotesSelectorComponent.Run();
-                FoldersSelectorComponent.Run();
-                FilterParamComponent.Run();
-                NoteEditorComponent.Run();
-                MessagesManagmentComponent.Run();
+                NotesSelectorCtrl.Run();
+                FoldersSelectorCtrl.Run();
+                FilterParamCtrl.Run();
+                NoteEditorCtrl.Run();
+                MessagesManagmentCtrl.Run();
 
                 NotifyView.ShowView();
 
                 // TODO: Experimental ---------------------------------
                 if (!string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
                 {
-                    RunKntChatComponent(false);
+                    RunKntChatCtrl(false);
                 }
                 //-----------------------------------------------------
             }
@@ -235,31 +235,31 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #endregion
 
-    #region Components included
+    #region Controllers included
 
-    #region FoldersSelector component
+    #region FoldersSelector controller
 
-    private FoldersSelectorCtrl _folderSelectorComponent;
-    public FoldersSelectorCtrl FoldersSelectorComponent
+    private FoldersSelectorCtrl _folderSelectorCtrl;
+    public FoldersSelectorCtrl FoldersSelectorCtrl
     {
         get
         {
-            if (_folderSelectorComponent == null)
+            if (_folderSelectorCtrl == null)
             {
-                _folderSelectorComponent = new FoldersSelectorCtrl(Store);
-                _folderSelectorComponent.EmbededMode = true;                    
-                _folderSelectorComponent.EntitySelection += _folderSelectorComponent_EntitySelection;
+                _folderSelectorCtrl = new FoldersSelectorCtrl(Store);
+                _folderSelectorCtrl.EmbededMode = true;                    
+                _folderSelectorCtrl.EntitySelection += _folderSelectorCtrl_EntitySelection;
 
-                _folderSelectorComponent.Extensions.Add("New folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendNewFolder));
-                _folderSelectorComponent.Extensions.Add("Edit folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendEditFolder));
-                _folderSelectorComponent.Extensions.Add("Delete folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendDeleteFolder));
+                _folderSelectorCtrl.Extensions.Add("New folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendNewFolder));
+                _folderSelectorCtrl.Extensions.Add("Edit folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendEditFolder));
+                _folderSelectorCtrl.Extensions.Add("Delete folder ...", new ExtensionsEventHandler<FolderWithServiceRef>(ExtendDeleteFolder));
 
             }
-            return _folderSelectorComponent;
+            return _folderSelectorCtrl;
         }
     }
 
-    private void _folderSelectorComponent_EntitySelection(object sender, ControllerEventArgs<FolderWithServiceRef> e)
+    private void _folderSelectorCtrl_EntitySelection(object sender, ControllerEventArgs<FolderWithServiceRef> e)
     {
         SelectedFolderWithServiceRef = e.Entity;            
     }
@@ -281,37 +281,37 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #endregion
 
-    #region NotesSelector component
+    #region NotesSelector controller
 
-    private NotesSelectorCtrl _notesSelectorComponent;
-    public NotesSelectorCtrl NotesSelectorComponent
+    private NotesSelectorCtrl _notesSelectorCtrl;
+    public NotesSelectorCtrl NotesSelectorCtrl
     {
         get
         {
-            if (_notesSelectorComponent == null)
+            if (_notesSelectorCtrl == null)
             {
-                _notesSelectorComponent = new NotesSelectorCtrl(Store);
-                _notesSelectorComponent.EmbededMode = true;                    
-                _notesSelectorComponent.EntitySelection += _notesSelectorComponent_EntitySelection;
-                _notesSelectorComponent.EntitySelectionDoubleClick += _notesSelectorComponent_EntitySelectionDoubleClick;
+                _notesSelectorCtrl = new NotesSelectorCtrl(Store);
+                _notesSelectorCtrl.EmbededMode = true;                    
+                _notesSelectorCtrl.EntitySelection += _notesSelectorCtrl_EntitySelection;
+                _notesSelectorCtrl.EntitySelectionDoubleClick += _notesSelectorCtrl_EntitySelectionDoubleClick;
 
-                _notesSelectorComponent.Extensions.Add("New note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddNote));
-                _notesSelectorComponent.Extensions.Add("New note as PostIt...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddNoteAsPostIt));
-                _notesSelectorComponent.Extensions.Add("Edit note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNote));
-                _notesSelectorComponent.Extensions.Add("Edit note as PostIt ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNoteAsPostIt));
-                _notesSelectorComponent.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendDeleteNote));
-                _notesSelectorComponent.Extensions.Add("--0", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
-                _notesSelectorComponent.Extensions.Add("Add automatic resolved task", new ExtensionsEventHandler<NoteInfoDto>(AddFastResolvedTask));
-                _notesSelectorComponent.Extensions.Add("--1", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
-                _notesSelectorComponent.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendMoveSelectedNotes));
-                _notesSelectorComponent.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddTagSelectedNotes));
-                _notesSelectorComponent.Extensions.Add("Remove tag from selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendRemoveTagSelectedNotes));
+                _notesSelectorCtrl.Extensions.Add("New note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddNote));
+                _notesSelectorCtrl.Extensions.Add("New note as PostIt...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddNoteAsPostIt));
+                _notesSelectorCtrl.Extensions.Add("Edit note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNote));
+                _notesSelectorCtrl.Extensions.Add("Edit note as PostIt ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNoteAsPostIt));
+                _notesSelectorCtrl.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendDeleteNote));
+                _notesSelectorCtrl.Extensions.Add("--0", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
+                _notesSelectorCtrl.Extensions.Add("Add automatic resolved task", new ExtensionsEventHandler<NoteInfoDto>(AddFastResolvedTask));
+                _notesSelectorCtrl.Extensions.Add("--1", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
+                _notesSelectorCtrl.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendMoveSelectedNotes));
+                _notesSelectorCtrl.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddTagSelectedNotes));
+                _notesSelectorCtrl.Extensions.Add("Remove tag from selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendRemoveTagSelectedNotes));
             }
-            return _notesSelectorComponent;
+            return _notesSelectorCtrl;
         }
     }
 
-    private async void _notesSelectorComponent_EntitySelectionDoubleClick(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void _notesSelectorCtrl_EntitySelectionDoubleClick(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         if (e.Entity == null)
             return;
@@ -319,7 +319,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await EditNote();
     }
 
-    private async void _notesSelectorComponent_EntitySelection(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void _notesSelectorCtrl_EntitySelection(object sender, ControllerEventArgs<NoteInfoDto> e)
     {
         if (e.Entity == null || SelectedServiceRef == null)
             return;
@@ -327,7 +327,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         NotifyMessage($"Loading note details for note {e.Entity.NoteNumber}");
 
         _selectedNoteInfo = e.Entity;            
-        await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
+        await NoteEditorCtrl.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
 
         NotifyMessage($"Loaded note details for note {e.Entity.NoteNumber}");
     }
@@ -384,45 +384,45 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #endregion
 
-    #region NoteEditor component
+    #region NoteEditor controller
 
-    private NoteEditorCtrl _noteEditorComponent;
-    public NoteEditorCtrl NoteEditorComponent
+    private NoteEditorCtrl _noteEditorCtrl;
+    public NoteEditorCtrl NoteEditorCtrl
     {
         get
         {
-            if (_noteEditorComponent == null)
+            if (_noteEditorCtrl == null)
             {
-                _noteEditorComponent = new NoteEditorCtrl(Store);
-                _noteEditorComponent.EmbededMode = true;
+                _noteEditorCtrl = new NoteEditorCtrl(Store);
+                _noteEditorCtrl.EmbededMode = true;
             }
-            return _noteEditorComponent;
+            return _noteEditorCtrl;
         }
     }
 
     #endregion
 
-    #region Messages Managment component
+    #region Messages Managment controller
 
-    private MessagesManagmentCtrl _messagesManagmentComponent;
-    public MessagesManagmentCtrl MessagesManagmentComponent
+    private MessagesManagmentCtrl _messagesManagmentCtrl;
+    public MessagesManagmentCtrl MessagesManagmentCtrl
     {
         get
         {
-            if(_messagesManagmentComponent == null)
+            if(_messagesManagmentCtrl == null)
             {
-                _messagesManagmentComponent = new MessagesManagmentCtrl(Store);
-                _messagesManagmentComponent.PostItVisible += _messagesManagment_PostItVisible;                    
-                _messagesManagmentComponent.PostItAlarm += _messagesManagment_PostItAlarm;
-                //_messagesManagmentComponent.EMailAlarm += _messagesManagment_EMailAlarm;
-                //_messagesManagmentComponent.AppAlarm += _messagesManagment_AppAlarm;    
-                _messagesManagmentComponent.ExecuteKntScript += _messagesManagmentComponent_ExecuteKntScript;
+                _messagesManagmentCtrl = new MessagesManagmentCtrl(Store);
+                _messagesManagmentCtrl.PostItVisible += _messagesManagment_PostItVisible;                    
+                _messagesManagmentCtrl.PostItAlarm += _messagesManagment_PostItAlarm;
+                //_messagesManagmentCtrl.EMailAlarm += _messagesManagment_EMailAlarm;
+                //_messagesManagmentCtrl.AppAlarm += _messagesManagment_AppAlarm;    
+                _messagesManagmentCtrl.ExecuteKntScript += _messagesManagmentCtrl_ExecuteKntScript;
             }
-            return _messagesManagmentComponent;
+            return _messagesManagmentCtrl;
         }
     }
 
-    private async void _messagesManagmentComponent_ExecuteKntScript(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagmentCtrl_ExecuteKntScript(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         var service = e.Entity.Service;
         var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
@@ -457,85 +457,84 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #endregion
 
-    #region FilterParam component
+    #region FilterParam controller
 
-    private FiltersSelectorCtrl _filterParamComponent;
-    public FiltersSelectorCtrl FilterParamComponent
+    private FiltersSelectorCtrl _filterParamCtrl;
+    public FiltersSelectorCtrl FilterParamCtrl
     {
         get
         {
-            if (_filterParamComponent == null)
+            if (_filterParamCtrl == null)
             {
-                _filterParamComponent = new FiltersSelectorCtrl(Store);
-                _filterParamComponent.EmbededMode = true;
-                _filterParamComponent.EntitySelection += _filterParamComponent_EntitySelection;                    
+                _filterParamCtrl = new FiltersSelectorCtrl(Store);
+                _filterParamCtrl.EmbededMode = true;
+                _filterParamCtrl.EntitySelection += _filterParamCtrl_EntitySelection;                    
             }
-            return _filterParamComponent;
+            return _filterParamCtrl;
         }
     }
 
-    private void _filterParamComponent_EntitySelection(object sender, ControllerEventArgs<SelectedNotesInServiceRef> e)
+    private void _filterParamCtrl_EntitySelection(object sender, ControllerEventArgs<SelectedNotesInServiceRef> e)
     {            
         SelectedNotesInServiceRef = e.Entity;
     }
 
     #endregion
 
-    #region KntChat component 
+    #region KntChat controller 
     
-    private KntChatCtrl _kntChatComponent;
-    public KntChatCtrl KntChatComponent
+    private KntChatCtrl _kntChatCtrl;
+    public KntChatCtrl KntChatCtrl
     {
         get
         {
-            if (_kntChatComponent == null)
+            if (_kntChatCtrl == null)
             {
-                _kntChatComponent = new KntChatCtrl(Store);
-                _kntChatComponent.ReceiveMessage += _kntChatComponent_ReceiveMessage;
+                _kntChatCtrl = new KntChatCtrl(Store);
+                _kntChatCtrl.ReceiveMessage += _kntChatCtrl_ReceiveMessage;
             }
-            return _kntChatComponent;
+            return _kntChatCtrl;
         }
-        protected set { _kntChatComponent = value; }
+        protected set { _kntChatCtrl = value; }
     }
 
-    private void _kntChatComponent_ReceiveMessage(object sender, ControllerEventArgs<string> e)
+    private void _kntChatCtrl_ReceiveMessage(object sender, ControllerEventArgs<string> e)
     {
-        KntChatComponent.VisibleView(true);
+        KntChatCtrl.VisibleView(true);
     }
     
     #endregion
 
-    #region Heavy process component
+    #region Heavy process controller
 
-    private HeavyProcessCtrl _heavyProcessComponent;
-    public HeavyProcessCtrl HeavyProcessComponent
+    private HeavyProcessCtrl _heavyProcessCtrl;
+    public HeavyProcessCtrl HeavyProcessCtrl
     {
         get
         {
-            if (_heavyProcessComponent == null)
+            if (_heavyProcessCtrl == null)
             {
-                _heavyProcessComponent = new HeavyProcessCtrl(Store);
-                _heavyProcessComponent.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
+                _heavyProcessCtrl = new HeavyProcessCtrl(Store);
+                _heavyProcessCtrl.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
             }
-            return _heavyProcessComponent;
+            return _heavyProcessCtrl;
         }
     }
 
     private void ReportProgressChangeTags(KNoteProgress progress)
     {
-        if (progress.HeavyProcessComponent == null)
+        if (progress.HeavyProcessCtrl == null)
             return;
-        progress.HeavyProcessComponent.UpdateProgress(progress.Progress);
+        progress.HeavyProcessCtrl.UpdateProgress(progress.Progress);
         if(progress.Info != null)
-            progress.HeavyProcessComponent.UpdateProcessInfo(progress.Info);
+            progress.HeavyProcessCtrl.UpdateProcessInfo(progress.Info);
     }
 
     #endregion 
 
-
     #endregion
 
-    #region Component public methods
+    #region Controller public methods
 
     public async Task<bool> FinalizeApp()
     {
@@ -566,28 +565,28 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public void ShowKntChatConsole()
     {
-        // Use _kntChatComponent field here
-        if (_kntChatComponent != null)  
-            KntChatComponent.VisibleView(true);
+        // Use _kntChatCtrl field here
+        if (_kntChatCtrl != null)  
+            KntChatCtrl.VisibleView(true);
         else
         {
-            KntChatComponent.ShowErrorMessagesOnInitialize = true;
-            RunKntChatComponent();
+            KntChatCtrl.ShowErrorMessagesOnInitialize = true;
+            RunKntChatCtrl();
         }
     }
 
     public void ShowKntChatGPTConsole()
     {
-        var kntChatGPTComponent = new KntChatGPTCtrl(Store);
-        kntChatGPTComponent.Run();            
-        kntChatGPTComponent.ShowChatGPTView(true, true);
+        var kntChatGPTCtrl = new KntChatGPTCtrl(Store);
+        kntChatGPTCtrl.Run();            
+        kntChatGPTCtrl.ShowChatGPTView(true, true);
     }
 
     public void ShowKntCOMPortServerConsole()
     {
-        var kntServerCOMComponent = new KntServerCOMCtrl(Store);
-        kntServerCOMComponent.Run();
-        kntServerCOMComponent.ShowServerCOMView(true);
+        var kntServerCOMCtrl = new KntServerCOMCtrl(Store);
+        kntServerCOMCtrl.Run();
+        kntServerCOMCtrl.ShowServerCOMView(true);
     }
 
 
@@ -649,9 +648,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public async Task<bool> EditNote(IKntService service, Guid noteId)
     {
-        var noteEditorComponent = new NoteEditorCtrl(Store);
-        var res = await noteEditorComponent.LoadModelById(service, noteId, false);
-        noteEditorComponent.Run();            
+        var noteEditorCtrl = new NoteEditorCtrl(Store);
+        var res = await noteEditorCtrl.LoadModelById(service, noteId, false);
+        noteEditorCtrl.Run();            
         return res;
     }
 
@@ -672,11 +671,11 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     
     public async Task<bool> EditNotePostIt(IKntService service, Guid noteId, bool alwaysTop = false)
     {            
-        var postItEditorComponent = new PostItEditorCtrl(Store);
-        var res = await postItEditorComponent.LoadModelById(service, noteId, false);
+        var postItEditorCtrl = new PostItEditorCtrl(Store);
+        var res = await postItEditorCtrl.LoadModelById(service, noteId, false);
         if(alwaysTop)
-            postItEditorComponent.ForceAlwaysTop = true;
-        postItEditorComponent.Run();
+            postItEditorCtrl.ForceAlwaysTop = true;
+        postItEditorCtrl.Run();
         return res;
     }
 
@@ -692,9 +691,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public async Task AddNote(IKntService service)
     {
-        var noteEditorComponent = new NoteEditorCtrl(Store);
-        await noteEditorComponent.NewModel(service);
-        noteEditorComponent.Run();
+        var noteEditorCtrl = new NoteEditorCtrl(Store);
+        await noteEditorCtrl.NewModel(service);
+        noteEditorCtrl.Run();
     }
 
     public async Task AddNotePostIt()
@@ -727,21 +726,21 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             return;
         }
 
-        var noteEditorComponent = new NoteEditorCtrl(Store);            
-        await noteEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
+        var noteEditorCtrl = new NoteEditorCtrl(Store);            
+        await noteEditorCtrl.DeleteModel(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);            
     }
 
     public void NewFolder()
     {
-        var folderEditorComponent = new FolderEditorCtrl(Store);
-        folderEditorComponent.NewModel(SelectedServiceRef.Service);
-        folderEditorComponent.Model.ParentId = SelectedFolderInfo?.FolderId;
-        folderEditorComponent.Model.ParentFolderDto = SelectedFolderInfo?.GetSimpleDto<FolderDto>();
-        var res = folderEditorComponent.RunModal();
+        var folderEditorCtrl = new FolderEditorCtrl(Store);
+        folderEditorCtrl.NewModel(SelectedServiceRef.Service);
+        folderEditorCtrl.Model.ParentId = SelectedFolderInfo?.FolderId;
+        folderEditorCtrl.Model.ParentFolderDto = SelectedFolderInfo?.GetSimpleDto<FolderDto>();
+        var res = folderEditorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {                
-            var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>() };
-            FoldersSelectorComponent.AddItem(fs);
+            var fs = new FolderWithServiceRef { ServiceRef = SelectedServiceRef, FolderInfo = folderEditorCtrl.Model.GetSimpleDto<FolderInfoDto>() };
+            FoldersSelectorCtrl.AddItem(fs);
         }            
     }
 
@@ -753,14 +752,14 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             return;
         }
 
-        var folderEditorComponent = new FolderEditorCtrl(Store);
-        await folderEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
-        FoldersSelectorComponent.OldParent = folderEditorComponent.Model.ParentId;
-        var res = folderEditorComponent.RunModal();
+        var folderEditorCtrl = new FolderEditorCtrl(Store);
+        await folderEditorCtrl.LoadModelById(SelectedServiceRef.Service, SelectedFolderInfo.FolderId, false);
+        FoldersSelectorCtrl.OldParent = folderEditorCtrl.Model.ParentId;
+        var res = folderEditorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {                
-            SelectedFolderWithServiceRef.FolderInfo = folderEditorComponent.Model.GetSimpleDto<FolderInfoDto>();
-            FoldersSelectorComponent.RefreshItem(SelectedFolderWithServiceRef);
+            SelectedFolderWithServiceRef.FolderInfo = folderEditorCtrl.Model.GetSimpleDto<FolderInfoDto>();
+            FoldersSelectorCtrl.RefreshItem(SelectedFolderWithServiceRef);
         }            
     }
 
@@ -772,11 +771,11 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             return;
         }
 
-        var folderEditorComponent = new FolderEditorCtrl(Store);
-        var res = await folderEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);
+        var folderEditorCtrl = new FolderEditorCtrl(Store);
+        var res = await folderEditorCtrl.DeleteModel(SelectedServiceRef.Service, SelectedFolderInfo.FolderId);
         if (res)
         {                
-            FoldersSelectorComponent.DeleteItem(SelectedFolderWithServiceRef);
+            FoldersSelectorCtrl.DeleteItem(SelectedFolderWithServiceRef);
         }            
     }
 
@@ -787,8 +786,8 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             View.ShowInfo("There is no repository selected to remove.");
             return;
         }            
-        var repositoryEditorComponent = new RepositoryEditorCtrl(Store);            
-        var res = await repositoryEditorComponent.DeleteModel(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef);
+        var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);            
+        var res = await repositoryEditorCtrl.DeleteModel(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef);
         if (res)
         {                
             RefreshRepositoryAndFolderTree();
@@ -812,10 +811,10 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             View.ShowInfo("There is no repository selected to configure.");
             return;
         }                        
-        var repositoryEditorComponent = new RepositoryEditorCtrl(Store);
-        repositoryEditorComponent.EditorMode = EnumRepositoryEditorMode.Managment;
-        await repositoryEditorComponent.LoadModelById(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef, false);
-        var res = repositoryEditorComponent.RunModal();
+        var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);
+        repositoryEditorCtrl.EditorMode = EnumRepositoryEditorMode.Managment;
+        await repositoryEditorCtrl.LoadModelById(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef, false);
+        var res = repositoryEditorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {
             // Do action 
@@ -832,10 +831,10 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         SelectedNoteInfo = null;
         FolderPath = "";
         CountNotes = 0;
-        FoldersSelectorComponent.ServicesRef = null;  // force get repostiroy list form store
-        FoldersSelectorComponent.Refresh();
-        NoteEditorComponent.CleanView();
-        NotesSelectorComponent.CleanView();
+        FoldersSelectorCtrl.ServicesRef = null;  // force get repostiroy list form store
+        FoldersSelectorCtrl.Refresh();
+        NoteEditorCtrl.CleanView();
+        NotesSelectorCtrl.CleanView();
         View.ShowInfo(null);
         NotifyMessage("Refreshed tree folder ...");
         View.DeactivateWaitState();
@@ -863,7 +862,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public async Task MoveSelectedNotes()
     {                
-        var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo().ToList();
+        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesInfo().ToList();
         if(selectedNotes == null || selectedNotes?.Count == 0)
         {                
             View.ShowInfo("You have not selected notes .");
@@ -884,8 +883,8 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             var folderName = folderSelector.SelectedEntity.FolderInfo.Name;
 
             // --- Heavy process singleton model
-            HeavyProcessComponent.UpdateProcessName($"Moving notes to folder '{folderName}'.");
-            await HeavyProcessComponent.Exec2(MoveSelectedNotesAction, selectedNotes, folderId);            
+            HeavyProcessCtrl.UpdateProcessName($"Moving notes to folder '{folderName}'.");
+            await HeavyProcessCtrl.Exec2(MoveSelectedNotesAction, selectedNotes, folderId);            
         }
         catch (TaskCanceledException)
         {
@@ -902,7 +901,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessComponent = null)
+    public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessCtrl = null)
     {
         var index = 0;
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
@@ -917,7 +916,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
             await Task.Delay(1); // This delay is necessary
             if (progress != null)                
-                progress.Report(new KNoteProgress { Progress = percentageInt, Info = $"Updating Note #{n.NoteNumber}", HeavyProcessComponent = heavyProcessComponent });
+                progress.Report(new KNoteProgress { Progress = percentageInt, Info = $"Updating Note #{n.NoteNumber}", HeavyProcessCtrl = heavyProcessCtrl });
 
             if (cancellationToken != null && cancellationToken.IsCancellationRequested)
             {
@@ -930,7 +929,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     {
         string labelInput;        
 
-        var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo().ToList();
+        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesInfo().ToList();
         if (selectedNotes == null || selectedNotes?.Count == 0)
         {
             if (action == EnumChangeTag.Add)
@@ -971,10 +970,10 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 var tag = listVars[0].VarNewValueText;
 
                 // --- Heavy process instance model
-                using var heavyProcessComponent = new HeavyProcessCtrl(Store);
-                heavyProcessComponent.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
-                heavyProcessComponent.UpdateProcessName($"Updating tags. {labelInput} {tag} .");
-                await heavyProcessComponent.Exec3(ChangeTagsAction, action, selectedNotes, tag);
+                using var heavyProcessCtrl = new HeavyProcessCtrl(Store);
+                heavyProcessCtrl.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
+                heavyProcessCtrl.UpdateProcessName($"Updating tags. {labelInput} {tag} .");
+                await heavyProcessCtrl.Exec3(ChangeTagsAction, action, selectedNotes, tag);
             }
             catch (TaskCanceledException)
             {
@@ -992,7 +991,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessComponent = null)
+    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessCtrl = null)
     {
         var index = 0;
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
@@ -1010,7 +1009,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             var percentageInt = (int)Math.Round(percentage, 0);
             await Task.Delay(1); // This delay is necessary
             if (progress != null)
-                progress.Report(new KNoteProgress { Progress = percentageInt, Info = $"Updating Note #{note.NoteNumber}", HeavyProcessComponent = heavyProcessComponent });
+                progress.Report(new KNoteProgress { Progress = percentageInt, Info = $"Updating Note #{note.NoteNumber}", HeavyProcessCtrl = heavyProcessCtrl });
 
             if (cancellationToken != null && cancellationToken.IsCancellationRequested)
             {
@@ -1021,7 +1020,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public void RunScriptSelectedNotes()
     {
-        var selectedNotes = NotesSelectorComponent.GetSelectedListNotesInfo();
+        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesInfo();
 
         if (selectedNotes == null || selectedNotes?.Count == 0)
         {
@@ -1038,13 +1037,13 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public void Options()
     {
-        var optionsEditorComponent = new OptionsEditorCtrl(Store);
+        var optionsEditorCtrl = new OptionsEditorCtrl(Store);
         
-        optionsEditorComponent.LoadModel(
+        optionsEditorCtrl.LoadModel(
             SelectedServiceRef?.Service,
             Store.AppConfig.GetSimpleDto<AppConfig>(), 
             true);
-        var res = optionsEditorComponent.RunModal();
+        var res = optionsEditorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {
             // TODO: refresh context managment
@@ -1089,88 +1088,88 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public void Lab()
     {
-        var kntLabComponent = new KntLabCtrl(Store);
-        kntLabComponent.Run();
-        kntLabComponent.ShowLabView();
+        var kntLabCtrl = new KntLabCtrl(Store);
+        kntLabCtrl.Run();
+        kntLabCtrl.ShowLabView();
     }
 
     #endregion
 
-    #region Events handlers for extension components 
+    #region Events handlers for extension controller 
 
-    private async void PostItEditorComponent_AddedEntity(object sender, ControllerEventArgs<NoteDto> e)
+    private async void PostItEditorCtrl_AddedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
         await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private async void NoteEditorComponent_AddedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
+    private async void NoteEditorCtrl_AddedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
     private async Task OnNoteEditorAdded(NoteInfoDto noteInfo)
     {
-        if (NotesSelectorComponent.ListEntities == null)
+        if (NotesSelectorCtrl.ListEntities == null)
             return;
 
-        if (NotesSelectorComponent.ListEntities.Count == 0)
+        if (NotesSelectorCtrl.ListEntities.Count == 0)
         {
-            await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);
+            await NoteEditorCtrl.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);
             _selectedNoteInfo = noteInfo;
         }
-        NotesSelectorComponent.AddItem(noteInfo);
+        NotesSelectorCtrl.AddItem(noteInfo);
     }
 
-    private async void PostItEditorComponent_SavedEntity(object sender, ControllerEventArgs<NoteDto> e)
+    private async void PostItEditorCtrl_SavedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
         await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private async void NoteEditorComponent_SavedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
+    private async void NoteEditorCtrl_SavedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>()); 
     }
 
-    private async void PostItEditorComponent_ExtendedEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void PostItEditorCtrl_ExtendedEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         await EditNote(e.Entity.Service, e.Entity.NoteId);
     }
 
-    private async void NoteEditorComponent_PostItEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void NoteEditorCtrl_PostItEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
     }
 
     private async Task OnNoteEditorSaved(NoteInfoDto noteInfo)
     {
-        if (NoteEditorComponent.Model.NoteId == noteInfo.NoteId)
-            await NoteEditorComponent.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);
+        if (NoteEditorCtrl.Model.NoteId == noteInfo.NoteId)
+            await NoteEditorCtrl.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);
 
-        NotesSelectorComponent.RefreshItem(noteInfo);
+        NotesSelectorCtrl.RefreshItem(noteInfo);
 
-        if (NotesSelectorComponent.ListEntities?.Count == 0)
+        if (NotesSelectorCtrl.ListEntities?.Count == 0)
         {
-            NoteEditorComponent.View.CleanView();
+            NoteEditorCtrl.View.CleanView();
             _selectedNoteInfo = null;
         }                            
     }
 
-    private void PostItEditorComponent_DeletedEntity(object sender, ControllerEventArgs<NoteDto> e)
+    private void PostItEditorCtrl_DeletedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
         OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
-    private void NoteEditorComponent_DeletedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
+    private void NoteEditorCtrl_DeletedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
         OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteInfoDto>());
     }
 
     private void OnNoteEditorDeleted(NoteInfoDto noteInfo)
     {            
-        NotesSelectorComponent.DeleteItem(noteInfo);
-        if (NotesSelectorComponent.ListEntities?.Count == 0)
+        NotesSelectorCtrl.DeleteItem(noteInfo);
+        if (NotesSelectorCtrl.ListEntities?.Count == 0)
         {
-            NoteEditorComponent.View.CleanView();
+            NoteEditorCtrl.View.CleanView();
             _selectedNoteInfo = null;
         }
     }
@@ -1189,10 +1188,10 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     private async Task NewRepository(EnumRepositoryEditorMode mode)
     {
-        var repositoryEditorComponent = new RepositoryEditorCtrl(Store);
-        repositoryEditorComponent.EditorMode = mode;
-        await repositoryEditorComponent.NewModel();
-        var res = repositoryEditorComponent.RunModal();
+        var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);
+        repositoryEditorCtrl.EditorMode = mode;
+        await repositoryEditorCtrl.NewModel();
+        var res = repositoryEditorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {
             RefreshRepositoryAndFolderTree();
@@ -1201,24 +1200,24 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     
     private async Task AddNotePostIt(FolderWithServiceRef folderWithServiceRef)
     {
-        var postItEditorComponent = new PostItEditorCtrl(Store);
-        postItEditorComponent.FolderWithServiceRef = folderWithServiceRef;
-        await postItEditorComponent.NewModel(folderWithServiceRef.ServiceRef.Service);
-        postItEditorComponent.Run();
+        var postItEditorCtrl = new PostItEditorCtrl(Store);
+        postItEditorCtrl.FolderWithServiceRef = folderWithServiceRef;
+        await postItEditorCtrl.NewModel(folderWithServiceRef.ServiceRef.Service);
+        postItEditorCtrl.Run();
     }
 
-    private void RunKntChatComponent(bool visibleView = true)
+    private void RunKntChatCtrl(bool visibleView = true)
     {
-        var chatCanRun = KntChatComponent.Run();
+        var chatCanRun = KntChatCtrl.Run();
         if (chatCanRun.Entity == EControllerResult.Executed)
         {
-            KntChatComponent.ShowChatView(false);
-            KntChatComponent.VisibleView(visibleView);
+            KntChatCtrl.ShowChatView(false);
+            KntChatCtrl.VisibleView(visibleView);
         }
         else
         {
-            KntChatComponent.Finalize();
-            KntChatComponent = null;
+            KntChatCtrl.Finalize();
+            KntChatCtrl = null;
         }
     }
 

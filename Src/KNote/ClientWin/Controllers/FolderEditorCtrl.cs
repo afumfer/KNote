@@ -25,7 +25,7 @@ public class FolderEditorCtrl : CtrlNoteEditorBase<IViewEditor<FolderDto>, Folde
 
     #endregion
 
-    #region Component override methods
+    #region Controller override methods
 
     public override async Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
     {

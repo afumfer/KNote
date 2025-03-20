@@ -116,7 +116,7 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
     {
         if (!_viewFinalized)
         {
-            if (_ctrl.AutoCloseComponentOnViewExit)
+            if (_ctrl.AutoCloseCtrlOnViewExit)
                 _ctrl.Finalize();
             else
             {

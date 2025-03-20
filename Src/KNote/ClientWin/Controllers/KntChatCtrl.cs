@@ -14,9 +14,9 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     #region Properties 
 
-    public bool AutoCloseComponentOnViewExit { get; set; } = false;
+    public bool AutoCloseCtrlOnViewExit { get; set; } = false;
     public bool ShowErrorMessagesOnInitialize { get; set; } = false;
-    public string Tag { get; set; } = "KntChatComponent v 0.1";
+    public string Tag { get; set; } = "KntChatCtrl v 0.1";
 
     #endregion
 
@@ -24,7 +24,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     public KntChatCtrl(Store store) : base(store)
     {
-        ControllerName = "KntChat Component";
+        ControllerName = "KntChat controller";
     }
 
     #endregion
@@ -66,7 +66,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
         catch (Exception ex)
         {
             var res = new Result<EControllerResult>(EControllerResult.Error);
-            var resMessage = $"KntChat component. The connection could not be started. Error: {ex.Message}.";
+            var resMessage = $"KntChat controller. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(resMessage);
             if(ShowErrorMessagesOnInitialize)
                 ChatView.ShowInfo(resMessage, KntConst.AppName);
@@ -147,9 +147,9 @@ public class KntChatCtrl : CtrlBase, IDisposable
         }
     }
 
-    public void ShowChatView(bool autoCloseComponentOnViewExit)
+    public void ShowChatView(bool autoCloseCtrlOnViewExit)
     {
-        AutoCloseComponentOnViewExit = autoCloseComponentOnViewExit;        
+        AutoCloseCtrlOnViewExit = autoCloseCtrlOnViewExit;        
         ChatView.ShowView();
     }
 
@@ -163,7 +163,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
         }
         else
         {
-            ChatView.ShowInfo("KntChat component is no started.");
+            ChatView.ShowInfo("KntChat controller is no started.");
         }
     }
 

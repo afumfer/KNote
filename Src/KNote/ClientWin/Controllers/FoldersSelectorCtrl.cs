@@ -40,7 +40,7 @@ public class FoldersSelectorCtrl : CtrlSelectorBase<IViewSelector<FolderWithServ
 
     #endregion 
 
-    #region Component override methods 
+    #region Controller override methods 
 
     protected override IViewSelector<FolderWithServiceRef> CreateView()
     {
@@ -49,7 +49,7 @@ public class FoldersSelectorCtrl : CtrlSelectorBase<IViewSelector<FolderWithServ
 
     #endregion 
 
-    #region Component methods
+    #region Controller methods
 
     public override Task<bool> LoadEntities(IKntService service, bool refreshView = true)
     {
@@ -95,7 +95,7 @@ public class FoldersSelectorCtrl : CtrlSelectorBase<IViewSelector<FolderWithServ
 
     #endregion
 
-    #region Component extra methods
+    #region Controller extra methods
 
     public void Refresh()
     {

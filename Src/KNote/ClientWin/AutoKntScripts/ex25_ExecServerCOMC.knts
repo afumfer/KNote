@@ -1,4 +1,4 @@
-﻿' Note: Only one instance of KntServerCOMComponent can be executed at a time.
+﻿' Note: Only one instance of KntServerCOMCtrl can be executed at a time.
 
 var serverCom = GetServerCOMCtrl();
 

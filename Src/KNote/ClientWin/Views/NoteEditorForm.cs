@@ -92,7 +92,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         ModelToControls();
     }
 
-    public void RefreshViewOnlyRequiredComponents()
+    public void RefreshViewOnlyRequiredCtrl()
     {
         ModelToControlsOnlyRequiredComponents();
     }

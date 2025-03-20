@@ -23,7 +23,7 @@ public class HeavyProcessCtrl : CtrlBase
 
     public HeavyProcessCtrl(Store store) : base(store)
     {
-        ControllerName = "KntLab Component";
+        ControllerName = "KntLab Controller";
         _processInExecution = false;
     }
 
@@ -44,7 +44,7 @@ public class HeavyProcessCtrl : CtrlBase
 
     #endregion
 
-    #region Public components methods
+    #region Public controller methods
 
     public void UpdateProgress(int progress)
     {
@@ -138,5 +138,5 @@ public class KNoteProgress
 {
     public int Progress { get; set; }
     public string Info { get; set; }    
-    public HeavyProcessCtrl HeavyProcessComponent { get; set; }    
+    public HeavyProcessCtrl HeavyProcessCtrl { get; set; }    
 }

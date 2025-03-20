@@ -158,7 +158,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
                 // Experimental
                 //View.RefreshView();
-                View.RefreshViewOnlyRequiredComponents();
+                View.RefreshViewOnlyRequiredCtrl();
 
                 // TODO: future version ... notify actions.
                 // NotifyMessage($"Note {Model?.NoteNumber.ToString()} saved");
@@ -204,7 +204,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     #endregion
 
-    #region Component specific methods
+    #region Controller specific methods
 
     public NoteKAttributeDto EditAttribute(NoteKAttributeDto noteAttribute)
     {

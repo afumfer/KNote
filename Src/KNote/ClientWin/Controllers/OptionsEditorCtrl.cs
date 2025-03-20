@@ -15,7 +15,7 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfi
 
     #endregion 
 
-    #region ComponentEditor implementation 
+    #region Controller editor implementation 
 
     protected override IViewEditor<AppConfig> CreateView()
     {

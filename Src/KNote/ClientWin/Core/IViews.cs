@@ -36,7 +36,7 @@ public interface IViewEditorEmbeddable<T> : IViewEmbeddable
 {
     void CleanView();
     void RefreshModel();
-    void RefreshViewOnlyRequiredComponents();
+    void RefreshViewOnlyRequiredCtrl();
 }
 
 public interface IViewSelector<TItem> : IViewEmbeddable

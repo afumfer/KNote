@@ -115,7 +115,7 @@ public partial class KntChatGPTForm : Form, IViewBase
             {
                 await SaveChatMessages();
             }
-            if (_ctrl.AutoCloseComponentOnViewExit)
+            if (_ctrl.AutoCloseCtrlOnViewExit)
                 _ctrl.Finalize();
         }
     }

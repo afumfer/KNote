@@ -373,10 +373,10 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
     private void LinkComponents()
     {
-        tabTreeFolders.Controls.Add(_ctrl.FoldersSelectorComponent.View.PanelView());
-        tabSearch.Controls.Add(_ctrl.FilterParamComponent.View.PanelView());
-        splitContainer2.Panel1.Controls.Add(_ctrl.NotesSelectorComponent.View.PanelView());
-        splitContainer2.Panel2.Controls.Add(_ctrl.NoteEditorComponent.View.PanelView());
+        tabTreeFolders.Controls.Add(_ctrl.FoldersSelectorCtrl.View.PanelView());
+        tabSearch.Controls.Add(_ctrl.FilterParamCtrl.View.PanelView());
+        splitContainer2.Panel1.Controls.Add(_ctrl.NotesSelectorCtrl.View.PanelView());
+        splitContainer2.Panel2.Controls.Add(_ctrl.NoteEditorCtrl.View.PanelView());
     }
 
     private void SaveViewSizeAndPosition()

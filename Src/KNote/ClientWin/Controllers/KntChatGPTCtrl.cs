@@ -53,11 +53,11 @@ public class KntChatGPTCtrl : CtrlBase
         get { return _totalProcessingTime; }
     }
 
-    public bool AutoCloseComponentOnViewExit { get; set; } = false;
+    public bool AutoCloseCtrlOnViewExit { get; set; } = false;
 
     public bool AutoSaveChatMessagesOnViewExit { get; set; } = false;
 
-    public string Tag { get; set; } = "KntChatGPTComponent v 0.1";
+    public string Tag { get; set; } = "KntChatGPTCtrl v 0.1";
 
     #endregion
 
@@ -65,7 +65,7 @@ public class KntChatGPTCtrl : CtrlBase
 
     public KntChatGPTCtrl(Store store) : base(store)
     {
-        ControllerName = "KntChatGPT Component";        
+        ControllerName = "KntChatGPT Controller";        
     }
 
     #endregion
@@ -102,7 +102,7 @@ public class KntChatGPTCtrl : CtrlBase
         catch (Exception ex)
         {
             var res = new Result<EControllerResult>(EControllerResult.Error);
-            var resMessage = $"OnInitialized KntChatGPTComponent error: {ex.Message}";
+            var resMessage = $"OnInitialized KntChatGPTController error: {ex.Message}";
             res.AddErrorMessage(resMessage);
             ChatGPTView.ShowInfo(resMessage);
             return res;
@@ -125,9 +125,9 @@ public class KntChatGPTCtrl : CtrlBase
         }
     }
 
-    public void ShowChatGPTView(bool autoCloseComponentOnViewExit, bool autoSaveChatMessagesOnViewExit)
+    public void ShowChatGPTView(bool autoCloseCtrlOnViewExit, bool autoSaveChatMessagesOnViewExit)
     {
-        AutoCloseComponentOnViewExit = autoCloseComponentOnViewExit;
+        AutoCloseCtrlOnViewExit = autoCloseCtrlOnViewExit;
         AutoSaveChatMessagesOnViewExit = autoSaveChatMessagesOnViewExit;
         ChatGPTView.ShowView();
     }
@@ -141,7 +141,7 @@ public class KntChatGPTCtrl : CtrlBase
         }
         else
         {
-            ChatGPTView.ShowInfo("KntChatGPT component is no started.");
+            ChatGPTView.ShowInfo("KntChatGPT controller is no started.");
         }
     }
 

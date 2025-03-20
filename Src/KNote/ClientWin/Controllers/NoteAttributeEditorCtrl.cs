@@ -25,7 +25,7 @@ public class NoteAttributeEditorCtrl : CtrlEditorBase<IViewEditor<NoteKAttribute
 
     #endregion
 
-    #region Component override methods
+    #region Controller override methods
 
     public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
     {

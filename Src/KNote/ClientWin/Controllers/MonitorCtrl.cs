@@ -24,7 +24,7 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
     #endregion
 
-    #region Component override methods
+    #region Controller override methods
 
     protected override Result<EControllerResult> OnInitialized()
     {
@@ -34,10 +34,10 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
         try
         {                                                
-            Store.ControllerStateChanged += Store_ComponentsStateChanged;
+            Store.ControllerStateChanged += Store_CtrlStateChanged;
             Store.AddedServiceRef += Store_AddedServiceRef;                
             Store.RemovedServiceRef += Store_RemovedServiceRef;
-            Store.ControllerNotification += Store_ComponentNotification;
+            Store.ControllerNotification += Store_ControllerNotification;
         }
         catch (Exception ex)
         {                
@@ -54,7 +54,7 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
         try
         {
             result = base.OnFinalized();
-            Store.ControllerStateChanged -= Store_ComponentsStateChanged;
+            Store.ControllerStateChanged -= Store_CtrlStateChanged;
             Store.AddedServiceRef -= Store_AddedServiceRef;                
             Store.RemovedServiceRef -= Store_RemovedServiceRef;                
         }
@@ -71,13 +71,13 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
     #region Store events handlers
 
-    private void Store_ComponentNotification(object sender, ControllerEventArgs<string> e)
+    private void Store_ControllerNotification(object sender, ControllerEventArgs<string> e)
     {
         var info = $"{((CtrlBase)sender).ControllerName} - {e.Entity.ToString()}";
         OnShowLog(info);
     }
 
-    private void Store_ComponentsStateChanged(object sender, ControllerEventArgs<EControllerState> e)
+    private void Store_CtrlStateChanged(object sender, ControllerEventArgs<EControllerState> e)
     {
         var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((CtrlBase)sender).ControllerId}";
         OnShowLog(info);

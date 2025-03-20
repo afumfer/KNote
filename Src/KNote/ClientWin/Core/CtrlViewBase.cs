@@ -173,7 +173,7 @@ abstract public class CtrlSelectorBase<TView, TEntity> : CtrlViewEmbeddableBase<
 
     #endregion 
 
-    #region Component events 
+    #region Controller events 
 
     public event EventHandler<ControllerEventArgs<TEntity>> EntitySelection;
     protected virtual void OnEntitySelection(TEntity entity)

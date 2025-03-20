@@ -1,4 +1,4 @@
-' Test use some components
+' Test use some controllers
 
 var f = GetFoldersSelectorCtrl();
 var n = GetNotesSelectorCtrl();

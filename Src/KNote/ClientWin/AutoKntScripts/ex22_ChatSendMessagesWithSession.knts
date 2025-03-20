@@ -1,4 +1,4 @@
-﻿' Chat SingalR example 2, send messages with chat component
+﻿' Chat SingalR example 2, send messages with chat controller
 
 var i = 0;
 

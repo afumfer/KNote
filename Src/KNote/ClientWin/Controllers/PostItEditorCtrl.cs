@@ -50,7 +50,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     #endregion 
 
-    #region Component specific events 
+    #region Controller specific events 
 
     public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> ExtendedEdit;
     protected virtual void OnExtendedEdit()
@@ -69,7 +69,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     #endregion 
 
-    #region ComponentEditor override methods
+    #region Controller editor override methods
 
     public async override Task<bool> LoadModelById(IKntService service, Guid noteId, bool refreshView = true)
     {
@@ -231,7 +231,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     #endregion
 
-    #region Component specific methods
+    #region Controller specific methods
 
     public async Task<bool> SaveAndHide()
     {

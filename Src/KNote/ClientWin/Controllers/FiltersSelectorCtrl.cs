@@ -35,7 +35,7 @@ public class FiltersSelectorCtrl : CtrlSelectorBase<IViewSelector<SelectedNotesI
 
     #endregion
 
-    #region ComponentEditorBase implementation 
+    #region ControllerEditorBase implementation 
 
     protected override IViewSelector<SelectedNotesInServiceRef> CreateView()
     {

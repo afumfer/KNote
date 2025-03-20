@@ -24,7 +24,7 @@ public class KntHttpClientCtrl : CtrlBase
 
     public KntHttpClientCtrl(Store store) : base(store)
     {
-        ControllerName = "KntHttpClient Component";
+        ControllerName = "KntHttpClient Controller";
     }
 
     #endregion
@@ -44,7 +44,7 @@ public class KntHttpClientCtrl : CtrlBase
         catch (Exception ex)
         {
             var res = new Result<EControllerResult>(EControllerResult.Error);
-            var resMessage = $"KntHttpClient component. The connection could not be started. Error: {ex.Message}.";
+            var resMessage = $"KntHttpClient controller. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(resMessage);                
             return res;
         }
@@ -113,7 +113,7 @@ public class KntHttpClientCtrl : CtrlBase
 
     #region Experimental (in construction ...)
     
-    // TODO: Check null references. Use component properties.
+    // TODO: Check null references. Use controller properties.
 
     public async Task<string> PostAsync(string url, string jsonContent)
     {

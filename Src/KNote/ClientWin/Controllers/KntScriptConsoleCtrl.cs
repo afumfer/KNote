@@ -22,7 +22,7 @@ public class KntScriptConsoleCtrl : CtrlViewBase<IViewBase>
 
     #endregion
 
-    #region Component overrid methods
+    #region Controller overrid methods
 
     protected override IViewBase CreateView()
     {            

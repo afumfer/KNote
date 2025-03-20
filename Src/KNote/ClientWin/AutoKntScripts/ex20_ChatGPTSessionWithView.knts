@@ -1,4 +1,4 @@
-﻿' ChatGPT example 3, use chat component view
+﻿' ChatGPT example 3, use chat controller view
 
 var chat = GetKntChatGPTCtrl();
 chat.Run();

@@ -85,7 +85,7 @@ public partial class KntChatForm : Form, IViewChat
     {
         if (!_viewFinalized)
         {
-            if (_ctrl.AutoCloseComponentOnViewExit)
+            if (_ctrl.AutoCloseCtrlOnViewExit)
                 _ctrl.Finalize();
             else
             {

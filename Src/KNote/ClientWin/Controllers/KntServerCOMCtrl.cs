@@ -72,7 +72,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public int RetroDelay { get; set; }
 
-    public bool AutoCloseComponentOnViewExit { get; set; }
+    public bool AutoCloseCtrlOnViewExit { get; set; }
 
     public bool ShowErrorMessagesOnInitialize { get; set; }
 
@@ -82,7 +82,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public KntServerCOMCtrl(Store store) : base(store)
     {
-        ControllerName = "KntServerCOM Component";
+        ControllerName = "KntServerCOM Controller";
 
         // --- BaudRate and HandShake
 
@@ -100,13 +100,13 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         RetroDelay = 20;
         
         // --- Control flags
-        AutoCloseComponentOnViewExit = false;
+        AutoCloseCtrlOnViewExit = false;
         ShowErrorMessagesOnInitialize = false;
         _showViewMessage = true;
                 
         _convTable = LoadQDOSCharacterSetTable();
 
-        // ChatGPT included component
+        // ChatGPT included controller
         _chatGPT = new KntChatGPTCtrl(store);
         _chatGPT.Run();
     }
@@ -137,7 +137,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         catch (Exception ex)
         {
             var res = new Result<EControllerResult>(EControllerResult.Error);
-            var _statusInfo = $"KntServerCOM component. The connection could not be started. Error: {ex.Message}.";
+            var _statusInfo = $"KntServerCOM controller. The connection could not be started. Error: {ex.Message}.";
             res.AddErrorMessage(_statusInfo);            
             if (ShowErrorMessagesOnInitialize)
                 ServerCOMView.ShowInfo(_statusInfo, KntConst.AppName);
@@ -658,9 +658,9 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         }
     }
 
-    public void ShowServerCOMView(bool autoCloseComponentOnViewExit)
+    public void ShowServerCOMView(bool autoCloseCtrlOnViewExit)
     {
-        AutoCloseComponentOnViewExit = autoCloseComponentOnViewExit;
+        AutoCloseCtrlOnViewExit = autoCloseCtrlOnViewExit;
         ServerCOMView.ShowView();
     }
 
@@ -674,7 +674,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         }
         else
         {
-            ServerCOMView.ShowInfo("KntChat component is no started.");
+            ServerCOMView.ShowInfo("KntChat controller is no started.");
         }
     }
 
