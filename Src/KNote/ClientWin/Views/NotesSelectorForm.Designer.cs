@@ -107,7 +107,7 @@
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(365, 8);
+            buttonCancel.Location = new Point(368, 10);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(79, 24);
             buttonCancel.TabIndex = 5;
@@ -119,7 +119,7 @@
             // 
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonAccept.DialogResult = DialogResult.OK;
-            buttonAccept.Location = new Point(280, 8);
+            buttonAccept.Location = new Point(284, 10);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(79, 24);
             buttonAccept.TabIndex = 4;

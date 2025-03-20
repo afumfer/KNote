@@ -34,9 +34,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         buttonPrint.Visible = false;
         buttonCheck.Visible = false;
         toolStripS3.Visible = false;
-        toolStripS4.Visible = false;
-        buttonInsertTemplate.Visible = false;
-        toolStripToolS1.Visible = false;
+        toolStripS4.Visible = false;                
     }
 
     #endregion
@@ -200,6 +198,16 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 buttonLockFormat.Checked = true;
             }
         }
+        else if (menuSel == buttonInsertTemplate)
+        {
+            await InsertTemplate();
+        }
+        else if (menuSel == buttonInsertCode)
+        {
+            await InsertCode();
+        }
+
+        // 
     }
 
     private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -1295,6 +1303,50 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
     }
 
+    private async Task InsertTemplate()
+    {
+        // If navigate mode then msgbox and return
+        if (!buttonNavigate.Enabled)
+        {
+            _ctrl.ShowMessage("Cannot insert a template into the text when editing mode (markdown or html) is not active", KntConst.AppName);
+            return;
+        }
+
+        var strContent = await _ctrl.GetCatalogTemplate();
+        if (string.IsNullOrEmpty(strContent))
+            return;
+
+        tabNoteData.SelectedIndex = 0;
+
+        if (!buttonViewHtml.Enabled)
+        {
+            kntEditView.HtmlContentControl.SelectedHtml = strContent;
+            kntEditView.HtmlContentControl.Focus();
+        }
+        else
+        {
+            var selStart = kntEditView.MarkdownContentControl.SelectionStart;
+            kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, strContent);
+            kntEditView.MarkdownContentControl.Focus();
+            kntEditView.MarkdownContentControl.Select(selStart + strContent.Length, 0);
+        }
+    }
+
+    private async Task InsertCode()
+    {
+        var strContent = await _ctrl.GetCatalogCode();
+        if (string.IsNullOrEmpty(strContent))
+            return;
+
+        tabNoteData.SelectedIndex = 5;
+
+        var selStart = textScriptCode.SelectionStart;
+        textScriptCode.Text = textScriptCode.Text.Insert(selStart, strContent);
+        textScriptCode.Focus();
+        textScriptCode.Select(selStart + strContent.Length, 0);
+    }
+
+
     private void UpdateResource(ResourceDto resource)
     {
         var item = listViewResources.Items[resource.ResourceId.ToString()];
@@ -1321,8 +1373,4 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     #endregion
 
-    private void tabAttributes_Click(object sender, EventArgs e)
-    {
-
-    }
 }

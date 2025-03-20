@@ -42,11 +42,12 @@
             buttonPrint = new ToolStripButton();
             toolStripS4 = new ToolStripSeparator();
             buttonTools = new ToolStripDropDownButton();
-            buttonInsertTemplate = new ToolStripMenuItem();
             toolStripToolS1 = new ToolStripSeparator();
             buttonExecuteKntScript = new ToolStripMenuItem();
+            buttonInsertCode = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
             buttonLockFormat = new ToolStripMenuItem();
+            buttonInsertTemplate = new ToolStripMenuItem();
             imageListTabNoteData = new ImageList(components);
             panelForm = new Panel();
             tabNoteData = new TabControl();
@@ -269,7 +270,7 @@
             // buttonTools
             // 
             buttonTools.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonInsertTemplate, toolStripToolS1, buttonExecuteKntScript, toolStripSeparator1, buttonLockFormat });
+            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonInsertTemplate, toolStripToolS1, buttonExecuteKntScript, buttonInsertCode, toolStripSeparator1, buttonLockFormat });
             buttonTools.Image = (Image)resources.GetObject("buttonTools.Image");
             buttonTools.ImageScaling = ToolStripItemImageScaling.None;
             buttonTools.ImageTransparentColor = Color.Magenta;
@@ -277,17 +278,10 @@
             buttonTools.Size = new Size(29, 22);
             buttonTools.Text = "toolStripDropDownTools";
             // 
-            // buttonInsertTemplate
-            // 
-            buttonInsertTemplate.Name = "buttonInsertTemplate";
-            buttonInsertTemplate.ShortcutKeys = Keys.F9;
-            buttonInsertTemplate.Size = new Size(217, 22);
-            buttonInsertTemplate.Text = "Insertar template text ...";
-            // 
             // toolStripToolS1
             // 
             toolStripToolS1.Name = "toolStripToolS1";
-            toolStripToolS1.Size = new Size(214, 6);
+            toolStripToolS1.Size = new Size(212, 6);
             // 
             // buttonExecuteKntScript
             // 
@@ -295,21 +289,36 @@
             buttonExecuteKntScript.ImageScaling = ToolStripItemImageScaling.None;
             buttonExecuteKntScript.Name = "buttonExecuteKntScript";
             buttonExecuteKntScript.ShortcutKeys = Keys.F5;
-            buttonExecuteKntScript.Size = new Size(217, 22);
+            buttonExecuteKntScript.Size = new Size(215, 22);
             buttonExecuteKntScript.Text = "Execute AntScript code";
             buttonExecuteKntScript.Click += buttonToolBar_Click;
+            // 
+            // buttonInsertCode
+            // 
+            buttonInsertCode.Name = "buttonInsertCode";
+            buttonInsertCode.Size = new Size(215, 22);
+            buttonInsertCode.Text = "Insert code snippet ...";
+            buttonInsertCode.Click += buttonToolBar_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(214, 6);
+            toolStripSeparator1.Size = new Size(212, 6);
             // 
             // buttonLockFormat
             // 
             buttonLockFormat.Name = "buttonLockFormat";
-            buttonLockFormat.Size = new Size(217, 22);
+            buttonLockFormat.Size = new Size(215, 22);
             buttonLockFormat.Text = "Lock format";
             buttonLockFormat.Click += buttonToolBar_Click;
+            // 
+            // buttonInsertTemplate
+            // 
+            buttonInsertTemplate.Name = "buttonInsertTemplate";
+            buttonInsertTemplate.ShortcutKeys = Keys.F9;
+            buttonInsertTemplate.Size = new Size(215, 22);
+            buttonInsertTemplate.Text = "Insert template text ...";
+            buttonInsertTemplate.Click += buttonToolBar_Click;
             // 
             // imageListTabNoteData
             // 
@@ -1647,5 +1656,6 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem buttonLockFormat;
         private KntWebView.KntEditView kntEditViewTask;
+        private ToolStripMenuItem buttonInsertCode;        
     }
 }

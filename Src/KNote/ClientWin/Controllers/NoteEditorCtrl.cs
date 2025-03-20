@@ -51,25 +51,6 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     #endregion
 
-    #region Extensions
-
-    private NotesSelectorCtrl _notesSelector = null;
-    protected NotesSelectorCtrl NotesSelector
-    {
-        get
-        {
-            if(_notesSelector == null)
-            {
-                _notesSelector = new NotesSelectorCtrl(this.Store);
-                _notesSelector.EmbededMode = false;
-                _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime, ContentType";
-            }
-            return _notesSelector;
-        }
-    }
-
-    #endregion 
-
     #region IViewEditorEmbeddable implementation
 
     protected override IViewEditorEmbeddable<NoteExtendedDto> CreateView()
@@ -558,29 +539,12 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     public async Task<string> GetCatalogTemplate()
     {
-        return await GetCatalogItem(KntConst.TemplateTag);
-    }
-
-    public async Task<string> GetCatalogPrompt()
-    {        
-        return await GetCatalogItem(KntConst.PromptTag);
+        return await Store.GetCatalogItem(ServiceRef, KntConst.TemplateTag, "Select template");
     }
 
     public async Task<string> GetCatalogCode()
     {        
-        return await GetCatalogItem(KntConst.CodeTag);
-    }
-
-    private async Task<string> GetCatalogItem(string item)
-    {
-        await NotesSelector.LoadFilteredEntities(this.Service, new NotesFilterDto { Tags = item }, false);
-
-        var res = NotesSelector.RunModal();
-
-        if (res.Entity == EComponentResult.Executed)
-            return NotesSelector.SelectedEntity.Description;
-        else
-            return null;
+        return await Store.GetCatalogItem(ServiceRef, KntConst.CodeTag, "Select code snippet");
     }
 
     #endregion

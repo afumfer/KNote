@@ -492,6 +492,25 @@ public class Store
 
     #endregion
 
+    #region Coomon controllers extensions
+
+    private NotesSelectorCtrl _notesSelector = null;
+    protected NotesSelectorCtrl NotesSelector
+    {
+        get
+        {
+            if (_notesSelector == null)
+            {
+                _notesSelector = new NotesSelectorCtrl(this);
+                _notesSelector.EmbededMode = false;
+                _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime, ContentType";
+            }
+            return _notesSelector;
+        }
+    }
+
+    #endregion 
+
     #region Helper event handlers 
 
     public event EventHandler<ComponentEventArgs<ServiceWithNoteId>> EditedPostItNote;
@@ -583,8 +602,7 @@ public class Store
         else
             return null;
     }
-
-    //TODO: !!! Delete form here (tralated to KntEditViewControl 
+    
     public string ExtractUrlFromText(string text)
     {      
         if (string.IsNullOrEmpty(text))        
@@ -599,6 +617,19 @@ public class Store
 
         if (validResult)
             return urlFistLine;
+        else
+            return null;
+    }
+
+    public async Task<string> GetCatalogItem(ServiceRef serviceRef, string item, string viewTitle)
+    {
+        await NotesSelector.LoadFilteredEntities(serviceRef.Service, new NotesFilterDto { Tags = item }, false);
+        NotesSelector.ViewTitle = viewTitle;
+        
+        var res = NotesSelector.RunModal();
+
+        if (res.Entity == EComponentResult.Executed)
+            return NotesSelector.SelectedEntity.Description;
         else
             return null;
     }

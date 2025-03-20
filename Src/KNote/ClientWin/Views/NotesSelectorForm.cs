@@ -68,6 +68,9 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     public void RefreshView()
     {
+        if (!string.IsNullOrEmpty(_ctrl.ViewTitle))
+            this.Text = _ctrl.ViewTitle;
+
         if (_ctrl.ListEntities == null)
             return;
 

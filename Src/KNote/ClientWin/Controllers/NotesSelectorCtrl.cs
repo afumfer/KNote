@@ -32,6 +32,11 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
         get; set;
     }
 
+    public string ViewTitle
+    {
+        get; set;
+    }
+
     #endregion
 
     #region Constructor
