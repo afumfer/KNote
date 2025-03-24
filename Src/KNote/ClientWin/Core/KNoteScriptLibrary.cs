@@ -53,13 +53,13 @@ public class KNoteScriptLibrary: Library
     public NoteEditorCtrl GetNewNoteEditorCtrl()
     {
         var noteEditor = new NoteEditorCtrl(_store);        
-        Task.Run(() => noteEditor.NewModel(_store.GetActiveOrDefaultServide()).Wait());
+        Task.Run(() => noteEditor.NewModel(_store.GetActiveOrDefaultService()).Wait());
         return noteEditor;
     }
 
     public NoteEditorCtrl GetNoteEditorCtrl(int noteNumber)
     {
-        var service = _store.GetActiveOrDefaultServide();
+        var service = _store.GetActiveOrDefaultService();
         NoteExtendedDto resNoteExt = null;
         var resNoteInfo = Task.Run(() => service.Notes.GetAsync(noteNumber)).Result;
         if (resNoteInfo.IsValid)
@@ -71,7 +71,7 @@ public class KNoteScriptLibrary: Library
         if(resNoteExt != null)
             noteEditor.LoadModel(service, resNoteExt);
         else
-            Task.Run(() => noteEditor.NewModel(_store.GetActiveOrDefaultServide()).Wait());
+            Task.Run(() => noteEditor.NewModel(_store.GetActiveOrDefaultService()).Wait());
         return noteEditor;
     }
 

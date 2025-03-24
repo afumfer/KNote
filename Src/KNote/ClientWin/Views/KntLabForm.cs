@@ -1125,9 +1125,9 @@ window.chrome.webview.postMessage(retValue);";
         //var qserver = new KntServerCOMForm(new KntServerCOMComponent(_ctrl.Store));
         //qserver.Show();
 
-        var kntServerCOMComponent = new KntServerCOMCtrl(_ctrl.Store);
-        kntServerCOMComponent.Run();
-        kntServerCOMComponent.ShowServerCOMView(true);
+        var kntServerCOMCtrl = new KntServerCOMCtrl(_ctrl.Store);
+        kntServerCOMCtrl.Run();
+        kntServerCOMCtrl.ShowServerCOMView(true);
     }
 
     #endregion 

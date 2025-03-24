@@ -1,5 +1,6 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Service.Core;
 using OpenAI.Chat;
 using System.ClientModel;
 using System.Diagnostics;
@@ -57,7 +58,11 @@ public class KntChatGPTCtrl : CtrlBase
 
     public bool AutoSaveChatMessagesOnViewExit { get; set; } = false;
 
-    public string Tag { get; set; } = "KntChatGPTCtrl v 0.1";
+    public string Tag { get; set; } = "KntChatGPTCtrl v0.2";
+
+    public ServiceRef ServiceRef { get; private set; }
+
+    public string RootSystemChat { get; set; }
 
     #endregion
 
@@ -65,7 +70,9 @@ public class KntChatGPTCtrl : CtrlBase
 
     public KntChatGPTCtrl(Store store) : base(store)
     {
-        ControllerName = "KntChatGPT Controller";        
+        ControllerName = "KntChatGPT Controller";
+        ServiceRef = store.GetActiveOrDefaultServiceRef();        
+        RootSystemChat = KntConst.DefaultRootSystemChat;
     }
 
     #endregion
@@ -155,7 +162,7 @@ public class KntChatGPTCtrl : CtrlBase
         _result = "";
                 
         _chatMessages.Clear();
-        _chatMessages.Add(new SystemChatMessage("Eres una asistente útil."));
+        _chatMessages.Add(new SystemChatMessage(RootSystemChat));
 
         _chatTextMessasges.Clear();
         _totalTokens = 0;
@@ -242,6 +249,12 @@ public class KntChatGPTCtrl : CtrlBase
 
         StreamToken?.Invoke(this, new ControllerEventArgs<string>($"\r\n\r\n"));
     }
+
+    public async Task<string> GetCatalogPrompt()
+    {        
+        return await Store.GetCatalogItem(ServiceRef, KntConst.PromptTag, "Select prompt");
+    }
+
 
     #endregion
 }

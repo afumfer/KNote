@@ -30,15 +30,20 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KntChatGPTForm));
             statusStripChat = new StatusStrip();
+            toolStripStatusServiceRef = new ToolStripStatusLabel();
+            toolStripStatusLabel1 = new ToolStripStatusLabel();
             toolStripStatusLabelTokens = new ToolStripStatusLabel();
             toolStripStatusLabelProcessingTime = new ToolStripStatusLabel();
-            toolStripStatusLabel1 = new ToolStripStatusLabel();
+            toolStripStatusLabel2 = new ToolStripStatusLabel();
             toolStripStatusLabelProcessing = new ToolStripStatusLabel();
             splitChat = new SplitContainer();
             radioGetStream = new RadioButton();
             radioGetCompletion = new RadioButton();
             textResult = new TextBox();
             labelResult = new Label();
+            panelSeparator = new Panel();
+            buttonViewSystem = new Button();
+            buttonCatalogPrompts = new Button();
             buttonRestart = new Button();
             labelPrompt = new Label();
             textPrompt = new TextBox();
@@ -53,11 +58,23 @@
             // statusStripChat
             // 
             statusStripChat.ImageScalingSize = new Size(20, 20);
-            statusStripChat.Items.AddRange(new ToolStripItem[] { toolStripStatusLabelTokens, toolStripStatusLabelProcessingTime, toolStripStatusLabel1, toolStripStatusLabelProcessing });
-            statusStripChat.Location = new Point(0, 489);
+            statusStripChat.Items.AddRange(new ToolStripItem[] { toolStripStatusServiceRef, toolStripStatusLabel1, toolStripStatusLabelTokens, toolStripStatusLabelProcessingTime, toolStripStatusLabel2, toolStripStatusLabelProcessing });
+            statusStripChat.Location = new Point(0, 601);
             statusStripChat.Name = "statusStripChat";
-            statusStripChat.Size = new Size(684, 22);
+            statusStripChat.Size = new Size(735, 22);
             statusStripChat.TabIndex = 22;
+            // 
+            // toolStripStatusServiceRef
+            // 
+            toolStripStatusServiceRef.Name = "toolStripStatusServiceRef";
+            toolStripStatusServiceRef.Size = new Size(44, 17);
+            toolStripStatusServiceRef.Text = "Service";
+            // 
+            // toolStripStatusLabel1
+            // 
+            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            toolStripStatusLabel1.Size = new Size(10, 17);
+            toolStripStatusLabel1.Text = "|";
             // 
             // toolStripStatusLabelTokens
             // 
@@ -72,11 +89,11 @@
             toolStripStatusLabelProcessingTime.Size = new Size(10, 17);
             toolStripStatusLabelProcessingTime.Text = " ";
             // 
-            // toolStripStatusLabel1
+            // toolStripStatusLabel2
             // 
-            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(10, 17);
-            toolStripStatusLabel1.Text = "|";
+            toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            toolStripStatusLabel2.Size = new Size(10, 17);
+            toolStripStatusLabel2.Text = "|";
             // 
             // toolStripStatusLabelProcessing
             // 
@@ -101,13 +118,16 @@
             // 
             // splitChat.Panel2
             // 
+            splitChat.Panel2.Controls.Add(panelSeparator);
+            splitChat.Panel2.Controls.Add(buttonViewSystem);
+            splitChat.Panel2.Controls.Add(buttonCatalogPrompts);
             splitChat.Panel2.Controls.Add(buttonRestart);
             splitChat.Panel2.Controls.Add(labelPrompt);
             splitChat.Panel2.Controls.Add(textPrompt);
             splitChat.Panel2.Controls.Add(buttonSend);
             splitChat.Panel2MinSize = 50;
-            splitChat.Size = new Size(684, 489);
-            splitChat.SplitterDistance = 393;
+            splitChat.Size = new Size(735, 601);
+            splitChat.SplitterDistance = 410;
             splitChat.SplitterWidth = 6;
             splitChat.TabIndex = 25;
             // 
@@ -116,7 +136,7 @@
             radioGetStream.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetStream.AutoSize = true;
             radioGetStream.Checked = true;
-            radioGetStream.Location = new Point(475, 7);
+            radioGetStream.Location = new Point(526, 7);
             radioGetStream.Name = "radioGetStream";
             radioGetStream.Size = new Size(83, 19);
             radioGetStream.TabIndex = 5;
@@ -128,7 +148,7 @@
             // 
             radioGetCompletion.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetCompletion.AutoSize = true;
-            radioGetCompletion.Location = new Point(571, 7);
+            radioGetCompletion.Location = new Point(622, 7);
             radioGetCompletion.Name = "radioGetCompletion";
             radioGetCompletion.Size = new Size(109, 19);
             radioGetCompletion.TabIndex = 6;
@@ -144,24 +164,55 @@
             textResult.Multiline = true;
             textResult.Name = "textResult";
             textResult.ScrollBars = ScrollBars.Vertical;
-            textResult.Size = new Size(672, 360);
+            textResult.Size = new Size(723, 377);
             textResult.TabIndex = 4;
             // 
             // labelResult
             // 
             labelResult.AutoSize = true;
-            labelResult.Location = new Point(3, 9);
+            labelResult.Location = new Point(6, 9);
             labelResult.Name = "labelResult";
             labelResult.Size = new Size(42, 15);
             labelResult.TabIndex = 25;
             labelResult.Text = "Result:";
             // 
+            // panelSeparator
+            // 
+            panelSeparator.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            panelSeparator.BackColor = SystemColors.ControlDarkDark;
+            panelSeparator.Location = new Point(446, 5);
+            panelSeparator.Name = "panelSeparator";
+            panelSeparator.Size = new Size(3, 25);
+            panelSeparator.TabIndex = 27;
+            // 
+            // buttonViewSystem
+            // 
+            buttonViewSystem.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonViewSystem.Location = new Point(615, 4);
+            buttonViewSystem.Name = "buttonViewSystem";
+            buttonViewSystem.Size = new Size(114, 26);
+            buttonViewSystem.TabIndex = 26;
+            buttonViewSystem.Text = "&View system root";
+            buttonViewSystem.UseVisualStyleBackColor = true;
+            buttonViewSystem.Click += buttonViewSystem_Click;
+            // 
+            // buttonCatalogPrompts
+            // 
+            buttonCatalogPrompts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonCatalogPrompts.Location = new Point(455, 4);
+            buttonCatalogPrompts.Name = "buttonCatalogPrompts";
+            buttonCatalogPrompts.Size = new Size(154, 26);
+            buttonCatalogPrompts.TabIndex = 25;
+            buttonCatalogPrompts.Text = "Get prompt form &catalog";
+            buttonCatalogPrompts.UseVisualStyleBackColor = true;
+            buttonCatalogPrompts.Click += buttonCatalogPrompts_Click;
+            // 
             // buttonRestart
             // 
             buttonRestart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonRestart.Location = new Point(623, 39);
+            buttonRestart.Location = new Point(383, 4);
             buttonRestart.Name = "buttonRestart";
-            buttonRestart.Size = new Size(55, 27);
+            buttonRestart.Size = new Size(56, 26);
             buttonRestart.TabIndex = 3;
             buttonRestart.Text = "&Restart";
             buttonRestart.UseVisualStyleBackColor = true;
@@ -170,7 +221,7 @@
             // labelPrompt
             // 
             labelPrompt.AutoSize = true;
-            labelPrompt.Location = new Point(5, 4);
+            labelPrompt.Location = new Point(8, 12);
             labelPrompt.Name = "labelPrompt";
             labelPrompt.Size = new Size(50, 15);
             labelPrompt.TabIndex = 24;
@@ -180,20 +231,20 @@
             // 
             textPrompt.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             textPrompt.Font = new Font("Segoe UI", 9.75F);
-            textPrompt.Location = new Point(65, 6);
+            textPrompt.Location = new Point(6, 34);
             textPrompt.MaxLength = 0;
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(553, 54);
+            textPrompt.Size = new Size(723, 140);
             textPrompt.TabIndex = 0;
             // 
             // buttonSend
             // 
             buttonSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSend.Location = new Point(623, 6);
+            buttonSend.Location = new Point(321, 4);
             buttonSend.Name = "buttonSend";
-            buttonSend.Size = new Size(55, 27);
+            buttonSend.Size = new Size(56, 26);
             buttonSend.TabIndex = 2;
             buttonSend.Text = "&Send";
             buttonSend.UseVisualStyleBackColor = true;
@@ -203,7 +254,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(684, 511);
+            ClientSize = new Size(735, 623);
             Controls.Add(splitChat);
             Controls.Add(statusStripChat);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -238,5 +289,10 @@
         private Label labelPrompt;
         private TextBox textPrompt;
         private Button buttonSend;
+        private Button buttonCatalogPrompts;
+        private ToolStripStatusLabel toolStripStatusServiceRef;
+        private ToolStripStatusLabel toolStripStatusLabel2;
+        private Button buttonViewSystem;
+        private Panel panelSeparator;
     }
 }

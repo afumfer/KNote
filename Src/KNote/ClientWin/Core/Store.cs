@@ -151,12 +151,20 @@ public class Store
         return _servicesRefs.FirstOrDefault();
     }
 
-    public IKntService GetActiveOrDefaultServide()
+    public IKntService GetActiveOrDefaultService()
     {
         if (ActiveFolderWithServiceRef != null)
             return ActiveFolderWithServiceRef.ServiceRef.Service;
         else
             return GetFirstServiceRef().Service;
+    }
+
+    public ServiceRef GetActiveOrDefaultServiceRef()
+    {
+        if (ActiveFolderWithServiceRef != null)
+            return ActiveFolderWithServiceRef.ServiceRef;
+        else
+            return GetFirstServiceRef();
     }
 
     public event EventHandler<ControllerEventArgs<CtrlBase>> AddedController;

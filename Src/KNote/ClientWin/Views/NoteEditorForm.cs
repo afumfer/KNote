@@ -116,6 +116,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         FormBorderStyle = FormBorderStyle.None;
         toolBarNoteEditor.Visible = false;
         _ctrl.EditMode = false;
+        kntEditView.MarkdownContentControl.ReadOnly = true;
+        kntEditView.MarkdownContentControl.BackColor = SystemColors.Window;
+        kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.FixedSingle;
     }
 
     public void ConfigureWindowMode()

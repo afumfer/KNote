@@ -3,6 +3,8 @@ using System.Text.Json;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KntWebView;
+using Microsoft.Identity.Client;
 
 namespace KNote.ClientWin.Views;
 
@@ -34,6 +36,7 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public void ShowView()
     {
+        toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Alias}";
         this.Show();
     }
 
@@ -104,7 +107,45 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private void buttonRestart_Click(object sender, EventArgs e)
     {
+        _ctrl.RootSystemChat = KntConst.DefaultRootSystemChat;
         RestartChatGPT();
+    }
+
+    private async void buttonCatalogPrompts_Click(object sender, EventArgs e)
+    {
+        var strPrompt = await _ctrl.GetCatalogPrompt();
+        if (string.IsNullOrEmpty(strPrompt))
+            return;
+
+        var promptTemplate = new PromptTemplate();
+
+        try
+        {
+            // Try json parse
+            var jsonDoc = JsonDocument.Parse(strPrompt);
+            var root = jsonDoc.RootElement;
+
+            promptTemplate.System = root.GetProperty("System").GetString();
+            promptTemplate.User = root.GetProperty("User").GetString();
+        }
+        catch
+        {
+            promptTemplate.User = strPrompt;
+        }
+
+        if (!string.IsNullOrEmpty(promptTemplate.System))
+            _ctrl.RootSystemChat = promptTemplate.System;
+        else
+            _ctrl.RootSystemChat = KntConst.DefaultRootSystemChat;
+
+        RestartChatGPT();
+
+        textPrompt.Text = promptTemplate.User;
+    }
+
+    private void buttonViewSystem_Click(object sender, EventArgs e)
+    {
+        ShowInfo($"System: {_ctrl.RootSystemChat}", $"{KntConst.AppName} - root system chat " );
     }
 
     private async void KntChatGPTForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -129,7 +170,7 @@ public partial class KntChatGPTForm : Form, IViewBase
         try
         {
             var noteEditor = new NoteEditorCtrl(_ctrl.Store);
-            await noteEditor.NewModel(_ctrl.Store.GetActiveOrDefaultServide());
+            await noteEditor.NewModel(_ctrl.Store.GetActiveOrDefaultService());
             noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
             noteEditor.Model.Description = _ctrl.ChatTextMessasges.ToString();
             noteEditor.Model.Tags = "[ChatGPT]";
@@ -149,7 +190,7 @@ public partial class KntChatGPTForm : Form, IViewBase
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";
         textResult.Text = _ctrl.ChatTextMessasges.ToString();
         _sbResult.Clear();
-        textPrompt.Text = "";        
+        textPrompt.Text = "";
     }
 
     private void StatusProcessing(bool processing = false)
@@ -184,7 +225,7 @@ public partial class KntChatGPTForm : Form, IViewBase
     }
 
     private async Task GoStreamCompletion(string prompt)
-    {        
+    {
         _countNRres = 0;
         _ctrl.StreamToken += _com_StreamToken;
 
@@ -218,7 +259,7 @@ public partial class KntChatGPTForm : Form, IViewBase
     {
         _sbResult.Append(text);
         _countNRres++;
-        if(_countNRres > 10)
+        if (_countNRres > 10)
         {
             RefreshStreamResult();
             _countNRres = 0;
@@ -235,3 +276,13 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     #endregion
 }
+
+#region Utils 
+
+public class PromptTemplate
+{
+    public string System { get; set; }
+    public string User { get; set; }
+}
+
+#endregion

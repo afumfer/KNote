@@ -42,12 +42,12 @@
             buttonPrint = new ToolStripButton();
             toolStripS4 = new ToolStripSeparator();
             buttonTools = new ToolStripDropDownButton();
+            buttonInsertTemplate = new ToolStripMenuItem();
             toolStripToolS1 = new ToolStripSeparator();
             buttonExecuteKntScript = new ToolStripMenuItem();
             buttonInsertCode = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
             buttonLockFormat = new ToolStripMenuItem();
-            buttonInsertTemplate = new ToolStripMenuItem();
             imageListTabNoteData = new ImageList(components);
             panelForm = new Panel();
             tabNoteData = new TabControl();
@@ -278,6 +278,14 @@
             buttonTools.Size = new Size(29, 22);
             buttonTools.Text = "toolStripDropDownTools";
             // 
+            // buttonInsertTemplate
+            // 
+            buttonInsertTemplate.Name = "buttonInsertTemplate";
+            buttonInsertTemplate.ShortcutKeys = Keys.F9;
+            buttonInsertTemplate.Size = new Size(215, 22);
+            buttonInsertTemplate.Text = "Insert template text ...";
+            buttonInsertTemplate.Click += buttonToolBar_Click;
+            // 
             // toolStripToolS1
             // 
             toolStripToolS1.Name = "toolStripToolS1";
@@ -311,14 +319,6 @@
             buttonLockFormat.Size = new Size(215, 22);
             buttonLockFormat.Text = "Lock format";
             buttonLockFormat.Click += buttonToolBar_Click;
-            // 
-            // buttonInsertTemplate
-            // 
-            buttonInsertTemplate.Name = "buttonInsertTemplate";
-            buttonInsertTemplate.ShortcutKeys = Keys.F9;
-            buttonInsertTemplate.Size = new Size(215, 22);
-            buttonInsertTemplate.Text = "Insert template text ...";
-            buttonInsertTemplate.Click += buttonToolBar_Click;
             // 
             // imageListTabNoteData
             // 
