@@ -87,17 +87,15 @@ abstract public class CtrlViewEmbeddableBase<TView> : CtrlViewBase<TView>
     }
    
     protected override Result<EControllerResult> OnInitialized()
-    {
-        var result = base.OnInitialized();
-
-        // TODO: pending check result correctrly
-
-        View.RefreshView();
-
+    {                
         if (!EmbededMode)
             View.ConfigureWindowMode();
         else
             View.ConfigureEmbededMode();
+
+        var result = base.OnInitialized();
+
+        View.RefreshView();
 
         return result;
     }
@@ -356,13 +354,13 @@ public abstract class CtrlNoteEditorEmbeddableBase<TView, TEntity> : CtrlNoteEdi
     }
 
     protected override Result<EControllerResult> OnInitialized()
-    {
-        var result = base.OnInitialized();
-
+    {        
         if (!EmbededMode)
             View.ConfigureWindowMode();
         else
             View.ConfigureEmbededMode();
+
+        var result = base.OnInitialized();
 
         return result;
     }
