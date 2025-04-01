@@ -3,6 +3,7 @@ using System.Text.Json;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Model.Dto;
 using KntWebView;
 using Microsoft.Identity.Client;
 
@@ -108,39 +109,46 @@ public partial class KntChatGPTForm : Form, IViewBase
     private void buttonRestart_Click(object sender, EventArgs e)
     {
         _ctrl.RootSystemChat = KntConst.DefaultRootSystemChat;
-        RestartChatGPT();
+        _ctrl.RestartChatGPT();
+        RestartChatGPTView();
     }
 
     private async void buttonCatalogPrompts_Click(object sender, EventArgs e)
     {
-        var strPrompt = await _ctrl.GetCatalogPrompt();
-        if (string.IsNullOrEmpty(strPrompt))
-            return;
+        //var strPrompt = (await _ctrl.GetCatalogPrompt())?.Description;
+        //if (string.IsNullOrEmpty(strPrompt))
+        //    return;
 
-        var promptTemplate = new PromptTemplate();
+        //var promptTemplate = new KntAssistantInfo();
 
-        try
-        {
-            // Try json parse
-            var jsonDoc = JsonDocument.Parse(strPrompt);
-            var root = jsonDoc.RootElement;
+        //try
+        //{
+        //    // Try json parse
+        //    var jsonDoc = JsonDocument.Parse(strPrompt);
+        //    var root = jsonDoc.RootElement;
 
-            promptTemplate.System = root.GetProperty("System").GetString();
-            promptTemplate.User = root.GetProperty("User").GetString();
-        }
-        catch
-        {
-            promptTemplate.User = strPrompt;
-        }
+        //    promptTemplate.System = root.GetProperty("System").GetString();
+        //    promptTemplate.User = root.GetProperty("User").GetString();
+        //}
+        //catch
+        //{
+        //    promptTemplate.User = strPrompt;
+        //}
 
-        if (!string.IsNullOrEmpty(promptTemplate.System))
-            _ctrl.RootSystemChat = promptTemplate.System;
-        else
-            _ctrl.RootSystemChat = KntConst.DefaultRootSystemChat;
+        //var promptTemplate = await _ctrl.GetCatalogPrompt();
 
-        RestartChatGPT();
+        //if (!string.IsNullOrEmpty(promptTemplate.System))
+        //    _ctrl.RootSystemChat = promptTemplate.System;
+        //else
+        //    _ctrl.RootSystemChat = KntConst.DefaultRootSystemChat;
 
-        textPrompt.Text = promptTemplate.User;
+        
+
+        var newPrompt = await _ctrl.GetCatalogPrompt();
+
+        RestartChatGPTView();
+
+        textPrompt.Text = newPrompt;
     }
 
     private void buttonViewSystem_Click(object sender, EventArgs e)
@@ -182,10 +190,8 @@ public partial class KntChatGPTForm : Form, IViewBase
         }
     }
 
-    private void RestartChatGPT()
-    {
-        _ctrl.RestartChatGPT();
-
+    private void RestartChatGPTView()
+    {        
         toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";
         textResult.Text = _ctrl.ChatTextMessasges.ToString();
@@ -276,13 +282,3 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     #endregion
 }
-
-#region Utils 
-
-public class PromptTemplate
-{
-    public string System { get; set; }
-    public string User { get; set; }
-}
-
-#endregion

@@ -1,10 +1,13 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.IdentityModel.Tokens;
 using OpenAI.Chat;
 using System.ClientModel;
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 
 namespace KNote.ClientWin.Controllers;
 
@@ -252,7 +255,35 @@ public class KntChatGPTCtrl : CtrlBase
 
     public async Task<string> GetCatalogPrompt()
     {        
-        return await Store.GetCatalogItem(ServiceRef, KntConst.PromptTag, "Select prompt");
+        var catalogItem = await Store.GetCatalogItem(ServiceRef, KntConst.PromptTag, "Select prompt");
+        
+        if (string.IsNullOrEmpty(catalogItem.Description))
+            return null;
+
+        var promptTemplate = new PromptTemplate();
+
+        try
+        {
+            // Try json parse
+            var jsonDoc = JsonDocument.Parse(catalogItem.Description);
+            var root = jsonDoc.RootElement;
+
+            promptTemplate.System = root.GetProperty("System").GetString();
+            promptTemplate.User = root.GetProperty("User").GetString();            
+        }
+        catch
+        {
+            promptTemplate.User = catalogItem.Description;
+        }
+        
+        if (!string.IsNullOrEmpty(promptTemplate.System))
+            RootSystemChat = promptTemplate.System;
+        else
+            RootSystemChat = KntConst.DefaultRootSystemChat;
+
+        RestartChatGPT();
+
+        return promptTemplate.User;
     }
 
 

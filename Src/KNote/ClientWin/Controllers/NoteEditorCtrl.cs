@@ -1,7 +1,11 @@
 ﻿using KNote.ClientWin.Core;
+using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KntScript;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace KNote.ClientWin.Controllers;
 
@@ -539,14 +543,82 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     public async Task<string> GetCatalogTemplate()
     {
-        return await Store.GetCatalogItem(ServiceRef, KntConst.TemplateTag, "Select template");
+        return (await Store.GetCatalogItem(ServiceRef, KntConst.TemplateTag, "Select template"))?.Description;
     }
 
     public async Task<string> GetCatalogCode()
     {        
-        return await Store.GetCatalogItem(ServiceRef, KntConst.CodeTag, "Select code snippet");
+        return (await Store.GetCatalogItem(ServiceRef, KntConst.CodeTag, "Select code snippet"))?.Description;
+    }
+
+    public async Task ExecKNoteAssistant()
+    {
+        // TODO: show messages to user when objects return is null
+
+        var assistantInfo = await Store.GetCatalogItem(ServiceRef, KntConst.AssistantTag, "Select KNote assistant");       
+        if (assistantInfo == null)
+            return;
+
+        var codeInfo = (await Service.Notes.GetAsync(assistantInfo.NoteId)).Entity;
+        if (codeInfo == null)
+            return;
+
+        if (codeInfo.Script == null)
+            return;
+
+        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(Store));
+        var promptTemplate = new PromptTemplate();
+
+        try
+        {
+            // Try json parse
+            var jsonDoc = JsonDocument.Parse(assistantInfo.Description);
+            var root = jsonDoc.RootElement;
+
+            promptTemplate.System = root.GetProperty("System").GetString();
+            promptTemplate.User = root.GetProperty("User").GetString();
+        }
+        catch
+        {
+            promptTemplate.User = assistantInfo.Description;
+        }
+
+        // inject variable for KntScript
+        if (!string.IsNullOrEmpty(promptTemplate.System))
+            kntScript.AddVar("_rootSystemChat", promptTemplate.System);
+        else
+            kntScript.AddVar("_rootSystemChat", KntConst.DefaultRootSystemChat);
+             
+        kntScript.AddVar("_knote", Model);
+
+        #region Test
+        // TODO: !!! delete
+        //var code = @"
+        //            ' Assistant 1
+        //            '
+        //            ' _knote and _rootSystemChat variables comes from the host application
+
+        //            HideOutWindow();
+
+        //            var chat = GetKntChatGPTCtrl();
+        //            chat.RootSystemChat = _rootSystemChat;
+        //            chat.Run();
+
+        //            var prompt = _knote.Description;
+
+        //            chat.GetCompletion(prompt);
+
+        //            ' Return value to host application in _knote variable.
+        //            _knote.Description =  chat.Result;
+
+        //            ";
+
+        //kntScript.Run(code);
+
+        #endregion 
+
+        kntScript.Run(codeInfo.Script);        
     }
 
     #endregion
 }
-

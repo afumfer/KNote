@@ -209,8 +209,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             await InsertCode();
         }
-
-        // 
+        else if (menuSel == buttonKNoteAssistant)
+        {
+            ExecKNoteAssistant();
+        }
     }
 
     private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -781,7 +783,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textTags.Text = _ctrl.Model.Tags;
         textStatus.Text = _ctrl.Model.InternalTags;
         textPriority.Text = _ctrl.Model.Priority.ToString();
-
+        
         kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
 
         if (_ctrl.Model.ContentType.Contains("html"))
@@ -1315,7 +1317,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
 
-        var strContent = await _ctrl.GetCatalogTemplate();
+        var strContent = (await _ctrl.GetCatalogTemplate());
         if (string.IsNullOrEmpty(strContent))
             return;
 
@@ -1337,7 +1339,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async Task InsertCode()
     {
-        var strContent = await _ctrl.GetCatalogCode();
+        var strContent = (await _ctrl.GetCatalogCode());
         if (string.IsNullOrEmpty(strContent))
             return;
 
@@ -1349,6 +1351,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textScriptCode.Select(selStart + strContent.Length, 0);
     }
 
+    private async void ExecKNoteAssistant()
+    {
+        ControlsToModel();
+        await _ctrl.ExecKNoteAssistant();
+        RefreshView();
+    }
 
     private void UpdateResource(ResourceDto resource)
     {

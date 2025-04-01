@@ -27,6 +27,7 @@ public static class KntConst
     public static string TemplateTag { get; private set; } = "@Template";
     public static string PromptTag { get; private set; } = "@Prompt";
     public static string CodeTag { get; private set; } = "@Code";
+    public static string AssistantTag { get; private set; } = "@Assistant";
     public static string DefaultRootSystemChat { get; private set; } = "You are a useful assistant.";
 
     static KntConst()

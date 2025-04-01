@@ -628,7 +628,7 @@ public class Store
             return null;
     }
 
-    public async Task<string> GetCatalogItem(ServiceRef serviceRef, string item, string viewTitle)
+    public async Task<NoteInfoDto> GetCatalogItem(ServiceRef serviceRef, string item, string viewTitle)
     {
         await NotesSelector.LoadFilteredEntities(serviceRef.Service, new NotesFilterDto { Tags = item }, false);
         NotesSelector.ViewTitle = viewTitle;
@@ -636,7 +636,7 @@ public class Store
         var res = NotesSelector.RunModal();
 
         if (res.Entity == EControllerResult.Executed)
-            return NotesSelector.SelectedEntity.Description;
+            return NotesSelector.SelectedEntity;
         else
             return null;
     }
