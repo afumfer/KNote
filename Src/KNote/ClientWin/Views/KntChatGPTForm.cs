@@ -115,39 +115,8 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private async void buttonCatalogPrompts_Click(object sender, EventArgs e)
     {
-        //var strPrompt = (await _ctrl.GetCatalogPrompt())?.Description;
-        //if (string.IsNullOrEmpty(strPrompt))
-        //    return;
-
-        //var promptTemplate = new KntAssistantInfo();
-
-        //try
-        //{
-        //    // Try json parse
-        //    var jsonDoc = JsonDocument.Parse(strPrompt);
-        //    var root = jsonDoc.RootElement;
-
-        //    promptTemplate.System = root.GetProperty("System").GetString();
-        //    promptTemplate.User = root.GetProperty("User").GetString();
-        //}
-        //catch
-        //{
-        //    promptTemplate.User = strPrompt;
-        //}
-
-        //var promptTemplate = await _ctrl.GetCatalogPrompt();
-
-        //if (!string.IsNullOrEmpty(promptTemplate.System))
-        //    _ctrl.RootSystemChat = promptTemplate.System;
-        //else
-        //    _ctrl.RootSystemChat = KntConst.DefaultRootSystemChat;
-
-        
-
         var newPrompt = await _ctrl.GetCatalogPrompt();
-
         RestartChatGPTView();
-
         textPrompt.Text = newPrompt;
     }
 

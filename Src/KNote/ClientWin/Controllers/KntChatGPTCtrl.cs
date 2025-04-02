@@ -260,32 +260,26 @@ public class KntChatGPTCtrl : CtrlBase
         if (string.IsNullOrEmpty(catalogItem.Description))
             return null;
 
-        var promptTemplate = new PromptTemplate();
+        var chatTemplate = new KntAssistantInfo();
 
         try
         {
-            // Try json parse
-            var jsonDoc = JsonDocument.Parse(catalogItem.Description);
-            var root = jsonDoc.RootElement;
-
-            promptTemplate.System = root.GetProperty("System").GetString();
-            promptTemplate.User = root.GetProperty("User").GetString();            
+            chatTemplate = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description);
         }
         catch
         {
-            promptTemplate.User = catalogItem.Description;
+            chatTemplate.User = catalogItem.Description;
         }
         
-        if (!string.IsNullOrEmpty(promptTemplate.System))
-            RootSystemChat = promptTemplate.System;
+        if (!string.IsNullOrEmpty(chatTemplate.System))
+            RootSystemChat = chatTemplate.System;
         else
             RootSystemChat = KntConst.DefaultRootSystemChat;
 
         RestartChatGPT();
 
-        return promptTemplate.User;
+        return chatTemplate.User;
     }
-
 
     #endregion
 }

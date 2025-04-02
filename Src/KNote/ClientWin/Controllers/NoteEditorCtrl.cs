@@ -475,7 +475,6 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         }
     }
 
-
     public Task<ResourceDto> EditResource(Guid resourceId)
     {
         var resourceEditor = new ResourceEditorCtrl(Store);
@@ -552,72 +551,66 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
     }
 
     public async Task ExecKNoteAssistant()
-    {
-        // TODO: show messages to user when objects return is null
-
-        var assistantInfo = await Store.GetCatalogItem(ServiceRef, KntConst.AssistantTag, "Select KNote assistant");       
-        if (assistantInfo == null)
-            return;
-
-        var codeInfo = (await Service.Notes.GetAsync(assistantInfo.NoteId)).Entity;
-        if (codeInfo == null)
-            return;
-
-        if (codeInfo.Script == null)
-            return;
-
+    {             
+        var catalogItem = await Store.GetCatalogItem(ServiceRef, KntConst.AssistantTag, "Select KNote assistant");       
+        if (catalogItem == null)                    
+            return;  // Action cancelled.
+        
         var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(Store));
-        var promptTemplate = new PromptTemplate();
-
+        var assistantInfo = new KntAssistantInfo();
+        var assistantScript = "";
+        
         try
         {
-            // Try json parse
-            var jsonDoc = JsonDocument.Parse(assistantInfo.Description);
-            var root = jsonDoc.RootElement;
+            NoteDto codeInfo;
+            string err = "";
 
-            promptTemplate.System = root.GetProperty("System").GetString();
-            promptTemplate.User = root.GetProperty("User").GetString();
+            assistantInfo = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description);
+
+            if(assistantInfo.AssistantScriptNumber != 0)
+            {
+                codeInfo = (await Service.Notes.GetAsync(assistantInfo.AssistantScriptNumber)).Entity;
+                if (codeInfo == null)
+                    err = "The assistant cannot be run, the assistant script cannot be found (by identification number).";
+            }
+            else
+            {
+                codeInfo = (await Service.Notes.GetAsync(catalogItem.NoteId)).Entity;
+                if (codeInfo == null)
+                    err = "The assistant cannot be run, the assistant script cannot be found (by identification guid).";
+            }
+
+            if(string.IsNullOrEmpty(err))
+                assistantScript = codeInfo.Script;
+            else
+            {
+                View.ShowInfo(err);
+                return;
+            }
         }
         catch
         {
-            promptTemplate.User = assistantInfo.Description;
+            assistantInfo.User = catalogItem.Description;
         }
 
-        // inject variable for KntScript
-        if (!string.IsNullOrEmpty(promptTemplate.System))
-            kntScript.AddVar("_rootSystemChat", promptTemplate.System);
+        // Inject variables for KntScript
+        if (!string.IsNullOrEmpty(assistantInfo.System))
+            kntScript.AddVar("_rootSystemChat", assistantInfo.System);
         else
             kntScript.AddVar("_rootSystemChat", KntConst.DefaultRootSystemChat);
-             
+        if (string.IsNullOrEmpty(assistantInfo.User))
+            assistantInfo.User = "";
+        kntScript.AddVar("_promptChat", assistantInfo.User);             
         kntScript.AddVar("_knote", Model);
 
-        #region Test
-        // TODO: !!! delete
-        //var code = @"
-        //            ' Assistant 1
-        //            '
-        //            ' _knote and _rootSystemChat variables comes from the host application
-
-        //            HideOutWindow();
-
-        //            var chat = GetKntChatGPTCtrl();
-        //            chat.RootSystemChat = _rootSystemChat;
-        //            chat.Run();
-
-        //            var prompt = _knote.Description;
-
-        //            chat.GetCompletion(prompt);
-
-        //            ' Return value to host application in _knote variable.
-        //            _knote.Description =  chat.Result;
-
-        //            ";
-
-        //kntScript.Run(code);
-
-        #endregion 
-
-        kntScript.Run(codeInfo.Script);        
+        try
+        {
+            kntScript.Run(assistantScript);
+        }
+        catch (Exception ex)
+        {
+            View.ShowInfo($"The assistant cannot be run, {ex.Message}");
+        }
     }
 
     #endregion

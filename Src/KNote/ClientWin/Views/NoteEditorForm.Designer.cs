@@ -43,12 +43,12 @@
             toolStripS4 = new ToolStripSeparator();
             buttonTools = new ToolStripDropDownButton();
             buttonInsertTemplate = new ToolStripMenuItem();
+            buttonKNoteAssistant = new ToolStripMenuItem();
             toolStripToolS1 = new ToolStripSeparator();
             buttonExecuteKntScript = new ToolStripMenuItem();
             buttonInsertCode = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
             buttonLockFormat = new ToolStripMenuItem();
-            buttonKNoteAssistant = new ToolStripMenuItem();
             imageListTabNoteData = new ImageList(components);
             panelForm = new Panel();
             tabNoteData = new TabControl();
@@ -86,7 +86,7 @@
             toolDescriptionS3 = new ToolStripSeparator();
             toolDescriptionUploadResource = new ToolStripButton();
             toolDescriptionUploadResourceFromClipboard = new ToolStripButton();
-            labelLoadingHtml = new Label();
+            labelAction = new Label();
             label7 = new Label();
             buttonEditMarkdown = new Button();
             buttonViewHtml = new Button();
@@ -283,42 +283,9 @@
             // 
             buttonInsertTemplate.Name = "buttonInsertTemplate";
             buttonInsertTemplate.ShortcutKeys = Keys.F9;
-            buttonInsertTemplate.Size = new Size(220, 22);
+            buttonInsertTemplate.Size = new Size(215, 22);
             buttonInsertTemplate.Text = "Insert template text ...";
             buttonInsertTemplate.Click += buttonToolBar_Click;
-            // 
-            // toolStripToolS1
-            // 
-            toolStripToolS1.Name = "toolStripToolS1";
-            toolStripToolS1.Size = new Size(217, 6);
-            // 
-            // buttonExecuteKntScript
-            // 
-            buttonExecuteKntScript.ImageScaling = ToolStripItemImageScaling.None;
-            buttonExecuteKntScript.Name = "buttonExecuteKntScript";
-            buttonExecuteKntScript.ShortcutKeys = Keys.F5;
-            buttonExecuteKntScript.Size = new Size(220, 22);
-            buttonExecuteKntScript.Text = "Execute AntScript code";
-            buttonExecuteKntScript.Click += buttonToolBar_Click;
-            // 
-            // buttonInsertCode
-            // 
-            buttonInsertCode.Name = "buttonInsertCode";
-            buttonInsertCode.Size = new Size(220, 22);
-            buttonInsertCode.Text = "Insert code snippet ...";
-            buttonInsertCode.Click += buttonToolBar_Click;
-            // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(217, 6);
-            // 
-            // buttonLockFormat
-            // 
-            buttonLockFormat.Name = "buttonLockFormat";
-            buttonLockFormat.Size = new Size(220, 22);
-            buttonLockFormat.Text = "Lock format";
-            buttonLockFormat.Click += buttonToolBar_Click;
             // 
             // buttonKNoteAssistant
             // 
@@ -326,6 +293,39 @@
             buttonKNoteAssistant.Size = new Size(215, 22);
             buttonKNoteAssistant.Text = "KNote Assistant ...";
             buttonKNoteAssistant.Click += buttonToolBar_Click;
+            // 
+            // toolStripToolS1
+            // 
+            toolStripToolS1.Name = "toolStripToolS1";
+            toolStripToolS1.Size = new Size(212, 6);
+            // 
+            // buttonExecuteKntScript
+            // 
+            buttonExecuteKntScript.ImageScaling = ToolStripItemImageScaling.None;
+            buttonExecuteKntScript.Name = "buttonExecuteKntScript";
+            buttonExecuteKntScript.ShortcutKeys = Keys.F5;
+            buttonExecuteKntScript.Size = new Size(215, 22);
+            buttonExecuteKntScript.Text = "Execute AntScript code";
+            buttonExecuteKntScript.Click += buttonToolBar_Click;
+            // 
+            // buttonInsertCode
+            // 
+            buttonInsertCode.Name = "buttonInsertCode";
+            buttonInsertCode.Size = new Size(215, 22);
+            buttonInsertCode.Text = "Insert code snippet ...";
+            buttonInsertCode.Click += buttonToolBar_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(212, 6);
+            // 
+            // buttonLockFormat
+            // 
+            buttonLockFormat.Name = "buttonLockFormat";
+            buttonLockFormat.Size = new Size(215, 22);
+            buttonLockFormat.Text = "Lock format";
+            buttonLockFormat.Click += buttonToolBar_Click;
             // 
             // imageListTabNoteData
             // 
@@ -379,7 +379,7 @@
             tabBasicData.Controls.Add(textStatus);
             tabBasicData.Controls.Add(label8);
             tabBasicData.Controls.Add(panelDescription);
-            tabBasicData.Controls.Add(labelLoadingHtml);
+            tabBasicData.Controls.Add(labelAction);
             tabBasicData.Controls.Add(label7);
             tabBasicData.Controls.Add(buttonEditMarkdown);
             tabBasicData.Controls.Add(buttonViewHtml);
@@ -669,16 +669,17 @@
             toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
             toolDescriptionUploadResourceFromClipboard.Click += toolDescriptionUploadResourceFromClipboard_Click;
             // 
-            // labelLoadingHtml
+            // labelAction
             // 
-            labelLoadingHtml.AutoSize = true;
-            labelLoadingHtml.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelLoadingHtml.Location = new Point(136, 112);
-            labelLoadingHtml.Name = "labelLoadingHtml";
-            labelLoadingHtml.Size = new Size(138, 15);
-            labelLoadingHtml.TabIndex = 54;
-            labelLoadingHtml.Text = "Loading html content ...";
-            labelLoadingHtml.Visible = false;
+            labelAction.AutoSize = true;
+            labelAction.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            labelAction.Location = new Point(136, 112);
+            labelAction.Name = "labelAction";
+            labelAction.Size = new Size(226, 15);
+            labelAction.TabIndex = 54;
+            labelAction.Text = "Please wait, some actions are working...";
+            labelAction.TextAlign = ContentAlignment.MiddleRight;
+            labelAction.Visible = false;
             // 
             // label7
             // 
@@ -1613,7 +1614,7 @@
         private ListView listViewAlarms;
         private ListView listViewTraceNoteTo;
         private ListView listViewTraceNoteFrom;
-        private Label labelLoadingHtml;
+        private Label labelAction;
         private Panel panelDescription;
         private ToolStrip toolDescription;
         private ToolStripDropDownButton toolDescriptionHtml;

@@ -788,10 +788,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         if (_ctrl.Model.ContentType.Contains("html"))
         {
-            labelLoadingHtml.Visible = true;
-            labelLoadingHtml.Refresh();
+            labelAction.Visible = true;
+            labelAction.Refresh();
             kntEditView.ShowHtmlContent(kntEditView.MarkdownText);
-            labelLoadingHtml.Visible = false;
+            labelAction.Visible = false;
             EnableHtmlView();
         }
         else if (_ctrl.Model.ContentType.Contains("navigation"))
@@ -1353,9 +1353,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void ExecKNoteAssistant()
     {
+        labelAction.Visible = true;
+        labelAction.Refresh();
         ControlsToModel();
         await _ctrl.ExecKNoteAssistant();
         RefreshView();
+        labelAction.Visible = false;
+        labelAction.Refresh();
     }
 
     private void UpdateResource(ResourceDto resource)
