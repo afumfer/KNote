@@ -290,6 +290,7 @@
             // buttonKNoteAssistant
             // 
             buttonKNoteAssistant.Name = "buttonKNoteAssistant";
+            buttonKNoteAssistant.ShortcutKeys = Keys.F8;
             buttonKNoteAssistant.Size = new Size(215, 22);
             buttonKNoteAssistant.Text = "KNote Assistant ...";
             buttonKNoteAssistant.Click += buttonToolBar_Click;
