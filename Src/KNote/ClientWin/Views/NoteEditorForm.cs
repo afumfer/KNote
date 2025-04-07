@@ -76,8 +76,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (webViewResource.Visible)
             await webViewResource.ClearWebView();
         webViewResource.Visible = true;
-        panelPreview.Visible = false;
-        //textTaskDescription.Text = "";  // !!!
+        panelPreview.Visible = false;        
         await kntEditViewTask.ClearWebView();
         textTaskTags.Text = "";
         textScriptCode.Text = "";
@@ -739,14 +738,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textDescriptionResource.ReadOnly = true;
         textDescriptionResource.BackColor = Color.White;
 
-        // TODO: !!! refactor this
-        //textTaskDescription.ReadOnly = true;
-        //textTaskDescription.BackColor = Color.White;
         kntEditViewTask.ShowStatusInfo = false;
         kntEditViewTask.EnableUrlBox = false;
         kntEditViewTask.ShowNavigationTools = false;
         kntEditViewTask.BorderStyle = BorderStyle.FixedSingle;
-
 
         textTaskTags.ReadOnly = true;
         textTaskTags.BackColor = Color.White;
@@ -836,8 +831,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (_ctrl.Model.Tasks.Count > 0)
             listViewTasks.Items[0].Selected = true;
         else
-        {
-            //textTaskDescription.Text = "";  // !!!
+        {            
             await kntEditViewTask.ClearWebView();
             textTaskTags.Text = "";
         }

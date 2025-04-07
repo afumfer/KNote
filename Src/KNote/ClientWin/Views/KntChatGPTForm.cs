@@ -1,11 +1,7 @@
 ﻿using System.Text;
-using System.Text.Json;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
-using KNote.Model.Dto;
-using KntWebView;
-using Microsoft.Identity.Client;
 
 namespace KNote.ClientWin.Views;
 
@@ -17,6 +13,7 @@ public partial class KntChatGPTForm : Form, IViewBase
     private bool _viewFinalized = false;
     private int _countNRres;
     private StringBuilder _sbResult = new StringBuilder();
+    private const string ViewCaptionText = "KNote ChatAI";
 
     #endregion
 
@@ -38,6 +35,7 @@ public partial class KntChatGPTForm : Form, IViewBase
     public void ShowView()
     {
         toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Alias}";
+        MarkDownView();
         this.Show();
     }
 
@@ -59,9 +57,9 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public void RefreshView()
     {
-        textResult.Text = _ctrl.ChatTextMessasges.ToString();
-        textResult.SelectionStart = textResult.Text.Length;
-        textResult.ScrollToCaret();
+        kntEditViewResult.MarkdownContentControl.Text = _ctrl.ChatTextMessasges.ToString();
+        kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
+        kntEditViewResult.MarkdownContentControl.ScrollToCaret();
         textPrompt.Text = "";
         toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_ctrl.TotalProcessingTime}";
@@ -71,7 +69,7 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     #region Form events handlers
 
-    private void ChatGPTForm_Load(object sender, EventArgs e)
+    private void KntChatGPTForm_Load(object sender, EventArgs e)
     {
         try
         {
@@ -80,6 +78,19 @@ public partial class KntChatGPTForm : Form, IViewBase
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message);
+        }
+    }
+
+    private async void KntChatGPTForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (!_viewFinalized)
+        {
+            if (_ctrl.AutoSaveChatMessagesOnViewExit && !string.IsNullOrEmpty(kntEditViewResult.MarkdownText))
+            {
+                await SaveChatMessages();
+            }
+            if (_ctrl.AutoCloseCtrlOnViewExit)
+                _ctrl.Finalize();
         }
     }
 
@@ -103,7 +114,6 @@ public partial class KntChatGPTForm : Form, IViewBase
         {
             StatusProcessing(false);
         }
-
     }
 
     private void buttonRestart_Click(object sender, EventArgs e)
@@ -111,33 +121,33 @@ public partial class KntChatGPTForm : Form, IViewBase
         _ctrl.RootSystemChat = KntConst.DefaultRootSystemChat;
         _ctrl.RestartChatGPT();
         RestartChatGPTView();
+        Text = $"{ViewCaptionText}";
     }
 
     private async void buttonCatalogPrompts_Click(object sender, EventArgs e)
     {
-        var newPrompt = await _ctrl.GetCatalogPrompt();
-        if (newPrompt == null)
+        var assistantInfo = await _ctrl.GetCatalogPrompt();
+        if (assistantInfo == null)                   
             return;
+        
         RestartChatGPTView();
-        textPrompt.Text = newPrompt;
+        Text = $"{ViewCaptionText} - {assistantInfo.Name}";
+        textPrompt.Text = assistantInfo.User;
     }
 
     private void buttonViewSystem_Click(object sender, EventArgs e)
     {
-        ShowInfo($"System: {_ctrl.RootSystemChat}", $"{KntConst.AppName} - root system chat " );
+        ShowInfo($"System: {_ctrl.RootSystemChat}", $"{KntConst.AppName} - root system chat ");
     }
 
-    private async void KntChatGPTForm_FormClosing(object sender, FormClosingEventArgs e)
+    private void buttonMarkDown_Click(object sender, EventArgs e)
     {
-        if (!_viewFinalized)
-        {
-            if (_ctrl.AutoSaveChatMessagesOnViewExit && !string.IsNullOrEmpty(textResult.Text))
-            {
-                await SaveChatMessages();
-            }
-            if (_ctrl.AutoCloseCtrlOnViewExit)
-                _ctrl.Finalize();
-        }
+        MarkDownView();
+    }
+
+    private async void buttonNavigate_Click(object sender, EventArgs e)
+    {
+        await NavigateView();
     }
 
     #endregion
@@ -162,18 +172,21 @@ public partial class KntChatGPTForm : Form, IViewBase
     }
 
     private void RestartChatGPTView()
-    {        
+    {
         toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";
-        textResult.Text = _ctrl.ChatTextMessasges.ToString();
+        toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";        
+        kntEditViewResult.SetMarkdownContent(_ctrl.ChatTextMessasges.ToString());
+        MarkDownView();
         _sbResult.Clear();
         textPrompt.Text = "";
+        textPrompt.Focus();
     }
 
     private void StatusProcessing(bool processing = false)
     {
         if (processing)
         {
+            MarkDownView();
             toolStripStatusLabelProcessing.Text = " Processing ...";
             textPrompt.Enabled = false;
             buttonSend.Enabled = false;
@@ -182,15 +195,15 @@ public partial class KntChatGPTForm : Form, IViewBase
             radioGetStream.Enabled = false;
         }
         else
-        {
+        {           
             toolStripStatusLabelProcessing.Text = " ";
             textPrompt.Enabled = true;
             buttonSend.Enabled = true;
             buttonRestart.Enabled = true;
             radioGetCompletion.Enabled = true;
             radioGetStream.Enabled = true;
-            textResult.SelectionStart = textResult.Text.Length;
-            textResult.ScrollToCaret();
+            kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
+            kntEditViewResult.MarkdownContentControl.ScrollToCaret();
             ActiveControl = textPrompt;
         }
     }
@@ -219,9 +232,9 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private void _com_StreamToken(object sender, ControllerEventArgs<string> e)
     {
-        if (textResult.InvokeRequired)
+        if (kntEditViewResult.MarkdownContentControl.InvokeRequired)
         {
-            textResult.Invoke(new MethodInvoker(delegate
+            kntEditViewResult.MarkdownContentControl.Invoke(new MethodInvoker(delegate
             {
                 UpdateTextResult(e.Entity?.ToString());
             }));
@@ -245,10 +258,27 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     private void RefreshStreamResult()
     {
-        textResult.Text = _sbResult.ToString();
-        textResult.SelectionStart = textResult.Text.Length;
-        textResult.ScrollToCaret();
-        textResult.Update();
+        kntEditViewResult.MarkdownContentControl.Text = _sbResult.ToString();
+        kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;        
+        kntEditViewResult.MarkdownContentControl.ScrollToCaret();
+        kntEditViewResult.MarkdownContentControl.Update();
+    }
+
+    private void MarkDownView()
+    {
+        kntEditViewResult.ShowMarkdownContent();
+        buttonMarkDown.Enabled = false;
+        buttonNavigate.Enabled = true;
+    }
+
+    private async Task NavigateView()
+    {
+        var service = _ctrl.ServiceRef.Service;
+        var content = kntEditViewResult.MarkdownText;
+        var htmlContent = service.Notes.UtilMarkdownToHtml(content.Replace(service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
+        await kntEditViewResult.ShowNavigationContent(htmlContent);
+        buttonMarkDown.Enabled = true;
+        buttonNavigate.Enabled = false;
     }
 
     #endregion

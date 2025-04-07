@@ -253,7 +253,7 @@ public class KntChatGPTCtrl : CtrlBase
         StreamToken?.Invoke(this, new ControllerEventArgs<string>($"\r\n\r\n"));
     }
 
-    public async Task<string> GetCatalogPrompt()
+    public async Task<KntAssistantInfo> GetCatalogPrompt()
     {        
         var catalogItem = await Store.GetCatalogItem(ServiceRef, KntConst.PromptTag, "Select prompt");
         
@@ -262,15 +262,15 @@ public class KntChatGPTCtrl : CtrlBase
 
         var chatTemplate = new KntAssistantInfo();
 
-        try
-        {
-            chatTemplate = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description);
+        try 
+        { 
+            chatTemplate = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description); 
         }
-        catch
-        {
-            chatTemplate.User = catalogItem.Description;
-        }
-        
+        catch 
+        { 
+            chatTemplate.User = catalogItem.Description; 
+        }        
+        chatTemplate.Name = catalogItem.Topic;
         if (!string.IsNullOrEmpty(chatTemplate.System))
             RootSystemChat = chatTemplate.System;
         else
@@ -278,7 +278,7 @@ public class KntChatGPTCtrl : CtrlBase
 
         RestartChatGPT();
 
-        return chatTemplate.User;
+        return chatTemplate;
     }
 
     #endregion

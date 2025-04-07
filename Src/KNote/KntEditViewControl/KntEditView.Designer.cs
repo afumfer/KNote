@@ -128,7 +128,6 @@
             textContent.ScrollBars = ScrollBars.Vertical;
             textContent.Size = new Size(315, 128);
             textContent.TabIndex = 6;
-            textContent.Text = "textContent";
             textContent.Visible = false;
             // 
             // webView

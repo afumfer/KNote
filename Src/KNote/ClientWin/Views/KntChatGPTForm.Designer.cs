@@ -37,9 +37,11 @@
             toolStripStatusLabel2 = new ToolStripStatusLabel();
             toolStripStatusLabelProcessing = new ToolStripStatusLabel();
             splitChat = new SplitContainer();
+            buttonNavigate = new Button();
+            buttonMarkDown = new Button();
+            kntEditViewResult = new KntWebView.KntEditView();
             radioGetStream = new RadioButton();
             radioGetCompletion = new RadioButton();
-            textResult = new TextBox();
             labelResult = new Label();
             panelSeparator = new Panel();
             buttonViewSystem = new Button();
@@ -110,9 +112,11 @@
             // 
             // splitChat.Panel1
             // 
+            splitChat.Panel1.Controls.Add(buttonNavigate);
+            splitChat.Panel1.Controls.Add(buttonMarkDown);
+            splitChat.Panel1.Controls.Add(kntEditViewResult);
             splitChat.Panel1.Controls.Add(radioGetStream);
             splitChat.Panel1.Controls.Add(radioGetCompletion);
-            splitChat.Panel1.Controls.Add(textResult);
             splitChat.Panel1.Controls.Add(labelResult);
             splitChat.Panel1MinSize = 200;
             // 
@@ -131,12 +135,42 @@
             splitChat.SplitterWidth = 6;
             splitChat.TabIndex = 25;
             // 
+            // buttonNavigate
+            // 
+            buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonNavigate.Location = new Point(647, 6);
+            buttonNavigate.Name = "buttonNavigate";
+            buttonNavigate.Size = new Size(82, 23);
+            buttonNavigate.TabIndex = 28;
+            buttonNavigate.Text = "Navigate";
+            buttonNavigate.UseVisualStyleBackColor = true;
+            buttonNavigate.Click += buttonNavigate_Click;
+            // 
+            // buttonMarkDown
+            // 
+            buttonMarkDown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonMarkDown.Location = new Point(559, 6);
+            buttonMarkDown.Name = "buttonMarkDown";
+            buttonMarkDown.Size = new Size(82, 23);
+            buttonMarkDown.TabIndex = 27;
+            buttonMarkDown.Text = "Markdown";
+            buttonMarkDown.UseVisualStyleBackColor = true;
+            buttonMarkDown.Click += buttonMarkDown_Click;
+            // 
+            // kntEditViewResult
+            // 
+            kntEditViewResult.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            kntEditViewResult.Location = new Point(6, 32);
+            kntEditViewResult.Name = "kntEditViewResult";
+            kntEditViewResult.Size = new Size(723, 375);
+            kntEditViewResult.TabIndex = 26;
+            // 
             // radioGetStream
             // 
             radioGetStream.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetStream.AutoSize = true;
             radioGetStream.Checked = true;
-            radioGetStream.Location = new Point(526, 7);
+            radioGetStream.Location = new Point(335, 9);
             radioGetStream.Name = "radioGetStream";
             radioGetStream.Size = new Size(83, 19);
             radioGetStream.TabIndex = 5;
@@ -148,24 +182,12 @@
             // 
             radioGetCompletion.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetCompletion.AutoSize = true;
-            radioGetCompletion.Location = new Point(622, 7);
+            radioGetCompletion.Location = new Point(431, 9);
             radioGetCompletion.Name = "radioGetCompletion";
             radioGetCompletion.Size = new Size(109, 19);
             radioGetCompletion.TabIndex = 6;
             radioGetCompletion.Text = "Get Completion";
             radioGetCompletion.UseVisualStyleBackColor = true;
-            // 
-            // textResult
-            // 
-            textResult.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textResult.Font = new Font("Segoe UI", 9.75F);
-            textResult.Location = new Point(6, 28);
-            textResult.MaxLength = 0;
-            textResult.Multiline = true;
-            textResult.Name = "textResult";
-            textResult.ScrollBars = ScrollBars.Vertical;
-            textResult.Size = new Size(723, 377);
-            textResult.TabIndex = 4;
             // 
             // labelResult
             // 
@@ -236,7 +258,7 @@
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(723, 138);
+            textPrompt.Size = new Size(723, 142);
             textPrompt.TabIndex = 0;
             // 
             // buttonSend
@@ -259,9 +281,9 @@
             Controls.Add(statusStripChat);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "KntChatGPTForm";
-            Text = "Simple ChatGPT";
+            Text = "KNote ChatAI";
             FormClosing += KntChatGPTForm_FormClosing;
-            Load += ChatGPTForm_Load;
+            Load += KntChatGPTForm_Load;
             statusStripChat.ResumeLayout(false);
             statusStripChat.PerformLayout();
             splitChat.Panel1.ResumeLayout(false);
@@ -281,9 +303,6 @@
         private ToolStripStatusLabel toolStripStatusLabelProcessingTime;
         private ToolStripStatusLabel toolStripStatusLabel1;
         private SplitContainer splitChat;
-        private RadioButton radioGetStream;
-        private RadioButton radioGetCompletion;
-        private TextBox textResult;
         private Label labelResult;
         private Button buttonRestart;
         private Label labelPrompt;
@@ -294,5 +313,10 @@
         private ToolStripStatusLabel toolStripStatusLabel2;
         private Button buttonViewSystem;
         private Panel panelSeparator;
+        private KntWebView.KntEditView kntEditViewResult;
+        private RadioButton radioGetStream;
+        private RadioButton radioGetCompletion;
+        private Button buttonMarkDown;
+        private Button buttonNavigate;
     }
 }
