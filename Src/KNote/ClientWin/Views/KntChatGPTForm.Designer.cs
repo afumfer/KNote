@@ -203,7 +203,7 @@
             buttonCatalogPrompts.Name = "buttonCatalogPrompts";
             buttonCatalogPrompts.Size = new Size(154, 26);
             buttonCatalogPrompts.TabIndex = 25;
-            buttonCatalogPrompts.Text = "Get prompt form &catalog";
+            buttonCatalogPrompts.Text = "Get prompt from &catalog";
             buttonCatalogPrompts.UseVisualStyleBackColor = true;
             buttonCatalogPrompts.Click += buttonCatalogPrompts_Click;
             // 
@@ -236,7 +236,7 @@
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(723, 140);
+            textPrompt.Size = new Size(723, 138);
             textPrompt.TabIndex = 0;
             // 
             // buttonSend

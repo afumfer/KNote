@@ -257,7 +257,7 @@ public class KntChatGPTCtrl : CtrlBase
     {        
         var catalogItem = await Store.GetCatalogItem(ServiceRef, KntConst.PromptTag, "Select prompt");
         
-        if (string.IsNullOrEmpty(catalogItem.Description))
+        if (string.IsNullOrEmpty(catalogItem?.Description))
             return null;
 
         var chatTemplate = new KntAssistantInfo();

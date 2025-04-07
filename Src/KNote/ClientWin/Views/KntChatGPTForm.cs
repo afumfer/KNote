@@ -116,6 +116,8 @@ public partial class KntChatGPTForm : Form, IViewBase
     private async void buttonCatalogPrompts_Click(object sender, EventArgs e)
     {
         var newPrompt = await _ctrl.GetCatalogPrompt();
+        if (newPrompt == null)
+            return;
         RestartChatGPTView();
         textPrompt.Text = newPrompt;
     }
