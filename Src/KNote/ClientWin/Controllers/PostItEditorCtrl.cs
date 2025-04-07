@@ -233,9 +233,14 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     #region Controller specific methods
 
-    public async Task<bool> SaveAndHide()
+    public async Task<bool> SaveAndHideAndFinalize()
     {
         WindowPostIt.Visible = false;
+        return await SaveAndFinalize();
+    }
+
+    public async Task<bool> SaveAndFinalize()
+    {        
         var res = await SaveModel();
         Finalize();
         return res;

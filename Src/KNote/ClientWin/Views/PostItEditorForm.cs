@@ -105,9 +105,14 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)
-        {            
-            var savedOk = await _ctrl.SaveAndHide();
-            if (!savedOk)                
+        {
+            bool savedOk;
+            if (e.CloseReason == CloseReason.WindowsShutDown)
+                savedOk = await _ctrl.SaveAndFinalize();
+            else
+                savedOk = await _ctrl.SaveAndHideAndFinalize();
+
+            if (!savedOk)
                 ShowInfo("The note could not be saved");                    
                 
             _ctrl.Finalize();
@@ -121,7 +126,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
         if (menuSel == menuHide)
         {
-            await _ctrl.SaveAndHide();
+            await _ctrl.SaveAndHideAndFinalize();
         }
         else if (menuSel == menuSaveNow)
         {
@@ -211,7 +216,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                     await _ctrl.SaveModel();
                     break;
                 case Keys.Q:
-                    await _ctrl.SaveAndHide();
+                    await _ctrl.SaveAndHideAndFinalize();
                     break;
                 case Keys.D:
                     await _ctrl.DeleteAndFinalize();
