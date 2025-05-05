@@ -6,7 +6,7 @@
     <FileVersion>0.0.9.2</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.40.0" />
+    <PackageReference Include="Markdig" Version="0.41.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.4" />
     <PackageReference Include="NLog" Version="5.4.0" />
     <PackageReference Include="ReverseMarkdown" Version="4.6.0" />
