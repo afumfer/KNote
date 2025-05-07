@@ -102,9 +102,10 @@ public class KntChatGPTCtrl : CtrlBase
                 var message = "It does not have an ApiKey of the OpenAI API defined. You must configure these values (ChatGPTApiKey) in the program settings.";
                 throw new Exception(message);
             }
+           
+            //_chatClient = new(model: "gpt-4o-mini", apiKey ?? "--");
+            _chatClient = new(model: Store.AppConfig.ChatGPTDefaultModel, apiKey ?? "--");
 
-            _chatClient = new (model: "gpt-4o-mini", apiKey ?? "--");            
-            
             RestartChatGPT();
 
             return new Result<EControllerResult>(EControllerResult.Executed);
@@ -254,9 +255,10 @@ public class KntChatGPTCtrl : CtrlBase
     }
 
     public async Task<KntAssistantInfo> GetCatalogPrompt()
-    {        
-        var catalogItem = await Store.GetCatalogItem(ServiceRef, KntConst.PromptTag, "Select prompt");
-        
+    {
+        var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
+        var catalogItem = await Store.GetCatalogItem(assistantServiceRef, KntConst.PromptTag, "Select prompt");
+
         if (string.IsNullOrEmpty(catalogItem?.Description))
             return null;
 

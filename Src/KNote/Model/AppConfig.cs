@@ -247,6 +247,20 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    private string _chatGPTDefaultModel;
+    public string ChatGPTDefaultModel
+    {
+        get { return _chatGPTDefaultModel; }
+        set
+        {
+            if (_chatGPTDefaultModel != value)
+            {
+                _chatGPTDefaultModel = value;
+                OnPropertyChanged("ChatGPTDefaultModel");
+            }
+        }
+    }
+
     private bool _activateMessageBroker;
     public bool ActivateMessageBroker
     {
@@ -260,7 +274,6 @@ public class AppConfig : SmartModelDtoBase
             }
         }
     }
-
 
     private List<RepositoryRef> _respositoryRef;
     public List<RepositoryRef> RespositoryRefs
@@ -277,6 +290,25 @@ public class AppConfig : SmartModelDtoBase
             {
                 _respositoryRef = value;
                 OnPropertyChanged("RespositoryRefs");
+            }
+        }
+    }
+
+    private RepositoryRef _assistantRespositoryRef;
+    public RepositoryRef AssistantRespositoryRef
+    {
+        get
+        {
+            if (_assistantRespositoryRef == null)
+                _assistantRespositoryRef = new RepositoryRef();
+            return _assistantRespositoryRef;
+        }
+        set
+        {
+            if (_assistantRespositoryRef != value)
+            {
+                _assistantRespositoryRef = value;
+                OnPropertyChanged("AssistantRespositoryRef");
             }
         }
     }

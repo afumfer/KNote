@@ -14,11 +14,13 @@ public class Store
 {
     #region Private fields
 
-    private readonly List<ServiceRef> _servicesRefs;
+    private readonly List<ServiceRef> _servicesRefs;       
 
     private readonly List<CtrlBase> _listControllers;
 
     private readonly char[] newLine = { '\r', '\n' };
+    
+    private ServiceRef _assistantServiceRef;
 
     #endregion 
 
@@ -167,6 +169,16 @@ public class Store
             return GetFirstServiceRef();
     }
 
+    public void SetAssistantServiceRef(ServiceRef assistantServiceRef)
+    {
+        _assistantServiceRef = assistantServiceRef;
+    }
+
+    public ServiceRef GetAssistantServiceRef()
+    {
+        return _assistantServiceRef ;
+    }
+
     public event EventHandler<ControllerEventArgs<CtrlBase>> AddedController;
     public event EventHandler<ControllerEventArgs<EControllerState>> ControllerStateChanged;
     public void AddController(CtrlBase controller)
@@ -246,8 +258,6 @@ public class Store
             TextReader reader = new StreamReader(configFile);
             XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
             AppConfig = (AppConfig)serializer.Deserialize(reader);
-            AppConfig.LastDateTimeStart = DateTime.Now;
-            AppConfig.RunCounter++;
             reader.Close();                
         }
         catch (Exception ex)
@@ -640,6 +650,20 @@ public class Store
         else
             return null;
     }
+
+    // TODO: Delete this
+    //public async Task<NoteInfoDto> GetCatalogItemOld(ServiceRef serviceRef, string item, string viewTitle)
+    //{
+    //    await NotesSelector.LoadFilteredEntities(serviceRef.Service, new NotesFilterDto { Tags = item }, false);
+    //    NotesSelector.ViewTitle = viewTitle;
+
+    //    var res = NotesSelector.RunModal();
+
+    //    if (res.Entity == EControllerResult.Executed)
+    //        return NotesSelector.SelectedEntity;
+    //    else
+    //        return null;
+    //}
 
     #endregion 
 }

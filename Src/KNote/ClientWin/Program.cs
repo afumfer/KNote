@@ -1,7 +1,4 @@
 using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Security.Policy;
-using System;
 using Microsoft.Extensions.Logging;
 using NLog;
 using KNote.ClientWin.Views;
@@ -72,8 +69,6 @@ static class Program
         // Set session values
         store.AppUserName = SystemInformation.UserName;
         store.ComputerName = SystemInformation.ComputerName;
-        store.AppConfig.LastDateTimeStart = DateTime.Now;
-        store.AppConfig.RunCounter += 1;
 
         // Log configuration                
         if (File.Exists(Path.Combine(pathApp, "NLog.config")))
@@ -113,7 +108,9 @@ static class Program
             if (resCreateDB)
             {                    
                 store.AddServiceRef(initialServiceRef);
+                store.SetAssistantServiceRef(null);
                 store.AppConfig.RespositoryRefs.Add(r0);
+                store.AppConfig.AssistantRespositoryRef = null;
             }
 
             // Default values
@@ -132,7 +129,17 @@ static class Program
             store.LoadConfig(appFileConfig);
             foreach (var r in store.AppConfig.RespositoryRefs)                
                 store.AddServiceRef(new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger));
+            
+            if (store.AppConfig.AssistantRespositoryRef?.ConnectionString != null)
+                store.SetAssistantServiceRef(new ServiceRef(store.AppConfig.AssistantRespositoryRef, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger));
+            else
+                store.SetAssistantServiceRef(null);
         }
+
+        store.AppConfig.LastDateTimeStart = DateTime.Now;
+        store.AppConfig.RunCounter += 1;
+        if (string.IsNullOrEmpty(store.AppConfig.ChatGPTDefaultModel))
+            store.AppConfig.ChatGPTDefaultModel = "gpt-4o-mini";
 
         store.SaveConfig(appFileConfig);
 

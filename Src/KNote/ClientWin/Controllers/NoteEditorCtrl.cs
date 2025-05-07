@@ -542,17 +542,20 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     public async Task<string> GetCatalogTemplate()
     {
-        return (await Store.GetCatalogItem(ServiceRef, KntConst.TemplateTag, "Select template"))?.Description;
+        var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
+        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.TemplateTag, "Select template"))?.Description;
     }
 
     public async Task<string> GetCatalogCode()
-    {        
-        return (await Store.GetCatalogItem(ServiceRef, KntConst.CodeTag, "Select code snippet"))?.Description;
+    {
+        var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
+        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.CodeTag, "Select code snippet"))?.Description;
     }
 
     public async Task ExecKNoteAssistant()
-    {             
-        var catalogItem = await Store.GetCatalogItem(ServiceRef, KntConst.AssistantTag, "Select KNote assistant");       
+    {
+        var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
+        var catalogItem = await Store.GetCatalogItem(assistantServiceRef, KntConst.AssistantTag, "Select KNote assistant");
         if (catalogItem == null)                    
             return;  // Action cancelled.
         
