@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using NLog;
 using KNote.ClientWin.Views;
