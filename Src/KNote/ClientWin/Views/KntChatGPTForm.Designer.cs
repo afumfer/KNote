@@ -138,6 +138,7 @@
             // buttonNavigate
             // 
             buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonNavigate.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonNavigate.Location = new Point(647, 6);
             buttonNavigate.Name = "buttonNavigate";
             buttonNavigate.Size = new Size(82, 23);
@@ -149,6 +150,7 @@
             // buttonMarkDown
             // 
             buttonMarkDown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonMarkDown.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonMarkDown.Location = new Point(559, 6);
             buttonMarkDown.Name = "buttonMarkDown";
             buttonMarkDown.Size = new Size(82, 23);
@@ -170,9 +172,10 @@
             radioGetStream.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetStream.AutoSize = true;
             radioGetStream.Checked = true;
-            radioGetStream.Location = new Point(335, 9);
+            radioGetStream.Font = new Font("Segoe UI", 8.25F);
+            radioGetStream.Location = new Point(332, 9);
             radioGetStream.Name = "radioGetStream";
-            radioGetStream.Size = new Size(83, 19);
+            radioGetStream.Size = new Size(81, 17);
             radioGetStream.TabIndex = 5;
             radioGetStream.TabStop = true;
             radioGetStream.Text = "Get Stream";
@@ -182,9 +185,10 @@
             // 
             radioGetCompletion.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetCompletion.AutoSize = true;
-            radioGetCompletion.Location = new Point(431, 9);
+            radioGetCompletion.Font = new Font("Segoe UI", 8.25F);
+            radioGetCompletion.Location = new Point(434, 9);
             radioGetCompletion.Name = "radioGetCompletion";
-            radioGetCompletion.Size = new Size(109, 19);
+            radioGetCompletion.Size = new Size(106, 17);
             radioGetCompletion.TabIndex = 6;
             radioGetCompletion.Text = "Get Completion";
             radioGetCompletion.UseVisualStyleBackColor = true;
@@ -192,9 +196,10 @@
             // labelResult
             // 
             labelResult.AutoSize = true;
-            labelResult.Location = new Point(6, 9);
+            labelResult.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelResult.Location = new Point(8, 12);
             labelResult.Name = "labelResult";
-            labelResult.Size = new Size(42, 15);
+            labelResult.Size = new Size(46, 17);
             labelResult.TabIndex = 25;
             labelResult.Text = "Result:";
             // 
@@ -210,6 +215,7 @@
             // buttonViewSystem
             // 
             buttonViewSystem.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonViewSystem.Font = new Font("Segoe UI", 8.25F);
             buttonViewSystem.Location = new Point(615, 4);
             buttonViewSystem.Name = "buttonViewSystem";
             buttonViewSystem.Size = new Size(114, 26);
@@ -221,6 +227,7 @@
             // buttonCatalogPrompts
             // 
             buttonCatalogPrompts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonCatalogPrompts.Font = new Font("Segoe UI", 8.25F);
             buttonCatalogPrompts.Location = new Point(455, 4);
             buttonCatalogPrompts.Name = "buttonCatalogPrompts";
             buttonCatalogPrompts.Size = new Size(154, 26);
@@ -232,6 +239,7 @@
             // buttonRestart
             // 
             buttonRestart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonRestart.Font = new Font("Segoe UI", 8.25F);
             buttonRestart.Location = new Point(383, 4);
             buttonRestart.Name = "buttonRestart";
             buttonRestart.Size = new Size(56, 26);
@@ -243,9 +251,10 @@
             // labelPrompt
             // 
             labelPrompt.AutoSize = true;
+            labelPrompt.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             labelPrompt.Location = new Point(8, 12);
             labelPrompt.Name = "labelPrompt";
-            labelPrompt.Size = new Size(50, 15);
+            labelPrompt.Size = new Size(54, 17);
             labelPrompt.TabIndex = 24;
             labelPrompt.Text = "Prompt:";
             // 
@@ -258,12 +267,13 @@
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(723, 142);
+            textPrompt.Size = new Size(723, 144);
             textPrompt.TabIndex = 0;
             // 
             // buttonSend
             // 
             buttonSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonSend.Font = new Font("Segoe UI", 8.25F);
             buttonSend.Location = new Point(321, 4);
             buttonSend.Name = "buttonSend";
             buttonSend.Size = new Size(56, 26);

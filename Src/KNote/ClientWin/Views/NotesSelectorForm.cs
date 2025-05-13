@@ -44,7 +44,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
         InitializeComponent();
 
-        _ctrl = ctrl;        
+        _ctrl = ctrl;                
     }
 
     #endregion 
@@ -113,7 +113,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         FormBorderStyle = FormBorderStyle.Sizable;
         panelBottom.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
-        dataGridNotes.Dock = DockStyle.Fill;        
+        dataGridNotes.Dock = DockStyle.Fill;
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -278,13 +278,14 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         
         dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
         dataGridNotes.Columns[1].Width = 80;
-        dataGridNotes.Columns[1].HeaderText = "Number";
+        dataGridNotes.Columns[1].HeaderText = "Number";        
         dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         if(_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("NoteNumber"))
             dataGridNotes.Columns[1].Visible = false;
 
-        dataGridNotes.Columns[2].DataPropertyName = "Topic";
-        dataGridNotes.Columns[2].Width = 450;
+        dataGridNotes.Columns[2].DataPropertyName = "Topic";        
+        dataGridNotes.Columns[2].MinimumWidth = 450;
+        dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
         dataGridNotes.Columns[2].HeaderText = "Topic";
 
         dataGridNotes.Columns[3].DataPropertyName = "Priority";

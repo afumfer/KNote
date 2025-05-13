@@ -321,7 +321,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     private void InitializeComponentEditor()
     {
         kntEditView.Location = new System.Drawing.Point(3, 24);
-        kntEditView.Size = new System.Drawing.Size(472, 292);
+        kntEditView.Size = new System.Drawing.Size(473, 295);
         kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));

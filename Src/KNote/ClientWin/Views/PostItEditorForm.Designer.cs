@@ -32,11 +32,11 @@ namespace KNote.ClientWin.Views
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             panelForm = new Panel();
-            labelCaption = new LabelNoCopy();
+            picMenu = new PictureBox();
             kntEditView = new KntWebView.KntEditView();
             labelStatus = new LabelNoCopy();
             picResize = new PictureBox();
-            picMenu = new PictureBox();
+            labelCaption = new LabelNoCopy();
             menuPostIt = new ContextMenuStrip(components);
             menuHide = new ToolStripMenuItem();
             menuAlwaysFront = new ToolStripMenuItem();
@@ -63,8 +63,8 @@ namespace KNote.ClientWin.Views
             menuMoreActions = new ToolStripMenuItem();
             menuAddResolvedTask = new ToolStripMenuItem();
             panelForm.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)picResize).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picMenu).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picResize).BeginInit();
             menuPostIt.SuspendLayout();
             SuspendLayout();
             // 
@@ -81,19 +81,17 @@ namespace KNote.ClientWin.Views
             panelForm.Size = new Size(479, 340);
             panelForm.TabIndex = 3;
             // 
-            // labelCaption
+            // picMenu
             // 
-            labelCaption.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            labelCaption.BackColor = Color.PaleGoldenrod;
-            labelCaption.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelCaption.Location = new Point(3, 3);
-            labelCaption.Name = "labelCaption";
-            labelCaption.Padding = new Padding(20, 2, 0, 0);
-            labelCaption.Size = new Size(472, 20);
-            labelCaption.TabIndex = 6;
-            labelCaption.DoubleClick += labelCaption_DoubleClick;
-            labelCaption.MouseDown += labelCaption_MouseDown;
-            labelCaption.MouseMove += labelCaption_MouseMove;
+            picMenu.Cursor = Cursors.Hand;
+            picMenu.Image = (Image)resources.GetObject("picMenu.Image");
+            picMenu.Location = new Point(5, 5);
+            picMenu.Name = "picMenu";
+            picMenu.Size = new Size(16, 16);
+            picMenu.SizeMode = PictureBoxSizeMode.StretchImage;
+            picMenu.TabIndex = 4;
+            picMenu.TabStop = false;
+            picMenu.MouseUp += picMenu_MouseUp;
             // 
             // kntEditView
             // 
@@ -127,17 +125,19 @@ namespace KNote.ClientWin.Views
             picResize.MouseDown += picResize_MouseDown;
             picResize.MouseMove += picResize_MouseMove;
             // 
-            // picMenu
+            // labelCaption
             // 
-            picMenu.Cursor = Cursors.Hand;
-            picMenu.Image = (Image)resources.GetObject("picMenu.Image");
-            picMenu.Location = new Point(5, 5);
-            picMenu.Name = "picMenu";
-            picMenu.Size = new Size(16, 16);
-            picMenu.SizeMode = PictureBoxSizeMode.StretchImage;
-            picMenu.TabIndex = 4;
-            picMenu.TabStop = false;
-            picMenu.MouseUp += picMenu_MouseUp;
+            labelCaption.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelCaption.BackColor = Color.PaleGoldenrod;
+            labelCaption.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            labelCaption.Location = new Point(3, 3);
+            labelCaption.Name = "labelCaption";
+            labelCaption.Padding = new Padding(20, 2, 0, 0);
+            labelCaption.Size = new Size(472, 20);
+            labelCaption.TabIndex = 6;
+            labelCaption.DoubleClick += labelCaption_DoubleClick;
+            labelCaption.MouseDown += labelCaption_MouseDown;
+            labelCaption.MouseMove += labelCaption_MouseMove;
             // 
             // menuPostIt
             // 
@@ -335,8 +335,8 @@ namespace KNote.ClientWin.Views
             Paint += PostItEditorForm_Paint;
             KeyUp += PostItEditorForm_KeyUp;
             panelForm.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)picResize).EndInit();
             ((System.ComponentModel.ISupportInitialize)picMenu).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picResize).EndInit();
             menuPostIt.ResumeLayout(false);
             ResumeLayout(false);
         }
