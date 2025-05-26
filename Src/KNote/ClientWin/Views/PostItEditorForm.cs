@@ -369,7 +369,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                     
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await kntEditView.ShowNavigationContent(htmlContent);
+                    await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
                 }
             }            
             kntEditView.BorderStyle = BorderStyle.None;

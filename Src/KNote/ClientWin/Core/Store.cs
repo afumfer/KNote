@@ -1,12 +1,13 @@
-﻿using System.Xml.Serialization;
-using System.Reflection;
-using Microsoft.Extensions.Logging;
-using KNote.Model;
-using KNote.ClientWin.Controllers;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Views;
+using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
+using Microsoft.Extensions.Logging;
+using System.ComponentModel;
+using System.Reflection;
+using System.Xml.Serialization;
 
 namespace KNote.ClientWin.Core;
 
@@ -56,6 +57,25 @@ public class Store
     }
 
     public ILogger Logger { get; set; }
+
+    private string _kNoteWebViewStyle = null;    
+    public string KNoteWebViewStyle
+    {
+        get
+        {
+            if (_kNoteWebViewStyle == null)
+            {
+                if (File.Exists(@$"{AppContext.BaseDirectory}\KNoteWebViewStyle.css"))
+                {
+                    var css = File.ReadAllText(@$"{AppContext.BaseDirectory}\KNoteWebViewStyle.css");
+                    _kNoteWebViewStyle = $"<style>{css}</style>";
+                }
+                else
+                    _kNoteWebViewStyle = "";
+            }
+            return _kNoteWebViewStyle;
+        }
+    }
 
     #endregion
 
@@ -650,20 +670,6 @@ public class Store
         else
             return null;
     }
-
-    // TODO: Delete this
-    //public async Task<NoteInfoDto> GetCatalogItemOld(ServiceRef serviceRef, string item, string viewTitle)
-    //{
-    //    await NotesSelector.LoadFilteredEntities(serviceRef.Service, new NotesFilterDto { Tags = item }, false);
-    //    NotesSelector.ViewTitle = viewTitle;
-
-    //    var res = NotesSelector.RunModal();
-
-    //    if (res.Entity == EControllerResult.Executed)
-    //        return NotesSelector.SelectedEntity;
-    //    else
-    //        return null;
-    //}
 
     #endregion 
 }

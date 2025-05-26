@@ -276,7 +276,7 @@ public partial class KntChatGPTForm : Form, IViewBase
         var service = _ctrl.ServiceRef.Service;
         var content = kntEditViewResult.MarkdownText;
         var htmlContent = service.Notes.UtilMarkdownToHtml(content.Replace(service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
-        await kntEditViewResult.ShowNavigationContent(htmlContent);
+        await kntEditViewResult.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
         buttonMarkDown.Enabled = true;
         buttonNavigate.Enabled = false;
     }

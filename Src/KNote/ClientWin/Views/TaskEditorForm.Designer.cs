@@ -237,6 +237,7 @@ namespace KNote.ClientWin.Views
             textDescription.Location = new Point(6, 60);
             textDescription.Multiline = true;
             textDescription.Name = "textDescription";
+            textDescription.ScrollBars = ScrollBars.Vertical;
             textDescription.Size = new Size(603, 272);
             textDescription.TabIndex = 1;
             // 
