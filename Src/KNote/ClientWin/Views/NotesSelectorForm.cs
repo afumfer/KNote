@@ -1,9 +1,8 @@
-﻿using System.Data;
-
-using KNote.ClientWin.Controllers;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using System.Data;
 
 namespace KNote.ClientWin.Views;
 
@@ -284,10 +283,10 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
             dataGridNotes.Columns[1].Visible = false;
 
         dataGridNotes.Columns[2].DataPropertyName = "Topic";        
-        dataGridNotes.Columns[2].MinimumWidth = 450;
+        dataGridNotes.Columns[2].MinimumWidth = 450;        
         dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-        dataGridNotes.Columns[2].Resizable = DataGridViewTriState.NotSet;
-        dataGridNotes.Columns[2].HeaderText = "Topic";
+        dataGridNotes.Columns[2].Resizable = DataGridViewTriState.True;
+        dataGridNotes.Columns[2].HeaderText = "Topic";        
 
         dataGridNotes.Columns[3].DataPropertyName = "Priority";
         dataGridNotes.Columns[3].Width = 70;
@@ -337,6 +336,14 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
             
         dataGridNotes.Columns[12].DataPropertyName = "NoteTypeId";
         dataGridNotes.Columns[12].Visible = false;
+
+        foreach (DataGridViewColumn col in dataGridNotes.Columns)
+        {
+            if (col.Name != "Topic")
+            {
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            }
+        }
     }
 
     private NoteInfoDto DataGridViewRowToNoteInfo(DataGridViewRow dgr)
