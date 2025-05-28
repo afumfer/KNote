@@ -50,12 +50,11 @@ public abstract class ModelBase : IValidatableObject
             foreach (var child in childs)
             {
                 var chilValidations = child.Validate(null);
-                if(chilValidations != null)
+                if(chilValidations != null)   
                 {
                     foreach(var v in chilValidations)
                         msgVal += v.ErrorMessage + "\n";
-                }
-                
+                }                
             }
         }
 

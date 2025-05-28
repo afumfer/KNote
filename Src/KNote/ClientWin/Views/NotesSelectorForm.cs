@@ -286,6 +286,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         dataGridNotes.Columns[2].DataPropertyName = "Topic";        
         dataGridNotes.Columns[2].MinimumWidth = 450;
         dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+        dataGridNotes.Columns[2].Resizable = DataGridViewTriState.NotSet;
         dataGridNotes.Columns[2].HeaderText = "Topic";
 
         dataGridNotes.Columns[3].DataPropertyName = "Priority";

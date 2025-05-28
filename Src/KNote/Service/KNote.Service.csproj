@@ -9,7 +9,7 @@
     <PackageReference Include="Markdig" Version="0.41.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="NLog" Version="5.4.0" />
-    <PackageReference Include="ReverseMarkdown" Version="4.6.0" />
+    <PackageReference Include="ReverseMarkdown" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MessageBroker.RabbitMQ\KNote.MessageBroker.RabbitMQ.csproj" />

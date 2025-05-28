@@ -39,7 +39,7 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfi
         if (!Model.IsDirty())
             return Task.FromResult(true);
 
-        var msgVal = Model.GetErrorMessage();
+        var msgVal = Model.GetErrorMessage(false);
         if (!string.IsNullOrEmpty(msgVal))
         {
             View.ShowInfo(msgVal);
