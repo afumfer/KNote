@@ -8,14 +8,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.41.1" />
+    <PackageReference Include="Markdig" Version="0.41.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.5" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.5" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.11.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.0" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.5" />
-    <PackageReference Include="Radzen.Blazor" Version="7.0.7" />
+    <PackageReference Include="Radzen.Blazor" Version="7.0.8" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
