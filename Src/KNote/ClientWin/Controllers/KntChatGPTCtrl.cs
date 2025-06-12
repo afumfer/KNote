@@ -1,7 +1,9 @@
 ﻿using KNote.ClientWin.Core;
+using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KntScript;
 using Microsoft.IdentityModel.Tokens;
 using OpenAI.Chat;
 using System.ClientModel;
@@ -281,6 +283,72 @@ public class KntChatGPTCtrl : CtrlBase
         RestartChatGPT();
 
         return chatTemplate;
+    }
+
+    public async Task ExecChatAssistant()
+    {
+        var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
+        var catalogItem = await Store.GetCatalogItem(assistantServiceRef, KntConst.AssistantTag, "Select KNote assistant");
+        if (catalogItem == null)
+            return;  // Action cancelled.
+
+        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(Store));
+        var assistantInfo = new KntAssistantInfo();
+        var assistantScript = "";
+
+        try
+        {
+            NoteDto codeInfo;
+            string err = "";
+
+            assistantInfo = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description);
+
+            if (assistantInfo.AssistantScriptNumber != 0)
+            {
+                codeInfo = (await assistantServiceRef.Service.Notes.GetAsync(assistantInfo.AssistantScriptNumber)).Entity;
+                if (codeInfo == null)
+                    err = "The assistant cannot be run, the assistant script cannot be found (by identification number).";
+            }
+            else
+            {
+                codeInfo = (await assistantServiceRef.Service.Notes.GetAsync(catalogItem.NoteId)).Entity;
+                if (codeInfo == null)
+                    err = "The assistant cannot be run, the assistant script cannot be found (by identification guid).";
+            }
+
+            if (string.IsNullOrEmpty(err))
+                assistantScript = codeInfo.Script;
+            else
+            {
+                _chatGPTView.ShowInfo(err);
+                return;
+            }
+        }
+        catch
+        {
+            assistantInfo.User = catalogItem.Description;
+        }
+
+
+
+        // Inject variables for KntScript
+        if (!string.IsNullOrEmpty(assistantInfo.System))
+            kntScript.AddVar("_rootSystemChat", assistantInfo.System);
+        else
+            kntScript.AddVar("_rootSystemChat", KntConst.DefaultRootSystemChat);
+        if (string.IsNullOrEmpty(assistantInfo.User))
+            assistantInfo.User = "";
+        kntScript.AddVar("_promptChat", assistantInfo.User);
+        ////////////////////kntScript.AddVar("_knote", Model);
+
+        try
+        {
+            kntScript.Run(assistantScript);
+        }
+        catch (Exception ex)
+        {
+            _chatGPTView.ShowInfo($"The assistant cannot be run, {ex.Message}");
+        }
     }
 
     #endregion

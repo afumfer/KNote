@@ -572,13 +572,13 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
             if(assistantInfo.AssistantScriptNumber != 0)
             {
-                codeInfo = (await Service.Notes.GetAsync(assistantInfo.AssistantScriptNumber)).Entity;
+                codeInfo = (await assistantServiceRef.Service.Notes.GetAsync(assistantInfo.AssistantScriptNumber)).Entity;
                 if (codeInfo == null)
                     err = "The assistant cannot be run, the assistant script cannot be found (by identification number).";
             }
             else
             {
-                codeInfo = (await Service.Notes.GetAsync(catalogItem.NoteId)).Entity;
+                codeInfo = (await assistantServiceRef.Service.Notes.GetAsync(catalogItem.NoteId)).Entity;
                 if (codeInfo == null)
                     err = "The assistant cannot be run, the assistant script cannot be found (by identification guid).";
             }
