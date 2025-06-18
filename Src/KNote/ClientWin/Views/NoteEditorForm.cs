@@ -415,7 +415,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         var selStart = kntEditView.MarkdownContentControl.SelectionStart;
         kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, tag);
         kntEditView.MarkdownContentControl.Focus();
-        kntEditView.MarkdownContentControl.SelectionStart = selStart;
+        kntEditView.MarkdownContentControl.SelectionStart = selStart + tag.Length;
+        kntEditView.MarkdownContentControl.BeginInvoke(new Action(() => kntEditView.MarkdownContentControl.ScrollToCaret()));
     }
 
     private void buttonFolderSearch_Click(object sender, EventArgs e)
@@ -1297,8 +1298,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
             var selStart = kntEditView.MarkdownContentControl.SelectionStart;
             kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, strLink);
-            kntEditView.MarkdownContentControl.Focus();
-            kntEditView.MarkdownContentControl.Select(selStart + strLink.Length, 0);
+            kntEditView.MarkdownContentControl.SelectionStart = selStart + strLink.Length;
+            kntEditView.MarkdownContentControl.BeginInvoke(new Action(() => kntEditView.MarkdownContentControl.ScrollToCaret()));
         }
     }
 
@@ -1327,7 +1328,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             var selStart = kntEditView.MarkdownContentControl.SelectionStart;
             kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, strContent);
             kntEditView.MarkdownContentControl.Focus();
-            kntEditView.MarkdownContentControl.Select(selStart + strContent.Length, 0);
+            kntEditView.MarkdownContentControl.SelectionStart = selStart + strContent.Length;
+            kntEditView.MarkdownContentControl.BeginInvoke(new Action(() => kntEditView.MarkdownContentControl.ScrollToCaret()));
         }
     }
 
@@ -1341,8 +1343,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         var selStart = textScriptCode.SelectionStart;
         textScriptCode.Text = textScriptCode.Text.Insert(selStart, strContent);
-        textScriptCode.Focus();
-        textScriptCode.Select(selStart + strContent.Length, 0);
+        textScriptCode.SelectionStart = selStart + strContent.Length;
+        textScriptCode.BeginInvoke(new Action(() => textScriptCode.ScrollToCaret()));
     }
 
     private async void ExecKNoteAssistant()
@@ -1381,5 +1383,4 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     #endregion
-
 }

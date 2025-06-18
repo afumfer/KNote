@@ -49,8 +49,9 @@
             panelForm.Controls.Add(panelBottom);
             panelForm.Dock = DockStyle.Fill;
             panelForm.Location = new Point(0, 0);
+            panelForm.Margin = new Padding(3, 4, 3, 4);
             panelForm.Name = "panelForm";
-            panelForm.Size = new Size(584, 461);
+            panelForm.Size = new Size(667, 615);
             panelForm.TabIndex = 0;
             // 
             // panelDataGridNotes
@@ -58,8 +59,9 @@
             panelDataGridNotes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panelDataGridNotes.Controls.Add(dataGridNotes);
             panelDataGridNotes.Location = new Point(1, 1);
+            panelDataGridNotes.Margin = new Padding(3, 4, 3, 4);
             panelDataGridNotes.Name = "panelDataGridNotes";
-            panelDataGridNotes.Size = new Size(583, 418);
+            panelDataGridNotes.Size = new Size(666, 557);
             panelDataGridNotes.TabIndex = 2;
             // 
             // dataGridNotes
@@ -74,12 +76,13 @@
             dataGridNotes.EditMode = DataGridViewEditMode.EditOnF2;
             dataGridNotes.GridColor = SystemColors.ControlDark;
             dataGridNotes.Location = new Point(0, 0);
+            dataGridNotes.Margin = new Padding(3, 4, 3, 4);
             dataGridNotes.Name = "dataGridNotes";
             dataGridNotes.ReadOnly = true;
             dataGridNotes.RowHeadersVisible = false;
             dataGridNotes.RowHeadersWidth = 25;
             dataGridNotes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridNotes.Size = new Size(582, 416);
+            dataGridNotes.Size = new Size(665, 555);
             dataGridNotes.TabIndex = 0;
             dataGridNotes.Text = "dataGridView1";
             dataGridNotes.ColumnHeaderMouseClick += dataGridNotes_ColumnHeaderMouseClick;
@@ -90,6 +93,7 @@
             // 
             // contextMenu
             // 
+            contextMenu.ImageScalingSize = new Size(20, 20);
             contextMenu.Name = "contextMenu";
             contextMenu.Size = new Size(61, 4);
             // 
@@ -98,18 +102,20 @@
             panelBottom.Controls.Add(buttonCancel);
             panelBottom.Controls.Add(buttonAccept);
             panelBottom.Dock = DockStyle.Bottom;
-            panelBottom.Location = new Point(0, 417);
+            panelBottom.Location = new Point(0, 556);
+            panelBottom.Margin = new Padding(3, 4, 3, 4);
             panelBottom.Name = "panelBottom";
-            panelBottom.Size = new Size(584, 44);
+            panelBottom.Size = new Size(667, 59);
             panelBottom.TabIndex = 1;
             // 
             // buttonCancel
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(496, 10);
+            buttonCancel.Location = new Point(567, 13);
+            buttonCancel.Margin = new Padding(3, 4, 3, 4);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new Size(79, 24);
+            buttonCancel.Size = new Size(90, 34);
             buttonCancel.TabIndex = 2;
             buttonCancel.Text = "&Cancel";
             buttonCancel.UseVisualStyleBackColor = true;
@@ -119,9 +125,10 @@
             // 
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonAccept.DialogResult = DialogResult.OK;
-            buttonAccept.Location = new Point(412, 10);
+            buttonAccept.Location = new Point(471, 13);
+            buttonAccept.Margin = new Padding(3, 4, 3, 4);
             buttonAccept.Name = "buttonAccept";
-            buttonAccept.Size = new Size(79, 24);
+            buttonAccept.Size = new Size(90, 34);
             buttonAccept.TabIndex = 1;
             buttonAccept.Text = "&Accept";
             buttonAccept.UseVisualStyleBackColor = true;
@@ -129,11 +136,12 @@
             // 
             // NotesSelectorForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(584, 461);
+            ClientSize = new Size(667, 615);
             Controls.Add(panelForm);
             Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(3, 4, 3, 4);
             Name = "NotesSelectorForm";
             Text = "Notes selector";
             FormClosing += NotesSelectorForm_FormClosing;
