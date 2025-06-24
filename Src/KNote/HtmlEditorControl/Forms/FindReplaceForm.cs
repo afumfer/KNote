@@ -19,10 +19,10 @@ namespace MSDN.Html.Editor
 	internal partial class FindReplaceForm : Form
 	{
         // constants defining the form sizes
-        private const int FORM_HEIGHT_WITH_OPTION = 264;
-        private const int TAB_HEIGHT_WITH_OPTION = 216;
-        private const int FORM_HEIGHT_WITHOUT_OPTION = 200;
-        private const int TAB_HEIGHT_WITHOUT_OPTION = 152;
+        private const int FORM_HEIGHT_WITH_OPTION = 294;
+        private const int TAB_HEIGHT_WITH_OPTION = 232;
+        private const int FORM_HEIGHT_WITHOUT_OPTION = 230;
+        private const int TAB_HEIGHT_WITHOUT_OPTION = 168;
 
         // private variables defining the state of the form
 		private bool options = false;

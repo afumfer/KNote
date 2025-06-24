@@ -43,6 +43,7 @@
             toolStripS4 = new ToolStripSeparator();
             buttonTools = new ToolStripDropDownButton();
             buttonTextSearch = new ToolStripMenuItem();
+            buttonTextSearchNext = new ToolStripMenuItem();
             buttonInsertTemplate = new ToolStripMenuItem();
             toolStripToolS1 = new ToolStripSeparator();
             buttonKNoteAssistant = new ToolStripMenuItem();
@@ -158,7 +159,6 @@
             label14 = new Label();
             toolTipHelps = new ToolTip(components);
             saveFileDialog = new SaveFileDialog();
-            buttonTextSearchNext = new ToolStripMenuItem();
             toolBarNoteEditor.SuspendLayout();
             panelForm.SuspendLayout();
             tabNoteData.SuspendLayout();
@@ -288,6 +288,14 @@
             buttonTextSearch.Size = new Size(327, 22);
             buttonTextSearch.Text = "Text search in description ...";
             buttonTextSearch.Click += buttonToolBar_Click;
+            // 
+            // buttonTextSearchNext
+            // 
+            buttonTextSearchNext.Name = "buttonTextSearchNext";
+            buttonTextSearchNext.ShortcutKeys = Keys.Control | Keys.Shift | Keys.F;
+            buttonTextSearchNext.Size = new Size(327, 22);
+            buttonTextSearchNext.Text = "Continue with the next text search";
+            buttonTextSearchNext.Click += buttonToolBar_Click;
             // 
             // buttonInsertTemplate
             // 
@@ -1504,14 +1512,6 @@
             label14.Size = new Size(99, 15);
             label14.TabIndex = 4;
             label14.Text = "Trace node from :";
-            // 
-            // buttonTextSearchNext
-            // 
-            buttonTextSearchNext.Name = "buttonTextSearchNext";
-            buttonTextSearchNext.ShortcutKeys = Keys.Control | Keys.Shift | Keys.F;
-            buttonTextSearchNext.Size = new Size(327, 22);
-            buttonTextSearchNext.Text = "Continue with the next text search";
-            buttonTextSearchNext.Click += buttonToolBar_Click;
             // 
             // NoteEditorForm
             // 

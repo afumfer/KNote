@@ -61,54 +61,52 @@
             // 
             statusStripChat.ImageScalingSize = new Size(20, 20);
             statusStripChat.Items.AddRange(new ToolStripItem[] { toolStripStatusServiceRef, toolStripStatusLabel1, toolStripStatusLabelTokens, toolStripStatusLabelProcessingTime, toolStripStatusLabel2, toolStripStatusLabelProcessing });
-            statusStripChat.Location = new Point(0, 805);
+            statusStripChat.Location = new Point(0, 601);
             statusStripChat.Name = "statusStripChat";
-            statusStripChat.Padding = new Padding(1, 0, 16, 0);
-            statusStripChat.Size = new Size(980, 26);
+            statusStripChat.Size = new Size(858, 22);
             statusStripChat.TabIndex = 22;
             // 
             // toolStripStatusServiceRef
             // 
             toolStripStatusServiceRef.Name = "toolStripStatusServiceRef";
-            toolStripStatusServiceRef.Size = new Size(56, 20);
+            toolStripStatusServiceRef.Size = new Size(44, 17);
             toolStripStatusServiceRef.Text = "Service";
             // 
             // toolStripStatusLabel1
             // 
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(13, 20);
+            toolStripStatusLabel1.Size = new Size(10, 17);
             toolStripStatusLabel1.Text = "|";
             // 
             // toolStripStatusLabelTokens
             // 
             toolStripStatusLabelTokens.BorderStyle = Border3DStyle.Raised;
             toolStripStatusLabelTokens.Name = "toolStripStatusLabelTokens";
-            toolStripStatusLabelTokens.Size = new Size(69, 20);
+            toolStripStatusLabelTokens.Size = new Size(55, 17);
             toolStripStatusLabelTokens.Text = "Tokens: 0";
             // 
             // toolStripStatusLabelProcessingTime
             // 
             toolStripStatusLabelProcessingTime.Name = "toolStripStatusLabelProcessingTime";
-            toolStripStatusLabelProcessingTime.Size = new Size(13, 20);
+            toolStripStatusLabelProcessingTime.Size = new Size(10, 17);
             toolStripStatusLabelProcessingTime.Text = " ";
             // 
             // toolStripStatusLabel2
             // 
             toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            toolStripStatusLabel2.Size = new Size(13, 20);
+            toolStripStatusLabel2.Size = new Size(10, 17);
             toolStripStatusLabel2.Text = "|";
             // 
             // toolStripStatusLabelProcessing
             // 
             toolStripStatusLabelProcessing.BorderStyle = Border3DStyle.Raised;
             toolStripStatusLabelProcessing.Name = "toolStripStatusLabelProcessing";
-            toolStripStatusLabelProcessing.Size = new Size(0, 20);
+            toolStripStatusLabelProcessing.Size = new Size(0, 17);
             // 
             // splitChat
             // 
             splitChat.Dock = DockStyle.Fill;
             splitChat.Location = new Point(0, 0);
-            splitChat.Margin = new Padding(3, 4, 3, 4);
             splitChat.Name = "splitChat";
             splitChat.Orientation = Orientation.Horizontal;
             // 
@@ -132,19 +130,18 @@
             splitChat.Panel2.Controls.Add(textPrompt);
             splitChat.Panel2.Controls.Add(buttonSend);
             splitChat.Panel2MinSize = 50;
-            splitChat.Size = new Size(980, 805);
-            splitChat.SplitterDistance = 549;
-            splitChat.SplitterWidth = 8;
+            splitChat.Size = new Size(858, 601);
+            splitChat.SplitterDistance = 409;
+            splitChat.SplitterWidth = 6;
             splitChat.TabIndex = 25;
             // 
             // buttonNavigate
             // 
             buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonNavigate.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            buttonNavigate.Location = new Point(879, 6);
-            buttonNavigate.Margin = new Padding(3, 4, 3, 4);
+            buttonNavigate.Location = new Point(769, 4);
             buttonNavigate.Name = "buttonNavigate";
-            buttonNavigate.Size = new Size(94, 36);
+            buttonNavigate.Size = new Size(82, 26);
             buttonNavigate.TabIndex = 28;
             buttonNavigate.Text = "Navigate";
             buttonNavigate.UseVisualStyleBackColor = true;
@@ -154,10 +151,9 @@
             // 
             buttonMarkDown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonMarkDown.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            buttonMarkDown.Location = new Point(779, 6);
-            buttonMarkDown.Margin = new Padding(3, 4, 3, 4);
+            buttonMarkDown.Location = new Point(682, 4);
             buttonMarkDown.Name = "buttonMarkDown";
-            buttonMarkDown.Size = new Size(94, 36);
+            buttonMarkDown.Size = new Size(82, 26);
             buttonMarkDown.TabIndex = 27;
             buttonMarkDown.Text = "Markdown";
             buttonMarkDown.UseVisualStyleBackColor = true;
@@ -166,10 +162,10 @@
             // kntEditViewResult
             // 
             kntEditViewResult.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            kntEditViewResult.Location = new Point(7, 43);
-            kntEditViewResult.Margin = new Padding(3, 5, 3, 5);
+            kntEditViewResult.Location = new Point(6, 32);
+            kntEditViewResult.Margin = new Padding(3, 4, 3, 4);
             kntEditViewResult.Name = "kntEditViewResult";
-            kntEditViewResult.Size = new Size(966, 502);
+            kntEditViewResult.Size = new Size(845, 373);
             kntEditViewResult.TabIndex = 26;
             // 
             // radioGetStream
@@ -178,10 +174,9 @@
             radioGetStream.AutoSize = true;
             radioGetStream.Checked = true;
             radioGetStream.Font = new Font("Segoe UI", 8.25F);
-            radioGetStream.Location = new Point(513, 12);
-            radioGetStream.Margin = new Padding(3, 4, 3, 4);
+            radioGetStream.Location = new Point(455, 9);
             radioGetStream.Name = "radioGetStream";
-            radioGetStream.Size = new Size(99, 23);
+            radioGetStream.Size = new Size(81, 17);
             radioGetStream.TabIndex = 5;
             radioGetStream.TabStop = true;
             radioGetStream.Text = "Get Stream";
@@ -192,10 +187,9 @@
             radioGetCompletion.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             radioGetCompletion.AutoSize = true;
             radioGetCompletion.Font = new Font("Segoe UI", 8.25F);
-            radioGetCompletion.Location = new Point(630, 12);
-            radioGetCompletion.Margin = new Padding(3, 4, 3, 4);
+            radioGetCompletion.Location = new Point(557, 9);
             radioGetCompletion.Name = "radioGetCompletion";
-            radioGetCompletion.Size = new Size(127, 23);
+            radioGetCompletion.Size = new Size(106, 17);
             radioGetCompletion.TabIndex = 6;
             radioGetCompletion.Text = "Get Completion";
             radioGetCompletion.UseVisualStyleBackColor = true;
@@ -204,9 +198,9 @@
             // 
             labelResult.AutoSize = true;
             labelResult.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelResult.Location = new Point(9, 16);
+            labelResult.Location = new Point(8, 12);
             labelResult.Name = "labelResult";
-            labelResult.Size = new Size(60, 23);
+            labelResult.Size = new Size(46, 17);
             labelResult.TabIndex = 25;
             labelResult.Text = "Result:";
             // 
@@ -214,20 +208,18 @@
             // 
             panelSeparator.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             panelSeparator.BackColor = SystemColors.ControlDarkDark;
-            panelSeparator.Location = new Point(650, 7);
-            panelSeparator.Margin = new Padding(3, 4, 3, 4);
+            panelSeparator.Location = new Point(569, 5);
             panelSeparator.Name = "panelSeparator";
-            panelSeparator.Size = new Size(3, 33);
+            panelSeparator.Size = new Size(3, 25);
             panelSeparator.TabIndex = 27;
             // 
             // buttonViewSystem
             // 
             buttonViewSystem.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonViewSystem.Font = new Font("Segoe UI", 8.25F);
-            buttonViewSystem.Location = new Point(843, 6);
-            buttonViewSystem.Margin = new Padding(3, 4, 3, 4);
+            buttonViewSystem.Location = new Point(738, 4);
             buttonViewSystem.Name = "buttonViewSystem";
-            buttonViewSystem.Size = new Size(130, 36);
+            buttonViewSystem.Size = new Size(114, 26);
             buttonViewSystem.TabIndex = 26;
             buttonViewSystem.Text = "&View system root";
             buttonViewSystem.UseVisualStyleBackColor = true;
@@ -237,10 +229,9 @@
             // 
             buttonCatalogPrompts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonCatalogPrompts.Font = new Font("Segoe UI", 8.25F);
-            buttonCatalogPrompts.Location = new Point(660, 6);
-            buttonCatalogPrompts.Margin = new Padding(3, 4, 3, 4);
+            buttonCatalogPrompts.Location = new Point(578, 4);
             buttonCatalogPrompts.Name = "buttonCatalogPrompts";
-            buttonCatalogPrompts.Size = new Size(176, 36);
+            buttonCatalogPrompts.Size = new Size(154, 26);
             buttonCatalogPrompts.TabIndex = 25;
             buttonCatalogPrompts.Text = "Get prompt from &catalog";
             buttonCatalogPrompts.UseVisualStyleBackColor = true;
@@ -250,10 +241,9 @@
             // 
             buttonRestart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonRestart.Font = new Font("Segoe UI", 8.25F);
-            buttonRestart.Location = new Point(578, 6);
-            buttonRestart.Margin = new Padding(3, 4, 3, 4);
+            buttonRestart.Location = new Point(506, 4);
             buttonRestart.Name = "buttonRestart";
-            buttonRestart.Size = new Size(64, 36);
+            buttonRestart.Size = new Size(56, 26);
             buttonRestart.TabIndex = 3;
             buttonRestart.Text = "&Restart";
             buttonRestart.UseVisualStyleBackColor = true;
@@ -263,9 +253,9 @@
             // 
             labelPrompt.AutoSize = true;
             labelPrompt.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelPrompt.Location = new Point(9, 16);
+            labelPrompt.Location = new Point(8, 12);
             labelPrompt.Name = "labelPrompt";
-            labelPrompt.Size = new Size(71, 23);
+            labelPrompt.Size = new Size(54, 17);
             labelPrompt.TabIndex = 24;
             labelPrompt.Text = "Prompt:";
             // 
@@ -273,23 +263,21 @@
             // 
             textPrompt.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             textPrompt.Font = new Font("Segoe UI", 9.75F);
-            textPrompt.Location = new Point(7, 45);
-            textPrompt.Margin = new Padding(3, 4, 3, 4);
+            textPrompt.Location = new Point(6, 34);
             textPrompt.MaxLength = 0;
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(966, 181);
+            textPrompt.Size = new Size(846, 132);
             textPrompt.TabIndex = 0;
             // 
             // buttonSend
             // 
             buttonSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonSend.Font = new Font("Segoe UI", 8.25F);
-            buttonSend.Location = new Point(507, 6);
-            buttonSend.Margin = new Padding(3, 4, 3, 4);
+            buttonSend.Location = new Point(444, 4);
             buttonSend.Name = "buttonSend";
-            buttonSend.Size = new Size(64, 36);
+            buttonSend.Size = new Size(56, 26);
             buttonSend.TabIndex = 2;
             buttonSend.Text = "&Send";
             buttonSend.UseVisualStyleBackColor = true;
@@ -297,13 +285,12 @@
             // 
             // KntChatGPTForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(980, 831);
+            ClientSize = new Size(858, 623);
             Controls.Add(splitChat);
             Controls.Add(statusStripChat);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(3, 4, 3, 4);
             Name = "KntChatGPTForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "KNote ChatAI";
