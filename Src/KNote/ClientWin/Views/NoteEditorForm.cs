@@ -1,10 +1,12 @@
-﻿using System.Data;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using KNote.ClientWin.Controllers;
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KntScript;
+using System;
+using System.Data;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace KNote.ClientWin.Views;
 
@@ -17,6 +19,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private Guid _selectedFolderId;
     private ResourceDto _selectedResource;
+
+    private string _textSearch = "";
+    private int _indexTextSearch = 0;
 
     #endregion 
 
@@ -211,6 +216,14 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else if (menuSel == buttonKNoteAssistant)
         {
             ExecKNoteAssistant();
+        }
+        else if (menuSel == buttonTextSearch)
+        {
+            TextSearch();
+        }
+        else if (menuSel == buttonTextSearchNext)
+        {
+            TextSearchNext();
         }
     }
 
@@ -1301,6 +1314,88 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             kntEditView.MarkdownContentControl.SelectionStart = selStart + strLink.Length;
             kntEditView.MarkdownContentControl.BeginInvoke(new Action(() => kntEditView.MarkdownContentControl.ScrollToCaret()));
         }
+    }
+
+    private void TextSearch()
+    {
+        // If navigate mode then msgbox and return
+        if (!buttonNavigate.Enabled)
+        {
+            _ctrl.ShowMessage("Cannot search text when editing mode in markdown format is not active", KntConst.AppName);
+            return;
+        }
+
+        // Context for new search
+        _textSearch = "";
+        _indexTextSearch = 0;
+
+        var listVars = new List<ReadVarItem> {new ReadVarItem
+        {
+            Label = "Text for search",
+            VarIdent = "textSearch",
+            VarValue = "",
+            VarNewValueText = ""
+        }};
+
+        // Form for capture text to search
+        var formReadVar = new ReadVarForm(listVars);
+        
+        formReadVar.Text = "Search for text in the note description";
+        formReadVar.Size = new Size(500, 150);
+
+        var result = formReadVar.ShowDialog();
+
+        if (result == DialogResult.Cancel)
+            return;
+        else        
+            _textSearch = listVars[0].VarNewValueText;
+                
+        if (string.IsNullOrEmpty(_textSearch))
+        {            
+            _ctrl.ShowMessage("Please, insert text for find.", KntConst.AppName);
+            return;
+        }
+
+        DoTextSearch();
+    }
+
+    private void TextSearchNext()
+    {
+        // If navigate mode then msgbox and return
+        if (!buttonNavigate.Enabled)
+        {
+            _ctrl.ShowMessage("Cannot search text when editing mode in markdown format is not active", KntConst.AppName);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_textSearch))
+        {
+            _ctrl.ShowMessage("You have not entered text to continue a search. Please, insert text for find with Ctrl-F key.", KntConst.AppName);
+            return;
+        }
+
+        DoTextSearch();
+    }
+
+    private void DoTextSearch()
+    {
+        string text = kntEditView.MarkdownContentControl.Text;
+        var _indexTextSearchNew = text.IndexOf(_textSearch, _indexTextSearch, StringComparison.CurrentCultureIgnoreCase);
+
+        if (_indexTextSearchNew != -1)
+        {
+            // Seleccionar la subcadena encontrada en textBox1
+            kntEditView.MarkdownContentControl.Focus();
+            kntEditView.MarkdownContentControl.SelectionStart = _indexTextSearchNew;
+            kntEditView.MarkdownContentControl.SelectionLength = _textSearch.Length;
+            kntEditView.MarkdownContentControl.BeginInvoke(new Action(() => kntEditView.MarkdownContentControl.ScrollToCaret()));
+        }
+        else
+        {
+            _ctrl.ShowMessage("Search text not found.", KntConst.AppName);
+        }
+
+        _indexTextSearch = _indexTextSearchNew + _textSearch.Length;
     }
 
     private async Task InsertTemplate()

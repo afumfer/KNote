@@ -42,9 +42,10 @@
             buttonPrint = new ToolStripButton();
             toolStripS4 = new ToolStripSeparator();
             buttonTools = new ToolStripDropDownButton();
+            buttonTextSearch = new ToolStripMenuItem();
             buttonInsertTemplate = new ToolStripMenuItem();
-            buttonKNoteAssistant = new ToolStripMenuItem();
             toolStripToolS1 = new ToolStripSeparator();
+            buttonKNoteAssistant = new ToolStripMenuItem();
             buttonExecuteKntScript = new ToolStripMenuItem();
             buttonInsertCode = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
@@ -157,6 +158,7 @@
             label14 = new Label();
             toolTipHelps = new ToolTip(components);
             saveFileDialog = new SaveFileDialog();
+            buttonTextSearchNext = new ToolStripMenuItem();
             toolBarNoteEditor.SuspendLayout();
             panelForm.SuspendLayout();
             tabNoteData.SuspendLayout();
@@ -271,7 +273,7 @@
             // buttonTools
             // 
             buttonTools.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonInsertTemplate, buttonKNoteAssistant, toolStripToolS1, buttonExecuteKntScript, buttonInsertCode, toolStripSeparator1, buttonLockFormat });
+            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonTextSearch, buttonTextSearchNext, buttonInsertTemplate, toolStripToolS1, buttonKNoteAssistant, buttonExecuteKntScript, buttonInsertCode, toolStripSeparator1, buttonLockFormat });
             buttonTools.Image = (Image)resources.GetObject("buttonTools.Image");
             buttonTools.ImageScaling = ToolStripItemImageScaling.None;
             buttonTools.ImageTransparentColor = Color.Magenta;
@@ -279,52 +281,60 @@
             buttonTools.Size = new Size(29, 22);
             buttonTools.Text = "toolStripDropDownTools";
             // 
+            // buttonTextSearch
+            // 
+            buttonTextSearch.Name = "buttonTextSearch";
+            buttonTextSearch.ShortcutKeys = Keys.Control | Keys.F;
+            buttonTextSearch.Size = new Size(327, 22);
+            buttonTextSearch.Text = "Text search in description ...";
+            buttonTextSearch.Click += buttonToolBar_Click;
+            // 
             // buttonInsertTemplate
             // 
             buttonInsertTemplate.Name = "buttonInsertTemplate";
             buttonInsertTemplate.ShortcutKeys = Keys.F9;
-            buttonInsertTemplate.Size = new Size(215, 22);
+            buttonInsertTemplate.Size = new Size(327, 22);
             buttonInsertTemplate.Text = "Insert template text ...";
             buttonInsertTemplate.Click += buttonToolBar_Click;
+            // 
+            // toolStripToolS1
+            // 
+            toolStripToolS1.Name = "toolStripToolS1";
+            toolStripToolS1.Size = new Size(324, 6);
             // 
             // buttonKNoteAssistant
             // 
             buttonKNoteAssistant.Name = "buttonKNoteAssistant";
             buttonKNoteAssistant.ShortcutKeys = Keys.F8;
-            buttonKNoteAssistant.Size = new Size(215, 22);
+            buttonKNoteAssistant.Size = new Size(327, 22);
             buttonKNoteAssistant.Text = "KNote Assistant ...";
             buttonKNoteAssistant.Click += buttonToolBar_Click;
-            // 
-            // toolStripToolS1
-            // 
-            toolStripToolS1.Name = "toolStripToolS1";
-            toolStripToolS1.Size = new Size(212, 6);
             // 
             // buttonExecuteKntScript
             // 
             buttonExecuteKntScript.ImageScaling = ToolStripItemImageScaling.None;
             buttonExecuteKntScript.Name = "buttonExecuteKntScript";
             buttonExecuteKntScript.ShortcutKeys = Keys.F5;
-            buttonExecuteKntScript.Size = new Size(215, 22);
+            buttonExecuteKntScript.Size = new Size(327, 22);
             buttonExecuteKntScript.Text = "Execute AntScript code";
             buttonExecuteKntScript.Click += buttonToolBar_Click;
             // 
             // buttonInsertCode
             // 
             buttonInsertCode.Name = "buttonInsertCode";
-            buttonInsertCode.Size = new Size(215, 22);
+            buttonInsertCode.Size = new Size(327, 22);
             buttonInsertCode.Text = "Insert code snippet ...";
             buttonInsertCode.Click += buttonToolBar_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(212, 6);
+            toolStripSeparator1.Size = new Size(324, 6);
             // 
             // buttonLockFormat
             // 
             buttonLockFormat.Name = "buttonLockFormat";
-            buttonLockFormat.Size = new Size(215, 22);
+            buttonLockFormat.Size = new Size(327, 22);
             buttonLockFormat.Text = "Lock format";
             buttonLockFormat.Click += buttonToolBar_Click;
             // 
@@ -1495,6 +1505,14 @@
             label14.TabIndex = 4;
             label14.Text = "Trace node from :";
             // 
+            // buttonTextSearchNext
+            // 
+            buttonTextSearchNext.Name = "buttonTextSearchNext";
+            buttonTextSearchNext.ShortcutKeys = Keys.Control | Keys.Shift | Keys.F;
+            buttonTextSearchNext.Size = new Size(327, 22);
+            buttonTextSearchNext.Text = "Continue with the next text search";
+            buttonTextSearchNext.Click += buttonToolBar_Click;
+            // 
             // NoteEditorForm
             // 
             AutoScaleMode = AutoScaleMode.Inherit;
@@ -1667,5 +1685,7 @@
         private KntWebView.KntEditView kntEditViewTask;
         private ToolStripMenuItem buttonInsertCode;
         private ToolStripMenuItem buttonKNoteAssistant;
+        private ToolStripMenuItem buttonTextSearch;
+        private ToolStripMenuItem buttonTextSearchNext;
     }
 }
