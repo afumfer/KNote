@@ -19,6 +19,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         
     private Guid _selectedFolderId;
 
+    private readonly string _url;
+
     #endregion
 
     #region Constructor
@@ -33,13 +35,20 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
         // These lines are here to avoid the sensation of double visual refresh
         // when the posit is activated in navigation mode
-        if (_ctrl.Model != null )
+        if (_ctrl.Model != null)
+        {
             if (_ctrl.Model.ContentType.Contains("navigation"))
             {
-                ShowPostItInWindowsFormView(true);
-                kntEditView.ShowStatusInfo = false;
-            }                            
-        //---
+                _url = _ctrl.Store.ExtractUrlFromText(_ctrl.Model?.Description);
+                ConfigurePostItView(true);                
+            }
+            else
+            {
+                ConfigurePostItView(false);                
+            }
+        }
+        else
+            ConfigurePostItView(false);
     }
 
     #endregion 
@@ -97,8 +106,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     #region Form events handlers
 
     private void PostItEditorForm_Load(object sender, EventArgs e)
-    {
-        InitializeComponentEditor();
+    {        
         ModelToControlsPostIt(true, _ctrl.ForceAlwaysTop);        
     }
 
@@ -318,17 +326,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     #region Private Methods
 
-    private void InitializeComponentEditor()
-    {
-        kntEditView.Location = new System.Drawing.Point(3, 24);
-        kntEditView.Size = new System.Drawing.Size(473, 295);
-        kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-        kntEditView.ShowStatusInfo = false;
-        kntEditView.MarkdownContentControl.ScrollBars = ScrollBars.None;        
-    }
-
     private async void ModelToControls()
     {
         if (_ctrl.Model is null)
@@ -339,7 +336,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         _selectedFolderId = _ctrl.Model.FolderId;
 
         kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
-
         kntEditView.MarkdownContentControl.SelectionStart = 0;
 
         if (_ctrl.Model.ContentType.Contains("html"))
@@ -354,24 +350,21 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         {
             Text = KntConst.AppName + " Web View";
             if (!string.IsNullOrEmpty(kntEditView.MarkdownText))
-            {
-                var url = _ctrl.Store.ExtractUrlFromText(kntEditView.MarkdownText);
-                if (!string.IsNullOrEmpty(url))
+            {                
+                if (!string.IsNullOrEmpty(_url))
                 {                    
-                    menuWindowsFormView.Checked = true;
-                    kntEditView.ShowNavigationTools = true;
-                    await kntEditView.ShowNavigationUrlContent(url);
+                    menuWindowsFormView.Checked = true;                    
+                    await kntEditView.ShowNavigationUrlContent(_url);
+                    Text += " - " + _ctrl.Model?.Topic;
                 }
                 else
                 {
-                    kntEditView.TextUrl = "";
-                    kntEditView.ShowNavigationTools = false;
-                    
+                    kntEditView.TextUrl = "";                                        
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
                     await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
                 }
-            }            
+            }              
             kntEditView.BorderStyle = BorderStyle.None;
         }
         else
@@ -379,7 +372,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             Text = KntConst.AppName + " markdown editor";
             kntEditView.ShowMarkdownContent();
             kntEditView.BorderStyle = BorderStyle.None;
-            kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.None;  
+            kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.None;            
         }
     }
 
@@ -476,11 +469,13 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private void WindowsFormView()
     {        
-        ShowPostItInWindowsFormView(!menuWindowsFormView.Checked);
+        ConfigurePostItView(!menuWindowsFormView.Checked);
     }
 
-    private void ShowPostItInWindowsFormView(bool showInWindowsFormView)
+    private void ConfigurePostItView(bool showInWindowsFormView)
     {
+        Size clientSize = this.ClientSize;
+
         if (showInWindowsFormView)
         {
             this.FormBorderStyle = FormBorderStyle.Sizable;
@@ -489,6 +484,29 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             this.MinimizeBox = true;
             this.ShowInTaskbar = true;
             menuWindowsFormView.Checked = true;
+
+            if (!string.IsNullOrEmpty(_url))
+            {                
+                labelCaption.Visible = false;
+                picMenu.Top = 9;
+                picMenu.Left = this.Width - 44;
+                picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
+                    | System.Windows.Forms.AnchorStyles.Right));
+                kntEditView.Location = new System.Drawing.Point(3, 3);                
+                kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 26);
+                kntEditView.ShowNavigationTools = true;
+            }
+            else
+            {
+                labelCaption.Visible = true;
+                picMenu.Top = 5;
+                picMenu.Left = 5;
+                picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
+                    | System.Windows.Forms.AnchorStyles.Left));
+                kntEditView.Location = new System.Drawing.Point(3, 24);                
+                kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 47);
+                kntEditView.ShowNavigationTools = false;
+            }
         }
         else
         {
@@ -498,7 +516,24 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             this.MinimizeBox = false;
             this.ShowInTaskbar = false;
             menuWindowsFormView.Checked = false;
+
+            labelCaption.Visible = true;
+            picMenu.Top = 5;
+            picMenu.Left = 5;
+            picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
+                | System.Windows.Forms.AnchorStyles.Left));
+            kntEditView.Location = new System.Drawing.Point(3, 24);            
+            kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 47);
+            kntEditView.ShowNavigationTools = false;
         }
+        
+        kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+        kntEditView.ShowStatusInfo = false;
+        kntEditView.MarkdownContentControl.ScrollBars = ScrollBars.None;
+
+        kntEditView.ShowStatusInfo = false;
     }
 
     public void AlwaysFront()
