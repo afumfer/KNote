@@ -490,6 +490,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 labelCaption.Visible = false;
                 picMenu.Top = 9;
                 picMenu.Left = this.Width - 44;
+                picMenu.BackColor = Color.WhiteSmoke;
                 picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                     | System.Windows.Forms.AnchorStyles.Right));
                 kntEditView.Location = new System.Drawing.Point(3, 3);                
@@ -500,7 +501,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             {
                 labelCaption.Visible = true;
                 picMenu.Top = 5;
-                picMenu.Left = 5;
+                picMenu.Left = 5;                
                 picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                     | System.Windows.Forms.AnchorStyles.Left));
                 kntEditView.Location = new System.Drawing.Point(3, 24);                
@@ -519,7 +520,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
             labelCaption.Visible = true;
             picMenu.Top = 5;
-            picMenu.Left = 5;
+            picMenu.Left = 5;            
             picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                 | System.Windows.Forms.AnchorStyles.Left));
             kntEditView.Location = new System.Drawing.Point(3, 24);            
