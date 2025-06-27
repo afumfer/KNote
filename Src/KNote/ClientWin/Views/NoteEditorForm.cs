@@ -819,6 +819,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
                 }
             }
+            else
+            {
+                await kntEditView.ShowNavigationContent("");
+            }
             EnableNavigationView();
         }
         else
