@@ -481,54 +481,6 @@ public class Store
 
     #endregion
 
-    #region Plugins
-
-    public string GetVsSolutionRootPath()
-    {
-        // Navigate up to the solution root
-        string root = Path.GetFullPath(Path.Combine(
-            Path.GetDirectoryName(
-                Path.GetDirectoryName(
-                    Path.GetDirectoryName(
-                        Path.GetDirectoryName(
-                            Path.GetDirectoryName(typeof(Program).Assembly.Location)))))));
-        return root;
-    }
-
-    public Assembly LoadPlugin(string pluginLocation)
-    {
-        PluginLoadContext loadContext = new PluginLoadContext(pluginLocation);
-        return loadContext.LoadFromAssemblyName(AssemblyName.GetAssemblyName(pluginLocation));
-    }
-
-    public IEnumerable<IPluginCommand> CreateCommands(Assembly assembly)
-    {
-        int count = 0;
-
-        foreach (Type type in assembly.GetTypes())
-        {
-            if (typeof(IPluginCommand).IsAssignableFrom(type))
-            {
-                IPluginCommand result = Activator.CreateInstance(type) as IPluginCommand;
-                if (result != null)
-                {
-                    count++;
-                    yield return result;
-                }
-            }
-        }
-
-        if (count == 0)
-        {
-            string availableTypes = string.Join(",", assembly.GetTypes().Select(t => t.FullName));
-            throw new ApplicationException(
-                $"Can't find any type which implements ICommand in {assembly} from {assembly.Location}.\n" +
-                $"Available types: {availableTypes}");
-        }
-    }
-
-    #endregion
-
     #region Coomon controllers extensions
 
     private NotesSelectorCtrl _notesSelector = null;

@@ -1078,46 +1078,6 @@ window.chrome.webview.postMessage(retValue);";
 
     #endregion
 
-    #region Plugin
-
-    private void buttonPlugin_Click(object sender, EventArgs e)
-    {
-        //var c = new KntRedminePluginCommand
-        //{
-        //    Service = _store.ActiveFolderWithServiceRef?.ServiceRef.Service,
-        //    AppUserName = _store.AppUserName,
-        //    ToolsPath = "" //_store.AppConfig.ToolsPath
-        //};
-
-        //c.Execute();
-
-        Process.Start(@"D:\KaNote\Plugins\KntRedmine\KntRedmineApi.exe");
-    }
-
-    private void buttonGetPluginFile_Click(object sender, EventArgs e)
-    {
-        //var relativePath = @"KntRedmineApi\bin\Debug\net6.0-windows\KntRedmineApi.exe";
-        //var root = _store.GetVsSolutionRootPath();
-        //string pluginLocation = Path.GetFullPath(Path.Combine(root, relativePath.Replace('\\', Path.DirectorySeparatorChar)));
-        //textPlugin.Text = pluginLocation;
-
-        var pFile = @"D:\Dev\KNote\Src\KNote\KntRedmineApi\bin\Debug\net6.0-windows\KntRedmineApi.exe";
-
-        //var aa = AssemblyLoadContext.GetExecutingAssembly();
-        var a = _store.LoadPlugin(pFile);
-        var listCommands = _store.CreateCommands(a);
-
-        foreach (var c in listCommands)
-        {
-            textPlugin.Text = c.Description;
-            break;
-        }
-        return;
-
-    }
-
-    #endregion
-
     #region QServerCOM
 
     private void buttonServerCOMForm_Click(object sender, EventArgs e)

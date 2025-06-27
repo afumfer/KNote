@@ -60,9 +60,6 @@
             buttonServerCOMForm = new Button();
             buttonMessageBrokerSendMessage = new Button();
             buttonConfigureMessageBroker = new Button();
-            buttonGetPluginFile = new Button();
-            textPlugin = new TextBox();
-            buttonPlugin = new Button();
             buttonTestReflection = new Button();
             buttonTestProcessStart = new Button();
             buttonTestReadVarItem = new Button();
@@ -354,9 +351,6 @@
             tabAppLab.Controls.Add(buttonServerCOMForm);
             tabAppLab.Controls.Add(buttonMessageBrokerSendMessage);
             tabAppLab.Controls.Add(buttonConfigureMessageBroker);
-            tabAppLab.Controls.Add(buttonGetPluginFile);
-            tabAppLab.Controls.Add(textPlugin);
-            tabAppLab.Controls.Add(buttonPlugin);
             tabAppLab.Controls.Add(buttonTestReflection);
             tabAppLab.Controls.Add(buttonTestProcessStart);
             tabAppLab.Controls.Add(buttonTestReadVarItem);
@@ -375,7 +369,7 @@
             // 
             // buttonTestNoteList
             // 
-            buttonTestNoteList.Location = new Point(349, 205);
+            buttonTestNoteList.Location = new Point(352, 119);
             buttonTestNoteList.Name = "buttonTestNoteList";
             buttonTestNoteList.Size = new Size(127, 28);
             buttonTestNoteList.TabIndex = 19;
@@ -385,7 +379,7 @@
             // 
             // buttonNLog
             // 
-            buttonNLog.Location = new Point(349, 164);
+            buttonNLog.Location = new Point(352, 85);
             buttonNLog.Name = "buttonNLog";
             buttonNLog.Size = new Size(127, 28);
             buttonNLog.TabIndex = 18;
@@ -395,7 +389,7 @@
             // 
             // buttonServerCOMForm
             // 
-            buttonServerCOMForm.Location = new Point(349, 85);
+            buttonServerCOMForm.Location = new Point(352, 16);
             buttonServerCOMForm.Name = "buttonServerCOMForm";
             buttonServerCOMForm.Size = new Size(297, 28);
             buttonServerCOMForm.TabIndex = 17;
@@ -405,7 +399,7 @@
             // 
             // buttonMessageBrokerSendMessage
             // 
-            buttonMessageBrokerSendMessage.Location = new Point(524, 128);
+            buttonMessageBrokerSendMessage.Location = new Point(527, 51);
             buttonMessageBrokerSendMessage.Name = "buttonMessageBrokerSendMessage";
             buttonMessageBrokerSendMessage.Size = new Size(122, 28);
             buttonMessageBrokerSendMessage.TabIndex = 16;
@@ -415,40 +409,13 @@
             // 
             // buttonConfigureMessageBroker
             // 
-            buttonConfigureMessageBroker.Location = new Point(349, 128);
+            buttonConfigureMessageBroker.Location = new Point(352, 51);
             buttonConfigureMessageBroker.Name = "buttonConfigureMessageBroker";
             buttonConfigureMessageBroker.Size = new Size(169, 28);
             buttonConfigureMessageBroker.TabIndex = 15;
             buttonConfigureMessageBroker.Text = "Configure Message Broker";
             buttonConfigureMessageBroker.UseVisualStyleBackColor = true;
             buttonConfigureMessageBroker.Click += buttonConfigureMessageBroker_Click;
-            // 
-            // buttonGetPluginFile
-            // 
-            buttonGetPluginFile.Location = new Point(607, 15);
-            buttonGetPluginFile.Name = "buttonGetPluginFile";
-            buttonGetPluginFile.Size = new Size(39, 23);
-            buttonGetPluginFile.TabIndex = 14;
-            buttonGetPluginFile.Text = "<-";
-            buttonGetPluginFile.UseVisualStyleBackColor = true;
-            buttonGetPluginFile.Click += buttonGetPluginFile_Click;
-            // 
-            // textPlugin
-            // 
-            textPlugin.Location = new Point(352, 15);
-            textPlugin.Name = "textPlugin";
-            textPlugin.Size = new Size(247, 23);
-            textPlugin.TabIndex = 13;
-            // 
-            // buttonPlugin
-            // 
-            buttonPlugin.Location = new Point(352, 51);
-            buttonPlugin.Name = "buttonPlugin";
-            buttonPlugin.Size = new Size(297, 28);
-            buttonPlugin.TabIndex = 12;
-            buttonPlugin.Text = "Test Plugin";
-            buttonPlugin.UseVisualStyleBackColor = true;
-            buttonPlugin.Click += buttonPlugin_Click;
             // 
             // buttonTestReflection
             // 
@@ -668,9 +635,6 @@
         private Button btnNavigate;
         private TextBox textStatusWebView2;
         private TextBox textUrlWebView2;
-        private Button buttonPlugin;
-        private TextBox textPlugin;
-        private Button buttonGetPluginFile;
         private Button buttonMessageBrokerSendMessage;
         private Button buttonConfigureMessageBroker;
         private Button buttonServerCOMForm;
