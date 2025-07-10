@@ -98,6 +98,8 @@
             toolStripSeparator2 = new ToolStripSeparator();
             toolConfiguration = new ToolStripButton();
             panelSupManagment = new Panel();
+            labelReResources = new Label();
+            labelRepAliasCon = new Label();
             labelFolderDetail = new Label();
             labelFolder = new Label();
             pictureBoxFolder = new PictureBox();
@@ -617,6 +619,8 @@
             // panelSupManagment
             // 
             panelSupManagment.BackColor = SystemColors.ControlDarkDark;
+            panelSupManagment.Controls.Add(labelReResources);
+            panelSupManagment.Controls.Add(labelRepAliasCon);
             panelSupManagment.Controls.Add(labelFolderDetail);
             panelSupManagment.Controls.Add(labelFolder);
             panelSupManagment.Controls.Add(pictureBoxFolder);
@@ -627,27 +631,56 @@
             panelSupManagment.Size = new Size(1014, 50);
             panelSupManagment.TabIndex = 5;
             // 
+            // labelReResources
+            // 
+            labelReResources.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            labelReResources.BackColor = SystemColors.ControlDarkDark;
+            labelReResources.ForeColor = Color.White;
+            labelReResources.Location = new Point(623, 28);
+            labelReResources.Margin = new Padding(0, 4, 0, 4);
+            labelReResources.Name = "labelReResources";
+            labelReResources.Size = new Size(382, 18);
+            labelReResources.TabIndex = 4;
+            labelReResources.Text = "-";
+            labelReResources.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // labelRepAliasCon
+            // 
+            labelRepAliasCon.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            labelRepAliasCon.BackColor = SystemColors.ControlDarkDark;
+            labelRepAliasCon.ForeColor = Color.White;
+            labelRepAliasCon.Location = new Point(623, 5);
+            labelRepAliasCon.Margin = new Padding(0, 4, 0, 4);
+            labelRepAliasCon.Name = "labelRepAliasCon";
+            labelRepAliasCon.Size = new Size(382, 18);
+            labelRepAliasCon.TabIndex = 3;
+            labelRepAliasCon.Text = "-";
+            labelRepAliasCon.TextAlign = ContentAlignment.MiddleRight;
+            // 
             // labelFolderDetail
             // 
             labelFolderDetail.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelFolderDetail.BackColor = SystemColors.ControlDarkDark;
             labelFolderDetail.ForeColor = Color.White;
-            labelFolderDetail.Location = new Point(58, 26);
-            labelFolderDetail.Margin = new Padding(4, 0, 4, 0);
+            labelFolderDetail.Location = new Point(55, 26);
+            labelFolderDetail.Margin = new Padding(0);
             labelFolderDetail.Name = "labelFolderDetail";
-            labelFolderDetail.Size = new Size(920, 22);
+            labelFolderDetail.Size = new Size(560, 20);
             labelFolderDetail.TabIndex = 2;
             labelFolderDetail.Text = "Uncatalog notes folder";
             labelFolderDetail.TextAlign = ContentAlignment.MiddleLeft;
+            labelFolderDetail.Click += labelFolderDetail_Click;
             // 
             // labelFolder
             // 
             labelFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelFolder.BackColor = SystemColors.ControlDarkDark;
             labelFolder.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Bold);
             labelFolder.ForeColor = Color.White;
-            labelFolder.Location = new Point(55, 3);
+            labelFolder.Location = new Point(55, 0);
             labelFolder.Margin = new Padding(4, 0, 4, 0);
             labelFolder.Name = "labelFolder";
-            labelFolder.Size = new Size(920, 28);
+            labelFolder.Size = new Size(560, 33);
             labelFolder.TabIndex = 1;
             labelFolder.Text = "[ - Not Catalogued ]";
             labelFolder.TextAlign = ContentAlignment.MiddleLeft;
@@ -868,5 +901,7 @@
         private ToolStripMenuItem menuChatGPT;
         private ToolStripProgressBar progressBar;
         private ToolStripMenuItem menuCOMPortServer;
+        private Label labelReResources;
+        private Label labelRepAliasCon;
     }
 }

@@ -100,6 +100,8 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             labelFolder.Text = msg1;
             labelFolderDetail.Text = msg2;
+            labelRepAliasCon.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Alias} ({_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Provider})";
+            labelReResources.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainerRootPath}\\{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainer}";
         }
 
         statusLabel1.Text = $"Notes: {_ctrl.CountNotes.ToString()}";
@@ -408,4 +410,9 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
     }
 
     #endregion
+
+    private void labelFolderDetail_Click(object sender, EventArgs e)
+    {
+
+    }
 }
