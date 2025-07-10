@@ -52,7 +52,6 @@ public class KntFolderService : KntServiceBase, IKntFolderService
         return await ExecuteCommand(command);
     }
 
-
     public async Task<Result<FolderDto>> SaveAsync(FolderDto entity)
     {
         var command = new KntFoldersSaveAsyncCommand(Service, entity);

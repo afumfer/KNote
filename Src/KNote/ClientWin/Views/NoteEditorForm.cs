@@ -786,7 +786,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
         textTopic.Text = _ctrl.Model.Topic;
         textNoteNumber.Text = "#" + _ctrl.Model.NoteNumber.ToString();
+        
         textFolder.Text = _ctrl.Model.FolderDto?.Name;
+        //textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);  // TODO: !!! Experimental
+        
         textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
         _selectedFolderId = _ctrl.Model.FolderId;
         textTags.Text = _ctrl.Model.Tags;

@@ -623,5 +623,41 @@ public class Store
             return null;
     }
 
+    // TODO: !!! Experimental
+    public async Task<string> GetKNoteFolerPath(ServiceRef serviceRef, Guid folderId)
+    {
+        string folderPath = string.Empty;
+        Guid? parentFolderId = null;        
+
+        if(serviceRef == null)
+            return string.Empty;
+
+        do
+        {
+            var res = await serviceRef.Service.Folders.GetAsync(folderId);
+
+            if(res.IsValid)
+            {
+                FolderDto folder = res.Entity;
+                if (folder == null)
+                    break;
+                if (string.IsNullOrEmpty(folderPath))
+                    folderPath = folder.Name;
+                else
+                    folderPath = folder.Name + "\\" + folderPath;
+                parentFolderId = folder.ParentId;
+                folderId = parentFolderId ?? Guid.Empty; // If no parent, exit loop
+            }
+            else
+            {
+                Logger?.LogError("GetKNoteFolerPath: {message}", res.ErrorMessage);
+                break;
+            }
+
+        } while (parentFolderId != null);
+
+        return folderPath;
+    }
+
     #endregion 
 }
