@@ -86,7 +86,7 @@ namespace KntWebView
                 }
                 else if (_contentType == "navigation")
                 {
-                    EnableNavigationView();
+                    EnableNavigationView();                    
                 }
                 else if (_contentType == "html")
                 {
@@ -239,7 +239,7 @@ namespace KntWebView
         {
             ShowStatusInfo = false;
             await Navigate(content);            
-            ContentType = "navigation";
+            ContentType = "navigation";            
         }
 
         public void ShowHtmlContent(string content)
@@ -342,14 +342,14 @@ namespace KntWebView
             ShowNavigationTools = false;
             ShowStatusInfo = false;            
             htmlContent.Visible = false;
-            textContent.Visible = true;
+            textContent.Visible = true;            
         }
 
         private void EnableNavigationView()
         {
             textContent.Visible = false;
             htmlContent.Visible = false;            
-            webView.Visible = true;
+            webView.Visible = true;            
         }
         
         private void EnableHtmlView()
@@ -358,7 +358,7 @@ namespace KntWebView
             ShowNavigationTools = false;
             ShowStatusInfo = false;
             webView.Visible = false;            
-            htmlContent.Visible = true;
+            htmlContent.Visible = true;            
         }
 
         private async Task Navigate()

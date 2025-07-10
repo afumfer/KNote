@@ -64,7 +64,7 @@
             btnForward.Location = new Point(26, 2);
             btnForward.Name = "btnForward";
             btnForward.Size = new Size(25, 25);
-            btnForward.TabIndex = 1;
+            btnForward.TabIndex = 4;
             btnForward.UseVisualStyleBackColor = true;
             btnForward.Click += btnForward_Click;
             // 
@@ -74,7 +74,7 @@
             btnBack.Location = new Point(1, 2);
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(25, 25);
-            btnBack.TabIndex = 0;
+            btnBack.TabIndex = 3;
             btnBack.UseVisualStyleBackColor = true;
             btnBack.Click += btnBack_Click;
             // 
@@ -84,7 +84,7 @@
             btnNavigate.Location = new Point(51, 2);
             btnNavigate.Name = "btnNavigate";
             btnNavigate.Size = new Size(25, 25);
-            btnNavigate.TabIndex = 2;
+            btnNavigate.TabIndex = 5;
             btnNavigate.UseVisualStyleBackColor = true;
             btnNavigate.Click += btnNavigate_Click;
             btnNavigate.MouseDown += btnNavigate_MouseDown;
@@ -95,7 +95,7 @@
             textUrl.Location = new Point(77, 3);
             textUrl.Name = "textUrl";
             textUrl.Size = new Size(269, 23);
-            textUrl.TabIndex = 3;
+            textUrl.TabIndex = 6;
             textUrl.KeyUp += textUrl_KeyUp;
             // 
             // panelWebView
@@ -116,7 +116,7 @@
             htmlContent.Location = new Point(14, 286);
             htmlContent.Name = "htmlContent";
             htmlContent.Size = new Size(315, 144);
-            htmlContent.TabIndex = 7;
+            htmlContent.TabIndex = 2;
             // 
             // textContent
             // 
@@ -127,7 +127,7 @@
             textContent.Name = "textContent";
             textContent.ScrollBars = ScrollBars.Vertical;
             textContent.Size = new Size(315, 128);
-            textContent.TabIndex = 6;
+            textContent.TabIndex = 0;
             textContent.Visible = false;
             // 
             // webView
@@ -138,7 +138,7 @@
             webView.Location = new Point(14, 152);
             webView.Name = "webView";
             webView.Size = new Size(315, 128);
-            webView.TabIndex = 5;
+            webView.TabIndex = 1;
             webView.Visible = false;
             webView.ZoomFactor = 1D;
             // 
@@ -151,7 +151,7 @@
             statusBar.Name = "statusBar";
             statusBar.Size = new Size(348, 22);
             statusBar.SizingGrip = false;
-            statusBar.TabIndex = 15;
+            statusBar.TabIndex = 7;
             // 
             // statusLabel
             // 

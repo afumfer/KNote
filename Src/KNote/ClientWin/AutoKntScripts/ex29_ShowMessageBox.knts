@@ -1,0 +1,28 @@
+﻿' Message box for info
+ShowMessageBox("Message info, ok button - info icon", "MessageBox caption", 0, 64);
+
+' Message box for OK / Cancel
+var response1 = ShowMessageBox("Message info, ok/candel button - question icon", "MessageBox caption", 1, 32);
+printline "Response from message box: " + response1;
+if (response1 == "OK") then
+	printline "Actions for OK";
+else
+	printline "Actions for Cancel";
+end if;
+
+
+' Icons:
+'   None = 0, 
+'   Error=16, 
+'   Question = 32, 
+'   Alert=48, 
+'   Information = 64
+' 
+' Buttons
+'   OK = 0,
+'   OKCancel = 1,
+'   AbortRetryIgnore = 2,
+'   YesNoCancel = 3,
+'   YesNo = 4,
+'   RetryCancel = 5,
+'   CancelTryContinue = 6

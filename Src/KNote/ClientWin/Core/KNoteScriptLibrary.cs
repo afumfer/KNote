@@ -144,11 +144,12 @@ public class KNoteScriptLibrary: Library
         }
     }
 
-    public bool CheckHttpRequest(string url)
+    public DbConnection GetSQLConnection(string connectionString)
     {
-        return CheckHttpRequest(url, 30000);
+        var db = new SqlConnection(connectionString);
+        db.Open();
+        return db;
     }
-
 
     #endregion
 
@@ -281,11 +282,10 @@ public class KNoteScriptLibrary: Library
         }
     }
 
-    public DbConnection GetSQLConnection(string connectionString)
+
+    public DialogResult ShowMessageBox(string info, string caption, int buttons, int icon)
     {
-        var db =  new SqlConnection(connectionString);
-        db.Open();
-        return db;                        
+        return MessageBox.Show(info, caption, (MessageBoxButtons)buttons, (MessageBoxIcon)icon);
     }
 
     public void SetParameter(SqlCommand cmd, SqlParameter par)
@@ -465,6 +465,11 @@ public class KNoteScriptLibrary: Library
         Result<NoteDto> result = task.Result;
 
         return result.Entity;
+    }
+
+    public bool CheckHttpRequest(string url)
+    {
+        return CheckHttpRequest(url, 30000);
     }
 
     #endregion 

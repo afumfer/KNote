@@ -100,7 +100,7 @@ namespace KNote.ClientWin.Views
             kntEditView.Margin = new Padding(3, 4, 3, 4);
             kntEditView.Name = "kntEditView";
             kntEditView.Size = new Size(277, 166);
-            kntEditView.TabIndex = 13;
+            kntEditView.TabIndex = 0;
             // 
             // labelStatus
             // 
@@ -109,7 +109,7 @@ namespace KNote.ClientWin.Views
             labelStatus.Location = new Point(3, 322);
             labelStatus.Name = "labelStatus";
             labelStatus.Size = new Size(456, 14);
-            labelStatus.TabIndex = 7;
+            labelStatus.TabIndex = 2;
             labelStatus.DoubleClick += labelStatus_DoubleClick;
             // 
             // picResize
@@ -134,7 +134,7 @@ namespace KNote.ClientWin.Views
             labelCaption.Name = "labelCaption";
             labelCaption.Padding = new Padding(20, 2, 0, 0);
             labelCaption.Size = new Size(472, 20);
-            labelCaption.TabIndex = 6;
+            labelCaption.TabIndex = 1;
             labelCaption.DoubleClick += labelCaption_DoubleClick;
             labelCaption.MouseDown += labelCaption_MouseDown;
             labelCaption.MouseMove += labelCaption_MouseMove;

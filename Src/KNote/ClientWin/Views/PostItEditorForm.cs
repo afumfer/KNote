@@ -345,6 +345,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             kntEditView.BorderStyle = BorderStyle.None;
             kntEditView.HtmlContentControl.BorderStyle = BorderStyle.None;
             kntEditView.HtmlContentControl.ToolbarVisible = false;
+            kntEditView.HtmlContentControl.Focus();
         }
         else if (_ctrl.Model.ContentType.Contains("navigation"))
         {
@@ -355,24 +356,26 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 {                    
                     menuWindowsFormView.Checked = true;                    
                     await kntEditView.ShowNavigationUrlContent(_url);
-                    Text += " - " + _ctrl.Model?.Topic;
+                    Text += " - " + _ctrl.Model?.Topic;                    
                 }
                 else
                 {
                     kntEditView.TextUrl = "";                                        
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
+                    await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);                    
                 }
             }              
             kntEditView.BorderStyle = BorderStyle.None;
+            kntEditView.WebViewControl.Focus();
         }
         else
         {
             Text = KntConst.AppName + " markdown editor";
             kntEditView.ShowMarkdownContent();
             kntEditView.BorderStyle = BorderStyle.None;
-            kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.None;            
+            kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.None;
+            kntEditView.MarkdownContentControl.Focus();
         }
     }
 
