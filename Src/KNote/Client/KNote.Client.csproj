@@ -9,13 +9,13 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.41.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.6" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.7" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
-    <PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.6" />
-    <PackageReference Include="Radzen.Blazor" Version="7.1.2" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.7" />
+    <PackageReference Include="Radzen.Blazor" Version="7.1.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
