@@ -29,211 +29,210 @@ namespace KNote.ClientWin.Views
         /// </summary>
         private void InitializeComponent()
         {
-            this.colorDialog = new System.Windows.Forms.ColorDialog();
-            this.fontDialog = new System.Windows.Forms.FontDialog();
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonAccept = new System.Windows.Forms.Button();
-            this.panelForm = new System.Windows.Forms.Panel();
-            this.buttonCaptionTextColor = new System.Windows.Forms.Button();
-            this.buttonNoteFont = new System.Windows.Forms.Button();
-            this.buttonNoteColor = new System.Windows.Forms.Button();
-            this.buttonLightGray = new System.Windows.Forms.Button();
-            this.buttonDark = new System.Windows.Forms.Button();
-            this.labelText = new System.Windows.Forms.Label();
-            this.labelNote = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.buttonCaptionColor = new System.Windows.Forms.Button();
-            this.labelCaption = new System.Windows.Forms.Label();
-            this.buttonYellow = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.panelForm.SuspendLayout();
-            this.SuspendLayout();
+            colorDialog = new ColorDialog();
+            fontDialog = new FontDialog();
+            buttonCancel = new Button();
+            buttonAccept = new Button();
+            panelForm = new Panel();
+            buttonCaptionTextColor = new Button();
+            buttonNoteFont = new Button();
+            buttonNoteColor = new Button();
+            buttonLightGray = new Button();
+            buttonDark = new Button();
+            labelText = new Label();
+            labelNote = new Label();
+            label2 = new Label();
+            buttonCaptionColor = new Button();
+            labelCaption = new Label();
+            buttonYellow = new Button();
+            label1 = new Label();
+            panelForm.SuspendLayout();
+            SuspendLayout();
             // 
             // fontDialog
             // 
-            this.fontDialog.ShowColor = true;
+            fontDialog.ShowColor = true;
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(501, 249);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(81, 29);
-            this.buttonCancel.TabIndex = 8;
-            this.buttonCancel.Text = "&Cancel";
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.Location = new Point(501, 249);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new Size(81, 29);
+            buttonCancel.TabIndex = 8;
+            buttonCancel.Text = "&Cancel";
+            buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += buttonCancel_Click;
             // 
             // buttonAccept
             // 
-            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(418, 249);
-            this.buttonAccept.Name = "buttonAccept";
-            this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 7;
-            this.buttonAccept.Text = "&Accept";
-            this.buttonAccept.UseVisualStyleBackColor = true;
-            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
+            buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonAccept.Location = new Point(418, 249);
+            buttonAccept.Name = "buttonAccept";
+            buttonAccept.Size = new Size(81, 29);
+            buttonAccept.TabIndex = 7;
+            buttonAccept.Text = "&Accept";
+            buttonAccept.UseVisualStyleBackColor = true;
+            buttonAccept.Click += buttonAccept_Click;
             // 
             // panelForm
             // 
-            this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelForm.BackColor = System.Drawing.SystemColors.Window;
-            this.panelForm.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelForm.Controls.Add(this.buttonCaptionTextColor);
-            this.panelForm.Controls.Add(this.buttonNoteFont);
-            this.panelForm.Controls.Add(this.buttonNoteColor);
-            this.panelForm.Controls.Add(this.buttonLightGray);
-            this.panelForm.Controls.Add(this.buttonDark);
-            this.panelForm.Controls.Add(this.labelText);
-            this.panelForm.Controls.Add(this.labelNote);
-            this.panelForm.Controls.Add(this.label2);
-            this.panelForm.Controls.Add(this.buttonCaptionColor);
-            this.panelForm.Controls.Add(this.labelCaption);
-            this.panelForm.Controls.Add(this.buttonYellow);
-            this.panelForm.Controls.Add(this.label1);
-            this.panelForm.Location = new System.Drawing.Point(3, 6);
-            this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(579, 227);
-            this.panelForm.TabIndex = 8;
+            panelForm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelForm.BackColor = SystemColors.Window;
+            panelForm.BorderStyle = BorderStyle.FixedSingle;
+            panelForm.Controls.Add(buttonCaptionTextColor);
+            panelForm.Controls.Add(buttonNoteFont);
+            panelForm.Controls.Add(buttonNoteColor);
+            panelForm.Controls.Add(buttonLightGray);
+            panelForm.Controls.Add(buttonDark);
+            panelForm.Controls.Add(labelText);
+            panelForm.Controls.Add(labelNote);
+            panelForm.Controls.Add(label2);
+            panelForm.Controls.Add(buttonCaptionColor);
+            panelForm.Controls.Add(labelCaption);
+            panelForm.Controls.Add(buttonYellow);
+            panelForm.Controls.Add(label1);
+            panelForm.Location = new Point(3, 6);
+            panelForm.Name = "panelForm";
+            panelForm.Size = new Size(579, 227);
+            panelForm.TabIndex = 8;
             // 
             // buttonCaptionTextColor
             // 
-            this.buttonCaptionTextColor.Location = new System.Drawing.Point(399, 69);
-            this.buttonCaptionTextColor.Name = "buttonCaptionTextColor";
-            this.buttonCaptionTextColor.Size = new System.Drawing.Size(171, 26);
-            this.buttonCaptionTextColor.TabIndex = 4;
-            this.buttonCaptionTextColor.Text = "Change caption text color ...";
-            this.buttonCaptionTextColor.UseVisualStyleBackColor = true;
-            this.buttonCaptionTextColor.Click += new System.EventHandler(this.buttonStyle_Click);
+            buttonCaptionTextColor.Location = new Point(399, 69);
+            buttonCaptionTextColor.Name = "buttonCaptionTextColor";
+            buttonCaptionTextColor.Size = new Size(171, 26);
+            buttonCaptionTextColor.TabIndex = 4;
+            buttonCaptionTextColor.Text = "Change caption text color ...";
+            buttonCaptionTextColor.UseVisualStyleBackColor = true;
+            buttonCaptionTextColor.Click += buttonStyle_Click;
             // 
             // buttonNoteFont
             // 
-            this.buttonNoteFont.Location = new System.Drawing.Point(399, 180);
-            this.buttonNoteFont.Name = "buttonNoteFont";
-            this.buttonNoteFont.Size = new System.Drawing.Size(171, 26);
-            this.buttonNoteFont.TabIndex = 6;
-            this.buttonNoteFont.Text = "Change note font ...";
-            this.buttonNoteFont.UseVisualStyleBackColor = true;
-            this.buttonNoteFont.Click += new System.EventHandler(this.buttonStyle_Click);
+            buttonNoteFont.Location = new Point(399, 180);
+            buttonNoteFont.Name = "buttonNoteFont";
+            buttonNoteFont.Size = new Size(171, 26);
+            buttonNoteFont.TabIndex = 6;
+            buttonNoteFont.Text = "Change note font ...";
+            buttonNoteFont.UseVisualStyleBackColor = true;
+            buttonNoteFont.Click += buttonStyle_Click;
             // 
             // buttonNoteColor
             // 
-            this.buttonNoteColor.Location = new System.Drawing.Point(399, 148);
-            this.buttonNoteColor.Name = "buttonNoteColor";
-            this.buttonNoteColor.Size = new System.Drawing.Size(171, 26);
-            this.buttonNoteColor.TabIndex = 5;
-            this.buttonNoteColor.Text = "Change note color ...";
-            this.buttonNoteColor.UseVisualStyleBackColor = true;
-            this.buttonNoteColor.Click += new System.EventHandler(this.buttonStyle_Click);
+            buttonNoteColor.Location = new Point(399, 148);
+            buttonNoteColor.Name = "buttonNoteColor";
+            buttonNoteColor.Size = new Size(171, 26);
+            buttonNoteColor.TabIndex = 5;
+            buttonNoteColor.Text = "Change note color ...";
+            buttonNoteColor.UseVisualStyleBackColor = true;
+            buttonNoteColor.Click += buttonStyle_Click;
             // 
             // buttonLightGray
             // 
-            this.buttonLightGray.Location = new System.Drawing.Point(9, 100);
-            this.buttonLightGray.Name = "buttonLightGray";
-            this.buttonLightGray.Size = new System.Drawing.Size(139, 26);
-            this.buttonLightGray.TabIndex = 2;
-            this.buttonLightGray.Text = "Light gray style";
-            this.buttonLightGray.UseVisualStyleBackColor = true;
-            this.buttonLightGray.Click += new System.EventHandler(this.buttonStyle_Click);
+            buttonLightGray.Location = new Point(9, 100);
+            buttonLightGray.Name = "buttonLightGray";
+            buttonLightGray.Size = new Size(139, 26);
+            buttonLightGray.TabIndex = 2;
+            buttonLightGray.Text = "Light gray style";
+            buttonLightGray.UseVisualStyleBackColor = true;
+            buttonLightGray.Click += buttonStyle_Click;
             // 
             // buttonDark
             // 
-            this.buttonDark.Location = new System.Drawing.Point(9, 68);
-            this.buttonDark.Name = "buttonDark";
-            this.buttonDark.Size = new System.Drawing.Size(139, 26);
-            this.buttonDark.TabIndex = 1;
-            this.buttonDark.Text = "Dark style ";
-            this.buttonDark.UseVisualStyleBackColor = true;
-            this.buttonDark.Click += new System.EventHandler(this.buttonStyle_Click);
+            buttonDark.Location = new Point(9, 68);
+            buttonDark.Name = "buttonDark";
+            buttonDark.Size = new Size(139, 26);
+            buttonDark.TabIndex = 1;
+            buttonDark.Text = "Dark style ";
+            buttonDark.UseVisualStyleBackColor = true;
+            buttonDark.Click += buttonStyle_Click;
             // 
             // labelText
             // 
-            this.labelText.BackColor = System.Drawing.Color.LemonChiffon;
-            this.labelText.Location = new System.Drawing.Point(188, 52);
-            this.labelText.Name = "labelText";
-            this.labelText.Size = new System.Drawing.Size(168, 134);
-            this.labelText.TabIndex = 6;
-            this.labelText.Text = "...";
+            labelText.BackColor = Color.LemonChiffon;
+            labelText.Location = new Point(188, 52);
+            labelText.Name = "labelText";
+            labelText.Size = new Size(168, 134);
+            labelText.TabIndex = 6;
+            labelText.Text = "...";
             // 
             // labelNote
             // 
-            this.labelNote.BackColor = System.Drawing.Color.LemonChiffon;
-            this.labelNote.Location = new System.Drawing.Point(171, 37);
-            this.labelNote.Name = "labelNote";
-            this.labelNote.Size = new System.Drawing.Size(202, 169);
-            this.labelNote.TabIndex = 5;
+            labelNote.BackColor = Color.LemonChiffon;
+            labelNote.Location = new Point(171, 37);
+            labelNote.Name = "labelNote";
+            labelNote.Size = new Size(202, 169);
+            labelNote.TabIndex = 5;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(399, 17);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(93, 15);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Customize style:";
+            label2.AutoSize = true;
+            label2.Location = new Point(399, 17);
+            label2.Name = "label2";
+            label2.Size = new Size(93, 15);
+            label2.TabIndex = 4;
+            label2.Text = "Customize style:";
             // 
             // buttonCaptionColor
             // 
-            this.buttonCaptionColor.Location = new System.Drawing.Point(399, 37);
-            this.buttonCaptionColor.Name = "buttonCaptionColor";
-            this.buttonCaptionColor.Size = new System.Drawing.Size(171, 26);
-            this.buttonCaptionColor.TabIndex = 3;
-            this.buttonCaptionColor.Text = "Change caption color ...";
-            this.buttonCaptionColor.UseVisualStyleBackColor = true;
-            this.buttonCaptionColor.Click += new System.EventHandler(this.buttonStyle_Click);
+            buttonCaptionColor.Location = new Point(399, 37);
+            buttonCaptionColor.Name = "buttonCaptionColor";
+            buttonCaptionColor.Size = new Size(171, 26);
+            buttonCaptionColor.TabIndex = 3;
+            buttonCaptionColor.Text = "Change caption color ...";
+            buttonCaptionColor.UseVisualStyleBackColor = true;
+            buttonCaptionColor.Click += buttonStyle_Click;
             // 
             // labelCaption
             // 
-            this.labelCaption.BackColor = System.Drawing.Color.Khaki;
-            this.labelCaption.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelCaption.Location = new System.Drawing.Point(171, 17);
-            this.labelCaption.Name = "labelCaption";
-            this.labelCaption.Padding = new System.Windows.Forms.Padding(2, 2, 0, 0);
-            this.labelCaption.Size = new System.Drawing.Size(202, 20);
-            this.labelCaption.TabIndex = 2;
-            this.labelCaption.Text = "Caption text ...";
+            labelCaption.BackColor = Color.Khaki;
+            labelCaption.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            labelCaption.Location = new Point(171, 17);
+            labelCaption.Name = "labelCaption";
+            labelCaption.Padding = new Padding(2, 2, 0, 0);
+            labelCaption.Size = new Size(202, 20);
+            labelCaption.TabIndex = 2;
+            labelCaption.Text = "Caption text ...";
             // 
             // buttonYellow
             // 
-            this.buttonYellow.Location = new System.Drawing.Point(9, 36);
-            this.buttonYellow.Name = "buttonYellow";
-            this.buttonYellow.Size = new System.Drawing.Size(139, 26);
-            this.buttonYellow.TabIndex = 0;
-            this.buttonYellow.Text = "Yellow style ";
-            this.buttonYellow.UseVisualStyleBackColor = true;
-            this.buttonYellow.Click += new System.EventHandler(this.buttonStyle_Click);
+            buttonYellow.Location = new Point(9, 36);
+            buttonYellow.Name = "buttonYellow";
+            buttonYellow.Size = new Size(139, 26);
+            buttonYellow.TabIndex = 0;
+            buttonYellow.Text = "Yellow style ";
+            buttonYellow.UseVisualStyleBackColor = true;
+            buttonYellow.Click += buttonStyle_Click;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 17);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(99, 15);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Predefined styles:";
+            label1.AutoSize = true;
+            label1.Location = new Point(9, 17);
+            label1.Name = "label1";
+            label1.Size = new Size(99, 15);
+            label1.TabIndex = 0;
+            label1.Text = "Predefined styles:";
             // 
             // PostItPropertiesForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(586, 291);
-            this.Controls.Add(this.buttonCancel);
-            this.Controls.Add(this.buttonAccept);
-            this.Controls.Add(this.panelForm);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "PostItPropertiesForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "PostIt properties";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PostItPropertiesForm_FormClosing);
-            this.Load += new System.EventHandler(this.PostItPropertiesForm_Load);
-            this.panelForm.ResumeLayout(false);
-            this.panelForm.PerformLayout();
-            this.ResumeLayout(false);
+            AcceptButton = buttonAccept;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(586, 291);
+            Controls.Add(buttonCancel);
+            Controls.Add(buttonAccept);
+            Controls.Add(panelForm);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "PostItPropertiesForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "PostIt properties";
+            FormClosing += PostItPropertiesForm_FormClosing;
+            Load += PostItPropertiesForm_Load;
+            panelForm.ResumeLayout(false);
+            panelForm.PerformLayout();
+            ResumeLayout(false);
 
         }
 
