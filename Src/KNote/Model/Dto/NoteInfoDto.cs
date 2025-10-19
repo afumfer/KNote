@@ -218,7 +218,9 @@ public class NoteInfoDto : SmartModelDtoBase
         // ---
         // Capture the validations implemented with attributes.
         // ---
-        
+
+        // TODO: !!! Usar yield return para devolver los resultados uno a uno y no crear la lista results
+
         Validator.TryValidateProperty(this.Topic,
             new ValidationContext(this, null, null) { MemberName = "Topic" },
             results);
@@ -237,9 +239,13 @@ public class NoteInfoDto : SmartModelDtoBase
 
         if (FolderId == Guid.Empty)
         {
+            //results.Add(new ValidationResult
+            //    ("KMSG: The FolderId attribute cannot be empty."
+            //    , new[] { "FolderId" }));
+
             results.Add(new ValidationResult
                 ("KMSG: The FolderId attribute cannot be empty."
-                , new[] { "FolderId" }));
+                , new[] { nameof(FolderId) }));  // !!! Aplicar este ambio a todas las validaciones
         }
 
         if (ModificationDateTime < CreationDateTime)

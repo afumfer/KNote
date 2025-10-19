@@ -15,14 +15,14 @@
     <None Remove="Temp\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.41.3" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.8" />
-    <PackageReference Include="NLog" Version="6.0.2" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="6.0.2" />
-    <PackageReference Include="OpenAI" Version="2.3.0" />
+    <PackageReference Include="Markdig" Version="0.42.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.10" />
+    <PackageReference Include="NLog" Version="6.0.5" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="6.0.5" />
+    <PackageReference Include="OpenAI" Version="2.5.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
-    <PackageReference Include="System.IO.Ports" Version="9.0.8" />
-    <PackageReference Include="System.Text.Json" Version="9.0.8" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.10" />
+    <PackageReference Include="System.Text.Json" Version="9.0.10" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HtmlEditorControl\HTMLEditorControl.csproj" />
