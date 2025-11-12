@@ -76,6 +76,7 @@
             btnKntEditViewHtml = new Button();
             btnKntEditViewNavigation = new Button();
             btnKntEditViewMarkdown = new Button();
+            buttonImportFiles = new Button();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
             tabRichEditor.SuspendLayout();
@@ -346,6 +347,7 @@
             // 
             // tabAppLab
             // 
+            tabAppLab.Controls.Add(buttonImportFiles);
             tabAppLab.Controls.Add(buttonTestNoteList);
             tabAppLab.Controls.Add(buttonNLog);
             tabAppLab.Controls.Add(buttonServerCOMForm);
@@ -419,7 +421,7 @@
             // 
             // buttonTestReflection
             // 
-            buttonTestReflection.Location = new Point(14, 164);
+            buttonTestReflection.Location = new Point(12, 209);
             buttonTestReflection.Name = "buttonTestReflection";
             buttonTestReflection.Size = new Size(296, 26);
             buttonTestReflection.TabIndex = 11;
@@ -429,7 +431,7 @@
             // 
             // buttonTestProcessStart
             // 
-            buttonTestProcessStart.Location = new Point(14, 133);
+            buttonTestProcessStart.Location = new Point(12, 178);
             buttonTestProcessStart.Name = "buttonTestProcessStart";
             buttonTestProcessStart.Size = new Size(296, 25);
             buttonTestProcessStart.TabIndex = 10;
@@ -439,7 +441,7 @@
             // 
             // buttonTestReadVarItem
             // 
-            buttonTestReadVarItem.Location = new Point(14, 101);
+            buttonTestReadVarItem.Location = new Point(12, 146);
             buttonTestReadVarItem.Name = "buttonTestReadVarItem";
             buttonTestReadVarItem.Size = new Size(296, 26);
             buttonTestReadVarItem.TabIndex = 9;
@@ -450,7 +452,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(13, 233);
+            label2.Location = new Point(12, 285);
             label2.Name = "label2";
             label2.Size = new Size(38, 15);
             label2.TabIndex = 8;
@@ -459,7 +461,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(13, 218);
+            label1.Location = new Point(12, 270);
             label1.Name = "label1";
             label1.Size = new Size(38, 15);
             label1.TabIndex = 7;
@@ -469,7 +471,7 @@
             // 
             listMessages.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listMessages.FormattingEnabled = true;
-            listMessages.Location = new Point(13, 254);
+            listMessages.Location = new Point(12, 306);
             listMessages.Name = "listMessages";
             listMessages.Size = new Size(636, 274);
             listMessages.TabIndex = 6;
@@ -578,6 +580,16 @@
             btnKntEditViewMarkdown.UseVisualStyleBackColor = true;
             btnKntEditViewMarkdown.Click += btnKntEditViewMarkdown_Click;
             // 
+            // buttonImportFiles
+            // 
+            buttonImportFiles.Location = new Point(13, 85);
+            buttonImportFiles.Name = "buttonImportFiles";
+            buttonImportFiles.Size = new Size(298, 28);
+            buttonImportFiles.TabIndex = 20;
+            buttonImportFiles.Text = "Import files as notes";
+            buttonImportFiles.UseVisualStyleBackColor = true;
+            buttonImportFiles.Click += buttonImportFiles_Click;
+            // 
             // KntLabForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -653,5 +665,6 @@
         private Panel panel1;
         private KntWebView.KntEditView kntEditView;
         private Button buttonTestNoteList;
+        private Button buttonImportFiles;
     }
 }

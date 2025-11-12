@@ -1488,7 +1488,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             var db = GetOpenConnection();
 
             sql = @"Select Tags FROM Notes WHERE NoteId = @NoteId";                
-            var actualTag = await db.ExecuteScalarAsync<string>(sql.ToString(), new { NoteId = noteId });         
+            var actualTag = await db.ExecuteScalarAsync<string>(sql.ToString(), new { NoteId = noteId }) ?? "";         
                 
             if (string.IsNullOrEmpty(oldTag))
             {

@@ -1,18 +1,17 @@
-﻿using System.Data;
-using System.Text;
-using System.Xml.Serialization;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
-using KNote.ClientWin.Controllers;
 using KNote.Model;
 using KNote.Model.Dto;
-using KntScript;
 using KNote.Service.Core;
-
-using NLog;
+using KntScript;
 using Microsoft.Web.WebView2.Core;
+using NLog;
+using System.Data;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Xml.Serialization;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 
 namespace KNote.ClientWin.Views;
@@ -1195,7 +1194,7 @@ window.chrome.webview.postMessage(retValue);";
             _notesSelector = new NotesSelectorCtrl(_ctrl.Store);
             _notesSelector.EmbededMode = false;
             _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime, ContentType";
-        }        
+        }
 
         await _notesSelector.LoadFilteredEntities(_ctrl.Store.GetFirstServiceRef().Service, new NotesFilterDto { Tags = KntConst.PromptTag }, false);
 
@@ -1207,5 +1206,68 @@ window.chrome.webview.postMessage(retValue);";
             MessageBox.Show("not selected");
     }
 
-    #endregion 
+    #endregion
+
+    //#region Import files as Notes
+
+    private async void buttonImportFiles_Click(object sender, EventArgs e)
+    {
+        
+        if (_store.ActiveFolderWithServiceRef == null)
+        {
+            MessageBox.Show("There is no archive selected ");
+            return;
+        }
+
+        var serviceRef = _store.ActiveFolderWithServiceRef.ServiceRef;
+        var activeFolderId = _store.ActiveFolderWithServiceRef.FolderInfo.FolderId;
+
+        var service = serviceRef.Service;
+
+        using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+        {
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                string folder = dialog.SelectedPath;
+
+                string[] filesTxt = Directory.GetFiles(folder, "*.txt");
+                foreach (string file in filesTxt)
+                {
+                    try
+                    {
+                        using (StreamReader sr = new StreamReader(file))
+                        {
+                            string firstLine = sr.ReadLine();
+                            if (firstLine != null)
+                            {
+                                sr.BaseStream.Seek(0, SeekOrigin.Begin);
+                                sr.DiscardBufferedData(); 
+                                string allContent = sr.ReadToEnd();
+
+                                if (firstLine.Length > 80)
+                                    firstLine = firstLine.Substring(0, 79);
+
+                                var newNote = (await service.Notes.NewAsync()).Entity;
+
+                                newNote.FolderId = activeFolderId;                                
+                                newNote.Description = allContent;
+                                newNote.Topic = $"{Path.GetFileName(file)} - {firstLine} ";
+                                newNote.Tags = "";
+                                newNote.InternalTags = "";
+
+                                var resSave = await service.Notes.SaveAsync(newNote, false);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al leer {file}:\n{ex.Message}");
+                    }
+                }                
+            }
+        }
+
+        MessageBox.Show("End");
+
+    }
 }

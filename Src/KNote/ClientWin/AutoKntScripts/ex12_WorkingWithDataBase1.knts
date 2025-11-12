@@ -1,7 +1,7 @@
 ' --- Example obtain data from SQL Server.
 '     (Customize your server, database and select statement).
 
-var conn = "Server=.\SQLEXPRESS;Database=KNote02DB;trusted_connection=Yes";
+var conn = "Server=.\SQLEXPRESS;Database=KNote05DB;trusted_connection=Yes;Encrypt=false";
 
 var db = GetSQLConnection(conn);
 ' ... or with .net class connection

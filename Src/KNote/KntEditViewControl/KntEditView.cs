@@ -70,7 +70,7 @@ namespace KntWebView
         public bool ForceHttps { get; set; } = false;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string FolderForVirtualHostNameMapping { get; private set; }
+        public string? FolderForVirtualHostNameMapping { get; private set; }
 
         private string _contentType = "navigation";
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
