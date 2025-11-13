@@ -29,70 +29,72 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReadVarForm));
-            this.panelButtons = new System.Windows.Forms.Panel();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.panelControls = new System.Windows.Forms.Panel();
-            this.panelButtons.SuspendLayout();
-            this.SuspendLayout();
+            panelButtons = new Panel();
+            buttonCancel = new Button();
+            buttonAcept = new Button();
+            panelControls = new Panel();
+            panelButtons.SuspendLayout();
+            SuspendLayout();
             // 
             // panelButtons
             // 
-            this.panelButtons.Controls.Add(this.button2);
-            this.panelButtons.Controls.Add(this.button1);
-            this.panelButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelButtons.Location = new System.Drawing.Point(0, 325);
-            this.panelButtons.Name = "panelButtons";
-            this.panelButtons.Size = new System.Drawing.Size(586, 50);
-            this.panelButtons.TabIndex = 2;
+            panelButtons.Controls.Add(buttonCancel);
+            panelButtons.Controls.Add(buttonAcept);
+            panelButtons.Dock = DockStyle.Bottom;
+            panelButtons.Location = new Point(0, 325);
+            panelButtons.Name = "panelButtons";
+            panelButtons.Size = new Size(586, 50);
+            panelButtons.TabIndex = 2;
             // 
-            // button2
+            // buttonCancel
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(496, 11);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(81, 29);
-            this.button2.TabIndex = 1;
-            this.button2.Text = "&Cancel";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.buttonCancel_Click);
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.Location = new Point(496, 11);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new Size(81, 29);
+            buttonCancel.TabIndex = 1;
+            buttonCancel.Text = "&Cancel";
+            buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += buttonCancel_Click;
             // 
-            // button1
+            // buttonAcept
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(409, 11);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(81, 29);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "&Acept";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.buttonAccept_Click);
+            buttonAcept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonAcept.Location = new Point(409, 11);
+            buttonAcept.Name = "buttonAcept";
+            buttonAcept.Size = new Size(81, 29);
+            buttonAcept.TabIndex = 1;
+            buttonAcept.Text = "&Acept";
+            buttonAcept.UseVisualStyleBackColor = true;
+            buttonAcept.Click += buttonAccept_Click;
             // 
             // panelControls
             // 
-            this.panelControls.BackColor = System.Drawing.Color.White;
-            this.panelControls.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelControls.Location = new System.Drawing.Point(0, 0);
-            this.panelControls.Name = "panelControls";
-            this.panelControls.Size = new System.Drawing.Size(586, 325);
-            this.panelControls.TabIndex = 3;
+            panelControls.BackColor = Color.White;
+            panelControls.Dock = DockStyle.Fill;
+            panelControls.Location = new Point(0, 0);
+            panelControls.Name = "panelControls";
+            panelControls.Size = new Size(586, 325);
+            panelControls.TabIndex = 3;
             // 
             // ReadVarForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(586, 375);
-            this.Controls.Add(this.panelControls);
-            this.Controls.Add(this.panelButtons);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "ReadVarForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "KntScript read vars";
-            this.panelButtons.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AcceptButton = buttonAcept;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            CancelButton = buttonCancel;
+            ClientSize = new Size(586, 375);
+            Controls.Add(panelControls);
+            Controls.Add(panelButtons);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "ReadVarForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "KntScript read vars";            
+            Shown += ReadVarForm_Shown;
+            panelButtons.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion
@@ -100,5 +102,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Panel panelControls;
+        private Button buttonCancel;
+        private Button buttonAcept;
     }
 }

@@ -27,7 +27,7 @@ public partial class ReadVarForm : Form
         AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
-        
+
         _readVarItems = readVarItems;
 
         GenControls();
@@ -37,9 +37,10 @@ public partial class ReadVarForm : Form
 
     #region Form events handler
 
-    private void ReadVarForm_Load(object sender, EventArgs e)
+    private void ReadVarForm_Shown(object sender, EventArgs e)
     {
-
+        if (textFirst != null)        
+            textFirst.Focus();        
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)
@@ -69,7 +70,6 @@ public partial class ReadVarForm : Form
         int widthText = 350;
         int inc = 30;
         int i = 0;
-
 
         foreach (ReadVarItem var in _readVarItems)
         {
@@ -116,4 +116,5 @@ public partial class ReadVarForm : Form
     }
 
     #endregion
+
 }
