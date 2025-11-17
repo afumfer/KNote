@@ -413,7 +413,6 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         return res;
     }
 
-
     public async Task<ResourceDto> NewResource()
     {
         var resource = new ResourceEditorCtrl(Store);

@@ -11,6 +11,13 @@ namespace KNote.ClientWin.Controllers;
 
 public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 {
+    #region Private fields
+
+    private static readonly object lockObject = new object();
+    private static bool loadingNote = false;
+
+    #endregion 
+
     #region Properties
 
     public FolderWithServiceRef SelectedFolderWithServiceRef 
@@ -592,18 +599,31 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public async Task EditNote()
     {
+        if (loadingNote)
+            return;
+
+        lock (lockObject)
+            loadingNote = true;
+
         if (SelectedNoteInfo == null)
         {
+            lock (lockObject)
+                loadingNote = false;
             View.ShowInfo("There is no note selected to edit.");
             return;
         }            
         if (await Store.CheckNoteIsActive(SelectedNoteInfo.NoteId) || await Store.CheckPostItIsActive(SelectedNoteInfo.NoteId))
         {
+            lock (lockObject)
+                loadingNote = false;
             View.ShowInfo("This note is already active.");
             return;
         }
 
         await EditNote(SelectedServiceRef.Service, SelectedNoteInfo.NoteId);
+
+        lock (lockObject)
+            loadingNote = false;
     }
 
     public async Task AddFastResolvedTask()

@@ -1193,7 +1193,7 @@ window.chrome.webview.postMessage(retValue);";
         {
             _notesSelector = new NotesSelectorCtrl(_ctrl.Store);
             _notesSelector.EmbededMode = false;
-            _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime, ContentType";
+            _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime";
         }
 
         await _notesSelector.LoadFilteredEntities(_ctrl.Store.GetFirstServiceRef().Service, new NotesFilterDto { Tags = KntConst.PromptTag }, false);

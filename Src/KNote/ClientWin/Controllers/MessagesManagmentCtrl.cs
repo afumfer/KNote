@@ -7,11 +7,11 @@ public class MessagesManagmentCtrl : CtrlBase
 {
     #region Fields
 
-    static System.Windows.Forms.Timer kntTimerAlarms;
-    static System.Windows.Forms.Timer kntTimerAutoSave;
+    private static System.Windows.Forms.Timer kntTimerAlarms;
+    private static System.Windows.Forms.Timer kntTimerAutoSave;
 
-    private static readonly object _lockObject = new object();
-    static bool execAutoSave = true;
+    private static readonly object lockObject = new object();
+    private static bool execAutoSave = true;
 
     #endregion
 
@@ -87,7 +87,7 @@ public class MessagesManagmentCtrl : CtrlBase
 
     private async void VisibleWindows()
     {
-        lock (_lockObject)
+        lock (lockObject)
             execAutoSave = false;
         foreach (var store in Store.GetAllServiceRef())
         {
@@ -96,13 +96,13 @@ public class MessagesManagmentCtrl : CtrlBase
             foreach(var id in res.Entity)                                    
                 PostItVisible?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
         }
-        lock (_lockObject)
+        lock (lockObject)
             execAutoSave = true;
     }
 
     private async Task AlarmsWindows()
     {
-        lock (_lockObject)
+        lock (lockObject)
             execAutoSave = false;
         foreach (var store in Store.GetAllServiceRef())
         {
@@ -124,7 +124,7 @@ public class MessagesManagmentCtrl : CtrlBase
             foreach (var id in resKntScript.Entity)
                 ExecuteKntScript?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
         }
-        lock (_lockObject)
+        lock (lockObject)
             execAutoSave = true;
     }
 

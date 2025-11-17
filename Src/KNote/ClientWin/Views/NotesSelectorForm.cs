@@ -284,7 +284,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
         dataGridNotes.Columns[2].DataPropertyName = "Topic";        
         dataGridNotes.Columns[2].MinimumWidth = 450;        
-        dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+        //dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;  // ??
         dataGridNotes.Columns[2].Resizable = DataGridViewTriState.True;
         dataGridNotes.Columns[2].HeaderText = "Topic";        
 
@@ -324,9 +324,8 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         dataGridNotes.Columns[8].DataPropertyName = "Description";
         dataGridNotes.Columns[8].Visible = false;            
 
-        dataGridNotes.Columns[9].DataPropertyName = "ContentType";
-        if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("ContentType"))
-            dataGridNotes.Columns[9].Visible = false;
+        dataGridNotes.Columns[9].DataPropertyName = "ContentType";        
+        dataGridNotes.Columns[9].Visible = false;
 
         dataGridNotes.Columns[10].DataPropertyName = "Script";
         dataGridNotes.Columns[10].Visible = false;

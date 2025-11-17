@@ -204,14 +204,12 @@ public class FolderInfoDto : SmartModelDtoBase
         // Specific validations
         // ----
 
-        // ---- Example 
-        //if (ModificationDateTime < CreationDateTime)
-        //{
-        //    results.Add(new ValidationResult
-        //     ("KMSG: The modification date cannot be greater than the creation date "
-        //     , new[] { "ModificationDateTime", "CreationDateTime" }));
-        //}
-
+        if (FolderId == ParentId)
+        {
+            results.Add(new ValidationResult
+             ("KMSG: A folder cannot be the parent of itself "
+             , new[] { "FolderId", "ParentId" }));
+        }
 
         return results;
     }

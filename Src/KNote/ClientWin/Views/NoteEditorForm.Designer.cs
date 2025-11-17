@@ -1231,9 +1231,9 @@
             label11.Location = new Point(6, 16);
             label11.Margin = new Padding(4, 0, 4, 0);
             label11.Name = "label11";
-            label11.Size = new Size(82, 15);
+            label11.Size = new Size(90, 15);
             label11.TabIndex = 5;
-            label11.Text = "Tasks/Actions:";
+            label11.Text = "Tasks/Activities:";
             // 
             // tabAlarms
             // 

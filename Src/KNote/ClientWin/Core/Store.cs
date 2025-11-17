@@ -492,7 +492,7 @@ public class Store
             {
                 _notesSelector = new NotesSelectorCtrl(this);
                 _notesSelector.EmbededMode = false;
-                _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime, ContentType";
+                _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime";
             }
             return _notesSelector;
         }
