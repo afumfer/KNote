@@ -26,16 +26,6 @@
                 <RadzenMenu>
                     <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
                     <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
-                    <RadzenMenuItem Text="Display options" Icon="tune">
-                        @if (viewMode == 0)
-                        {                                 
-                            <RadzenMenuItem Text="Item view" Click="ToggleView"></RadzenMenuItem>                                        
-                        }
-                        else
-                        {                                    
-                            <RadzenMenuItem Text="Table view" Click="ToggleView"></RadzenMenuItem>                        
-                        }            
-                    </RadzenMenuItem>
                 </RadzenMenu>
             </span>
         </div>
@@ -61,15 +51,8 @@
                         <h5>  </h5>
                     }
                     else
-                    {                    
-                        @if (viewMode == 0)
-                        {
-                            <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
-                        }
-                        else
-                        {
-                            <NotesList Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
-                        }
+                    {
+                        <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
                     }           
                 </RadzenSplitterPane>
             </RadzenSplitter>
@@ -80,13 +63,12 @@
 
 @code {
     private List<FolderDto>? foldersTree;
-    private List<NoteInfoDto>? notes;
+    private List<NoteMinimalDto>? notes;
     private FolderDto? folder;
     private NotesFilterDto filter = new NotesFilterDto();
     private PaginationContext paginationContext = new PaginationContext();
     private RadzenPager pager;
     private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";    
-    private int viewMode = 0;    
     private bool componentInitialized = false;
     private AppState appState = null!;
 
@@ -143,11 +125,6 @@
         await SelectedPage(1);
     }
 
-    private void ToggleView()
-    {
-        viewMode = (viewMode == 0) ? 1 : 0;
-    }
-
     private async Task PageChanged(PagerEventArgs args)
     {
         await SelectedPage(args.PageIndex + 1);                
@@ -181,17 +158,17 @@
         store.NavigateTo($"notes/new/tree");
     }
 
-    void OnView(NoteInfoDto note)
+    void OnView(NoteMinimalDto note)
     {
         store.NavigateTo($"notes/{note.NoteId}/tree");
     }
 
-    void OnEdit(NoteInfoDto note)
+    void OnEdit(NoteMinimalDto note)
     {
         store.NavigateTo($"notes/edit/{note.NoteId}/tree");
     }
 
-    async Task OnDelete(NoteInfoDto item)
+    async Task OnDelete(NoteMinimalDto item)
     {                
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?", 

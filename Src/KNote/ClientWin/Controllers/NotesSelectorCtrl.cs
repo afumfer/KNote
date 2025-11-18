@@ -130,7 +130,7 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteMinimalDto>,
             }
             else
             {
-                response = await Service.Notes.GetSearchMinimal(notesSearch);                
+                response = await Service.Notes.GetSearchMinimalAsync(notesSearch);                
             }
 
             if (response.IsValid)
@@ -183,7 +183,7 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteMinimalDto>,
             }
             else
             {
-                response = await Service.Notes.GetFilterMinimal(notesFilter);
+                response = await Service.Notes.GetFilterMinimalAsync(notesFilter);
             }
 
             if (response.IsValid)

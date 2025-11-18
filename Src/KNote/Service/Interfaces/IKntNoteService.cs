@@ -17,10 +17,10 @@ public interface IKntNoteService
     Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId);
     Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);
     Task<Result<List<NoteMinimalDto>>> GetByFolderMinimalAsync(Guid folderId);
-    Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);
-    Task<Result<List<NoteMinimalDto>>> GetFilterMinimal(NotesFilterDto notesFilter);
-    Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);
-    Task<Result<List<NoteMinimalDto>>> GetSearchMinimal(NotesSearchDto notesSearch);
+    Task<Result<List<NoteInfoDto>>> GetFilterAsync(NotesFilterDto notesFilter);
+    Task<Result<List<NoteMinimalDto>>> GetFilterMinimalAsync(NotesFilterDto notesFilter);
+    Task<Result<List<NoteInfoDto>>> GetSearchAsync(NotesSearchDto notesSearch);
+    Task<Result<List<NoteMinimalDto>>> GetSearchMinimalAsync(NotesSearchDto notesSearch);
     Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);
     Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entity = null);
     Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true);

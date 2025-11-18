@@ -4,13 +4,13 @@
 
 <EntityList List="Notes">
     <AllItems>
-        <RadzenDataGrid Data="@Notes" TItem="NoteInfoDto" AllowColumnResize="true" Density="@Density.Compact">
+        <RadzenDataGrid Data="@Notes" TItem="NoteMinimalDto" AllowColumnResize="true" Density="@Density.Compact">
             <Columns>                
-                <RadzenDataGridColumn TItem="NoteInfoDto" Property="NoteNumber" Title="Note #" Width="80px" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn TItem="NoteInfoDto" Property="Topic" Title="Topic" />
-                <RadzenDataGridColumn TItem="NoteInfoDto" Property="Priority" Title="Priority " Width="60px"  TextAlign="TextAlign.Right" />
-                <RadzenDataGridColumn TItem="NoteInfoDto" Property="CreationDateTime" Title="Date " FormatString="{0:d}" Width="80px"  TextAlign="TextAlign.Right" />                
-                <RadzenDataGridColumn TItem="NoteInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
+                <RadzenDataGridColumn TItem="NoteMinimalDto" Property="NoteNumber" Title="Note #" Width="80px" TextAlign="TextAlign.Center" />
+                <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Topic" Title="Topic" />
+                <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Priority" Title="Priority " Width="60px" TextAlign="TextAlign.Right" />
+                <RadzenDataGridColumn TItem="NoteMinimalDto" Property="CreationDateTime" Title="Date " FormatString="{0:d}" Width="80px" TextAlign="TextAlign.Right" />
+                <RadzenDataGridColumn TItem="NoteMinimalDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center">
                     <Template Context="data">                                                
                         <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(data))" Icon="edit" Size="ButtonSize.Small"
                             ButtonStyle="ButtonStyle.Primary" 
@@ -26,8 +26,8 @@
 </EntityList>
 
 @code {
-    [Parameter] public List<NoteInfoDto>? Notes { get; set; }
-    [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
-    [Parameter] public EventCallback<NoteInfoDto> OnNoteEdit { get; set; }
-    [Parameter] public EventCallback<NoteInfoDto> OnNoteView { get; set; }
+    [Parameter] public List<NoteMinimalDto>? Notes { get; set; }
+    [Parameter] public EventCallback<NoteMinimalDto> OnNoteDelete { get; set; }
+    [Parameter] public EventCallback<NoteMinimalDto> OnNoteEdit { get; set; }
+    [Parameter] public EventCallback<NoteMinimalDto> OnNoteView { get; set; }
 }

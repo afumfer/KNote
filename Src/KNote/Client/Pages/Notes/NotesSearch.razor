@@ -13,16 +13,6 @@
             <IndexMenu>
                 <RadzenMenu>
                     <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                    <RadzenMenuItem Text="Display options" Icon="tune">
-                        @if (viewMode == 0)
-                        {                                 
-                            <RadzenMenuItem Text="Item view" Click="ToggleView"></RadzenMenuItem>                                        
-                        }
-                        else
-                        {                                    
-                            <RadzenMenuItem Text="Table view" Click="ToggleView"></RadzenMenuItem>                        
-                        }            
-                    </RadzenMenuItem>
                 </RadzenMenu>
             </IndexMenu>
         </KntIndexHeader>
@@ -53,21 +43,13 @@
 
 <div class="row">
     <div class="col-12">
-        @if (viewMode == 0)
-        {
-            <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
-        }
-        else
-        {
-            <NotesList Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
-        }
+        <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
     </div>
 </div>
 
 
 @code {
-    private List<NoteInfoDto>? notes;        
-    private int viewMode = 0;
+    private List<NoteMinimalDto>? notes;            
     private string textSearch = "";
     private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
     private PaginationContext paginationContext = new PaginationContext();
@@ -95,11 +77,6 @@
     }
 
     #region Utils
-
-    private void ToggleView()
-    {
-        viewMode = (viewMode == 0) ? 1 : 0;
-    }
 
     private void LoadFormControls()
     {
@@ -195,7 +172,7 @@
 
     #region  Edit / Delete events ...
 
-    private void OnView(NoteInfoDto note)
+    private void OnView(NoteMinimalDto note)
     {
         store.NavigateTo($"notes/{note.NoteId}/search");
     }
@@ -205,12 +182,12 @@
         store.NavigateTo($"notes/new/search");
     }
 
-    private void OnEdit(NoteInfoDto note)
+    private void OnEdit(NoteMinimalDto note)
     {
         store.NavigateTo($"notes/edit/{note.NoteId}/search");
     }
 
-    async Task OnDelete(NoteInfoDto item)
+    async Task OnDelete(NoteMinimalDto item)
     {                
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?", 

@@ -14,16 +14,6 @@
             <IndexMenu>
                 <RadzenMenu>
                     <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                    <RadzenMenuItem Text="Display options" Icon="tune">
-                        @if (viewMode == 0)
-                        {                                 
-                            <RadzenMenuItem Text="Item view" Click="ToggleView"></RadzenMenuItem>                                        
-                        }
-                        else
-                        {                                    
-                            <RadzenMenuItem Text="Table view" Click="ToggleView"></RadzenMenuItem>                        
-                        }            
-                    </RadzenMenuItem>
                 </RadzenMenu>
             </IndexMenu>
         </KntIndexHeader>
@@ -45,14 +35,7 @@
                             Count="@((int)paginationContext.TotalCount)" 
                             PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
                             PageChanged=@PageChanged/>
-                    @if (viewMode == 0)
-                    {
-                        <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit"  OnNoteView="OnView"></NotesIndex>
-                    }
-                    else
-                    {
-                        <NotesList Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
-                    } 
+                    <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
                  </RadzenSplitterPane>
             </RadzenSplitter>
         </div>
@@ -60,12 +43,11 @@
 </RadzenCard>
 
 @code {        
-    private List<NoteInfoDto>? notes = new List<NoteInfoDto>();
+    private List<NoteMinimalDto>? notes = new List<NoteMinimalDto>();
     private NotesFilterDto filter = new NotesFilterDto();
     private PaginationContext paginationContext = new PaginationContext();
     private RadzenPager? pager;
-    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";    
-    private int viewMode = 0;
+    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";        
     private bool componentInitialized = false;
 
     protected override async Task OnInitializedAsync()
@@ -73,11 +55,6 @@
         await SelectedPage(1);
         await base.OnInitializedAsync();
         componentInitialized = true;
-    }
-
-    private void ToggleView()
-    {
-        viewMode = (viewMode == 0) ? 1 : 0;
     }
 
     private async Task FilterSelected(NotesFilterDto f)
@@ -118,17 +95,17 @@
         store.NavigateTo($"notes/new/filter");
     }
 
-    void OnView(NoteInfoDto note)
+    void OnView(NoteMinimalDto note)
     {
         store.NavigateTo($"notes/{note.NoteId}/filter");
     }
 
-    void OnEdit(NoteInfoDto note)
+    void OnEdit(NoteMinimalDto note)
     {
         store.NavigateTo($"notes/edit/{note.NoteId}/filter");
     }
 
-    async Task OnDelete(NoteInfoDto item)
+    async Task OnDelete(NoteMinimalDto item)
     {                
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?", 

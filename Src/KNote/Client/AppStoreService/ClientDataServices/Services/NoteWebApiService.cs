@@ -18,16 +18,16 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get home notes");
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetSearch(string queryString)
+    public async Task<Result<List<NoteMinimalDto>>> GetSearch(string queryString)
     {
         var httpRes = await _httpClient.GetAsync($"api/notes/search?{queryString}");
-        return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get notes from search string");
+        return await ProcessResultFromHttpResponse<List<NoteMinimalDto>>(httpRes, "Get notes from search string");
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
+    public async Task<Result<List<NoteMinimalDto>>> GetFilter(NotesFilterDto notesFilter)
     {
         var httpRes = await _httpClient.PostAsJsonAsync($"api/notes/filter", notesFilter);
-        return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get notes from filter");
+        return await ProcessResultFromHttpResponse<List<NoteMinimalDto>>(httpRes, "Get notes from filter");
     }
 
     public async Task<Result<NoteDto>> GetAsync(Guid noteId)

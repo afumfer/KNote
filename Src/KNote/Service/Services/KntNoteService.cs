@@ -74,26 +74,26 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
+    public async Task<Result<List<NoteInfoDto>>> GetFilterAsync(NotesFilterDto notesFilter)
     {     
         var command = new KntNotesGetFilterAsyncCommand(Service, notesFilter);
         return await ExecuteCommand(command);
     }
 
-    public async Task<Result<List<NoteMinimalDto>>> GetFilterMinimal(NotesFilterDto notesFilter)
+    public async Task<Result<List<NoteMinimalDto>>> GetFilterMinimalAsync(NotesFilterDto notesFilter)
     {
         var command = new KntNotesGetMinimalFilterAsyncCommand(Service, notesFilter);
         return await ExecuteCommand(command);
 
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
+    public async Task<Result<List<NoteInfoDto>>> GetSearchAsync(NotesSearchDto notesSearch)
     {        
         var command = new KntNotesGetSearchAsyncCommand(Service, notesSearch);
         return await ExecuteCommand(command);
     }
 
-    public async Task<Result<List<NoteMinimalDto>>> GetSearchMinimal(NotesSearchDto notesSearch)
+    public async Task<Result<List<NoteMinimalDto>>> GetSearchMinimalAsync(NotesSearchDto notesSearch)
     {
         var command = new KntNotesGetMinimalSearchAsyncCommand(Service, notesSearch);
         return await ExecuteCommand(command);

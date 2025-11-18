@@ -20,8 +20,8 @@ public interface INoteWebApiService
     Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo);
     Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId);
 
-    Task<Result<List<NoteInfoDto>>> GetSearch(string queryString);
-    Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);
+    Task<Result<List<NoteMinimalDto>>> GetSearch(string queryString);
+    Task<Result<List<NoteMinimalDto>>> GetFilter(NotesFilterDto notesFilter);
 
     //Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId);
     //Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entity = null);

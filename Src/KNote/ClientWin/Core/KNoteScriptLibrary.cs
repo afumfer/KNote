@@ -371,7 +371,7 @@ public class KNoteScriptLibrary: Library
             throw new Exception("Invalid parameter.");
 
         NotesSearchDto search = new NotesSearchDto { TextSearch = $"{varIdentifier} " };
-        var note = (await serviceRef.Service.Notes.GetSearch(search)).Entity.FirstOrDefault();
+        var note = (await serviceRef.Service.Notes.GetSearchAsync(search)).Entity.FirstOrDefault();
 
         string content = note?.Description;
         if (content != null)

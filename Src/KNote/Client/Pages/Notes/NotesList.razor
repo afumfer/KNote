@@ -11,7 +11,7 @@
 </EntityList>
 
 @code {
-    [Parameter] [EditorRequired] public List<NoteInfoDto> Notes { get; set; } = null!;
+    [Parameter][EditorRequired] public List<NoteInfoDto> Notes { get; set; } = null!;
     [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteEdit { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteView { get; set; }

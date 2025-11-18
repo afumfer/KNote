@@ -73,15 +73,10 @@ public class NotesController : ControllerBase
         {
             _logger.LogTrace("Filter {dateTime}.", DateTime.Now);
 
-            var resApi = await _service.Notes.GetFilter(notesFilter);
+            var resApi = await _service.Notes.GetFilterMinimalAsync(notesFilter);
                             
-            if (resApi.IsValid)
-            {
-                // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
-                ListNotesUpdateResourceInDescriptionForRead(resApi.Entity, _service.RepositoryRef);
-                // ----
-                return Ok(resApi);
-            }
+            if (resApi.IsValid)            
+                return Ok(resApi);            
             else
                 return BadRequest(resApi);
         }
@@ -95,7 +90,7 @@ public class NotesController : ControllerBase
     }
             
     [HttpGet("[action]")]
-    public async Task<IActionResult> Search([FromQuery] NotesSearchParam notesSearchParam)  // NotesSearchDto notesSearch
+    public async Task<IActionResult> Search([FromQuery] NotesSearchParam notesSearchParam)
     {
         try
         {
@@ -108,15 +103,10 @@ public class NotesController : ControllerBase
             notesSearch.PageIdentifier.PageSize = notesSearchParam.PageSize;
             // .....
 
-            var resApi = await _service.Notes.GetSearch(notesSearch);
+            var resApi = await _service.Notes.GetSearchMinimalAsync(notesSearch);
             
-            if (resApi.IsValid)
-            {
-                // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
-                ListNotesUpdateResourceInDescriptionForRead(resApi.Entity, _service.RepositoryRef);
-                // ----
-                return Ok(resApi);
-            }
+            if (resApi.IsValid)            
+                return Ok(resApi);            
             else
                 return BadRequest(resApi);
         }
