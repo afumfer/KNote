@@ -119,7 +119,7 @@ public class KntFoldersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<F
             if (resGetEntity.Entity.ChildFolders.Count > 0)
                 result.AddErrorMessage("This folder has child folders. Delete is not possible.");
 
-            if ((await Repository.Notes.CountNotesInFolder(Param)).Entity > 0)
+            if ((await Repository.Notes.CountNotesInFolderAsync(Param)).Entity > 0)
                 result.AddErrorMessage("This folder has notes. Delete is not possible.");
 
             if (!result.IsValid)

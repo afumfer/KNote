@@ -10,13 +10,17 @@ namespace KNote.Service.Interfaces;
 public interface IKntNoteService
 {
     Task<Result<List<NoteInfoDto>>> GetAllAsync();
+    Task<Result<List<NoteMinimalDto>>> GetAllMinimalAsync();
     Task<Result<List<NoteInfoDto>>> HomeNotesAsync();
     Task<Result<NoteDto>> GetAsync(Guid noteId);
     Task<Result<NoteDto>> GetAsync(int noteNumber);
     Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId);
     Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);
+    Task<Result<List<NoteMinimalDto>>> GetByFolderMinimalAsync(Guid folderId);
     Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);
+    Task<Result<List<NoteMinimalDto>>> GetFilterMinimal(NotesFilterDto notesFilter);
     Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);
+    Task<Result<List<NoteMinimalDto>>> GetSearchMinimal(NotesSearchDto notesSearch);
     Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);
     Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entity = null);
     Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true);
@@ -46,9 +50,9 @@ public interface IKntNoteService
     Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null);
 
     #region Utils 
-    Task<Result<bool>> UtilPatchFolder(Guid noteId, Guid folderId);
-    Task<Result<bool>> UtilPatchChangeTags(Guid noteId, string oldTag, string newTag);        
-    Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
+    Task<Result<bool>> UtilPatchFolderAsync(Guid noteId, Guid folderId);
+    Task<Result<bool>> UtilPatchChangeTagsAsync(Guid noteId, string oldTag, string newTag);        
+    Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
     string UtilGetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages);
     (string, string) UtilGetResourceUrls(ResourceDto resource);
     bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);

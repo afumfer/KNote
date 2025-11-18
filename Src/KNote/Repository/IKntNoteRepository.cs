@@ -6,17 +6,21 @@ namespace KNote.Repository;
 public interface IKntNoteRepository : IDisposable
 {
     Task<Result<List<NoteInfoDto>>> GetAllAsync();
+    Task<Result<List<NoteMinimalDto>>> GetAllMinimalAsync();
     Task<Result<List<NoteInfoDto>>> HomeNotesAsync();
     Task<Result<NoteDto>> GetAsync(Guid noteId);
     Task<Result<NoteDto>> GetAsync(int noteNumber);
     Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);
-    Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter);
-    Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch);
+    Task<Result<List<NoteMinimalDto>>> GetByFolderMinimalAsync(Guid folderId);
+    Task<Result<List<NoteInfoDto>>> GetFilterAsync(NotesFilterDto notesFilter);
+    Task<Result<List<NoteMinimalDto>>> GetFilterMinimalAsync(NotesFilterDto notesFilter);
+    Task<Result<List<NoteInfoDto>>> GetSearchAsync(NotesSearchDto notesSearch);
+    Task<Result<List<NoteMinimalDto>>> GetSearchMinimalAsync(NotesSearchDto notesSearch);
     Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);        
     Task<Result<NoteDto>> AddAsync(NoteDto entity);
     Task<Result<NoteDto>> UpdateAsync(NoteDto entity);
     Task<Result> DeleteAsync(Guid id);
-    Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
+    Task<List<NoteKAttributeDto>> CompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
     Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);
     Task<Result<ResourceDto>> GetResourceAsync(Guid noteResourceId);
     Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity);
@@ -34,12 +38,12 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity);
     Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity);
     Task<Result> DeleteMessageAsync(Guid messageId);
-    Task<Result<int>> CountNotesInFolder(Guid folderId);
+    Task<Result<int>> CountNotesInFolderAsync(Guid folderId);
     Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId);
     Task<Result<WindowDto>> AddWindowAsync(WindowDto entity);
     Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity);
     Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId);
     Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId, EnumNotificationType? notificationType = null);
-    Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId);
-    Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag);       
+    Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId);
+    Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag);       
 }

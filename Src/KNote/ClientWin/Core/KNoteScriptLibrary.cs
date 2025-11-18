@@ -282,7 +282,6 @@ public class KNoteScriptLibrary: Library
         }
     }
 
-
     public DialogResult ShowMessageBox(string info, string caption, int buttons, int icon)
     {
         return MessageBox.Show(info, caption, (MessageBoxButtons)buttons, (MessageBoxIcon)icon);

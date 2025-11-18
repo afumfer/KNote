@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, NoteInfoDto>
+public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteMinimalDto>, NoteMinimalDto>
 {
     #region Properties
 
@@ -51,7 +51,7 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
 
     #region ISelectorView implementation
 
-    protected override IViewSelector<NoteInfoDto> CreateView()
+    protected override IViewSelector<NoteMinimalDto> CreateView()
     {
         return Store.FactoryViews.View(this);
     }
@@ -79,11 +79,11 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
             else 
                 f = Folder.FolderId;
 
-            Result<List<NoteInfoDto>> response;
+            Result<List<NoteMinimalDto>> response;
             if(folder == null)
-                response = await Service.Notes.GetAllAsync();
+                response = await Service.Notes.GetAllMinimalAsync();
             else 
-                response = await Service.Notes.GetByFolderAsync(f);
+                response = await Service.Notes.GetByFolderMinimalAsync(f);
 
             if (response.IsValid)
             {
@@ -122,15 +122,15 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
             Service = service;
             Folder = null;
 
-            Result<List<NoteInfoDto>> response;
+            Result<List<NoteMinimalDto>> response;
             if (string.IsNullOrEmpty(notesSearch?.TextSearch.Trim()) || service == null || notesSearch == null)
             {
-                response = new Result<List<NoteInfoDto>>();
-                response.Entity = new List<NoteInfoDto>();                    
+                response = new Result<List<NoteMinimalDto>>();
+                response.Entity = new List<NoteMinimalDto>();                    
             }
             else
             {
-                response = await Service.Notes.GetSearch(notesSearch);                
+                response = await Service.Notes.GetSearchMinimal(notesSearch);                
             }
 
             if (response.IsValid)
@@ -175,15 +175,15 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
             Service = service;
             Folder = null;
 
-            Result<List<NoteInfoDto>> response;
+            Result<List<NoteMinimalDto>> response;
             if (service == null || notesFilter == null)
             {
-                response = new Result<List<NoteInfoDto>>();
-                response.Entity = new List<NoteInfoDto>();
+                response = new Result<List<NoteMinimalDto>>();
+                response.Entity = new List<NoteMinimalDto>();
             }
             else
             {
-                response = await Service.Notes.GetFilter(notesFilter);
+                response = await Service.Notes.GetFilterMinimal(notesFilter);
             }
 
             if (response.IsValid)
@@ -218,12 +218,12 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
         return resLoad;
     }
 
-    public override void SelectItem(NoteInfoDto item)
+    public override void SelectItem(NoteMinimalDto item)
     {
         throw new NotImplementedException();
     }
 
-    public override void RefreshItem(NoteInfoDto note)
+    public override void RefreshItem(NoteMinimalDto note)
     {
         var updateNote = ListEntities?.FirstOrDefault(_ => _.NoteId == note.NoteId);
 
@@ -261,12 +261,12 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
         }
     }
 
-    public override void AddItem(NoteInfoDto note)
+    public override void AddItem(NoteMinimalDto note)
     {
         RefreshItem(note);
     }
 
-    public override void DeleteItem(NoteInfoDto note)
+    public override void DeleteItem(NoteMinimalDto note)
     {
         var entiesFoud = ListEntities?.Where(_ => _.NoteId == note.NoteId).Select(_ => _.NoteId).ToList();
         if (entiesFoud?.Count > 0)
@@ -280,14 +280,14 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteInfoDto>, No
 
     #region Extra methods
     
-    public List<NoteInfoDto> GetSelectedListNotesInfo()
+    public List<NoteMinimalDto> GetSelectedListNotesMinimal()
     {
         return View.GetSelectedListItem();
     }
 
     public void CleanView()
     {
-        ListEntities = new List<NoteInfoDto>();            
+        ListEntities = new List<NoteMinimalDto>();            
         View.RefreshView();
     }
 

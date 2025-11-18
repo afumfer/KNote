@@ -15,13 +15,6 @@ public class NotesFilterDto : SmartModelDtoBase // NotesSearchDto
 
     public List<AtrFilterDto> AttributesFilter { get; set; } = new List<AtrFilterDto>();
 
-    //TODO: !!!
-    //public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    //{
-    //    var results = base.Validate(validationContext);       
-    //    return results;
-    //}
-
     public PageIdentifier PageIdentifier { get; set; } = new PageIdentifier();
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -30,15 +23,6 @@ public class NotesFilterDto : SmartModelDtoBase // NotesSearchDto
 
         return results;
     }
-
-    //TODO: !!!
-    //public bool IsEmpty()
-    //{
-    //    if (FolderId.HasValue || !string.IsNullOrEmpty(Topic) || NoteTypeId.HasValue || !string.IsNullOrEmpty(Tags) || !string.IsNullOrEmpty(Description))
-    //        return false;
-    //    else
-    //        return true;
-    //}
 }
 
 public class AtrFilterDto : SmartModelDtoBase

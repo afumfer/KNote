@@ -6,7 +6,7 @@ using System.Data;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
+public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
 {
     #region Private fields 
 
@@ -122,12 +122,12 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
 
     #region Extension methods ...
 
-    public object SelectItem(NoteInfoDto item)
+    public object SelectItem(NoteMinimalDto item)
     {
         throw new NotImplementedException();
     }
 
-    public void AddItem(NoteInfoDto item)
+    public void AddItem(NoteMinimalDto item)
     {
         // In this case item is not used, the update is resolved with databindig 
         RefreshDataGridNotes();
@@ -148,7 +148,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         dataGridNotes.Rows[index].Selected = true;
     }
 
-    public void DeleteItem(NoteInfoDto item)
+    public void DeleteItem(NoteMinimalDto item)
     {
         // In this case item is not used, the update is resolved with databindig 
         RefreshDataGridNotes();
@@ -159,7 +159,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         GridSelectFirstElement(false);
     }
 
-    public void RefreshItem(NoteInfoDto item)
+    public void RefreshItem(NoteMinimalDto item)
     {
         dataGridNotes.Refresh();
     }
@@ -269,7 +269,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         if (dataGridNotes.Columns.Count > 1)
             return;
 
-        _source.DataSource = new List<NoteInfoDto>();
+        _source.DataSource = new List<NoteMinimalDto>();
         dataGridNotes.DataSource = _source;
 
         dataGridNotes.Columns[0].DataPropertyName = "NoteId";       
@@ -321,20 +321,8 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("CreationDateTime"))
             dataGridNotes.Columns[7].Visible = false;
 
-        dataGridNotes.Columns[8].DataPropertyName = "Description";
-        dataGridNotes.Columns[8].Visible = false;            
-
-        dataGridNotes.Columns[9].DataPropertyName = "ContentType";        
-        dataGridNotes.Columns[9].Visible = false;
-
-        dataGridNotes.Columns[10].DataPropertyName = "Script";
-        dataGridNotes.Columns[10].Visible = false;
-            
-        dataGridNotes.Columns[11].DataPropertyName = "FolderId";
-        dataGridNotes.Columns[11].Visible = false;
-            
-        dataGridNotes.Columns[12].DataPropertyName = "NoteTypeId";
-        dataGridNotes.Columns[12].Visible = false;
+        dataGridNotes.Columns[8].DataPropertyName = "FolderId";
+        dataGridNotes.Columns[8].Visible = false;
 
         foreach (DataGridViewColumn col in dataGridNotes.Columns)
         {
@@ -345,13 +333,13 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         }
     }
 
-    private NoteInfoDto DataGridViewRowToNoteInfo(DataGridViewRow dgr)
+    private NoteMinimalDto DataGridViewRowToNoteInfo(DataGridViewRow dgr)
     {            
         if (dgr == null)
             return null;
         else
         {
-            var n = new NoteInfoDto();
+            var n = new NoteMinimalDto();
 
             n.NoteId = (Guid)dgr.Cells["NoteId"].Value;
             n.NoteNumber = (int)dgr.Cells["NoteNumber"].Value;
@@ -360,22 +348,15 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
             n.Tags = (string)dgr.Cells["Tags"].Value;                
             n.ModificationDateTime = (DateTime)dgr.Cells["ModificationDateTime"].Value;
             n.CreationDateTime = (DateTime)dgr.Cells["CreationDateTime"].Value;
-            n.Description = (string)dgr.Cells["Description"].Value;
-            n.ContentType = (string)dgr.Cells["ContentType"].Value;
-            n.Script = (string)dgr.Cells["Script"].Value;
             n.InternalTags = (string)dgr.Cells["InternalTags"].Value;                                
             n.FolderId = (Guid)dgr.Cells["FolderId"].Value;
-            if (dgr.Cells[12].Value != null)
-                n.NoteTypeId = (Guid)dgr.Cells["NoteTypeId"].Value;
-            else
-                n.NoteTypeId = null;
             return n;
         }
     }
 
-    public List<NoteInfoDto> GetSelectedListItem()
+    public List<NoteMinimalDto> GetSelectedListItem()
     {
-        var listNoteInfo = new List<NoteInfoDto>();
+        var listNoteInfo = new List<NoteMinimalDto>();
 
         foreach(var dg in dataGridNotes.SelectedRows)            
             listNoteInfo.Add(DataGridViewRowToNoteInfo((DataGridViewRow)dg));
@@ -448,7 +429,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteInfoDto>
         ToolStripMenuItem menuSel;
         menuSel = (ToolStripMenuItem)sender;
 
-        _ctrl.Extensions[menuSel.Text](this, new ControllerEventArgs<NoteInfoDto>(_ctrl.SelectedEntity));
+        _ctrl.Extensions[menuSel.Text](this, new ControllerEventArgs<NoteMinimalDto>(_ctrl.SelectedEntity));
     }
 
     #endregion

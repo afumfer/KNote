@@ -155,9 +155,7 @@ public class NoteMinimalDto : SmartModelDtoBase
         // ---
         // Capture the validations implemented with attributes.
         // ---
-
-        // TODO: !!! Usar yield return para devolver los resultados uno a uno y no crear la lista results
-
+        
         Validator.TryValidateProperty(Topic,
             new ValidationContext(this, null, null) { MemberName = "Topic" },
             results);
@@ -176,13 +174,9 @@ public class NoteMinimalDto : SmartModelDtoBase
 
         if (FolderId == Guid.Empty)
         {
-            //results.Add(new ValidationResult
-            //    ("KMSG: The FolderId attribute cannot be empty."
-            //    , new[] { "FolderId" }));
-
             results.Add(new ValidationResult
                 ("KMSG: The FolderId attribute cannot be empty."
-                , new[] { nameof(FolderId) }));  // !!! Aplicar este ambio a todas las validaciones
+                , new[] { nameof(FolderId) }));  // ### Aplicar este ambio a todas las validaciones
         }
 
         if (ModificationDateTime < CreationDateTime)
@@ -191,9 +185,7 @@ public class NoteMinimalDto : SmartModelDtoBase
                 ("KMSG: Modification date cannot be greater than creation date."
                 , new[] { "ModificationDateTime", "CreationDateTime" }));
         }
-
-        // TODO: Validar NoteNumber an more ....
-
+        
         return results;
     }
 

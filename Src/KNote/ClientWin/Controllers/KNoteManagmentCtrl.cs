@@ -60,8 +60,8 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         get { return Store.DefaultFolderWithServiceRef; }
     }
 
-    private NoteInfoDto _selectedNoteInfo;
-    public NoteInfoDto SelectedNoteInfo
+    private NoteMinimalDto _selectedNoteInfo;
+    public NoteMinimalDto SelectedNoteInfo
     {
         get { return _selectedNoteInfo; }
         protected set { _selectedNoteInfo = value; }
@@ -302,23 +302,23 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 _notesSelectorCtrl.EntitySelection += _notesSelectorCtrl_EntitySelection;
                 _notesSelectorCtrl.EntitySelectionDoubleClick += _notesSelectorCtrl_EntitySelectionDoubleClick;
 
-                _notesSelectorCtrl.Extensions.Add("New note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddNote));
-                _notesSelectorCtrl.Extensions.Add("New note as PostIt...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddNoteAsPostIt));
-                _notesSelectorCtrl.Extensions.Add("Edit note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNote));
-                _notesSelectorCtrl.Extensions.Add("Edit note as PostIt ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendEditNoteAsPostIt));
-                _notesSelectorCtrl.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendDeleteNote));
-                _notesSelectorCtrl.Extensions.Add("--0", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
-                _notesSelectorCtrl.Extensions.Add("Add automatic resolved task", new ExtensionsEventHandler<NoteInfoDto>(AddFastResolvedTask));
-                _notesSelectorCtrl.Extensions.Add("--1", new ExtensionsEventHandler<NoteInfoDto>(ExtendNull));
-                _notesSelectorCtrl.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendMoveSelectedNotes));
-                _notesSelectorCtrl.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendAddTagSelectedNotes));
-                _notesSelectorCtrl.Extensions.Add("Remove tag from selected notes ...", new ExtensionsEventHandler<NoteInfoDto>(ExtendRemoveTagSelectedNotes));
+                _notesSelectorCtrl.Extensions.Add("New note ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendAddNote));
+                _notesSelectorCtrl.Extensions.Add("New note as PostIt...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendAddNoteAsPostIt));
+                _notesSelectorCtrl.Extensions.Add("Edit note ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendEditNote));
+                _notesSelectorCtrl.Extensions.Add("Edit note as PostIt ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendEditNoteAsPostIt));
+                _notesSelectorCtrl.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendDeleteNote));
+                _notesSelectorCtrl.Extensions.Add("--0", new ExtensionsEventHandler<NoteMinimalDto>(ExtendNull));
+                _notesSelectorCtrl.Extensions.Add("Add automatic resolved task", new ExtensionsEventHandler<NoteMinimalDto>(AddFastResolvedTask));
+                _notesSelectorCtrl.Extensions.Add("--1", new ExtensionsEventHandler<NoteMinimalDto>(ExtendNull));
+                _notesSelectorCtrl.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendMoveSelectedNotes));
+                _notesSelectorCtrl.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendAddTagSelectedNotes));
+                _notesSelectorCtrl.Extensions.Add("Remove tag from selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendRemoveTagSelectedNotes));
             }
             return _notesSelectorCtrl;
         }
     }
 
-    private async void _notesSelectorCtrl_EntitySelectionDoubleClick(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void _notesSelectorCtrl_EntitySelectionDoubleClick(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         if (e.Entity == null)
             return;
@@ -326,7 +326,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await EditNote();
     }
 
-    private async void _notesSelectorCtrl_EntitySelection(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void _notesSelectorCtrl_EntitySelection(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         if (e.Entity == null || SelectedServiceRef == null)
             return;
@@ -339,52 +339,52 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         NotifyMessage($"Loaded note details for note {e.Entity.NoteNumber}");
     }
 
-    private async void ExtendAddNote(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void ExtendAddNote(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         await AddNote();
     }
 
-    private async void ExtendAddNoteAsPostIt(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void ExtendAddNoteAsPostIt(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         await AddNotePostIt();
     }
 
-    private async void ExtendEditNote(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void ExtendEditNote(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         await EditNote();
     }
 
-    private async void AddFastResolvedTask(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void AddFastResolvedTask(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         await AddFastResolvedTask();
     }
    
-    private async void ExtendEditNoteAsPostIt(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void ExtendEditNoteAsPostIt(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         await EditNotePostIt();
     }
 
-    private async void ExtendDeleteNote(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void ExtendDeleteNote(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         await DeleteNote();
     }
 
-    private async void ExtendMoveSelectedNotes(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void ExtendMoveSelectedNotes(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         await MoveSelectedNotes();
     }
 
-    private void ExtendNull(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private void ExtendNull(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         
     }
 
-    private async void ExtendAddTagSelectedNotes(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void ExtendAddTagSelectedNotes(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {            
         await ChangeTags(EnumChangeTag.Add);
     }
 
-    private async void ExtendRemoveTagSelectedNotes(object sender, ControllerEventArgs<NoteInfoDto> e)
+    private async void ExtendRemoveTagSelectedNotes(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {            
         await ChangeTags(EnumChangeTag.Remove);
     }
@@ -663,7 +663,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
         var res = (await service.Notes.SaveExtendedAsync(resNoteForSaveTask)).Entity;
         
-        await OnNoteEditorSaved(res.GetSimpleDto<NoteInfoDto>());            
+        await OnNoteEditorSaved(res.GetSimpleDto<NoteMinimalDto>());            
     }
 
     public async Task<bool> EditNote(IKntService service, Guid noteId)
@@ -882,7 +882,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public async Task MoveSelectedNotes()
     {                
-        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesInfo().ToList();
+        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal().ToList();
         if(selectedNotes == null || selectedNotes?.Count == 0)
         {                
             View.ShowInfo("You have not selected notes .");
@@ -921,13 +921,13 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task MoveSelectedNotesAction(List<NoteInfoDto> selectedNotes, Guid newFolderId, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessCtrl = null)
+    public async Task MoveSelectedNotesAction(List<NoteMinimalDto> selectedNotes, Guid newFolderId, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessCtrl = null)
     {
         var index = 0;
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
         foreach (var n in selectedNotes)
         {
-            await service.Notes.UtilPatchFolder(n.NoteId, newFolderId);
+            await service.Notes.UtilPatchFolderAsync(n.NoteId, newFolderId);
 
             index++;
             var percentage = (double)index / selectedNotes.Count;
@@ -949,7 +949,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     {
         string labelInput;        
 
-        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesInfo().ToList();
+        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal().ToList();
         if (selectedNotes == null || selectedNotes?.Count == 0)
         {
             if (action == EnumChangeTag.Add)
@@ -1011,7 +1011,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteInfoDto> selectedNotes, string tag, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessCtrl = null)
+    public async Task ChangeTagsAction(EnumChangeTag action, List<NoteMinimalDto> selectedNotes, string tag, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessCtrl = null)
     {
         var index = 0;
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
@@ -1019,9 +1019,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         foreach (var note in selectedNotes)
         {
             if (action == EnumChangeTag.Add)
-                await service.Notes.UtilPatchChangeTags(note.NoteId, "", tag);
+                await service.Notes.UtilPatchChangeTagsAsync(note.NoteId, "", tag);
             else
-                await service.Notes.UtilPatchChangeTags(note.NoteId, tag, "");
+                await service.Notes.UtilPatchChangeTagsAsync(note.NoteId, tag, "");
 
             index++;
             var percentage = (double)index / selectedNotes.Count;
@@ -1040,7 +1040,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     public void RunScriptSelectedNotes()
     {
-        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesInfo();
+        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal();
 
         if (selectedNotes == null || selectedNotes?.Count == 0)
         {
@@ -1050,8 +1050,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
         foreach (var note in selectedNotes)
         {
-            if (!string.IsNullOrEmpty(note.Script))
-                Store.RunScript(note.Script);
+            var script = NotesSelectorCtrl.Service.Notes.GetAsync(note.NoteId).Result.Entity.Script;
+            if (!string.IsNullOrEmpty(script))
+                Store.RunScript(script);
         }
     }
 
@@ -1067,7 +1068,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         if (res.Entity == EControllerResult.Executed)
         {
             // TODO: refresh context managment
-            
+            // ... for next major version
         }
     }
     
@@ -1119,15 +1120,15 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     private async void PostItEditorCtrl_AddedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
-        await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
+        await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
     private async void NoteEditorCtrl_AddedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
-        await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteInfoDto>());
+        await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
-    private async Task OnNoteEditorAdded(NoteInfoDto noteInfo)
+    private async Task OnNoteEditorAdded(NoteMinimalDto noteInfo)
     {
         if (NotesSelectorCtrl.ListEntities == null)
             return;
@@ -1142,12 +1143,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     private async void PostItEditorCtrl_SavedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
-        await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>());
+        await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
     private async void NoteEditorCtrl_SavedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
-        await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteInfoDto>()); 
+        await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteMinimalDto>()); 
     }
 
     private async void PostItEditorCtrl_ExtendedEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
@@ -1160,7 +1161,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
     }
 
-    private async Task OnNoteEditorSaved(NoteInfoDto noteInfo)
+    private async Task OnNoteEditorSaved(NoteMinimalDto noteInfo)
     {
         if (NoteEditorCtrl.Model.NoteId == noteInfo.NoteId)
             await NoteEditorCtrl.LoadModelById(SelectedServiceRef.Service, noteInfo.NoteId);
@@ -1176,15 +1177,15 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     private void PostItEditorCtrl_DeletedEntity(object sender, ControllerEventArgs<NoteDto> e)
     {
-        OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteInfoDto>());
+        OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
     private void NoteEditorCtrl_DeletedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
     {
-        OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteInfoDto>());
+        OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
-    private void OnNoteEditorDeleted(NoteInfoDto noteInfo)
+    private void OnNoteEditorDeleted(NoteMinimalDto noteInfo)
     {            
         NotesSelectorCtrl.DeleteItem(noteInfo);
         if (NotesSelectorCtrl.ListEntities?.Count == 0)

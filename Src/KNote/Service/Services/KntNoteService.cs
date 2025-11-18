@@ -31,7 +31,13 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         var command = new KntNotesGetAllAsyncCommand(Service);
         return await ExecuteCommand(command);
     }
-    
+
+    public async Task<Result<List<NoteMinimalDto>>> GetAllMinimalAsync()
+    {
+        var command = new KntNotesGetMinimalAllAsyncCommand(Service);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
     {     
         var command = new KntNotesHomeAllAsyncCommand(Service);
@@ -62,15 +68,34 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<List<NoteMinimalDto>>> GetByFolderMinimalAsync(Guid folderId)
+    {
+        var command = new KntNotesGetMinimalByFolderAsyncCommand(Service, folderId);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
     {     
         var command = new KntNotesGetFilterAsyncCommand(Service, notesFilter);
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<List<NoteMinimalDto>>> GetFilterMinimal(NotesFilterDto notesFilter)
+    {
+        var command = new KntNotesGetMinimalFilterAsyncCommand(Service, notesFilter);
+        return await ExecuteCommand(command);
+
+    }
+
     public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
     {        
         var command = new KntNotesGetSearchAsyncCommand(Service, notesSearch);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<List<NoteMinimalDto>>> GetSearchMinimal(NotesSearchDto notesSearch)
+    {
+        var command = new KntNotesGetMinimalSearchAsyncCommand(Service, notesSearch);
         return await ExecuteCommand(command);
     }
 
@@ -241,13 +266,13 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     #region Utils
 
-    public async Task<Result<bool>> UtilPatchFolder(Guid noteId, Guid folderId)
+    public async Task<Result<bool>> UtilPatchFolderAsync(Guid noteId, Guid folderId)
     {
         var command = new KntNotesPatchFolderAsyncCommand(Service, noteId, folderId);
         return await ExecuteCommand(command);
     }
 
-    public async Task<Result<bool>> UtilPatchChangeTags(Guid noteId, string oldTag, string newTag)
+    public async Task<Result<bool>> UtilPatchChangeTagsAsync(Guid noteId, string oldTag, string newTag)
     {        
         var command = new KntNotesPatchChangeTagsAsyncCommand(Service, noteId, oldTag, newTag);
         return await ExecuteCommand(command);
@@ -301,9 +326,9 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return status;
     }
 
-    public async Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+    public async Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
     {
-        return await Repository.Notes.CompleteNoteAttributes(attributesNotes, noteId, noteTypeId);
+        return await Repository.Notes.CompleteNoteAttributesAsync(attributesNotes, noteId, noteTypeId);
     }
 
     public bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true)
@@ -486,6 +511,5 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return replaceString;
     }
 
-    #endregion 
-
+    #endregion
 }

@@ -2,6 +2,7 @@
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
 using KntScript;
 using Microsoft.Extensions.Logging;
@@ -610,20 +611,23 @@ public class Store
             return null;
     }
 
-    public async Task<NoteInfoDto> GetCatalogItem(ServiceRef serviceRef, string item, string viewTitle)
+    public async Task<NoteDto> GetCatalogItem(ServiceRef serviceRef, string item, string viewTitle)
     {
         await NotesSelector.LoadFilteredEntities(serviceRef.Service, new NotesFilterDto { Tags = item }, false);
         NotesSelector.ViewTitle = viewTitle;
         
         var res = NotesSelector.RunModal();
 
-        if (res.Entity == EControllerResult.Executed)
-            return NotesSelector.SelectedEntity;
+        if (res.Entity == EControllerResult.Executed) 
+        {
+            //return NotesSelector.SelectedEntity;            
+            return NotesSelector.Service.Notes.GetAsync(NotesSelector.SelectedEntity.NoteId).Result.Entity;
+        }        
         else
             return null;
     }
 
-    // TODO: !!! Experimental
+    // TODO: (Experimental ###)
     public async Task<string> GetKNoteFolerPath(ServiceRef serviceRef, Guid folderId)
     {
         string folderPath = string.Empty;

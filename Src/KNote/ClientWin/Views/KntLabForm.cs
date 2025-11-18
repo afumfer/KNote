@@ -1201,7 +1201,7 @@ window.chrome.webview.postMessage(retValue);";
         var res = _notesSelector.RunModal();
 
         if (res.Entity == EControllerResult.Executed)
-            MessageBox.Show(_notesSelector.SelectedEntity.Description);
+            MessageBox.Show(_notesSelector.SelectedEntity.Topic);
         else
             MessageBox.Show("not selected");
     }
@@ -1268,6 +1268,5 @@ window.chrome.webview.postMessage(retValue);";
         }
 
         MessageBox.Show("End");
-
     }
 }

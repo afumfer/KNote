@@ -262,7 +262,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
                 return true;
 
             // Add new attributes
-            Model.KAttributesDto = await Service.Notes.UtilCompleteNoteAttributes(Model.KAttributesDto, Model.NoteId, newType.NoteTypeId);                
+            Model.KAttributesDto = await Service.Notes.UtilCompleteNoteAttributesAsync(Model.KAttributesDto, Model.NoteId, newType.NoteTypeId);                
             return true;
         }
         catch (Exception)
@@ -540,15 +540,15 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
     }
 
     public async Task<string> GetCatalogTemplate()
-    {
+    {        
         var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
-        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.TemplateTag, "Select template"))?.Description;
+        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.TemplateTag, "Select template"))?.Description;     
     }
 
     public async Task<string> GetCatalogCode()
-    {
+    {        
         var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
-        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.CodeTag, "Select code snippet"))?.Description;
+        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.CodeTag, "Select code snippet"))?.Description;        
     }
 
     public async Task ExecKNoteAssistant()
@@ -566,10 +566,10 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         {
             NoteDto codeInfo;
             string err = "";
-
+            
             assistantInfo = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description);
-
-            if(assistantInfo.AssistantScriptNumber != 0)
+            
+            if (assistantInfo.AssistantScriptNumber != 0)
             {
                 codeInfo = (await assistantServiceRef.Service.Notes.GetAsync(assistantInfo.AssistantScriptNumber)).Entity;
                 if (codeInfo == null)
@@ -591,8 +591,8 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             }
         }
         catch
-        {
-            assistantInfo.User = catalogItem.Description;
+        {            
+            assistantInfo.User = catalogItem.Description;         
         }
 
         // Inject variables for KntScript

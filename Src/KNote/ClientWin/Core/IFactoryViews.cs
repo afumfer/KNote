@@ -9,7 +9,8 @@ public interface IFactoryViews
     IViewBase View(MonitorCtrl controller);
     IViewBase View(KntScriptConsoleCtrl controller);
     IViewSelector<FolderWithServiceRef> View(FoldersSelectorCtrl controller);
-    IViewSelector<NoteInfoDto> View(NotesSelectorCtrl controller);
+    //IViewSelector<NoteInfoDto> View(NotesSelectorCtrl controller);
+    IViewSelector<NoteMinimalDto> View(NotesSelectorCtrl controller);
     IViewKNoteManagment View(KNoteManagmentCtrl controller);
     IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorCtrl controller);
     IViewPostIt<NoteDto> View(PostItEditorCtrl controller);

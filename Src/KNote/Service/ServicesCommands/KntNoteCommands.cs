@@ -21,6 +21,19 @@ public class KntNotesGetAllAsyncCommand : KntCommandServiceBase<Result<List<Note
     }
 }
 
+public class KntNotesGetMinimalAllAsyncCommand : KntCommandServiceBase<Result<List<NoteMinimalDto>>>
+{
+    public KntNotesGetMinimalAllAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<List<NoteMinimalDto>>> Execute()
+    {
+        return await Repository.Notes.GetAllMinimalAsync();
+    }
+}
+
 public class KntNotesHomeAllAsyncCommand : KntCommandServiceBase<Result<List<NoteInfoDto>>>
 {
     public KntNotesHomeAllAsyncCommand(IKntService service) : base(service)
@@ -94,6 +107,20 @@ public class KntNotesGetByFolderAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
+public class KntNotesGetMinimalByFolderAsyncCommand : KntCommandServiceBase<Guid, Result<List<NoteMinimalDto>>>
+{
+    public KntNotesGetMinimalByFolderAsyncCommand(IKntService service, Guid folderId) : base(service, folderId)
+    {
+
+    }
+
+    public override async Task<Result<List<NoteMinimalDto>>> Execute()
+    {
+        return await Repository.Notes.GetByFolderMinimalAsync(Param);
+    }
+}
+
+
 public class KntNotesGetFilterAsyncCommand : KntCommandServiceBase<NotesFilterDto, Result<List<NoteInfoDto>>>
 {
     public KntNotesGetFilterAsyncCommand(IKntService service, NotesFilterDto notesFilter) : base(service, notesFilter)
@@ -103,7 +130,20 @@ public class KntNotesGetFilterAsyncCommand : KntCommandServiceBase<NotesFilterDt
 
     public override async Task<Result<List<NoteInfoDto>>> Execute()
     {
-        return await Repository.Notes.GetFilter(Param);
+        return await Repository.Notes.GetFilterAsync(Param);
+    }
+}
+
+public class KntNotesGetMinimalFilterAsyncCommand : KntCommandServiceBase<NotesFilterDto, Result<List<NoteMinimalDto>>>
+{
+    public KntNotesGetMinimalFilterAsyncCommand(IKntService service, NotesFilterDto notesFilter) : base(service, notesFilter)
+    {
+
+    }
+
+    public override async Task<Result<List<NoteMinimalDto>>> Execute()
+    {
+        return await Repository.Notes.GetFilterMinimalAsync(Param);
     }
 }
 
@@ -116,7 +156,20 @@ public class KntNotesGetSearchAsyncCommand : KntCommandServiceBase<NotesSearchDt
 
     public override async Task<Result<List<NoteInfoDto>>> Execute()
     {
-        return await Repository.Notes.GetSearch(Param);
+        return await Repository.Notes.GetSearchAsync(Param);
+    }
+}
+
+public class KntNotesGetMinimalSearchAsyncCommand : KntCommandServiceBase<NotesSearchDto, Result<List<NoteMinimalDto>>>
+{
+    public KntNotesGetMinimalSearchAsyncCommand(IKntService service, NotesSearchDto notesSearch) : base(service, notesSearch)
+    {
+
+    }
+
+    public override async Task<Result<List<NoteMinimalDto>>> Execute()
+    {
+        return await Repository.Notes.GetSearchMinimalAsync(Param);
     }
 }
 
@@ -903,7 +956,7 @@ public class KntNotesPatchFolderAsyncCommand : KntCommandServiceBase<Result<bool
 
     public override async Task<Result<bool>> Execute()
     {
-        return await Repository.Notes.PatchFolder(noteId, folderId);
+        return await Repository.Notes.PatchFolderAsync(noteId, folderId);
     }
 }
 
@@ -922,6 +975,6 @@ public class KntNotesPatchChangeTagsAsyncCommand : KntCommandServiceBase<Result<
 
     public override async Task<Result<bool>> Execute()
     {
-        return await Repository.Notes.PatchChangeTags(noteId, oldTag, newTag);
+        return await Repository.Notes.PatchChangeTagsAsync(noteId, oldTag, newTag);
     }
 }

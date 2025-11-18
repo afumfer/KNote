@@ -23,7 +23,7 @@ public class FactoryViewsWinForms : IFactoryViews
         return new FoldersSelectorForm(controller);
     }
 
-    public IViewSelector<NoteInfoDto> View(NotesSelectorCtrl controller)
+    public IViewSelector<NoteMinimalDto> View(NotesSelectorCtrl controller)
     {
         return new NotesSelectorForm(controller);
     }

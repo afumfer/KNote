@@ -227,9 +227,6 @@ public class KntService : IKntService, IDisposable
         {
             resNextNoteNumber = int.Parse(valueDto.Entity.Value) + 1;
         }
-        {
-            resNextNoteNumber = 4000; // !!! TODO: replace for count notes 
-        }
         var res = Task.Run(() => SystemValues.SaveAsync(new SystemValueDto { SystemValueId = id, Scope = scope, Key = key, Value = resNextNoteNumber.ToString() }));
         return resNextNoteNumber;
 

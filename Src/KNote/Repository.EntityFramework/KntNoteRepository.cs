@@ -32,28 +32,12 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
     public async Task<Result<List<NoteInfoDto>>> GetAllAsync()
     {
-        try
-        {
-            var result = new Result<List<NoteInfoDto>>();
+        return await GetAllPrivateAsync<NoteInfoDto>();
+    }
 
-            var ctx = GetOpenConnection();
-            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
-
-            var resRep = await notes.GetAllAsync();
-            result.Entity = resRep.Entity?
-                .Select(_ => _.GetSimpleDto<NoteInfoDto>())
-                .OrderBy(_ => _.Priority).ThenBy(_ => _.Topic)
-                .ToList();
-            result.AddListErrorMessage(resRep.ListErrorMessage);
-
-            await CloseIsTempConnection(ctx);
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
+    public async Task<Result<List<NoteMinimalDto>>> GetAllMinimalAsync()
+    {
+        return await GetAllPrivateAsync<NoteMinimalDto>();
     }
 
     public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
@@ -88,162 +72,32 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
     public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
     {
-        try
-        {
-            var result = new Result<List<NoteInfoDto>>();
-
-            var ctx = GetOpenConnection();
-            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
-
-            var resRep = await notes.GetAllAsync(n => n.FolderId == folderId);
-            result.Entity = resRep.Entity?.Select(n => n.GetSimpleDto<NoteInfoDto>()).ToList();
-            result.AddListErrorMessage(resRep.ListErrorMessage);
-
-            await CloseIsTempConnection(ctx);
-        
-            return result;
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
+        return await GetByFolderPrivateAsync<NoteInfoDto>(folderId);
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
-    {            
-        try
-        {
-            var result = new Result<List<NoteInfoDto>>();
-
-            var ctx = GetOpenConnection();
-            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
-
-            var query = notes.Queryable;
-
-            // Filters 
-            if (notesFilter.FolderId != null)
-                query = query.Where(n => n.FolderId == notesFilter.FolderId);
-
-            if (notesFilter.NoteTypeId != null)
-                query = query.Where(n => n.NoteTypeId == notesFilter.NoteTypeId);
-
-            if (!string.IsNullOrEmpty(notesFilter.Topic))
-                query = query.Where(n => n.Topic.ToLower().Contains(notesFilter.Topic.ToLower()));
-
-            if (!string.IsNullOrEmpty(notesFilter.Tags))
-                query = query.Where(n => n.Tags.ToLower().Contains(notesFilter.Tags.ToLower()));
-
-            if (!string.IsNullOrEmpty(notesFilter.Description))
-                query = query.Where(n => n.Description.ToLower().Contains(notesFilter.Description.ToLower()));
-
-            foreach (var f in notesFilter.AttributesFilter)
-            {                    
-                query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
-            }
-
-            result.TotalCount = await query.CountAsync();
-
-            // Order by and pagination
-            query = query
-                .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
-                .Pagination(notesFilter.PageIdentifier);
-
-            // Get content
-            result.Entity = await query
-                .Select(u => u.GetSimpleDto<NoteInfoDto>())
-                .ToListAsync();
-
-            await CloseIsTempConnection(ctx);
-            
-            return result;
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
-    }
-
-    public async Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
+    public async Task<Result<List<NoteMinimalDto>>> GetByFolderMinimalAsync(Guid folderId)
     {
-        try
-        {
-            var result = new Result<List<NoteInfoDto>>();
+        return await GetByFolderPrivateAsync<NoteMinimalDto>(folderId);       
+    }
 
-            int searchNumber;
-            var ctx = GetOpenConnection();
-            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+    public async Task<Result<List<NoteInfoDto>>> GetFilterAsync(NotesFilterDto notesFilter)
+    {      
+        return await GetFilterPrivateAsync<NoteInfoDto>(notesFilter);
+    }
 
-            var query = notes.Queryable;
+    public async Task<Result<List<NoteMinimalDto>>> GetFilterMinimalAsync(NotesFilterDto notesFilter)
+    {
+        return await GetFilterPrivateAsync<NoteMinimalDto>(notesFilter);
+    }
 
-            searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
+    public async Task<Result<List<NoteInfoDto>>> GetSearchAsync(NotesSearchDto notesSearch)
+    {
+        return await GetSearchPrivateAsync<NoteInfoDto>(notesSearch);
+    }
 
-            if (searchNumber > 0)
-                query = query.Where(n => n.NoteNumber == searchNumber);
-
-            else
-            {
-                var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
-
-                // TODO: refactor this -----------------------------
-                var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
-                var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());                    
-                bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
-                // --------------------------------------------------
-                
-                if (!flagSearchDescription)
-                {
-                    foreach (var token in listTokens)
-                    {
-                        if (!string.IsNullOrEmpty(token))
-                        {
-                            if (token[0] != '!')
-                                query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Tags.ToLower().Contains(token.ToLower()));
-                            else
-                            {
-                                var tokenNot = token.Substring(1, token.Length - 1);
-                                query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Tags.ToLower().Contains(tokenNot.ToLower()));
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var token in listTokens)
-                    {
-                        if (!string.IsNullOrEmpty(token))
-                        {
-                            if (token[0] != '!')
-                                query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Tags.ToLower().Contains(token.ToLower()) || n.Description.ToLower().Contains(token.ToLower()));
-                            else
-                            {
-                                var tokenNot = token.Substring(1, token.Length - 1);
-                                query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Tags.ToLower().Contains(tokenNot.ToLower()) && !n.Description.ToLower().Contains(tokenNot.ToLower()));
-                            }
-                        }
-                    }
-                }
-            }
-
-            result.TotalCount = await query.CountAsync();
-
-            // Order by and pagination
-            query = query
-                .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
-                .Pagination(notesSearch.PageIdentifier);
-
-            // Get content
-            result.Entity = await query
-                .Select(u => u.GetSimpleDto<NoteInfoDto>())
-                .ToListAsync();
-
-            await CloseIsTempConnection(ctx);
-        
-            return result;
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
+    public async Task<Result<List<NoteMinimalDto>>> GetSearchMinimalAsync(NotesSearchDto notesSearch)
+    {
+        return await GetSearchPrivateAsync<NoteMinimalDto>(notesSearch);
     }
 
     public async Task<Result<NoteDto>> GetAsync(Guid noteId)
@@ -256,7 +110,6 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         return await GetAsync(null, noteNumber);
     }
 
-
     public async Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null)
     {
         try
@@ -267,14 +120,11 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             newNote = new NoteDto();
             if (entity != null)
                 newNote.SetSimpleDto(entity);
-
-            //if (newNote.NoteId == Guid.Empty)
-            //    newNote.NoteId = Guid.NewGuid();
             newNote.SetIsNew(true);
             newNote.CreationDateTime = DateTime.Now;
             newNote.ModificationDateTime = DateTime.Now;
             newNote.KAttributesDto = new List<NoteKAttributeDto>();
-            newNote.KAttributesDto = await CompleteNoteAttributes(newNote.KAttributesDto, newNote.NoteId, entity?.NoteTypeId);
+            newNote.KAttributesDto = await CompleteNoteAttributesAsync(newNote.KAttributesDto, newNote.NoteId, entity?.NoteTypeId);
 
             result.Entity = newNote;
             
@@ -312,7 +162,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                 {
                     atr.NoteId = entity.NoteId;
                     var res = (await SaveAttrtibuteAsync(ctx, atr)).Entity;
-                    // TODO: !!! Importante, pendiente de capturar y volcar errores de res en resService
+                    // TODO: Importante, pendiente de capturar y volcar errores de res en resService
                     atr.KAttributeId = res.KAttributeId;
                     atr.NoteKAttributeId = res.NoteKAttributeId;
                 }
@@ -374,7 +224,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                 foreach (NoteKAttributeDto atr in entity.KAttributesDto)
                 {
                     var res = await SaveAttrtibuteAsync(ctx, atr);
-                    // TODO: !!! Importante !!! pendiente de capturar y volcar errores de res en resService
+                    // TODO: Importante, pendiente de capturar y volcar errores de res en resService
                     result.Entity.KAttributesDto.Add(res.Entity);
                 }
 
@@ -607,7 +457,6 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
     {
         throw new NotImplementedException();
     }
-
 
     public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask)
     {
@@ -967,7 +816,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<int>> CountNotesInFolder(Guid folderId)
+    public async Task<Result<int>> CountNotesInFolderAsync(Guid folderId)
     {
         try
         {
@@ -1048,7 +897,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId)
+    public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId)
     {
         try
         {
@@ -1083,7 +932,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
+    public async Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag)
     {
         try
         {
@@ -1133,7 +982,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+    public async Task<List<NoteKAttributeDto>> CompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
     {
         var ctx = GetOpenConnection();
         var kattributes = new KntKAttributeRepository(ctx, _repositoryRef);
@@ -1223,7 +1072,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     .ToList();
 
                 // Complete Attributes list
-                result.Entity.KAttributesDto = await CompleteNoteAttributes(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
+                result.Entity.KAttributesDto = await CompleteNoteAttributesAsync(result.Entity.KAttributesDto, entity.NoteId, entity.NoteTypeId);
             }
             else
             {
@@ -1337,6 +1186,192 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         {
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }                    
+    }
+
+    private async Task<Result<List<T>>> GetAllPrivateAsync<T>() where T : NoteMinimalDto, new()
+    {
+        try
+        {
+            var result = new Result<List<T>>();
+
+            var ctx = GetOpenConnection();
+            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+
+            var resRep = await notes.GetAllAsync();
+            result.Entity = resRep.Entity?
+                .Select(_ => _.GetSimpleDto<T>())
+                .OrderBy(_ => _.Priority).ThenBy(_ => _.Topic)
+                .ToList();
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    private async Task<Result<List<T>>> GetByFolderPrivateAsync<T>(Guid folderId) where T : NoteMinimalDto, new()
+    {
+        try
+        {
+            var result = new Result<List<T>>();
+
+            var ctx = GetOpenConnection();
+            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+
+            var resRep = await notes.GetAllAsync(n => n.FolderId == folderId);
+            result.Entity = resRep.Entity?.Select(n => n.GetSimpleDto<T>()).ToList();
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    private async Task<Result<List<T>>> GetFilterPrivateAsync<T>(NotesFilterDto notesFilter) where T : NoteMinimalDto, new()
+    {
+        try
+        {
+            var result = new Result<List<T>>();
+
+            var ctx = GetOpenConnection();
+            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+
+            var query = notes.Queryable;
+
+            // Filters 
+            if (notesFilter.FolderId != null)
+                query = query.Where(n => n.FolderId == notesFilter.FolderId);
+
+            if (notesFilter.NoteTypeId != null)
+                query = query.Where(n => n.NoteTypeId == notesFilter.NoteTypeId);
+
+            if (!string.IsNullOrEmpty(notesFilter.Topic))
+                query = query.Where(n => n.Topic.ToLower().Contains(notesFilter.Topic.ToLower()));
+
+            if (!string.IsNullOrEmpty(notesFilter.Tags))
+                query = query.Where(n => n.Tags.ToLower().Contains(notesFilter.Tags.ToLower()));
+
+            if (!string.IsNullOrEmpty(notesFilter.Description))
+                query = query.Where(n => n.Description.ToLower().Contains(notesFilter.Description.ToLower()));
+
+            foreach (var f in notesFilter.AttributesFilter)
+            {
+                query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
+            }
+
+            result.TotalCount = await query.CountAsync();
+
+            // Order by and pagination
+            query = query
+                .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
+                .Pagination(notesFilter.PageIdentifier);
+
+            // Get content
+            result.Entity = await query
+                .Select(u => u.GetSimpleDto<T>())
+                .ToListAsync();
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    private async Task<Result<List<T>>> GetSearchPrivateAsync<T>(NotesSearchDto notesSearch) where T : NoteMinimalDto, new()
+    {
+        try
+        {
+            var result = new Result<List<T>>();
+
+            int searchNumber;
+            var ctx = GetOpenConnection();
+            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+
+            var query = notes.Queryable;
+
+            searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
+
+            if (searchNumber > 0)
+                query = query.Where(n => n.NoteNumber == searchNumber);
+
+            else
+            {
+                var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
+
+                // TODO: refactor this -----------------------------
+                var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
+                var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());
+                bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
+                // --------------------------------------------------
+
+                if (!flagSearchDescription)
+                {
+                    foreach (var token in listTokens)
+                    {
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            if (token[0] != '!')
+                                query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Tags.ToLower().Contains(token.ToLower()));
+                            else
+                            {
+                                var tokenNot = token.Substring(1, token.Length - 1);
+                                query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Tags.ToLower().Contains(tokenNot.ToLower()));
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var token in listTokens)
+                    {
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            if (token[0] != '!')
+                                query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Tags.ToLower().Contains(token.ToLower()) || n.Description.ToLower().Contains(token.ToLower()));
+                            else
+                            {
+                                var tokenNot = token.Substring(1, token.Length - 1);
+                                query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Tags.ToLower().Contains(tokenNot.ToLower()) && !n.Description.ToLower().Contains(tokenNot.ToLower()));
+                            }
+                        }
+                    }
+                }
+            }
+
+            result.TotalCount = await query.CountAsync();
+
+            // Order by and pagination
+            query = query
+                .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
+                .Pagination(notesSearch.PageIdentifier);
+
+            // Get content
+            result.Entity = await query
+                .Select(u => u.GetSimpleDto<T>())
+                .ToListAsync();
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
     }
 
     #endregion

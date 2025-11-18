@@ -41,197 +41,44 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             return null;            
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
-    {        
-        try
-        {
-            var result = new Result<List<NoteInfoDto>>();
-
-            var db = GetOpenConnection();
-
-            var sql = GetSelectNotes();
-            sql += @" WHERE FolderId = @folderId ORDER BY [Priority], Topic ;";
-            var entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { folderId });
-            result.Entity = entity.ToList();
-
-            await CloseIsTempConnection(db);
-            
-            return result;
-        }
-        catch (Exception ex)
-        {            
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
-    }
-
     public async Task<Result<List<NoteInfoDto>>> GetAllAsync()
     {
-        try
-        {
-            var result = new Result<List<NoteInfoDto>>();
-
-            var db = GetOpenConnection();
-
-            var sql = GetSelectNotes();
-            sql += @" ORDER BY [Priority], Topic ;";
-
-            var entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
-            result.Entity = entity.ToList();
-
-            await CloseIsTempConnection(db);
-            
-            return result;
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
+        return await GetAllPrivateAsync<NoteInfoDto>();
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetFilter(NotesFilterDto notesFilter)
+    public async Task<Result<List<NoteMinimalDto>>> GetAllMinimalAsync()
     {
-        try
-        {
-            var result = new Result<List<NoteInfoDto>>();
-
-            var db = GetOpenConnection();
-
-            IEnumerable<NoteInfoDto> entity;
-            var sql = GetSelectNotes();
-            var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
-
-            result.TotalCount = GetCountNotes(db, sqlWhere);
-
-            sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
-                
-            var pagination = notesFilter.PageIdentifier;
-
-            if (pagination != null)
-            {                    
-                // Pagination SqlServer != SQlite
-                if (db.GetType().Name == "SqliteConnection")
-                    sql += " LIMIT @NumRecords OFFSET @Offset ;";
-                else
-                    sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
-
-                entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
-            }
-            else
-            {
-                entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { });
-            }
-                
-            result.Entity = entity.ToList();
-
-            await CloseIsTempConnection(db);
-            
-            return result;
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
+        return await GetAllPrivateAsync<NoteMinimalDto>();
     }
 
-    public async  Task<Result<List<NoteInfoDto>>> GetSearch(NotesSearchDto notesSearch)
+    public async Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId)
+    {      
+        return await GetByFolderPrivateAsync<NoteInfoDto>(folderId);    
+    }
+
+    public async Task<Result<List<NoteMinimalDto>>> GetByFolderMinimalAsync(Guid folderId)
     {
-        try
-        {                
-            var result = new Result<List<NoteInfoDto>>();
-            var searchNumber = 0;            
-            var sql = "";
-            var sqlWhere = "";
-            var sqlOrder = "";
-            IEnumerable<NoteInfoDto> entity;
+        return await GetByFolderPrivateAsync<NoteMinimalDto>(folderId);
+    }
 
-            var db = GetOpenConnection();
+    public async Task<Result<List<NoteInfoDto>>> GetFilterAsync(NotesFilterDto notesFilter)
+    {
+        return await GetFilterPrivateAsync<NoteInfoDto>(notesFilter);      
+    }
 
-            searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
-            sql = GetSelectNotes();
-            sqlWhere = "";                
-            sqlOrder = @" ORDER BY Topic ";
+    public async Task<Result<List<NoteMinimalDto>>> GetFilterMinimalAsync(NotesFilterDto notesFilter)
+    {
+        return await GetFilterPrivateAsync<NoteMinimalDto>(notesFilter);        
+    }
 
-            if (searchNumber > 0)
-            {
-                sqlWhere = " WHERE NoteNumber = " + searchNumber.ToString() + " " ;
-            }                
-            else
-            {
-                var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
+    public async Task<Result<List<NoteInfoDto>>> GetSearchAsync(NotesSearchDto notesSearch)
+    {
+        return await GetSearchPrivateAsync<NoteInfoDto>(notesSearch);        
+    }
 
-                // TODO: refactor this -----------------------------
-                var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
-                var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());
-                bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
-                // --------------------------------------------------
-
-                if (!flagSearchDescription)
-                {
-                    foreach (var token in listTokens)
-                    {
-                        if (!string.IsNullOrEmpty(token))
-                        {
-                            if (token[0] != '!')
-                            {
-                                sqlWhere = AddAndToStringSQL(sqlWhere);                                    
-                                sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' ) ";
-                            }
-                            else
-                            {
-                                var tokenNot = token.Substring(1, token.Length - 1);
-                                sqlWhere = AddAndToStringSQL(sqlWhere);                                    
-                                sqlWhere += $" (Topic NOT LIKE '%{tokenNot}%' AND Tags NOT LIKE '%{tokenNot}%')";
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var token in listTokens)
-                    {
-                        if (!string.IsNullOrEmpty(token))
-                        {
-                            if (token[0] != '!')
-                            {                                    
-                                sqlWhere = AddOrToStringSQL(sqlWhere);                                    
-                                sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' OR Description LIKE '%{token}%') ";
-                            }
-                            else
-                            {
-                                var tokenNot = token.Substring(1, token.Length - 1);                                 
-                                sqlWhere = AddAndToStringSQL(sqlWhere);                                    
-                                sqlWhere += $" (Topic NOT LIKE '%{tokenNot}%' AND Tags NOT LIKE '%{tokenNot}%' AND Description NOT LIKE '%{tokenNot}%') ";
-                            }
-                        }
-                    }
-                }
-                if (sqlWhere != "")
-                    sqlWhere = " WHERE " + sqlWhere;
-            }
-
-            sql = sql + sqlWhere + sqlOrder;
-                                
-            result.TotalCount = GetCountNotes(db, sqlWhere);
-
-            if (db.GetType().Name == "SqliteConnection")
-                sql += " LIMIT @NumRecords OFFSET @Offset ;";
-            else
-                sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
-
-            var pagination = notesSearch.PageIdentifier;
-            entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
-
-            result.Entity = entity.ToList();
-
-            await CloseIsTempConnection(db);
-
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
+    public async Task<Result<List<NoteMinimalDto>>> GetSearchMinimalAsync(NotesSearchDto notesSearch)
+    {
+        return await GetSearchPrivateAsync<NoteMinimalDto>(notesSearch);        
     }
 
     public async Task<Result<NoteDto>> GetAsync(Guid noteId)
@@ -846,7 +693,6 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         throw new NotImplementedException();
     }
 
-
     public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask)
     {            
         try
@@ -1362,7 +1208,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<int>> CountNotesInFolder(Guid folderId)
+    public async Task<Result<int>> CountNotesInFolderAsync(Guid folderId)
     {
         try
         {
@@ -1444,7 +1290,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<bool>> PatchFolder(Guid noteId, Guid folderId)
+    public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId)
     {
         try
         {
@@ -1478,7 +1324,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<bool>> PatchChangeTags(Guid noteId, string oldTag, string newTag)
+    public async Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag)
     {
         try
         {
@@ -1582,6 +1428,13 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 FROM Notes ";
     }
 
+    private string GetMinimalSelectNotes()
+    {
+        return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
+                        InternalTags, Tags, [Priority], FolderId
+                FROM Notes ";
+    }
+
     private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter)
     {
         string strWhere = "" ;
@@ -1645,8 +1498,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         return str;
     }
 
-
-    public async Task<List<NoteKAttributeDto>> CompleteNoteAttributes(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
+    public async Task<List<NoteKAttributeDto>> CompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
     {
         var db = GetOpenConnection();
         return await CompleteNoteAttributes(db, attributesNotes, noteId, noteTypeId);
@@ -1697,6 +1549,216 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             }
         }
         return attributesNotes.OrderBy(_ => _.Order).ThenBy(_ => _.Name).ToList();
+    }
+
+    public async Task<Result<List<T>>> GetAllPrivateAsync<T>()
+    {
+        try
+        {
+            var result = new Result<List<T>>();
+
+            var db = GetOpenConnection();
+
+            var sql = GetSelectNotes();
+            sql += @" ORDER BY [Priority], Topic ;";
+
+            var entity = await db.QueryAsync<T>(sql.ToString(), new { });
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    private async Task<Result<List<T>>> GetByFolderPrivateAsync<T>(Guid folderId)
+    {
+        try
+        {
+            var result = new Result<List<T>>();
+
+            var db = GetOpenConnection();
+
+            string sql = "";
+
+            if (typeof(T).GetProperty("Description", BindingFlags.Public | BindingFlags.Instance) != null)
+                sql = GetSelectNotes();
+            else
+                sql = GetMinimalSelectNotes();
+
+            sql += @" WHERE FolderId = @folderId ORDER BY [Priority], Topic ;";
+            var entity = await db.QueryAsync<T>(sql.ToString(), new { folderId });
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    private async Task<Result<List<T>>> GetFilterPrivateAsync<T>(NotesFilterDto notesFilter)
+    {
+        try
+        {
+            var result = new Result<List<T>>();
+
+            var db = GetOpenConnection();
+
+            IEnumerable<T> entity;
+
+            string sql = "";
+
+            if (typeof(T).GetProperty("Description", BindingFlags.Public | BindingFlags.Instance) != null)
+                sql = GetSelectNotes();
+            else
+                sql = GetMinimalSelectNotes();
+
+            var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
+
+            result.TotalCount = GetCountNotes(db, sqlWhere);
+
+            sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
+
+            var pagination = notesFilter.PageIdentifier;
+
+            if (pagination != null)
+            {
+                // Pagination SqlServer != SQlite
+                if (db.GetType().Name == "SqliteConnection")
+                    sql += " LIMIT @NumRecords OFFSET @Offset ;";
+                else
+                    sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+
+                entity = await db.QueryAsync<T>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
+            }
+            else
+            {
+                entity = await db.QueryAsync<T>(sql.ToString(), new { });
+            }
+
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    private async Task<Result<List<T>>> GetSearchPrivateAsync<T>(NotesSearchDto notesSearch)
+    {
+        try
+        {
+            var result = new Result<List<T>>();
+            var searchNumber = 0;
+            var sql = "";
+            var sqlWhere = "";
+            var sqlOrder = "";
+            IEnumerable<T> entity;
+
+            var db = GetOpenConnection();
+
+            searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
+            
+            if (typeof(T).GetProperty("Description", BindingFlags.Public | BindingFlags.Instance) != null)
+                sql = GetSelectNotes();
+            else
+                sql = GetMinimalSelectNotes();
+
+            sqlWhere = "";
+            sqlOrder = @" ORDER BY Topic ";
+
+            if (searchNumber > 0)
+            {
+                sqlWhere = " WHERE NoteNumber = " + searchNumber.ToString() + " ";
+            }
+            else
+            {
+                var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
+
+                // TODO: refactor this -----------------------------
+                var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
+                var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());
+                bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
+                // --------------------------------------------------
+
+                if (!flagSearchDescription)
+                {
+                    foreach (var token in listTokens)
+                    {
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            if (token[0] != '!')
+                            {
+                                sqlWhere = AddAndToStringSQL(sqlWhere);
+                                sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' ) ";
+                            }
+                            else
+                            {
+                                var tokenNot = token.Substring(1, token.Length - 1);
+                                sqlWhere = AddAndToStringSQL(sqlWhere);
+                                sqlWhere += $" (Topic NOT LIKE '%{tokenNot}%' AND Tags NOT LIKE '%{tokenNot}%')";
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var token in listTokens)
+                    {
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            if (token[0] != '!')
+                            {
+                                sqlWhere = AddOrToStringSQL(sqlWhere);
+                                sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' OR Description LIKE '%{token}%') ";
+                            }
+                            else
+                            {
+                                var tokenNot = token.Substring(1, token.Length - 1);
+                                sqlWhere = AddAndToStringSQL(sqlWhere);
+                                sqlWhere += $" (Topic NOT LIKE '%{tokenNot}%' AND Tags NOT LIKE '%{tokenNot}%' AND Description NOT LIKE '%{tokenNot}%') ";
+                            }
+                        }
+                    }
+                }
+                if (sqlWhere != "")
+                    sqlWhere = " WHERE " + sqlWhere;
+            }
+
+            sql = sql + sqlWhere + sqlOrder;
+
+            result.TotalCount = GetCountNotes(db, sqlWhere);
+
+            if (db.GetType().Name == "SqliteConnection")
+                sql += " LIMIT @NumRecords OFFSET @Offset ;";
+            else
+                sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
+
+            var pagination = notesSearch.PageIdentifier;
+            entity = await db.QueryAsync<T>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
+
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
     }
 
     #endregion

@@ -1,4 +1,5 @@
-﻿using KNote.ClientWin.Core;
+﻿using HtmlAgilityPack;
+using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -266,14 +267,14 @@ public class KntChatGPTCtrl : CtrlBase
 
         var chatTemplate = new KntAssistantInfo();
 
-        try 
-        { 
-            chatTemplate = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description); 
+        try
+        {
+            chatTemplate = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description);
         }
-        catch 
-        { 
-            chatTemplate.User = catalogItem.Description; 
-        }        
+        catch
+        {
+            chatTemplate.User = catalogItem.Description;
+        }
         chatTemplate.Name = catalogItem.Topic;
         if (!string.IsNullOrEmpty(chatTemplate.System))
             RootSystemChat = chatTemplate.System;
@@ -300,8 +301,8 @@ public class KntChatGPTCtrl : CtrlBase
         {
             NoteDto codeInfo;
             string err = "";
-
-            assistantInfo = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description);
+            
+            assistantInfo = JsonSerializer.Deserialize<KntAssistantInfo>(catalogItem.Description);            
 
             if (assistantInfo.AssistantScriptNumber != 0)
             {
@@ -325,11 +326,9 @@ public class KntChatGPTCtrl : CtrlBase
             }
         }
         catch
-        {
-            assistantInfo.User = catalogItem.Description;
+        {            
+            assistantInfo.User = catalogItem.Description;            
         }
-
-
 
         // Inject variables for KntScript
         if (!string.IsNullOrEmpty(assistantInfo.System))
@@ -339,7 +338,7 @@ public class KntChatGPTCtrl : CtrlBase
         if (string.IsNullOrEmpty(assistantInfo.User))
             assistantInfo.User = "";
         kntScript.AddVar("_promptChat", assistantInfo.User);
-        ////////////////////kntScript.AddVar("_knote", Model);
+        // kntScript.AddVar("_knote", Model);
 
         try
         {
