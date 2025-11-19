@@ -487,7 +487,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             panelHeaderData.Visible = false;
             labelExpandContent.Text = "▼";
-            labelExpandContent.Top = 10;
+            labelExpandContent.Top = 6;
             labelContent.Top = 10;
             labelAction.Top = 6;
             buttonEditMarkdown.Top = 4;
