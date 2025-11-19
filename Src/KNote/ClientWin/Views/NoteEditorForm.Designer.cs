@@ -534,6 +534,7 @@
             buttonFolderSearch.TabIndex = 2;
             buttonFolderSearch.Text = "...";
             buttonFolderSearch.UseVisualStyleBackColor = false;
+            buttonFolderSearch.Click += buttonFolderSearch_Click;
             // 
             // label3
             // 
