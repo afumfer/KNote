@@ -39,7 +39,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         buttonPrint.Visible = false;
         buttonCheck.Visible = false;
         toolStripS3.Visible = false;
-        toolStripS4.Visible = false;                
+        toolStripS4.Visible = false;
     }
 
     #endregion
@@ -81,7 +81,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (webViewResource.Visible)
             await webViewResource.ClearWebView();
         webViewResource.Visible = true;
-        panelPreview.Visible = false;        
+        panelPreview.Visible = false;
         await kntEditViewTask.ClearWebView();
         textTaskTags.Text = "";
         textScriptCode.Text = "";
@@ -478,6 +478,36 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textBox.SelectionLength = 0;
     }
 
+    private void labelExpandContent_Click(object sender, EventArgs e)
+    {
+        if (panelHeaderData.Visible == true)
+        {
+            panelHeaderData.Visible = false;
+            labelExpandContent.Text = "▼";
+            labelExpandContent.Top = 10;
+            labelContent.Top = 8;
+            labelAction.Top = 4;
+            buttonEditMarkdown.Top = 4;
+            buttonNavigate.Top = 4;
+            buttonViewHtml.Top = 4;
+            panelDescription.Location = new System.Drawing.Point(4, 32);
+            panelDescription.Height = panelDescription.Height + 92;
+        }
+        else
+        {
+            panelHeaderData.Visible = true;
+            labelExpandContent.Text = "▲";
+            labelExpandContent.Top = 102;
+            labelContent.Top = 100;
+            labelAction.Top = 96;
+            buttonEditMarkdown.Top = 96;
+            buttonNavigate.Top = 96;
+            buttonViewHtml.Top = 96;
+            panelDescription.Location = new System.Drawing.Point(4, 124);
+            panelDescription.Height = panelDescription.Height - 92;
+        }
+    }
+
     #region Messages managment
 
     private async void buttonAddAlarm_Click(object sender, EventArgs e)
@@ -786,16 +816,16 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
         textTopic.Text = _ctrl.Model.Topic;
         textNoteNumber.Text = "#" + _ctrl.Model.NoteNumber.ToString();
-        
+
         textFolder.Text = _ctrl.Model.FolderDto?.Name;
         //textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);  // TODO: ### Experimental
-        
+
         textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
         _selectedFolderId = _ctrl.Model.FolderId;
         textTags.Text = _ctrl.Model.Tags;
         textStatus.Text = _ctrl.Model.InternalTags;
         textPriority.Text = _ctrl.Model.Priority.ToString();
-        
+
         kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
 
         if (_ctrl.Model.ContentType.Contains("html"))
@@ -852,7 +882,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (_ctrl.Model.Tasks.Count > 0)
             listViewTasks.Items[0].Selected = true;
         else
-        {            
+        {
             await kntEditViewTask.ClearWebView();
             textTaskTags.Text = "";
         }
@@ -1346,7 +1376,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // Form for capture text to search
         var formReadVar = new ReadVarForm(listVars);
-        
+
         formReadVar.Text = "Search for text in the note description";
         formReadVar.Size = new Size(500, 150);
 
@@ -1354,11 +1384,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         if (result == DialogResult.Cancel)
             return;
-        else        
+        else
             _textSearch = listVars[0].VarNewValueText;
-                
+
         if (string.IsNullOrEmpty(_textSearch))
-        {            
+        {
             _ctrl.ShowMessage("Please, insert text for find.", KntConst.AppName);
             return;
         }

@@ -55,9 +55,22 @@
             panelForm = new Panel();
             tabNoteData = new TabControl();
             tabBasicData = new TabPage();
-            buttonNavigate = new Button();
+            labelExpandContent = new Label();
+            panelHeaderData = new Panel();
             textStatus = new TextBox();
             label8 = new Label();
+            label7 = new Label();
+            textPriority = new TextBox();
+            textTags = new TextBox();
+            textFolder = new TextBox();
+            textTopic = new TextBox();
+            buttonFolderSearch = new Button();
+            label3 = new Label();
+            label2 = new Label();
+            label1 = new Label();
+            textNoteNumber = new TextBox();
+            textFolderNumber = new TextBox();
+            buttonNavigate = new Button();
             panelDescription = new Panel();
             kntEditView = new KntWebView.KntEditView();
             toolDescription = new ToolStrip();
@@ -89,20 +102,9 @@
             toolDescriptionUploadResource = new ToolStripButton();
             toolDescriptionUploadResourceFromClipboard = new ToolStripButton();
             labelAction = new Label();
-            label7 = new Label();
             buttonEditMarkdown = new Button();
             buttonViewHtml = new Button();
-            textPriority = new TextBox();
-            label6 = new Label();
-            textTags = new TextBox();
-            textFolder = new TextBox();
-            textTopic = new TextBox();
-            buttonFolderSearch = new Button();
-            label3 = new Label();
-            label2 = new Label();
-            label1 = new Label();
-            textNoteNumber = new TextBox();
-            textFolderNumber = new TextBox();
+            labelContent = new Label();
             tabAttributes = new TabPage();
             buttonDeleteType = new Button();
             listViewAttributes = new ListView();
@@ -163,6 +165,7 @@
             panelForm.SuspendLayout();
             tabNoteData.SuspendLayout();
             tabBasicData.SuspendLayout();
+            panelHeaderData.SuspendLayout();
             panelDescription.SuspendLayout();
             toolDescription.SuspendLayout();
             tabAttributes.SuspendLayout();
@@ -182,7 +185,7 @@
             toolBarNoteEditor.Location = new Point(0, 0);
             toolBarNoteEditor.Name = "toolBarNoteEditor";
             toolBarNoteEditor.RenderMode = ToolStripRenderMode.Professional;
-            toolBarNoteEditor.Size = new Size(808, 25);
+            toolBarNoteEditor.Size = new Size(809, 25);
             toolBarNoteEditor.TabIndex = 6;
             toolBarNoteEditor.Text = "Toolbar KeyNotes";
             // 
@@ -370,7 +373,7 @@
             panelForm.Location = new Point(0, 25);
             panelForm.Margin = new Padding(4, 3, 4, 3);
             panelForm.Name = "panelForm";
-            panelForm.Size = new Size(808, 612);
+            panelForm.Size = new Size(809, 600);
             panelForm.TabIndex = 39;
             // 
             // tabNoteData
@@ -389,45 +392,208 @@
             tabNoteData.Name = "tabNoteData";
             tabNoteData.Padding = new Point(4, 6);
             tabNoteData.SelectedIndex = 0;
-            tabNoteData.Size = new Size(802, 603);
+            tabNoteData.Size = new Size(803, 591);
             tabNoteData.TabIndex = 8;
             // 
             // tabBasicData
             // 
+            tabBasicData.Controls.Add(labelExpandContent);
+            tabBasicData.Controls.Add(panelHeaderData);
             tabBasicData.Controls.Add(buttonNavigate);
-            tabBasicData.Controls.Add(textStatus);
-            tabBasicData.Controls.Add(label8);
             tabBasicData.Controls.Add(panelDescription);
             tabBasicData.Controls.Add(labelAction);
-            tabBasicData.Controls.Add(label7);
             tabBasicData.Controls.Add(buttonEditMarkdown);
             tabBasicData.Controls.Add(buttonViewHtml);
-            tabBasicData.Controls.Add(textPriority);
-            tabBasicData.Controls.Add(label6);
-            tabBasicData.Controls.Add(textTags);
-            tabBasicData.Controls.Add(textFolder);
-            tabBasicData.Controls.Add(textTopic);
-            tabBasicData.Controls.Add(buttonFolderSearch);
-            tabBasicData.Controls.Add(label3);
-            tabBasicData.Controls.Add(label2);
-            tabBasicData.Controls.Add(label1);
-            tabBasicData.Controls.Add(textNoteNumber);
-            tabBasicData.Controls.Add(textFolderNumber);
+            tabBasicData.Controls.Add(labelContent);
             tabBasicData.ImageIndex = 1;
             tabBasicData.Location = new Point(4, 30);
             tabBasicData.Margin = new Padding(4, 3, 4, 3);
             tabBasicData.Name = "tabBasicData";
             tabBasicData.Padding = new Padding(4, 3, 4, 3);
-            tabBasicData.Size = new Size(794, 569);
+            tabBasicData.Size = new Size(795, 557);
             tabBasicData.TabIndex = 0;
             tabBasicData.Text = "Basic data  ";
             tabBasicData.UseVisualStyleBackColor = true;
+            // 
+            // labelExpandContent
+            // 
+            labelExpandContent.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            labelExpandContent.AutoSize = true;
+            labelExpandContent.Font = new Font("Segoe UI", 10F);
+            labelExpandContent.ForeColor = SystemColors.ControlDarkDark;
+            labelExpandContent.Location = new Point(770, 102);
+            labelExpandContent.Name = "labelExpandContent";
+            labelExpandContent.Size = new Size(21, 19);
+            labelExpandContent.TabIndex = 59;
+            labelExpandContent.Text = "▲";
+            labelExpandContent.TextAlign = ContentAlignment.MiddleLeft;
+            labelExpandContent.Click += labelExpandContent_Click;
+            // 
+            // panelHeaderData
+            // 
+            panelHeaderData.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panelHeaderData.Controls.Add(textStatus);
+            panelHeaderData.Controls.Add(label8);
+            panelHeaderData.Controls.Add(label7);
+            panelHeaderData.Controls.Add(textPriority);
+            panelHeaderData.Controls.Add(textTags);
+            panelHeaderData.Controls.Add(textFolder);
+            panelHeaderData.Controls.Add(textTopic);
+            panelHeaderData.Controls.Add(buttonFolderSearch);
+            panelHeaderData.Controls.Add(label3);
+            panelHeaderData.Controls.Add(label2);
+            panelHeaderData.Controls.Add(label1);
+            panelHeaderData.Controls.Add(textNoteNumber);
+            panelHeaderData.Controls.Add(textFolderNumber);
+            panelHeaderData.Location = new Point(3, 3);
+            panelHeaderData.Name = "panelHeaderData";
+            panelHeaderData.Size = new Size(787, 91);
+            panelHeaderData.TabIndex = 58;
+            // 
+            // textStatus
+            // 
+            textStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            textStatus.BackColor = SystemColors.Control;
+            textStatus.Enabled = false;
+            textStatus.Location = new Point(594, 62);
+            textStatus.Margin = new Padding(4, 3, 4, 3);
+            textStatus.Name = "textStatus";
+            textStatus.Size = new Size(193, 23);
+            textStatus.TabIndex = 61;
+            // 
+            // label8
+            // 
+            label8.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label8.Location = new Point(545, 62);
+            label8.Margin = new Padding(4, 0, 4, 0);
+            label8.Name = "label8";
+            label8.Size = new Size(45, 18);
+            label8.TabIndex = 69;
+            label8.Text = "Status:";
+            label8.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // label7
+            // 
+            label7.Location = new Point(2, 62);
+            label7.Margin = new Padding(4, 0, 4, 0);
+            label7.Name = "label7";
+            label7.Size = new Size(59, 18);
+            label7.TabIndex = 66;
+            label7.Text = "Priority:";
+            label7.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // textPriority
+            // 
+            textPriority.Location = new Point(72, 62);
+            textPriority.Margin = new Padding(4, 3, 4, 3);
+            textPriority.Name = "textPriority";
+            textPriority.Size = new Size(75, 23);
+            textPriority.TabIndex = 3;
+            // 
+            // textTags
+            // 
+            textTags.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textTags.Location = new Point(202, 62);
+            textTags.Margin = new Padding(4, 3, 4, 3);
+            textTags.MaxLength = 255;
+            textTags.Name = "textTags";
+            textTags.Size = new Size(325, 23);
+            textTags.TabIndex = 4;
+            // 
+            // textFolder
+            // 
+            textFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textFolder.Enabled = false;
+            textFolder.Location = new Point(72, 32);
+            textFolder.Margin = new Padding(4, 3, 4, 3);
+            textFolder.MaxLength = 255;
+            textFolder.Name = "textFolder";
+            textFolder.Size = new Size(635, 23);
+            textFolder.TabIndex = 1;
+            // 
+            // textTopic
+            // 
+            textTopic.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textTopic.Location = new Point(72, 2);
+            textTopic.Margin = new Padding(4, 3, 4, 3);
+            textTopic.MaxLength = 255;
+            textTopic.Name = "textTopic";
+            textTopic.Size = new Size(635, 23);
+            textTopic.TabIndex = 0;
+            // 
+            // buttonFolderSearch
+            // 
+            buttonFolderSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonFolderSearch.BackColor = SystemColors.Control;
+            buttonFolderSearch.FlatStyle = FlatStyle.System;
+            buttonFolderSearch.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonFolderSearch.Location = new Point(760, 30);
+            buttonFolderSearch.Margin = new Padding(4, 3, 4, 3);
+            buttonFolderSearch.Name = "buttonFolderSearch";
+            buttonFolderSearch.Size = new Size(27, 26);
+            buttonFolderSearch.TabIndex = 2;
+            buttonFolderSearch.Text = "...";
+            buttonFolderSearch.UseVisualStyleBackColor = false;
+            // 
+            // label3
+            // 
+            label3.Location = new Point(163, 62);
+            label3.Margin = new Padding(4, 0, 4, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(35, 18);
+            label3.TabIndex = 65;
+            label3.Text = "Tags:";
+            label3.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // label2
+            // 
+            label2.Location = new Point(2, 32);
+            label2.Margin = new Padding(4, 0, 4, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(59, 18);
+            label2.TabIndex = 64;
+            label2.Text = "Folder:";
+            label2.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // label1
+            // 
+            label1.Location = new Point(2, 2);
+            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(59, 18);
+            label1.TabIndex = 63;
+            label1.Text = "Topic:";
+            label1.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // textNoteNumber
+            // 
+            textNoteNumber.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            textNoteNumber.BackColor = SystemColors.Control;
+            textNoteNumber.Enabled = false;
+            textNoteNumber.Location = new Point(703, 2);
+            textNoteNumber.Name = "textNoteNumber";
+            textNoteNumber.Size = new Size(84, 23);
+            textNoteNumber.TabIndex = 67;
+            textNoteNumber.TabStop = false;
+            textNoteNumber.TextAlign = HorizontalAlignment.Right;
+            // 
+            // textFolderNumber
+            // 
+            textFolderNumber.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            textFolderNumber.BackColor = SystemColors.Control;
+            textFolderNumber.Enabled = false;
+            textFolderNumber.Location = new Point(703, 32);
+            textFolderNumber.Name = "textFolderNumber";
+            textFolderNumber.Size = new Size(54, 23);
+            textFolderNumber.TabIndex = 68;
+            textFolderNumber.TabStop = false;
+            textFolderNumber.TextAlign = HorizontalAlignment.Right;
             // 
             // buttonNavigate
             // 
             buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonNavigate.Font = new Font("Segoe UI", 8.25F);
-            buttonNavigate.Location = new Point(593, 104);
+            buttonNavigate.Location = new Point(570, 96);
             buttonNavigate.Margin = new Padding(4, 3, 4, 3);
             buttonNavigate.Name = "buttonNavigate";
             buttonNavigate.Size = new Size(96, 26);
@@ -436,37 +602,16 @@
             buttonNavigate.UseVisualStyleBackColor = true;
             buttonNavigate.Click += buttonNavigate_Click;
             // 
-            // textStatus
-            // 
-            textStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            textStatus.BackColor = SystemColors.Control;
-            textStatus.Enabled = false;
-            textStatus.Location = new Point(593, 68);
-            textStatus.Margin = new Padding(4, 3, 4, 3);
-            textStatus.Name = "textStatus";
-            textStatus.Size = new Size(193, 23);
-            textStatus.TabIndex = 4;
-            // 
-            // label8
-            // 
-            label8.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label8.Location = new Point(544, 68);
-            label8.Margin = new Padding(4, 0, 4, 0);
-            label8.Name = "label8";
-            label8.Size = new Size(45, 18);
-            label8.TabIndex = 56;
-            label8.Text = "Status:";
-            label8.TextAlign = ContentAlignment.MiddleLeft;
-            // 
             // panelDescription
             // 
             panelDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelDescription.BackColor = SystemColors.Control;
             panelDescription.Controls.Add(kntEditView);
             panelDescription.Controls.Add(toolDescription);
-            panelDescription.Location = new Point(4, 132);
+            panelDescription.Location = new Point(4, 124);
             panelDescription.Name = "panelDescription";
-            panelDescription.Size = new Size(782, 434);
-            panelDescription.TabIndex = 55;
+            panelDescription.Size = new Size(783, 430);
+            panelDescription.TabIndex = 9;
             panelDescription.Visible = false;
             // 
             // kntEditView
@@ -485,7 +630,7 @@
             toolDescription.Items.AddRange(new ToolStripItem[] { toolDescriptionHtml, toolDescriptionMarkdown, toolDescriptionS3, toolDescriptionUploadResource, toolDescriptionUploadResourceFromClipboard });
             toolDescription.Location = new Point(0, 0);
             toolDescription.Name = "toolDescription";
-            toolDescription.Size = new Size(30, 434);
+            toolDescription.Size = new Size(30, 430);
             toolDescription.TabIndex = 0;
             toolDescription.Text = "Tool description editor";
             // 
@@ -692,7 +837,7 @@
             // 
             labelAction.AutoSize = true;
             labelAction.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelAction.Location = new Point(136, 112);
+            labelAction.Location = new Point(142, 104);
             labelAction.Name = "labelAction";
             labelAction.Size = new Size(226, 15);
             labelAction.TabIndex = 54;
@@ -700,23 +845,13 @@
             labelAction.TextAlign = ContentAlignment.MiddleRight;
             labelAction.Visible = false;
             // 
-            // label7
-            // 
-            label7.Location = new Point(9, 68);
-            label7.Margin = new Padding(4, 0, 4, 0);
-            label7.Name = "label7";
-            label7.Size = new Size(64, 18);
-            label7.TabIndex = 50;
-            label7.Text = "Priority:";
-            label7.TextAlign = ContentAlignment.MiddleLeft;
-            // 
             // buttonEditMarkdown
             // 
             buttonEditMarkdown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonEditMarkdown.Font = new Font("Segoe UI", 8.25F);
             buttonEditMarkdown.ImageAlign = ContentAlignment.MiddleLeft;
             buttonEditMarkdown.ImageList = imageListTabNoteData;
-            buttonEditMarkdown.Location = new Point(496, 104);
+            buttonEditMarkdown.Location = new Point(473, 96);
             buttonEditMarkdown.Margin = new Padding(4, 3, 4, 3);
             buttonEditMarkdown.Name = "buttonEditMarkdown";
             buttonEditMarkdown.Size = new Size(96, 26);
@@ -729,7 +864,7 @@
             // 
             buttonViewHtml.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonViewHtml.Font = new Font("Segoe UI", 8.25F);
-            buttonViewHtml.Location = new Point(690, 104);
+            buttonViewHtml.Location = new Point(668, 96);
             buttonViewHtml.Margin = new Padding(4, 3, 4, 3);
             buttonViewHtml.Name = "buttonViewHtml";
             buttonViewHtml.Size = new Size(96, 26);
@@ -738,122 +873,15 @@
             buttonViewHtml.UseVisualStyleBackColor = true;
             buttonViewHtml.Click += buttonEditHtml_Click;
             // 
-            // textPriority
+            // labelContent
             // 
-            textPriority.Location = new Point(81, 68);
-            textPriority.Margin = new Padding(4, 3, 4, 3);
-            textPriority.Name = "textPriority";
-            textPriority.Size = new Size(75, 23);
-            textPriority.TabIndex = 3;
-            // 
-            // label6
-            // 
-            label6.Location = new Point(9, 112);
-            label6.Margin = new Padding(4, 0, 4, 0);
-            label6.Name = "label6";
-            label6.Size = new Size(103, 18);
-            label6.TabIndex = 44;
-            label6.Text = "Content:";
-            // 
-            // textTags
-            // 
-            textTags.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textTags.Location = new Point(211, 68);
-            textTags.Margin = new Padding(4, 3, 4, 3);
-            textTags.MaxLength = 255;
-            textTags.Name = "textTags";
-            textTags.Size = new Size(315, 23);
-            textTags.TabIndex = 4;
-            // 
-            // textFolder
-            // 
-            textFolder.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textFolder.Enabled = false;
-            textFolder.Location = new Point(81, 38);
-            textFolder.Margin = new Padding(4, 3, 4, 3);
-            textFolder.MaxLength = 255;
-            textFolder.Name = "textFolder";
-            textFolder.Size = new Size(625, 23);
-            textFolder.TabIndex = 1;
-            // 
-            // textTopic
-            // 
-            textTopic.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textTopic.Location = new Point(81, 8);
-            textTopic.Margin = new Padding(4, 3, 4, 3);
-            textTopic.MaxLength = 255;
-            textTopic.Name = "textTopic";
-            textTopic.Size = new Size(625, 23);
-            textTopic.TabIndex = 0;
-            // 
-            // buttonFolderSearch
-            // 
-            buttonFolderSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonFolderSearch.BackColor = SystemColors.Control;
-            buttonFolderSearch.FlatStyle = FlatStyle.System;
-            buttonFolderSearch.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            buttonFolderSearch.Location = new Point(760, 36);
-            buttonFolderSearch.Margin = new Padding(4, 3, 4, 3);
-            buttonFolderSearch.Name = "buttonFolderSearch";
-            buttonFolderSearch.Size = new Size(27, 26);
-            buttonFolderSearch.TabIndex = 2;
-            buttonFolderSearch.Text = "...";
-            buttonFolderSearch.UseVisualStyleBackColor = false;
-            buttonFolderSearch.Click += buttonFolderSearch_Click;
-            // 
-            // label3
-            // 
-            label3.Location = new Point(172, 68);
-            label3.Margin = new Padding(4, 0, 4, 0);
-            label3.Name = "label3";
-            label3.Size = new Size(35, 18);
-            label3.TabIndex = 36;
-            label3.Text = "Tags:";
-            label3.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // label2
-            // 
-            label2.Location = new Point(9, 38);
-            label2.Margin = new Padding(4, 0, 4, 0);
-            label2.Name = "label2";
-            label2.Size = new Size(64, 18);
-            label2.TabIndex = 34;
-            label2.Text = "Folder:";
-            label2.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // label1
-            // 
-            label1.Location = new Point(9, 8);
-            label1.Margin = new Padding(4, 0, 4, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(64, 18);
-            label1.TabIndex = 33;
-            label1.Text = "Topic:";
-            label1.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // textNoteNumber
-            // 
-            textNoteNumber.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            textNoteNumber.BackColor = SystemColors.Control;
-            textNoteNumber.Enabled = false;
-            textNoteNumber.Location = new Point(702, 8);
-            textNoteNumber.Name = "textNoteNumber";
-            textNoteNumber.Size = new Size(84, 23);
-            textNoteNumber.TabIndex = 51;
-            textNoteNumber.TabStop = false;
-            textNoteNumber.TextAlign = HorizontalAlignment.Right;
-            // 
-            // textFolderNumber
-            // 
-            textFolderNumber.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            textFolderNumber.BackColor = SystemColors.Control;
-            textFolderNumber.Enabled = false;
-            textFolderNumber.Location = new Point(702, 38);
-            textFolderNumber.Name = "textFolderNumber";
-            textFolderNumber.Size = new Size(54, 23);
-            textFolderNumber.TabIndex = 52;
-            textFolderNumber.TabStop = false;
-            textFolderNumber.TextAlign = HorizontalAlignment.Right;
+            labelContent.Location = new Point(4, 104);
+            labelContent.Margin = new Padding(4, 0, 4, 0);
+            labelContent.Name = "labelContent";
+            labelContent.Size = new Size(103, 18);
+            labelContent.TabIndex = 44;
+            labelContent.Text = "Content:";
+            labelContent.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // tabAttributes
             // 
@@ -868,7 +896,7 @@
             tabAttributes.Location = new Point(4, 30);
             tabAttributes.Margin = new Padding(4, 3, 4, 3);
             tabAttributes.Name = "tabAttributes";
-            tabAttributes.Size = new Size(794, 569);
+            tabAttributes.Size = new Size(795, 557);
             tabAttributes.TabIndex = 3;
             tabAttributes.Text = "Attributes  ";
             tabAttributes.UseVisualStyleBackColor = true;
@@ -879,7 +907,7 @@
             buttonDeleteType.BackColor = SystemColors.Control;
             buttonDeleteType.FlatStyle = FlatStyle.System;
             buttonDeleteType.Font = new Font("Segoe UI", 8.25F);
-            buttonDeleteType.Location = new Point(730, 14);
+            buttonDeleteType.Location = new Point(731, 14);
             buttonDeleteType.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteType.Name = "buttonDeleteType";
             buttonDeleteType.Size = new Size(27, 26);
@@ -895,7 +923,7 @@
             listViewAttributes.Location = new Point(10, 79);
             listViewAttributes.MultiSelect = false;
             listViewAttributes.Name = "listViewAttributes";
-            listViewAttributes.Size = new Size(774, 478);
+            listViewAttributes.Size = new Size(775, 466);
             listViewAttributes.TabIndex = 46;
             listViewAttributes.UseCompatibleStateImageBehavior = false;
             listViewAttributes.DoubleClick += listViewAttributes_DoubleClick;
@@ -910,7 +938,7 @@
             textNoteType.MaxLength = 255;
             textNoteType.Name = "textNoteType";
             textNoteType.ShortcutsEnabled = false;
-            textNoteType.Size = new Size(624, 23);
+            textNoteType.Size = new Size(625, 23);
             textNoteType.TabIndex = 44;
             // 
             // buttonNoteType
@@ -919,7 +947,7 @@
             buttonNoteType.BackColor = SystemColors.Control;
             buttonNoteType.FlatStyle = FlatStyle.System;
             buttonNoteType.Font = new Font("Segoe UI", 8.25F);
-            buttonNoteType.Location = new Point(758, 14);
+            buttonNoteType.Location = new Point(759, 14);
             buttonNoteType.Margin = new Padding(4, 3, 4, 3);
             buttonNoteType.Name = "buttonNoteType";
             buttonNoteType.Size = new Size(27, 26);
@@ -943,7 +971,7 @@
             // 
             buttonAttributeEdit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonAttributeEdit.Font = new Font("Segoe UI", 8.25F);
-            buttonAttributeEdit.Location = new Point(758, 52);
+            buttonAttributeEdit.Location = new Point(759, 52);
             buttonAttributeEdit.Margin = new Padding(4, 3, 4, 3);
             buttonAttributeEdit.Name = "buttonAttributeEdit";
             buttonAttributeEdit.Size = new Size(27, 26);
@@ -979,7 +1007,7 @@
             tabResources.Location = new Point(4, 30);
             tabResources.Margin = new Padding(4, 3, 4, 3);
             tabResources.Name = "tabResources";
-            tabResources.Size = new Size(794, 569);
+            tabResources.Size = new Size(795, 557);
             tabResources.TabIndex = 4;
             tabResources.Text = "Resources  ";
             tabResources.ToolTipText = "Save resource file";
@@ -989,7 +1017,7 @@
             // 
             labelPreview.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelPreview.AutoSize = true;
-            labelPreview.Location = new Point(685, 18);
+            labelPreview.Location = new Point(686, 18);
             labelPreview.Name = "labelPreview";
             labelPreview.Size = new Size(99, 15);
             labelPreview.TabIndex = 24;
@@ -998,10 +1026,10 @@
             // textDescriptionResource
             // 
             textDescriptionResource.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textDescriptionResource.Location = new Point(396, 513);
+            textDescriptionResource.Location = new Point(396, 501);
             textDescriptionResource.Multiline = true;
             textDescriptionResource.Name = "textDescriptionResource";
-            textDescriptionResource.Size = new Size(392, 52);
+            textDescriptionResource.Size = new Size(393, 52);
             textDescriptionResource.TabIndex = 19;
             // 
             // webViewResource
@@ -1011,7 +1039,7 @@
             webViewResource.Location = new Point(392, 36);
             webViewResource.Margin = new Padding(3, 4, 3, 4);
             webViewResource.Name = "webViewResource";
-            webViewResource.Size = new Size(392, 157);
+            webViewResource.Size = new Size(393, 145);
             webViewResource.TabIndex = 21;
             webViewResource.Visible = false;
             // 
@@ -1046,7 +1074,7 @@
             panelPreview.Controls.Add(linkViewFile);
             panelPreview.Location = new Point(392, 202);
             panelPreview.Name = "panelPreview";
-            panelPreview.Size = new Size(392, 84);
+            panelPreview.Size = new Size(393, 72);
             panelPreview.TabIndex = 18;
             panelPreview.Visible = false;
             // 
@@ -1068,7 +1096,7 @@
             listViewResources.Location = new Point(5, 36);
             listViewResources.MultiSelect = false;
             listViewResources.Name = "listViewResources";
-            listViewResources.Size = new Size(381, 529);
+            listViewResources.Size = new Size(381, 517);
             listViewResources.TabIndex = 14;
             listViewResources.UseCompatibleStateImageBehavior = false;
             listViewResources.SelectedIndexChanged += listViewResources_SelectedIndexChanged;
@@ -1136,7 +1164,7 @@
             tabActivities.Location = new Point(4, 30);
             tabActivities.Margin = new Padding(4, 3, 4, 3);
             tabActivities.Name = "tabActivities";
-            tabActivities.Size = new Size(794, 569);
+            tabActivities.Size = new Size(795, 557);
             tabActivities.TabIndex = 2;
             tabActivities.Text = "Activities ";
             tabActivities.UseVisualStyleBackColor = true;
@@ -1146,22 +1174,22 @@
             kntEditViewTask.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             kntEditViewTask.Location = new Point(400, 34);
             kntEditViewTask.Name = "kntEditViewTask";
-            kntEditViewTask.Size = new Size(388, 462);
+            kntEditViewTask.Size = new Size(389, 450);
             kntEditViewTask.TabIndex = 17;
             // 
             // textTaskTags
             // 
             textTaskTags.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textTaskTags.Location = new Point(400, 527);
+            textTaskTags.Location = new Point(400, 515);
             textTaskTags.Name = "textTaskTags";
-            textTaskTags.Size = new Size(389, 23);
+            textTaskTags.Size = new Size(390, 23);
             textTaskTags.TabIndex = 16;
             // 
             // label17
             // 
             label17.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             label17.AutoSize = true;
-            label17.Location = new Point(400, 508);
+            label17.Location = new Point(400, 496);
             label17.Name = "label17";
             label17.Size = new Size(33, 15);
             label17.TabIndex = 16;
@@ -1182,7 +1210,7 @@
             listViewTasks.Location = new Point(5, 36);
             listViewTasks.MultiSelect = false;
             listViewTasks.Name = "listViewTasks";
-            listViewTasks.Size = new Size(387, 530);
+            listViewTasks.Size = new Size(387, 518);
             listViewTasks.TabIndex = 13;
             listViewTasks.UseCompatibleStateImageBehavior = false;
             listViewTasks.SelectedIndexChanged += listViewTasks_SelectedIndexChanged;
@@ -1247,7 +1275,7 @@
             tabAlarms.Margin = new Padding(4, 3, 4, 3);
             tabAlarms.Name = "tabAlarms";
             tabAlarms.Padding = new Padding(4, 3, 4, 3);
-            tabAlarms.Size = new Size(794, 569);
+            tabAlarms.Size = new Size(795, 557);
             tabAlarms.TabIndex = 1;
             tabAlarms.Text = "Alarms  ";
             tabAlarms.UseVisualStyleBackColor = true;
@@ -1258,7 +1286,7 @@
             listViewAlarms.Location = new Point(6, 36);
             listViewAlarms.MultiSelect = false;
             listViewAlarms.Name = "listViewAlarms";
-            listViewAlarms.Size = new Size(781, 530);
+            listViewAlarms.Size = new Size(782, 518);
             listViewAlarms.TabIndex = 11;
             listViewAlarms.UseCompatibleStateImageBehavior = false;
             listViewAlarms.DoubleClick += listViewAlarms_DoubleClick;
@@ -1268,7 +1296,7 @@
             // 
             buttonEditAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonEditAlarm.Font = new Font("Segoe UI", 8.25F);
-            buttonEditAlarm.Location = new Point(760, 8);
+            buttonEditAlarm.Location = new Point(761, 8);
             buttonEditAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonEditAlarm.Name = "buttonEditAlarm";
             buttonEditAlarm.Size = new Size(27, 26);
@@ -1281,7 +1309,7 @@
             // 
             buttonDeleteAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonDeleteAlarm.Font = new Font("Segoe UI", 8.25F);
-            buttonDeleteAlarm.Location = new Point(730, 8);
+            buttonDeleteAlarm.Location = new Point(731, 8);
             buttonDeleteAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteAlarm.Name = "buttonDeleteAlarm";
             buttonDeleteAlarm.Size = new Size(27, 26);
@@ -1294,7 +1322,7 @@
             // 
             buttonAddAlarm.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonAddAlarm.Font = new Font("Segoe UI", 8.25F);
-            buttonAddAlarm.Location = new Point(700, 8);
+            buttonAddAlarm.Location = new Point(701, 8);
             buttonAddAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonAddAlarm.Name = "buttonAddAlarm";
             buttonAddAlarm.Size = new Size(27, 26);
@@ -1321,7 +1349,7 @@
             tabCode.Location = new Point(4, 30);
             tabCode.Margin = new Padding(4, 3, 4, 3);
             tabCode.Name = "tabCode";
-            tabCode.Size = new Size(794, 569);
+            tabCode.Size = new Size(795, 557);
             tabCode.TabIndex = 6;
             tabCode.Text = "Code   ";
             tabCode.UseVisualStyleBackColor = true;
@@ -1335,7 +1363,7 @@
             textScriptCode.Multiline = true;
             textScriptCode.Name = "textScriptCode";
             textScriptCode.ScrollBars = ScrollBars.Both;
-            textScriptCode.Size = new Size(780, 532);
+            textScriptCode.Size = new Size(781, 520);
             textScriptCode.TabIndex = 6;
             textScriptCode.WordWrap = false;
             // 
@@ -1368,7 +1396,7 @@
             tabTraceNotes.Location = new Point(4, 30);
             tabTraceNotes.Margin = new Padding(4, 3, 4, 3);
             tabTraceNotes.Name = "tabTraceNotes";
-            tabTraceNotes.Size = new Size(794, 569);
+            tabTraceNotes.Size = new Size(795, 557);
             tabTraceNotes.TabIndex = 5;
             tabTraceNotes.Text = "Trace notes  ";
             tabTraceNotes.UseVisualStyleBackColor = true;
@@ -1378,7 +1406,7 @@
             listViewTraceNoteTo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listViewTraceNoteTo.Location = new Point(406, 71);
             listViewTraceNoteTo.Name = "listViewTraceNoteTo";
-            listViewTraceNoteTo.Size = new Size(382, 495);
+            listViewTraceNoteTo.Size = new Size(383, 483);
             listViewTraceNoteTo.TabIndex = 44;
             listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
             // 
@@ -1388,7 +1416,7 @@
             listViewTraceNoteFrom.Location = new Point(6, 71);
             listViewTraceNoteFrom.MultiSelect = false;
             listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
-            listViewTraceNoteFrom.Size = new Size(383, 495);
+            listViewTraceNoteFrom.Size = new Size(383, 483);
             listViewTraceNoteFrom.TabIndex = 43;
             listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
             // 
@@ -1400,7 +1428,7 @@
             textTraceNodeType.Margin = new Padding(4, 3, 4, 3);
             textTraceNodeType.MaxLength = 255;
             textTraceNodeType.Name = "textTraceNodeType";
-            textTraceNodeType.Size = new Size(617, 23);
+            textTraceNodeType.Size = new Size(618, 23);
             textTraceNodeType.TabIndex = 41;
             // 
             // buttonTraceNodeTypes
@@ -1409,7 +1437,7 @@
             buttonTraceNodeTypes.BackColor = SystemColors.Control;
             buttonTraceNodeTypes.FlatStyle = FlatStyle.System;
             buttonTraceNodeTypes.Font = new Font("Segoe UI", 8.25F);
-            buttonTraceNodeTypes.Location = new Point(760, 8);
+            buttonTraceNodeTypes.Location = new Point(761, 8);
             buttonTraceNodeTypes.Margin = new Padding(4, 3, 4, 3);
             buttonTraceNodeTypes.Name = "buttonTraceNodeTypes";
             buttonTraceNodeTypes.Size = new Size(24, 26);
@@ -1516,7 +1544,7 @@
             // NoteEditorForm
             // 
             AutoScaleMode = AutoScaleMode.Inherit;
-            ClientSize = new Size(808, 637);
+            ClientSize = new Size(809, 625);
             Controls.Add(panelForm);
             Controls.Add(toolBarNoteEditor);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -1534,6 +1562,8 @@
             tabNoteData.ResumeLayout(false);
             tabBasicData.ResumeLayout(false);
             tabBasicData.PerformLayout();
+            panelHeaderData.ResumeLayout(false);
+            panelHeaderData.PerformLayout();
             panelDescription.ResumeLayout(false);
             panelDescription.PerformLayout();
             toolDescription.ResumeLayout(false);
@@ -1577,14 +1607,7 @@
         private Panel panelForm;
         private TabControl tabNoteData;
         private TabPage tabBasicData;
-        private Label label6;
-        internal TextBox textTags;
-        internal TextBox textFolder;
-        internal TextBox textTopic;
-        private Button buttonFolderSearch;
-        private Label label3;
-        private Label label2;
-        private Label label1;
+        private Label labelContent;
         private TabPage tabAlarms;
         private TabPage tabActivities;
         private TabPage tabAttributes;
@@ -1617,16 +1640,12 @@
         private Label label9;
         private Button buttonEditMarkdown;
         private Button buttonViewHtml;
-        private TextBox textPriority;
-        private Label label7;
         internal TextBox textNoteType;
         private Button buttonNoteType;
         private Label label15;
         internal TextBox textTraceNodeType;
         private Button buttonTraceNodeTypes;
         private Label label5;
-        private TextBox textFolderNumber;
-        private TextBox textNoteNumber;
         private ListView listViewAttributes;
         private ListView listViewResources;
         private ListView listViewTasks;
@@ -1668,8 +1687,6 @@
         private ToolStripButton toolDescriptionUploadResource;
         private Button buttonDeleteType;
         private ToolStripButton toolDescriptionUploadResourceFromClipboard;
-        private TextBox textStatus;
-        private Label label8;
         private Label label17;
         private Label label16;
         private Button buttonSaveResource;
@@ -1687,5 +1704,20 @@
         private ToolStripMenuItem buttonKNoteAssistant;
         private ToolStripMenuItem buttonTextSearch;
         private ToolStripMenuItem buttonTextSearchNext;
+        private Panel panelHeaderData;
+        private TextBox textStatus;
+        private Label label8;
+        private Label label7;
+        private TextBox textPriority;
+        internal TextBox textTags;
+        internal TextBox textFolder;
+        internal TextBox textTopic;
+        private Button buttonFolderSearch;
+        private Label label3;
+        private Label label2;
+        private Label label1;
+        private TextBox textNoteNumber;
+        private TextBox textFolderNumber;
+        private Label labelExpandContent;
     }
 }
