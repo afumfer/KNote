@@ -421,7 +421,7 @@
             labelExpandContent.AutoSize = true;
             labelExpandContent.Font = new Font("Segoe UI", 10F);
             labelExpandContent.ForeColor = SystemColors.ControlDarkDark;
-            labelExpandContent.Location = new Point(770, 102);
+            labelExpandContent.Location = new Point(768, 102);
             labelExpandContent.Name = "labelExpandContent";
             labelExpandContent.Size = new Size(21, 19);
             labelExpandContent.TabIndex = 59;
@@ -593,7 +593,7 @@
             // 
             buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonNavigate.Font = new Font("Segoe UI", 8.25F);
-            buttonNavigate.Location = new Point(570, 96);
+            buttonNavigate.Location = new Point(572, 96);
             buttonNavigate.Margin = new Padding(4, 3, 4, 3);
             buttonNavigate.Name = "buttonNavigate";
             buttonNavigate.Size = new Size(96, 26);
@@ -837,7 +837,7 @@
             // 
             labelAction.AutoSize = true;
             labelAction.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelAction.Location = new Point(142, 104);
+            labelAction.Location = new Point(142, 106);
             labelAction.Name = "labelAction";
             labelAction.Size = new Size(226, 15);
             labelAction.TabIndex = 54;
@@ -851,7 +851,7 @@
             buttonEditMarkdown.Font = new Font("Segoe UI", 8.25F);
             buttonEditMarkdown.ImageAlign = ContentAlignment.MiddleLeft;
             buttonEditMarkdown.ImageList = imageListTabNoteData;
-            buttonEditMarkdown.Location = new Point(473, 96);
+            buttonEditMarkdown.Location = new Point(476, 96);
             buttonEditMarkdown.Margin = new Padding(4, 3, 4, 3);
             buttonEditMarkdown.Name = "buttonEditMarkdown";
             buttonEditMarkdown.Size = new Size(96, 26);
@@ -875,10 +875,10 @@
             // 
             // labelContent
             // 
-            labelContent.Location = new Point(4, 104);
+            labelContent.Location = new Point(4, 106);
             labelContent.Margin = new Padding(4, 0, 4, 0);
             labelContent.Name = "labelContent";
-            labelContent.Size = new Size(103, 18);
+            labelContent.Size = new Size(103, 16);
             labelContent.TabIndex = 44;
             labelContent.Text = "Content:";
             labelContent.TextAlign = ContentAlignment.MiddleLeft;

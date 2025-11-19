@@ -54,6 +54,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     public void ShowView()
     {
         this.Show();
+        if(_ctrl.EditMode == false)
+            // for contract extended view
+            labelExpandContent_Click(this, new EventArgs());
     }
 
     public Result<EControllerResult> ShowModalView()
@@ -485,8 +488,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             panelHeaderData.Visible = false;
             labelExpandContent.Text = "▼";
             labelExpandContent.Top = 10;
-            labelContent.Top = 8;
-            labelAction.Top = 4;
+            labelContent.Top = 10;
+            labelAction.Top = 6;
             buttonEditMarkdown.Top = 4;
             buttonNavigate.Top = 4;
             buttonViewHtml.Top = 4;
@@ -498,8 +501,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             panelHeaderData.Visible = true;
             labelExpandContent.Text = "▲";
             labelExpandContent.Top = 102;
-            labelContent.Top = 100;
-            labelAction.Top = 96;
+            labelContent.Top = 102;
+            labelAction.Top = 98;
             buttonEditMarkdown.Top = 96;
             buttonNavigate.Top = 96;
             buttonViewHtml.Top = 96;
