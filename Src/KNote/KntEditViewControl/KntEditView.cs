@@ -260,9 +260,13 @@ namespace KntWebView
             
             FolderForVirtualHostNameMapping = folder;
             
-            webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
-                "knote.resources", FolderForVirtualHostNameMapping,
-                CoreWebView2HostResourceAccessKind.Allow);
+            if (File.Exists(FolderForVirtualHostNameMapping))
+            {
+                webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "knote.resources", FolderForVirtualHostNameMapping,
+                    CoreWebView2HostResourceAccessKind.Allow);
+            }
+
         }
         
         public async Task ClearWebView()
