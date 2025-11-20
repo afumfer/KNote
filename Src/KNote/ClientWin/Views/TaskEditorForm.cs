@@ -148,6 +148,10 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
                 textEndDate.Text = DateTime.Now.ToString();
     }
 
+    private void TaskEditorForm_Shown(object sender, EventArgs e)
+    {
+        textDescription.Focus();
+    }
     #endregion
 
     #region Private methods
@@ -217,5 +221,6 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
         return selDate;
     }
 
-#endregion
+    #endregion
+
 }

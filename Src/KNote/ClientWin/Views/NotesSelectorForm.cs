@@ -283,8 +283,10 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
             dataGridNotes.Columns[1].Visible = false;
 
         dataGridNotes.Columns[2].DataPropertyName = "Topic";        
-        dataGridNotes.Columns[2].MinimumWidth = 450;        
-        //dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;  // ??
+        dataGridNotes.Columns[2].MinimumWidth = 450;
+
+        if(_ctrl.EmbededMode == false) // ### Hack for selector view
+            dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
         dataGridNotes.Columns[2].Resizable = DataGridViewTriState.True;
         dataGridNotes.Columns[2].HeaderText = "Topic";        
 

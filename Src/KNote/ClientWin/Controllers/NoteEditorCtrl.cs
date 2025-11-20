@@ -343,7 +343,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         return res;
     }
 
-    public async Task<NoteTaskDto> NewTask()
+    public async Task<NoteTaskDto> NewTask(string defaultDescription = "")
     {
         var taskEditor = new TaskEditorCtrl(Store);
 
@@ -354,7 +354,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         var userDto = (await Service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
         taskEditor.Model.UserId = userDto.UserId;
         taskEditor.Model.UserFullName = userDto.FullName;
-        taskEditor.Model.Description = "(Task descripcion ...)";
+        taskEditor.Model.Description = defaultDescription ?? "";
         taskEditor.Model.StartDate = DateTime.Now;
         taskEditor.Model.SetIsNew(true);
 

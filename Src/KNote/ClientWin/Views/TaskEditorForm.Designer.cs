@@ -131,7 +131,7 @@ namespace KNote.ClientWin.Views
             textPriority.Location = new Point(550, 342);
             textPriority.Name = "textPriority";
             textPriority.Size = new Size(59, 23);
-            textPriority.TabIndex = 3;
+            textPriority.TabIndex = 2;
             // 
             // label3
             // 
@@ -150,7 +150,7 @@ namespace KNote.ClientWin.Views
             checkResolved.Location = new Point(496, 370);
             checkResolved.Name = "checkResolved";
             checkResolved.Size = new Size(73, 19);
-            checkResolved.TabIndex = 8;
+            checkResolved.TabIndex = 7;
             checkResolved.Text = "&Resolved";
             checkResolved.UseVisualStyleBackColor = true;
             checkResolved.Click += checkResolved_Click;
@@ -161,7 +161,7 @@ namespace KNote.ClientWin.Views
             buttonSelDateEnd.Location = new Point(441, 368);
             buttonSelDateEnd.Name = "buttonSelDateEnd";
             buttonSelDateEnd.Size = new Size(24, 24);
-            buttonSelDateEnd.TabIndex = 7;
+            buttonSelDateEnd.TabIndex = 6;
             buttonSelDateEnd.Text = "...";
             buttonSelDateEnd.UseVisualStyleBackColor = true;
             buttonSelDateEnd.Click += buttonSelDate_Click;
@@ -172,7 +172,7 @@ namespace KNote.ClientWin.Views
             textEndDate.Location = new Point(317, 369);
             textEndDate.Name = "textEndDate";
             textEndDate.Size = new Size(118, 23);
-            textEndDate.TabIndex = 6;
+            textEndDate.TabIndex = 5;
             // 
             // label10
             // 
@@ -190,7 +190,7 @@ namespace KNote.ClientWin.Views
             buttonSelDateStart.Location = new Point(198, 368);
             buttonSelDateStart.Name = "buttonSelDateStart";
             buttonSelDateStart.Size = new Size(24, 24);
-            buttonSelDateStart.TabIndex = 5;
+            buttonSelDateStart.TabIndex = 4;
             buttonSelDateStart.Text = "...";
             buttonSelDateStart.UseVisualStyleBackColor = true;
             buttonSelDateStart.Click += buttonSelDate_Click;
@@ -201,7 +201,7 @@ namespace KNote.ClientWin.Views
             textStartDate.Location = new Point(74, 368);
             textStartDate.Name = "textStartDate";
             textStartDate.Size = new Size(118, 23);
-            textStartDate.TabIndex = 4;
+            textStartDate.TabIndex = 3;
             // 
             // label9
             // 
@@ -219,7 +219,7 @@ namespace KNote.ClientWin.Views
             textTags.Location = new Point(74, 339);
             textTags.Name = "textTags";
             textTags.Size = new Size(409, 23);
-            textTags.TabIndex = 2;
+            textTags.TabIndex = 1;
             // 
             // label2
             // 
@@ -239,7 +239,7 @@ namespace KNote.ClientWin.Views
             textDescription.Name = "textDescription";
             textDescription.ScrollBars = ScrollBars.Vertical;
             textDescription.Size = new Size(603, 272);
-            textDescription.TabIndex = 1;
+            textDescription.TabIndex = 0;
             // 
             // textUser
             // 
@@ -248,7 +248,7 @@ namespace KNote.ClientWin.Views
             textUser.Location = new Point(52, 6);
             textUser.Name = "textUser";
             textUser.Size = new Size(557, 23);
-            textUser.TabIndex = 0;
+            textUser.TabIndex = 8;
             // 
             // label11
             // 
@@ -405,6 +405,7 @@ namespace KNote.ClientWin.Views
             StartPosition = FormStartPosition.CenterParent;
             Text = "Task editor";
             FormClosing += TaskEditorForm_FormClosing;
+            Shown += TaskEditorForm_Shown;
             KeyPress += TaskEditorForm_KeyPress;
             KeyUp += TaskEditorForm_KeyUp;
             tabTaskData.ResumeLayout(false);

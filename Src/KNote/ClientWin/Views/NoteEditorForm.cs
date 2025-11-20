@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
+using KntWebView;
 using System;
 using System.Data;
 using System.Diagnostics;
@@ -54,7 +55,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     public void ShowView()
     {
         this.Show();
-        if(_ctrl.EditMode == false)
+        if (_ctrl.EditMode == false)
             // for contract extended view
             labelExpandContent_Click(this, new EventArgs());
     }
@@ -228,6 +229,19 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             TextSearchNext();
         }
+        else if (menuSel == buttonAddTaskSelectedText)
+        {            
+            var taskSaved = await AddTask (kntEditView.MarkdownContentControl.SelectedText);
+            if (taskSaved)
+            {
+                // Remove selected text
+                var selStart = kntEditView.MarkdownContentControl.SelectionStart;
+                kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Remove(selStart, kntEditView.MarkdownContentControl.SelectedText.Length);
+                kntEditView.MarkdownContentControl.Focus();
+                kntEditView.MarkdownContentControl.SelectionStart = selStart;
+            }
+        }
+        //
     }
 
     private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -553,16 +567,21 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void buttonTaskAdd_Click(object sender, EventArgs e)
     {
-        NoteTaskDto task = await _ctrl.NewTask();
+        await AddTask();
+    }
+
+    private async Task<bool> AddTask(string defaultDescription = "")
+    {
+        NoteTaskDto task = await _ctrl.NewTask(defaultDescription);
         if (task != null)
         {
             listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
             listViewTasks.Items[listViewTasks.Items.Count - 1].Selected = true;
-
             await UpdateTaskDescription(task.Description);
-
             textTaskTags.Text = task.Tags;
+            return true;
         }
+        return false;
     }
 
     private void buttonTaskEdit_Click(object sender, EventArgs e)
@@ -1518,4 +1537,5 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     }
 
     #endregion
+
 }

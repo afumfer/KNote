@@ -44,6 +44,7 @@
             buttonTools = new ToolStripDropDownButton();
             buttonTextSearch = new ToolStripMenuItem();
             buttonTextSearchNext = new ToolStripMenuItem();
+            buttonAddTaskSelectedText = new ToolStripMenuItem();
             buttonInsertTemplate = new ToolStripMenuItem();
             toolStripToolS1 = new ToolStripSeparator();
             buttonKNoteAssistant = new ToolStripMenuItem();
@@ -276,7 +277,7 @@
             // buttonTools
             // 
             buttonTools.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonTextSearch, buttonTextSearchNext, buttonInsertTemplate, toolStripToolS1, buttonKNoteAssistant, buttonExecuteKntScript, buttonInsertCode, toolStripSeparator1, buttonLockFormat });
+            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonTextSearch, buttonTextSearchNext, buttonAddTaskSelectedText, buttonInsertTemplate, toolStripToolS1, buttonKNoteAssistant, buttonExecuteKntScript, buttonInsertCode, toolStripSeparator1, buttonLockFormat });
             buttonTools.Image = (Image)resources.GetObject("buttonTools.Image");
             buttonTools.ImageScaling = ToolStripItemImageScaling.None;
             buttonTools.ImageTransparentColor = Color.Magenta;
@@ -299,6 +300,14 @@
             buttonTextSearchNext.Size = new Size(327, 22);
             buttonTextSearchNext.Text = "Continue with the next text search";
             buttonTextSearchNext.Click += buttonToolBar_Click;
+            // 
+            // buttonAddTaskSelectedText
+            // 
+            buttonAddTaskSelectedText.Name = "buttonAddTaskSelectedText";
+            buttonAddTaskSelectedText.ShortcutKeys = Keys.Control | Keys.T;
+            buttonAddTaskSelectedText.Size = new Size(327, 22);
+            buttonAddTaskSelectedText.Text = "Add task with selected text ...";
+            buttonAddTaskSelectedText.Click += buttonToolBar_Click;
             // 
             // buttonInsertTemplate
             // 
@@ -1720,5 +1729,6 @@
         private TextBox textNoteNumber;
         private TextBox textFolderNumber;
         private Label labelExpandContent;
+        private ToolStripMenuItem buttonAddTaskSelectedText;
     }
 }
