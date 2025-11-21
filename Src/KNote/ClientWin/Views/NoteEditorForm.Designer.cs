@@ -1209,6 +1209,9 @@
             listViewTasks.Size = new Size(368, 513);
             listViewTasks.TabIndex = 18;
             listViewTasks.UseCompatibleStateImageBehavior = false;
+            listViewTasks.SelectedIndexChanged += listViewTasks_SelectedIndexChanged;
+            listViewTasks.DoubleClick += listViewTasks_DoubleClick;
+            listViewTasks.Resize += listView_Resize;
             // 
             // buttonTaskEdit
             // 

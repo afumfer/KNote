@@ -193,6 +193,10 @@ public partial class KntChatGPTForm : Form, IViewBase
             buttonRestart.Enabled = false;
             radioGetCompletion.Enabled = false;
             radioGetStream.Enabled = false;
+            buttonCatalogPrompts.Enabled = false;
+            buttonViewSystem.Enabled = false;
+            buttonMarkDown.Enabled = false;
+            buttonNavigate.Enabled = false;
         }
         else
         {           
@@ -202,6 +206,10 @@ public partial class KntChatGPTForm : Form, IViewBase
             buttonRestart.Enabled = true;
             radioGetCompletion.Enabled = true;
             radioGetStream.Enabled = true;
+            buttonCatalogPrompts.Enabled = true;
+            buttonViewSystem.Enabled = true;
+            buttonMarkDown.Enabled = true;
+            buttonNavigate.Enabled = true;
             kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
             kntEditViewResult.MarkdownContentControl.ScrollToCaret();
             ActiveControl = textPrompt;

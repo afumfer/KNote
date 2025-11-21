@@ -792,7 +792,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         PersonalizeListView(listViewAttributes);
         PersonalizeListView(listViewResources);
         PersonalizeListView(listViewTasks);
-        PersonalizeListView(listViewAlarms);
+        PersonalizeListView(listViewAlarms);                  
 
         // TODO: remove in this version
         tabNoteData.TabPages.Remove(tabTraceNotes);
@@ -1110,6 +1110,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listView.FullRowSelect = true;
         listView.GridLines = true;
         listView.Sorting = SortOrder.None;
+
+        //splitTasksViewer.SplitterDistance = (int)(splitTasksViewer.Height * 0.4f);
     }
 
     private ListViewItem MessageDtoToListViewItem(KMessageDto message)

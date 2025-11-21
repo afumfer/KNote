@@ -151,6 +151,7 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
     private void TaskEditorForm_Shown(object sender, EventArgs e)
     {
         textDescription.Focus();
+        textDescription.SelectionStart = textDescription.Text.Length;
     }
     #endregion
 

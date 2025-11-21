@@ -127,17 +127,17 @@ namespace KNote.ClientWin.Views
             // 
             // textPriority
             // 
-            textPriority.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            textPriority.Location = new Point(550, 342);
+            textPriority.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            textPriority.Location = new Point(62, 376);
             textPriority.Name = "textPriority";
-            textPriority.Size = new Size(59, 23);
-            textPriority.TabIndex = 2;
+            textPriority.Size = new Size(34, 23);
+            textPriority.TabIndex = 3;
             // 
             // label3
             // 
-            label3.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            label3.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label3.AutoSize = true;
-            label3.Location = new Point(496, 345);
+            label3.Location = new Point(8, 380);
             label3.Name = "label3";
             label3.Size = new Size(48, 15);
             label3.TabIndex = 26;
@@ -147,10 +147,10 @@ namespace KNote.ClientWin.Views
             // 
             checkResolved.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             checkResolved.AutoSize = true;
-            checkResolved.Location = new Point(496, 370);
+            checkResolved.Location = new Point(536, 378);
             checkResolved.Name = "checkResolved";
             checkResolved.Size = new Size(73, 19);
-            checkResolved.TabIndex = 7;
+            checkResolved.TabIndex = 8;
             checkResolved.Text = "&Resolved";
             checkResolved.UseVisualStyleBackColor = true;
             checkResolved.Click += checkResolved_Click;
@@ -158,10 +158,10 @@ namespace KNote.ClientWin.Views
             // buttonSelDateEnd
             // 
             buttonSelDateEnd.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonSelDateEnd.Location = new Point(441, 368);
+            buttonSelDateEnd.Location = new Point(498, 375);
             buttonSelDateEnd.Name = "buttonSelDateEnd";
             buttonSelDateEnd.Size = new Size(24, 24);
-            buttonSelDateEnd.TabIndex = 6;
+            buttonSelDateEnd.TabIndex = 7;
             buttonSelDateEnd.Text = "...";
             buttonSelDateEnd.UseVisualStyleBackColor = true;
             buttonSelDateEnd.Click += buttonSelDate_Click;
@@ -169,16 +169,16 @@ namespace KNote.ClientWin.Views
             // textEndDate
             // 
             textEndDate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            textEndDate.Location = new Point(317, 369);
+            textEndDate.Location = new Point(386, 376);
             textEndDate.Name = "textEndDate";
-            textEndDate.Size = new Size(118, 23);
-            textEndDate.TabIndex = 5;
+            textEndDate.Size = new Size(106, 23);
+            textEndDate.TabIndex = 6;
             // 
             // label10
             // 
             label10.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label10.AutoSize = true;
-            label10.Location = new Point(255, 374);
+            label10.Location = new Point(326, 380);
             label10.Name = "label10";
             label10.Size = new Size(56, 15);
             label10.TabIndex = 21;
@@ -187,10 +187,10 @@ namespace KNote.ClientWin.Views
             // buttonSelDateStart
             // 
             buttonSelDateStart.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonSelDateStart.Location = new Point(198, 368);
+            buttonSelDateStart.Location = new Point(285, 375);
             buttonSelDateStart.Name = "buttonSelDateStart";
             buttonSelDateStart.Size = new Size(24, 24);
-            buttonSelDateStart.TabIndex = 4;
+            buttonSelDateStart.TabIndex = 5;
             buttonSelDateStart.Text = "...";
             buttonSelDateStart.UseVisualStyleBackColor = true;
             buttonSelDateStart.Click += buttonSelDate_Click;
@@ -198,16 +198,16 @@ namespace KNote.ClientWin.Views
             // textStartDate
             // 
             textStartDate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            textStartDate.Location = new Point(74, 368);
+            textStartDate.Location = new Point(172, 376);
             textStartDate.Name = "textStartDate";
-            textStartDate.Size = new Size(118, 23);
-            textStartDate.TabIndex = 3;
+            textStartDate.Size = new Size(107, 23);
+            textStartDate.TabIndex = 4;
             // 
             // label9
             // 
             label9.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label9.AutoSize = true;
-            label9.Location = new Point(8, 371);
+            label9.Location = new Point(108, 380);
             label9.Name = "label9";
             label9.Size = new Size(60, 15);
             label9.TabIndex = 18;
@@ -215,17 +215,16 @@ namespace KNote.ClientWin.Views
             // 
             // textTags
             // 
-            textTags.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textTags.Location = new Point(74, 339);
+            textTags.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textTags.Location = new Point(52, 32);
             textTags.Name = "textTags";
-            textTags.Size = new Size(409, 23);
+            textTags.Size = new Size(557, 23);
             textTags.TabIndex = 1;
             // 
             // label2
             // 
-            label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label2.AutoSize = true;
-            label2.Location = new Point(8, 342);
+            label2.Location = new Point(6, 35);
             label2.Name = "label2";
             label2.Size = new Size(33, 15);
             label2.TabIndex = 17;
@@ -234,12 +233,12 @@ namespace KNote.ClientWin.Views
             // textDescription
             // 
             textDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textDescription.Location = new Point(6, 60);
+            textDescription.Location = new Point(6, 84);
             textDescription.Multiline = true;
             textDescription.Name = "textDescription";
             textDescription.ScrollBars = ScrollBars.Vertical;
-            textDescription.Size = new Size(603, 272);
-            textDescription.TabIndex = 0;
+            textDescription.Size = new Size(603, 280);
+            textDescription.TabIndex = 2;
             // 
             // textUser
             // 
@@ -248,12 +247,12 @@ namespace KNote.ClientWin.Views
             textUser.Location = new Point(52, 6);
             textUser.Name = "textUser";
             textUser.Size = new Size(557, 23);
-            textUser.TabIndex = 8;
+            textUser.TabIndex = 0;
             // 
             // label11
             // 
             label11.AutoSize = true;
-            label11.Location = new Point(6, 42);
+            label11.Location = new Point(6, 64);
             label11.Name = "label11";
             label11.Size = new Size(70, 15);
             label11.TabIndex = 15;
@@ -262,7 +261,7 @@ namespace KNote.ClientWin.Views
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(8, 9);
+            label1.Location = new Point(6, 9);
             label1.Name = "label1";
             label1.Size = new Size(33, 15);
             label1.TabIndex = 14;
