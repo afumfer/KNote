@@ -128,15 +128,16 @@
             buttonResourceAdd = new Button();
             label12 = new Label();
             tabActivities = new TabPage();
-            kntEditViewTask = new KntWebView.KntEditView();
-            textTaskTags = new TextBox();
-            label17 = new Label();
-            label16 = new Label();
+            splitTasksViewer = new SplitContainer();
             listViewTasks = new ListView();
             buttonTaskEdit = new Button();
             buttonTaskDelete = new Button();
             buttonTaskAdd = new Button();
             label11 = new Label();
+            kntEditViewTask = new KntWebView.KntEditView();
+            textTaskTags = new TextBox();
+            label17 = new Label();
+            label16 = new Label();
             tabAlarms = new TabPage();
             listViewAlarms = new ListView();
             buttonEditAlarm = new Button();
@@ -173,6 +174,10 @@
             tabResources.SuspendLayout();
             panelPreview.SuspendLayout();
             tabActivities.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitTasksViewer).BeginInit();
+            splitTasksViewer.Panel1.SuspendLayout();
+            splitTasksViewer.Panel2.SuspendLayout();
+            splitTasksViewer.SuspendLayout();
             tabAlarms.SuspendLayout();
             tabCode.SuspendLayout();
             tabTraceNotes.SuspendLayout();
@@ -1161,15 +1166,7 @@
             // 
             // tabActivities
             // 
-            tabActivities.Controls.Add(kntEditViewTask);
-            tabActivities.Controls.Add(textTaskTags);
-            tabActivities.Controls.Add(label17);
-            tabActivities.Controls.Add(label16);
-            tabActivities.Controls.Add(listViewTasks);
-            tabActivities.Controls.Add(buttonTaskEdit);
-            tabActivities.Controls.Add(buttonTaskDelete);
-            tabActivities.Controls.Add(buttonTaskAdd);
-            tabActivities.Controls.Add(label11);
+            tabActivities.Controls.Add(splitTasksViewer);
             tabActivities.ImageIndex = 6;
             tabActivities.Location = new Point(4, 30);
             tabActivities.Margin = new Padding(4, 3, 4, 3);
@@ -1179,86 +1176,75 @@
             tabActivities.Text = "Activities ";
             tabActivities.UseVisualStyleBackColor = true;
             // 
-            // kntEditViewTask
+            // splitTasksViewer
             // 
-            kntEditViewTask.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            kntEditViewTask.Location = new Point(400, 34);
-            kntEditViewTask.Name = "kntEditViewTask";
-            kntEditViewTask.Size = new Size(389, 450);
-            kntEditViewTask.TabIndex = 17;
+            splitTasksViewer.Dock = DockStyle.Fill;
+            splitTasksViewer.Location = new Point(0, 0);
+            splitTasksViewer.Name = "splitTasksViewer";
             // 
-            // textTaskTags
+            // splitTasksViewer.Panel1
             // 
-            textTaskTags.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textTaskTags.Location = new Point(400, 515);
-            textTaskTags.Name = "textTaskTags";
-            textTaskTags.Size = new Size(390, 23);
-            textTaskTags.TabIndex = 16;
+            splitTasksViewer.Panel1.Controls.Add(listViewTasks);
+            splitTasksViewer.Panel1.Controls.Add(buttonTaskEdit);
+            splitTasksViewer.Panel1.Controls.Add(buttonTaskDelete);
+            splitTasksViewer.Panel1.Controls.Add(buttonTaskAdd);
+            splitTasksViewer.Panel1.Controls.Add(label11);
             // 
-            // label17
+            // splitTasksViewer.Panel2
             // 
-            label17.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            label17.AutoSize = true;
-            label17.Location = new Point(400, 496);
-            label17.Name = "label17";
-            label17.Size = new Size(33, 15);
-            label17.TabIndex = 16;
-            label17.Text = "Tags:";
-            // 
-            // label16
-            // 
-            label16.AutoSize = true;
-            label16.Location = new Point(400, 16);
-            label16.Name = "label16";
-            label16.Size = new Size(134, 15);
-            label16.TabIndex = 14;
-            label16.Text = "Task/Action description:";
+            splitTasksViewer.Panel2.Controls.Add(kntEditViewTask);
+            splitTasksViewer.Panel2.Controls.Add(textTaskTags);
+            splitTasksViewer.Panel2.Controls.Add(label17);
+            splitTasksViewer.Panel2.Controls.Add(label16);
+            splitTasksViewer.Size = new Size(795, 557);
+            splitTasksViewer.SplitterDistance = 373;
+            splitTasksViewer.TabIndex = 18;
             // 
             // listViewTasks
             // 
-            listViewTasks.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            listViewTasks.Location = new Point(5, 36);
+            listViewTasks.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listViewTasks.Location = new Point(4, 34);
             listViewTasks.MultiSelect = false;
             listViewTasks.Name = "listViewTasks";
-            listViewTasks.Size = new Size(387, 518);
-            listViewTasks.TabIndex = 13;
+            listViewTasks.Size = new Size(368, 513);
+            listViewTasks.TabIndex = 18;
             listViewTasks.UseCompatibleStateImageBehavior = false;
-            listViewTasks.SelectedIndexChanged += listViewTasks_SelectedIndexChanged;
-            listViewTasks.DoubleClick += listViewTasks_DoubleClick;
-            listViewTasks.Resize += listView_Resize;
             // 
             // buttonTaskEdit
             // 
+            buttonTaskEdit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonTaskEdit.Font = new Font("Segoe UI", 8.25F);
-            buttonTaskEdit.Location = new Point(366, 8);
+            buttonTaskEdit.Location = new Point(340, 4);
             buttonTaskEdit.Margin = new Padding(4, 3, 4, 3);
             buttonTaskEdit.Name = "buttonTaskEdit";
-            buttonTaskEdit.Size = new Size(27, 26);
-            buttonTaskEdit.TabIndex = 12;
+            buttonTaskEdit.Size = new Size(29, 26);
+            buttonTaskEdit.TabIndex = 17;
             buttonTaskEdit.Text = "...";
             buttonTaskEdit.UseVisualStyleBackColor = true;
             buttonTaskEdit.Click += buttonTaskEdit_Click;
             // 
             // buttonTaskDelete
             // 
+            buttonTaskDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonTaskDelete.Font = new Font("Segoe UI", 8.25F);
-            buttonTaskDelete.Location = new Point(336, 8);
+            buttonTaskDelete.Location = new Point(310, 4);
             buttonTaskDelete.Margin = new Padding(4, 3, 4, 3);
             buttonTaskDelete.Name = "buttonTaskDelete";
-            buttonTaskDelete.Size = new Size(27, 26);
-            buttonTaskDelete.TabIndex = 11;
+            buttonTaskDelete.Size = new Size(29, 26);
+            buttonTaskDelete.TabIndex = 16;
             buttonTaskDelete.Text = "-";
             buttonTaskDelete.UseVisualStyleBackColor = true;
             buttonTaskDelete.Click += buttonTaskDelete_Click;
             // 
             // buttonTaskAdd
             // 
+            buttonTaskAdd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonTaskAdd.Font = new Font("Segoe UI", 8.25F);
-            buttonTaskAdd.Location = new Point(306, 8);
+            buttonTaskAdd.Location = new Point(280, 4);
             buttonTaskAdd.Margin = new Padding(4, 3, 4, 3);
             buttonTaskAdd.Name = "buttonTaskAdd";
-            buttonTaskAdd.Size = new Size(27, 26);
-            buttonTaskAdd.TabIndex = 10;
+            buttonTaskAdd.Size = new Size(29, 26);
+            buttonTaskAdd.TabIndex = 15;
             buttonTaskAdd.Text = "+";
             buttonTaskAdd.UseVisualStyleBackColor = true;
             buttonTaskAdd.Click += buttonTaskAdd_Click;
@@ -1266,12 +1252,46 @@
             // label11
             // 
             label11.AutoSize = true;
-            label11.Location = new Point(6, 16);
+            label11.Location = new Point(5, 12);
             label11.Margin = new Padding(4, 0, 4, 0);
             label11.Name = "label11";
             label11.Size = new Size(90, 15);
-            label11.TabIndex = 5;
+            label11.TabIndex = 14;
             label11.Text = "Tasks/Activities:";
+            // 
+            // kntEditViewTask
+            // 
+            kntEditViewTask.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            kntEditViewTask.Location = new Point(4, 76);
+            kntEditViewTask.Name = "kntEditViewTask";
+            kntEditViewTask.Size = new Size(408, 470);
+            kntEditViewTask.TabIndex = 21;
+            // 
+            // textTaskTags
+            // 
+            textTaskTags.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textTaskTags.Location = new Point(4, 24);
+            textTaskTags.Name = "textTaskTags";
+            textTaskTags.Size = new Size(408, 23);
+            textTaskTags.TabIndex = 19;
+            // 
+            // label17
+            // 
+            label17.AutoSize = true;
+            label17.Location = new Point(4, 4);
+            label17.Name = "label17";
+            label17.Size = new Size(33, 15);
+            label17.TabIndex = 20;
+            label17.Text = "Tags:";
+            // 
+            // label16
+            // 
+            label16.AutoSize = true;
+            label16.Location = new Point(4, 56);
+            label16.Name = "label16";
+            label16.Size = new Size(134, 15);
+            label16.TabIndex = 18;
+            label16.Text = "Task/Action description:";
             // 
             // tabAlarms
             // 
@@ -1585,7 +1605,12 @@
             panelPreview.ResumeLayout(false);
             panelPreview.PerformLayout();
             tabActivities.ResumeLayout(false);
-            tabActivities.PerformLayout();
+            splitTasksViewer.Panel1.ResumeLayout(false);
+            splitTasksViewer.Panel1.PerformLayout();
+            splitTasksViewer.Panel2.ResumeLayout(false);
+            splitTasksViewer.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitTasksViewer).EndInit();
+            splitTasksViewer.ResumeLayout(false);
             tabAlarms.ResumeLayout(false);
             tabAlarms.PerformLayout();
             tabCode.ResumeLayout(false);
@@ -1630,10 +1655,6 @@
         private Label label4;
         private Button buttonAttributeEdit;
         private Label label10;
-        private Button buttonTaskEdit;
-        private Button buttonTaskDelete;
-        private Button buttonTaskAdd;
-        private Label label11;
         private Button buttonResourceEdit;
         private Button buttonResourceDelete;
         private Button buttonResourceAdd;
@@ -1658,7 +1679,6 @@
         private Label label5;
         private ListView listViewAttributes;
         private ListView listViewResources;
-        private ListView listViewTasks;
         private ListView listViewAlarms;
         private ListView listViewTraceNoteTo;
         private ListView listViewTraceNoteFrom;
@@ -1697,19 +1717,15 @@
         private ToolStripButton toolDescriptionUploadResource;
         private Button buttonDeleteType;
         private ToolStripButton toolDescriptionUploadResourceFromClipboard;
-        private Label label17;
-        private Label label16;
         private Button buttonSaveResource;
         private SaveFileDialog saveFileDialog;
         private Button buttonNavigate;
         private KntWebView.KntEditView kntEditView;
         private KntWebView.KntEditView webViewResource;
         private TextBox textDescriptionResource;
-        private TextBox textTaskTags;
         private Label labelPreview;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem buttonLockFormat;
-        private KntWebView.KntEditView kntEditViewTask;
         private ToolStripMenuItem buttonInsertCode;
         private ToolStripMenuItem buttonKNoteAssistant;
         private ToolStripMenuItem buttonTextSearch;
@@ -1730,5 +1746,15 @@
         private TextBox textFolderNumber;
         private Label labelExpandContent;
         private ToolStripMenuItem buttonAddTaskSelectedText;
+        private SplitContainer splitTasksViewer;
+        private ListView listViewTasks;
+        private Button buttonTaskEdit;
+        private Button buttonTaskDelete;
+        private Button buttonTaskAdd;
+        private Label label11;
+        private KntWebView.KntEditView kntEditViewTask;
+        private TextBox textTaskTags;
+        private Label label17;
+        private Label label16;
     }
 }
