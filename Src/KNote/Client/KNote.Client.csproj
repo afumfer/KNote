@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>0.0.9</Version>
-    <AssemblyVersion>0.0.9.28</AssemblyVersion>
-    <FileVersion>0.0.9.28</FileVersion>
+    <AssemblyVersion>0.0.10.1</AssemblyVersion>
+    <FileVersion>0.0.10.1</FileVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.43.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.11" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.11" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
-    <PackageReference Include="System.Net.Http.Json" Version="9.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.11" />
-    <PackageReference Include="Radzen.Blazor" Version="8.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+    <PackageReference Include="System.Net.Http.Json" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.0" />
+    <PackageReference Include="Radzen.Blazor" Version="8.3.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
