@@ -231,17 +231,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         else if (menuSel == buttonAddTaskSelectedText)
         {            
-            var taskSaved = await AddTask (kntEditView.MarkdownContentControl.SelectedText);
-            if (taskSaved)
-            {
-                // Remove selected text
-                var selStart = kntEditView.MarkdownContentControl.SelectionStart;
-                kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Remove(selStart, kntEditView.MarkdownContentControl.SelectedText.Length);
-                kntEditView.MarkdownContentControl.Focus();
-                kntEditView.MarkdownContentControl.SelectionStart = selStart;
-            }
-        }
-        //
+            await AddTaskFromSelectedText();
+        }        
     }
 
     private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -568,20 +559,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private async void buttonTaskAdd_Click(object sender, EventArgs e)
     {
         await AddTask();
-    }
-
-    private async Task<bool> AddTask(string defaultDescription = "")
-    {
-        NoteTaskDto task = await _ctrl.NewTask(defaultDescription);
-        if (task != null)
-        {
-            listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
-            listViewTasks.Items[listViewTasks.Items.Count - 1].Selected = true;
-            await UpdateTaskDescription(task.Description);
-            textTaskTags.Text = task.Tags;
-            return true;
-        }
-        return false;
     }
 
     private void buttonTaskEdit_Click(object sender, EventArgs e)
@@ -1530,10 +1507,42 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async Task UpdateTaskDescription(string description)
     {
-        kntEditViewTask.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(description, true));
+        kntEditViewTask.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(description, true));        
         var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditViewTask.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
         await kntEditViewTask.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
         await kntEditViewTask.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
+    }
+
+    private async Task AddTaskFromSelectedText()
+    {
+        var selText = kntEditView.MarkdownContentControl.SelectedText;
+        if (!string.IsNullOrEmpty(selText))
+        {
+            selText = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(selText, true);
+        }
+        var taskSaved = await AddTask(selText);
+        if (taskSaved)
+        {
+            // Remove selected text
+            var selStart = kntEditView.MarkdownContentControl.SelectionStart;
+            kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Remove(selStart, kntEditView.MarkdownContentControl.SelectedText.Length);
+            kntEditView.MarkdownContentControl.Focus();
+            kntEditView.MarkdownContentControl.SelectionStart = selStart;
+        }
+    }
+
+    private async Task<bool> AddTask(string defaultDescription = "")
+    {
+        NoteTaskDto task = await _ctrl.NewTask(defaultDescription);
+        if (task != null)
+        {
+            listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
+            listViewTasks.Items[listViewTasks.Items.Count - 1].Selected = true;
+            await UpdateTaskDescription(task.Description);
+            textTaskTags.Text = task.Tags;
+            return true;
+        }
+        return false;
     }
 
     #endregion
