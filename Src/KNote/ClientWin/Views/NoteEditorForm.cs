@@ -605,24 +605,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void buttonResourceDelete_Click(object sender, EventArgs e)
     {
-        if (listViewResources.SelectedItems.Count == 0)
-        {
-            MessageBox.Show("There is no task selected .", KntConst.AppName);
-            return;
-        }
-        var delRes = listViewResources.SelectedItems[0].Name;
-        var res = _ctrl.DeleteResource(Guid.Parse(delRes));
-        if (res)
-        {
-            listViewResources.Items[delRes].Remove();
-            _selectedResource = null;
-            await webViewResource.ClearWebView();
-            webViewResource.Visible = false;
-            panelPreview.Visible = true;
-            textDescriptionResource.Text = "";
-            if (listViewResources.Items.Count > 0)
-                listViewResources.Items[0].Selected = true;
-        }
+        await ResourceDelete();
     }
 
     private async void listViewResources_DoubleClick(object sender, EventArgs e)
@@ -1545,6 +1528,34 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return true;
         }
         return false;
+    }
+
+    private async Task ResourceDelete()
+    {
+        if (listViewResources.SelectedItems.Count == 0)
+        {
+            MessageBox.Show("There is no task selected .", KntConst.AppName);
+            return;
+        }
+        var delRes = listViewResources.SelectedItems[0].Name;
+        var res = _ctrl.DeleteResource(Guid.Parse(delRes));
+        if (res)
+        {
+            listViewResources.Items[delRes].Remove();
+            _selectedResource = null;
+            await webViewResource.ClearWebView();
+            webViewResource.Visible = false;
+            panelPreview.Visible = true;
+            textDescriptionResource.Text = "";
+            if (listViewResources.Items.Count > 0)
+                listViewResources.Items[0].Selected = true;
+            else
+            {
+                await webViewResource.ShowNavigationContent("");
+                webViewResource.Visible = true;
+                panelPreview.Visible = false;
+            }
+        }
     }
 
     #endregion
