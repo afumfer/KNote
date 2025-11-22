@@ -43,7 +43,6 @@
             textStatusWebView2 = new TextBox();
             textUrlWebView2 = new TextBox();
             tabRichEditor = new TabPage();
-            htmlDescription = new MSDN.Html.Editor.HtmlEditorControl();
             tabKntScriptLab = new TabPage();
             groupSamples = new GroupBox();
             buttonSelectScriptDirectory = new Button();
@@ -55,6 +54,8 @@
             buttonShowConsole = new Button();
             buttonRunScript = new Button();
             tabAppLab = new TabPage();
+            buttonRunAppCS = new Button();
+            buttonImportFiles = new Button();
             buttonTestNoteList = new Button();
             buttonNLog = new Button();
             buttonServerCOMForm = new Button();
@@ -71,15 +72,13 @@
             tabControlLab = new TabControl();
             tabKntEditView = new TabPage();
             panel1 = new Panel();
-            kntEditView = new KntWebView.KntEditView();
             textForKntEditView = new TextBox();
             btnKntEditViewHtml = new Button();
             btnKntEditViewNavigation = new Button();
             btnKntEditViewMarkdown = new Button();
-            buttonImportFiles = new Button();
+            kntEditView = new KntWebView.KntEditView();
             tabWebView2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).BeginInit();
-            tabRichEditor.SuspendLayout();
             tabKntScriptLab.SuspendLayout();
             groupSamples.SuspendLayout();
             tabAppLab.SuspendLayout();
@@ -103,7 +102,7 @@
             tabWebView2.Controls.Add(textUrlWebView2);
             tabWebView2.Location = new Point(4, 24);
             tabWebView2.Name = "tabWebView2";
-            tabWebView2.Size = new Size(726, 597);
+            tabWebView2.Size = new Size(665, 488);
             tabWebView2.TabIndex = 3;
             tabWebView2.Text = "WebView2";
             tabWebView2.UseVisualStyleBackColor = true;
@@ -129,10 +128,10 @@
             // textScript
             // 
             textScript.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            textScript.Location = new Point(372, 390);
+            textScript.Location = new Point(374, 390);
             textScript.Multiline = true;
             textScript.Name = "textScript";
-            textScript.Size = new Size(351, 204);
+            textScript.Size = new Size(288, 95);
             textScript.TabIndex = 8;
             // 
             // btnExecuteScript
@@ -152,7 +151,7 @@
             textHtml.Location = new Point(6, 390);
             textHtml.Multiline = true;
             textHtml.Name = "textHtml";
-            textHtml.Size = new Size(351, 171);
+            textHtml.Size = new Size(362, 95);
             textHtml.TabIndex = 6;
             // 
             // btnNavToString
@@ -174,7 +173,7 @@
             webView2.DefaultBackgroundColor = Color.White;
             webView2.Location = new Point(3, 32);
             webView2.Name = "webView2";
-            webView2.Size = new Size(720, 284);
+            webView2.Size = new Size(659, 270);
             webView2.TabIndex = 4;
             webView2.ZoomFactor = 1D;
             // 
@@ -219,22 +218,12 @@
             // 
             // tabRichEditor
             // 
-            tabRichEditor.Controls.Add(htmlDescription);
             tabRichEditor.Location = new Point(4, 24);
             tabRichEditor.Name = "tabRichEditor";
-            tabRichEditor.Size = new Size(726, 597);
+            tabRichEditor.Size = new Size(665, 488);
             tabRichEditor.TabIndex = 2;
             tabRichEditor.Text = "Test rich editor";
             tabRichEditor.UseVisualStyleBackColor = true;
-            // 
-            // htmlDescription
-            // 
-            htmlDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            htmlDescription.InnerText = null;
-            htmlDescription.Location = new Point(14, 15);
-            htmlDescription.Name = "htmlDescription";
-            htmlDescription.Size = new Size(697, 566);
-            htmlDescription.TabIndex = 10;
             // 
             // tabKntScriptLab
             // 
@@ -246,7 +235,7 @@
             tabKntScriptLab.Location = new Point(4, 24);
             tabKntScriptLab.Name = "tabKntScriptLab";
             tabKntScriptLab.Padding = new Padding(3);
-            tabKntScriptLab.Size = new Size(726, 597);
+            tabKntScriptLab.Size = new Size(665, 488);
             tabKntScriptLab.TabIndex = 1;
             tabKntScriptLab.Text = "KntScript lab";
             tabKntScriptLab.UseVisualStyleBackColor = true;
@@ -347,6 +336,7 @@
             // 
             // tabAppLab
             // 
+            tabAppLab.Controls.Add(buttonRunAppCS);
             tabAppLab.Controls.Add(buttonImportFiles);
             tabAppLab.Controls.Add(buttonTestNoteList);
             tabAppLab.Controls.Add(buttonNLog);
@@ -364,16 +354,36 @@
             tabAppLab.Location = new Point(4, 24);
             tabAppLab.Name = "tabAppLab";
             tabAppLab.Padding = new Padding(3);
-            tabAppLab.Size = new Size(726, 597);
+            tabAppLab.Size = new Size(665, 488);
             tabAppLab.TabIndex = 0;
             tabAppLab.Text = "Lab app components";
             tabAppLab.UseVisualStyleBackColor = true;
+            // 
+            // buttonRunAppCS
+            // 
+            buttonRunAppCS.Location = new Point(352, 153);
+            buttonRunAppCS.Name = "buttonRunAppCS";
+            buttonRunAppCS.Size = new Size(169, 28);
+            buttonRunAppCS.TabIndex = 21;
+            buttonRunAppCS.Text = "Test run app.cs";
+            buttonRunAppCS.UseVisualStyleBackColor = true;
+            buttonRunAppCS.Click += buttonRunAppCS_Click;
+            // 
+            // buttonImportFiles
+            // 
+            buttonImportFiles.Location = new Point(13, 85);
+            buttonImportFiles.Name = "buttonImportFiles";
+            buttonImportFiles.Size = new Size(298, 28);
+            buttonImportFiles.TabIndex = 20;
+            buttonImportFiles.Text = "Import files as notes";
+            buttonImportFiles.UseVisualStyleBackColor = true;
+            buttonImportFiles.Click += buttonImportFiles_Click;
             // 
             // buttonTestNoteList
             // 
             buttonTestNoteList.Location = new Point(352, 119);
             buttonTestNoteList.Name = "buttonTestNoteList";
-            buttonTestNoteList.Size = new Size(127, 28);
+            buttonTestNoteList.Size = new Size(169, 28);
             buttonTestNoteList.TabIndex = 19;
             buttonTestNoteList.Text = "Test note list";
             buttonTestNoteList.UseVisualStyleBackColor = true;
@@ -383,7 +393,7 @@
             // 
             buttonNLog.Location = new Point(352, 85);
             buttonNLog.Name = "buttonNLog";
-            buttonNLog.Size = new Size(127, 28);
+            buttonNLog.Size = new Size(169, 28);
             buttonNLog.TabIndex = 18;
             buttonNLog.Text = "Test NLog";
             buttonNLog.UseVisualStyleBackColor = true;
@@ -473,7 +483,7 @@
             listMessages.FormattingEnabled = true;
             listMessages.Location = new Point(12, 306);
             listMessages.Name = "listMessages";
-            listMessages.Size = new Size(636, 274);
+            listMessages.Size = new Size(637, 154);
             listMessages.TabIndex = 6;
             // 
             // buttonImportAnotasXML
@@ -507,7 +517,7 @@
             tabControlLab.Location = new Point(12, 12);
             tabControlLab.Name = "tabControlLab";
             tabControlLab.SelectedIndex = 0;
-            tabControlLab.Size = new Size(734, 625);
+            tabControlLab.Size = new Size(673, 516);
             tabControlLab.TabIndex = 4;
             // 
             // tabKntEditView
@@ -519,7 +529,7 @@
             tabKntEditView.Controls.Add(btnKntEditViewMarkdown);
             tabKntEditView.Location = new Point(4, 24);
             tabKntEditView.Name = "tabKntEditView";
-            tabKntEditView.Size = new Size(726, 597);
+            tabKntEditView.Size = new Size(665, 488);
             tabKntEditView.TabIndex = 4;
             tabKntEditView.Text = "KntEditView";
             tabKntEditView.UseVisualStyleBackColor = true;
@@ -528,18 +538,10 @@
             // 
             panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panel1.Controls.Add(kntEditView);
-            panel1.Location = new Point(17, 139);
+            panel1.Location = new Point(17, 132);
             panel1.Name = "panel1";
-            panel1.Size = new Size(693, 439);
+            panel1.Size = new Size(633, 343);
             panel1.TabIndex = 5;
-            // 
-            // kntEditView
-            // 
-            kntEditView.BorderStyle = BorderStyle.FixedSingle;
-            kntEditView.Location = new Point(40, 44);
-            kntEditView.Name = "kntEditView";
-            kntEditView.Size = new Size(281, 148);
-            kntEditView.TabIndex = 1;
             // 
             // textForKntEditView
             // 
@@ -580,21 +582,19 @@
             btnKntEditViewMarkdown.UseVisualStyleBackColor = true;
             btnKntEditViewMarkdown.Click += btnKntEditViewMarkdown_Click;
             // 
-            // buttonImportFiles
+            // kntEditView
             // 
-            buttonImportFiles.Location = new Point(13, 85);
-            buttonImportFiles.Name = "buttonImportFiles";
-            buttonImportFiles.Size = new Size(298, 28);
-            buttonImportFiles.TabIndex = 20;
-            buttonImportFiles.Text = "Import files as notes";
-            buttonImportFiles.UseVisualStyleBackColor = true;
-            buttonImportFiles.Click += buttonImportFiles_Click;
+            kntEditView.Dock = DockStyle.Fill;
+            kntEditView.Location = new Point(0, 0);
+            kntEditView.Name = "kntEditView";
+            kntEditView.Size = new Size(633, 343);
+            kntEditView.TabIndex = 0;
             // 
             // KntLabForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(754, 643);
+            ClientSize = new Size(693, 534);
             Controls.Add(tabControlLab);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "KntLabForm";
@@ -605,7 +605,6 @@
             tabWebView2.ResumeLayout(false);
             tabWebView2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)webView2).EndInit();
-            tabRichEditor.ResumeLayout(false);
             tabKntScriptLab.ResumeLayout(false);
             groupSamples.ResumeLayout(false);
             tabAppLab.ResumeLayout(false);
@@ -666,5 +665,7 @@
         private KntWebView.KntEditView kntEditView;
         private Button buttonTestNoteList;
         private Button buttonImportFiles;
+        private Button buttonRunAppCS;
+        private KntWebView.KntEditView kntEditView1;
     }
 }

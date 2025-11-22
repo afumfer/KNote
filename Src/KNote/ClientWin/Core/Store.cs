@@ -7,6 +7,7 @@ using KNote.Service.Core;
 using KntScript;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Xml.Serialization;
 
@@ -661,6 +662,39 @@ public class Store
         } while (parentFolderId != null);
 
         return folderPath;
+    }
+
+    public string ExecuteCommand(string command, string dir)
+    {
+        try
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    // /C tells CMD to execute the command or set of commands specified below and then terminate.
+                    // Multiple commands can be concatenated like this: / C command1 && command2 && command3
+                    //   Examplo: Arguments = $"/C {command} && echo %cd%",
+                    Arguments = $"/C {command}",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = dir
+                }
+            };
+            process.Start();
+            string result = process.StandardOutput.ReadToEnd();
+            string resultError = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            return result != "" ? result : resultError;
+        }
+        catch (System.Exception ex)
+        {
+            return $"Error: {ex.Message}";
+        }
     }
 
     #endregion 

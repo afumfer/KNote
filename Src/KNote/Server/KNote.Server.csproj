@@ -23,7 +23,6 @@
     </PackageReference>
     <PackageReference Include="NLog.Web.AspNetCore" Version="6.1.0" />
     <PackageReference Include="OpenAI" Version="2.7.0" />
-    <PackageReference Include="System.Text.Json" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Client\KNote.Client.csproj" />

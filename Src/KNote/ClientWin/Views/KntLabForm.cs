@@ -8,6 +8,7 @@ using Microsoft.Web.WebView2.Core;
 using NLog;
 using System.Data;
 using System.Diagnostics;
+using System.Resources.Tools;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml.Serialization;
@@ -103,6 +104,9 @@ window.chrome.webview.postMessage(retValue);";
         #endregion
 
         #region KntEditView
+
+        if (kntEditView == null)
+            return;
 
         kntEditView.Dock = DockStyle.Fill;
 
@@ -1208,11 +1212,11 @@ window.chrome.webview.postMessage(retValue);";
 
     #endregion
 
-    //#region Import files as Notes
+    #region Import files as Notes
 
     private async void buttonImportFiles_Click(object sender, EventArgs e)
     {
-        
+
         if (_store.ActiveFolderWithServiceRef == null)
         {
             MessageBox.Show("There is no archive selected ");
@@ -1241,7 +1245,7 @@ window.chrome.webview.postMessage(retValue);";
                             if (firstLine != null)
                             {
                                 sr.BaseStream.Seek(0, SeekOrigin.Begin);
-                                sr.DiscardBufferedData(); 
+                                sr.DiscardBufferedData();
                                 string allContent = sr.ReadToEnd();
 
                                 if (firstLine.Length > 80)
@@ -1249,7 +1253,7 @@ window.chrome.webview.postMessage(retValue);";
 
                                 var newNote = (await service.Notes.NewAsync()).Entity;
 
-                                newNote.FolderId = activeFolderId;                                
+                                newNote.FolderId = activeFolderId;
                                 newNote.Description = allContent;
                                 newNote.Topic = $"{Path.GetFileName(file)} - {firstLine} ";
                                 newNote.Tags = "";
@@ -1263,10 +1267,39 @@ window.chrome.webview.postMessage(retValue);";
                     {
                         MessageBox.Show($"Error al leer {file}:\n{ex.Message}");
                     }
-                }                
+                }
             }
         }
 
         MessageBox.Show("End");
     }
+
+    #endregion
+
+    #region Test dotnet run app.cx
+
+    private void buttonRunAppCS_Click(object sender, EventArgs e)
+    {
+        string code =
+@"#:package Figgle@0.6.5
+#:package Figgle.Fonts@0.6.5
+
+using Figgle;
+using Figgle.Fonts;
+
+Console.WriteLine(FiggleFonts.Standard.Render(""Hello World""));";
+
+        //string tempDir = Path.GetTempPath();
+        string tempDir = @"D:\Tmp2";
+        string nameFile = Guid.NewGuid().ToString() + ".cs";
+        string tempFullFileName = Path.Combine(tempDir, nameFile);
+        File.WriteAllText(tempFullFileName, code);
+
+        var result = _ctrl.Store.ExecuteCommand($"dotnet run {nameFile}", tempDir);
+
+        MessageBox.Show(result);
+    }
+
+    #endregion
+
 }
