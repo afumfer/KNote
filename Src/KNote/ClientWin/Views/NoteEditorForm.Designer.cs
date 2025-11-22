@@ -1041,10 +1041,10 @@
             // textDescriptionResource
             // 
             textDescriptionResource.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textDescriptionResource.Location = new Point(396, 501);
+            textDescriptionResource.Location = new Point(396, 506);
             textDescriptionResource.Multiline = true;
             textDescriptionResource.Name = "textDescriptionResource";
-            textDescriptionResource.Size = new Size(393, 52);
+            textDescriptionResource.Size = new Size(393, 47);
             textDescriptionResource.TabIndex = 19;
             // 
             // webViewResource
