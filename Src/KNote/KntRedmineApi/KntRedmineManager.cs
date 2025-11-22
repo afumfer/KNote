@@ -141,8 +141,7 @@ public class KntRedmineManager
 
             #region  Issue basic data
 
-            var filter = new NotesFilterDto();
-            filter.SearchInDescription = false;
+            var filter = new NotesFilterDto();            
             if (issue.Tracker.Id == 20)
                 filter.Tags = $"HU#{id}";
             else if (issue.Tracker.Id == 21)
@@ -150,7 +149,7 @@ public class KntRedmineManager
             else if (issue.Tracker.Id == 23)
                 filter.Tags = $"INC#{id}";
 
-            var notes = (await Service.Notes.GetFilter(filter)).Entity;
+            var notes = (await Service.Notes.GetFilterAsync(filter)).Entity;
 
             if (notes != null)
             {
