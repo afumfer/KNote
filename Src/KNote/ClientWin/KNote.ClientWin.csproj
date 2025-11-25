@@ -5,8 +5,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>0.0.9</Version>
-    <AssemblyVersion>0.0.10.1</AssemblyVersion>
-    <FileVersion>0.0.10.1</FileVersion>
+    <AssemblyVersion>0.0.10.2</AssemblyVersion>
+    <FileVersion>0.0.10.2</FileVersion>
     <ApplicationIcon>stickyyellow_32_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
@@ -15,7 +15,7 @@
     <None Remove="Temp\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.43.0" />
+    <PackageReference Include="Markdig" Version="0.44.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
     <PackageReference Include="NLog" Version="6.0.6" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.1.0" />
