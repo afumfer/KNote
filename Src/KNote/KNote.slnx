@@ -1,0 +1,15 @@
+<Solution>
+  <Project Path="Server/KNote.Server.csproj" />
+  <Project Path="Model/KNote.Model.csproj" />
+  <Project Path="Service/KNote.Service.csproj" />
+  <Project Path="Repository/KNote.Repository.csproj" />
+  <Project Path="Repository.EntityFramework/KNote.Repository.EntityFramework.csproj" />
+  <Project Path="Repository.Dapper/KNote.Repository.Dapper.csproj" />
+  <Project Path="ClientWin/KNote.ClientWin.csproj" />
+  <Project Path="KntScript/KntScript.csproj" />
+  <Project Path="Client/KNote.Client.csproj" />
+  <Project Path="MessageBroker/KNote.MessageBroker.csproj" />
+  <Project Path="MessageBroker.RabbitMQ/KNote.MessageBroker.RabbitMQ.csproj" />
+  <Project Path="HtmlEditorControl/HTMLEditorControl.csproj" />
+  <Project Path="KntEditViewControl/KntEditViewControl.csproj" />
+</Solution>

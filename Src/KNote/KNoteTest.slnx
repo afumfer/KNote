@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Model/KNote.Model.csproj" />
+  <Project Path="Tests/KNote.Tests.csproj" />
+</Solution>

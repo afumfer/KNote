@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="Model/KNote.Model.csproj" />
+  <Project Path="Service/KNote.Service.csproj" />
+  <Project Path="Repository/KNote.Repository.csproj" />
+  <Project Path="Repository.EntityFramework/KNote.Repository.EntityFramework.csproj" />
+  <Project Path="Repository.Dapper/KNote.Repository.Dapper.csproj" /> 
+  <Project Path="MessageBroker/KNote.MessageBroker.csproj" />
+  <Project Path="MessageBroker.RabbitMQ/KNote.MessageBroker.RabbitMQ.csproj" />  
+  <Project Path="KntRedmineApi/KntRedmineApi.csproj" />
+</Solution>
