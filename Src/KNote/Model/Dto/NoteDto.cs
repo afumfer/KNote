@@ -5,8 +5,8 @@ namespace KNote.Model.Dto;
 
 public class NoteDto : NoteInfoDto
 {
-    private FolderDto _folderDto;
-    public FolderDto FolderDto 
+    private FolderInfoDto _folderDto;
+    public FolderInfoDto FolderDto 
     {
         get {
             if (_folderDto == null)

@@ -17,8 +17,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private readonly NoteEditorCtrl _ctrl;
     private bool _viewFinalized = false;
-
-    private Guid _selectedFolderId;
+    
+    private FolderInfoDto _changedFolder = null;
     private ResourceDto _selectedResource;
 
     private string _textSearch = "";
@@ -444,11 +444,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         var folder = _ctrl.GetFolder();
         if (folder != null)
-        {
-            _selectedFolderId = folder.FolderId;
-            textFolder.Text = folder?.Name;
-            textFolderNumber.Text = "#" + folder.FolderNumber.ToString();
-
+        {            
+            _changedFolder = folder;
+            textFolder.Text = _changedFolder?.Name;
+            textFolderNumber.Text = "#" + _changedFolder.FolderNumber.ToString();
+            
             buttonUndo.Enabled = true;
         }
     }
@@ -802,8 +802,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textFolder.Text = _ctrl.Model.FolderDto?.Name;
         //textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);  // TODO: ### Experimental
 
-        textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
-        _selectedFolderId = _ctrl.Model.FolderId;
+        textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();        
         textTags.Text = _ctrl.Model.Tags;
         textStatus.Text = _ctrl.Model.InternalTags;
         textPriority.Text = _ctrl.Model.Priority.ToString();
@@ -987,14 +986,17 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
     }
 
-    private void ControlsToModel()
+    private async Task ControlsToModel()
     {
         // Basic data
         _ctrl.Model.Topic = textTopic.Text;
-        _ctrl.Model.FolderId = _selectedFolderId;
-        _ctrl.Model.FolderDto.FolderId = _selectedFolderId;
-        _ctrl.Model.FolderDto.Name = textFolder.Text;
-        _ctrl.Model.FolderDto.FolderNumber = int.Parse(textFolderNumber.Text.Substring(1));
+        
+        if(_changedFolder != null)
+        {
+            _ctrl.Model.FolderId = _changedFolder.FolderId;
+            _ctrl.Model.FolderDto = _changedFolder;
+        }
+
         _ctrl.Model.Tags = textTags.Text;
         _ctrl.Model.InternalTags = textStatus.Text;
 
