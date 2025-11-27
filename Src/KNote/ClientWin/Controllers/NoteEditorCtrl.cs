@@ -5,6 +5,7 @@ using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.Text.Json;
 
 namespace KNote.ClientWin.Controllers;
@@ -442,14 +443,12 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
     {
         try
         {
-            if (!Clipboard.GetDataObject().GetDataPresent(DataFormats.Bitmap))
+            if (!Clipboard.ContainsImage())
             {
                 View.ShowInfo("You do not have any images on the Clipboard to insert into this note.", KntConst.AppName);
                 return null;
             }
-            var bm = (Bitmap)Clipboard.GetDataObject().GetData(DataFormats.Bitmap);
-            var converter = new ImageConverter();
-
+            
             var newResource = new ResourceDto();
             newResource.SetIsNew(true);
             newResource.ResourceId = Guid.NewGuid();
@@ -460,10 +459,22 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             newResource.Name = "ClipboardImg_" + newResource.ResourceId.ToString() + ".png";
             newResource.FileType = Store.ExtensionFileToFileType(".png");
             newResource.Container = Service.Notes.UtilGetDefaultNewResourceContainer();
-            newResource.ContentArrayBytes = (byte[])converter.ConvertTo(bm, typeof(byte[]));
+
+            // Get image from clipboard and convert to byte array
+            using (Image img = Clipboard.GetImage())
+            {
+                if (img != null)
+                {
+                    using (var ms = new MemoryStream())
+                    {                    
+                        img.Save(ms, ImageFormat.Png);
+                        newResource.ContentArrayBytes = ms.ToArray();
+                    }
+                }                    
+            }
 
             Service.Notes.UtilManageResourceContent(newResource);
-            
+
             Model.Resources.Add(newResource);
             return newResource;
         }
@@ -472,6 +483,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             View.ShowInfo($"Error: {ex.Message}");
             return null;
         }
+
     }
 
     public Task<ResourceDto> EditResource(Guid resourceId)
