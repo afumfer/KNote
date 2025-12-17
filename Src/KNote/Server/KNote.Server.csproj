@@ -22,7 +22,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="NLog.Web.AspNetCore" Version="6.1.0" />
-    <PackageReference Include="OpenAI" Version="2.7.0" />
+    <PackageReference Include="OpenAI" Version="2.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Client\KNote.Client.csproj" />
