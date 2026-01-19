@@ -1,9 +1,9 @@
-﻿using System.Runtime.InteropServices;
-
+﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
-using KNote.ClientWin.Controllers;
 using KntScript;
+using ReverseMarkdown.Converters;
+using System.Runtime.InteropServices;
 
 namespace KNote.ClientWin.Views;
 
@@ -16,11 +16,11 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     private string _sourceCodeDirWork;
     private string _sourceCodeFile;
-    private KntSEngine _engine;        
+    private KntSEngine _kntScriptEngine;
 
-    private const int EM_SETTABSTOPS = 0x00CB; 
-    [DllImport("User32.dll", CharSet = CharSet.Auto)] 
-    private static extern IntPtr SendMessage(IntPtr h, int msg, int wParam, int [] lParam);
+    private const int EM_SETTABSTOPS = 0x00CB;
+    [DllImport("User32.dll", CharSet = CharSet.Auto)]
+    private static extern IntPtr SendMessage(IntPtr h, int msg, int wParam, int[] lParam);
 
     #endregion
 
@@ -34,8 +34,8 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         PersonalizeTabStop();
 
         _ctrl = ctrl;
-        _engine = _ctrl.KntSEngine;
-        _sourceCodeFile = _ctrl.CodeFile;            
+        _kntScriptEngine = _ctrl.KntSEngine;
+        _sourceCodeFile = _ctrl.CodeFile;
     }
 
     #endregion
@@ -44,12 +44,12 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     private void KntScriptForm_Load(object sender, EventArgs e)
     {
-        _engine.InOutDevice.SetEmbeddedMode();
-        splitContainer1.Panel2.Controls.Add((Control)_engine.InOutDevice);
+        _kntScriptEngine.InOutDevice.SetEmbeddedMode();
+        splitContainer1.Panel2.Controls.Add((Control)_kntScriptEngine.InOutDevice);
 
         LoadFile(_sourceCodeFile);
 
-        _engine.InOutDevice.Show();            
+        _kntScriptEngine.InOutDevice.Show();        
     }
 
     private void KntScriptForm_KeyUp(object sender, KeyEventArgs e)
@@ -67,12 +67,12 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
 
         try
-        {
-            toolStripConsole.Enabled = false;
+        {            
+            RefreshStatusAction(true);
 
-            _engine.InOutDevice.Clear();                
-            _engine.ClearAllVars();
-            _engine.Run(textSourceCode.Text);
+            _kntScriptEngine.InOutDevice.Clear();
+            _kntScriptEngine.ClearAllVars();
+            _kntScriptEngine.Run(textSourceCode.Text);
         }
         catch (Exception err)
         {
@@ -80,7 +80,55 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
         finally
         {
-            toolStripConsole.Enabled = true;
+            RefreshStatusAction(false);
+        }
+    }
+
+    private void buttonRunCSCode_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+        {
+            MessageBox.Show("No code found to run", "KntScript");
+            return;
+        }
+
+        try
+        {            
+            RefreshStatusAction(true);
+            _kntScriptEngine.InOutDevice.Clear();
+            (var result, var error) = RunCSCode(textSourceCode.Text, true);
+            _kntScriptEngine.InOutDevice.Print($"{result}\n\n{"----"}\n{error}");
+        }
+        catch (Exception err)
+        {
+            MessageBox.Show(err.Message);
+        }
+        finally
+        {
+            RefreshStatusAction(false);
+        }
+    }
+
+    private void buttonRunCSCodeStdOut_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+        {
+            MessageBox.Show("No code found to run", "KntScript");
+            return;
+        }
+
+        try
+        {
+            RefreshStatusAction(true);
+            RunCSCode(textSourceCode.Text, false);
+        }
+        catch (Exception err)
+        {
+            MessageBox.Show(err.Message);
+        }
+        finally
+        {
+            RefreshStatusAction(false);
         }
     }
 
@@ -97,12 +145,12 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
             _sourceCodeDirWork = Application.StartupPath;
         openFileDialogScript.Title = "Open KntScript file";
         openFileDialogScript.InitialDirectory = _sourceCodeDirWork;
-        openFileDialogScript.Filter = "KntScript file (*.knts)|*.knts";
+        openFileDialogScript.Filter = "KntScript file (*.knts)|*.knts|CSharp file (*.cs)|*.cs";
         openFileDialogScript.FileName = "";
         openFileDialogScript.CheckFileExists = true;
 
-        if (openFileDialogScript.ShowDialog() == DialogResult.OK)                            
-            LoadFile(openFileDialogScript.FileName);                                       
+        if (openFileDialogScript.ShowDialog() == DialogResult.OK)
+            LoadFile(openFileDialogScript.FileName);
     }
 
     private void buttonSave_Click(object sender, EventArgs e)
@@ -111,13 +159,13 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         {
             saveFileDialogScript.Title = "Save KntScript file";
             saveFileDialogScript.InitialDirectory = _sourceCodeDirWork;
-            saveFileDialogScript.Filter = "KntScript file (*.ants)|*.ants";
+            saveFileDialogScript.Filter = "KntScript file (*.ants)|*.ants|CSharp file (*.cs)|*.cs";
             saveFileDialogScript.FileName = "";
 
             if (saveFileDialogScript.ShowDialog() == DialogResult.OK)
             {
                 if (Path.GetExtension(saveFileDialogScript.FileName) == "")
-                    saveFileDialogScript.FileName += @".ants";                    
+                    saveFileDialogScript.FileName += @".ants";
                 _sourceCodeFile = saveFileDialogScript.FileName;
                 _sourceCodeDirWork = Path.GetDirectoryName(_sourceCodeFile);
                 SaveFile(_sourceCodeFile);
@@ -150,39 +198,64 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         if (string.IsNullOrEmpty(sourceCodeFile))
             return;
 
-        if (!string.IsNullOrEmpty(_sourceCodeFile))
+        if (File.Exists(sourceCodeFile))
         {
-            if (File.Exists(_sourceCodeFile))
+            using (TextReader input = File.OpenText(sourceCodeFile))
             {
-                using (TextReader input = File.OpenText(_sourceCodeFile))
-                {
-                    textSourceCode.Text = input.ReadToEnd().ToString();
-                    textSourceCode.Select(0, 0);
-                }
+                textSourceCode.Text = input.ReadToEnd().ToString();
+                _sourceCodeFile = sourceCodeFile;
+                _sourceCodeDirWork = Path.GetDirectoryName(sourceCodeFile);
+                textSourceCode.Select(0, 0);
+                textSourceCode.Select(0, 0);
+                statusFileName.Text = _sourceCodeFile;                
             }
-            else
-            {
-                throw new Exception("Source code file no exist.");
-            }
-
         }
-        
-        _sourceCodeFile = sourceCodeFile;            
-        statusFileName.Text = sourceCodeFile;
-
-        textSourceCode.Select(0, 0);
-        _sourceCodeDirWork = Path.GetDirectoryName(sourceCodeFile);
+        else
+        {
+            ShowInfo("Source code file no exist.");
+        }        
     }
 
     private void SaveFile(string sourceCodeFile)
     {
         try
         {
-            File.WriteAllLines(sourceCodeFile, textSourceCode.Lines);                
+            File.WriteAllLines(sourceCodeFile, textSourceCode.Lines);
         }
         catch (Exception err)
         {
             MessageBox.Show(err.Message);
+        }
+    }
+
+    private (string, string) RunCSCode(string code, bool redirectStandardOut)
+    {
+        string tempDir = Path.GetTempPath();
+        //string nameFile = Guid.NewGuid().ToString() + ".cs";
+        string nameFile = "kntTmpCodeFile.cs";
+        string tempFullFileName = Path.Combine(tempDir, nameFile);
+        File.WriteAllText(tempFullFileName, code);
+
+        (var result, var error) = _ctrl.Store.ExecuteCommand($"dotnet run {nameFile}", tempDir, redirectStandardOut);
+
+        File.Delete(tempFullFileName);
+
+        return (result, error);
+    }
+
+    private void RefreshStatusAction(bool running)
+    {
+        if (running)
+        {
+            statusAction.Text = "Running code ... ";
+            statusStripKntConsole.Refresh();
+            toolStripConsole.Enabled = false;
+        }
+        else
+        {
+            statusAction.Text = ""; 
+            statusStripKntConsole.Refresh();
+            toolStripConsole.Enabled = true;
         }
     }
 
@@ -217,4 +290,5 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     }
 
     #endregion
+
 }

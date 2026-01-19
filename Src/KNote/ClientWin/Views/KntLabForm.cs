@@ -4,6 +4,7 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Web.WebView2.Core;
 using NLog;
 using System.Data;
@@ -1281,23 +1282,41 @@ window.chrome.webview.postMessage(retValue);";
     private void buttonRunAppCS_Click(object sender, EventArgs e)
     {
         string code =
-@"#:package Figgle@0.6.5
+@"
+#:package Figgle@0.6.5
 #:package Figgle.Fonts@0.6.5
 
 using Figgle;
 using Figgle.Fonts;
 
-Console.WriteLine(FiggleFonts.Standard.Render(""Hello World""));";
+Console.WriteLine(FiggleFonts.Standard.Render(""Hello World""));
+Console.WriteLine(FiggleFonts.Standard.Render(""QChat AI""));
 
-        //string tempDir = Path.GetTempPath();
-        string tempDir = @"D:\Tmp2";
-        string nameFile = Guid.NewGuid().ToString() + ".cs";
+// Demo read from Standard Input
+//var xx = Console.ReadLine();
+//Console.WriteLine(xx);
+
+// Demo Standard Error
+//Console.Error.WriteLine(""Esto va a StandardError"");
+ 
+";
+
+        string tempDir = Path.GetTempPath();        
+        //string nameFile = Guid.NewGuid().ToString() + ".cs";
+        string nameFile = "kntTmpCodeFile.cs";
         string tempFullFileName = Path.Combine(tempDir, nameFile);
         File.WriteAllText(tempFullFileName, code);
 
-        var result = _ctrl.Store.ExecuteCommand($"dotnet run {nameFile}", tempDir);
+        var redirectStandardOut = false;
+        (var result, var error) = _ctrl.Store.ExecuteCommand($"dotnet run {nameFile}", tempDir, redirectStandardOut);
+               
+        if (redirectStandardOut)
+            if(!string.IsNullOrEmpty(error))
+                MessageBox.Show(error);
+            else
+                MessageBox.Show(result);
 
-        MessageBox.Show(result);
+        File.Delete(tempFullFileName);
     }
 
     #endregion

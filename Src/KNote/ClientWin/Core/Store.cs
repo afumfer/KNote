@@ -664,7 +664,7 @@ public class Store
         return folderPath;
     }
 
-    public string ExecuteCommand(string command, string dir)
+    public (string, string) ExecuteCommand(string command, string dir, bool redirectStandardOut = true)
     {
         try
         {
@@ -677,23 +677,28 @@ public class Store
                     // Multiple commands can be concatenated like this: / C command1 && command2 && command3
                     //   Examplo: Arguments = $"/C {command} && echo %cd%",
                     Arguments = $"/C {command}",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
+                    RedirectStandardOutput = redirectStandardOut,
+                    RedirectStandardError = redirectStandardOut,
+                    UseShellExecute = !redirectStandardOut,
+                    CreateNoWindow = redirectStandardOut,
                     WorkingDirectory = dir
                 }
             };
             process.Start();
-            string result = process.StandardOutput.ReadToEnd();
-            string resultError = process.StandardError.ReadToEnd();
+            string result = "";
+            string resultError = "";
+            if (redirectStandardOut)
+            {
+                result = process.StandardOutput.ReadToEnd();
+                resultError = process.StandardError.ReadToEnd();
+            }
             process.WaitForExit();
-
-            return result != "" ? result : resultError;
+            //return result != "" ? result : resultError;
+            return (result , resultError);
         }
         catch (System.Exception ex)
         {
-            return $"Error: {ex.Message}";
+            return ("Exception message:", $"Error: {ex.Message}");
         }
     }
 
