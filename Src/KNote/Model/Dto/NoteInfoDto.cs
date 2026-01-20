@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Mime;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace KNote.Model.Dto;
@@ -26,14 +27,14 @@ public class NoteInfoDto : NoteMinimalDto
         }
     }
 
-    private string _contentType = "markdown";
+    private string _contentType;
     [MaxLength(1024)]
     public string ContentType
     {
         get 
         {
             if (_contentType == null)
-                _contentType = "";
+                _contentType = "markdown";
             return _contentType; 
         }
         set
@@ -45,7 +46,7 @@ public class NoteInfoDto : NoteMinimalDto
             }
         }
     }
-
+    
     private string _script;
     public string Script
     {
@@ -84,4 +85,60 @@ public class NoteInfoDto : NoteMinimalDto
     }
 
     #endregion
+
+    #region Util ContentTypeExt
+
+    public ContentTypeExt GetContentTypeExt()
+    {        
+        if (ContentTypeExtJsonHelper.TryDeserialize(_contentType, out var tryDes))
+            return tryDes;
+        return new ContentTypeExt(_contentType, "", false);        
+    }
+
+    public void SetContentTypeExt(ContentTypeExt value)
+    {     
+        _contentType = ContentTypeExtJsonHelper.Serialize(value);
+        OnPropertyChanged("ContentType");     
+    }
+
+    #endregion
+
+}
+
+public record ContentTypeExt(string Desciption, string Script, bool DescriptionBlocked);
+
+public static class ContentTypeExtJsonHelper
+{
+    private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
+    {
+        WriteIndented = true,
+        PropertyNameCaseInsensitive = true
+    };
+
+    public static string Serialize(ContentTypeExt obj)
+    {
+        if (obj == null) throw new ArgumentNullException(nameof(obj));
+        return JsonSerializer.Serialize(obj, Options);
+    }
+    
+    public static ContentTypeExt Deserialize(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) throw new ArgumentNullException(nameof(json));
+        return JsonSerializer.Deserialize<ContentTypeExt>(json, Options);
+    }
+
+    public static bool TryDeserialize(string json, out ContentTypeExt result)
+    {
+        result = null;
+        if (string.IsNullOrWhiteSpace(json)) return false;
+        try
+        {
+            result = JsonSerializer.Deserialize<ContentTypeExt>(json, Options);
+            return result != null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
