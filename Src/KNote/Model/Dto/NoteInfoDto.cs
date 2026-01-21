@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace KNote.Model.Dto;
@@ -33,8 +34,8 @@ public class NoteInfoDto : NoteMinimalDto
     {
         get 
         {
-            if (_contentType == null)
-                _contentType = "markdown";
+            if (_contentType == null)                
+                _contentType = "markdown";                
             return _contentType; 
         }
         set
@@ -90,14 +91,16 @@ public class NoteInfoDto : NoteMinimalDto
 
     public ContentTypeExt GetContentTypeExt()
     {        
-        if (ContentTypeExtJsonHelper.TryDeserialize(_contentType, out var tryDes))
+        if (ContentTypeExtJsonHelper.TryDeserialize(ContentType, out var tryDes))
             return tryDes;
-        return new ContentTypeExt(_contentType, "", false);        
+        // Transformation from old format  
+
+        return new ContentTypeExt { ForDescription = ContentType?.Replace("#", ""), ForScript = "", DescriptionBlocked = (bool) ContentType?.Contains("#") };        
     }
 
     public void SetContentTypeExt(ContentTypeExt value)
     {     
-        _contentType = ContentTypeExtJsonHelper.Serialize(value);
+        ContentType = ContentTypeExtJsonHelper.Serialize(value);
         OnPropertyChanged("ContentType");     
     }
 
@@ -105,13 +108,21 @@ public class NoteInfoDto : NoteMinimalDto
 
 }
 
-public record ContentTypeExt(string Desciption, string Script, bool DescriptionBlocked);
+public record ContentTypeExt
+{
+    [JsonPropertyName("des")]
+    public string ForDescription { get; set; } = "";
+    [JsonPropertyName("scr")]
+    public string ForScript { get; set; } = "";
+    [JsonPropertyName("blk")]
+    public bool DescriptionBlocked { get; set; }
+}
 
 public static class ContentTypeExtJsonHelper
 {
     private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
     {
-        WriteIndented = true,
+        WriteIndented = false,
         PropertyNameCaseInsensitive = true
     };
 

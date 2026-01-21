@@ -37,7 +37,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         // when the posit is activated in navigation mode
         if (_ctrl.Model != null)
         {
-            if (_ctrl.Model.ContentType.Contains("navigation"))
+            // !!! ct
+            //if (_ctrl.Model.ContentType.Contains("navigation"))
+            if (_ctrl.Model.GetContentTypeExt().ForDescription == "navigation")
             {
                 _url = _ctrl.Store.ExtractUrlFromText(_ctrl.Model?.Description);
                 ConfigurePostItView(true);                
@@ -331,6 +333,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         if (_ctrl.Model is null)
             return;
 
+        var ct = _ctrl.Model.GetContentTypeExt();
+
         labelCaption.Text = _ctrl.Model.Topic;
         RefreshStatus();
         _selectedFolderId = _ctrl.Model.FolderId;
@@ -338,7 +342,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
         kntEditView.MarkdownContentControl.SelectionStart = 0;
 
-        if (_ctrl.Model.ContentType.Contains("html"))
+        // !!! ct
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        if (ct.ForDescription == "html")
         {
             Text = KntConst.AppName + " Html editor";
             kntEditView.ShowHtmlContent(kntEditView.MarkdownText);
@@ -347,7 +353,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             kntEditView.HtmlContentControl.ToolbarVisible = false;
             kntEditView.HtmlContentControl.Focus();
         }
-        else if (_ctrl.Model.ContentType.Contains("navigation"))
+        // !!! ct
+        else if (ct.ForDescription == "navigation")
         {
             Text = KntConst.AppName + " Web View";
             if (!string.IsNullOrEmpty(kntEditView.MarkdownText))
@@ -386,7 +393,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
         kntEditView.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
 
-        if (_ctrl.Model.ContentType.Contains("markdown"))
+        // !!! ct
+        //if (_ctrl.Model.ContentType.Contains("markdown"))
+        if (_ctrl.Model.GetContentTypeExt().ForDescription == "markdown")
         {
             FontStyle style = new FontStyle();
             if (_ctrl.WindowPostIt.FontBold)
@@ -431,7 +440,9 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         if (_ctrl.Model is null)
             return;
 
-        if (_ctrl.Model.ContentType.Contains("html"))
+        // !!! ct
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        if (_ctrl.Model.GetContentTypeExt().ForDescription == "html")
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
         else
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);

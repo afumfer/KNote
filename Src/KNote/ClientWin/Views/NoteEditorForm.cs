@@ -198,16 +198,22 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         else if (menuSel == buttonLockFormat)
         {
-            if (buttonLockFormat.Checked)
-            {
-                _ctrl.Model.ContentType = _ctrl.Model.ContentType.Replace("#", "");
-                buttonLockFormat.Checked = false;
-            }
-            else
-            {
-                _ctrl.Model.ContentType = "#" + _ctrl.Model.ContentType;
-                buttonLockFormat.Checked = true;
-            }
+            // !!! ct
+            //if (buttonLockFormat.Checked)
+            //{                           
+            //    _ctrl.Model.ContentType = _ctrl.Model.ContentType.Replace("#", "");
+            //    buttonLockFormat.Checked = false;
+            //}
+            //else
+            //{
+            //    _ctrl.Model.ContentType = "#" + _ctrl.Model.ContentType;
+            //    buttonLockFormat.Checked = true;
+            //}
+
+            var ct = _ctrl.Model.GetContentTypeExt();
+            ct.DescriptionBlocked = !ct.DescriptionBlocked;
+            buttonLockFormat.Checked = ct.DescriptionBlocked;
+            _ctrl.Model.SetContentTypeExt(ct);
         }
         else if (menuSel == buttonInsertTemplate)
         {
@@ -250,9 +256,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
+            var ct = _ctrl.Model.GetContentTypeExt();
             if (kntEditView.ContentType == "html")
             {
-                if (_ctrl.Model.ContentType.Contains('#'))
+                // !!! ct
+                //if (_ctrl.Model.ContentType.Contains('#'))
+                if (ct.DescriptionBlocked)
                 {
                     ShowInfo($"This note cannot be changed to another format, the format is locked.");
                     return;
@@ -263,7 +272,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             else
                 kntEditView.ShowMarkdownContent();
 
-            _ctrl.Model.ContentType = "markdown";
+            // !!! ct
+            //_ctrl.Model.ContentType = "markdown";
+            ct.ForDescription = "markdown";
+            _ctrl.Model.SetContentTypeExt(ct);
 
             EnableMarkdownView();
         }
@@ -278,7 +290,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
-            if (_ctrl.Model.ContentType.Contains('#'))
+            var ct = _ctrl.Model.GetContentTypeExt();
+            /// ct
+            //if (_ctrl.Model.ContentType.Contains('#'))
+            if (ct.DescriptionBlocked)
             {
                 ShowInfo($"This note cannot be changed to another format, the format is locked.");
                 return;
@@ -303,7 +318,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
             }
 
-            _ctrl.Model.ContentType = "navigation";
+            // !!! ct
+            //_ctrl.Model.ContentType = "navigation";
+            ct.ForDescription = "navigation";
+            _ctrl.Model.SetContentTypeExt(ct);
 
             EnableNavigationView();
         }
@@ -317,7 +335,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
-            if (_ctrl.Model.ContentType.Contains('#'))
+            // !!! ct
+            var ct = _ctrl.Model.GetContentTypeExt();
+            // if (_ctrl.Model.ContentType.Contains('#'))
+            if (ct.DescriptionBlocked)
             {
                 ShowInfo($"This note cannot be changed to another format, the format is locked.");
                 return;
@@ -325,7 +346,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
             kntEditView.ShowHtmlContent(_ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText));
 
-            _ctrl.Model.ContentType = "html";
+            // !!! ct
+            //_ctrl.Model.ContentType = "html";
+            ct.ForDescription = "html";
+            _ctrl.Model.SetContentTypeExt(ct);
 
             EnableHtmlView();
         }
@@ -731,7 +755,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         kntEditView.HtmlContentControl.BorderStyle = BorderStyle.None;
         kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.FixedSingle;
 
-        kntEditView.ContentType = _ctrl.Model.ContentType;
+        // !!! ct
+        //kntEditView.ContentType = _ctrl.Model.ContentType;
+        kntEditView.ContentType = _ctrl.Model.GetContentTypeExt().ForDescription;
 
         if (!_ctrl.EditMode)
         {
@@ -794,6 +820,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void ModelToControls()
     {
+        var ct = _ctrl.Model.GetContentTypeExt();
+
         // Basic data            
         Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
         textTopic.Text = _ctrl.Model.Topic;
@@ -809,7 +837,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
 
-        if (_ctrl.Model.ContentType.Contains("html"))
+        // !!! ct
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        if (ct.ForDescription == "html")
         {
             labelAction.Visible = true;
             labelAction.Refresh();
@@ -817,7 +847,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             labelAction.Visible = false;
             EnableHtmlView();
         }
-        else if (_ctrl.Model.ContentType.Contains("navigation"))
+        // !!! ct
+        //else if (_ctrl.Model.ContentType.Contains("navigation"))
+        else if (ct.ForDescription == "navigation")
         {
             if (!string.IsNullOrEmpty(kntEditView.MarkdownText))
             {
@@ -845,7 +877,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             EnableMarkdownView();
         }
 
-        buttonLockFormat.Checked = _ctrl.Model.ContentType != null && _ctrl.Model.ContentType.Contains('#');
+        // !!! ct
+        //buttonLockFormat.Checked = _ctrl.Model.ContentType != null && _ctrl.Model.ContentType.Contains('#');
+        buttonLockFormat.Checked = ct.DescriptionBlocked;
 
         // KAttributes           
         textNoteType.Text = _ctrl.Model.NoteTypeDto.Name;
@@ -1000,7 +1034,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         _ctrl.Model.Tags = textTags.Text;
         _ctrl.Model.InternalTags = textStatus.Text;
 
-        if (_ctrl.Model.ContentType.Contains("html"))
+        // !!! ct
+        //if (_ctrl.Model.ContentType.Contains("html"))
+        if (_ctrl.Model.GetContentTypeExt().ForDescription == "html")
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
         else
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
