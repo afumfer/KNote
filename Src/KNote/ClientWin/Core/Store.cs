@@ -412,15 +412,6 @@ public class Store
         }
     }
 
-    public void RunScript(string code)
-    {
-        if (string.IsNullOrEmpty(code))
-            return;
-
-        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this), false);
-        kntScript.Run(code);
-    }
-
     public void RunScriptInNewThread(string code)
     {
         if (string.IsNullOrEmpty(code))
@@ -662,6 +653,29 @@ public class Store
         } while (parentFolderId != null);
 
         return folderPath;
+    }
+
+    public void RunKNoteScript(string code)
+    {
+        if (string.IsNullOrEmpty(code))
+            return;
+
+        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this), false);
+        kntScript.Run(code);
+    }
+
+    public (string, string) RunCSCode(string code, bool redirectStandardOut)
+    {
+        string tempDir = Path.GetTempPath();        
+        string nameFile = $"kntTmpCodeFile_{Guid.NewGuid().ToString()}.cs";
+        string tempFullFileName = Path.Combine(tempDir, nameFile);
+        File.WriteAllText(tempFullFileName, code);
+
+        (var result, var error) = ExecuteCommand($"dotnet run {nameFile}", tempDir, redirectStandardOut);
+
+        File.Delete(tempFullFileName);
+
+        return (result, error);
     }
 
     public (string, string) ExecuteCommand(string command, string dir, bool redirectStandardOut = true)

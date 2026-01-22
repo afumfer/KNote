@@ -17,7 +17,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private readonly NoteEditorCtrl _ctrl;
     private bool _viewFinalized = false;
-    
+
     private FolderInfoDto _changedFolder = null;
     private ResourceDto _selectedResource;
 
@@ -122,11 +122,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         TopLevel = false;
         Dock = DockStyle.Fill;
         FormBorderStyle = FormBorderStyle.None;
-        toolBarNoteEditor.Visible = false;
-        _ctrl.EditMode = false;
+        toolBarNoteEditor.Visible = false;        
         kntEditView.MarkdownContentControl.ReadOnly = true;
         kntEditView.MarkdownContentControl.BackColor = SystemColors.Window;
         kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.FixedSingle;
+        _ctrl.EditMode = false;
     }
 
     public void ConfigureWindowMode()
@@ -198,18 +198,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
         else if (menuSel == buttonLockFormat)
         {
-            // !!! ct
-            //if (buttonLockFormat.Checked)
-            //{                           
-            //    _ctrl.Model.ContentType = _ctrl.Model.ContentType.Replace("#", "");
-            //    buttonLockFormat.Checked = false;
-            //}
-            //else
-            //{
-            //    _ctrl.Model.ContentType = "#" + _ctrl.Model.ContentType;
-            //    buttonLockFormat.Checked = true;
-            //}
-
             var ct = _ctrl.Model.GetContentTypeExt();
             ct.DescriptionBlocked = !ct.DescriptionBlocked;
             buttonLockFormat.Checked = ct.DescriptionBlocked;
@@ -236,9 +224,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             TextSearchNext();
         }
         else if (menuSel == buttonAddTaskSelectedText)
-        {            
+        {
             await AddTaskFromSelectedText();
-        }        
+        }
     }
 
     private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
@@ -259,8 +247,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             var ct = _ctrl.Model.GetContentTypeExt();
             if (kntEditView.ContentType == "html")
             {
-                // !!! ct
-                //if (_ctrl.Model.ContentType.Contains('#'))
                 if (ct.DescriptionBlocked)
                 {
                     ShowInfo($"This note cannot be changed to another format, the format is locked.");
@@ -272,8 +258,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             else
                 kntEditView.ShowMarkdownContent();
 
-            // !!! ct
-            //_ctrl.Model.ContentType = "markdown";
             ct.ForDescription = "markdown";
             _ctrl.Model.SetContentTypeExt(ct);
 
@@ -318,8 +302,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
             }
 
-            // !!! ct
-            //_ctrl.Model.ContentType = "navigation";
             ct.ForDescription = "navigation";
             _ctrl.Model.SetContentTypeExt(ct);
 
@@ -335,9 +317,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         try
         {
-            // !!! ct
             var ct = _ctrl.Model.GetContentTypeExt();
-            // if (_ctrl.Model.ContentType.Contains('#'))
             if (ct.DescriptionBlocked)
             {
                 ShowInfo($"This note cannot be changed to another format, the format is locked.");
@@ -346,8 +326,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
             kntEditView.ShowHtmlContent(_ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText));
 
-            // !!! ct
-            //_ctrl.Model.ContentType = "html";
             ct.ForDescription = "html";
             _ctrl.Model.SetContentTypeExt(ct);
 
@@ -468,11 +446,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         var folder = _ctrl.GetFolder();
         if (folder != null)
-        {            
+        {
             _changedFolder = folder;
             textFolder.Text = _changedFolder?.Name;
             textFolderNumber.Text = "#" + _changedFolder.FolderNumber.ToString();
-            
+
             buttonUndo.Enabled = true;
         }
     }
@@ -755,8 +733,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         kntEditView.HtmlContentControl.BorderStyle = BorderStyle.None;
         kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.FixedSingle;
 
-        // !!! ct
-        //kntEditView.ContentType = _ctrl.Model.ContentType;
         kntEditView.ContentType = _ctrl.Model.GetContentTypeExt().ForDescription;
 
         if (!_ctrl.EditMode)
@@ -801,7 +777,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         PersonalizeListView(listViewAttributes);
         PersonalizeListView(listViewResources);
         PersonalizeListView(listViewTasks);
-        PersonalizeListView(listViewAlarms);                  
+        PersonalizeListView(listViewAlarms);
 
         // TODO: remove in this version
         tabNoteData.TabPages.Remove(tabTraceNotes);
@@ -830,15 +806,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textFolder.Text = _ctrl.Model.FolderDto?.Name;
         //textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);  // TODO: ### Experimental
 
-        textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();        
+        textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
         textTags.Text = _ctrl.Model.Tags;
         textStatus.Text = _ctrl.Model.InternalTags;
         textPriority.Text = _ctrl.Model.Priority.ToString();
 
         kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
 
-        // !!! ct
-        //if (_ctrl.Model.ContentType.Contains("html"))
         if (ct.ForDescription == "html")
         {
             labelAction.Visible = true;
@@ -847,8 +821,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             labelAction.Visible = false;
             EnableHtmlView();
         }
-        // !!! ct
-        //else if (_ctrl.Model.ContentType.Contains("navigation"))
         else if (ct.ForDescription == "navigation")
         {
             if (!string.IsNullOrEmpty(kntEditView.MarkdownText))
@@ -877,8 +849,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             EnableMarkdownView();
         }
 
-        // !!! ct
-        //buttonLockFormat.Checked = _ctrl.Model.ContentType != null && _ctrl.Model.ContentType.Contains('#');
         buttonLockFormat.Checked = ct.DescriptionBlocked;
 
         // KAttributes           
@@ -907,6 +877,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // Script             
         textScriptCode.Text = _ctrl.Model.Script;
+        if (ct.ForScript == "cs")
+            radioCsScript.Checked = true;
+        else
+            radioKntScript.Checked = true;
 
         this.Update();
         this.Refresh();
@@ -1023,9 +997,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private async Task ControlsToModel()
     {
         // Basic data
+        var ct = _ctrl.Model.GetContentTypeExt();
+
         _ctrl.Model.Topic = textTopic.Text;
-        
-        if(_changedFolder != null)
+
+        if (_changedFolder != null)
         {
             _ctrl.Model.FolderId = _changedFolder.FolderId;
             _ctrl.Model.FolderDto = _changedFolder;
@@ -1034,9 +1010,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         _ctrl.Model.Tags = textTags.Text;
         _ctrl.Model.InternalTags = textStatus.Text;
 
-        // !!! ct
-        //if (_ctrl.Model.ContentType.Contains("html"))
-        if (_ctrl.Model.GetContentTypeExt().ForDescription == "html")
+        if (ct.ForDescription == "html")
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
         else
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
@@ -1096,6 +1070,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else if (c is CheckBox)
         {
             CheckBox cb = (CheckBox)c;
+            cb.Enabled = false;
+            return;
+        }
+        else if (c is RadioButton)
+        {
+            RadioButton cb = (RadioButton)c;
             cb.Enabled = false;
             return;
         }
@@ -1530,7 +1510,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async Task UpdateTaskDescription(string description)
     {
-        kntEditViewTask.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(description, true));        
+        kntEditViewTask.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(description, true));
         var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditViewTask.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
         await kntEditViewTask.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
         await kntEditViewTask.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
@@ -1598,4 +1578,23 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     #endregion
 
+    private void radioKntScript_CheckedChanged(object sender, EventArgs e)
+    {
+        var ct = _ctrl.Model.GetContentTypeExt();
+        if (radioKntScript.Checked)
+            ct.ForScript = "knt";
+        else
+            ct.ForScript = "cs";        
+        _ctrl.Model.SetContentTypeExt(ct);
+    }
+
+    private void radioCsScript_CheckedChanged(object sender, EventArgs e)
+    {
+        var ct = _ctrl.Model.GetContentTypeExt();
+        if (radioCsScript.Checked)
+            ct.ForScript = "cs";
+        else
+            ct.ForScript = "knt";
+        _ctrl.Model.SetContentTypeExt(ct);
+    }
 }

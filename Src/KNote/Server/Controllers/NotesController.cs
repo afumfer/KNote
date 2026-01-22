@@ -210,20 +210,15 @@ public class NotesController : ControllerBase
         try
         {
             _logger.LogTrace("Post/Put {topic} at {dateTime}.", note.Topic?.ToString(), DateTime.Now);
-
-            // !!! ct
-
+            
             var ct = note.GetContentTypeExt();
 
             // Hack to make it compatible with the desktop application. ----------------------------------
             note.Description = _service.Notes.UtilUpdateResourceInDescriptionForWrite(note.Description);
             if(note.Description != null)
             {
-                //var blockingContentType = note.ContentType.Contains('#');
                 if (note.Description.StartsWith(@"<BODY"))
                 {
-                    //blockingContentType = true; // override this value
-                    //note.ContentType = "html";
                     ct.DescriptionBlocked = true;
                     ct.ForDescription = "html";
                     note.SetContentTypeExt(ct);
@@ -231,13 +226,9 @@ public class NotesController : ControllerBase
                 else
                 {                
                     note.Description = note.Description.Replace("\n", "\r\n");
-                    //note.ContentType = "markdown";
                     ct.ForDescription = "markdown";
                     note.SetContentTypeExt(ct);
                 }
-
-                //if(blockingContentType)
-                //    note.ContentType = "#" + note.ContentType;
             }
             // -------------------------------------------------------------------------------------------
 

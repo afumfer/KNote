@@ -1052,7 +1052,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         {
             var script = NotesSelectorCtrl.Service.Notes.GetAsync(note.NoteId).Result.Entity.Script;
             if (!string.IsNullOrEmpty(script))
-                Store.RunScript(script);
+                Store.RunKNoteScript(script);
         }
     }
 

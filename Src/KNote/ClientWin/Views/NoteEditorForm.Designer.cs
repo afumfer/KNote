@@ -145,8 +145,11 @@
             buttonAddAlarm = new Button();
             label4 = new Label();
             tabCode = new TabPage();
+            radioCsScript = new RadioButton();
+            radioKntScript = new RadioButton();
+            labelCodeType = new Label();
             textScriptCode = new TextBox();
-            label9 = new Label();
+            labelScriptCode = new Label();
             tabTraceNotes = new TabPage();
             listViewTraceNoteTo = new ListView();
             listViewTraceNoteFrom = new ListView();
@@ -341,7 +344,7 @@
             buttonExecuteKntScript.Name = "buttonExecuteKntScript";
             buttonExecuteKntScript.ShortcutKeys = Keys.F5;
             buttonExecuteKntScript.Size = new Size(327, 22);
-            buttonExecuteKntScript.Text = "Execute AntScript code";
+            buttonExecuteKntScript.Text = "Run script note";
             buttonExecuteKntScript.Click += buttonToolBar_Click;
             // 
             // buttonInsertCode
@@ -1376,8 +1379,11 @@
             // 
             // tabCode
             // 
+            tabCode.Controls.Add(radioCsScript);
+            tabCode.Controls.Add(radioKntScript);
+            tabCode.Controls.Add(labelCodeType);
             tabCode.Controls.Add(textScriptCode);
-            tabCode.Controls.Add(label9);
+            tabCode.Controls.Add(labelScriptCode);
             tabCode.ImageIndex = 8;
             tabCode.Location = new Point(4, 30);
             tabCode.Margin = new Padding(4, 3, 4, 3);
@@ -1386,6 +1392,43 @@
             tabCode.TabIndex = 6;
             tabCode.Text = "Code   ";
             tabCode.UseVisualStyleBackColor = true;
+            // 
+            // radioCsScript
+            // 
+            radioCsScript.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            radioCsScript.AutoSize = true;
+            radioCsScript.Location = new Point(715, 14);
+            radioCsScript.Name = "radioCsScript";
+            radioCsScript.Size = new Size(73, 19);
+            radioCsScript.TabIndex = 9;
+            radioCsScript.TabStop = true;
+            radioCsScript.Text = "C# Script";
+            radioCsScript.UseVisualStyleBackColor = true;
+            radioCsScript.CheckedChanged += radioCsScript_CheckedChanged;
+            // 
+            // radioKntScript
+            // 
+            radioKntScript.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            radioKntScript.AutoSize = true;
+            radioKntScript.Location = new Point(618, 14);
+            radioKntScript.Name = "radioKntScript";
+            radioKntScript.Size = new Size(91, 19);
+            radioKntScript.TabIndex = 8;
+            radioKntScript.TabStop = true;
+            radioKntScript.Text = "KNote Script";
+            radioKntScript.UseVisualStyleBackColor = true;
+            radioKntScript.CheckedChanged += radioKntScript_CheckedChanged;
+            // 
+            // labelCodeType
+            // 
+            labelCodeType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            labelCodeType.AutoSize = true;
+            labelCodeType.Location = new Point(547, 16);
+            labelCodeType.Margin = new Padding(4, 0, 4, 0);
+            labelCodeType.Name = "labelCodeType";
+            labelCodeType.Size = new Size(64, 15);
+            labelCodeType.TabIndex = 7;
+            labelCodeType.Text = "Code type:";
             // 
             // textScriptCode
             // 
@@ -1400,15 +1443,15 @@
             textScriptCode.TabIndex = 6;
             textScriptCode.WordWrap = false;
             // 
-            // label9
+            // labelScriptCode
             // 
-            label9.AutoSize = true;
-            label9.Location = new Point(6, 16);
-            label9.Margin = new Padding(4, 0, 4, 0);
-            label9.Name = "label9";
-            label9.Size = new Size(69, 15);
-            label9.TabIndex = 4;
-            label9.Text = "Script code:";
+            labelScriptCode.AutoSize = true;
+            labelScriptCode.Location = new Point(6, 16);
+            labelScriptCode.Margin = new Padding(4, 0, 4, 0);
+            labelScriptCode.Name = "labelScriptCode";
+            labelScriptCode.Size = new Size(69, 15);
+            labelScriptCode.TabIndex = 4;
+            labelScriptCode.Text = "Script code:";
             // 
             // tabTraceNotes
             // 
@@ -1671,7 +1714,7 @@
         private Label label13;
         private Label label14;
         private TextBox textScriptCode;
-        private Label label9;
+        private Label labelScriptCode;
         private Button buttonEditMarkdown;
         private Button buttonViewHtml;
         internal TextBox textNoteType;
@@ -1759,5 +1802,8 @@
         private TextBox textTaskTags;
         private Label label17;
         private Label label16;
+        private Label labelCodeType;
+        private RadioButton radioCsScript;
+        private RadioButton radioKntScript;
     }
 }

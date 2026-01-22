@@ -37,8 +37,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         // when the posit is activated in navigation mode
         if (_ctrl.Model != null)
         {
-            // !!! ct
-            //if (_ctrl.Model.ContentType.Contains("navigation"))
             if (_ctrl.Model.GetContentTypeExt().ForDescription == "navigation")
             {
                 _url = _ctrl.Store.ExtractUrlFromText(_ctrl.Model?.Description);
@@ -342,8 +340,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         kntEditView.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(_ctrl.Model?.Description, true));
         kntEditView.MarkdownContentControl.SelectionStart = 0;
 
-        // !!! ct
-        //if (_ctrl.Model.ContentType.Contains("html"))
         if (ct.ForDescription == "html")
         {
             Text = KntConst.AppName + " Html editor";
@@ -353,7 +349,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             kntEditView.HtmlContentControl.ToolbarVisible = false;
             kntEditView.HtmlContentControl.Focus();
         }
-        // !!! ct
         else if (ct.ForDescription == "navigation")
         {
             Text = KntConst.AppName + " Web View";
@@ -393,8 +388,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
         kntEditView.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
 
-        // !!! ct
-        //if (_ctrl.Model.ContentType.Contains("markdown"))
         if (_ctrl.Model.GetContentTypeExt().ForDescription == "markdown")
         {
             FontStyle style = new FontStyle();
@@ -440,8 +433,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         if (_ctrl.Model is null)
             return;
 
-        // !!! ct
-        //if (_ctrl.Model.ContentType.Contains("html"))
         if (_ctrl.Model.GetContentTypeExt().ForDescription == "html")
             _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
         else

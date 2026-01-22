@@ -96,7 +96,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         {            
             RefreshStatusAction(true);
             _kntScriptEngine.InOutDevice.Clear();
-            (var result, var error) = RunCSCode(textSourceCode.Text, true);
+            (var result, var error) = _ctrl.Store.RunCSCode(textSourceCode.Text, true);
             _kntScriptEngine.InOutDevice.Print($"{result}\n\n{"----"}\n{error}");
         }
         catch (Exception err)
@@ -120,7 +120,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         try
         {
             RefreshStatusAction(true);
-            RunCSCode(textSourceCode.Text, false);
+            _ctrl.Store.RunCSCode(textSourceCode.Text, false);
         }
         catch (Exception err)
         {
@@ -226,21 +226,6 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         {
             MessageBox.Show(err.Message);
         }
-    }
-
-    private (string, string) RunCSCode(string code, bool redirectStandardOut)
-    {
-        string tempDir = Path.GetTempPath();
-        //string nameFile = Guid.NewGuid().ToString() + ".cs";
-        string nameFile = "kntTmpCodeFile.cs";
-        string tempFullFileName = Path.Combine(tempDir, nameFile);
-        File.WriteAllText(tempFullFileName, code);
-
-        (var result, var error) = _ctrl.Store.ExecuteCommand($"dotnet run {nameFile}", tempDir, redirectStandardOut);
-
-        File.Delete(tempFullFileName);
-
-        return (result, error);
     }
 
     private void RefreshStatusAction(bool running)

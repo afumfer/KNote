@@ -35,7 +35,12 @@ public class NoteInfoDto : NoteMinimalDto
         get 
         {
             if (_contentType == null)                
-                _contentType = "markdown";                
+                _contentType = ContentTypeExtJsonHelper.Serialize(new ContentTypeExt
+                {
+                    ForDescription = "markdown",
+                    ForScript = "knt",
+                    DescriptionBlocked = false
+                }); ;                
             return _contentType; 
         }
         set
@@ -93,9 +98,9 @@ public class NoteInfoDto : NoteMinimalDto
     {        
         if (ContentTypeExtJsonHelper.TryDeserialize(ContentType, out var tryDes))
             return tryDes;
+        
         // Transformation from old format  
-
-        return new ContentTypeExt { ForDescription = ContentType?.Replace("#", ""), ForScript = "", DescriptionBlocked = (bool) ContentType?.Contains("#") };        
+        return new ContentTypeExt { ForDescription = ContentType?.Replace("#", ""), ForScript = "knt", DescriptionBlocked = (bool) ContentType?.Contains("#") };        
     }
 
     public void SetContentTypeExt(ContentTypeExt value)
