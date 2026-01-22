@@ -412,18 +412,6 @@ public class Store
         }
     }
 
-    public void RunScriptInNewThread(string code)
-    {
-        if (string.IsNullOrEmpty(code))
-            return;
-
-        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this));
-                
-        var t = new Thread(() => kntScript.Run(code));
-        t.IsBackground = false;
-        t.Start();        
-    }
-
     public string ExtensionFileToFileType(string extension)
     {
         // TODO: Refactor this method
@@ -655,7 +643,11 @@ public class Store
         return folderPath;
     }
 
-    public void RunKNoteScript(string code)
+    #endregion
+
+    #region KntScript and C# code execution
+
+    public void RunKntScript(string code)
     {
         if (string.IsNullOrEmpty(code))
             return;
@@ -663,6 +655,31 @@ public class Store
         var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this), false);
         kntScript.Run(code);
     }
+
+    public void RunKntScriptInNewThread(string code)
+    {
+        if (string.IsNullOrEmpty(code))
+            return;
+
+        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this));
+
+        var t = new Thread(() => kntScript.Run(code));
+        t.IsBackground = false;
+        t.Start();
+    }
+
+    public Task RunKntScriptAsync(string code)
+    {
+        if (string.IsNullOrEmpty(code))
+            return Task.CompletedTask;
+
+        return Task.Run(() =>
+        {
+            var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this));
+            kntScript.Run(code);
+        });
+    }
+    // Example  -> await RunKntScriptAsync(myCode);
 
     public (string, string) RunCSCode(string code, bool redirectStandardOut)
     {
@@ -677,6 +694,13 @@ public class Store
 
         return (result, error);
     }
+
+    public Task<(string, string)> RunCSCodeAsync(string code, bool redirectStandardOut)
+    {
+        return Task.Run(() => RunCSCode(code, redirectStandardOut));
+    }
+    // Example  -> var (result, error) = await RunCSCodeAsync(myCode, true);
+
 
     public (string, string) ExecuteCommand(string command, string dir, bool redirectStandardOut = true)
     {
@@ -706,8 +730,7 @@ public class Store
                 result = process.StandardOutput.ReadToEnd();
                 resultError = process.StandardError.ReadToEnd();
             }
-            process.WaitForExit();
-            //return result != "" ? result : resultError;
+            process.WaitForExit();            
             return (result , resultError);
         }
         catch (System.Exception ex)

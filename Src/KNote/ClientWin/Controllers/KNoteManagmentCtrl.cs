@@ -433,7 +433,22 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     {
         var service = e.Entity.Service;
         var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
-        Store.RunScriptInNewThread(note?.Script);
+
+        // !!! Old version
+        //Store.RunKntScriptInNewThread(note?.Script);
+        // --------------------
+
+        // !!! Experimental async and run cs code
+
+        var ct = note.GetContentTypeExt();
+        if(ct == null || string.IsNullOrEmpty(ct.ForScript))
+            return;
+
+        if(ct.ForScript == "cs")        
+            var (result, error) = await Store.RunCSCodeAsync(note?.Script, false);
+            //Store.RunCSCode(note?.Script, false);
+        else
+            await Store.RunKntScriptAsync(note?.Script);        
     }
 
     private void _messagesManagment_AppAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
@@ -1038,7 +1053,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    public void RunScriptSelectedNotes()
+    public async Task RunScriptSelectedNotes()
     {
         var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal();
 
@@ -1050,9 +1065,15 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
         foreach (var note in selectedNotes)
         {
-            var script = NotesSelectorCtrl.Service.Notes.GetAsync(note.NoteId).Result.Entity.Script;
-            if (!string.IsNullOrEmpty(script))
-                Store.RunKNoteScript(script);
+            var noteDto = (await NotesSelectorCtrl.Service.Notes.GetAsync(note.NoteId)).Entity;
+            if (!string.IsNullOrEmpty(noteDto.Script))
+            {
+                var ct = noteDto.GetContentTypeExt();
+                if (ct.ForScript == "cs")
+                    Store.RunCSCode(noteDto.Script, false);
+                else
+                    Store.RunKntScript(noteDto.Script);
+            }
         }
     }
 
