@@ -6,10 +6,10 @@
     <FileVersion>0.0.10.4</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.44.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.2" />
-    <PackageReference Include="NLog" Version="6.0.7" />
-    <PackageReference Include="ReverseMarkdown" Version="5.0.0" />
+    <PackageReference Include="Markdig" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.5" />
+    <PackageReference Include="NLog" Version="6.1.2" />
+    <PackageReference Include="ReverseMarkdown" Version="5.3.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MessageBroker.RabbitMQ\KNote.MessageBroker.RabbitMQ.csproj" />

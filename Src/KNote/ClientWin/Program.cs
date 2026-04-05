@@ -27,6 +27,9 @@ static class Program
             return;
         }
 #endif
+        Application.SetHighDpiMode(HighDpiMode.SystemAware);
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
 
         ApplicationConfiguration.Initialize();
         ApplicationContext applicationContext = new ApplicationContext();
@@ -44,8 +47,6 @@ static class Program
             knoteManagment.Run();
             applicationContext.MainForm = (Form)knoteManagment.View;
             splashForm.Close();
-            if (Environment.OSVersion.Version.Major >= 6)
-                SetProcessDPIAware();
             
             Application.Run(applicationContext);
 
@@ -172,8 +173,6 @@ static class Program
         SetForegroundWindow(handle);
     }
 
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern bool SetProcessDPIAware();
     #endregion
 }
 

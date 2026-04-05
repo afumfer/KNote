@@ -27,7 +27,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     public PostItEditorForm(PostItEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
+        AutoScaleMode = AutoScaleMode.Font;
 
         InitializeComponent();
 

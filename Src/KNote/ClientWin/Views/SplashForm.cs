@@ -16,7 +16,7 @@ public partial class SplashForm : Form
 
     public SplashForm(Store appContext)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
+        AutoScaleMode = AutoScaleMode.Font;
 
         InitializeComponent();
         this.labelANotas.Text = KntConst.AppName;

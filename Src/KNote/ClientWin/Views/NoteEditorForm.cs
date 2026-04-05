@@ -30,7 +30,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     public NoteEditorForm(NoteEditorCtrl ctrl)
     {
-        //AutoScaleMode = AutoScaleMode.Dpi;
+        AutoScaleMode = AutoScaleMode.Font;
 
         InitializeComponent();
 
