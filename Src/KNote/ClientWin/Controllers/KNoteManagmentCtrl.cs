@@ -434,21 +434,20 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         var service = e.Entity.Service;
         var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
 
-        // !!! Old version
+        #region !!! Old version  -------------------------------
         //Store.RunKntScriptInNewThread(note?.Script);
-        // --------------------
+        #endregion ---------------------------------------------
 
-        // !!! Experimental async and run cs code
-
+        #region !!! Experimental async and run cs code ---------
         var ct = note.GetContentTypeExt();
         if(ct == null || string.IsNullOrEmpty(ct.ForScript))
             return;
 
         if(ct.ForScript == "cs")        
-            var (result, error) = await Store.RunCSCodeAsync(note?.Script, false);
-            //Store.RunCSCode(note?.Script, false);
-        else
-            await Store.RunKntScriptAsync(note?.Script);        
+            var (result, error) = await Store.RunCSCodeAsync(note?.Script, false);        
+        else            
+            Store.RunKntScriptInNewThread(note?.Script);
+        #endregion ---------------------------------------------
     }
 
     private void _messagesManagment_AppAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)

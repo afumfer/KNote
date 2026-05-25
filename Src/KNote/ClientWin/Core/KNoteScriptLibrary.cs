@@ -206,7 +206,7 @@ public class KNoteScriptLibrary: Library
                 if (File.Exists(temppath))
                 {
                     FileInfo ftmp = new FileInfo(temppath);
-                    if (file.Length != ftmp.Length || file.LastWriteTime != ftmp.LastWriteTime || ftmp.IsReadOnly != true)
+                    if ((file.Length != ftmp.Length || file.LastWriteTime != ftmp.LastWriteTime) && ftmp.IsReadOnly == false)
                         FileCopy(file, temppath, showError);
                 }
                 else

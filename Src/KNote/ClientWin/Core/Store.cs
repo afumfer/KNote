@@ -668,19 +668,6 @@ public class Store
         t.Start();
     }
 
-    public Task RunKntScriptAsync(string code)
-    {
-        if (string.IsNullOrEmpty(code))
-            return Task.CompletedTask;
-
-        return Task.Run(() =>
-        {
-            var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this));
-            kntScript.Run(code);
-        });
-    }
-    // Example  -> await RunKntScriptAsync(myCode);
-
     public (string, string) RunCSCode(string code, bool redirectStandardOut)
     {
         string tempDir = Path.GetTempPath();        
@@ -718,10 +705,11 @@ public class Store
                     RedirectStandardOutput = redirectStandardOut,
                     RedirectStandardError = redirectStandardOut,
                     UseShellExecute = !redirectStandardOut,
-                    CreateNoWindow = redirectStandardOut,
+                    CreateNoWindow = !redirectStandardOut,
                     WorkingDirectory = dir
                 }
             };
+
             process.Start();
             string result = "";
             string resultError = "";
@@ -741,3 +729,4 @@ public class Store
 
     #endregion 
 }
+  
