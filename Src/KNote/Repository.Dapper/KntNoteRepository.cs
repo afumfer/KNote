@@ -1491,13 +1491,6 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         return str;
     }
 
-    private string AddOrToStringSQL(string str)
-    {
-        if (!string.IsNullOrEmpty(str))
-            str += " OR ";
-        return str;
-    }
-
     public async Task<List<NoteKAttributeDto>> CompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)
     {
         var db = GetOpenConnection();
@@ -1721,7 +1714,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                         {
                             if (token[0] != '!')
                             {
-                                sqlWhere = AddOrToStringSQL(sqlWhere);
+                                sqlWhere = AddAndToStringSQL(sqlWhere);
                                 sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' OR Description LIKE '%{token}%') ";
                             }
                             else
