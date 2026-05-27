@@ -19,8 +19,6 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 
     public TaskEditorForm(TaskEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;
@@ -150,8 +148,9 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
 
     private void TaskEditorForm_Shown(object sender, EventArgs e)
     {
-        textDescription.Focus();
-        textDescription.SelectionStart = textDescription.Text.Length;
+        textTags.Focus();
+        //textDescription.Focus();
+        //textDescription.SelectionStart = textDescription.Text.Length;
     }
     #endregion
 

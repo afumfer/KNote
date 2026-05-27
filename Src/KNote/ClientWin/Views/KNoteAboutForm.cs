@@ -16,8 +16,6 @@ public partial class KNoteAboutForm : Form, IViewBase
 
     public KNoteAboutForm(KNoteManagmentCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
         Text = KntConst.AppName;
         labelAppName.Text = KntConst.AppName;

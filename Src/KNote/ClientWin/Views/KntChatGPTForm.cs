@@ -21,8 +21,6 @@ public partial class KntChatGPTForm : Form, IViewBase
 
     public KntChatGPTForm(KntChatGPTCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

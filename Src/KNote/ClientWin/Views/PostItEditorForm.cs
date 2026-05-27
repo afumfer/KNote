@@ -27,8 +27,6 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     public PostItEditorForm(PostItEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Font;
-
         InitializeComponent();
 
         _ctrl = ctrl;
@@ -499,7 +497,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                     | System.Windows.Forms.AnchorStyles.Right));
                 kntEditView.Location = new System.Drawing.Point(3, 3);                
-                kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 26);
+                kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 28);
                 kntEditView.ShowNavigationTools = true;
             }
             else
@@ -510,7 +508,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                     | System.Windows.Forms.AnchorStyles.Left));
                 kntEditView.Location = new System.Drawing.Point(3, 24);                
-                kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 47);
+                kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 49);
                 kntEditView.ShowNavigationTools = false;
             }
         }
@@ -529,7 +527,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                 | System.Windows.Forms.AnchorStyles.Left));
             kntEditView.Location = new System.Drawing.Point(3, 24);            
-            kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 47);
+            kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 49);
             kntEditView.ShowNavigationTools = false;
         }
         

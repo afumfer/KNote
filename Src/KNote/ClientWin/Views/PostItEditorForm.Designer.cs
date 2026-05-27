@@ -106,10 +106,11 @@ namespace KNote.ClientWin.Views
             // 
             labelStatus.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelStatus.ForeColor = SystemColors.ControlDarkDark;
-            labelStatus.Location = new Point(3, 322);
+            labelStatus.Location = new Point(3, 320);
             labelStatus.Name = "labelStatus";
-            labelStatus.Size = new Size(456, 14);
+            labelStatus.Size = new Size(456, 16);
             labelStatus.TabIndex = 2;
+            labelStatus.TextAlign = ContentAlignment.MiddleLeft;
             labelStatus.DoubleClick += labelStatus_DoubleClick;
             // 
             // picResize

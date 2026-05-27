@@ -18,8 +18,6 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
 
     public OptionsEditorForm(OptionsEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
         this.Text = $"{KntConst.AppName} options";
 

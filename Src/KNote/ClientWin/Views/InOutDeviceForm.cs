@@ -14,8 +14,6 @@ public partial class InOutDeviceForm : Form, IInOutDevice
 
     public InOutDeviceForm()
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
     }
 

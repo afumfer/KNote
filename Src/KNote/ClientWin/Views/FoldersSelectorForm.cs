@@ -19,8 +19,6 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
 
     public FoldersSelectorForm(FoldersSelectorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

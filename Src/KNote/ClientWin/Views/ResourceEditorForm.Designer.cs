@@ -168,10 +168,6 @@ namespace KNote.ClientWin.Views
             labelFileName.TabIndex = 10;
             labelFileName.Text = "File name:";
             // 
-            // openFileDialog
-            // 
-            openFileDialog.FileName = "openFileDialog1";
-            // 
             // ResourceEditorForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);

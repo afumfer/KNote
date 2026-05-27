@@ -16,8 +16,6 @@ public partial class NotifyForm : Form, IViewBase
 
     public NotifyForm(KNoteManagmentCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
         notifyKNote.Text = KntConst.AppName;
         menuShowKNoteManagment.Text = $"Show {KntConst.AppName} managment ...";

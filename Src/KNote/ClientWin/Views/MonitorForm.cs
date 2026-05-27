@@ -17,8 +17,6 @@ public partial class MonitorForm : Form, IViewBase
 
     public MonitorForm(MonitorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

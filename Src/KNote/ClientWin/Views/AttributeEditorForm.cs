@@ -19,8 +19,6 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
 
     public AttributeEditorForm(AttributeEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

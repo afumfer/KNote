@@ -39,8 +39,6 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
 
     public NotesSelectorForm(NotesSelectorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;                

@@ -20,8 +20,6 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
 
     public NoteTypesSelectorForm(NoteTypesSelectorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

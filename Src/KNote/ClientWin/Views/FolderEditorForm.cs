@@ -21,7 +21,6 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
 
     public FolderEditorForm(FolderEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
 
         InitializeComponent();
 

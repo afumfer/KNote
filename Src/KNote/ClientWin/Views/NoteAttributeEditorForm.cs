@@ -19,8 +19,6 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
 
     public NoteAttributeEditorForm(NoteAttributeEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

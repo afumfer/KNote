@@ -17,8 +17,6 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
 
     public KntServerCOMForm(KntServerCOMCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

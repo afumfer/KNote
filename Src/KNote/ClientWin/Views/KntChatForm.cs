@@ -17,8 +17,6 @@ public partial class KntChatForm : Form, IViewChat
 
     public KntChatForm(KntChatCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

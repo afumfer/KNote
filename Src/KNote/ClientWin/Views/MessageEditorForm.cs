@@ -19,8 +19,6 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
 
     public MessageEditorForm(MessageEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
         PersonalizeControls();
 

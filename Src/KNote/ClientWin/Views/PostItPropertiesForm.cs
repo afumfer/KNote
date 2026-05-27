@@ -19,8 +19,6 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
 
     public PostItPropertiesForm(PostItPropertiesCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

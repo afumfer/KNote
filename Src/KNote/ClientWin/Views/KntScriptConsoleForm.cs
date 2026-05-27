@@ -28,8 +28,6 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     public KntScriptConsoleForm(KntScriptConsoleCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
         PersonalizeTabStop();
 

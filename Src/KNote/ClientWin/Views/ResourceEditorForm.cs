@@ -24,8 +24,6 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
 
     public ResourceEditorForm(ResourceEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

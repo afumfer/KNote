@@ -17,8 +17,6 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
     public KNoteManagmentForm(KNoteManagmentCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
         menuMangment.Text = $"{KntConst.AppName} menu managment";
         menuHide.Text = $"&Hide {KntConst.AppName} managment";

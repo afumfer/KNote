@@ -25,8 +25,6 @@ public partial class DateSelectorForm : Form
 
     public DateSelectorForm()
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
     }
 

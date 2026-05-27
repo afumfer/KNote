@@ -30,8 +30,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     public NoteEditorForm(NoteEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Font;
-
         InitializeComponent();
 
         _ctrl = ctrl;
@@ -737,6 +735,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         if (!_ctrl.EditMode)
         {
+            // get all controls in principal tab to disable edition
             foreach (var tab in tabNoteData.TabPages)
             {
                 foreach (Control conTmp in ((TabPage)tab).Controls)
@@ -744,7 +743,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                     BlockControl(conTmp);
                 }
             }
+
+            // other controls out of principal tab
             kntEditView.HtmlEditorEditMode = false;
+            buttonTaskAdd.Visible = false;
+            buttonTaskDelete.Visible = false;
+            buttonTaskEdit.Visible = false;
         }
 
         panelDescription.Visible = true;

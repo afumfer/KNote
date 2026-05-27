@@ -20,8 +20,6 @@ public partial class FiltersSelectorForm : Form, IViewSelector<SelectedNotesInSe
 
     public FiltersSelectorForm(FiltersSelectorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;            

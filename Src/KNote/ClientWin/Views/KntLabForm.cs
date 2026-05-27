@@ -38,8 +38,6 @@ public partial class KntLabForm : Form, IViewBase
 
     public KntLabForm(KntLabCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;

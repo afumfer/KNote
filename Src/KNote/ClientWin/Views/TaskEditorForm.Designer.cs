@@ -46,9 +46,7 @@ namespace KNote.ClientWin.Views
             textTags = new TextBox();
             label2 = new Label();
             textDescription = new TextBox();
-            textUser = new TextBox();
             label11 = new Label();
-            label1 = new Label();
             tabPageMoreDetails = new TabPage();
             buttonSelDateExE = new Button();
             buttonSelDateExS = new Button();
@@ -62,6 +60,8 @@ namespace KNote.ClientWin.Views
             label5 = new Label();
             textEstimatedTime = new TextBox();
             label4 = new Label();
+            textUser = new TextBox();
+            label1 = new Label();
             tabTaskData.SuspendLayout();
             tabPageBasicData.SuspendLayout();
             tabPageMoreDetails.SuspendLayout();
@@ -114,9 +114,7 @@ namespace KNote.ClientWin.Views
             tabPageBasicData.Controls.Add(textTags);
             tabPageBasicData.Controls.Add(label2);
             tabPageBasicData.Controls.Add(textDescription);
-            tabPageBasicData.Controls.Add(textUser);
             tabPageBasicData.Controls.Add(label11);
-            tabPageBasicData.Controls.Add(label1);
             tabPageBasicData.Location = new Point(4, 24);
             tabPageBasicData.Name = "tabPageBasicData";
             tabPageBasicData.Padding = new Padding(3);
@@ -216,59 +214,43 @@ namespace KNote.ClientWin.Views
             // textTags
             // 
             textTags.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textTags.Location = new Point(52, 32);
+            textTags.Location = new Point(108, 10);
             textTags.Name = "textTags";
-            textTags.Size = new Size(557, 23);
-            textTags.TabIndex = 1;
+            textTags.Size = new Size(501, 23);
+            textTags.TabIndex = 0;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(6, 35);
+            label2.Location = new Point(8, 13);
             label2.Name = "label2";
-            label2.Size = new Size(33, 15);
+            label2.Size = new Size(96, 15);
             label2.TabIndex = 17;
-            label2.Text = "Tags:";
+            label2.Text = "Topic task / Tags:";
             // 
             // textDescription
             // 
             textDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textDescription.Location = new Point(6, 84);
+            textDescription.Location = new Point(6, 60);
             textDescription.Multiline = true;
             textDescription.Name = "textDescription";
             textDescription.ScrollBars = ScrollBars.Vertical;
-            textDescription.Size = new Size(603, 280);
-            textDescription.TabIndex = 2;
-            // 
-            // textUser
-            // 
-            textUser.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textUser.Enabled = false;
-            textUser.Location = new Point(52, 6);
-            textUser.Name = "textUser";
-            textUser.Size = new Size(557, 23);
-            textUser.TabIndex = 0;
+            textDescription.Size = new Size(603, 304);
+            textDescription.TabIndex = 1;
             // 
             // label11
             // 
             label11.AutoSize = true;
-            label11.Location = new Point(6, 64);
+            label11.Location = new Point(6, 42);
             label11.Name = "label11";
             label11.Size = new Size(70, 15);
             label11.TabIndex = 15;
             label11.Text = "Description:";
             // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(6, 9);
-            label1.Name = "label1";
-            label1.Size = new Size(33, 15);
-            label1.TabIndex = 14;
-            label1.Text = "User:";
-            // 
             // tabPageMoreDetails
             // 
+            tabPageMoreDetails.Controls.Add(textUser);
+            tabPageMoreDetails.Controls.Add(label1);
             tabPageMoreDetails.Controls.Add(buttonSelDateExE);
             tabPageMoreDetails.Controls.Add(buttonSelDateExS);
             tabPageMoreDetails.Controls.Add(textDificultyLevel);
@@ -291,7 +273,7 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelDateExE
             // 
-            buttonSelDateExE.Location = new Point(276, 52);
+            buttonSelDateExE.Location = new Point(276, 46);
             buttonSelDateExE.Name = "buttonSelDateExE";
             buttonSelDateExE.Size = new Size(24, 24);
             buttonSelDateExE.TabIndex = 15;
@@ -311,21 +293,21 @@ namespace KNote.ClientWin.Views
             // 
             // textDificultyLevel
             // 
-            textDificultyLevel.Location = new Point(141, 160);
+            textDificultyLevel.Location = new Point(141, 132);
             textDificultyLevel.Name = "textDificultyLevel";
             textDificultyLevel.Size = new Size(92, 23);
             textDificultyLevel.TabIndex = 18;
             // 
             // textSpendTime
             // 
-            textSpendTime.Location = new Point(141, 124);
+            textSpendTime.Location = new Point(141, 103);
             textSpendTime.Name = "textSpendTime";
             textSpendTime.Size = new Size(92, 23);
             textSpendTime.TabIndex = 17;
             // 
             // textExEndDate
             // 
-            textExEndDate.Location = new Point(141, 52);
+            textExEndDate.Location = new Point(141, 45);
             textExEndDate.Name = "textExEndDate";
             textExEndDate.Size = new Size(129, 23);
             textExEndDate.TabIndex = 14;
@@ -340,7 +322,7 @@ namespace KNote.ClientWin.Views
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new Point(16, 55);
+            label8.Location = new Point(16, 51);
             label8.Name = "label8";
             label8.Size = new Size(107, 15);
             label8.TabIndex = 23;
@@ -358,7 +340,7 @@ namespace KNote.ClientWin.Views
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(16, 163);
+            label6.Location = new Point(16, 135);
             label6.Name = "label6";
             label6.Size = new Size(81, 15);
             label6.TabIndex = 19;
@@ -367,7 +349,7 @@ namespace KNote.ClientWin.Views
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(16, 127);
+            label5.Location = new Point(16, 106);
             label5.Name = "label5";
             label5.Size = new Size(70, 15);
             label5.TabIndex = 16;
@@ -375,7 +357,7 @@ namespace KNote.ClientWin.Views
             // 
             // textEstimatedTime
             // 
-            textEstimatedTime.Location = new Point(141, 88);
+            textEstimatedTime.Location = new Point(141, 74);
             textEstimatedTime.Name = "textEstimatedTime";
             textEstimatedTime.Size = new Size(92, 23);
             textEstimatedTime.TabIndex = 16;
@@ -383,11 +365,29 @@ namespace KNote.ClientWin.Views
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(16, 91);
+            label4.Location = new Point(16, 77);
             label4.Name = "label4";
             label4.Size = new Size(89, 15);
             label4.TabIndex = 6;
             label4.Text = "Estimated time:";
+            // 
+            // textUser
+            // 
+            textUser.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textUser.Enabled = false;
+            textUser.Location = new Point(141, 161);
+            textUser.Name = "textUser";
+            textUser.Size = new Size(92, 23);
+            textUser.TabIndex = 19;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(16, 164);
+            label1.Name = "label1";
+            label1.Size = new Size(33, 15);
+            label1.TabIndex = 25;
+            label1.Text = "User:";
             // 
             // TaskEditorForm
             // 
@@ -425,9 +425,7 @@ namespace KNote.ClientWin.Views
         private TextBox textTags;
         private Label label2;
         private TextBox textDescription;
-        private TextBox textUser;
         private Label label11;
-        private Label label1;
         private TabPage tabPageMoreDetails;
         private TextBox textPriority;
         private Label label3;
@@ -449,5 +447,7 @@ namespace KNote.ClientWin.Views
         private Label label5;
         private TextBox textEstimatedTime;
         private Label label4;
+        private TextBox textUser;
+        private Label label1;
     }
 }

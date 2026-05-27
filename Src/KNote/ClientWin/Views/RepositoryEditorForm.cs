@@ -18,8 +18,6 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     public RepositoryEditorForm(RepositoryEditorCtrl ctrl)
     {
-        AutoScaleMode = AutoScaleMode.Dpi;
-
         InitializeComponent();
 
         _ctrl = ctrl;
