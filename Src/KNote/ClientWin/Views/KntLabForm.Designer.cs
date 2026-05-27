@@ -631,8 +631,7 @@
         private Button buttonRunMonitor;
         private ListBox listMessages;
         private Button buttonImportAnotasXML;
-        private TabPage tabRichEditor;
-        private MSDN.Html.Editor.HtmlEditorControl htmlDescription;
+        private TabPage tabRichEditor;        
         private OpenFileDialog openFileDialog;
         private Label label1;
         private Label label2;
@@ -665,7 +664,6 @@
         private KntWebView.KntEditView kntEditView;
         private Button buttonTestNoteList;
         private Button buttonImportFiles;
-        private Button buttonRunAppCS;
-        private KntWebView.KntEditView kntEditView1;
+        private Button buttonRunAppCS;        
     }
 }

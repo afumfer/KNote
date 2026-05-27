@@ -102,10 +102,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         ModelToControlsOnlyRequiredComponents();
     }
 
-
-    public void RefreshModel()
+    public async void RefreshModel()
     {
-        ControlsToModel();
+        await ControlsToModel();
     }
 
     public void OnClosingView()

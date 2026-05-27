@@ -98,9 +98,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.Panel panelButtons;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Panel panelButtons;        
         private System.Windows.Forms.Panel panelControls;
         private Button buttonCancel;
         private Button buttonAcept;

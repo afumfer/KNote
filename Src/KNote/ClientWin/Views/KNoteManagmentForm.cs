@@ -102,7 +102,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             labelReResources.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainerRootPath}\\{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainer}";
         }
 
-        statusLabel1.Text = $"Notes: {_ctrl.CountNotes.ToString()}";
+        statusLabel1.Text = $"Notes: {_ctrl.CountNotes?.ToString()}";
 
         return DialogResult.OK;
     }
@@ -250,7 +250,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         }
         else if (menuSel == menuExecuteKntScript)
         {
-            _ctrl.RunScriptSelectedNotes();
+            await _ctrl.RunScriptSelectedNotes();
         }
         else if (menuSel == menuOptions)
         {
