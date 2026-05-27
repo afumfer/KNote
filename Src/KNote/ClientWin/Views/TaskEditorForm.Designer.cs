@@ -48,6 +48,8 @@ namespace KNote.ClientWin.Views
             textDescription = new TextBox();
             label11 = new Label();
             tabPageMoreDetails = new TabPage();
+            textUser = new TextBox();
+            label1 = new Label();
             buttonSelDateExE = new Button();
             buttonSelDateExS = new Button();
             textDificultyLevel = new TextBox();
@@ -60,8 +62,6 @@ namespace KNote.ClientWin.Views
             label5 = new Label();
             textEstimatedTime = new TextBox();
             label4 = new Label();
-            textUser = new TextBox();
-            label1 = new Label();
             tabTaskData.SuspendLayout();
             tabPageBasicData.SuspendLayout();
             tabPageMoreDetails.SuspendLayout();
@@ -214,9 +214,9 @@ namespace KNote.ClientWin.Views
             // textTags
             // 
             textTags.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textTags.Location = new Point(108, 10);
+            textTags.Location = new Point(86, 10);
             textTags.Name = "textTags";
-            textTags.Size = new Size(501, 23);
+            textTags.Size = new Size(523, 23);
             textTags.TabIndex = 0;
             // 
             // label2
@@ -224,9 +224,9 @@ namespace KNote.ClientWin.Views
             label2.AutoSize = true;
             label2.Location = new Point(8, 13);
             label2.Name = "label2";
-            label2.Size = new Size(96, 15);
+            label2.Size = new Size(72, 15);
             label2.TabIndex = 17;
-            label2.Text = "Topic task / Tags:";
+            label2.Text = "Topic / Tags:";
             // 
             // textDescription
             // 
@@ -270,6 +270,24 @@ namespace KNote.ClientWin.Views
             tabPageMoreDetails.TabIndex = 1;
             tabPageMoreDetails.Text = "Additional data";
             tabPageMoreDetails.UseVisualStyleBackColor = true;
+            // 
+            // textUser
+            // 
+            textUser.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textUser.Enabled = false;
+            textUser.Location = new Point(141, 161);
+            textUser.Name = "textUser";
+            textUser.Size = new Size(92, 23);
+            textUser.TabIndex = 19;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(16, 164);
+            label1.Name = "label1";
+            label1.Size = new Size(33, 15);
+            label1.TabIndex = 25;
+            label1.Text = "User:";
             // 
             // buttonSelDateExE
             // 
@@ -370,24 +388,6 @@ namespace KNote.ClientWin.Views
             label4.Size = new Size(89, 15);
             label4.TabIndex = 6;
             label4.Text = "Estimated time:";
-            // 
-            // textUser
-            // 
-            textUser.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textUser.Enabled = false;
-            textUser.Location = new Point(141, 161);
-            textUser.Name = "textUser";
-            textUser.Size = new Size(92, 23);
-            textUser.TabIndex = 19;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(16, 164);
-            label1.Name = "label1";
-            label1.Size = new Size(33, 15);
-            label1.TabIndex = 25;
-            label1.Text = "User:";
             // 
             // TaskEditorForm
             // 

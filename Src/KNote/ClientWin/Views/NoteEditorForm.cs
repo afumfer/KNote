@@ -85,7 +85,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         webViewResource.Visible = true;
         panelPreview.Visible = false;
         await kntEditViewTask.ClearWebView();
-        textTaskTags.Text = "";
         textScriptCode.Text = "";
         listViewAttributes.Clear();
         listViewResources.Clear();
@@ -120,7 +119,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         TopLevel = false;
         Dock = DockStyle.Fill;
         FormBorderStyle = FormBorderStyle.None;
-        toolBarNoteEditor.Visible = false;        
+        toolBarNoteEditor.Visible = false;
         kntEditView.MarkdownContentControl.ReadOnly = true;
         kntEditView.MarkdownContentControl.BackColor = SystemColors.Window;
         kntEditView.MarkdownContentControl.BorderStyle = BorderStyle.FixedSingle;
@@ -578,7 +577,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (res)
         {
             await kntEditViewTask.ClearWebView();
-            textTaskTags.Text = "";
             listViewTasks.Items[delTsk].Remove();
         }
     }
@@ -696,8 +694,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 var selTask = _ctrl.Model.Tasks.Where(_ => _.NoteTaskId == idTask).FirstOrDefault();
 
                 await UpdateTaskDescription(selTask.Description);
-
-                textTaskTags.Text = selTask.Tags;
             }
         }
         catch (Exception ex)
@@ -774,9 +770,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         kntEditViewTask.EnableUrlBox = false;
         kntEditViewTask.ShowNavigationTools = false;
         kntEditViewTask.BorderStyle = BorderStyle.FixedSingle;
-
-        textTaskTags.ReadOnly = true;
-        textTaskTags.BackColor = Color.White;
 
         PersonalizeListView(listViewAttributes);
         PersonalizeListView(listViewResources);
@@ -871,10 +864,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (_ctrl.Model.Tasks.Count > 0)
             listViewTasks.Items[0].Selected = true;
         else
-        {
             await kntEditViewTask.ClearWebView();
-            textTaskTags.Text = "";
-        }
 
         // Alarms     
         ModelToControlsAlarms();
@@ -937,7 +927,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
 
         // Width of -2 indicates auto-size.
-        listViewTasks.Columns.Add("User", 150, HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Topic/Tags", 250, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Resolved", 60, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
@@ -947,6 +937,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Ex start", 120, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Ex end", 120, HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("User", 250, HorizontalAlignment.Left);
     }
 
     private void ModelToControlsAlarms()
@@ -1134,7 +1125,20 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private ListViewItem NoteTaskDtoToListViewItem(NoteTaskDto task)
     {
-        var itemList = new ListViewItem(task.UserFullName);
+        //var itemList = new ListViewItem(task.UserFullName);
+        //itemList.Name = task.NoteTaskId.ToString();
+        //itemList.SubItems.Add(task.Priority.ToString());
+        //itemList.SubItems.Add(task.Resolved.ToString());
+        //itemList.SubItems.Add(task.StartDate.ToString());
+        //itemList.SubItems.Add(task.EndDate.ToString());
+        //itemList.SubItems.Add(task.EstimatedTime.ToString());
+        //itemList.SubItems.Add(task.SpentTime.ToString());
+        //itemList.SubItems.Add(task.DifficultyLevel.ToString());
+        //itemList.SubItems.Add(task.ExpectedStartDate.ToString());
+        //itemList.SubItems.Add(task.ExpectedEndDate.ToString());
+        //return itemList;
+
+        var itemList = new ListViewItem(task.Tags);
         itemList.Name = task.NoteTaskId.ToString();
         itemList.SubItems.Add(task.Priority.ToString());
         itemList.SubItems.Add(task.Resolved.ToString());
@@ -1145,7 +1149,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         itemList.SubItems.Add(task.DifficultyLevel.ToString());
         itemList.SubItems.Add(task.ExpectedStartDate.ToString());
         itemList.SubItems.Add(task.ExpectedEndDate.ToString());
+        itemList.SubItems.Add(task.UserFullName.ToString());
         return itemList;
+
     }
 
     private ListViewItem ResourceDtoToListViewItem(ResourceDto resource)
@@ -1249,6 +1255,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private async Task UpdateTask(NoteTaskDto task)
     {
         var item = listViewTasks.Items[task.NoteTaskId.ToString()];
+        item.SubItems[0].Text = task.Tags.ToString();
         item.SubItems[1].Text = task.Priority.ToString();
         item.SubItems[2].Text = task.Resolved.ToString();
         item.SubItems[3].Text = task.StartDate.ToString();
@@ -1258,11 +1265,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         item.SubItems[7].Text = task.DifficultyLevel.ToString();
         item.SubItems[8].Text = task.ExpectedStartDate.ToString();
         item.SubItems[9].Text = task.ExpectedEndDate.ToString();
+        item.SubItems[10].Text = task.UserFullName.ToString();
         listViewTasks.Scrollable = true;
 
         await UpdateTaskDescription(task.Description);
 
-        textTaskTags.Text = task.Tags;
+
     }
 
     private async Task EditResource()
@@ -1489,7 +1497,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         labelAction.Visible = true;
         labelAction.Refresh();
-        ControlsToModel();
+        await ControlsToModel();
         await _ctrl.ExecKNoteAssistant();
         RefreshView();
         labelAction.Visible = false;
@@ -1546,7 +1554,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
             listViewTasks.Items[listViewTasks.Items.Count - 1].Selected = true;
             await UpdateTaskDescription(task.Description);
-            textTaskTags.Text = task.Tags;
             return true;
         }
         return false;
@@ -1588,7 +1595,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         if (radioKntScript.Checked)
             ct.ForScript = "knt";
         else
-            ct.ForScript = "cs";        
+            ct.ForScript = "cs";
         _ctrl.Model.SetContentTypeExt(ct);
     }
 

@@ -135,8 +135,6 @@
             buttonTaskAdd = new Button();
             label11 = new Label();
             kntEditViewTask = new KntWebView.KntEditView();
-            textTaskTags = new TextBox();
-            label17 = new Label();
             label16 = new Label();
             tabAlarms = new TabPage();
             listViewAlarms = new ListView();
@@ -1196,8 +1194,6 @@
             // splitTasksViewer.Panel2
             // 
             splitTasksViewer.Panel2.Controls.Add(kntEditViewTask);
-            splitTasksViewer.Panel2.Controls.Add(textTaskTags);
-            splitTasksViewer.Panel2.Controls.Add(label17);
             splitTasksViewer.Panel2.Controls.Add(label16);
             splitTasksViewer.Size = new Size(795, 557);
             splitTasksViewer.SplitterDistance = 373;
@@ -1268,36 +1264,19 @@
             // kntEditViewTask
             // 
             kntEditViewTask.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            kntEditViewTask.Location = new Point(4, 76);
+            kntEditViewTask.Location = new Point(4, 34);
             kntEditViewTask.Name = "kntEditViewTask";
-            kntEditViewTask.Size = new Size(408, 470);
+            kntEditViewTask.Size = new Size(408, 514);
             kntEditViewTask.TabIndex = 21;
-            // 
-            // textTaskTags
-            // 
-            textTaskTags.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textTaskTags.Location = new Point(4, 24);
-            textTaskTags.Name = "textTaskTags";
-            textTaskTags.Size = new Size(408, 23);
-            textTaskTags.TabIndex = 19;
-            // 
-            // label17
-            // 
-            label17.AutoSize = true;
-            label17.Location = new Point(4, 4);
-            label17.Name = "label17";
-            label17.Size = new Size(33, 15);
-            label17.TabIndex = 20;
-            label17.Text = "Tags:";
             // 
             // label16
             // 
             label16.AutoSize = true;
-            label16.Location = new Point(4, 56);
+            label16.Location = new Point(4, 12);
             label16.Name = "label16";
-            label16.Size = new Size(134, 15);
+            label16.Size = new Size(70, 15);
             label16.TabIndex = 18;
-            label16.Text = "Task/Action description:";
+            label16.Text = "Description:";
             // 
             // tabAlarms
             // 
@@ -1799,8 +1778,6 @@
         private Button buttonTaskAdd;
         private Label label11;
         private KntWebView.KntEditView kntEditViewTask;
-        private TextBox textTaskTags;
-        private Label label17;
         private Label label16;
         private Label labelCodeType;
         private RadioButton radioCsScript;
