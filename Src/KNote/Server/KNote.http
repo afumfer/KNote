@@ -1,0 +1,5 @@
+@KNote.API_HostAddress = https://localhost:44339/KNote
+
+GET https://localhost:44339/KNote/api/Notes/HomeNote
+Accept: application/json
+
