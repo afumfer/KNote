@@ -3,17 +3,10 @@ using Redmine.Net.Api.Types;
 using KNote.Model;
 using KNote.Model.Dto;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using Pandoc;
-using KNote.Repository.EntityFramework.Entities;
 using System.Globalization;
 using KNote.Service.Core;
-using System.Runtime.InteropServices;
-using System.Xml.Linq;
-using System.Net.Mail;
-using NLog.Filters;
 using System.Text;
-using static Azure.Core.HttpHeader;
 
 namespace KntRedmineApi;
 
@@ -192,6 +185,7 @@ public class KntRedmineManager
                 n.SetIsDeleted(true);
             
             var au = new NoteTaskDto();
+            au.Tags = $"{issue?.Author.Name} - ({issue?.CreatedOn.ToString()})";
             au.CreationDateTime = (DateTime)issue?.CreatedOn;
             au.ModificationDateTime = DateTime.Now;
             au.Priority = priority++;
