@@ -443,10 +443,14 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         if(ct == null || string.IsNullOrEmpty(ct.ForScript))
             return;
 
-        if(ct.ForScript == "cs")        
-            var (result, error) = await Store.RunCSCodeAsync(note?.Script, false);        
-        else            
-            Store.RunKntScriptInNewThread(note?.Script);
+        if (ct.ForScript == "cs")
+        {
+            var (result, error) = await Store.RunCSCodeAsync(note?.Script, false);            
+        }
+        else
+        {
+            Store.RunKntSCodeInNewThread(note?.Script);
+        }
         #endregion ---------------------------------------------
     }
 
@@ -1071,7 +1075,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 if (ct.ForScript == "cs")
                     Store.RunCSCode(noteDto.Script, false);
                 else
-                    Store.RunKntScript(noteDto.Script);
+                    Store.RunKntSCode(noteDto.Script);
             }
         }
     }

@@ -397,7 +397,6 @@ public class Store
         {
             if (com is PostItEditorCtrl)
             {
-
                 ((PostItEditorCtrl)com).HidePostIt();
             }
         }            
@@ -647,7 +646,14 @@ public class Store
 
     #region KntScript and C# code execution
 
-    public void RunKntScript(string code)
+    public void RunKntSCodeInNewThread(string code)
+    {
+        var t = new Thread(() => RunKntSCode(code));        
+        t.IsBackground = false;
+        t.Start();
+    }
+
+    public void RunKntSCode(string code)
     {
         if (string.IsNullOrEmpty(code))
             return;
@@ -656,18 +662,14 @@ public class Store
         kntScript.Run(code);
     }
 
-    public void RunKntScriptInNewThread(string code)
+    // RunCSCodeAsync. Examples for call:
+    //     -> var (result, error) = await RunCSCodeAsync(myCode, true);
+    //     -> var result = RunCSCodeAsync(myCode, true);
+    public Task<(string, string)> RunCSCodeAsync(string code, bool redirectStandardOut)
     {
-        if (string.IsNullOrEmpty(code))
-            return;
-
-        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this));
-
-        var t = new Thread(() => kntScript.Run(code));
-        t.IsBackground = false;
-        t.Start();
+        return Task.Run(() => RunCSCode(code, redirectStandardOut));
     }
-
+    
     public (string, string) RunCSCode(string code, bool redirectStandardOut)
     {
         string tempDir = Path.GetTempPath();        
@@ -681,13 +683,6 @@ public class Store
 
         return (result, error);
     }
-
-    public Task<(string, string)> RunCSCodeAsync(string code, bool redirectStandardOut)
-    {
-        return Task.Run(() => RunCSCode(code, redirectStandardOut));
-    }
-    // Example  -> var (result, error) = await RunCSCodeAsync(myCode, true);
-
 
     public (string, string) ExecuteCommand(string command, string dir, bool redirectStandardOut = true)
     {

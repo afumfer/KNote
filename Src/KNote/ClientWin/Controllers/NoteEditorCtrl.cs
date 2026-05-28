@@ -552,7 +552,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         if (ct.ForScript == "cs")
             Store.RunCSCode(Model.Script, false);
         else
-            Store.RunKntScript(Model.Script);
+            Store.RunKntSCode(Model.Script);
     }
 
     public async Task<string> GetCatalogTemplate()

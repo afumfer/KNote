@@ -7,6 +7,7 @@ public partial class InOutDeviceForm : Form, IInOutDevice
     #region Private methods
 
     private bool FlagClose = false;
+    private int RefreshIndex = 0;
 
     #endregion
 
@@ -23,9 +24,19 @@ public partial class InOutDeviceForm : Form, IInOutDevice
 
     public void Print(string str, bool newLine = false)
     {
-        textOut.AppendText(@str);
+        RefreshIndex++;
+
+        textOut.AppendText(@str);        
         if (newLine)
             textOut.AppendText("\r\n");
+
+        // Experimental
+        if (RefreshIndex > 100)
+        {
+            textOut.Refresh();
+            Refresh();
+            RefreshIndex = 0;
+        }
     }
 
     public bool ReadVars(List<ReadVarItem> readVarItmes)
