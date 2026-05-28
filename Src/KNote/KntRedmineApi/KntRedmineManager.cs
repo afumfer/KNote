@@ -198,6 +198,7 @@ public class KntRedmineManager
             if (issue?.AssignedTo != null)
             {
                 au = new NoteTaskDto();
+                au.Tags = $"{issue?.AssignedTo.Name} - ({issue?.CreatedOn.ToString()})";
                 au.CreationDateTime = (DateTime)issue?.CreatedOn;
                 au.ModificationDateTime = DateTime.Now;
                 au.Priority = priority++;
@@ -216,6 +217,7 @@ public class KntRedmineManager
                     if (!string.IsNullOrEmpty(an.Notes))
                     {
                         var n = new NoteTaskDto();
+                        n.Tags = $"{an.User.Name} - ({issue?.CreatedOn.ToString()})";
                         n.CreationDateTime = (DateTime) an.CreatedOn;
                         n.ModificationDateTime = DateTime.Now;
                         n.Priority = priority++;
