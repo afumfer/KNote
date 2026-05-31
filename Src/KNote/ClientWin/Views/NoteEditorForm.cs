@@ -190,7 +190,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else if (menuSel == buttonExecuteKntScript)
         {
             _ctrl.Model.Script = textScriptCode.Text;
-            _ctrl.RunScript();
+            await _ctrl.RunCode(false);
+        }        
+        else if (menuSel == buttonExecuteKntScriptInNewTask)
+        {
+            _ctrl.Model.Script = textScriptCode.Text;
+            await _ctrl.RunCode(true);
         }
         else if (menuSel == buttonLockFormat)
         {

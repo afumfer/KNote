@@ -646,6 +646,28 @@ public class Store
 
     #region KntScript and C# code execution
 
+    public async Task RunCode(NoteDto note, bool runInNewTask = true)
+    {
+        var ct = note.GetContentTypeExt();
+        if (ct == null || string.IsNullOrEmpty(ct.ForScript))
+            return;
+
+        if (ct.ForScript == "cs")
+        {
+            if (runInNewTask)
+                var (result, error) = await RunCSCodeInNewTask(note?.Script, false);
+            else
+                var (result, error) = RunCSCode(note?.Script, false);
+        }
+        else
+        {
+            if (runInNewTask)
+                RunKntSCodeInNewThread(note?.Script);
+            else
+                RunKntSCode(note?.Script);
+        }
+    }
+
     public void RunKntSCodeInNewThread(string code)
     {
         var t = new Thread(() => RunKntSCode(code));        
@@ -662,10 +684,7 @@ public class Store
         kntScript.Run(code);
     }
 
-    // RunCSCodeAsync. Examples for call:
-    //     -> var (result, error) = await RunCSCodeAsync(myCode, true);
-    //     -> var result = RunCSCodeAsync(myCode, true);
-    public Task<(string, string)> RunCSCodeAsync(string code, bool redirectStandardOut)
+    public Task<(string, string)> RunCSCodeInNewTask(string code, bool redirectStandardOut)
     {
         return Task.Run(() => RunCSCode(code, redirectStandardOut));
     }
@@ -695,7 +714,7 @@ public class Store
                     FileName = "cmd.exe",
                     // /C tells CMD to execute the command or set of commands specified below and then terminate.
                     // Multiple commands can be concatenated like this: / C command1 && command2 && command3
-                    //   Examplo: Arguments = $"/C {command} && echo %cd%",
+                    //   Example: Arguments = $"/C {command} && echo %cd%",
                     Arguments = $"/C {command}",
                     RedirectStandardOutput = redirectStandardOut,
                     RedirectStandardError = redirectStandardOut,

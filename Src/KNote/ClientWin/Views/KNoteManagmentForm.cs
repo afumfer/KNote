@@ -248,9 +248,13 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             await _ctrl.ChangeTags(EnumChangeTag.Remove);
         }
-        else if (menuSel == menuExecuteKntScript)
+        else if (menuSel == menuExecuteCode)
         {
-            await _ctrl.RunScriptSelectedNotes();
+            await _ctrl.RunCodeSelectedNotes(false);
+        }
+        else if (menuSel == menuExecuteCodeInNewTask)
+        {
+            await _ctrl.RunCodeSelectedNotes(true);
         }
         else if (menuSel == menuOptions)
         {

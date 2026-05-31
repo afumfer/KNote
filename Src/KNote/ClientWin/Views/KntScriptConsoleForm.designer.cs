@@ -34,9 +34,10 @@
             buttonOpen = new ToolStripButton();
             buttonSave = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
-            buttonRunKntScript = new ToolStripButton();
-            buttonRunCSCode = new ToolStripButton();
-            buttonRunCSCodeStdOut = new ToolStripButton();
+            buttonRun = new ToolStripDropDownButton();
+            buttonRunKntScript = new ToolStripMenuItem();
+            buttonRunCSCode = new ToolStripMenuItem();
+            buttonRunCSCodeStdOut = new ToolStripMenuItem();
             statusStripKntConsole = new StatusStrip();
             statusAction = new ToolStripStatusLabel();
             statusFileName = new ToolStripStatusLabel();
@@ -45,7 +46,6 @@
             textSourceCode = new TextBox();
             openFileDialogScript = new OpenFileDialog();
             saveFileDialogScript = new SaveFileDialog();
-            toolStripSeparator2 = new ToolStripSeparator();
             toolStripConsole.SuspendLayout();
             statusStripKntConsole.SuspendLayout();
             panel1.SuspendLayout();
@@ -56,7 +56,7 @@
             // 
             // toolStripConsole
             // 
-            toolStripConsole.Items.AddRange(new ToolStripItem[] { buttonNew, buttonOpen, buttonSave, toolStripSeparator1, buttonRunKntScript, toolStripSeparator2, buttonRunCSCode, buttonRunCSCodeStdOut });
+            toolStripConsole.Items.AddRange(new ToolStripItem[] { buttonNew, buttonOpen, buttonSave, toolStripSeparator1, buttonRun });
             toolStripConsole.Location = new Point(0, 0);
             toolStripConsole.Name = "toolStripConsole";
             toolStripConsole.Size = new Size(1111, 25);
@@ -98,32 +98,34 @@
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new Size(6, 25);
             // 
+            // buttonRun
+            // 
+            buttonRun.DropDownItems.AddRange(new ToolStripItem[] { buttonRunKntScript, buttonRunCSCode, buttonRunCSCodeStdOut });
+            buttonRun.Image = (Image)resources.GetObject("buttonRun.Image");
+            buttonRun.ImageTransparentColor = Color.Magenta;
+            buttonRun.Name = "buttonRun";
+            buttonRun.Size = new Size(57, 22);
+            buttonRun.Text = "Run";
+            // 
             // buttonRunKntScript
             // 
-            buttonRunKntScript.Image = (Image)resources.GetObject("buttonRunKntScript.Image");
-            buttonRunKntScript.ImageTransparentColor = Color.Magenta;
             buttonRunKntScript.Name = "buttonRunKntScript";
-            buttonRunKntScript.Size = new Size(99, 22);
-            buttonRunKntScript.Text = "Run KntScript";
-            buttonRunKntScript.TextAlign = ContentAlignment.MiddleRight;
-            buttonRunKntScript.Click += buttonRun_Click;
+            buttonRunKntScript.Size = new Size(212, 22);
+            buttonRunKntScript.Text = "KntScript code";
+            buttonRunKntScript.Click += buttonRunKntSCode_Click;
             // 
             // buttonRunCSCode
             // 
-            buttonRunCSCode.Image = (Image)resources.GetObject("buttonRunCSCode.Image");
-            buttonRunCSCode.ImageTransparentColor = Color.Magenta;
             buttonRunCSCode.Name = "buttonRunCSCode";
-            buttonRunCSCode.Size = new Size(94, 22);
-            buttonRunCSCode.Text = "Run CS code";
+            buttonRunCSCode.Size = new Size(212, 22);
+            buttonRunCSCode.Text = "C# code";
             buttonRunCSCode.Click += buttonRunCSCode_Click;
             // 
             // buttonRunCSCodeStdOut
             // 
-            buttonRunCSCodeStdOut.Image = (Image)resources.GetObject("buttonRunCSCodeStdOut.Image");
-            buttonRunCSCodeStdOut.ImageTransparentColor = Color.Magenta;
             buttonRunCSCodeStdOut.Name = "buttonRunCSCodeStdOut";
-            buttonRunCSCodeStdOut.Size = new Size(188, 22);
-            buttonRunCSCodeStdOut.Text = "Run CS code in stdout console";
+            buttonRunCSCodeStdOut.Size = new Size(212, 22);
+            buttonRunCSCodeStdOut.Text = "C# code in stdout console";
             buttonRunCSCodeStdOut.Click += buttonRunCSCodeStdOut_Click;
             // 
             // statusStripKntConsole
@@ -193,11 +195,6 @@
             // 
             openFileDialogScript.FileName = "KntScript";
             // 
-            // toolStripSeparator2
-            // 
-            toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(6, 25);
-            // 
             // KntScriptConsoleForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -240,13 +237,14 @@
         private System.Windows.Forms.ToolStripButton buttonOpen;
         private System.Windows.Forms.ToolStripButton buttonSave;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton buttonRunKntScript;
         private System.Windows.Forms.ToolStripStatusLabel statusFileName;
         private System.Windows.Forms.OpenFileDialog openFileDialogScript;
         private System.Windows.Forms.SaveFileDialog saveFileDialogScript;
-        private ToolStripButton buttonRunCSCode;
-        private ToolStripButton buttonRunCSCodeStdOut;
         private ToolStripStatusLabel statusAction;
-        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripDropDownButton buttonRun;
+        private ToolStripMenuItem buttonRunKntScript;
+        private ToolStripMenuItem cCodeToolStripMenuItem;
+        private ToolStripMenuItem buttonRunCSCodeStdOut;
+        private ToolStripMenuItem buttonRunCSCode;
     }
 }

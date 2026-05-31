@@ -546,13 +546,17 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         View.CleanView();
     }
 
-    public void RunScript()
+    public async Task RunCode(bool runInNewTask = true)
     {
-        var ct = Model.GetContentTypeExt();
-        if (ct.ForScript == "cs")
-            Store.RunCSCode(Model.Script, false);
-        else
-            Store.RunKntSCode(Model.Script);
+        // TODO: !!!
+        var m = (NoteDto)Model;
+        await Store.RunCode(m, runInNewTask);
+
+        //var ct = Model.GetContentTypeExt();
+        //if (ct.ForScript == "cs")
+        //    Store.RunCSCode(Model.Script, false);
+        //else
+        //    Store.RunKntSCode(Model.Script);
     }
 
     public async Task<string> GetCatalogTemplate()

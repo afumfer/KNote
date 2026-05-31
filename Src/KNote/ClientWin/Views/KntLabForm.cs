@@ -230,14 +230,8 @@ window.chrome.webview.postMessage(retValue);";
 
     private void buttonShowConsole_Click(object sender, EventArgs e)
     {
-        var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
-
         var com = new KntScriptConsoleCtrl(_store);
-        com.KntSEngine = kntEngine;
-
         com.Run();
-        //KntScriptConsoleForm f = new KntScriptConsoleForm(com);
-        //f.Show();
     }
 
     private void buttonShowSample_Click(object sender, EventArgs e)
@@ -248,15 +242,9 @@ window.chrome.webview.postMessage(retValue);";
             return;
         }
 
-        var kntEngine = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(_store));
-
         var com = new KntScriptConsoleCtrl(_store);
-        com.KntSEngine = kntEngine;
         com.CodeFile = Path.Combine(_pathSampleScripts, _selectedFile);
-
         com.Run();
-        //KntScriptConsoleForm f = new KntScriptConsoleForm(com);
-        //f.Show();
     }
 
     private void buttonRunSample_Click(object sender, EventArgs e)

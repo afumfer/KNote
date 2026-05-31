@@ -15,8 +15,6 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     private bool _viewFinalized = false;
 
     private string _sourceCodeDirWork;
-    private string _sourceCodeFile;
-    private KntSEngine _kntScriptEngine;
 
     private const int EM_SETTABSTOPS = 0x00CB;
     [DllImport("User32.dll", CharSet = CharSet.Auto)]
@@ -32,8 +30,6 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         PersonalizeTabStop();
 
         _ctrl = ctrl;
-        _kntScriptEngine = _ctrl.KntSEngine;
-        _sourceCodeFile = _ctrl.CodeFile;
     }
 
     #endregion
@@ -42,21 +38,21 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     private void KntScriptForm_Load(object sender, EventArgs e)
     {
-        _kntScriptEngine.InOutDevice.SetEmbeddedMode();
-        splitContainer1.Panel2.Controls.Add((Control)_kntScriptEngine.InOutDevice);
+        _ctrl.KntScriptInOutDevice.SetEmbeddedMode();
+        splitContainer1.Panel2.Controls.Add((Control)_ctrl.KntScriptInOutDevice);
 
-        LoadFile(_sourceCodeFile);
+        LoadFile(_ctrl.CodeFile);
 
-        _kntScriptEngine.InOutDevice.Show();        
+        _ctrl.KntScriptInOutDevice.Show();        
     }
 
     private void KntScriptForm_KeyUp(object sender, KeyEventArgs e)
     {
         if (e.KeyData == Keys.F5)
-            buttonRun_Click(this, new EventArgs());
+            buttonRunKntSCode_Click(this, new EventArgs());
     }
 
-    private void buttonRun_Click(object sender, EventArgs e)
+    private void buttonRunKntSCode_Click(object sender, EventArgs e)
     {
         if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
         {
@@ -68,9 +64,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         {            
             RefreshStatusAction(true);
 
-            _kntScriptEngine.InOutDevice.Clear();
-            _kntScriptEngine.ClearAllVars();
-            _kntScriptEngine.Run(textSourceCode.Text);
+            _ctrl.RunKntSCode(textSourceCode.Text);
         }
         catch (Exception err)
         {
@@ -93,9 +87,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         try
         {            
             RefreshStatusAction(true);
-            _kntScriptEngine.InOutDevice.Clear();
-            (var result, var error) = _ctrl.Store.RunCSCode(textSourceCode.Text, true);
-            _kntScriptEngine.InOutDevice.Print($"{result}\n\n{"----"}\n{error}");
+            _ctrl.RunCSCode(textSourceCode.Text);
         }
         catch (Exception err)
         {
@@ -118,7 +110,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         try
         {
             RefreshStatusAction(true);
-            _ctrl.Store.RunCSCode(textSourceCode.Text, false);
+            _ctrl.RunCSCodeStdOut(textSourceCode.Text);
         }
         catch (Exception err)
         {
@@ -132,7 +124,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     private void buttonNew_Click(object sender, EventArgs e)
     {
-        _sourceCodeFile = "";
+        _ctrl.CodeFile = "";
         textSourceCode.Text = "";
         statusFileName.Text = "";
     }
@@ -153,7 +145,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
 
     private void buttonSave_Click(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(_sourceCodeFile))
+        if (string.IsNullOrEmpty(_ctrl.CodeFile))
         {
             saveFileDialogScript.Title = "Save KntScript file";
             saveFileDialogScript.InitialDirectory = _sourceCodeDirWork;
@@ -164,14 +156,14 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
             {
                 if (Path.GetExtension(saveFileDialogScript.FileName) == "")
                     saveFileDialogScript.FileName += @".ants";
-                _sourceCodeFile = saveFileDialogScript.FileName;
-                _sourceCodeDirWork = Path.GetDirectoryName(_sourceCodeFile);
-                SaveFile(_sourceCodeFile);
-                statusFileName.Text = _sourceCodeFile;
+                _ctrl.CodeFile = saveFileDialogScript.FileName;
+                _sourceCodeDirWork = Path.GetDirectoryName(_ctrl.CodeFile);
+                SaveFile(_ctrl.CodeFile);
+                statusFileName.Text = _ctrl.CodeFile;
             }
         }
         else
-            SaveFile(_sourceCodeFile);
+            SaveFile(_ctrl.CodeFile);
     }
 
     private void KntScriptConsoleForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -201,11 +193,11 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
             using (TextReader input = File.OpenText(sourceCodeFile))
             {
                 textSourceCode.Text = input.ReadToEnd().ToString();
-                _sourceCodeFile = sourceCodeFile;
+                _ctrl.CodeFile = sourceCodeFile;
                 _sourceCodeDirWork = Path.GetDirectoryName(sourceCodeFile);
                 textSourceCode.Select(0, 0);
                 textSourceCode.Select(0, 0);
-                statusFileName.Text = _sourceCodeFile;                
+                statusFileName.Text = _ctrl.CodeFile;                
             }
         }
         else
