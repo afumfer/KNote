@@ -148,6 +148,10 @@ namespace KntWebView
         }
 
         #endregion
+        
+        public event EventHandler NavigationStart;
+
+        public event EventHandler NavigationEnd;        
 
         #region Form events managment 
 
@@ -162,6 +166,7 @@ namespace KntWebView
         private void webView2_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
             statusLabel.Text = webView.Source.ToString();
+            NavigationEnd?.Invoke(this, new EventArgs());
         }
 
         private void webView2_CoreWebView2InitializationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
@@ -341,6 +346,7 @@ namespace KntWebView
 
         private void EnableMarkdownView()
         {
+            NavigationEnd?.Invoke(this, new EventArgs());
             webView.Visible = false;
             ShowNavigationTools = false;
             ShowStatusInfo = false;            
@@ -357,6 +363,7 @@ namespace KntWebView
         
         private void EnableHtmlView()
         {
+            NavigationEnd?.Invoke(this, new EventArgs());
             textContent.Visible = false;
             ShowNavigationTools = false;
             ShowStatusInfo = false;
@@ -372,8 +379,11 @@ namespace KntWebView
                     await InitializeAsync();
 
                 if (webView.CoreWebView2 != null)  // This patch is required when using sql server repositories 
-                    if(!string.IsNullOrEmpty(textUrl.Text))
+                    if (!string.IsNullOrEmpty(textUrl.Text))
+                    {
+                        NavigationStart?.Invoke(this, new EventArgs());
                         webView.CoreWebView2.Navigate(textUrl.Text);
+                    }
             }
             catch
             {
@@ -392,7 +402,10 @@ namespace KntWebView
                     await InitializeAsync();
 
                 if (webView.CoreWebView2 != null)
+                {
+                    NavigationStart?.Invoke(this, new EventArgs());
                     webView.NavigateToString(contentString);
+                }
             }
             catch (Exception ex)
             {

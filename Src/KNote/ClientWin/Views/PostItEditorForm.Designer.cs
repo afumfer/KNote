@@ -32,6 +32,7 @@ namespace KNote.ClientWin.Views
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PostItEditorForm));
             panelForm = new Panel();
+            progressStatus = new ProgressBar();
             picMenu = new PictureBox();
             kntEditView = new KntWebView.KntEditView();
             labelStatus = new LabelNoCopy();
@@ -71,6 +72,7 @@ namespace KNote.ClientWin.Views
             // panelForm
             // 
             panelForm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelForm.Controls.Add(progressStatus);
             panelForm.Controls.Add(picMenu);
             panelForm.Controls.Add(kntEditView);
             panelForm.Controls.Add(labelStatus);
@@ -80,6 +82,18 @@ namespace KNote.ClientWin.Views
             panelForm.Name = "panelForm";
             panelForm.Size = new Size(479, 340);
             panelForm.TabIndex = 3;
+            // 
+            // progressStatus
+            // 
+            progressStatus.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            progressStatus.ForeColor = SystemColors.Window;
+            progressStatus.Location = new Point(415, 326);
+            progressStatus.Name = "progressStatus";
+            progressStatus.Size = new Size(42, 10);
+            progressStatus.Style = ProgressBarStyle.Marquee;
+            progressStatus.TabIndex = 7;
+            progressStatus.Visible = false;
+            progressStatus.Click += progressStatus_Click;
             // 
             // picMenu
             // 
@@ -374,5 +388,6 @@ namespace KNote.ClientWin.Views
         private LabelNoCopy labelCaption;
         private ToolStripMenuItem menuWindowsFormView;
         private KntWebView.KntEditView kntEditView;
+        private ProgressBar progressStatus;
     }
 }

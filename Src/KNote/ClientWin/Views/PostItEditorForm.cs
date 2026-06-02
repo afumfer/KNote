@@ -2,6 +2,8 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using System.Diagnostics.Eventing.Reader;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace KNote.ClientWin.Views;
 
@@ -16,7 +18,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     private int _topPosition;
     private int _heightRedim;
     private int _widthRedim;
-        
+
     private Guid _selectedFolderId;
 
     private readonly string _url;
@@ -38,11 +40,11 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             if (_ctrl.Model.GetContentTypeExt().ForDescription == "navigation")
             {
                 _url = _ctrl.Store.ExtractUrlFromText(_ctrl.Model?.Description);
-                ConfigurePostItView(true);                
+                ConfigurePostItView(true);
             }
             else
             {
-                ConfigurePostItView(false);                
+                ConfigurePostItView(false);
             }
         }
         else
@@ -90,7 +92,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     public void CleanView()
     {
-            
+
     }
 
     public void OnClosingView()
@@ -104,8 +106,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     #region Form events handlers
 
     private void PostItEditorForm_Load(object sender, EventArgs e)
-    {        
-        ModelToControlsPostIt(true, _ctrl.ForceAlwaysTop);        
+    {
+        ModelToControlsPostIt(true, _ctrl.ForceAlwaysTop);
     }
 
     private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -119,8 +121,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
                 savedOk = await _ctrl.SaveAndHideAndFinalize();
 
             if (!savedOk)
-                ShowInfo("The note could not be saved");                    
-                
+                ShowInfo("The note could not be saved");
+
             _ctrl.Finalize();
         }
     }
@@ -314,7 +316,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         {
             _selectedFolderId = folder.FolderId;
             _ctrl.Model.FolderDto = folder.GetSimpleDto<FolderDto>();
-            RefreshStatus();                
+            RefreshStatus();
         }
 
         TopMost = tmpTopMost;
@@ -351,21 +353,21 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         {
             Text = KntConst.AppName + " Web View";
             if (!string.IsNullOrEmpty(kntEditView.MarkdownText))
-            {                
+            {
                 if (!string.IsNullOrEmpty(_url))
-                {                    
-                    menuWindowsFormView.Checked = true;                    
+                {
+                    menuWindowsFormView.Checked = true;
                     await kntEditView.ShowNavigationUrlContent(_url);
-                    Text += " - " + _ctrl.Model?.Topic;                    
+                    Text += " - " + _ctrl.Model?.Topic;
                 }
                 else
                 {
-                    kntEditView.TextUrl = "";                                        
+                    kntEditView.TextUrl = "";
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);                    
+                    await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
                 }
-            }              
+            }
             kntEditView.BorderStyle = BorderStyle.None;
             kntEditView.WebViewControl.Focus();
         }
@@ -471,7 +473,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     }
 
     private void WindowsFormView()
-    {        
+    {
         ConfigurePostItView(!menuWindowsFormView.Checked);
     }
 
@@ -489,14 +491,14 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             menuWindowsFormView.Checked = true;
 
             if (!string.IsNullOrEmpty(_url))
-            {                
+            {
                 labelCaption.Visible = false;
                 picMenu.Top = 9;
                 picMenu.Left = this.Width - 44;
                 picMenu.BackColor = Color.WhiteSmoke;
                 picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                     | System.Windows.Forms.AnchorStyles.Right));
-                kntEditView.Location = new System.Drawing.Point(3, 3);                
+                kntEditView.Location = new System.Drawing.Point(3, 3);
                 kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 28);
                 kntEditView.ShowNavigationTools = true;
             }
@@ -504,10 +506,10 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             {
                 labelCaption.Visible = true;
                 picMenu.Top = 5;
-                picMenu.Left = 5;                
+                picMenu.Left = 5;
                 picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                     | System.Windows.Forms.AnchorStyles.Left));
-                kntEditView.Location = new System.Drawing.Point(3, 24);                
+                kntEditView.Location = new System.Drawing.Point(3, 24);
                 kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 49);
                 kntEditView.ShowNavigationTools = false;
             }
@@ -523,14 +525,14 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
             labelCaption.Visible = true;
             picMenu.Top = 5;
-            picMenu.Left = 5;            
+            picMenu.Left = 5;
             picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                 | System.Windows.Forms.AnchorStyles.Left));
-            kntEditView.Location = new System.Drawing.Point(3, 24);            
+            kntEditView.Location = new System.Drawing.Point(3, 24);
             kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 49);
             kntEditView.ShowNavigationTools = false;
         }
-        
+
         kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -538,6 +540,21 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         kntEditView.MarkdownContentControl.ScrollBars = ScrollBars.None;
 
         kntEditView.ShowStatusInfo = false;
+
+        kntEditView.NavigationStart += KntEditView_NavigationStart;
+        kntEditView.NavigationEnd += KntEditView_NavigationEnd; 
+    }
+
+    private void KntEditView_NavigationStart(object sender, EventArgs e)
+    {
+        progressStatus.Visible = true;        
+        progressStatus.MarqueeAnimationSpeed = 40;
+    }
+
+    private void KntEditView_NavigationEnd(object sender, EventArgs e)
+    {
+        progressStatus.Visible = false;
+        progressStatus.MarqueeAnimationSpeed = 0;
     }
 
     public void AlwaysFront()
@@ -565,5 +582,16 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{_ctrl.Model.FolderDto.Name}] {status}";
     }
 
-    #endregion 
+    #endregion
+
+    private void progressStatus_Click(object sender, EventArgs e)
+    {
+        progressStatus.Style = ProgressBarStyle.Marquee;
+        
+        if(progressStatus.MarqueeAnimationSpeed == 0)        
+            progressStatus.MarqueeAnimationSpeed = 40;        
+        else                
+            progressStatus.MarqueeAnimationSpeed = 0;        
+
+    }
 }

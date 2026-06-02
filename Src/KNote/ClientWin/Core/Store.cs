@@ -461,7 +461,7 @@ public class Store
 
     #endregion
 
-    #region Coomon controllers extensions
+    #region Common controllers extensions
 
     private NotesSelectorCtrl _notesSelector = null;
     protected NotesSelectorCtrl NotesSelector
