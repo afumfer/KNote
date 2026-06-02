@@ -57,6 +57,7 @@
             panelForm = new Panel();
             tabNoteData = new TabControl();
             tabBasicData = new TabPage();
+            progressStatus = new ProgressBar();
             labelExpandContent = new Label();
             panelHeaderData = new Panel();
             textStatus = new TextBox();
@@ -103,7 +104,6 @@
             toolDescriptionS3 = new ToolStripSeparator();
             toolDescriptionUploadResource = new ToolStripButton();
             toolDescriptionUploadResourceFromClipboard = new ToolStripButton();
-            labelAction = new Label();
             buttonEditMarkdown = new Button();
             buttonViewHtml = new Button();
             labelContent = new Label();
@@ -421,11 +421,11 @@
             // 
             // tabBasicData
             // 
+            tabBasicData.Controls.Add(progressStatus);
             tabBasicData.Controls.Add(labelExpandContent);
             tabBasicData.Controls.Add(panelHeaderData);
             tabBasicData.Controls.Add(buttonNavigate);
             tabBasicData.Controls.Add(panelDescription);
-            tabBasicData.Controls.Add(labelAction);
             tabBasicData.Controls.Add(buttonEditMarkdown);
             tabBasicData.Controls.Add(buttonViewHtml);
             tabBasicData.Controls.Add(labelContent);
@@ -438,6 +438,16 @@
             tabBasicData.TabIndex = 0;
             tabBasicData.Text = "Basic data  ";
             tabBasicData.UseVisualStyleBackColor = true;
+            // 
+            // progressStatus
+            // 
+            progressStatus.ForeColor = SystemColors.Window;
+            progressStatus.Location = new Point(75, 108);
+            progressStatus.Name = "progressStatus";
+            progressStatus.Size = new Size(42, 10);
+            progressStatus.Style = ProgressBarStyle.Marquee;
+            progressStatus.TabIndex = 60;
+            progressStatus.Visible = false;
             // 
             // labelExpandContent
             // 
@@ -857,18 +867,6 @@
             toolDescriptionUploadResourceFromClipboard.Size = new Size(27, 20);
             toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
             toolDescriptionUploadResourceFromClipboard.Click += toolDescriptionUploadResourceFromClipboard_Click;
-            // 
-            // labelAction
-            // 
-            labelAction.AutoSize = true;
-            labelAction.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelAction.Location = new Point(142, 106);
-            labelAction.Name = "labelAction";
-            labelAction.Size = new Size(226, 15);
-            labelAction.TabIndex = 54;
-            labelAction.Text = "Please wait, some actions are working...";
-            labelAction.TextAlign = ContentAlignment.MiddleRight;
-            labelAction.Visible = false;
             // 
             // buttonEditMarkdown
             // 
@@ -1716,7 +1714,6 @@
         private ListView listViewAlarms;
         private ListView listViewTraceNoteTo;
         private ListView listViewTraceNoteFrom;
-        private Label labelAction;
         private Panel panelDescription;
         private ToolStrip toolDescription;
         private ToolStripDropDownButton toolDescriptionHtml;
@@ -1792,5 +1789,6 @@
         private RadioButton radioCsScript;
         private RadioButton radioKntScript;
         private ToolStripMenuItem buttonExecuteKntScriptInNewTask;
+        private ProgressBar progressStatus;
     }
 }

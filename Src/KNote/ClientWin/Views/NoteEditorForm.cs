@@ -497,7 +497,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             labelExpandContent.Text = "▼";
             labelExpandContent.Top = 6;
             labelContent.Top = 10;
-            labelAction.Top = 6;
+            progressStatus.Top = 14;
             buttonEditMarkdown.Top = 4;
             buttonNavigate.Top = 4;
             buttonViewHtml.Top = 4;
@@ -510,7 +510,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             labelExpandContent.Text = "▲";
             labelExpandContent.Top = 102;
             labelContent.Top = 102;
-            labelAction.Top = 98;
+            progressStatus.Top = 106;
             buttonEditMarkdown.Top = 96;
             buttonNavigate.Top = 96;
             buttonViewHtml.Top = 96;
@@ -782,6 +782,19 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         // TODO: remove in this version
         tabNoteData.TabPages.Remove(tabTraceNotes);
+
+        kntEditView.NavigationStart += KntEditView_NavigationStart;
+        kntEditView.NavigationEnd += KntEditView_NavigationEnd; 
+    }
+
+    private void KntEditView_NavigationStart(object sender, EventArgs e)
+    {
+        ProgressBarOn();
+    }
+
+    private void KntEditView_NavigationEnd(object sender, EventArgs e)
+    {
+        ProgressBarOff();
     }
 
     private void ModelToControlsOnlyRequiredComponents()
@@ -816,10 +829,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         if (ct.ForDescription == "html")
         {
-            labelAction.Visible = true;
-            labelAction.Refresh();
+            ProgressBarOn();
             kntEditView.ShowHtmlContent(kntEditView.MarkdownText);
-            labelAction.Visible = false;
+            ProgressBarOff();
             EnableHtmlView();
         }
         else if (ct.ForDescription == "navigation")
@@ -1499,13 +1511,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async void ExecKNoteAssistant()
     {
-        labelAction.Visible = true;
-        labelAction.Refresh();
+        ProgressBarOn();
         await ControlsToModel();
         await _ctrl.ExecKNoteAssistant();
         RefreshView();
-        labelAction.Visible = false;
-        labelAction.Refresh();
+        ProgressBarOff();
     }
 
     private void UpdateResource(ResourceDto resource)
@@ -1611,5 +1621,17 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else
             ct.ForScript = "knt";
         _ctrl.Model.SetContentTypeExt(ct);
+    }
+
+    private void ProgressBarOn()
+    {
+        progressStatus.Visible = true;
+        progressStatus.MarqueeAnimationSpeed = 40;
+    }
+
+    private void ProgressBarOff()
+    {
+        progressStatus.Visible = false;
+        progressStatus.MarqueeAnimationSpeed = 0;
     }
 }
