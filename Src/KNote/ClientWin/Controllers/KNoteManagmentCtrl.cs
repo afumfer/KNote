@@ -308,7 +308,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 _notesSelectorCtrl.Extensions.Add("Edit note as PostIt ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendEditNoteAsPostIt));
                 _notesSelectorCtrl.Extensions.Add("Delete note ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendDeleteNote));
                 _notesSelectorCtrl.Extensions.Add("--0", new ExtensionsEventHandler<NoteMinimalDto>(ExtendNull));
-                _notesSelectorCtrl.Extensions.Add("Add automatic resolved task", new ExtensionsEventHandler<NoteMinimalDto>(AddFastResolvedTask));
+                _notesSelectorCtrl.Extensions.Add("Add quick resolved task", new ExtensionsEventHandler<NoteMinimalDto>(AddFastResolvedTask));
                 _notesSelectorCtrl.Extensions.Add("--1", new ExtensionsEventHandler<NoteMinimalDto>(ExtendNull));
                 _notesSelectorCtrl.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendMoveSelectedNotes));
                 _notesSelectorCtrl.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendAddTagSelectedNotes));
@@ -655,7 +655,8 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             NoteId = SelectedNoteInfo.NoteId,
             UserId = (Guid)userId,
             Description = SelectedNoteInfo.Topic,
-            Tags = "Automatic  task",
+            Tags = "Resolved task",
+            Priority = 1,
             Resolved = true,
             EndDate = DateTime.Now
         };

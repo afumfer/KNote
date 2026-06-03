@@ -1562,7 +1562,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private async Task<bool> AddTask(string defaultDescription = "")
     {
-        NoteTaskDto task = await _ctrl.NewTask(defaultDescription);
+        NoteTaskDto task = await _ctrl.NewTask(defaultDescription, listViewTasks.Items.Count);
         if (task != null)
         {
             listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));

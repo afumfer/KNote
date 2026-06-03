@@ -328,7 +328,7 @@ namespace KNote.ClientWin.Views
             // 
             menuAddResolvedTask.Name = "menuAddResolvedTask";
             menuAddResolvedTask.Size = new Size(224, 22);
-            menuAddResolvedTask.Text = "Add automatic resolved task";
+            menuAddResolvedTask.Text = "Add quick resolved task";
             menuAddResolvedTask.Click += postItMenu_Click;
             // 
             // PostItEditorForm
