@@ -548,28 +548,21 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
     }
 
     public async Task RunCode(bool runInNewTask = true)
-    {
-        // TODO: !!!
+    {        
         var m = (NoteDto)Model;
         await Store.RunCode(m, runInNewTask);
-
-        //var ct = Model.GetContentTypeExt();
-        //if (ct.ForScript == "cs")
-        //    Store.RunCSCode(Model.Script, false);
-        //else
-        //    Store.RunKntSCode(Model.Script);
     }
 
-    public async Task<string> GetCatalogTemplate()
+    public async Task<NoteDto> GetCatalogTemplate()
     {        
         var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
-        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.TemplateTag, "Select template"))?.Description;     
+        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.TemplateTag, "Select template"));
     }
 
-    public async Task<string> GetCatalogCode()
+    public async Task<NoteDto> GetCatalogCode()
     {        
         var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
-        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.CodeTag, "Select code snippet"))?.Description;        
+        return (await Store.GetCatalogItem(assistantServiceRef, KntConst.CodeTag, "Select code snippet"));
     }
 
     public async Task ExecKNoteAssistant()

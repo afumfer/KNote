@@ -1,0 +1,18 @@
+var variableName = "MY_VARIABLE_TEST";
+var variableValue = "Hello world";
+
+' Create user-level environment variable
+System.Environment.SetEnvironmentVariable(variableName, variableValue, System.EnvironmentVariableTarget.User);
+printline("Variable created: " + variableName + " = " + variableName);
+
+' Read the variable
+var readValue = System.Environment.GetEnvironmentVariable(variableName, System.EnvironmentVariableTarget.User);
+printline("Value read: " + readValue);
+
+' Psedo-Delete the environment variable
+System.Environment.SetEnvironmentVariable(variableName, "", System.EnvironmentVariableTarget.User);
+printline("Psudo-Deleted variable: " + variableName);
+
+' Pseudo-Verify that it was deleted
+var finalValue = System.Environment.GetEnvironmentVariable(variableName, System.EnvironmentVariableTarget.User);
+printline("Final value: " + finalValue);

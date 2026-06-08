@@ -2,6 +2,7 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Repository.EntityFramework.Entities;
 using KntScript;
 using KntWebView;
 using System;
@@ -517,6 +518,26 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             panelDescription.Location = new System.Drawing.Point(4, 124);
             panelDescription.Height = panelDescription.Height - 92;
         }
+    }
+
+    private void radioKntScript_CheckedChanged(object sender, EventArgs e)
+    {
+        var ct = _ctrl.Model.GetContentTypeExt();
+        if (radioKntScript.Checked)
+            ct.ForScript = "knt";
+        else
+            ct.ForScript = "cs";
+        _ctrl.Model.SetContentTypeExt(ct);
+    }
+
+    private void radioCsScript_CheckedChanged(object sender, EventArgs e)
+    {
+        var ct = _ctrl.Model.GetContentTypeExt();
+        if (radioCsScript.Checked)
+            ct.ForScript = "cs";
+        else
+            ct.ForScript = "knt";
+        _ctrl.Model.SetContentTypeExt(ct);
     }
 
     #region Messages managment
@@ -1474,38 +1495,45 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             return;
         }
 
-        var strContent = (await _ctrl.GetCatalogTemplate());
-        if (string.IsNullOrEmpty(strContent))
+        var noteTemplate = (await _ctrl.GetCatalogTemplate());
+        if (noteTemplate == null || string.IsNullOrEmpty(noteTemplate.Description))
             return;
 
         tabNoteData.SelectedIndex = 0;
 
         if (!buttonViewHtml.Enabled)
         {
-            kntEditView.HtmlContentControl.SelectedHtml = strContent;
+            kntEditView.HtmlContentControl.SelectedHtml = noteTemplate.Description;
             kntEditView.HtmlContentControl.Focus();
         }
         else
         {
             var selStart = kntEditView.MarkdownContentControl.SelectionStart;
-            kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, strContent);
+            kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, noteTemplate.Description);
             kntEditView.MarkdownContentControl.Focus();
-            kntEditView.MarkdownContentControl.SelectionStart = selStart + strContent.Length;
+            kntEditView.MarkdownContentControl.SelectionStart = selStart + noteTemplate.Description.Length;
             kntEditView.MarkdownContentControl.BeginInvoke(new Action(() => kntEditView.MarkdownContentControl.ScrollToCaret()));
         }
     }
 
     private async Task InsertCode()
     {
-        var strContent = (await _ctrl.GetCatalogCode());
-        if (string.IsNullOrEmpty(strContent))
+        var codeTemplate = (await _ctrl.GetCatalogCode());
+        
+        if (codeTemplate == null || string.IsNullOrEmpty(codeTemplate.Script))
             return;
 
         tabNoteData.SelectedIndex = 5;
 
+        var ct = codeTemplate.GetContentTypeExt();        
+        if (ct?.ForScript == "cs")
+            radioCsScript.Checked = true;
+        else
+            radioKntScript.Checked = true;
+
         var selStart = textScriptCode.SelectionStart;
-        textScriptCode.Text = textScriptCode.Text.Insert(selStart, strContent);
-        textScriptCode.SelectionStart = selStart + strContent.Length;
+        textScriptCode.Text = textScriptCode.Text.Insert(selStart, codeTemplate.Script);
+        textScriptCode.SelectionStart = selStart + codeTemplate.Script.Length;
         textScriptCode.BeginInvoke(new Action(() => textScriptCode.ScrollToCaret()));
     }
 
@@ -1601,28 +1629,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         }
     }
 
-    #endregion
-
-    private void radioKntScript_CheckedChanged(object sender, EventArgs e)
-    {
-        var ct = _ctrl.Model.GetContentTypeExt();
-        if (radioKntScript.Checked)
-            ct.ForScript = "knt";
-        else
-            ct.ForScript = "cs";
-        _ctrl.Model.SetContentTypeExt(ct);
-    }
-
-    private void radioCsScript_CheckedChanged(object sender, EventArgs e)
-    {
-        var ct = _ctrl.Model.GetContentTypeExt();
-        if (radioCsScript.Checked)
-            ct.ForScript = "cs";
-        else
-            ct.ForScript = "knt";
-        _ctrl.Model.SetContentTypeExt(ct);
-    }
-
     private void ProgressBarOn()
     {
         progressStatus.Visible = true;
@@ -1634,4 +1640,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         progressStatus.Visible = false;
         progressStatus.MarqueeAnimationSpeed = 0;
     }
+
+    #endregion
 }
