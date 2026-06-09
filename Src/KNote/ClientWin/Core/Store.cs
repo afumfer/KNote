@@ -6,6 +6,7 @@ using KNote.Repository.EntityFramework.Entities;
 using KNote.Service.Core;
 using KntScript;
 using Microsoft.Extensions.Logging;
+using ReverseMarkdown.Converters;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -647,24 +648,32 @@ public class Store
     #region KntScript and C# code execution
 
     public async Task RunCode(NoteDto note, bool runInNewTask = true)
-    {
+    {        
         var ct = note.GetContentTypeExt();
         if (ct == null || string.IsNullOrEmpty(ct.ForScript))
             return;
+        
+        var code = note?.Script ?? "";
 
         if (ct.ForScript == "cs")
         {
+            // Experimental hack, insert global include
+            code += await GetIncludeGlobalCode("cs");
+
             if (runInNewTask)
-                var (result, error) = await RunCSCodeInNewTask(note?.Script, false);
+                var (result, error) = await RunCSCodeInNewTask(code, false);
             else
-                var (result, error) = RunCSCode(note?.Script, false);
+                var (result, error) = RunCSCode(code, false);
         }
         else
         {
+            // Experimental hack, insert global include
+            code += await GetIncludeGlobalCode("knt");
+
             if (runInNewTask)
-                RunKntSCodeInNewThread(note?.Script);
+                RunKntSCodeInNewThread(code);
             else
-                RunKntSCode(note?.Script);
+                RunKntSCode(code);
         }
     }
 
@@ -680,6 +689,8 @@ public class Store
         if (string.IsNullOrEmpty(code))
             return;
 
+        
+
         var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this), false);
         kntScript.Run(code);
     }
@@ -694,6 +705,7 @@ public class Store
         string tempDir = Path.GetTempPath();        
         string nameFile = $"kntTmpCodeFile_{Guid.NewGuid().ToString()}.cs";
         string tempFullFileName = Path.Combine(tempDir, nameFile);
+
         File.WriteAllText(tempFullFileName, code);
 
         (var result, var error) = ExecuteCommand($"dotnet run {nameFile}", tempDir, redirectStandardOut);
@@ -739,6 +751,23 @@ public class Store
         {
             return ("Exception message:", $"Error: {ex.Message}");
         }
+    }
+    
+    public async Task<string> GetIncludeGlobalCode(string codeType)
+    {
+        string codeResult = string.Empty;
+
+        var assistantServiceRef = GetAssistantServiceRef();
+        var includes = await assistantServiceRef.Service.Notes.GetFilterAsync(new NotesFilterDto { Tags = KntConst.IncludeGlobalCodeTag });
+
+        foreach (var inc in includes.Entity)
+        {
+            var ct = inc.GetContentTypeExt();
+            if (ct != null && ct.ForScript == codeType)
+                codeResult += $"\r\n\r\n{inc.Script}";
+        }
+
+        return codeResult;
     }
 
     #endregion 
