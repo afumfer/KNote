@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "KNote.Server",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build: Server",
+            "program": "${workspaceFolder}/Server/bin/Debug/net10.0/KNote.Server.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Server",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/KNote"
+            },
+            "console": "internalConsole"
+        },
+        {
+            "name": "KNote.ClientWin",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build: ClientWin",
+            "program": "${workspaceFolder}/ClientWin/bin/Debug/net10.0-windows7.0/KNote.ClientWin.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/ClientWin",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

@@ -1,5 +1,4 @@
-﻿using HtmlAgilityPack;
-using KNote.ClientWin.Core;
+﻿using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;

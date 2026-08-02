@@ -314,7 +314,13 @@ namespace KntWebView
         {
             statusLabel.Text = "(Initializing ......)";
 
-            await webView.EnsureCoreWebView2Async(null);
+            // WebView2's default UserDataFolder is derived from the hosting process's exe path.
+            // When launched via "dotnet exec" (e.g. VS Code's coreclr debugger), the host is
+            // dotnet.exe under Program Files, which is not writable, causing E_ACCESSDENIED.
+            // Pinning the folder next to the app avoids that regardless of how it was launched.
+            var userDataFolder = Path.Combine(Application.StartupPath, "WebView2Cache");
+            var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
+            await webView.EnsureCoreWebView2Async(environment);
 
             if ((webView != null) && (webView.CoreWebView2 != null))
             {
