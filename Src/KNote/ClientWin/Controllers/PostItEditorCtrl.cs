@@ -453,10 +453,10 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
             return _userId;
 
         var userId = await Store.GetUserId(Service);
-        if (userId != null)
-            return (Guid)userId;
-        else
-            return _userId;
+        if (userId == null)
+            throw new InvalidOperationException($"The current user '{Store.AppUserName}' is not registered in the selected repository, so a PostIt window cannot be created for this note.");
+
+        return (Guid)userId;
     }
 
     #endregion 

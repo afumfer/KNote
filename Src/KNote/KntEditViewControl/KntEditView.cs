@@ -157,10 +157,7 @@ namespace KntWebView
 
         private async void KntEditView_Load(object sender, EventArgs e)
         {
-            if (_isInitialized)
-                return;                       
-            
-            await InitializeAsync();
+            await EnsureInitializedAsync();
         }
 
         private void webView2_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
@@ -260,9 +257,8 @@ namespace KntWebView
             if (webView.IsDisposed == true)
                 return;
 
-            if (!_isInitialized)
-                await InitializeAsync();
-            
+            await EnsureInitializedAsync();
+
             FolderForVirtualHostNameMapping = folder;
             
             if (Directory.Exists(FolderForVirtualHostNameMapping))
@@ -284,10 +280,9 @@ namespace KntWebView
         {
             try
             {
-                if (!_isInitialized)
-                    await InitializeAsync();
+                await EnsureInitializedAsync();
 
-                if (webView.CoreWebView2 != null) 
+                if (webView.CoreWebView2 != null)
                     await webView.CoreWebView2.ExecuteScriptAsync(script);
             }
             catch (Exception ex)
@@ -309,6 +304,19 @@ namespace KntWebView
         #endregion
 
         #region Private methods
+
+        // Caches the in-flight/completed initialization so concurrent callers (e.g. the control's
+        // Load event racing with an explicit SetVirtualHostNameToFolderMapping/Navigate call before
+        // _isInitialized flips to true) await the same task instead of each creating their own
+        // CoreWebView2Environment, which WebView2 rejects with "already initialized with a
+        // different CoreWebView2Environment".
+        private Task? _initializationTask;
+
+        private Task EnsureInitializedAsync()
+        {
+            _initializationTask ??= InitializeAsync();
+            return _initializationTask;
+        }
 
         private async Task InitializeAsync()
         {
@@ -332,6 +340,7 @@ namespace KntWebView
             else
             {
                 _isInitialized = false;
+                _initializationTask = null; // allow a retry on a later call
             }
             statusLabel.Text = "";
         }
@@ -381,10 +390,9 @@ namespace KntWebView
         {
             try
             {
-                if (!_isInitialized)
-                    await InitializeAsync();
+                await EnsureInitializedAsync();
 
-                if (webView.CoreWebView2 != null)  // This patch is required when using sql server repositories 
+                if (webView.CoreWebView2 != null)  // This patch is required when using sql server repositories
                     if (!string.IsNullOrEmpty(textUrl.Text))
                     {
                         NavigationStart?.Invoke(this, new EventArgs());
@@ -404,8 +412,7 @@ namespace KntWebView
             {
                 TextUrl = "";
 
-                if (!_isInitialized)
-                    await InitializeAsync();
+                await EnsureInitializedAsync();
 
                 if (webView.CoreWebView2 != null)
                 {
