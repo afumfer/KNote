@@ -1114,7 +1114,7 @@
             // 
             // buttonResourceAdd
             // 
-            buttonResourceAdd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonResourceAdd.Anchor = AnchorStyles.Top;
             buttonResourceAdd.Font = new Font("Segoe UI", 8.25F);
             buttonResourceAdd.Location = new Point(207, 6);
             buttonResourceAdd.Margin = new Padding(4, 3, 4, 3);
@@ -1128,7 +1128,7 @@
             // 
             // buttonResourceDelete
             // 
-            buttonResourceDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonResourceDelete.Anchor = AnchorStyles.Top;
             buttonResourceDelete.Font = new Font("Segoe UI", 8.25F);
             buttonResourceDelete.Location = new Point(237, 6);
             buttonResourceDelete.Margin = new Padding(4, 3, 4, 3);
@@ -1141,7 +1141,7 @@
             // 
             // buttonResourceEdit
             // 
-            buttonResourceEdit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonResourceEdit.Anchor = AnchorStyles.Top;
             buttonResourceEdit.Font = new Font("Segoe UI", 8.25F);
             buttonResourceEdit.Location = new Point(267, 6);
             buttonResourceEdit.Margin = new Padding(4, 3, 4, 3);
@@ -1154,7 +1154,7 @@
             // 
             // buttonInsertLink
             // 
-            buttonInsertLink.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonInsertLink.Anchor = AnchorStyles.Top;
             buttonInsertLink.Font = new Font("Segoe UI", 8.25F);
             buttonInsertLink.Location = new Point(297, 6);
             buttonInsertLink.Name = "buttonInsertLink";
@@ -1167,7 +1167,7 @@
             // 
             // buttonSaveResource
             // 
-            buttonSaveResource.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonSaveResource.Anchor = AnchorStyles.Top;
             buttonSaveResource.Font = new Font("Segoe UI", 8.25F);
             buttonSaveResource.Location = new Point(346, 6);
             buttonSaveResource.Name = "buttonSaveResource";
@@ -1308,7 +1308,7 @@
             // 
             // buttonTaskAdd
             // 
-            buttonTaskAdd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonTaskAdd.Anchor = AnchorStyles.Top;
             buttonTaskAdd.Font = new Font("Segoe UI", 8.25F);
             buttonTaskAdd.Location = new Point(279, 4);
             buttonTaskAdd.Margin = new Padding(4, 3, 4, 3);
@@ -1321,7 +1321,7 @@
             // 
             // buttonTaskDelete
             // 
-            buttonTaskDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonTaskDelete.Anchor = AnchorStyles.Top;
             buttonTaskDelete.Font = new Font("Segoe UI", 8.25F);
             buttonTaskDelete.Location = new Point(309, 4);
             buttonTaskDelete.Margin = new Padding(4, 3, 4, 3);
@@ -1334,7 +1334,7 @@
             // 
             // buttonTaskEdit
             // 
-            buttonTaskEdit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonTaskEdit.Anchor = AnchorStyles.Top;
             buttonTaskEdit.Font = new Font("Segoe UI", 8.25F);
             buttonTaskEdit.Location = new Point(339, 4);
             buttonTaskEdit.Margin = new Padding(4, 3, 4, 3);

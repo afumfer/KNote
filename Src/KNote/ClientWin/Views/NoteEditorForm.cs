@@ -40,6 +40,27 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         buttonCheck.Visible = false;
         toolStripS3.Visible = false;
         toolStripS4.Visible = false;
+
+        // Anchor=Right is not reliable here: its reference gap gets captured at a point
+        // in the layout lifecycle that ends up inconsistent with the DPI-driven
+        // SplitterDistance recalculation in FixSplitterDistances(). Reposition explicitly
+        // instead, driven by the header panel's own Resize (fires on load, DPI change and
+        // splitter drag alike), so it always reflects the panel's real runtime width.
+        panelResourcesLeftHeader.Resize += (s, e) => AlignButtonsRight(panelResourcesLeftHeader, 3, 3,
+            buttonResourceAdd, buttonResourceDelete, buttonResourceEdit, buttonInsertLink, buttonSaveResource);
+        panelTasksHeader.Resize += (s, e) => AlignButtonsRight(panelTasksHeader, 4, 1,
+            buttonTaskAdd, buttonTaskDelete, buttonTaskEdit);
+    }
+
+    private static void AlignButtonsRight(Control header, int rightMargin, int spacing, params Control[] buttonsLeftToRight)
+    {
+        int right = header.Width - rightMargin;
+        for (int i = buttonsLeftToRight.Length - 1; i >= 0; i--)
+        {
+            Control btn = buttonsLeftToRight[i];
+            btn.Left = right - btn.Width;
+            right = btn.Left - spacing;
+        }
     }
 
     #endregion
@@ -143,6 +164,17 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private void NoteEditorForm_Load(object sender, EventArgs e)
     {
         PersonalizeControls();
+        FixSplitterDistances();
+    }
+
+    // SplitContainer.SplitterDistance is baked as an absolute pixel value by the
+    // Designer at whatever DPI it was saved at, and is not reliably rescaled by
+    // AutoScaleMode at runtime. Recompute it from the container's real, already
+    // auto-scaled Width so the layout is correct at any Windows scale factor.
+    private void FixSplitterDistances()
+    {
+        splitTasksViewer.SplitterDistance = (int)(splitTasksViewer.Width * (372.0 / 797.0));
+        splitResourcesViewer.SplitterDistance = (int)(splitResourcesViewer.Width * (395.0 / 797.0));
     }
 
     private async void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -1135,8 +1167,6 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listView.FullRowSelect = true;
         listView.GridLines = true;
         listView.Sorting = SortOrder.None;
-
-        //splitTasksViewer.SplitterDistance = (int)(splitTasksViewer.Height * 0.4f);
     }
 
     private ListViewItem MessageDtoToListViewItem(KMessageDto message)
