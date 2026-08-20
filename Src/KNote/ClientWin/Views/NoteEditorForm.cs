@@ -362,6 +362,21 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         SizeLastColumn((ListView)sender);
     }
 
+    private void listViewResources_Resize(object sender, EventArgs e)
+    {
+        // Unlike listView_Resize (which stretches the last column), here the "Name" column
+        // absorbs the extra width so File type/Order keep their fixed size instead of leaving
+        // dead space to their right.
+        var lv = (ListView)sender;
+        if (lv.Columns.Count < 3)
+            return;
+
+        int otherColumnsWidth = lv.Columns[1].Width + lv.Columns[2].Width;
+        int nameWidth = lv.ClientSize.Width - otherColumnsWidth;
+        if (nameWidth > 50)
+            lv.Columns[0].Width = nameWidth;
+    }
+
     private void toolDescriptionHtml_Click(object sender, EventArgs e)
     {
         ToolStripItem menuSel;
@@ -492,32 +507,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void labelExpandContent_Click(object sender, EventArgs e)
     {
-        if (panelHeaderData.Visible == true)
-        {
-            panelHeaderData.Visible = false;
-            labelExpandContent.Text = "▼";
-            labelExpandContent.Top = 6;
-            labelContent.Top = 10;
-            progressStatus.Top = 14;
-            buttonEditMarkdown.Top = 4;
-            buttonNavigate.Top = 4;
-            buttonViewHtml.Top = 4;
-            panelDescription.Location = new System.Drawing.Point(4, 32);
-            panelDescription.Height = panelDescription.Height + 92;
-        }
-        else
-        {
-            panelHeaderData.Visible = true;
-            labelExpandContent.Text = "▲";
-            labelExpandContent.Top = 102;
-            labelContent.Top = 102;
-            progressStatus.Top = 106;
-            buttonEditMarkdown.Top = 96;
-            buttonNavigate.Top = 96;
-            buttonViewHtml.Top = 96;
-            panelDescription.Location = new System.Drawing.Point(4, 124);
-            panelDescription.Height = panelDescription.Height - 92;
-        }
+        // panelHeaderData and panelContentHeader (the Content:/buttons row) are both plain
+        // Dock=Top siblings of panelDescription (Dock=Fill) in tabBasicData. Toggling
+        // panelHeaderData.Visible is enough: Dock stacking automatically moves panelContentHeader
+        // up to take its place, and panelDescription automatically reclaims/gives back the rest -
+        // no manual Top/Height math needed.
+        panelHeaderData.Visible = !panelHeaderData.Visible;
+        labelExpandContent.Text = panelHeaderData.Visible ? "▲" : "▼";
     }
 
     private void radioKntScript_CheckedChanged(object sender, EventArgs e)
@@ -766,27 +762,22 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             }
 
             // other controls out of principal tab
+            // (BlockControl above can't reach these: they're nested inside SplitContainer
+            // panels, which BlockControl doesn't recurse into)
             kntEditView.HtmlEditorEditMode = false;
             buttonTaskAdd.Visible = false;
             buttonTaskDelete.Visible = false;
             buttonTaskEdit.Visible = false;
+            buttonResourceAdd.Visible = false;
+            buttonResourceDelete.Visible = false;
+            buttonResourceEdit.Visible = false;
+            buttonInsertLink.Visible = false;
+            buttonSaveResource.Visible = false;
         }
 
         panelDescription.Visible = true;
 
         webViewResource.ShowNavigationTools = false;
-        webViewResource.Location = new Point(396, 36);
-        panelPreview.Location = new Point(396, 36);
-        if (_ctrl.EditMode)
-        {
-            webViewResource.Size = new Size(392, 464);
-            panelPreview.Size = new Size(392, 464);
-        }
-        else
-        {
-            webViewResource.Size = new Size(392, 490);
-            panelPreview.Size = new Size(392, 490);
-        }
 
         textDescriptionResource.ReadOnly = true;
         textDescriptionResource.BackColor = Color.White;
@@ -951,6 +942,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listViewResources.Columns.Add("Name", 200, HorizontalAlignment.Left);
         listViewResources.Columns.Add("File type", 100, HorizontalAlignment.Left);
         listViewResources.Columns.Add("Order", 70, HorizontalAlignment.Left);
+        listViewResources_Resize(listViewResources, EventArgs.Empty);
     }
 
     private void ModelToControlsTasks()

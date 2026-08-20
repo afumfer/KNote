@@ -147,6 +147,18 @@ namespace KntWebView
             get { return webView; }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Panel NavigationToolBox
+        {
+            get { return panelToolBox; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public TextBox UrlTextBox
+        {
+            get { return textUrl; }
+        }
+
         #endregion
         
         public event EventHandler NavigationStart;

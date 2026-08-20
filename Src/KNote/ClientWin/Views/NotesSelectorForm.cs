@@ -270,7 +270,12 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         _source.DataSource = new List<NoteMinimalDto>();
         dataGridNotes.DataSource = _source;
 
-        dataGridNotes.Columns[0].DataPropertyName = "NoteId";       
+        // ColumnHeadersHeightSizeMode=AutoSize (Designer) grows the header row's height to fit
+        // wrapped text instead of growing the column's width - so headers wrap to two lines
+        // whenever the text doesn't fit, regardless of AutoSizeMode on the columns below.
+        dataGridNotes.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
+
+        dataGridNotes.Columns[0].DataPropertyName = "NoteId";
         dataGridNotes.Columns[0].Visible = false;
         
         dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
@@ -308,16 +313,22 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
             dataGridNotes.Columns[5].Visible = false;
 
         dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
-        dataGridNotes.Columns[6].Width = 130;
+        dataGridNotes.Columns[6].Width = 160;
         dataGridNotes.Columns[6].HeaderText = "Modification date";
         dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        // Fixed pixel widths don't grow with the header font at higher Windows scale factors
+        // (DataGridView column Width isn't rescaled by AutoScaleMode like a Control's own bounds
+        // are), so the header text was wrapping to two lines at 150%+. AllCells sizes the column
+        // to whatever the header/cell text actually needs at the current DPI, so it never wraps.
+        dataGridNotes.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
         if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("ModificationDateTime"))
             dataGridNotes.Columns[6].Visible = false;
 
         dataGridNotes.Columns[7].DataPropertyName = "CreationDateTime";
-        dataGridNotes.Columns[7].Width = 130;
+        dataGridNotes.Columns[7].Width = 150;
         dataGridNotes.Columns[7].HeaderText = "Creation date";
         dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        dataGridNotes.Columns[7].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
         if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("CreationDateTime"))
             dataGridNotes.Columns[7].Visible = false;
 

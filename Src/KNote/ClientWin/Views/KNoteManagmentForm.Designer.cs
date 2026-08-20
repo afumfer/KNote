@@ -693,6 +693,7 @@
             pictureBoxFolder.Margin = new Padding(4, 3, 4, 3);
             pictureBoxFolder.Name = "pictureBoxFolder";
             pictureBoxFolder.Size = new Size(42, 39);
+            pictureBoxFolder.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBoxFolder.TabIndex = 0;
             pictureBoxFolder.TabStop = false;
             // 
@@ -708,6 +709,7 @@
             // 
             splitContainer1.Panel1.BackColor = SystemColors.Control;
             splitContainer1.Panel1.Controls.Add(tabExplorers);
+            splitContainer1.Panel1.Padding = new Padding(3);
             splitContainer1.Panel1MinSize = 20;
             // 
             // splitContainer1.Panel2
@@ -719,17 +721,17 @@
             splitContainer1.TabIndex = 6;
             // 
             // tabExplorers
-            // 
-            tabExplorers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            //
             tabExplorers.Controls.Add(tabTreeFolders);
             tabExplorers.Controls.Add(tabSearch);
+            tabExplorers.Dock = DockStyle.Fill;
             tabExplorers.ImageList = imageTabExplorer;
-            tabExplorers.Location = new Point(4, 4);
+            tabExplorers.Location = new Point(0, 0);
             tabExplorers.Margin = new Padding(4, 3, 4, 3);
             tabExplorers.Name = "tabExplorers";
             tabExplorers.Padding = new Point(6, 6);
             tabExplorers.SelectedIndex = 0;
-            tabExplorers.Size = new Size(286, 560);
+            tabExplorers.Size = new Size(294, 569);
             tabExplorers.TabIndex = 0;
             tabExplorers.SelectedIndexChanged += tabExplorers_SelectedIndexChanged;
             // 
@@ -797,8 +799,9 @@
             menuExecuteCodeInNewTask.Click += menu_Click;
             // 
             // KNoteManagmentForm
-            // 
-            AutoScaleMode = AutoScaleMode.Inherit;
+            //
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1014, 690);
             Controls.Add(splitContainer1);
             Controls.Add(panelSupManagment);

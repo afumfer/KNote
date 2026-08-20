@@ -31,6 +31,13 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     {
         InitializeComponent();
 
+        // kntEditView hosts a WebView2 control, which - unlike plain GDI-rendered siblings -
+        // owns its own native child window and can end up painting over the menu/resize icons
+        // regardless of their position in the Controls collection. Forcing them to the front
+        // guarantees they stay visible on top of it.
+        picMenu.BringToFront();
+        picResize.BringToFront();
+
         _ctrl = ctrl;
 
         // These lines are here to avoid the sensation of double visual refresh
@@ -479,8 +486,8 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
     private void ConfigurePostItView(bool showInWindowsFormView)
     {
-        Size clientSize = this.ClientSize;
-
+        // kntEditView is Dock=Fill and labelCaption is Dock=Top, so hiding/showing the caption
+        // is enough for kntEditView to reclaim/give back that space - no manual Location/Size math.
         if (showInWindowsFormView)
         {
             this.FormBorderStyle = FormBorderStyle.Sizable;
@@ -492,25 +499,44 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
 
             if (!string.IsNullOrEmpty(_url))
             {
-                labelCaption.Visible = false;
-                picMenu.Top = 9;
-                picMenu.Left = this.Width - 44;
+                panelCaptionHeader.Visible = false;
+                kntEditView.ShowNavigationTools = true;
+                // panelCaptionHeader is hidden here, so panelContent.Padding.Top is what separates
+                // the toolbar/URL bar from the form's top border - trimmed by 2px for this mode only.
+                panelContent.Padding = new Padding(4, 2, 4, 4);
+                panelForm.PerformLayout(); // force kntEditView's Dock=Fill bounds to resolve now
+
+                // Size picMenu to match the URL textbox's own height (which now matches the
+                // back/forward/reload buttons) and float it as an overlay on top of the textbox's
+                // right edge, instead of shrinking the textbox to make room for it. It's then
+                // shrunk by ~25% around that same center point, so it doesn't fill the whole row.
+                var urlTextBox = kntEditView.UrlTextBox;
+
+                // kntEditView is nested inside panelContent, so its bounds aren't directly
+                // relative to panelForm (picMenu's own parent) - convert via screen coordinates
+                // instead of assuming a fixed nesting depth.
+                Point kntEditViewOrigin = panelForm.PointToClient(kntEditView.PointToScreen(Point.Empty));
+                int kntEditViewTop = kntEditViewOrigin.Y;
+                int kntEditViewRight = kntEditViewOrigin.X + kntEditView.Width;
+
+                int fullSize = urlTextBox.Height;
+                int centerX = kntEditViewRight - 2 - fullSize / 2;
+                int centerY = kntEditViewTop + urlTextBox.Top + fullSize / 2;
+
+                int picMenuSize = (int)(fullSize * 0.75);
+                picMenu.Size = new Size(picMenuSize, picMenuSize);
+                picMenu.Top = centerY - picMenuSize / 2;
+                picMenu.Left = centerX - picMenuSize / 2;
                 picMenu.BackColor = Color.WhiteSmoke;
                 picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                     | System.Windows.Forms.AnchorStyles.Right));
-                kntEditView.Location = new System.Drawing.Point(3, 3);
-                kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 28);
-                kntEditView.ShowNavigationTools = true;
+                picMenu.BringToFront();
             }
             else
             {
-                labelCaption.Visible = true;
-                picMenu.Top = 5;
-                picMenu.Left = 5;
-                picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
-                    | System.Windows.Forms.AnchorStyles.Left));
-                kntEditView.Location = new System.Drawing.Point(3, 24);
-                kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 49);
+                panelCaptionHeader.Visible = true;
+                panelContent.Padding = new Padding(4);
+                PositionCaptionModePicMenu();
                 kntEditView.ShowNavigationTools = false;
             }
         }
@@ -523,26 +549,33 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
             this.ShowInTaskbar = false;
             menuWindowsFormView.Checked = false;
 
-            labelCaption.Visible = true;
-            picMenu.Top = 5;
-            picMenu.Left = 5;
-            picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
-                | System.Windows.Forms.AnchorStyles.Left));
-            kntEditView.Location = new System.Drawing.Point(3, 24);
-            kntEditView.Size = new System.Drawing.Size(clientSize.Width - 8, clientSize.Height - 49);
+            panelCaptionHeader.Visible = true;
+            panelContent.Padding = new Padding(4);
+            PositionCaptionModePicMenu();
             kntEditView.ShowNavigationTools = false;
         }
 
-        kntEditView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
         kntEditView.ShowStatusInfo = false;
         kntEditView.MarkdownContentControl.ScrollBars = ScrollBars.None;
 
-        kntEditView.ShowStatusInfo = false;
-
         kntEditView.NavigationStart += KntEditView_NavigationStart;
-        kntEditView.NavigationEnd += KntEditView_NavigationEnd; 
+        kntEditView.NavigationEnd += KntEditView_NavigationEnd;
+    }
+
+    private void PositionCaptionModePicMenu()
+    {
+        // Sized/positioned from labelCaption's own (AutoScale-tracked) height instead of a
+        // hardcoded pixel value, so it stays correctly proportioned at any Windows scale factor -
+        // mirrors the same approach already used for picMenu in navigation mode.
+        int iconSize = (int)(labelCaption.Height * 0.7);
+        Point captionOrigin = panelForm.PointToClient(labelCaption.PointToScreen(Point.Empty));
+
+        picMenu.Size = new Size(iconSize, iconSize);
+        picMenu.Top = captionOrigin.Y + (labelCaption.Height - iconSize) / 2;
+        picMenu.Left = captionOrigin.X + 3;
+        picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
+            | System.Windows.Forms.AnchorStyles.Left));
+        picMenu.BringToFront();
     }
 
     private void KntEditView_NavigationStart(object sender, EventArgs e)

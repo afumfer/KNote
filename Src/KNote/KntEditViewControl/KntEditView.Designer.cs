@@ -93,9 +93,12 @@
             // 
             textUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textUrl.Location = new Point(77, 3);
+            textUrl.Multiline = true;
             textUrl.Name = "textUrl";
-            textUrl.Size = new Size(269, 23);
+            textUrl.Padding = new Padding(0, 4, 0, 0);
+            textUrl.Size = new Size(269, 25);
             textUrl.TabIndex = 6;
+            textUrl.WordWrap = false;
             textUrl.KeyUp += textUrl_KeyUp;
             // 
             // panelWebView

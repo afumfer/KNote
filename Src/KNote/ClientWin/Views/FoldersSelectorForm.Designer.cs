@@ -44,6 +44,7 @@
             // imageListFolders
             // 
             imageListFolders.ColorDepth = ColorDepth.Depth8Bit;
+            imageListFolders.ImageSize = new Size(20, 20);
             imageListFolders.ImageStream = (ImageListStreamer)resources.GetObject("imageListFolders.ImageStream");
             imageListFolders.TransparentColor = Color.Transparent;
             imageListFolders.Images.SetKeyName(0, "folderOpene_16.png");
