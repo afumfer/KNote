@@ -24,6 +24,26 @@ public partial class KntChatGPTForm : Form, IViewBase
         InitializeComponent();
 
         _ctrl = ctrl;
+
+        // Anchor=Right is not reliable for controls nested inside a SplitContainer panel
+        // when AutoScaleMode rescales the form at a different DPI than the Designer was
+        // saved at. Reposition explicitly instead, driven by the header panel's own
+        // Resize (fires on load, DPI change and splitter drag alike).
+        panelResultHeader.Resize += (s, e) => AlignControlsRight(panelResultHeader, 8, 8,
+            radioGetStream, radioGetCompletion, buttonMarkDown, buttonNavigate);
+        panelPromptHeader.Resize += (s, e) => AlignControlsRight(panelPromptHeader, 6, 6,
+            buttonSend, buttonRestart, panelSeparator, buttonCatalogPrompts, buttonViewSystem);
+    }
+
+    private static void AlignControlsRight(Control header, int rightMargin, int spacing, params Control[] controlsLeftToRight)
+    {
+        int right = header.Width - rightMargin;
+        for (int i = controlsLeftToRight.Length - 1; i >= 0; i--)
+        {
+            Control c = controlsLeftToRight[i];
+            c.Left = right - c.Width;
+            right = c.Left - spacing;
+        }
     }
 
     #endregion

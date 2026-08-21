@@ -50,11 +50,15 @@
             labelPrompt = new Label();
             textPrompt = new TextBox();
             buttonSend = new Button();
+            panelResultHeader = new Panel();
+            panelPromptHeader = new Panel();
             statusStripChat.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitChat).BeginInit();
             splitChat.Panel1.SuspendLayout();
             splitChat.Panel2.SuspendLayout();
             splitChat.SuspendLayout();
+            panelResultHeader.SuspendLayout();
+            panelPromptHeader.SuspendLayout();
             SuspendLayout();
             // 
             // statusStripChat
@@ -111,33 +115,36 @@
             splitChat.Orientation = Orientation.Horizontal;
             // 
             // splitChat.Panel1
-            // 
-            splitChat.Panel1.Controls.Add(buttonNavigate);
-            splitChat.Panel1.Controls.Add(buttonMarkDown);
+            //
             splitChat.Panel1.Controls.Add(kntEditViewResult);
-            splitChat.Panel1.Controls.Add(radioGetStream);
-            splitChat.Panel1.Controls.Add(radioGetCompletion);
-            splitChat.Panel1.Controls.Add(labelResult);
+            splitChat.Panel1.Controls.Add(panelResultHeader);
             splitChat.Panel1MinSize = 200;
-            // 
+            //
             // splitChat.Panel2
-            // 
-            splitChat.Panel2.Controls.Add(panelSeparator);
-            splitChat.Panel2.Controls.Add(buttonViewSystem);
-            splitChat.Panel2.Controls.Add(buttonCatalogPrompts);
-            splitChat.Panel2.Controls.Add(buttonRestart);
-            splitChat.Panel2.Controls.Add(labelPrompt);
+            //
             splitChat.Panel2.Controls.Add(textPrompt);
-            splitChat.Panel2.Controls.Add(buttonSend);
+            splitChat.Panel2.Controls.Add(panelPromptHeader);
             splitChat.Panel2MinSize = 50;
             splitChat.Size = new Size(858, 601);
             splitChat.SplitterDistance = 409;
             splitChat.SplitterWidth = 6;
             splitChat.TabIndex = 25;
-            // 
+            //
+            // panelResultHeader
+            //
+            panelResultHeader.Controls.Add(labelResult);
+            panelResultHeader.Controls.Add(radioGetStream);
+            panelResultHeader.Controls.Add(radioGetCompletion);
+            panelResultHeader.Controls.Add(buttonMarkDown);
+            panelResultHeader.Controls.Add(buttonNavigate);
+            panelResultHeader.Dock = DockStyle.Top;
+            panelResultHeader.Location = new Point(0, 0);
+            panelResultHeader.Name = "panelResultHeader";
+            panelResultHeader.Size = new Size(858, 34);
+            panelResultHeader.TabIndex = 29;
+            //
             // buttonNavigate
-            // 
-            buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             buttonNavigate.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonNavigate.Location = new Point(769, 4);
             buttonNavigate.Name = "buttonNavigate";
@@ -146,10 +153,9 @@
             buttonNavigate.Text = "Navigate";
             buttonNavigate.UseVisualStyleBackColor = true;
             buttonNavigate.Click += buttonNavigate_Click;
-            // 
+            //
             // buttonMarkDown
-            // 
-            buttonMarkDown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             buttonMarkDown.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonMarkDown.Location = new Point(682, 4);
             buttonMarkDown.Name = "buttonMarkDown";
@@ -158,19 +164,18 @@
             buttonMarkDown.Text = "Markdown";
             buttonMarkDown.UseVisualStyleBackColor = true;
             buttonMarkDown.Click += buttonMarkDown_Click;
-            // 
+            //
             // kntEditViewResult
-            // 
-            kntEditViewResult.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            kntEditViewResult.Location = new Point(6, 32);
+            //
+            kntEditViewResult.Dock = DockStyle.Fill;
+            kntEditViewResult.Location = new Point(0, 34);
             kntEditViewResult.Margin = new Padding(3, 4, 3, 4);
             kntEditViewResult.Name = "kntEditViewResult";
-            kntEditViewResult.Size = new Size(845, 373);
+            kntEditViewResult.Size = new Size(858, 567);
             kntEditViewResult.TabIndex = 26;
-            // 
+            //
             // radioGetStream
-            // 
-            radioGetStream.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             radioGetStream.AutoSize = true;
             radioGetStream.Checked = true;
             radioGetStream.Font = new Font("Segoe UI", 8.25F);
@@ -181,10 +186,9 @@
             radioGetStream.TabStop = true;
             radioGetStream.Text = "Get Stream";
             radioGetStream.UseVisualStyleBackColor = true;
-            // 
+            //
             // radioGetCompletion
-            // 
-            radioGetCompletion.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             radioGetCompletion.AutoSize = true;
             radioGetCompletion.Font = new Font("Segoe UI", 8.25F);
             radioGetCompletion.Location = new Point(557, 9);
@@ -193,9 +197,9 @@
             radioGetCompletion.TabIndex = 6;
             radioGetCompletion.Text = "Get Completion";
             radioGetCompletion.UseVisualStyleBackColor = true;
-            // 
+            //
             // labelResult
-            // 
+            //
             labelResult.AutoSize = true;
             labelResult.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             labelResult.Location = new Point(8, 12);
@@ -203,19 +207,31 @@
             labelResult.Size = new Size(46, 17);
             labelResult.TabIndex = 25;
             labelResult.Text = "Result:";
-            // 
+            //
+            // panelPromptHeader
+            //
+            panelPromptHeader.Controls.Add(labelPrompt);
+            panelPromptHeader.Controls.Add(buttonSend);
+            panelPromptHeader.Controls.Add(buttonRestart);
+            panelPromptHeader.Controls.Add(panelSeparator);
+            panelPromptHeader.Controls.Add(buttonCatalogPrompts);
+            panelPromptHeader.Controls.Add(buttonViewSystem);
+            panelPromptHeader.Dock = DockStyle.Top;
+            panelPromptHeader.Location = new Point(0, 0);
+            panelPromptHeader.Name = "panelPromptHeader";
+            panelPromptHeader.Size = new Size(858, 34);
+            panelPromptHeader.TabIndex = 30;
+            //
             // panelSeparator
-            // 
-            panelSeparator.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             panelSeparator.BackColor = SystemColors.ControlDarkDark;
             panelSeparator.Location = new Point(569, 5);
             panelSeparator.Name = "panelSeparator";
             panelSeparator.Size = new Size(3, 25);
             panelSeparator.TabIndex = 27;
-            // 
+            //
             // buttonViewSystem
-            // 
-            buttonViewSystem.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             buttonViewSystem.Font = new Font("Segoe UI", 8.25F);
             buttonViewSystem.Location = new Point(738, 4);
             buttonViewSystem.Name = "buttonViewSystem";
@@ -224,10 +240,9 @@
             buttonViewSystem.Text = "&View system root";
             buttonViewSystem.UseVisualStyleBackColor = true;
             buttonViewSystem.Click += buttonViewSystem_Click;
-            // 
+            //
             // buttonCatalogPrompts
-            // 
-            buttonCatalogPrompts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             buttonCatalogPrompts.Font = new Font("Segoe UI", 8.25F);
             buttonCatalogPrompts.Location = new Point(578, 4);
             buttonCatalogPrompts.Name = "buttonCatalogPrompts";
@@ -236,10 +251,9 @@
             buttonCatalogPrompts.Text = "Get prompt from &catalog";
             buttonCatalogPrompts.UseVisualStyleBackColor = true;
             buttonCatalogPrompts.Click += buttonCatalogPrompts_Click;
-            // 
+            //
             // buttonRestart
-            // 
-            buttonRestart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             buttonRestart.Font = new Font("Segoe UI", 8.25F);
             buttonRestart.Location = new Point(506, 4);
             buttonRestart.Name = "buttonRestart";
@@ -248,9 +262,9 @@
             buttonRestart.Text = "&Restart";
             buttonRestart.UseVisualStyleBackColor = true;
             buttonRestart.Click += buttonRestart_Click;
-            // 
+            //
             // labelPrompt
-            // 
+            //
             labelPrompt.AutoSize = true;
             labelPrompt.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             labelPrompt.Location = new Point(8, 12);
@@ -258,22 +272,21 @@
             labelPrompt.Size = new Size(54, 17);
             labelPrompt.TabIndex = 24;
             labelPrompt.Text = "Prompt:";
-            // 
+            //
             // textPrompt
-            // 
-            textPrompt.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            //
+            textPrompt.Dock = DockStyle.Fill;
             textPrompt.Font = new Font("Segoe UI", 9.75F);
-            textPrompt.Location = new Point(6, 34);
+            textPrompt.Location = new Point(0, 34);
             textPrompt.MaxLength = 0;
             textPrompt.Multiline = true;
             textPrompt.Name = "textPrompt";
             textPrompt.ScrollBars = ScrollBars.Vertical;
-            textPrompt.Size = new Size(846, 132);
+            textPrompt.Size = new Size(858, 158);
             textPrompt.TabIndex = 0;
-            // 
+            //
             // buttonSend
-            // 
-            buttonSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            //
             buttonSend.Font = new Font("Segoe UI", 8.25F);
             buttonSend.Location = new Point(444, 4);
             buttonSend.Name = "buttonSend";
@@ -304,6 +317,10 @@
             splitChat.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitChat).EndInit();
             splitChat.ResumeLayout(false);
+            panelResultHeader.ResumeLayout(false);
+            panelResultHeader.PerformLayout();
+            panelPromptHeader.ResumeLayout(false);
+            panelPromptHeader.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -330,5 +347,7 @@
         private RadioButton radioGetCompletion;
         private Button buttonMarkDown;
         private Button buttonNavigate;
+        private Panel panelResultHeader;
+        private Panel panelPromptHeader;
     }
 }

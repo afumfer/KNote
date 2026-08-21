@@ -105,11 +105,18 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
     private void RepositoryEditorForm_Load(object sender, EventArgs e)
     {
-        this.Height = 500;            
         panelSqLite.BorderStyle = BorderStyle.None;
         panelMSSqlServer.BorderStyle = BorderStyle.None;
         panelMSSqlServer.Top = panelSqLite.Top;
         panelMSSqlServer.Left = panelSqLite.Left;
+
+        // The form used to be forced to a hardcoded Height, which AutoScaleMode never
+        // rescales, so it only fit at the DPI it was tuned for. Derive it instead from
+        // the already auto-scaled geometry of the real content and the Accept/Cancel
+        // button row, so it fits at any Windows scale factor.
+        int footerHeight = ClientSize.Height - panelForm.Height;
+        int contentBottom = Math.Max(panelSqLite.Bottom, panelMSSqlServer.Bottom);
+        ClientSize = new Size(ClientSize.Width, contentBottom + footerHeight);
     }
 
     private void radioDataBase_CheckedChanged(object sender, EventArgs e)
