@@ -172,10 +172,10 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
         var password = Param.Password;
 
         if (string.IsNullOrWhiteSpace(password))
-            throw new AppException("Password is required");
+            throw new Exception("Password is required");
 
         if ((await Repository.Users.GetInternalAsync(Param.UserName)).Entity != null)
-            throw new AppException("Username \"" + Param.UserName + "\" is already taken");
+            throw new Exception("Username \"" + Param.UserName + "\" is already taken");
         else
         {
             byte[] passwordHash, passwordSalt;
