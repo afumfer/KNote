@@ -11,9 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.11" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
     <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
@@ -25,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
+    <ProjectReference Include="..\Server\KNote.Server.csproj" />
   </ItemGroup>
 
   <ItemGroup>

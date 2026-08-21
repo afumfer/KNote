@@ -128,3 +128,7 @@ finally
     LogManager.Shutdown();
 }
 
+// Exposes the top-level statements' generated Program class as public so
+// Microsoft.AspNetCore.Mvc.Testing's WebApplicationFactory<Program> can reference it from Tests.
+public partial class Program { }
+
