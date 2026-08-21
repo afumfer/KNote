@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using KNote.Model;
+using KNote.Repository.EntityFramework.Entities;
 using System.Data.Common;
 using System.ComponentModel;
 using System.Linq.Expressions;
