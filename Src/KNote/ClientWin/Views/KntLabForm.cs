@@ -67,7 +67,8 @@ public partial class KntLabForm : Form, IViewBase
             textStatusWebView2.Text = "webView2 not ready";
         }
 
-        textFolderForVirtualHostNameMapping.Text = @"D:\Tmp";
+        textFolderForVirtualHostNameMapping.Text = Path.Combine(Path.GetTempPath(), "KntLab");
+        Directory.CreateDirectory(textFolderForVirtualHostNameMapping.Text);
         webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
             "knote.resources", textFolderForVirtualHostNameMapping.Text,
             CoreWebView2HostResourceAccessKind.Allow);
