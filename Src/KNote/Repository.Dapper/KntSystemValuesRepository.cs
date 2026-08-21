@@ -73,8 +73,8 @@ public class KntSystemValuesRepository : KntRepositoryDapperBase, IKntSystemValu
 
             var db = GetOpenConnection();
 
-            var sql = @"SELECT  SystemValueId, Scope, [Key], [Value] FROM [SystemValues] 
-                    WHERE Id = @Id ";
+            var sql = @"SELECT  SystemValueId, Scope, [Key], [Value] FROM [SystemValues]
+                    WHERE SystemValueId = @Id ";
             var entity = await db.QueryFirstOrDefaultAsync<SystemValueDto>(sql.ToString(), new { Id = id });
             if (entity == null)
                 result.AddErrorMessage("Entity not found.");
