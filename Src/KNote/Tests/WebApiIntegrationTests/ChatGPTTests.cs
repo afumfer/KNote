@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Tests.Helpers;
 
 namespace KNote.Tests.WebApiIntegrationTests;

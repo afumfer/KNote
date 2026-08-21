@@ -1,5 +1,6 @@
 ﻿using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Model.Dto;
 
 namespace KNote.Client.AppStoreService.ClientDataServices.Interfaces;
 

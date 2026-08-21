@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Chat;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
 
