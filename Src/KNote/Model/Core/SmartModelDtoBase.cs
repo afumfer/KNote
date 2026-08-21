@@ -10,6 +10,14 @@ using System.Threading.Tasks;
 
 namespace KNote.Model;
 
+/// <summary>
+/// Base class for every class under KNote.Model.Dto ("XxxDto"). Despite the Dto naming
+/// convention, these are not plain data-transfer POCOs: IsDirty/IsNew/IsDeleted and
+/// INotifyPropertyChanged are domain-adjacent behavior that both UI stacks - the Blazor Client
+/// and the WinForms ClientWin - call directly (e.g. to enable/disable Save, flag unsaved
+/// changes, track dirty state on nested collections via GetChilds). Treat changes here as
+/// changing shared UI behavior, not just serialization shape.
+/// </summary>
 public abstract class SmartModelDtoBase : ModelBase, INotifyPropertyChanged
 {
     protected const string KMSG = "Attribute {0} is required. ";
