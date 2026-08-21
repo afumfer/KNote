@@ -1,8 +1,6 @@
 ﻿using System;
 using KNote.Model;
 using KNote.Repository;
-using EF = KNote.Repository.EntityFramework;
-using DP = KNote.Repository.Dapper;
 using Microsoft.Extensions.Logging;
 
 namespace KNote.Service.Core;
@@ -34,12 +32,7 @@ public class ServiceRef
     {
         get
         {
-            if (_repository == null)
-                // TODO: hack, implement here IoC.
-                if (RepositoryRef.Orm == "Dapper")
-                    _repository = new DP.KntRepository(RepositoryRef);
-                else if (RepositoryRef.Orm == "EntityFramework")
-                    _repository = new EF.KntRepository(RepositoryRef);
+            _repository ??= KntRepositoryFactory.Create(RepositoryRef);
             return _repository;
         }
 

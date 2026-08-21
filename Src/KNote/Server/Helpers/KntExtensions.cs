@@ -7,9 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System;
-using System.Runtime.Intrinsics.Arm;
-using EF = KNote.Repository.EntityFramework;
-using DP = KNote.Repository.Dapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
@@ -27,10 +24,7 @@ public static class KntExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        if (repositoryRef.Orm == "Dapper")
-            services.AddScoped<IKntRepository>(provider => new DP.KntRepository(repositoryRef));
-        else if (repositoryRef.Orm == "EntityFramework")
-            services.AddScoped<IKntRepository>(provider => new EF.KntRepository(repositoryRef));
+        services.AddScoped<IKntRepository>(provider => KntRepositoryFactory.Create(repositoryRef));
 
         services.AddScoped<IKntService, KntService>();
 
@@ -90,10 +84,7 @@ public static class KntExtensions
         
         if (appSettings.ActivateMessageBroker)
         {
-            if (repositoryRef.Orm == "Dapper")
-                _kntServiceForMessageBroker = new KntService(new DP.KntRepository(repositoryRef), true);
-            else if (repositoryRef.Orm == "EntityFramework")
-                _kntServiceForMessageBroker = new KntService(new EF.KntRepository(repositoryRef), true);
+            _kntServiceForMessageBroker = new KntService(KntRepositoryFactory.Create(repositoryRef), true);
         }
         // -------------------------------------------------------------------------------------
     }
