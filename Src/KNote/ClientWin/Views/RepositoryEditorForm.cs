@@ -21,6 +21,8 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         InitializeComponent();
 
         _ctrl = ctrl;
+
+        panelSqLite.Resize += panelSqLite_Resize;
     }
 
     #endregion 
@@ -117,6 +119,29 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         int footerHeight = ClientSize.Height - panelForm.Height;
         int contentBottom = Math.Max(panelSqLite.Bottom, panelMSSqlServer.Bottom);
         ClientSize = new Size(ClientSize.Width, contentBottom + footerHeight);
+
+        // Also run once explicitly: if the runtime DPI happens to match the Designer's
+        // baked scale, AutoScale is a no-op and panelSqLite never actually fires Resize.
+        panelSqLite_Resize(this, EventArgs.Empty);
+    }
+
+    // buttonSelectFile must behave exactly like buttonSelectDirectory: always visible,
+    // always at the same computed position. Both textboxes/buttons no longer use Anchor
+    // (which proved unreliable here) and are instead positioned explicitly from
+    // panelSqLite's own real width plus two fixed margins, driven by its Resize event so
+    // it re-runs after every layout pass (initial show, DPI change, form resize).
+    private const int SqLitePanelRightMargin = 17;
+    private const int SqLiteButtonGap = 8;
+
+    private void panelSqLite_Resize(object sender, EventArgs e)
+    {
+        int buttonLeft = panelSqLite.Width - SqLitePanelRightMargin - buttonSelectDirectory.Width;
+
+        buttonSelectDirectory.Left = buttonLeft;
+        textSqLiteDirectory.Width = buttonLeft - SqLiteButtonGap - textSqLiteDirectory.Left;
+
+        buttonSelectFile.Left = buttonLeft;
+        textSqLiteDataBase.Width = buttonLeft - SqLiteButtonGap - textSqLiteDataBase.Left;
     }
 
     private void radioDataBase_CheckedChanged(object sender, EventArgs e)
@@ -174,13 +199,11 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         {
             case EnumRepositoryEditorMode.AddLink:
                 Text = "Add link to existing repository";
-                buttonSelectFile.Visible = true;
-                textSqLiteDataBase.Width = 464;
                 break;
             case EnumRepositoryEditorMode.Create:
                 Text = "Create new repository";
                 break;
-            case EnumRepositoryEditorMode.Managment:                    
+            case EnumRepositoryEditorMode.Managment:
                 Text = "Edit repository properties";
                 groupRepositoryType.Enabled = false;
                 panelSqLite.Enabled = false;

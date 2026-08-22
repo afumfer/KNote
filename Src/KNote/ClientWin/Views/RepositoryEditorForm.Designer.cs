@@ -56,7 +56,6 @@ namespace KNote.ClientWin.Views
             groupRepositoryType = new GroupBox();
             radioMSSqlServer = new RadioButton();
             radioSqLite = new RadioButton();
-            buttonFolderSearch = new Button();
             labelAlias = new Label();
             textAliasName = new TextBox();
             panelForm.SuspendLayout();
@@ -68,7 +67,7 @@ namespace KNote.ClientWin.Views
             // buttonCancel
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonCancel.Location = new Point(804, 938);
+            buttonCancel.Location = new Point(804, 945);
             buttonCancel.Margin = new Padding(4, 5, 4, 5);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(91, 48);
@@ -80,7 +79,7 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonAccept.Location = new Point(704, 938);
+            buttonAccept.Location = new Point(705, 945);
             buttonAccept.Margin = new Padding(4, 5, 4, 5);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(91, 48);
@@ -102,7 +101,6 @@ namespace KNote.ClientWin.Views
             panelForm.Controls.Add(panelMSSqlServer);
             panelForm.Controls.Add(panelSqLite);
             panelForm.Controls.Add(groupRepositoryType);
-            panelForm.Controls.Add(buttonFolderSearch);
             panelForm.Controls.Add(labelAlias);
             panelForm.Controls.Add(textAliasName);
             panelForm.Dock = DockStyle.Top;
@@ -126,7 +124,7 @@ namespace KNote.ClientWin.Views
             // buttonSelectDirectoryResources
             // 
             buttonSelectDirectoryResources.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSelectDirectoryResources.Location = new Point(853, 330);
+            buttonSelectDirectoryResources.Location = new Point(850, 326);
             buttonSelectDirectoryResources.Margin = new Padding(4, 5, 4, 5);
             buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
             buttonSelectDirectoryResources.Size = new Size(34, 38);
@@ -137,11 +135,10 @@ namespace KNote.ClientWin.Views
             // 
             // textResourcesContainer
             // 
-            textResourcesContainer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textResourcesContainer.Location = new Point(14, 247);
             textResourcesContainer.Margin = new Padding(4, 5, 4, 5);
             textResourcesContainer.Name = "textResourcesContainer";
-            textResourcesContainer.Size = new Size(394, 31);
+            textResourcesContainer.Size = new Size(410, 31);
             textResourcesContainer.TabIndex = 3;
             // 
             // textResourcesContainerUrl
@@ -200,7 +197,7 @@ namespace KNote.ClientWin.Views
             panelMSSqlServer.Controls.Add(label1);
             panelMSSqlServer.Controls.Add(textSQLServer);
             panelMSSqlServer.Controls.Add(label5);
-            panelMSSqlServer.Location = new Point(9, 673);
+            panelMSSqlServer.Location = new Point(7, 672);
             panelMSSqlServer.Margin = new Padding(4, 5, 4, 5);
             panelMSSqlServer.Name = "panelMSSqlServer";
             panelMSSqlServer.Size = new Size(891, 194);
@@ -209,10 +206,10 @@ namespace KNote.ClientWin.Views
             // textSQLDataBase
             // 
             textSQLDataBase.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textSQLDataBase.Location = new Point(1, 138);
+            textSQLDataBase.Location = new Point(4, 138);
             textSQLDataBase.Margin = new Padding(4, 5, 4, 5);
             textSQLDataBase.Name = "textSQLDataBase";
-            textSQLDataBase.Size = new Size(874, 31);
+            textSQLDataBase.Size = new Size(871, 31);
             textSQLDataBase.TabIndex = 13;
             // 
             // label1
@@ -228,10 +225,10 @@ namespace KNote.ClientWin.Views
             // textSQLServer
             // 
             textSQLServer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textSQLServer.Location = new Point(1, 47);
+            textSQLServer.Location = new Point(4, 47);
             textSQLServer.Margin = new Padding(4, 5, 4, 5);
             textSQLServer.Name = "textSQLServer";
-            textSQLServer.Size = new Size(874, 31);
+            textSQLServer.Size = new Size(871, 31);
             textSQLServer.TabIndex = 12;
             // 
             // label5
@@ -254,7 +251,7 @@ namespace KNote.ClientWin.Views
             panelSqLite.Controls.Add(labelSqLiteDataBase);
             panelSqLite.Controls.Add(textSqLiteDirectory);
             panelSqLite.Controls.Add(labelDirectory);
-            panelSqLite.Location = new Point(9, 462);
+            panelSqLite.Location = new Point(7, 462);
             panelSqLite.Margin = new Padding(4, 5, 4, 5);
             panelSqLite.Name = "panelSqLite";
             panelSqLite.Size = new Size(891, 200);
@@ -262,21 +259,18 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelectFile
             // 
-            buttonSelectFile.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSelectFile.Location = new Point(843, 137);
+            buttonSelectFile.Location = new Point(842, 134);
             buttonSelectFile.Margin = new Padding(4, 5, 4, 5);
             buttonSelectFile.Name = "buttonSelectFile";
             buttonSelectFile.Size = new Size(34, 38);
-            buttonSelectFile.TabIndex = 11;
+            buttonSelectFile.TabIndex = 12;
             buttonSelectFile.Text = "...";
             buttonSelectFile.UseVisualStyleBackColor = true;
-            buttonSelectFile.Visible = false;
             buttonSelectFile.Click += buttonSelectFile_Click;
             // 
             // buttonSelectDirectory
             // 
-            buttonSelectDirectory.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSelectDirectory.Location = new Point(843, 47);
+            buttonSelectDirectory.Location = new Point(840, 43);
             buttonSelectDirectory.Margin = new Padding(4, 5, 4, 5);
             buttonSelectDirectory.Name = "buttonSelectDirectory";
             buttonSelectDirectory.Size = new Size(34, 38);
@@ -287,11 +281,10 @@ namespace KNote.ClientWin.Views
             // 
             // textSqLiteDataBase
             // 
-            textSqLiteDataBase.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textSqLiteDataBase.Location = new Point(1, 138);
+            textSqLiteDataBase.Location = new Point(4, 138);
             textSqLiteDataBase.Margin = new Padding(4, 5, 4, 5);
             textSqLiteDataBase.Name = "textSqLiteDataBase";
-            textSqLiteDataBase.Size = new Size(874, 31);
+            textSqLiteDataBase.Size = new Size(828, 31);
             textSqLiteDataBase.TabIndex = 10;
             // 
             // labelSqLiteDataBase
@@ -306,11 +299,10 @@ namespace KNote.ClientWin.Views
             // 
             // textSqLiteDirectory
             // 
-            textSqLiteDirectory.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textSqLiteDirectory.Location = new Point(1, 47);
+            textSqLiteDirectory.Location = new Point(4, 47);
             textSqLiteDirectory.Margin = new Padding(4, 5, 4, 5);
             textSqLiteDirectory.Name = "textSqLiteDirectory";
-            textSqLiteDirectory.Size = new Size(831, 31);
+            textSqLiteDirectory.Size = new Size(828, 31);
             textSqLiteDirectory.TabIndex = 8;
             // 
             // labelDirectory
@@ -362,19 +354,6 @@ namespace KNote.ClientWin.Views
             radioSqLite.Text = "SqLite";
             radioSqLite.UseVisualStyleBackColor = true;
             radioSqLite.CheckedChanged += radioDataBase_CheckedChanged;
-            // 
-            // buttonFolderSearch
-            // 
-            buttonFolderSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonFolderSearch.BackColor = SystemColors.Control;
-            buttonFolderSearch.FlatStyle = FlatStyle.System;
-            buttonFolderSearch.Location = new Point(1284, 332);
-            buttonFolderSearch.Margin = new Padding(6, 5, 6, 5);
-            buttonFolderSearch.Name = "buttonFolderSearch";
-            buttonFolderSearch.Size = new Size(39, 42);
-            buttonFolderSearch.TabIndex = 11;
-            buttonFolderSearch.Text = "...";
-            buttonFolderSearch.UseVisualStyleBackColor = false;
             // 
             // labelAlias
             // 
@@ -448,7 +427,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textSqLiteDirectory;
         private System.Windows.Forms.Label labelDirectory;
         private System.Windows.Forms.Button buttonSelectDirectory;
-        private System.Windows.Forms.Button buttonSelectFile;
         private System.Windows.Forms.TextBox textResourcesContainerUrl;
         private System.Windows.Forms.TextBox textResourcesContainerRoot;
         private System.Windows.Forms.TextBox textResourcesContainer;
@@ -457,5 +435,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelContainer;
         private System.Windows.Forms.Button buttonSelectDirectoryResources;
         private System.Windows.Forms.CheckBox checkResourceContentInDB;
+        private Button buttonSelectFile;
     }
 }
