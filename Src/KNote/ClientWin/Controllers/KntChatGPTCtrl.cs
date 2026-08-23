@@ -133,7 +133,7 @@ public class KntChatGPTCtrl : CtrlBase
         get
         {
             if (_chatGPTView == null)
-                _chatGPTView = Store.FactoryViews.View(this);
+                _chatGPTView = Store.FactoryViews.Registry.Resolve<KntChatGPTCtrl, IViewBase>(this);
             return _chatGPTView;
         }
     }

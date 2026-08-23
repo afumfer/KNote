@@ -20,7 +20,7 @@ public class NoteAttributeEditorCtrl : CtrlEditorBase<IViewEditor<NoteKAttribute
 
     protected override IViewEditor<NoteKAttributeDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<NoteAttributeEditorCtrl, IViewEditor<NoteKAttributeDto>>(this);
     }
 
     #endregion

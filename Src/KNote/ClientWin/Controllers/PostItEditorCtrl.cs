@@ -66,7 +66,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     protected override IViewPostIt<NoteDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<PostItEditorCtrl, IViewPostIt<NoteDto>>(this);
     }
 
     #endregion 

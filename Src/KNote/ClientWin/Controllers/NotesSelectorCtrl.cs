@@ -53,7 +53,7 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteMinimalDto>,
 
     protected override IViewSelector<NoteMinimalDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<NotesSelectorCtrl, IViewSelector<NoteMinimalDto>>(this);
     }
 
     #endregion 

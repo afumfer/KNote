@@ -653,7 +653,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         get
         {
             if (_serverCOMView == null)
-                _serverCOMView = Store.FactoryViews.View(this);
+                _serverCOMView = Store.FactoryViews.Registry.Resolve<KntServerCOMCtrl, IViewServerCOM>(this);
             return _serverCOMView;
         }
     }

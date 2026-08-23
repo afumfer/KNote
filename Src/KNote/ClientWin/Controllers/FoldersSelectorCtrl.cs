@@ -44,7 +44,7 @@ public class FoldersSelectorCtrl : CtrlSelectorBase<IViewSelector<FolderWithServ
 
     protected override IViewSelector<FolderWithServiceRef> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<FoldersSelectorCtrl, IViewSelector<FolderWithServiceRef>>(this);
     }
 
     #endregion 

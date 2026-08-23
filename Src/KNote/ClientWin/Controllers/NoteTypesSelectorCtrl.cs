@@ -19,7 +19,7 @@ public class NoteTypesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteTypeDto>
 
     protected override IViewSelector<NoteTypeDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<NoteTypesSelectorCtrl, IViewSelector<NoteTypeDto>>(this);
     }
 
     #endregion

@@ -142,7 +142,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
         get
         {
             if (_chatView == null)
-                _chatView = Store.FactoryViews.View(this);
+                _chatView = Store.FactoryViews.Registry.Resolve<KntChatCtrl, IViewChat>(this);
             return _chatView;
         }
     }

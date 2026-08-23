@@ -20,7 +20,7 @@ public class FolderEditorCtrl : CtrlNoteEditorBase<IViewEditor<FolderDto>, Folde
 
     protected override IViewEditor<FolderDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<FolderEditorCtrl, IViewEditor<FolderDto>>(this);
     }
 
     #endregion

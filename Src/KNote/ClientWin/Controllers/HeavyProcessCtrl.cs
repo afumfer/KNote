@@ -37,7 +37,7 @@ public class HeavyProcessCtrl : CtrlBase
         get
         {
             if (_heavyProcessView == null)
-                _heavyProcessView = Store.FactoryViews.View(this);
+                _heavyProcessView = Store.FactoryViews.Registry.Resolve<HeavyProcessCtrl, IViewHeavyProcess>(this);
             return _heavyProcessView;
         }
     }

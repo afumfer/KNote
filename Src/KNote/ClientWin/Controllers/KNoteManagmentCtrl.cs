@@ -170,7 +170,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     protected override IViewKNoteManagment CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<KNoteManagmentCtrl, IViewKNoteManagment>(this);
     }
 
     private IViewBase _notifyView;
@@ -180,7 +180,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         {
             if (_notifyView == null)
             {
-                _notifyView = Store.FactoryViews.NotifyView(this);
+                _notifyView = Store.FactoryViews.Registry.Resolve<KNoteManagmentCtrl, IViewBase>(this, key: "Notify");
             }
             return _notifyView;
         }
@@ -193,7 +193,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         {
             if (_aboutView == null)
             {
-                _aboutView = Store.FactoryViews.AboutView(this);
+                _aboutView = Store.FactoryViews.Registry.Resolve<KNoteManagmentCtrl, IViewBase>(this, key: "About");
             }
             return _aboutView;
         }

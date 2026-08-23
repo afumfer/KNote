@@ -20,7 +20,7 @@ public class ResourceEditorCtrl : CtrlEditorBase<IViewEditor<ResourceDto>, Resou
 
     protected override IViewEditor<ResourceDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<ResourceEditorCtrl, IViewEditor<ResourceDto>>(this);
     }
 
     public override Task<bool> NewModel(IKntService service)

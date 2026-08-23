@@ -70,7 +70,7 @@ CtrlBase
   si un controlador guarda sub-controladores o sub-vistas para que se limpien solos, deben ser campos de
   esos tipos exactos (o marcarse con `[ResetControllerField]`).
 - **`CtrlViewBase<TView>`**: posee la vista de forma perezosa vía el método abstracto `CreateView()` — este
-  es el punto donde cada Ctrl concreto invoca la factory (`Store.FactoryViews.View(this)`). `Run()` llama a
+  es el punto donde cada Ctrl concreto resuelve su vista contra `Store.FactoryViews.Registry`. `Run()` llama a
   `View.ShowView()`; `RunModal()` a `View.ShowModalView()`.
 - **`CtrlViewEmbeddableBase<TView>`**: para vistas que pueden mostrarse como ventana flotante o embebidas en
   un panel (`ConfigureWindowMode()`/`ConfigureEmbededMode()` según `EmbededMode`).
@@ -129,38 +129,32 @@ Más interfaces específicas de un caso de uso concreto: `IViewKNoteManagment`, 
 `IFactoryViews` (`Core/IFactoryViews.cs`) históricamente declaraba **una sobrecarga de `View(...)` por cada
 Ctrl concreto** (resolución por el tipo estático del controlador), más un par de vistas auxiliares de
 `KNoteManagmentCtrl` (`NotifyView`, `AboutView`) — con el inconveniente de que cada caso de uso nuevo
-obligaba a tocar esa interfaz. `FactoryViewsWinForms` (`Core/FactoryViewsWinForms.cs`) sigue siendo su
-única implementación, pero desde el refactor (Fase 4) las 25 fábricas ya no son código repetido por método:
-se registran en el constructor sobre un `ViewFactoryRegistry` (`Core/ViewFactoryRegistry.cs`), un mapa
-genérico `(tipo de Ctrl, key opcional) → Func<Ctrl, View>` (la `key` distingue los tres registros de
-`KNoteManagmentCtrl`: vista principal, `Notify`, `About`), y cada método de `IFactoryViews` solo resuelve
-contra ese registro:
+obligaba a tocar esa interfaz. Tras el refactor (Fases 4 y 4b), **`IFactoryViews` ya no declara ninguna
+sobrecarga**: se ha quedado reducida a un único miembro, `ViewFactoryRegistry Registry { get; }`
+(`Core/ViewFactoryRegistry.cs`), un mapa genérico `(tipo de Ctrl, key opcional) → Func<Ctrl, View>` (la
+`key` distingue los tres registros de `KNoteManagmentCtrl`: vista principal, `Notify`, `About`).
+`FactoryViewsWinForms` (`Core/FactoryViewsWinForms.cs`), su única implementación, registra las 25
+fábricas existentes en su constructor y no expone ya ningún método `View(...)`:
 
 ```csharp
-// Constructor de FactoryViewsWinForms
+// Constructor de FactoryViewsWinForms — todo lo que queda de la fábrica
 Registry.Register<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(c => new NoteEditorForm(c));
+Registry.Register<KNoteManagmentCtrl, IViewBase>(c => new NotifyForm(c), key: "Notify");
 ...
-// Implementación de IFactoryViews.View(NoteEditorCtrl) — se mantiene por compatibilidad con el código existente
-public IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorCtrl controller)
-    => Registry.Resolve<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(controller);
 ```
 
-Los 25 `Ctrl` existentes siguen resolviendo su vista exactamente igual que antes, vía `CreateView()`:
+Los 25 `Ctrl` existentes resuelven su vista directamente contra el registro desde `CreateView()` (o desde
+su propiedad de vista perezosa, en los pocos controladores como `KntChatCtrl`/`HeavyProcessCtrl` que no
+heredan de `CtrlViewBase<TView>`):
 
 ```csharp
 protected override IViewEditorEmbeddable<NoteExtendedDto> CreateView()
-    => Store.FactoryViews.View(this);
+    => Store.FactoryViews.Registry.Resolve<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(this);
 ```
 
-**Un `Ctrl` nuevo ya no necesita tocar `IFactoryViews`**: le basta con registrar su fábrica
-(`Store.FactoryViews.Registry.Register<MiCtrl, IViewMia>(c => new MiForm(c));`, típicamente en el
-constructor de `FactoryViewsWinForms` o justo después de crearla) e implementar `CreateView()` resolviendo
-directamente contra el registro:
-
-```csharp
-protected override IViewMia CreateView()
-    => Store.FactoryViews.Registry.Resolve<MiCtrl, IViewMia>(this);
-```
+**Un `Ctrl` nuevo no toca `IFactoryViews`** — nunca ha hecho falta desde que se retiraron todas las
+sobrecargas: solo hay que registrar su fábrica (típicamente en el constructor de `FactoryViewsWinForms`)
+y resolverla desde `CreateView()` con el mismo patrón de arriba.
 
 El `Form` concreto (en `Views/`) recibe el **controlador concreto** en su constructor y lo llama
 directamente (`_ctrl.MetodoX()`), mientras que el Ctrl solo ve al `Form` a través de la interfaz `IView*`.
@@ -168,17 +162,9 @@ Es un acoplamiento asimétrico a propósito: View → Ctrl concreto (referencia 
 interfaz), que es lo que permite sustituir WinForms por otro framework sin tocar `Controllers/`.
 
 **Al añadir un caso de uso nuevo hay que tocar, en este orden**: interfaz `IView*` (si no hay una genérica
-que sirva) → registro en `ViewFactoryRegistry` (vía `FactoryViewsWinForms`, sin tocar `IFactoryViews`) →
-clase `Ctrl` en `Controllers/` heredando de la base adecuada, resolviendo su vista contra el registro →
-`Form` en `Views/` implementando la interfaz.
-
-**Ejemplo ya migrado**: `MonitorCtrl` ya no pasa por `IFactoryViews` — su `CreateView()` resuelve
-directamente contra el registro (`Store.FactoryViews.Registry.Resolve<MonitorCtrl, IViewBase>(this)`), y
-se retiró su sobrecarga `IViewBase View(MonitorCtrl controller)` de `IFactoryViews`/`FactoryViewsWinForms`.
-El registro de su fábrica (`Registry.Register<MonitorCtrl, IViewBase>(c => new MonitorForm(c));`) se quedó
-tal cual en el constructor de `FactoryViewsWinForms` — lo único que desaparece es el método puente de la
-interfaz. Es el patrón a seguir para retirar, uno a uno y de forma oportunista, el resto de las sobrecargas
-existentes.
+que sirva) → registro en `ViewFactoryRegistry` (vía el constructor de `FactoryViewsWinForms`) → clase
+`Ctrl` en `Controllers/` heredando de la base adecuada, resolviendo su vista contra el registro → `Form`
+en `Views/` implementando la interfaz.
 
 ## `Store` (`Core/Store.cs`)
 
@@ -242,8 +228,8 @@ public async Task AddNote(IKntService service)
 {
     var noteEditorCtrl = new NoteEditorCtrl(Store);   // construcción manual, sin DI
     await noteEditorCtrl.NewModel(service);
-    noteEditorCtrl.Run();                              // → CreateView() → Store.FactoryViews.View(this)
-}                                                       //   → new NoteEditorForm(this) → View.ShowView()
+    noteEditorCtrl.Run();                     // → CreateView() → Store.FactoryViews.Registry.Resolve<...>(this)
+}                                              //   → new NoteEditorForm(this) → View.ShowView()
 ```
 
 Dentro de `NoteEditorCtrl.LoadModelById`, el acceso a datos baja por:

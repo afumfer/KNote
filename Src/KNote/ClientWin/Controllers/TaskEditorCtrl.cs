@@ -20,7 +20,7 @@ public class TaskEditorCtrl : CtrlEditorBase<IViewEditor<NoteTaskDto>, NoteTaskD
 
     protected override IViewEditor<NoteTaskDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<TaskEditorCtrl, IViewEditor<NoteTaskDto>>(this);
     }
 
     public override Task<bool> NewModel(IKntService service)

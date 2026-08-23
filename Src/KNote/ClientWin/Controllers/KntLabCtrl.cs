@@ -21,7 +21,7 @@ public class KntLabCtrl : CtrlBase
         get
         {
             if (_labView == null)
-                _labView = Store.FactoryViews.View(this);
+                _labView = Store.FactoryViews.Registry.Resolve<KntLabCtrl, IViewBase>(this);
             return _labView;
         }
     }

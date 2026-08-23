@@ -2,7 +2,6 @@ using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
-using System.ComponentModel;
 
 namespace KNote.ClientWin.Core;
 
@@ -38,52 +37,4 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<KntLabCtrl, IViewBase>(c => new KntLabForm(c));
         Registry.Register<HeavyProcessCtrl, IViewHeavyProcess>(c => new HeavyProcessForm(c));
     }
-
-    public IViewBase View(KntScriptConsoleCtrl controller) => Registry.Resolve<KntScriptConsoleCtrl, IViewBase>(controller);
-
-    public IViewSelector<FolderWithServiceRef> View(FoldersSelectorCtrl controller) => Registry.Resolve<FoldersSelectorCtrl, IViewSelector<FolderWithServiceRef>>(controller);
-
-    public IViewSelector<NoteMinimalDto> View(NotesSelectorCtrl controller) => Registry.Resolve<NotesSelectorCtrl, IViewSelector<NoteMinimalDto>>(controller);
-
-    public IViewKNoteManagment View(KNoteManagmentCtrl controller) => Registry.Resolve<KNoteManagmentCtrl, IViewKNoteManagment>(controller);
-
-    public IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorCtrl controller) => Registry.Resolve<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(controller);
-
-    public IViewPostIt<NoteDto> View(PostItEditorCtrl controller) => Registry.Resolve<PostItEditorCtrl, IViewPostIt<NoteDto>>(controller);
-
-    public IViewPostIt<WindowDto> View(PostItPropertiesCtrl controller) => Registry.Resolve<PostItPropertiesCtrl, IViewPostIt<WindowDto>>(controller);
-
-    public IViewEditor<FolderDto> View(FolderEditorCtrl controller) => Registry.Resolve<FolderEditorCtrl, IViewEditor<FolderDto>>(controller);
-
-    public IViewEditor<RepositoryRef> View(RepositoryEditorCtrl controller) => Registry.Resolve<RepositoryEditorCtrl, IViewEditor<RepositoryRef>>(controller);
-
-    public IViewBase NotifyView(KNoteManagmentCtrl controller) => Registry.Resolve<KNoteManagmentCtrl, IViewBase>(controller, key: "Notify");
-
-    public IViewBase AboutView(KNoteManagmentCtrl controller) => Registry.Resolve<KNoteManagmentCtrl, IViewBase>(controller, key: "About");
-
-    public IViewEditor<KMessageDto> View(MessageEditorCtrl controller) => Registry.Resolve<MessageEditorCtrl, IViewEditor<KMessageDto>>(controller);
-
-    public IViewEditor<ResourceDto> View(ResourceEditorCtrl controller) => Registry.Resolve<ResourceEditorCtrl, IViewEditor<ResourceDto>>(controller);
-
-    public IViewEditor<KAttributeDto> View(AttributeEditorCtrl controller) => Registry.Resolve<AttributeEditorCtrl, IViewEditor<KAttributeDto>>(controller);
-
-    public IViewEditor<NoteTaskDto> View(TaskEditorCtrl controller) => Registry.Resolve<TaskEditorCtrl, IViewEditor<NoteTaskDto>>(controller);
-
-    public IViewSelector<NoteTypeDto> View(NoteTypesSelectorCtrl controller) => Registry.Resolve<NoteTypesSelectorCtrl, IViewSelector<NoteTypeDto>>(controller);
-
-    public IViewEditor<NoteKAttributeDto> View(NoteAttributeEditorCtrl controller) => Registry.Resolve<NoteAttributeEditorCtrl, IViewEditor<NoteKAttributeDto>>(controller);
-
-    public IViewSelector<SelectedNotesInServiceRef> View(FiltersSelectorCtrl controller) => Registry.Resolve<FiltersSelectorCtrl, IViewSelector<SelectedNotesInServiceRef>>(controller);
-
-    public IViewEditor<AppConfig> View(OptionsEditorCtrl controller) => Registry.Resolve<OptionsEditorCtrl, IViewEditor<AppConfig>>(controller);
-
-    public IViewBase View(KntChatGPTCtrl controller) => Registry.Resolve<KntChatGPTCtrl, IViewBase>(controller);
-
-    public IViewChat View(KntChatCtrl controller) => Registry.Resolve<KntChatCtrl, IViewChat>(controller);
-
-    public IViewServerCOM View(KntServerCOMCtrl controller) => Registry.Resolve<KntServerCOMCtrl, IViewServerCOM>(controller);
-
-    public IViewBase View(KntLabCtrl controller) => Registry.Resolve<KntLabCtrl, IViewBase>(controller);
-
-    public IViewHeavyProcess View(HeavyProcessCtrl controller) => Registry.Resolve<HeavyProcessCtrl, IViewHeavyProcess>(controller);
 }

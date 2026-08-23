@@ -20,7 +20,7 @@ public class MessageEditorCtrl : CtrlEditorBase<IViewEditor<KMessageDto>, KMessa
 
     protected override IViewEditor<KMessageDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<MessageEditorCtrl, IViewEditor<KMessageDto>>(this);
     }
 
     public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)

@@ -25,7 +25,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
 
     protected override IViewEditor<RepositoryRef> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<RepositoryEditorCtrl, IViewEditor<RepositoryRef>>(this);
     }
 
     public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)

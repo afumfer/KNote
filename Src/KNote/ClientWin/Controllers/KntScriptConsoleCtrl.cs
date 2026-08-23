@@ -38,8 +38,8 @@ public class KntScriptConsoleCtrl : CtrlViewBase<IViewBase>
     #region Controller overrid methods
 
     protected override IViewBase CreateView()
-    {            
-        return Store.FactoryViews.View(this);
+    {
+        return Store.FactoryViews.Registry.Resolve<KntScriptConsoleCtrl, IViewBase>(this);
     }
 
     #endregion

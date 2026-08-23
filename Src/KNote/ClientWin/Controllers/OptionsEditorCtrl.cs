@@ -19,7 +19,7 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfi
 
     protected override IViewEditor<AppConfig> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<OptionsEditorCtrl, IViewEditor<AppConfig>>(this);
     }
 
     public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)

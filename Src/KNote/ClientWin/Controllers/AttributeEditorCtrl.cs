@@ -21,7 +21,7 @@ public class AttributeEditorCtrl : CtrlEditorBase<IViewEditor<KAttributeDto>, KA
 
     protected override IViewEditor<KAttributeDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<AttributeEditorCtrl, IViewEditor<KAttributeDto>>(this);
     }
 
     public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)

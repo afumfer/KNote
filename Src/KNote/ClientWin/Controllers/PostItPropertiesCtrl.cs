@@ -19,8 +19,8 @@ public class PostItPropertiesCtrl : CtrlEditorBase<IViewPostIt<WindowDto>, Windo
 
     protected override IViewPostIt<WindowDto> CreateView()
     {
-        return Store.FactoryViews.View(this);
-    }        
+        return Store.FactoryViews.Registry.Resolve<PostItPropertiesCtrl, IViewPostIt<WindowDto>>(this);
+    }
 
     public override Task<bool> NewModel(IKntService service)
     {

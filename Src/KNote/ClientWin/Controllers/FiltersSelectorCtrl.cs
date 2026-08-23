@@ -39,7 +39,7 @@ public class FiltersSelectorCtrl : CtrlSelectorBase<IViewSelector<SelectedNotesI
 
     protected override IViewSelector<SelectedNotesInServiceRef> CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<FiltersSelectorCtrl, IViewSelector<SelectedNotesInServiceRef>>(this);
     }
 
     public override Task<bool> LoadEntities(IKntService service, bool refreshView = true)
