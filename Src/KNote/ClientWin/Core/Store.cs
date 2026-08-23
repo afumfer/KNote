@@ -18,9 +18,9 @@ public class Store
 {
     #region Private fields
 
-    private readonly List<ServiceRef> _servicesRefs;       
+    private readonly ServiceRefRegistry _serviceRefRegistry;
 
-    private readonly List<CtrlBase> _listControllers;
+    private readonly ControllerRegistry _controllerRegistry;
 
     private ServiceRef _assistantServiceRef;
 
@@ -87,8 +87,8 @@ public class Store
         if (AppConfig == null)
             AppConfig = new AppConfig();
 
-        _listControllers = new List<CtrlBase>();
-        _servicesRefs = new List<ServiceRef>();
+        _controllerRegistry = new ControllerRegistry();
+        _serviceRefRegistry = new ServiceRefRegistry();
         FactoryViews = factoryViews; //
     }
 
@@ -129,7 +129,7 @@ public class Store
         if(serviceRef is null)
             throw new ArgumentNullException(nameof(serviceRef));
 
-        _servicesRefs.Add(serviceRef);
+        _serviceRefRegistry.Add(serviceRef);
         Logger?.LogInformation("Added ServiceRef {component}", serviceRef.ToString());
         AddedServiceRef?.Invoke(this, new ControllerEventArgs<ServiceRef>(serviceRef));
     }
@@ -148,7 +148,7 @@ public class Store
         if (serviceRef is null)
             throw new ArgumentNullException(nameof(serviceRef));
 
-        _servicesRefs.Remove(serviceRef);
+        _serviceRefRegistry.Remove(serviceRef);
         Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
         AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);            
         RemovedServiceRef?.Invoke(this, new ControllerEventArgs<ServiceRef>(serviceRef));
@@ -156,22 +156,22 @@ public class Store
 
     public List<ServiceRef> GetAllServiceRef()
     {
-        return _servicesRefs.ToList();
+        return _serviceRefRegistry.GetAll();
     }
 
     public ServiceRef GetServiceRef(Guid id)
     {
-        return _servicesRefs.Where(_ => _.IdServiceRef == id).FirstOrDefault();
+        return _serviceRefRegistry.GetById(id);
     }
 
     public ServiceRef GetServiceRef(string alias)
     {
-        return _servicesRefs.Where(_ => _.Alias == alias).FirstOrDefault();
+        return _serviceRefRegistry.GetByAlias(alias);
     }
 
     public ServiceRef GetFirstServiceRef()
     {
-        return _servicesRefs.FirstOrDefault();
+        return _serviceRefRegistry.GetFirst();
     }
 
     public IKntService GetActiveOrDefaultService()
@@ -221,7 +221,7 @@ public class Store
             ((NoteEditorCtrl)controller).PostItEdit += Store_EditedPostItNote;
         }
 
-        _listControllers.Add(controller);
+        _controllerRegistry.Add(controller);
         Logger?.LogInformation("Added Component {component}", controller.ToString());
         AddedController?.Invoke(this, new ControllerEventArgs<CtrlBase>(controller));
     }
@@ -246,7 +246,7 @@ public class Store
             ((NoteEditorCtrl)controller).PostItEdit += Store_EditedPostItNote;
         }
 
-        _listControllers.Remove(controller);
+        _controllerRegistry.Remove(controller);
         Logger?.LogInformation("Removed Component {component}", controller.ToString());
         RemovedController?.Invoke(this, new ControllerEventArgs<CtrlBase>(controller));
     }
@@ -290,7 +290,7 @@ public class Store
 
     public Task<bool> CheckNoteIsActive(Guid noteId)
     {
-        foreach(var com in _listControllers)
+        foreach (var com in _controllerRegistry.All)
         {
             if (com is NoteEditorCtrl)
             {
@@ -305,7 +305,7 @@ public class Store
 
     public Task<bool> CheckPostItIsActive(Guid noteId)
     {
-        foreach (var com in _listControllers)
+        foreach (var com in _controllerRegistry.All)
         {
             if (com is PostItEditorCtrl)
                 if (((PostItEditorCtrl)com).Model.NoteId == noteId)
@@ -318,7 +318,7 @@ public class Store
     {
         try
         {
-            foreach (var com in _listControllers)
+            foreach (var com in _controllerRegistry.All)
             {
                 if (com is PostItEditorCtrl)
                     await ((PostItEditorCtrl)com).SaveModel();
@@ -346,7 +346,7 @@ public class Store
 
         try
         {
-            foreach (var com in _listControllers)
+            foreach (var com in _controllerRegistry.All)
             {
                 if (com is PostItEditorCtrl)
                 {                        
@@ -392,7 +392,7 @@ public class Store
 
     public void HidePostIts()
     {
-        foreach (var com in _listControllers)
+        foreach (var com in _controllerRegistry.All)
         {
             if (com is PostItEditorCtrl)
             {
@@ -403,7 +403,7 @@ public class Store
 
     public void ActivatePostIts()
     {
-        foreach (var com in _listControllers)
+        foreach (var com in _controllerRegistry.All)
         {
             if (com is PostItEditorCtrl)
                 ((PostItEditorCtrl)com).ActivatePostIt();
