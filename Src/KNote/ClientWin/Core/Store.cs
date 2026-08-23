@@ -22,8 +22,6 @@ public class Store
 
     private readonly List<CtrlBase> _listControllers;
 
-    private readonly char[] newLine = { '\r', '\n' };
-    
     private ServiceRef _assistantServiceRef;
 
     #endregion 
@@ -412,44 +410,9 @@ public class Store
         }
     }
 
-    public string ExtensionFileToFileType(string extension)
-    {
-        // TODO: Refactor this method
+    public string ExtensionFileToFileType(string extension) => KntTextUtils.ExtensionFileToFileType(extension);
 
-        var ext = extension.ToLower();
-
-        if (ext == ".jpg")
-            return @"image/jpeg";
-        else if (ext == ".jpeg")
-            return @"image/jpeg";
-        else if (ext == ".png")
-            return "image/png";
-        else if (ext == ".pdf")
-            return "application/pdf";
-        else if (ext == ".mp4")
-            return "video/mp4";
-        else if (ext == ".mp3")
-            return "audio/mp3";
-        else if (ext == ".txt")
-            return "text/plain";
-        else if (ext == ".text")
-            return "text/plain";
-        else if (ext == ".htm")
-            return "text/plain";
-        else if (ext == ".html")
-            return "text/plain";
-        else
-            return "";            
-    }
-    
-    public bool IsSupportedFileTypeForPreview(string fileType)
-    {
-        // TODO: Refactor this method
-        if (string.IsNullOrEmpty(fileType))
-            return false;
-
-        return KntConst.SupportedMimeTypes.Contains(fileType);            
-    }
+    public bool IsSupportedFileTypeForPreview(string fileType) => KntTextUtils.IsSupportedFileTypeForPreview(fileType);
 
     public async Task<Guid?> GetUserId(IKntService service)
     {
@@ -546,50 +509,13 @@ public class Store
 
     #region Utils public methods
 
-    public DateTime? TextToDateTime(string text)
-    {
-        DateTime output;
-        if (DateTime.TryParse(text, out output))
-            return output;
-        else
-            return null;
-    }
+    public DateTime? TextToDateTime(string text) => KntTextUtils.TextToDateTime(text);
 
-    public int TextToInt(string text)
-    {
-        int output;
-        if (int.TryParse(text, out output))
-            return output;
-        else
-            return 0;
-    }
+    public int TextToInt(string text) => KntTextUtils.TextToInt(text);
 
-    public double? TextToDouble(string text)
-    {
-        double output;
-        if (double.TryParse(text, out output))
-            return output;
-        else
-            return null;
-    }
-    
-    public string ExtractUrlFromText(string text)
-    {      
-        if (string.IsNullOrEmpty(text))        
-            return null;
-        
-        int indexJump = text.IndexOfAny(newLine);
-        var urlFistLine =  (indexJump >= 0) ? text.Substring(0, indexJump) : text;
+    public double? TextToDouble(string text) => KntTextUtils.TextToDouble(text);
 
-        Uri resultUri;
-        var validResult = Uri.TryCreate(urlFistLine, UriKind.Absolute, out resultUri) &&
-               (resultUri.Scheme == Uri.UriSchemeHttp || resultUri.Scheme == Uri.UriSchemeHttps || resultUri.Scheme == Uri.UriSchemeFile);
-
-        if (validResult)
-            return urlFistLine;
-        else
-            return null;
-    }
+    public string ExtractUrlFromText(string text) => KntTextUtils.ExtractUrlFromText(text);
 
     public async Task<NoteDto> GetCatalogItem(ServiceRef serviceRef, string item, string viewTitle)
     {
