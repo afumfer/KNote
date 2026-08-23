@@ -98,7 +98,10 @@ public class TaskEditorCtrl : CtrlEditorBase<IViewEditor<NoteTaskDto>, NoteTaskD
                 Finalize();
             }
             else
+            {
                 View.ShowInfo(response.ErrorMessage);
+                return false;
+            }
         }
         catch (Exception ex)
         {

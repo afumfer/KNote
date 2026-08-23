@@ -97,7 +97,10 @@ public class FolderEditorCtrl : CtrlNoteEditorBase<IViewEditor<FolderDto>, Folde
                 Finalize();
             }
             else
+            {
                 View.ShowInfo(response.ErrorMessage);
+                return false;
+            }
         }
         catch (Exception ex)
         {

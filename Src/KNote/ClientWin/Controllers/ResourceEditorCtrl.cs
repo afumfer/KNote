@@ -99,7 +99,10 @@ public class ResourceEditorCtrl : CtrlEditorBase<IViewEditor<ResourceDto>, Resou
                 Finalize();
             }
             else
+            {
                 View.ShowInfo(response.ErrorMessage);
+                return false;
+            }
         }
         catch (Exception ex)
         {

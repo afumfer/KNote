@@ -84,7 +84,10 @@ public class NoteAttributeEditorCtrl : CtrlEditorBase<IViewEditor<NoteKAttribute
                 Finalize();
             }
             else
+            {
                 View.ShowInfo(response.ErrorMessage);
+                return Task.FromResult(false);
+            }
         }
         catch (Exception ex)
         {

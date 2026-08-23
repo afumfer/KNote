@@ -256,7 +256,15 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   Ctrl propietario (`_ctrl.AddNote()`), sin registro de comandos ni mapeo por atributos.
 - **Errores**: la capa de servicio devuelve `Result`/`Result<T>` (`IsValid`, `ErrorMessage`). Los métodos de
   los `Ctrl` normalmente capturan la excepción internamente y llaman a `View.ShowInfo(ex.Message)` en vez
-  de propagarla (existe el flag `ThrowKntException` en `CtrlBase` para el caso contrario).
+  de propagarla (existe el flag `ThrowKntException` en `CtrlBase` para el caso contrario). **El valor de
+  retorno `bool` de `SaveModel`/`DeleteModel`/`LoadModelById` debe reflejar honestamente el resultado**:
+  `false` si `Result.IsValid` es `false` o si se capturó una excepción, `true` solo si la operación
+  realmente tuvo éxito (Fase 5 del refactor corrigió varios `Ctrl` — `NoteEditorCtrl`, `PostItEditorCtrl`,
+  `TaskEditorCtrl`, `MessageEditorCtrl`, `ResourceEditorCtrl`, `FolderEditorCtrl`,
+  `NoteAttributeEditorCtrl` — que devolvían `true` incluso tras un fallo mostrado al usuario; el caso más
+  grave era `NoteEditorCtrl.DeleteModel`, que ni siquiera mostraba el mensaje de error). Al escribir un
+  `Ctrl` nuevo, sigue el patrón ya usado en `NotesSelectorCtrl`/`NoteTypesSelectorCtrl`: `if
+  (response.IsValid) { ...; return true; } else { View.ShowInfo(response.ErrorMessage); return false; }`.
 - **Async**: todo lo que toca `IKntService` es `async Task`/`async Task<T>`; los handlers de UI son
   `async void`. Para trabajo largo se usan hilos/tasks explícitos (`Store.RunKntSCodeInNewThread`,
   `Store.RunCSCodeInNewTask`) en vez de un patrón `async`/`await` puro — no hay disciplina de

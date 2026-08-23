@@ -170,13 +170,16 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
                 // TODO: future version ... notify actions.
                 // NotifyMessage($"Note {Model?.NoteNumber.ToString()} saved");
             }
-            else            
+            else
+            {
                 View.ShowInfo(response.ErrorMessage);
+                return false;
+            }
         }
         catch (Exception ex)
         {
             View.ShowInfo(ex.Message);
-            return true;
+            return false;
         }
 
         return true;
@@ -197,9 +200,12 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
                 var response = await service.Notes.DeleteExtendedAsync(noteId);
 
                 if (response.IsValid)
+                {
                     OnDeletedEntity(response.Entity);
-                
-                return true;
+                    return true;
+                }
+                else
+                    View.ShowInfo(response.ErrorMessage);
             }
             catch (Exception ex)
             {

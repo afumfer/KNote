@@ -151,6 +151,8 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
         if (!Model.IsDirty() && !WindowPostIt.IsDirty() )
             return true;
 
+        var success = true;
+
         try
         {
             var isNew = (Model.NoteId == Guid.Empty);
@@ -170,19 +172,20 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
                 Model.SetIsDirty(false);
                 Model.SetIsNew(false);
-                    
+
                 if (!isNew)
                     OnSavedEntity(response.Entity);
                 else
-                    OnAddedEntity(response.Entity);                    
+                    OnAddedEntity(response.Entity);
             }
             else
             {
                 View.ShowInfo(response.ErrorMessage);
+                success = false;
             }
 
             if (WindowPostIt != null)
-            {                    
+            {
                 if (WindowPostIt.NoteId == Guid.Empty)
                     WindowPostIt.NoteId = Model.NoteId;
                 var responseWinPostIt = await Service.Notes.SaveWindowAsync(WindowPostIt);
@@ -192,10 +195,10 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
         catch (Exception ex)
         {
             View.ShowInfo(ex.Message);
-            return true;
+            return false;
         }
 
-        return true;
+        return success;
     }
 
     public async override Task<bool> DeleteModel(IKntService service, Guid noteId)

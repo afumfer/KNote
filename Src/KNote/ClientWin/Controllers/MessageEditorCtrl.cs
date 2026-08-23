@@ -89,7 +89,7 @@ public class MessageEditorCtrl : CtrlEditorBase<IViewEditor<KMessageDto>, KMessa
             }
 
             if (response.IsValid)
-            {                                        
+            {
                 if (!isNew)
                     OnSavedEntity(response.Entity);
                 else
@@ -98,7 +98,10 @@ public class MessageEditorCtrl : CtrlEditorBase<IViewEditor<KMessageDto>, KMessa
                 Finalize();
             }
             else
+            {
                 View.ShowInfo(response.ErrorMessage);
+                return false;
+            }
         }
         catch (Exception ex)
         {
