@@ -291,19 +291,22 @@ abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
     public event EventHandler<ControllerEventArgs<TEntity>> SavedEntity;
     protected virtual void OnSavedEntity(TEntity entity)
     {
-        SavedEntity?.Invoke(this, new ControllerEventArgs<TEntity>(entity));            
+        SavedEntity?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
+        Store.Events.Publish(new EntitySaved<TEntity>(entity));
     }
 
     public event EventHandler<ControllerEventArgs<TEntity>> AddedEntity;
     protected virtual void OnAddedEntity(TEntity entity)
     {
         AddedEntity?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
+        Store.Events.Publish(new EntityAdded<TEntity>(entity));
     }
 
     public event EventHandler<ControllerEventArgs<TEntity>> DeletedEntity;
     protected virtual void OnDeletedEntity(TEntity entity)
     {
         DeletedEntity?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
+        Store.Events.Publish(new EntityDeleted<TEntity>(entity));
     }
 
     public event EventHandler<ControllerEventArgs<TEntity>> EditionCanceled;

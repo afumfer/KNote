@@ -38,6 +38,8 @@ public class Store
 
     public readonly IFactoryViews FactoryViews;
 
+    public DomainEventBus Events { get; } = new();
+
     public FolderWithServiceRef _dafaultFolderWithServiceRef;
     public FolderWithServiceRef DefaultFolderWithServiceRef
     {
