@@ -19,7 +19,7 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
     protected override IViewBase CreateView()
     {
-        return Store.FactoryViews.View(this);
+        return Store.FactoryViews.Registry.Resolve<MonitorCtrl, IViewBase>(this);
     }
 
     #endregion

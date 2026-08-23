@@ -39,8 +39,6 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<HeavyProcessCtrl, IViewHeavyProcess>(c => new HeavyProcessForm(c));
     }
 
-    public IViewBase View(MonitorCtrl controller) => Registry.Resolve<MonitorCtrl, IViewBase>(controller);
-
     public IViewBase View(KntScriptConsoleCtrl controller) => Registry.Resolve<KntScriptConsoleCtrl, IViewBase>(controller);
 
     public IViewSelector<FolderWithServiceRef> View(FoldersSelectorCtrl controller) => Registry.Resolve<FoldersSelectorCtrl, IViewSelector<FolderWithServiceRef>>(controller);

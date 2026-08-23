@@ -12,7 +12,6 @@ public interface IFactoryViews
     /// </summary>
     ViewFactoryRegistry Registry { get; }
 
-    IViewBase View(MonitorCtrl controller);
     IViewBase View(KntScriptConsoleCtrl controller);
     IViewSelector<FolderWithServiceRef> View(FoldersSelectorCtrl controller);
     //IViewSelector<NoteInfoDto> View(NotesSelectorCtrl controller);

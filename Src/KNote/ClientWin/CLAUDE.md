@@ -172,6 +172,14 @@ que sirva) → registro en `ViewFactoryRegistry` (vía `FactoryViewsWinForms`, s
 clase `Ctrl` en `Controllers/` heredando de la base adecuada, resolviendo su vista contra el registro →
 `Form` en `Views/` implementando la interfaz.
 
+**Ejemplo ya migrado**: `MonitorCtrl` ya no pasa por `IFactoryViews` — su `CreateView()` resuelve
+directamente contra el registro (`Store.FactoryViews.Registry.Resolve<MonitorCtrl, IViewBase>(this)`), y
+se retiró su sobrecarga `IViewBase View(MonitorCtrl controller)` de `IFactoryViews`/`FactoryViewsWinForms`.
+El registro de su fábrica (`Registry.Register<MonitorCtrl, IViewBase>(c => new MonitorForm(c));`) se quedó
+tal cual en el constructor de `FactoryViewsWinForms` — lo único que desaparece es el método puente de la
+interfaz. Es el patrón a seguir para retirar, uno a uno y de forma oportunista, el resto de las sobrecargas
+existentes.
+
 ## `Store` (`Core/Store.cs`)
 
 `Store` es el estado global y el mediador entre controladores; **no** guarda un único servicio, sino una
