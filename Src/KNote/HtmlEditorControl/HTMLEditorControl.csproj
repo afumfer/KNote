@@ -31,8 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <AssemblyVersion>0.0.10.13</AssemblyVersion>
-    <FileVersion>0.0.10.13</FileVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <BaseAddress>285212672</BaseAddress>
