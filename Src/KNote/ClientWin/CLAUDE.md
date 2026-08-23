@@ -126,21 +126,40 @@ public interface IViewSelector<TItem> : IViewEmbeddable { ... }
 Más interfaces específicas de un caso de uso concreto: `IViewKNoteManagment`, `IViewPostIt<T>`,
 `IViewChat`, `IViewServerCOM`, `IViewHeavyProcess`.
 
-`IFactoryViews` (`Core/IFactoryViews.cs`) declara **una sobrecarga de `View(...)` por cada Ctrl concreto**
-(resolución por el tipo estático del controlador), más un par de vistas auxiliares de
-`KNoteManagmentCtrl` (`NotifyView`, `AboutView`). `FactoryViewsWinForms` (`Core/FactoryViewsWinForms.cs`)
-es la única implementación y simplemente construye el `Form` correspondiente:
+`IFactoryViews` (`Core/IFactoryViews.cs`) históricamente declaraba **una sobrecarga de `View(...)` por cada
+Ctrl concreto** (resolución por el tipo estático del controlador), más un par de vistas auxiliares de
+`KNoteManagmentCtrl` (`NotifyView`, `AboutView`) — con el inconveniente de que cada caso de uso nuevo
+obligaba a tocar esa interfaz. `FactoryViewsWinForms` (`Core/FactoryViewsWinForms.cs`) sigue siendo su
+única implementación, pero desde el refactor (Fase 4) las 25 fábricas ya no son código repetido por método:
+se registran en el constructor sobre un `ViewFactoryRegistry` (`Core/ViewFactoryRegistry.cs`), un mapa
+genérico `(tipo de Ctrl, key opcional) → Func<Ctrl, View>` (la `key` distingue los tres registros de
+`KNoteManagmentCtrl`: vista principal, `Notify`, `About`), y cada método de `IFactoryViews` solo resuelve
+contra ese registro:
 
 ```csharp
+// Constructor de FactoryViewsWinForms
+Registry.Register<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(c => new NoteEditorForm(c));
+...
+// Implementación de IFactoryViews.View(NoteEditorCtrl) — se mantiene por compatibilidad con el código existente
 public IViewEditorEmbeddable<NoteExtendedDto> View(NoteEditorCtrl controller)
-    => new NoteEditorForm(controller);
+    => Registry.Resolve<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(controller);
 ```
 
-Cada Ctrl implementa `CreateView()` delegando en la factory de `Store`:
+Los 25 `Ctrl` existentes siguen resolviendo su vista exactamente igual que antes, vía `CreateView()`:
 
 ```csharp
 protected override IViewEditorEmbeddable<NoteExtendedDto> CreateView()
     => Store.FactoryViews.View(this);
+```
+
+**Un `Ctrl` nuevo ya no necesita tocar `IFactoryViews`**: le basta con registrar su fábrica
+(`Store.FactoryViews.Registry.Register<MiCtrl, IViewMia>(c => new MiForm(c));`, típicamente en el
+constructor de `FactoryViewsWinForms` o justo después de crearla) e implementar `CreateView()` resolviendo
+directamente contra el registro:
+
+```csharp
+protected override IViewMia CreateView()
+    => Store.FactoryViews.Registry.Resolve<MiCtrl, IViewMia>(this);
 ```
 
 El `Form` concreto (en `Views/`) recibe el **controlador concreto** en su constructor y lo llama
@@ -149,8 +168,9 @@ Es un acoplamiento asimétrico a propósito: View → Ctrl concreto (referencia 
 interfaz), que es lo que permite sustituir WinForms por otro framework sin tocar `Controllers/`.
 
 **Al añadir un caso de uso nuevo hay que tocar, en este orden**: interfaz `IView*` (si no hay una genérica
-que sirva) → sobrecarga en `IFactoryViews` + `FactoryViewsWinForms` → clase `Ctrl` en `Controllers/`
-heredando de la base adecuada → `Form` en `Views/` implementando la interfaz.
+que sirva) → registro en `ViewFactoryRegistry` (vía `FactoryViewsWinForms`, sin tocar `IFactoryViews`) →
+clase `Ctrl` en `Controllers/` heredando de la base adecuada, resolviendo su vista contra el registro →
+`Form` en `Views/` implementando la interfaz.
 
 ## `Store` (`Core/Store.cs`)
 

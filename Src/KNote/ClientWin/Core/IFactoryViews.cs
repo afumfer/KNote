@@ -6,6 +6,12 @@ namespace KNote.ClientWin.Core;
 
 public interface IFactoryViews
 {
+    /// <summary>
+    /// Registry a new Ctrl can use to register/resolve its view without adding an overload here
+    /// (Fase 4 of the ClientWin architecture refactor, see ClientWin/CLAUDE.md).
+    /// </summary>
+    ViewFactoryRegistry Registry { get; }
+
     IViewBase View(MonitorCtrl controller);
     IViewBase View(KntScriptConsoleCtrl controller);
     IViewSelector<FolderWithServiceRef> View(FoldersSelectorCtrl controller);
