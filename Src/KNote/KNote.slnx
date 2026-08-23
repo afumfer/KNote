@@ -6,6 +6,7 @@
   <Project Path="Repository.EntityFramework/KNote.Repository.EntityFramework.csproj" />
   <Project Path="Repository.Dapper/KNote.Repository.Dapper.csproj" />
   <Project Path="ClientWin/KNote.ClientWin.csproj" />
+  <Project Path="ClientWin.Tests/KNote.ClientWin.Tests.csproj" />
   <Project Path="KntScript/KntScript.csproj" />
   <Project Path="Client/KNote.Client.csproj" />
   <Project Path="MessageBroker/KNote.MessageBroker.csproj" />
