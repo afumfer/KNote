@@ -29,33 +29,35 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
     public PostItEditorCtrl(Store store): base(store)
     {
         ControllerName = "PostIt editor";
-        Store.DeletedNote += Store_DeletedNote;
+        Store.Events.Subscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
     }
 
     public override void Dispose()
     {
-        Store.DeletedNote -= Store_DeletedNote;
+        Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
         base.Dispose();
     }
 
-    #endregion 
+    #endregion
 
-    #region Store events 
+    #region Store events
 
-    private void Store_DeletedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)
+    private void OnNoteDeletedElsewhere(EntityDeleted<NoteExtendedDto> e)
     {
         if (e.Entity.NoteId == this.Model.NoteId)
             this.Finalize();
     }
 
-    #endregion 
+    #endregion
 
-    #region Controller specific events 
+    #region Controller specific events
 
     public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> ExtendedEdit;
     protected virtual void OnExtendedEdit()
     {
-        ExtendedEdit?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId }));
+        var target = new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId };
+        ExtendedEdit?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(target));
+        Store.Events.Publish(new ExtendedEditRequested(target));
     }
 
     #endregion

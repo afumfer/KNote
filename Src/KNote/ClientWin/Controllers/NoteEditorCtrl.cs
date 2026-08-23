@@ -23,35 +23,37 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
     public NoteEditorCtrl(Store store) : base(store)
     {
         ControllerName = "Note editor";
-        Store.DeletedNote += Store_DeletedNote;
+        Store.Events.Subscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
     }
 
     public override void Dispose()
     {
-        Store.DeletedNote -= Store_DeletedNote;
+        Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
         base.Dispose();
     }
 
     #endregion
 
-    #region Store events 
+    #region Store events
 
-    private void Store_DeletedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)
+    private void OnNoteDeletedElsewhere(EntityDeleted<NoteExtendedDto> e)
     {
-        if (EmbededMode)        
+        if (EmbededMode)
             return;
         if (e.Entity.NoteId == Model.NoteId)
             Finalize();
     }
 
-    #endregion 
+    #endregion
 
-    #region Controller specific events 
+    #region Controller specific events
 
     public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> PostItEdit;
     protected virtual void OnPostItEdit()
     {
-        PostItEdit?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId }));
+        var target = new ServiceWithNoteId { Service = Service, NoteId = Model.NoteId };
+        PostItEdit?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(target));
+        Store.Events.Publish(new PostItEditRequested(target));
     }
 
     #endregion

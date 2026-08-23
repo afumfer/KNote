@@ -207,21 +207,6 @@ public class Store
     public void AddController(CtrlBase controller)
     {
         controller.StateControllerChanged += Controller_StateCtrlChanged;
-        
-        if (controller is PostItEditorCtrl)
-        {
-            ((PostItEditorCtrl)controller).AddedEntity += Store_AddedPostIt;
-            ((PostItEditorCtrl)controller).SavedEntity += Store_SavedPostIt;
-            ((PostItEditorCtrl)controller).DeletedEntity += Store_DeletedPostIt;
-            ((PostItEditorCtrl)controller).ExtendedEdit += Store_ExtendedEditPostIt;
-        }
-        else if (controller is NoteEditorCtrl)
-        {
-            ((NoteEditorCtrl)controller).AddedEntity += Store_AddedNote;
-            ((NoteEditorCtrl)controller).SavedEntity += Store_SavedNote;
-            ((NoteEditorCtrl)controller).DeletedEntity += Store_DeletedNote;
-            ((NoteEditorCtrl)controller).PostItEdit += Store_EditedPostItNote;
-        }
 
         _controllerRegistry.Add(controller);
         Logger?.LogInformation("Added Component {component}", controller.ToString());
@@ -232,21 +217,6 @@ public class Store
     public void RemoveController(CtrlBase controller)
     {
         controller.StateControllerChanged -= Controller_StateCtrlChanged;
-
-        if (controller is PostItEditorCtrl)
-        {
-            ((PostItEditorCtrl)controller).AddedEntity -= Store_AddedPostIt;
-            ((PostItEditorCtrl)controller).SavedEntity -= Store_SavedPostIt;
-            ((PostItEditorCtrl)controller).DeletedEntity -= Store_DeletedPostIt;
-            ((PostItEditorCtrl)controller).ExtendedEdit -= Store_ExtendedEditPostIt;
-        }
-        else if (controller is NoteEditorCtrl)
-        {
-            ((NoteEditorCtrl)controller).AddedEntity += Store_AddedNote;
-            ((NoteEditorCtrl)controller).SavedEntity += Store_SavedNote;
-            ((NoteEditorCtrl)controller).DeletedEntity += Store_DeletedNote;
-            ((NoteEditorCtrl)controller).PostItEdit += Store_EditedPostItNote;
-        }
 
         _controllerRegistry.Remove(controller);
         Logger?.LogInformation("Removed Component {component}", controller.ToString());
@@ -446,55 +416,7 @@ public class Store
 
     #endregion 
 
-    #region Helper event handlers 
-
-    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> EditedPostItNote;
-    private void Store_EditedPostItNote(object sender, ControllerEventArgs<ServiceWithNoteId> e)
-    {
-        EditedPostItNote?.Invoke(sender, e);
-    }
-
-    public event EventHandler<ControllerEventArgs<NoteExtendedDto>> DeletedNote;
-    private void Store_DeletedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)  
-    {
-        DeletedNote?.Invoke(sender, e);
-    }
-
-    public event EventHandler<ControllerEventArgs<NoteExtendedDto>> SavedNote;
-    private void Store_SavedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)
-    {
-        SavedNote?.Invoke(sender, e);
-    }
-
-    public event EventHandler<ControllerEventArgs<NoteExtendedDto>> AddedNote;
-    private void Store_AddedNote(object sender, ControllerEventArgs<NoteExtendedDto> e)
-    {
-        AddedNote?.Invoke(sender, e);
-    }
-
-    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> ExtendedEditPostIt;
-    private void Store_ExtendedEditPostIt(object sender, ControllerEventArgs<ServiceWithNoteId> e)
-    {
-        ExtendedEditPostIt?.Invoke(sender, e);
-    }
-
-    public event EventHandler<ControllerEventArgs<NoteDto>> DeletedPostIt;
-    private void Store_DeletedPostIt(object sender, ControllerEventArgs<NoteDto> e)
-    {
-        DeletedPostIt?.Invoke(sender, e);
-    }
-
-    public event EventHandler<ControllerEventArgs<NoteDto>> SavedPostIt;
-    private void Store_SavedPostIt(object sender, ControllerEventArgs<NoteDto> e)
-    {
-        SavedPostIt?.Invoke(sender, e);
-    }
-
-    public event EventHandler<ControllerEventArgs<NoteDto>> AddedPostIt;
-    private void Store_AddedPostIt(object sender, ControllerEventArgs<NoteDto> e)
-    {
-        AddedPostIt?.Invoke(sender, e);
-    }
+    #region Helper event handlers
 
     private void Controller_StateCtrlChanged(object sender, ControllerEventArgs<EControllerState> e)
     {

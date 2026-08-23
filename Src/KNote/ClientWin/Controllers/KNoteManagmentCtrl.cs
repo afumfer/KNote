@@ -80,15 +80,15 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         Store.ChangedActiveFolderWithServiceRef += Store_ChangedActiveFolderWithServiceRef;
         Store.ChangedActiveFilterWithServiceRef += Store_ChangedActiveFilterWithServiceRef;
 
-        Store.AddedPostIt += PostItEditorCtrl_AddedEntity;
-        Store.SavedPostIt += PostItEditorCtrl_SavedEntity;            
-        Store.DeletedPostIt += PostItEditorCtrl_DeletedEntity;            
-        Store.ExtendedEditPostIt += PostItEditorCtrl_ExtendedEdit;
+        Store.Events.Subscribe<EntityAdded<NoteDto>>(PostItEditorCtrl_AddedEntity);
+        Store.Events.Subscribe<EntitySaved<NoteDto>>(PostItEditorCtrl_SavedEntity);
+        Store.Events.Subscribe<EntityDeleted<NoteDto>>(PostItEditorCtrl_DeletedEntity);
+        Store.Events.Subscribe<ExtendedEditRequested>(PostItEditorCtrl_ExtendedEdit);
 
-        Store.AddedNote += NoteEditorCtrl_AddedEntity;
-        Store.SavedNote += NoteEditorCtrl_SavedEntity;
-        Store.DeletedNote += NoteEditorCtrl_DeletedEntity;
-        Store.EditedPostItNote += NoteEditorCtrl_PostItEdit;
+        Store.Events.Subscribe<EntityAdded<NoteExtendedDto>>(NoteEditorCtrl_AddedEntity);
+        Store.Events.Subscribe<EntitySaved<NoteExtendedDto>>(NoteEditorCtrl_SavedEntity);
+        Store.Events.Subscribe<EntityDeleted<NoteExtendedDto>>(NoteEditorCtrl_DeletedEntity);
+        Store.Events.Subscribe<PostItEditRequested>(NoteEditorCtrl_PostItEdit);
     }
 
     private async void Store_ChangedActiveFolderWithServiceRef(object sender, ControllerEventArgs<FolderWithServiceRef> e)
@@ -151,15 +151,15 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         Store.ChangedActiveFolderWithServiceRef -= Store_ChangedActiveFolderWithServiceRef;
         Store.ChangedActiveFilterWithServiceRef -= Store_ChangedActiveFilterWithServiceRef;
 
-        Store.AddedPostIt -= PostItEditorCtrl_AddedEntity;
-        Store.SavedPostIt -= PostItEditorCtrl_SavedEntity;
-        Store.DeletedPostIt -= PostItEditorCtrl_DeletedEntity;
-        Store.ExtendedEditPostIt -= PostItEditorCtrl_ExtendedEdit;
+        Store.Events.Unsubscribe<EntityAdded<NoteDto>>(PostItEditorCtrl_AddedEntity);
+        Store.Events.Unsubscribe<EntitySaved<NoteDto>>(PostItEditorCtrl_SavedEntity);
+        Store.Events.Unsubscribe<EntityDeleted<NoteDto>>(PostItEditorCtrl_DeletedEntity);
+        Store.Events.Unsubscribe<ExtendedEditRequested>(PostItEditorCtrl_ExtendedEdit);
 
-        Store.AddedNote -= NoteEditorCtrl_AddedEntity;
-        Store.SavedNote -= NoteEditorCtrl_SavedEntity;
-        Store.DeletedNote -= NoteEditorCtrl_DeletedEntity;
-        Store.EditedPostItNote -= NoteEditorCtrl_PostItEdit;
+        Store.Events.Unsubscribe<EntityAdded<NoteExtendedDto>>(NoteEditorCtrl_AddedEntity);
+        Store.Events.Unsubscribe<EntitySaved<NoteExtendedDto>>(NoteEditorCtrl_SavedEntity);
+        Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(NoteEditorCtrl_DeletedEntity);
+        Store.Events.Unsubscribe<PostItEditRequested>(NoteEditorCtrl_PostItEdit);
 
         base.Dispose();
     }
@@ -1120,12 +1120,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #region Events handlers for extension controller 
 
-    private async void PostItEditorCtrl_AddedEntity(object sender, ControllerEventArgs<NoteDto> e)
+    private async void PostItEditorCtrl_AddedEntity(EntityAdded<NoteDto> e)
     {
         await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
-    private async void NoteEditorCtrl_AddedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
+    private async void NoteEditorCtrl_AddedEntity(EntityAdded<NoteExtendedDto> e)
     {
         await OnNoteEditorAdded(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
@@ -1143,24 +1143,24 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         NotesSelectorCtrl.AddItem(noteInfo);
     }
 
-    private async void PostItEditorCtrl_SavedEntity(object sender, ControllerEventArgs<NoteDto> e)
+    private async void PostItEditorCtrl_SavedEntity(EntitySaved<NoteDto> e)
     {
         await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
-    private async void NoteEditorCtrl_SavedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
+    private async void NoteEditorCtrl_SavedEntity(EntitySaved<NoteExtendedDto> e)
     {
-        await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteMinimalDto>()); 
+        await OnNoteEditorSaved(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
-    private async void PostItEditorCtrl_ExtendedEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void PostItEditorCtrl_ExtendedEdit(ExtendedEditRequested e)
     {
-        await EditNote(e.Entity.Service, e.Entity.NoteId);
+        await EditNote(e.Target.Service, e.Target.NoteId);
     }
 
-    private async void NoteEditorCtrl_PostItEdit(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void NoteEditorCtrl_PostItEdit(PostItEditRequested e)
     {
-        await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
+        await EditNotePostIt(e.Target.Service, e.Target.NoteId);
     }
 
     private async Task OnNoteEditorSaved(NoteMinimalDto noteInfo)
@@ -1177,12 +1177,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }                            
     }
 
-    private void PostItEditorCtrl_DeletedEntity(object sender, ControllerEventArgs<NoteDto> e)
+    private void PostItEditorCtrl_DeletedEntity(EntityDeleted<NoteDto> e)
     {
         OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
-    private void NoteEditorCtrl_DeletedEntity(object sender, ControllerEventArgs<NoteExtendedDto> e)
+    private void NoteEditorCtrl_DeletedEntity(EntityDeleted<NoteExtendedDto> e)
     {
         OnNoteEditorDeleted(e.Entity.GetSimpleDto<NoteMinimalDto>());
     }

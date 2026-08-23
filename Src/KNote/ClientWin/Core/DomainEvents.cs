@@ -11,3 +11,15 @@ public record EntitySaved<TEntity>(TEntity Entity);
 public record EntityAdded<TEntity>(TEntity Entity);
 
 public record EntityDeleted<TEntity>(TEntity Entity);
+
+/// <summary>
+/// Published by NoteEditorCtrl.OnPostItEdit (Fase 3b): the user wants to keep editing this note
+/// as a post-it. Previously only reachable via Store's NoteEditorCtrl special-casing.
+/// </summary>
+public record PostItEditRequested(ServiceWithNoteId Target);
+
+/// <summary>
+/// Published by PostItEditorCtrl.OnExtendedEdit (Fase 3b): the user wants to switch this post-it
+/// to the full note editor. Previously only reachable via Store's PostItEditorCtrl special-casing.
+/// </summary>
+public record ExtendedEditRequested(ServiceWithNoteId Target);

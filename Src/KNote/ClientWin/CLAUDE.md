@@ -155,27 +155,45 @@ heredando de la base adecuada → `Form` en `Views/` implementando la interfaz.
 ## `Store` (`Core/Store.cs`)
 
 `Store` es el estado global y el mediador entre controladores; **no** guarda un único servicio, sino una
-**lista de `ServiceRef`** (la app puede tener varias bases de datos de notas abiertas a la vez):
+colección de `ServiceRef` (la app puede tener varias bases de datos de notas abiertas a la vez). Desde el
+refactor incremental documentado en el plan de mejora de este archivo (ver más abajo), parte de lo que
+antes eran campos/lógica directos de `Store` vive en clases auxiliares propias, con `Store` delegando en
+ellas y manteniendo su API pública sin cambios para el resto del código:
 
-- `List<ServiceRef> _servicesRefs` + `AddServiceRef`/`RemoveServiceRef`/`GetServiceRef(Guid|alias)`/
-  `GetFirstServiceRef()`/`GetActiveOrDefaultService()`. Cada `ServiceRef` (en `Service/Core/ServiceRef.cs`)
-  construye de forma perezosa su `IKntService`, que a su vez usa un `IKntRepository` (Dapper o EF, según
-  `RepositoryRef.Orm`) — así es como `Store`/los controladores llegan finalmente a la capa de persistencia.
-- `List<CtrlBase> _listControllers` — todos los controladores vivos, usados para operaciones transversales
-  como `SaveActiveNotes()`, `SaveAndCloseActiveNotes()`, `HidePostIts()`/`ActivatePostIts()`.
+- `ServiceRefRegistry` (`Core/ServiceRefRegistry.cs`) — posee la colección de `ServiceRef` y las consultas
+  básicas (`GetById`/`GetByAlias`/`GetFirst`/`GetAll`); `Store.AddServiceRef`/`RemoveServiceRef`/
+  `GetServiceRef(Guid|alias)`/`GetFirstServiceRef()`/`GetActiveOrDefaultService()` delegan en ella. Cada
+  `ServiceRef` (en `Service/Core/ServiceRef.cs`) construye de forma perezosa su `IKntService`, que a su vez
+  usa un `IKntRepository` (Dapper o EF, según `RepositoryRef.Orm`) — así es como `Store`/los controladores
+  llegan finalmente a la capa de persistencia.
+- `ControllerRegistry` (`Core/ControllerRegistry.cs`) — posee la colección de `CtrlBase` vivos;
+  `Store.AddController`/`RemoveController` delegan el almacenamiento ahí, y operaciones transversales como
+  `SaveActiveNotes()`, `SaveAndCloseActiveNotes()`, `HidePostIts()`/`ActivatePostIts()` iteran sobre
+  `_controllerRegistry.All`.
+- `KntTextUtils` (`Core/KntTextUtils.cs`) — utilidades puras de texto/fichero (`TextToDateTime/Int/Double`,
+  `ExtractUrlFromText`, `ExtensionFileToFileType`, `IsSupportedFileTypeForPreview`); `Store` expone los
+  mismos métodos como envoltorios de una línea, por compatibilidad con el código existente.
+- `DomainEventBus` (`Core/DomainEventBus.cs`), expuesto como `Store.Events` — bus de publicación/suscripción
+  genérico (`Subscribe<TMessage>`/`Unsubscribe<TMessage>`/`Publish<TMessage>`). `CtrlEditorBase<TView,
+  TEntity>.OnSavedEntity`/`OnAddedEntity`/`OnDeletedEntity` publican `EntitySaved<TEntity>`/
+  `EntityAdded<TEntity>`/`EntityDeleted<TEntity>` en él, además de disparar los eventos CLR
+  `SavedEntity`/`AddedEntity`/`DeletedEntity` de siempre — por vivir en la base genérica, esto aplica a los
+  8 editores (`NoteEditorCtrl`, `PostItEditorCtrl`, `TaskEditorCtrl`, etc.), no solo a Note/PostIt.
+  `NoteEditorCtrl`/`PostItEditorCtrl` también publican `PostItEditRequested`/`ExtendedEditRequested`
+  (mensajes específicos de la transición nota↔post-it) desde sus propios `OnPostItEdit`/`OnExtendedEdit`.
+  **`Store.AddController`/`RemoveController` ya no conocen ningún tipo concreto de controlador** — el
+  antiguo relé especial-caseado (`if (controller is NoteEditorCtrl) ...` más los eventos
+  `Store.SavedNote`/`DeletedNote`/`AddedPostIt`/etc.) se ha retirado; `KNoteManagmentCtrl` y los propios
+  `NoteEditorCtrl`/`PostItEditorCtrl` (que necesitan enterarse de que una nota se borró en otra ventana)
+  ahora se suscriben directamente a `Store.Events`. Un controlador nuevo que quiera difundir sus cambios
+  no necesita tocar `Store`: le basta con heredar de `CtrlEditorBase` (para Saved/Added/Deleted) o publicar
+  sus propios mensajes en `Store.Events` (para eventos específicos de su dominio).
 - `FolderWithServiceRef ActiveFolderWithServiceRef` / `SelectedNotesInServiceRef
   ActiveFilterWithServiceRef` — selección activa compartida (carpeta/filtro actuales), cambiada vía
   `ChangeActiveFolderWithServiceRef(...)` con sus eventos `ChangedActiveFolderWithServiceRef`.
-- Eventos de coordinación: `AddedController`/`RemovedController`/`ControllerStateChanged`, más
+- Eventos de coordinación restantes: `AddedController`/`RemovedController`/`ControllerStateChanged`, más
   `ControllerNotification` (canal genérico de "toast" que cualquier Ctrl puede disparar vía
   `CtrlBase.NotifyMessage`).
-- **Relé automático de eventos de nota/postit**: `AddController`/`RemoveController` reconocen
-  explícitamente `NoteEditorCtrl` y `PostItEditorCtrl` (`if (controller is NoteEditorCtrl) ...`) y
-  reexponen sus eventos (`AddedEntity`, `SavedEntity`, `DeletedEntity`, ...) como eventos propios de
-  `Store` (`Store.SavedNote`, `Store.DeletedNote`, `Store.AddedPostIt`, etc.), para que un controlador no
-  relacionado (p. ej. una lista de notas) pueda suscribirse a `Store.SavedNote` sin conocer la instancia
-  concreta del editor. **Este mecanismo no es genérico**: un nuevo controlador tipo "editor de nota" que
-  quiera el mismo relé automático requiere modificar `Store.AddController`/`RemoveController`.
 - `AppConfig` (serializado a `KNoteData.config`), `Logger` (NLog), helpers de scripting (`RunKntSCode`,
   `RunCSCode`, `ExecuteCommand`) para el motor KntScript.
 - Constructor: `Store(IFactoryViews factoryViews)` — la factory se inyecta aquí, no vía DI.
