@@ -184,7 +184,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
     {
         _ctrl.Model.Name = varName;
         _ctrl.Model.Description = textDescription.Text;
-        _ctrl.Model.Order = _ctrl.Store.TextToInt(textOrder.Text);
+        _ctrl.Model.Order = _ctrl.Store.KntTextUtils.TextToInt(textOrder.Text);
         _ctrl.Model.FileType = varFileType;
         _ctrl.Model.Container = varContainer;
         _ctrl.Model.ContentArrayBytes = varContentArrayBytes;
@@ -201,7 +201,7 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         }
 
         var ext = Path.GetExtension(file);
-        if (_ctrl.Store.ExtensionFileToFileType(ext) != "")
+        if (_ctrl.Store.KntTextUtils.ExtensionFileToFileType(ext) != "")
         {
             try
             {

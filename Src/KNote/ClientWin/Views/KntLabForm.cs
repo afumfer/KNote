@@ -890,7 +890,7 @@ window.chrome.webview.postMessage(retValue);";
                         Description = $"(ANotas import {n.NotaEx})",
                         ContentArrayBytes = null,
                         ContentBase64 = null,
-                        FileType = _store.ExtensionFileToFileType(Path.GetExtension(fileImport))
+                        FileType = _store.KntTextUtils.ExtensionFileToFileType(Path.GetExtension(fileImport))
                     };
                     newNote.Resources.Add(resource);
 

@@ -4,14 +4,15 @@ namespace KNote.ClientWin.Core;
 
 /// <summary>
 /// Pure text/file parsing helpers extracted from <see cref="Store"/> (Fase 1 of the ClientWin
-/// architecture refactor, see ClientWin/CLAUDE.md). Behavior is unchanged from the original
-/// Store methods, including existing quirks (e.g. TextToDouble depends on CurrentCulture).
+/// architecture refactor, see ClientWin/CLAUDE.md). Exposed as the lazily-created singleton
+/// <see cref="Store.KntTextUtils"/> property (later refactor step) rather than through wrapper
+/// methods on Store, so callers use Store.KntTextUtils.Method(...) directly.
 /// </summary>
-public static class KntTextUtils
+public class KntTextUtils
 {
     private static readonly char[] NewLine = { '\r', '\n' };
 
-    public static DateTime? TextToDateTime(string text)
+    public DateTime? TextToDateTime(string text)
     {
         DateTime output;
         if (DateTime.TryParse(text, out output))
@@ -20,7 +21,7 @@ public static class KntTextUtils
             return null;
     }
 
-    public static int TextToInt(string text)
+    public int TextToInt(string text)
     {
         int output;
         if (int.TryParse(text, out output))
@@ -29,7 +30,7 @@ public static class KntTextUtils
             return 0;
     }
 
-    public static double? TextToDouble(string text)
+    public double? TextToDouble(string text)
     {
         double output;
         if (double.TryParse(text, out output))
@@ -38,7 +39,7 @@ public static class KntTextUtils
             return null;
     }
 
-    public static string ExtractUrlFromText(string text)
+    public string ExtractUrlFromText(string text)
     {
         if (string.IsNullOrEmpty(text))
             return null;
@@ -56,7 +57,7 @@ public static class KntTextUtils
             return null;
     }
 
-    public static string ExtensionFileToFileType(string extension)
+    public string ExtensionFileToFileType(string extension)
     {
         // TODO: Refactor this method
 
@@ -86,7 +87,7 @@ public static class KntTextUtils
             return "";
     }
 
-    public static bool IsSupportedFileTypeForPreview(string fileType)
+    public bool IsSupportedFileTypeForPreview(string fileType)
     {
         // TODO: Refactor this method
         if (string.IsNullOrEmpty(fileType))

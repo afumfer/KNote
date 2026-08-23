@@ -317,7 +317,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
                 return;
             }
 
-            var url = _ctrl.Store.ExtractUrlFromText(kntEditView.MarkdownText);
+            var url = _ctrl.Store.KntTextUtils.ExtractUrlFromText(kntEditView.MarkdownText);
             if (!string.IsNullOrEmpty(url))
             {
                 await kntEditView.ShowNavigationUrlContent(url);
@@ -882,7 +882,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         {
             if (!string.IsNullOrEmpty(kntEditView.MarkdownText))
             {
-                var url = _ctrl.Store.ExtractUrlFromText(kntEditView.MarkdownText);
+                var url = _ctrl.Store.KntTextUtils.ExtractUrlFromText(kntEditView.MarkdownText);
                 if (!string.IsNullOrEmpty(url))
                 {
                     await kntEditView.ShowNavigationUrlContent(url);
@@ -1034,7 +1034,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         textDescriptionResource.Text = _selectedResource.Description;
 
-        if (_ctrl.Store.IsSupportedFileTypeForPreview(_selectedResource.FileType))
+        if (_ctrl.Store.KntTextUtils.IsSupportedFileTypeForPreview(_selectedResource.FileType))
         {
             webViewResource.Visible = true;
             panelPreview.Visible = false;

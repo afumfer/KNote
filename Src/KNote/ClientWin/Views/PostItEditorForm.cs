@@ -46,7 +46,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         {
             if (_ctrl.Model.GetContentTypeExt().ForDescription == "navigation")
             {
-                _url = _ctrl.Store.ExtractUrlFromText(_ctrl.Model?.Description);
+                _url = _ctrl.Store.KntTextUtils.ExtractUrlFromText(_ctrl.Model?.Description);
                 ConfigurePostItView(true);
             }
             else

@@ -160,7 +160,7 @@ public class ResourceEditorCtrl : CtrlEditorBase<IViewEditor<ResourceDto>, Resou
 
     public string ExtensionFileToFileType(string extension)
     {
-        return Store.ExtensionFileToFileType(extension);
+        return Store.KntTextUtils.ExtensionFileToFileType(extension);
     }
 
     #endregion

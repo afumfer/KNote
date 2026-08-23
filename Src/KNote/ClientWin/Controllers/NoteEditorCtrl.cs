@@ -466,7 +466,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             newResource.Description = "Image inserted from clipboard.";
             newResource.Order = 0;
             newResource.Name = "ClipboardImg_" + newResource.ResourceId.ToString() + ".png";
-            newResource.FileType = Store.ExtensionFileToFileType(".png");
+            newResource.FileType = Store.KntTextUtils.ExtensionFileToFileType(".png");
             newResource.Container = Service.Notes.UtilGetDefaultNewResourceContainer();
 
             // Get image from clipboard and convert to byte array

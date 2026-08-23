@@ -189,16 +189,16 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
     {
         _ctrl.Model.UserFullName = textUser.Text;
         _ctrl.Model.Tags = textTags.Text;
-        _ctrl.Model.Priority = _ctrl.Store.TextToInt(textPriority.Text);
+        _ctrl.Model.Priority = _ctrl.Store.KntTextUtils.TextToInt(textPriority.Text);
 
-        _ctrl.Model.EstimatedTime = _ctrl.Store.TextToDouble(textEstimatedTime.Text);
-        _ctrl.Model.SpentTime = _ctrl.Store.TextToDouble(textSpendTime.Text);
-        _ctrl.Model.DifficultyLevel = _ctrl.Store.TextToDouble(textDificultyLevel.Text);
+        _ctrl.Model.EstimatedTime = _ctrl.Store.KntTextUtils.TextToDouble(textEstimatedTime.Text);
+        _ctrl.Model.SpentTime = _ctrl.Store.KntTextUtils.TextToDouble(textSpendTime.Text);
+        _ctrl.Model.DifficultyLevel = _ctrl.Store.KntTextUtils.TextToDouble(textDificultyLevel.Text);
 
-        _ctrl.Model.ExpectedStartDate = _ctrl.Store.TextToDateTime(textExStartDate.Text);
-        _ctrl.Model.ExpectedEndDate = _ctrl.Store.TextToDateTime(textExEndDate.Text);
-        _ctrl.Model.StartDate = _ctrl.Store.TextToDateTime(textStartDate.Text);
-        _ctrl.Model.EndDate = _ctrl.Store.TextToDateTime(textEndDate.Text);
+        _ctrl.Model.ExpectedStartDate = _ctrl.Store.KntTextUtils.TextToDateTime(textExStartDate.Text);
+        _ctrl.Model.ExpectedEndDate = _ctrl.Store.KntTextUtils.TextToDateTime(textExEndDate.Text);
+        _ctrl.Model.StartDate = _ctrl.Store.KntTextUtils.TextToDateTime(textStartDate.Text);
+        _ctrl.Model.EndDate = _ctrl.Store.KntTextUtils.TextToDateTime(textEndDate.Text);
 
         _ctrl.Model.Resolved = checkResolved.Checked;
         _ctrl.Model.Description = textDescription.Text;

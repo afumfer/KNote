@@ -3,9 +3,10 @@ using KNote.ClientWin.Core;
 namespace KNote.ClientWin.Tests;
 
 /// <summary>
-/// Smoke tests confirming Store still delegates correctly to KntTextUtils (Fase 1 of the
-/// ClientWin refactor plan). The full behavior matrix for each method lives in
-/// KntTextUtilsTests, tested directly against the extracted static class.
+/// Store no longer has TextToDateTime/Int/Double/ExtractUrlFromText/ExtensionFileToFileType/
+/// IsSupportedFileTypeForPreview wrapper methods - callers use Store.KntTextUtils.Method(...)
+/// directly. These tests cover the KntTextUtils property itself (lazy, singleton per Store
+/// instance); the full behavior matrix for each method lives in KntTextUtilsTests.
 /// </summary>
 [TestClass]
 public class StoreTextUtilsTests
@@ -13,42 +14,25 @@ public class StoreTextUtilsTests
     private readonly Store _store = new(factoryViews: null!);
 
     [TestMethod]
-    public void TextToDateTime_DelegatesToKntTextUtils()
+    public void KntTextUtils_ReturnsSameInstanceOnEachAccess()
     {
-        Assert.AreEqual(KntTextUtils.TextToDateTime("2026-08-23"), _store.TextToDateTime("2026-08-23"));
+        var first = _store.KntTextUtils;
+        var second = _store.KntTextUtils;
+
+        Assert.AreSame(first, second);
     }
 
     [TestMethod]
-    public void TextToInt_DelegatesToKntTextUtils()
+    public void KntTextUtils_IsIndependentPerStoreInstance()
     {
-        Assert.AreEqual(KntTextUtils.TextToInt("42"), _store.TextToInt("42"));
+        var otherStore = new Store(factoryViews: null!);
+
+        Assert.AreNotSame(_store.KntTextUtils, otherStore.KntTextUtils);
     }
 
     [TestMethod]
-    public void TextToDouble_DelegatesToKntTextUtils()
+    public void KntTextUtils_IsUsableForTextParsing()
     {
-        Assert.AreEqual(KntTextUtils.TextToDouble("not a number"), _store.TextToDouble("not a number"));
-    }
-
-    [TestMethod]
-    public void ExtractUrlFromText_DelegatesToKntTextUtils()
-    {
-        Assert.AreEqual(
-            KntTextUtils.ExtractUrlFromText("https://example.com"),
-            _store.ExtractUrlFromText("https://example.com"));
-    }
-
-    [TestMethod]
-    public void ExtensionFileToFileType_DelegatesToKntTextUtils()
-    {
-        Assert.AreEqual(KntTextUtils.ExtensionFileToFileType(".jpg"), _store.ExtensionFileToFileType(".jpg"));
-    }
-
-    [TestMethod]
-    public void IsSupportedFileTypeForPreview_DelegatesToKntTextUtils()
-    {
-        Assert.AreEqual(
-            KntTextUtils.IsSupportedFileTypeForPreview("image/jpeg"),
-            _store.IsSupportedFileTypeForPreview("image/jpeg"));
+        Assert.AreEqual(42, _store.KntTextUtils.TextToInt("42"));
     }
 }

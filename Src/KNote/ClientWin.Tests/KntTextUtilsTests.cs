@@ -6,6 +6,8 @@ namespace KNote.ClientWin.Tests;
 [TestClass]
 public class KntTextUtilsTests
 {
+    private readonly KntTextUtils KntTextUtils = new();
+
     [TestMethod]
     public void TextToDateTime_ValidDate_ReturnsParsedValue()
     {

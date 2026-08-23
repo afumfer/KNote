@@ -40,6 +40,16 @@ public class Store
 
     public DomainEventBus Events { get; } = new();
 
+    private KntTextUtils _kntTextUtils;
+    public KntTextUtils KntTextUtils
+    {
+        get
+        {
+            _kntTextUtils ??= new KntTextUtils();
+            return _kntTextUtils;
+        }
+    }
+
     public FolderWithServiceRef _dafaultFolderWithServiceRef;
     public FolderWithServiceRef DefaultFolderWithServiceRef
     {
@@ -382,10 +392,6 @@ public class Store
         }
     }
 
-    public string ExtensionFileToFileType(string extension) => KntTextUtils.ExtensionFileToFileType(extension);
-
-    public bool IsSupportedFileTypeForPreview(string fileType) => KntTextUtils.IsSupportedFileTypeForPreview(fileType);
-
     public async Task<Guid?> GetUserId(IKntService service)
     {
         var userDto = (await service.Users.GetByUserNameAsync(this.AppUserName)).Entity;
@@ -432,14 +438,6 @@ public class Store
     #endregion
 
     #region Utils public methods
-
-    public DateTime? TextToDateTime(string text) => KntTextUtils.TextToDateTime(text);
-
-    public int TextToInt(string text) => KntTextUtils.TextToInt(text);
-
-    public double? TextToDouble(string text) => KntTextUtils.TextToDouble(text);
-
-    public string ExtractUrlFromText(string text) => KntTextUtils.ExtractUrlFromText(text);
 
     public async Task<NoteDto> GetCatalogItem(ServiceRef serviceRef, string item, string viewTitle)
     {

@@ -185,8 +185,14 @@ ellas y manteniendo su API pública sin cambios para el resto del código:
   `SaveActiveNotes()`, `SaveAndCloseActiveNotes()`, `HidePostIts()`/`ActivatePostIts()` iteran sobre
   `_controllerRegistry.All`.
 - `KntTextUtils` (`Core/KntTextUtils.cs`) — utilidades puras de texto/fichero (`TextToDateTime/Int/Double`,
-  `ExtractUrlFromText`, `ExtensionFileToFileType`, `IsSupportedFileTypeForPreview`); `Store` expone los
-  mismos métodos como envoltorios de una línea, por compatibilidad con el código existente.
+  `ExtractUrlFromText`, `ExtensionFileToFileType`, `IsSupportedFileTypeForPreview`), expuestas como
+  `Store.KntTextUtils` (propiedad *lazy*, una única instancia por `Store`: `_kntTextUtils ??= new
+  KntTextUtils();`). `Store` **no** tiene métodos envoltorio para esto — los que había (`Store.TextToInt(...)`,
+  etc.) se retiraron a propósito; los ~20 puntos de uso en `Controllers/`/`Views/` llaman a
+  `Store.KntTextUtils.TextToInt(...)` directamente. Se eligió esta vía (propiedad instanciable) en vez de
+  dejar `KntTextUtils` como `static class` invocada sin pasar por `Store`, porque para el dominio de KNote
+  conviene que estas utilidades sean descubribles como parte de `Store` (autocompletado `Store.` →
+  `KntTextUtils`) en vez de exigir conocer y referenciar una clase estática suelta.
 - `DomainEventBus` (`Core/DomainEventBus.cs`), expuesto como `Store.Events` — bus de publicación/suscripción
   genérico (`Subscribe<TMessage>`/`Unsubscribe<TMessage>`/`Publish<TMessage>`). `CtrlEditorBase<TView,
   TEntity>.OnSavedEntity`/`OnAddedEntity`/`OnDeletedEntity` publican `EntitySaved<TEntity>`/
