@@ -21,6 +21,7 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<PostItPropertiesCtrl, IViewPostIt<WindowDto>>(c => new PostItPropertiesForm(c));
         Registry.Register<FolderEditorCtrl, IViewEditor<FolderDto>>(c => new FolderEditorForm(c));
         Registry.Register<RepositoryEditorCtrl, IViewEditor<RepositoryRef>>(c => new RepositoryEditorForm(c));
+        Registry.Register<UserRegisterCtrl, IViewEditor<UserRegisterDto>>(c => new UserRegisterForm(c));
         Registry.Register<KNoteManagmentCtrl, IViewBase>(c => new NotifyForm(c), key: "Notify");
         Registry.Register<KNoteManagmentCtrl, IViewBase>(c => new KNoteAboutForm(c), key: "About");
         Registry.Register<MessageEditorCtrl, IViewEditor<KMessageDto>>(c => new MessageEditorForm(c));

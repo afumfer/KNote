@@ -133,6 +133,31 @@ public class KntUserRepository : KntRepositoryEFBase, IKntUserRepository
         return result;
     }
 
+    public async Task<Result<UserDto>> GetByEMailAsync(string eMail)
+    {
+        var result = new Result<UserDto>();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var resRep = await users.GetAsync(_ => _.EMail == eMail);
+
+            result.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
+
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+
+        return result;
+    }
+
     public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
     {
         var result = new Result<UserInternalDto>();

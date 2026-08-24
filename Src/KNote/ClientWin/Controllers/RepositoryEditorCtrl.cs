@@ -104,10 +104,11 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);                    
                 if (await newService.Service.TestDbConnection())
                 {
-                    Store.AddServiceRef(newService);                    
+                    Store.AddServiceRef(newService);
                     Store.AddServiceRefInAppConfig(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
+                    await Store.EnsureCurrentUserRegistered(newService.Service);
                     OnAddedEntity(Model);
                 }
                 else

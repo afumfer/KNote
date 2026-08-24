@@ -134,6 +134,34 @@ public class KntUserRepository : KntRepositoryDapperBase, IKntUserRepository
         }
     }
 
+    public async Task<Result<UserDto>> GetByEMailAsync(string eMail)
+    {
+        try
+        {
+            var result = new Result<UserDto>();
+
+            var db = GetOpenConnection();
+
+            var sql = @"SELECT [UserId], [UserName], [EMail], [FullName], [RoleDefinition], [Disabled] FROM [Users]
+                    WHERE EMail = @eMail";
+
+            var entity = await db.QueryFirstOrDefaultAsync<UserDto>(sql.ToString(), new { eMail });
+
+            if (entity == null)
+                result.AddErrorMessage("Entity not found.");
+
+            result.Entity = entity;
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<UserInternalDto>> GetInternalAsync(string userName)
     {            
         try

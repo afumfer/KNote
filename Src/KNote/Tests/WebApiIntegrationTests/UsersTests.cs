@@ -74,6 +74,45 @@ public class UsersTests : WebApiTestBase
 
 
     [TestMethod]
+    public async Task Execute_Register_DuplicateEmail_ReturnsFriendlyError()
+    {
+        // Register a first user
+        string userName1 = "__TEST_DUPEMAIL_1_###__";
+        string userEmail = "TESTDUPEMAIL@TESTDUPEMAIL.ORG";
+        string userFullName = "__TEST_DUPEMAIL_FULLNAME_###__";
+        string userPass = "pass12345abcd!!";
+        UserRegisterDto user1 = new() { UserId = Guid.Empty, UserName = userName1, EMail = userEmail, FullName = userFullName, RoleDefinition = "Public", Password = userPass };
+
+        var httpRes1 = await HttpClient.PostAsJsonAsync($"{UrlBase}api/users/register", user1);
+        var res1 = await httpRes1.Content.ReadFromJsonAsync<UserTokenDto>();
+
+        Assert.IsNotNull(res1);
+        Assert.IsTrue(res1.success);
+        Assert.IsFalse(string.IsNullOrEmpty(res1.uid));
+
+        try
+        {
+            // Register a second user reusing the same email (different username): the underlying
+            // DB unique index on Users.EMail would only produce a raw, cryptic DbUpdateException -
+            // KntUsersCreateAsyncCommand now checks this upfront and must surface a clear message.
+            string userName2 = "__TEST_DUPEMAIL_2_###__";
+            UserRegisterDto user2 = new() { UserId = Guid.Empty, UserName = userName2, EMail = userEmail, FullName = userFullName, RoleDefinition = "Public", Password = userPass };
+
+            var httpRes2 = await HttpClient.PostAsJsonAsync($"{UrlBase}api/users/register", user2);
+            var res2 = await httpRes2.Content.ReadFromJsonAsync<UserTokenDto>();
+
+            Assert.IsNotNull(res2);
+            Assert.IsFalse(res2.success);
+            Assert.IsTrue(string.IsNullOrEmpty(res2.token));
+            Assert.IsTrue(res2.error?.Contains(userEmail, StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            await HttpClient.DeleteAsync($"{UrlBase}api/users/{Guid.Parse(res1.uid)}");
+        }
+    }
+
+    [TestMethod]
     public async Task Execute_BasicCRUD()
     {
         // Create 

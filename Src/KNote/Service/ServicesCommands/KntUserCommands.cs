@@ -176,6 +176,8 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
 
         if ((await Repository.Users.GetInternalAsync(Param.UserName)).Entity != null)
             throw new Exception("Username \"" + Param.UserName + "\" is already taken");
+        else if ((await Repository.Users.GetByEMailAsync(Param.EMail)).Entity != null)
+            throw new Exception("Email \"" + Param.EMail + "\" is already in use");
         else
         {
             byte[] passwordHash, passwordSalt;

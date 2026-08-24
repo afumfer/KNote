@@ -15,6 +15,7 @@ namespace KNote.ClientWin.Tests.Fakes;
 internal class FakeKntService : IKntService
 {
     public FakeKntNoteService NotesFake { get; } = new();
+    public FakeKntUserService UsersFake { get; } = new();
 
     public ILogger Logger { get; set; }
     public Guid IdServiceRef { get; } = Guid.NewGuid();
@@ -22,7 +23,7 @@ internal class FakeKntService : IKntService
     public string UserIdentityName { get; set; }
 
     public IKntRepository Repository => throw new NotSupportedException();
-    public IKntUserService Users => throw new NotSupportedException();
+    public IKntUserService Users => UsersFake;
     public IKntKAttributeService KAttributes => throw new NotSupportedException();
     public IKntSystemValuesService SystemValues => throw new NotSupportedException();
     public IKntFolderService Folders => throw new NotSupportedException();

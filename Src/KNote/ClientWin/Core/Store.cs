@@ -397,8 +397,25 @@ public class Store
         var userDto = (await service.Users.GetByUserNameAsync(this.AppUserName)).Entity;
         if (userDto != null)
             return userDto.UserId;
-        else 
+        else
             return null;
+    }
+
+    /// <summary>
+    /// Checks whether the current Windows user (AppUserName) is registered in the Users table of
+    /// the given repository, and if not, shows a modal registration dialog for it. Cancelling the
+    /// dialog is not blocking: the app keeps running against that repository without the user
+    /// registered (existing guards elsewhere, e.g. PostItEditorCtrl, already handle that case).
+    /// </summary>
+    public async Task<bool> EnsureCurrentUserRegistered(IKntService service)
+    {
+        if (await GetUserId(service) != null)
+            return true;
+
+        var userRegisterCtrl = new UserRegisterCtrl(this);
+        await userRegisterCtrl.NewModel(service);
+        var result = userRegisterCtrl.RunModal();
+        return result.Entity == EControllerResult.Executed;
     }
 
     #endregion

@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Runtime.ExceptionServices;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using NLog;
@@ -17,7 +18,7 @@ static class Program
     ///  The main entry point for the application.
     /// </summary>        
     [STAThread]
-    static void Main()        
+    static void Main()
     {
 #if RELEASE
         Process[] instancias = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
@@ -32,29 +33,53 @@ static class Program
         Application.SetCompatibleTextRenderingDefault(false);
 
         ApplicationConfiguration.Initialize();
-        ApplicationContext applicationContext = new ApplicationContext();
         Store appStore = new Store(new FactoryViewsWinForms());
-        KNoteManagmentCtrl knoteManagment;
         SplashForm splashForm = new SplashForm(appStore);
-        
-        splashForm.Show(); Application.DoEvents();
-        
-        LoadAppStore(appStore);        
+        Exception loadException = null;
 
         try
         {
-            knoteManagment = new KNoteManagmentCtrl(appStore);
+            // LoadAppStore does real async I/O (repository access) and can show a modal dialog
+            // (Store.EnsureCurrentUserRegistered). It must finish before KNoteManagmentCtrl is
+            // created. Kicking it off from SplashForm.Shown, under a real Application.Run(splashForm)
+            // message loop, lets every "await" marshal its continuation back onto this UI thread the
+            // normal WinForms way. A manual Application.DoEvents() polling loop here instead (run
+            // before any Application.Run() call) cannot be trusted for that: nothing guarantees a
+            // continuation resumes on this same thread once nested pumps are involved (ShowDialog's
+            // own loop, plus SplashForm's own DoEvents() call in AppContext_AddedServiceRef), which is
+            // exactly what caused a cross-thread control access as soon as repository loading had more
+            // than one "await" in a row (e.g. right after cancelling the registration dialog).
+            splashForm.Shown += async (s, e) =>
+            {
+                try
+                {
+                    await LoadAppStore(appStore);
+                }
+                catch (Exception ex)
+                {
+                    loadException = ex;
+                }
+                finally
+                {
+                    splashForm.Close();
+                }
+            };
+
+            Application.Run(splashForm);
+
+            if (loadException != null)
+                ExceptionDispatchInfo.Capture(loadException).Throw();
+
+            var knoteManagment = new KNoteManagmentCtrl(appStore);
             knoteManagment.Run();
-            applicationContext.MainForm = (Form)knoteManagment.View;
-            splashForm.Close();
-            
-            Application.Run(applicationContext);
+
+            Application.Run((Form)knoteManagment.View);
 
             appStore.Logger?.LogInformation("KNote finalized");
         }
         catch (Exception ex)
         {
-            appStore.Logger.LogCritical(ex, "KNote has stopped because there was an exception.");
+            appStore.Logger?.LogCritical(ex, "KNote has stopped because there was an exception.");
             throw;
         }
         finally
@@ -63,7 +88,7 @@ static class Program
         }
     }
 
-    static async void LoadAppStore(Store store)
+    static async Task LoadAppStore(Store store)
     {
         var pathApp = Application.StartupPath;
         var appFileConfig = Path.Combine(pathApp, "KNoteData.config");
@@ -129,9 +154,14 @@ static class Program
         else
         {
             store.LoadConfig(appFileConfig);
-            foreach (var r in store.AppConfig.RespositoryRefs)                
-                store.AddServiceRef(new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger));
-            
+            foreach (var r in store.AppConfig.RespositoryRefs)
+            {
+                var serviceRef = new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger);
+                store.AddServiceRef(serviceRef);
+                await store.EnsureCurrentUserRegistered(serviceRef.Service);
+            }
+
+
             if (store.AppConfig.AssistantRespositoryRef?.ConnectionString != null)
                 store.SetAssistantServiceRef(new ServiceRef(store.AppConfig.AssistantRespositoryRef, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger));
             else

@@ -8,6 +8,7 @@ public interface IKntUserRepository : IDisposable
     Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null);
     Task<Result<UserDto>> GetAsync(Guid userId);
     Task<Result<UserDto>> GetByUserNameAsync(string userName);
+    Task<Result<UserDto>> GetByEMailAsync(string eMail);
     Task<Result<UserInternalDto>> GetInternalAsync(string userName);        
     Task<Result<UserDto>> AddAsync(UserDto userEntity);
     Task<Result<UserDto>> UpdateAsync(UserDto userEntity);
