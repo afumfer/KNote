@@ -66,19 +66,29 @@ public class KntNoteTypeDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<
         var result = new Result<NoteTypeDto>();
 
         var resGetEntity = await Repository.NoteTypes.GetAsync(Param);
-        
-        if (resGetEntity.IsValid)
-        {
-            var resDelEntity = await Repository.NoteTypes.DeleteAsync(Param);
-            if (resDelEntity.IsValid)
-                result.Entity = resGetEntity.Entity;
-            else
-                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
-        }
-        else
+
+        if (!resGetEntity.IsValid)
         {
             result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+            return result;
         }
+
+        // Business rule, checked here instead of letting it surface as a raw FK-constraint DB
+        // error: a note type still in use by existing notes can't be deleted. Living in the command
+        // (not in a caller like ClientWin's NoteTypeEditorCtrl) means every consumer of this service
+        // - ClientWin and Server/Blazor's NoteTypesController alike - gets the same clear message.
+        var notesUsingType = await Repository.Notes.GetFilterMinimalAsync(new NotesFilterDto { NoteTypeId = Param });
+        if (notesUsingType.IsValid && notesUsingType.Entity?.Count > 0)
+        {
+            result.AddErrorMessage($"Can't delete this note type: {notesUsingType.Entity.Count} note(s) still use it.");
+            return result;
+        }
+
+        var resDelEntity = await Repository.NoteTypes.DeleteAsync(Param);
+        if (resDelEntity.IsValid)
+            result.Entity = resGetEntity.Entity;
+        else
+            result.AddListErrorMessage(resDelEntity.ListErrorMessage);
 
         return result;
     }

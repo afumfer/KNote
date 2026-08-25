@@ -23,6 +23,8 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         _ctrl = ctrl;
 
         panelSqLite.Resize += panelSqLite_Resize;
+
+        tabPageNoteTypes.Controls.Add(_ctrl.NoteTypesManageCtrl.View.PanelView());
     }
 
     #endregion 
@@ -115,10 +117,14 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         // The form used to be forced to a hardcoded Height, which AutoScaleMode never
         // rescales, so it only fit at the DPI it was tuned for. Derive it instead from
         // the already auto-scaled geometry of the real content and the Accept/Cancel
-        // button row, so it fits at any Windows scale factor.
-        int footerHeight = ClientSize.Height - panelForm.Height;
+        // button row, so it fits at any Windows scale factor. tabStripOverhead captures
+        // however much vertical space the tab strip itself takes at the current DPI/font
+        // (both it and panelForm were scaled by the same factor during InitializeComponent).
+        int footerHeight = ClientSize.Height - tabControlMain.Height;
+        int tabStripOverhead = tabControlMain.Height - panelForm.Height;
         int contentBottom = Math.Max(panelSqLite.Bottom, panelMSSqlServer.Bottom);
-        ClientSize = new Size(ClientSize.Width, contentBottom + footerHeight);
+        tabControlMain.Height = contentBottom + tabStripOverhead;
+        ClientSize = new Size(ClientSize.Width, tabControlMain.Height + footerHeight);
 
         // Also run once explicitly: if the runtime DPI happens to match the Designer's
         // baked scale, AutoScale is a no-op and panelSqLite never actually fires Resize.
@@ -210,6 +216,30 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
                 panelMSSqlServer.Enabled = false;
                 break;
         }
+
+        // Users/Note types/Attributes administration only makes sense for an already-linked
+        // repository (Managment mode) and only for a repository user with the Admin role.
+        tabPageUsers.Enabled = _ctrl.CurrentUserIsAdmin;
+        tabPageNoteTypes.Enabled = _ctrl.CurrentUserIsAdmin;
+        tabPageAttributes.Enabled = _ctrl.CurrentUserIsAdmin;
+
+        var adminTabsHint = _ctrl.EditorMode != EnumRepositoryEditorMode.Managment
+            ? "Available once the repository is linked."
+            : (_ctrl.CurrentUserIsAdmin ? "" : "Requires the Admin role in this repository.");
+        if (!string.IsNullOrEmpty(adminTabsHint))
+        {
+            labelUsersPlaceholder.Text = $"User management (coming soon). {adminTabsHint}";
+            labelAttributesPlaceholder.Text = $"Attribute management (coming soon). {adminTabsHint}";
+        }
+
+        // The tab's content gets disabled along with the tab (see above), so a placeholder label
+        // inside it (Users/Attributes, still pending their own phase) is invisible/unreadable once
+        // grayed out - and Note types has no such label at all, just a disabled ListView. A ToolTip
+        // on the TabPage itself still works when hovering the tab header, since that belongs to the
+        // TabControl (which stays enabled), not to the disabled page content.
+        toolTipAdminTabs.SetToolTip(tabPageUsers, adminTabsHint);
+        toolTipAdminTabs.SetToolTip(tabPageNoteTypes, adminTabsHint);
+        toolTipAdminTabs.SetToolTip(tabPageAttributes, adminTabsHint);
 
         textAliasName.Text = _ctrl.Model.Alias;
         textResourcesContainer.Text = _ctrl.Model.ResourcesContainer;

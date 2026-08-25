@@ -32,6 +32,14 @@ namespace KNote.ClientWin.Views
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RepositoryEditorForm));
             buttonCancel = new Button();
             buttonAccept = new Button();
+            toolTipAdminTabs = new ToolTip();
+            tabControlMain = new TabControl();
+            tabPageGeneral = new TabPage();
+            tabPageUsers = new TabPage();
+            labelUsersPlaceholder = new Label();
+            tabPageNoteTypes = new TabPage();
+            tabPageAttributes = new TabPage();
+            labelAttributesPlaceholder = new Label();
             panelForm = new Panel();
             checkResourceContentInDB = new CheckBox();
             buttonSelectDirectoryResources = new Button();
@@ -58,6 +66,11 @@ namespace KNote.ClientWin.Views
             radioSqLite = new RadioButton();
             labelAlias = new Label();
             textAliasName = new TextBox();
+            tabControlMain.SuspendLayout();
+            tabPageGeneral.SuspendLayout();
+            tabPageUsers.SuspendLayout();
+            tabPageNoteTypes.SuspendLayout();
+            tabPageAttributes.SuspendLayout();
             panelForm.SuspendLayout();
             panelMSSqlServer.SuspendLayout();
             panelSqLite.SuspendLayout();
@@ -67,7 +80,7 @@ namespace KNote.ClientWin.Views
             // buttonCancel
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonCancel.Location = new Point(804, 945);
+            buttonCancel.Location = new Point(804, 995);
             buttonCancel.Margin = new Padding(4, 5, 4, 5);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(91, 48);
@@ -79,7 +92,7 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             // 
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonAccept.Location = new Point(705, 945);
+            buttonAccept.Location = new Point(705, 995);
             buttonAccept.Margin = new Padding(4, 5, 4, 5);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(91, 48);
@@ -87,9 +100,90 @@ namespace KNote.ClientWin.Views
             buttonAccept.Text = "&Accept";
             buttonAccept.UseVisualStyleBackColor = true;
             buttonAccept.Click += buttonAccept_Click;
-            // 
+            //
+            // tabControlMain
+            //
+            tabControlMain.Controls.Add(tabPageGeneral);
+            tabControlMain.Controls.Add(tabPageUsers);
+            tabControlMain.Controls.Add(tabPageNoteTypes);
+            tabControlMain.Controls.Add(tabPageAttributes);
+            tabControlMain.Dock = DockStyle.Top;
+            tabControlMain.Location = new Point(0, 0);
+            tabControlMain.Margin = new Padding(4, 5, 4, 5);
+            tabControlMain.Name = "tabControlMain";
+            tabControlMain.SelectedIndex = 0;
+            tabControlMain.Size = new Size(913, 978);
+            tabControlMain.TabIndex = 16;
+            //
+            // tabPageGeneral
+            //
+            tabPageGeneral.Controls.Add(panelForm);
+            tabPageGeneral.Location = new Point(4, 34);
+            tabPageGeneral.Margin = new Padding(4, 5, 4, 5);
+            tabPageGeneral.Name = "tabPageGeneral";
+            tabPageGeneral.Padding = new Padding(4, 5, 4, 5);
+            tabPageGeneral.Size = new Size(905, 940);
+            tabPageGeneral.TabIndex = 0;
+            tabPageGeneral.Text = "General";
+            tabPageGeneral.UseVisualStyleBackColor = true;
+            //
+            // tabPageUsers
+            //
+            tabPageUsers.Controls.Add(labelUsersPlaceholder);
+            tabPageUsers.Location = new Point(4, 34);
+            tabPageUsers.Margin = new Padding(4, 5, 4, 5);
+            tabPageUsers.Name = "tabPageUsers";
+            tabPageUsers.Padding = new Padding(4, 5, 4, 5);
+            tabPageUsers.Size = new Size(905, 940);
+            tabPageUsers.TabIndex = 1;
+            tabPageUsers.Text = "Users";
+            tabPageUsers.UseVisualStyleBackColor = true;
+            //
+            // labelUsersPlaceholder
+            //
+            labelUsersPlaceholder.AutoSize = true;
+            labelUsersPlaceholder.Location = new Point(14, 16);
+            labelUsersPlaceholder.Margin = new Padding(4, 0, 4, 0);
+            labelUsersPlaceholder.Name = "labelUsersPlaceholder";
+            labelUsersPlaceholder.Size = new Size(240, 25);
+            labelUsersPlaceholder.TabIndex = 0;
+            labelUsersPlaceholder.Text = "User management (coming soon).";
+            //
+            // tabPageNoteTypes
+            //
+            tabPageNoteTypes.Location = new Point(4, 34);
+            tabPageNoteTypes.Margin = new Padding(4, 5, 4, 5);
+            tabPageNoteTypes.Name = "tabPageNoteTypes";
+            tabPageNoteTypes.Padding = new Padding(4, 5, 4, 5);
+            tabPageNoteTypes.Size = new Size(905, 940);
+            tabPageNoteTypes.TabIndex = 2;
+            tabPageNoteTypes.Text = "Note types";
+            tabPageNoteTypes.UseVisualStyleBackColor = true;
+            //
+            // tabPageAttributes
+            //
+            tabPageAttributes.Controls.Add(labelAttributesPlaceholder);
+            tabPageAttributes.Location = new Point(4, 34);
+            tabPageAttributes.Margin = new Padding(4, 5, 4, 5);
+            tabPageAttributes.Name = "tabPageAttributes";
+            tabPageAttributes.Padding = new Padding(4, 5, 4, 5);
+            tabPageAttributes.Size = new Size(905, 940);
+            tabPageAttributes.TabIndex = 3;
+            tabPageAttributes.Text = "Attributes";
+            tabPageAttributes.UseVisualStyleBackColor = true;
+            //
+            // labelAttributesPlaceholder
+            //
+            labelAttributesPlaceholder.AutoSize = true;
+            labelAttributesPlaceholder.Location = new Point(14, 16);
+            labelAttributesPlaceholder.Margin = new Padding(4, 0, 4, 0);
+            labelAttributesPlaceholder.Name = "labelAttributesPlaceholder";
+            labelAttributesPlaceholder.Size = new Size(268, 25);
+            labelAttributesPlaceholder.TabIndex = 0;
+            labelAttributesPlaceholder.Text = "Attribute management (coming soon).";
+            //
             // panelForm
-            // 
+            //
             panelForm.Controls.Add(checkResourceContentInDB);
             panelForm.Controls.Add(buttonSelectDirectoryResources);
             panelForm.Controls.Add(textResourcesContainer);
@@ -378,10 +472,10 @@ namespace KNote.ClientWin.Views
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(913, 1007);
+            ClientSize = new Size(913, 1057);
             Controls.Add(buttonCancel);
             Controls.Add(buttonAccept);
-            Controls.Add(panelForm);
+            Controls.Add(tabControlMain);
             Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Margin = new Padding(4, 5, 4, 5);
@@ -394,6 +488,14 @@ namespace KNote.ClientWin.Views
             Load += RepositoryEditorForm_Load;
             KeyPress += RepositoryEditorForm_KeyPress;
             KeyUp += RepositoryEditorForm_KeyUp;
+            tabControlMain.ResumeLayout(false);
+            tabPageGeneral.ResumeLayout(false);
+            tabPageUsers.ResumeLayout(false);
+            tabPageUsers.PerformLayout();
+            tabPageNoteTypes.ResumeLayout(false);
+            tabPageNoteTypes.PerformLayout();
+            tabPageAttributes.ResumeLayout(false);
+            tabPageAttributes.PerformLayout();
             panelForm.ResumeLayout(false);
             panelForm.PerformLayout();
             panelMSSqlServer.ResumeLayout(false);
@@ -409,6 +511,14 @@ namespace KNote.ClientWin.Views
 
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonAccept;
+        private System.Windows.Forms.ToolTip toolTipAdminTabs;
+        private System.Windows.Forms.TabControl tabControlMain;
+        private System.Windows.Forms.TabPage tabPageGeneral;
+        private System.Windows.Forms.TabPage tabPageUsers;
+        private System.Windows.Forms.Label labelUsersPlaceholder;
+        private System.Windows.Forms.TabPage tabPageNoteTypes;
+        private System.Windows.Forms.TabPage tabPageAttributes;
+        private System.Windows.Forms.Label labelAttributesPlaceholder;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Button buttonFolderSearch;
         private System.Windows.Forms.Label labelAlias;

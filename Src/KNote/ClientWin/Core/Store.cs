@@ -406,6 +406,22 @@ public class Store
     }
 
     /// <summary>
+    /// Checks whether the current Windows user (AppUserName) has the Admin role in the given
+    /// repository's Users table. Used to gate the repository administration tabs (Users, Note types,
+    /// Attributes) in RepositoryEditorCtrl/RepositoryEditorForm.
+    /// </summary>
+    public async Task<bool> IsCurrentUserAdminAsync(IKntService service)
+    {
+        var userDto = (await service.Users.GetByUserNameAsync(this.AppUserName)).Entity;
+        if (userDto?.RoleDefinition == null)
+            return false;
+
+        return userDto.RoleDefinition
+            .Split(',', StringSplitOptions.TrimEntries)
+            .Contains(nameof(EnumRoles.Admin));
+    }
+
+    /// <summary>
     /// Checks whether the current Windows user (AppUserName) is registered in the Users table of
     /// the given repository, and if not, shows a modal registration dialog for it. Cancelling the
     /// dialog is not blocking: the app keeps running against that repository without the user

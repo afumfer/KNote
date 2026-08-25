@@ -10,7 +10,21 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
 
     public EnumRepositoryEditorMode EditorMode { get; set; }
 
-    #endregion 
+    /// <summary>
+    /// Whether the current Windows user (Store.AppUserName) has the Admin role in the repository being
+    /// managed. Only meaningful in EnumRepositoryEditorMode.Managment (a repository must already be
+    /// linked to have a Users table to check against); gates the Users/Note types/Attributes tabs.
+    /// </summary>
+    public bool CurrentUserIsAdmin { get; private set; }
+
+    #endregion
+
+    #region Sub-controllers (repository administration tabs)
+
+    private NoteTypesManageCtrl _noteTypesManageCtrl;
+    public NoteTypesManageCtrl NoteTypesManageCtrl => _noteTypesManageCtrl ??= new NoteTypesManageCtrl(Store);
+
+    #endregion
 
     #region Constructor 
 
@@ -28,14 +42,14 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
         return Store.FactoryViews.Registry.Resolve<RepositoryEditorCtrl, IViewEditor<RepositoryRef>>(this);
     }
 
-    public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
+    public async override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
     {
         try
         {
-            Service = service;                
-            
+            Service = service;
+
             var repositoryForEdit = Store.GetServiceRef(id).RepositoryRef;
-            
+
             Model.Alias = repositoryForEdit.Alias;
             Model.ConnectionString = repositoryForEdit.ConnectionString;
             Model.Provider = repositoryForEdit.Provider;
@@ -45,15 +59,21 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             Model.ResourcesContainerRootPath = repositoryForEdit.ResourcesContainerRootPath;
             Model.ResourcesContainerRootUrl = repositoryForEdit.ResourcesContainerRootUrl;
             Model.SetIsDirty(false);
-            
+
+            CurrentUserIsAdmin = EditorMode == EnumRepositoryEditorMode.Managment
+                && await Store.IsCurrentUserAdminAsync(service);
+
+            if (CurrentUserIsAdmin)
+                await NoteTypesManageCtrl.LoadEntitiesAsync(service);
+
             if (refreshView)
                 View.RefreshView();
-            return Task.FromResult(true);
+            return true;
         }
         catch (Exception ex)
         {
             View.ShowInfo(ex.Message);
-            return Task.FromResult(false);
+            return false;
         }
     }
 
@@ -62,6 +82,10 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
         Service = service;
 
         Model = new RepositoryRef();
+
+        // AddLink/Create modes: the repository isn't linked yet, so there's no Users table to check
+        // the current user's role against - the admin tabs stay disabled regardless.
+        CurrentUserIsAdmin = false;
 
         return Task.FromResult(true);
     }

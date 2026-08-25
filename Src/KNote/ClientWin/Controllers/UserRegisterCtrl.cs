@@ -73,15 +73,7 @@ public class UserRegisterCtrl : CtrlEditorBase<IViewEditor<UserRegisterDto>, Use
         }
         catch (Exception ex)
         {
-            // The real cause can be wrapped more than once before it reaches here - e.g. a DB error
-            // is first wrapped by KntUserRepository.AddInternalAsync into a generic
-            // KntRepositoryException ("KNote repository error. (...)"), and that is wrapped again by
-            // KntServiceBase.ExecuteCommand into a KntServiceException ("KNote service error. (...)").
-            // Walk down to the innermost exception so the user sees the actual reason, not a wrapper.
-            var rootEx = ex;
-            while (rootEx.InnerException != null)
-                rootEx = rootEx.InnerException;
-            View.ShowInfo(rootEx.Message);
+            View.ShowInfo(RootExceptionMessage(ex));
             return false;
         }
     }

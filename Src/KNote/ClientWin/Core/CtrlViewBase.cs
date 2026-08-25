@@ -194,9 +194,50 @@ abstract public class CtrlSelectorBase<TView, TEntity> : CtrlViewEmbeddableBase<
     #endregion 
 }
 
+/// <summary>
+/// Base for the "manage list" family: an embeddable list of entities (typically hosted in a tab) with
+/// add/edit/delete actions that persist immediately against the service, e.g. repository administration
+/// screens (Users, Note types, Attributes) inside RepositoryEditorCtrl. Unlike CtrlSelectorBase, there is
+/// no "pick one and return it" semantics; unlike CtrlEditorBase, there is no single Model being edited —
+/// each add/edit/delete is a self-contained, immediately persisted operation, usually delegated to a
+/// CtrlEditorBase-derived popup editor for the single-entity form.
+/// </summary>
+abstract public class CtrlManageListBase<TView, TEntity> : CtrlViewEmbeddableBase<TView>
+    where TView : IViewEmbeddable
+{
+    #region Properties
+
+    public IKntService Service { get; protected set; }
+
+    public List<TEntity> ListEntities { get; protected set; } = new();
+
+    #endregion
+
+    #region Constructor
+
+    public CtrlManageListBase(Store store) : base(store)
+    {
+
+    }
+
+    #endregion
+
+    #region Controller abstract methods
+
+    public abstract Task<bool> LoadEntitiesAsync(IKntService service, bool refreshView = true);
+
+    public abstract Task<bool> AddItemAsync();
+
+    public abstract Task<bool> EditItemAsync(TEntity item);
+
+    public abstract Task<bool> DeleteItemAsync(TEntity item);
+
+    #endregion
+}
+
 abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
     where TView : IViewBase
-    where TEntity : SmartModelDtoBase, new()        
+    where TEntity : SmartModelDtoBase, new()
 {
     #region Properties
 

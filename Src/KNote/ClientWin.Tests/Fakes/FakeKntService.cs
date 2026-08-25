@@ -16,6 +16,7 @@ internal class FakeKntService : IKntService
 {
     public FakeKntNoteService NotesFake { get; } = new();
     public FakeKntUserService UsersFake { get; } = new();
+    public FakeKntNoteTypeService NoteTypesFake { get; } = new();
 
     public ILogger Logger { get; set; }
     public Guid IdServiceRef { get; } = Guid.NewGuid();
@@ -28,7 +29,7 @@ internal class FakeKntService : IKntService
     public IKntSystemValuesService SystemValues => throw new NotSupportedException();
     public IKntFolderService Folders => throw new NotSupportedException();
     public IKntNoteService Notes => NotesFake;
-    public IKntNoteTypeService NoteTypes => throw new NotSupportedException();
+    public IKntNoteTypeService NoteTypes => NoteTypesFake;
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();

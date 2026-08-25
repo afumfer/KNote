@@ -223,11 +223,27 @@ abstract public class CtrlBase : IDisposable
         foreach (FieldInfo field in fields)
         {
             object v = field.GetValue(this);
-            if (v != null && v is IViewBase) 
+            if (v != null && v is IViewBase)
                 myList.Add((IViewBase)field.GetValue(this));
         }
 
         return myList;
+    }
+
+    /// <summary>
+    /// Walks down an exception's InnerException chain to the innermost one. KntServiceBase.ExecuteCommand
+    /// wraps every exception thrown by a command into a generic "KNote service error. (...)" exception
+    /// (and a DB error may already be wrapped once more below that, e.g. "KNote repository error.
+    /// (...)"), so the message actually worth showing a user is usually several layers down from what a
+    /// Ctrl's catch block receives. Used by every editor Ctrl's SaveModel/DeleteModel catch block instead
+    /// of showing the generic wrapper message.
+    /// </summary>
+    protected static string RootExceptionMessage(Exception ex)
+    {
+        var rootEx = ex;
+        while (rootEx.InnerException != null)
+            rootEx = rootEx.InnerException;
+        return rootEx.Message;
     }
 
     #endregion

@@ -40,12 +40,24 @@ public interface IViewEditorEmbeddable<T> : IViewEmbeddable
 }
 
 public interface IViewSelector<TItem> : IViewEmbeddable
-{                
+{
     void RefreshItem(TItem item);
     void DeleteItem(TItem item);
     void AddItem(TItem item);
     object SelectItem(TItem item);
     List<TItem> GetSelectedListItem();
+}
+
+/// <summary>
+/// View for the "manage list" family (CtrlManageListBase): an embeddable list of entities with
+/// add/edit/delete actions that persist immediately, as opposed to IViewSelector (pick-and-return an
+/// entity) or IViewEditor (edit a single entity already loaded elsewhere).
+/// </summary>
+public interface IViewManageList<TEntity> : IViewEmbeddable
+{
+    void AddItem(TEntity item);
+    void UpdateItem(TEntity item);
+    void RemoveItem(TEntity item);
 }
 
 #endregion
