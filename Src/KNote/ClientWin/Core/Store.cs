@@ -236,7 +236,7 @@ public class Store
     public void SaveConfig(string configFile = null)
     {
         if(string.IsNullOrEmpty(configFile))
-            configFile = Path.Combine(Application.StartupPath, "KNoteData.config");
+            configFile = AppUserDataPath.ConfigFile;
         try
         {
             TextWriter w = new StreamWriter(configFile);
@@ -251,10 +251,14 @@ public class Store
         }
     }
 
-    public void LoadConfig(string configFile = @"KNoteData.config")
+    public void LoadConfig(string configFile = null)
     {
         try
         {
+            if (string.IsNullOrEmpty(configFile))
+                configFile = AppUserDataPath.ConfigFile;
+
+
             if (!File.Exists(configFile))
                 return;
             

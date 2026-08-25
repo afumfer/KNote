@@ -91,13 +91,39 @@ static class Program
     static async Task LoadAppStore(Store store)
     {
         var pathApp = Application.StartupPath;
-        var appFileConfig = Path.Combine(pathApp, "KNoteData.config");
+
+        AppUserDataPath.EnsureExists();
+        var appFileConfig = AppUserDataPath.ConfigFile;
+
+        // One-time migration: older versions kept KNoteData.config next to the application binaries.
+        // If the user data folder doesn't have a config yet but a legacy one is found, copy it over;
+        // once the copy is confirmed to have landed correctly, remove the legacy file so it doesn't
+        // linger as an orphaned, no-longer-read duplicate.
+        var legacyFileConfig = Path.Combine(pathApp, "KNoteData.config");
+        if (!File.Exists(appFileConfig) && File.Exists(legacyFileConfig))
+        {
+            File.Copy(legacyFileConfig, appFileConfig);
+
+            var copiedOk = File.Exists(appFileConfig)
+                && new FileInfo(appFileConfig).Length == new FileInfo(legacyFileConfig).Length;
+            if (copiedOk)
+            {
+                try
+                {
+                    File.Delete(legacyFileConfig);
+                }
+                catch (Exception)
+                {
+                    // Non-fatal: worst case the legacy file lingers as an unused duplicate.
+                }
+            }
+        }
 
         // Set session values
         store.AppUserName = SystemInformation.UserName;
         store.ComputerName = SystemInformation.ComputerName;
 
-        // Log configuration                
+        // Log configuration
         if (File.Exists(Path.Combine(pathApp, "NLog.config")))
         {
             LogManager.Setup().LoadConfigurationFromFile(Path.Combine(pathApp, "NLog.config"));
@@ -108,13 +134,13 @@ static class Program
 
         // Create default repository and add link
         if (!File.Exists(appFileConfig))
-        {                                            
-            var pathData = Path.Combine(pathApp, "Data");
+        {
+            var pathData = Path.Combine(AppUserDataPath.Directory, "Data");
             if (!Directory.Exists(pathData))
                 Directory.CreateDirectory(pathData);
             var dbFile = Path.Combine(pathData, $"knote_{SystemInformation.UserName}.db");
-                
-            var pathResourcesCache = Path.Combine(pathApp, "ResourcesCache");
+
+            var pathResourcesCache = Path.Combine(AppUserDataPath.Directory, "ResourcesCache");
             if (!Directory.Exists(pathResourcesCache))
                 Directory.CreateDirectory(pathResourcesCache);
 
@@ -147,13 +173,19 @@ static class Program
             store.AppConfig.AlarmSeconds = 30;
             store.AppConfig.LastDateTimeStart = DateTime.Now;
             store.AppConfig.RunCounter = 1;
-            store.AppConfig.LogFile = Path.Combine(pathApp, "KNoteWinApp.log");
+            store.AppConfig.LogFile = Path.Combine(AppUserDataPath.Directory, "KNoteWinApp.log");
             store.AppConfig.LogActivated = false;
         }
         // Load sevices references
         else
         {
             store.LoadConfig(appFileConfig);
+
+            // Migrate LogFile away from the old default location next to the binaries, if still set to it.
+            var legacyLogFile = Path.Combine(pathApp, "KNoteWinApp.log");
+            if (store.AppConfig.LogFile == legacyLogFile)
+                store.AppConfig.LogFile = Path.Combine(AppUserDataPath.Directory, "KNoteWinApp.log");
+
             foreach (var r in store.AppConfig.RespositoryRefs)
             {
                 var serviceRef = new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger);
