@@ -13,5 +13,6 @@ public interface IKntKAttributeRepository : IDisposable
     Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entityInfo);        
     Task<Result> DeleteAsync(Guid id);
     Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId);
+    Task<Result<int>> CountNoteUsagesAsync(Guid kattributeId);
 }
 

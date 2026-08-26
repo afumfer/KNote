@@ -161,16 +161,11 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
                     var sqlType = @"SELECT NoteTypeId FROM KAttributes WHERE KAttributeId = @KAttributeId";
                     var noteTypeOld = await db.QueryFirstOrDefaultAsync<Guid?>(sqlType, new { KAttributeId = entity.KAttributeId });
 
-                    if(noteTypeOld != entity.NoteTypeId)
+                    if (noteTypeOld != entity.NoteTypeId && await CountNoteUsagesAsync(db, entity.KAttributeId) > 0)
                     {
-                        var sqlType2 = "SELECT count(*) FROM NoteKAttributes WHERE KAttributeId = @KAttributeId";
-                        var n = await db.ExecuteScalarAsync<long>(sqlType2, new { KAttributeId = entity.KAttributeId });
-                        if (n > 0)
-                        {
-                            result.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
-                            result.Entity = entity;
-                            return result;
-                        }
+                        result.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
+                        result.Entity = entity;
+                        return result;
                     }
                 }
 
@@ -232,8 +227,28 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
         }
     }
 
+    public async Task<Result<int>> CountNoteUsagesAsync(Guid kattributeId)
+    {
+        try
+        {
+            var result = new Result<int>();
+
+            var db = GetOpenConnection();
+
+            result.Entity = await CountNoteUsagesAsync(db, kattributeId);
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
-    {            
+    {
         try
         {
             var result = new Result<List<KAttributeTabulatedValueDto>>();
@@ -314,6 +329,18 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
         {
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
+    }
+
+    /// <summary>
+    /// Number of NoteKAttributes rows referencing this attribute (i.e. notes that already have a
+    /// value stored for it). Shared by the "can't change note type while in use" check in
+    /// UpdateAsync and by KntKAttributesDeleteAsyncCommand's "can't delete while in use" business
+    /// rule - takes an already-open connection so it can run inside UpdateAsync's TransactionScope.
+    /// </summary>
+    private async Task<int> CountNoteUsagesAsync(DbConnection db, Guid kattributeId)
+    {
+        var sql = "SELECT count(*) FROM NoteKAttributes WHERE KAttributeId = @KAttributeId";
+        return await db.ExecuteScalarAsync<int>(sql, new { KAttributeId = kattributeId });
     }
 
     private async Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(DbConnection db, Guid kattributeId, List<KAttributeTabulatedValueDto> tabulatedValues)

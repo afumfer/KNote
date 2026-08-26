@@ -25,6 +25,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         panelSqLite.Resize += panelSqLite_Resize;
 
         tabPageNoteTypes.Controls.Add(_ctrl.NoteTypesManageCtrl.View.PanelView());
+        tabPageAttributes.Controls.Add(_ctrl.KAttributesManageCtrl.View.PanelView());
     }
 
     #endregion 
@@ -123,8 +124,22 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         int footerHeight = ClientSize.Height - tabControlMain.Height;
         int tabStripOverhead = tabControlMain.Height - panelForm.Height;
         int contentBottom = Math.Max(panelSqLite.Bottom, panelMSSqlServer.Bottom);
-        tabControlMain.Height = contentBottom + tabStripOverhead;
-        ClientSize = new Size(ClientSize.Width, tabControlMain.Height + footerHeight);
+        int targetTabControlHeight = contentBottom + tabStripOverhead;
+
+        // Deliberately NOT "tabControlMain.Height = targetTabControlHeight;" here: tabControlMain is
+        // anchored Top+Bottom (not Dock=Top) precisely so it grows/shrinks with the window instead of
+        // leaving a gap above the Accept/Cancel buttons when the user resizes taller. But WinForms
+        // recomputes an anchored control's "distance from the bottom edge" against the CURRENT
+        // ClientSize the instant its own bounds change - so manually setting Height first (while
+        // ClientSize is still its old value) locks in the wrong distance, and the ClientSize
+        // assignment right after then shrinks tabControlMain again to preserve *that* wrong distance.
+        // Setting ClientSize alone, in one shot, lets the anchor resize tabControlMain itself using
+        // the original (correct) bottom distance from Designer time.
+        ClientSize = new Size(ClientSize.Width, targetTabControlHeight + footerHeight);
+
+        // Floor the window at this just-computed size so shrinking can't push it back below the
+        // point where the tab content and the button row would start overlapping instead.
+        MinimumSize = new Size(Width, Height);
 
         // Also run once explicitly: if the runtime DPI happens to match the Designer's
         // baked scale, AutoScale is a no-op and panelSqLite never actually fires Resize.
@@ -229,12 +244,11 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         if (!string.IsNullOrEmpty(adminTabsHint))
         {
             labelUsersPlaceholder.Text = $"User management (coming soon). {adminTabsHint}";
-            labelAttributesPlaceholder.Text = $"Attribute management (coming soon). {adminTabsHint}";
         }
 
         // The tab's content gets disabled along with the tab (see above), so a placeholder label
-        // inside it (Users/Attributes, still pending their own phase) is invisible/unreadable once
-        // grayed out - and Note types has no such label at all, just a disabled ListView. A ToolTip
+        // inside it (Users, still pending its own phase) is invisible/unreadable once grayed out -
+        // and Note types/Attributes have no such label at all, just a disabled ListView. A ToolTip
         // on the TabPage itself still works when hovering the tab header, since that belongs to the
         // TabControl (which stays enabled), not to the disabled page content.
         toolTipAdminTabs.SetToolTip(tabPageUsers, adminTabsHint);

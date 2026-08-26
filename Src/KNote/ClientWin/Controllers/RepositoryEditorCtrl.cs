@@ -22,7 +22,25 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
     #region Sub-controllers (repository administration tabs)
 
     private NoteTypesManageCtrl _noteTypesManageCtrl;
-    public NoteTypesManageCtrl NoteTypesManageCtrl => _noteTypesManageCtrl ??= new NoteTypesManageCtrl(Store);
+    public NoteTypesManageCtrl NoteTypesManageCtrl
+    {
+        get
+        {
+            if (_noteTypesManageCtrl == null)
+            {
+                _noteTypesManageCtrl = new NoteTypesManageCtrl(Store);
+
+                // A note type rename/add/delete can make the Attributes tab's "Note type" column
+                // stale (it displays KAttributeInfoDto.NoteTypeDto.Name from whenever that list was
+                // last loaded), so reload it whenever the Note types list changes.
+                _noteTypesManageCtrl.ListChanged += async (s, e) => await KAttributesManageCtrl.LoadEntitiesAsync(Service);
+            }
+            return _noteTypesManageCtrl;
+        }
+    }
+
+    private KAttributesManageCtrl _kAttributesManageCtrl;
+    public KAttributesManageCtrl KAttributesManageCtrl => _kAttributesManageCtrl ??= new KAttributesManageCtrl(Store);
 
     #endregion
 
@@ -64,7 +82,10 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 && await Store.IsCurrentUserAdminAsync(service);
 
             if (CurrentUserIsAdmin)
+            {
                 await NoteTypesManageCtrl.LoadEntitiesAsync(service);
+                await KAttributesManageCtrl.LoadEntitiesAsync(service);
+            }
 
             if (refreshView)
                 View.RefreshView();

@@ -39,7 +39,6 @@ namespace KNote.ClientWin.Views
             labelUsersPlaceholder = new Label();
             tabPageNoteTypes = new TabPage();
             tabPageAttributes = new TabPage();
-            labelAttributesPlaceholder = new Label();
             panelForm = new Panel();
             checkResourceContentInDB = new CheckBox();
             buttonSelectDirectoryResources = new Button();
@@ -107,7 +106,7 @@ namespace KNote.ClientWin.Views
             tabControlMain.Controls.Add(tabPageUsers);
             tabControlMain.Controls.Add(tabPageNoteTypes);
             tabControlMain.Controls.Add(tabPageAttributes);
-            tabControlMain.Dock = DockStyle.Top;
+            tabControlMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControlMain.Location = new Point(0, 0);
             tabControlMain.Margin = new Padding(4, 5, 4, 5);
             tabControlMain.Name = "tabControlMain";
@@ -162,7 +161,6 @@ namespace KNote.ClientWin.Views
             //
             // tabPageAttributes
             //
-            tabPageAttributes.Controls.Add(labelAttributesPlaceholder);
             tabPageAttributes.Location = new Point(4, 34);
             tabPageAttributes.Margin = new Padding(4, 5, 4, 5);
             tabPageAttributes.Name = "tabPageAttributes";
@@ -171,16 +169,6 @@ namespace KNote.ClientWin.Views
             tabPageAttributes.TabIndex = 3;
             tabPageAttributes.Text = "Attributes";
             tabPageAttributes.UseVisualStyleBackColor = true;
-            //
-            // labelAttributesPlaceholder
-            //
-            labelAttributesPlaceholder.AutoSize = true;
-            labelAttributesPlaceholder.Location = new Point(14, 16);
-            labelAttributesPlaceholder.Margin = new Padding(4, 0, 4, 0);
-            labelAttributesPlaceholder.Name = "labelAttributesPlaceholder";
-            labelAttributesPlaceholder.Size = new Size(268, 25);
-            labelAttributesPlaceholder.TabIndex = 0;
-            labelAttributesPlaceholder.Text = "Attribute management (coming soon).";
             //
             // panelForm
             //
@@ -518,7 +506,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelUsersPlaceholder;
         private System.Windows.Forms.TabPage tabPageNoteTypes;
         private System.Windows.Forms.TabPage tabPageAttributes;
-        private System.Windows.Forms.Label labelAttributesPlaceholder;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Button buttonFolderSearch;
         private System.Windows.Forms.Label labelAlias;

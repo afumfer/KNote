@@ -19,21 +19,28 @@ public class BaseService
     {
         Result<T>? res;
 
-        if (httpRes.IsSuccessStatusCode)
+        // Server controllers deliberately return BadRequest(resApi) - not just Ok(resApi) - with a
+        // real Result<T> body (IsValid=false, ErrorMessage set to the actual business-rule reason,
+        // e.g. "Can't delete this note type: N note(s) still use it.") whenever a service call is
+        // rejected, not just for malformed requests. Try to read that body regardless of status
+        // code, so the user sees that real reason instead of a generic "server responded with
+        // BadRequest" message; only fall back to the generic message when there's truly no
+        // parseable body (a raw framework/network failure, or a 401/403 with no JSON at all).
+        try
         {
             res = await httpRes.Content.ReadFromJsonAsync<Result<T>>();
-            if (res == null)
-            {
-                res = new Result<T>();
-                res.AddErrorMessage($"Error. The web server has responded with the following message: StatusCode - {httpRes.StatusCode}. Reason Phrase - {httpRes.ReasonPhrase}");
-            }
         }
-        else
+        catch
+        {
+            res = null;
+        }
+
+        if (res == null)
         {
             res = new Result<T>();
             res.AddErrorMessage($"Error. The web server has responded with the following message: StatusCode - {httpRes.StatusCode}. Reason Phrase - {httpRes.ReasonPhrase}");
-        }        
-                    
+        }
+
         if (res.IsValid)
         {
             if (emitNotifySucess)

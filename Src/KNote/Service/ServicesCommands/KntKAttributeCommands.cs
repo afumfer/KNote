@@ -80,18 +80,29 @@ public class KntKAttributesDeleteAsyncCommand : KntCommandServiceBase<Guid, Resu
 
         var resGetEntity = await Service.KAttributes.GetAsync(Param);
 
-        if (resGetEntity.IsValid)
-        {
-            var resDelEntity = await Repository.KAttributes.DeleteAsync(Param);
-            if (resDelEntity.IsValid)
-                result.Entity = resGetEntity.Entity;
-            else
-                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
-        }
-        else
+        if (!resGetEntity.IsValid)
         {
             result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+            return result;
         }
+
+        // Business rule, checked here instead of letting it surface as a raw FK-constraint DB
+        // error: an attribute still holding values on existing notes can't be deleted. Living in
+        // the command (not in a caller like ClientWin's AttributeEditorCtrl) means every consumer
+        // of this service - ClientWin and Server/Blazor's AttributesController alike - gets the
+        // same clear message. Mirrors KntNoteTypeDeleteAsyncCommand's equivalent check.
+        var resCountUsages = await Repository.KAttributes.CountNoteUsagesAsync(Param);
+        if (resCountUsages.IsValid && resCountUsages.Entity > 0)
+        {
+            result.AddErrorMessage($"Can't delete this attribute: {resCountUsages.Entity} note(s) still use it.");
+            return result;
+        }
+
+        var resDelEntity = await Repository.KAttributes.DeleteAsync(Param);
+        if (resDelEntity.IsValid)
+            result.Entity = resGetEntity.Entity;
+        else
+            result.AddListErrorMessage(resDelEntity.ListErrorMessage);
 
         return result;
     }

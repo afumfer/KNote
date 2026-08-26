@@ -134,4 +134,54 @@ public class NoteTypesManageCtrlTests
         Assert.AreEqual(0, ctrl.ListEntities.Count);
         Assert.AreEqual(1, view.RemovedItems.Count);
     }
+
+    [TestMethod]
+    public async Task AddItemAsync_EditorExecuted_FiresListChanged()
+    {
+        var (ctrl, _, service) = CreateCtrl(editorCtrl =>
+        {
+            editorCtrl.Model.Name = "Task";
+            return new Result<EControllerResult>(EControllerResult.Executed);
+        });
+        service.NoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<NoteTypeDto>>(new List<NoteTypeDto>()));
+        await ctrl.LoadEntitiesAsync(service);
+        var listChangedRaised = false;
+        ctrl.ListChanged += (s, e) => listChangedRaised = true;
+
+        await ctrl.AddItemAsync();
+
+        Assert.IsTrue(listChangedRaised);
+    }
+
+    [TestMethod]
+    public async Task AddItemAsync_EditorCanceled_DoesNotFireListChanged()
+    {
+        var (ctrl, _, service) = CreateCtrl(_ => new Result<EControllerResult>(EControllerResult.Canceled));
+        service.NoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<NoteTypeDto>>(new List<NoteTypeDto>()));
+        await ctrl.LoadEntitiesAsync(service);
+        var listChangedRaised = false;
+        ctrl.ListChanged += (s, e) => listChangedRaised = true;
+
+        await ctrl.AddItemAsync();
+
+        Assert.IsFalse(listChangedRaised);
+    }
+
+    [TestMethod]
+    public async Task DeleteItemAsync_Confirmed_FiresListChanged()
+    {
+        var existingId = Guid.NewGuid();
+        var existing = new NoteTypeDto { NoteTypeId = existingId, Name = "Task" };
+
+        var (ctrl, _, service) = CreateCtrl();
+        service.NoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<NoteTypeDto>>(new List<NoteTypeDto> { existing }));
+        service.NoteTypesFake.DeleteAsyncImpl = id => Task.FromResult(new Result<NoteTypeDto>(new NoteTypeDto { NoteTypeId = id }));
+        await ctrl.LoadEntitiesAsync(service);
+        var listChangedRaised = false;
+        ctrl.ListChanged += (s, e) => listChangedRaised = true;
+
+        await ctrl.DeleteItemAsync(existing);
+
+        Assert.IsTrue(listChangedRaised);
+    }
 }

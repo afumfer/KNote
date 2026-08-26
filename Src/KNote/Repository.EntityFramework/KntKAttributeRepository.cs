@@ -138,6 +138,7 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
             result.Entity = resRep.Entity?.GetSimpleDto<KAttributeDto>();
             result.Entity.KAttributeValues = resRep.Entity?.KAttributeTabulatedValues?
                 .Select(_ => _.GetSimpleDto<KAttributeTabulatedValueDto>()).OrderBy(_ => _.Order).ToList();
+            await PopulateNoteTypeDtoAsync(ctx, result.Entity);
 
             await CloseIsTempConnection(ctx);
         
@@ -167,6 +168,7 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
 
                 result.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
+                await PopulateNoteTypeDtoAsync(ctx, result.Entity);
 
                 foreach (var value in entity.KAttributeValues)
                 {
@@ -208,15 +210,11 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
                 if (resGenRepGet.IsValid)
                 {
                     // Check notetype in notes.
-                    if (entity.NoteTypeId != null && resGenRepGet.Entity.NoteTypeId != entity.NoteTypeId)
+                    if (entity.NoteTypeId != null && resGenRepGet.Entity.NoteTypeId != entity.NoteTypeId
+                        && await CountNoteUsagesAsync(ctx, entity.KAttributeId) > 0)
                     {
-                        var noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(ctx);
-                        var nAttributes = (await noteKAttributes.GetAllAsync(n => n.KAttributeId == entity.KAttributeId)).Entity;
-                        if (nAttributes.Count > 0)
-                        {
-                            result.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
-                            result.Entity = entity;                                
-                        }
+                        result.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
+                        result.Entity = entity;
                     }
 
                     if (result.IsValid)
@@ -227,7 +225,8 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
                         resGenRep = await kattributes.UpdateAsync(entityForUpdate);
 
                         result.Entity = resGenRep.Entity?.GetSimpleDto<KAttributeDto>();
-                        
+                        await PopulateNoteTypeDtoAsync(ctx, result.Entity);
+
                         var guidsUpdated = new List<Guid>();
                         foreach (var value in entity.KAttributeValues)
                         {
@@ -285,13 +284,33 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
         }
     }
 
+    public async Task<Result<int>> CountNoteUsagesAsync(Guid kattributeId)
+    {
+        try
+        {
+            var result = new Result<int>();
+
+            var ctx = GetOpenConnection();
+
+            result.Entity = await CountNoteUsagesAsync(ctx, kattributeId);
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid attributeId)
     {
         try
         {
             var result = new Result<List<KAttributeTabulatedValueDto>>();
 
-            var ctx = GetOpenConnection();                
+            var ctx = GetOpenConnection();
             var kattributeTabulatedValues = new GenericRepositoryEF<KntDbContext, KAttributeTabulatedValue>(ctx);
             
             var resRep = await kattributeTabulatedValues.GetAllAsync(tv => tv.KAttributeId == attributeId);
@@ -314,6 +333,35 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
     }
 
     #region Private methods
+
+    /// <summary>
+    /// GetSimpleDto&lt;KAttributeDto&gt;() only maps KAttribute's own scalar columns (including
+    /// NoteTypeId), never navigation properties - unlike GetAllAsync(), which explicitly
+    /// .Include(a => a.NoteType)s. Called after Get/Add/Update so callers (e.g. ClientWin's
+    /// KAttributesManageCtrl, which displays dto.NoteTypeDto?.Name without a full reload) see the
+    /// same "Note type" value GetAllAsync() would show, instead of a blank one.
+    /// </summary>
+    private static async Task PopulateNoteTypeDtoAsync(KntDbContext ctx, KAttributeDto dto)
+    {
+        if (dto?.NoteTypeId == null)
+            return;
+
+        var noteType = await ctx.NoteTypes.FindAsync(dto.NoteTypeId.Value);
+        dto.NoteTypeDto = noteType?.GetSimpleDto<NoteTypeDto>();
+    }
+
+    /// <summary>
+    /// Number of NoteKAttributes rows referencing this attribute (i.e. notes that already have a
+    /// value stored for it). Shared by the "can't change note type while in use" check in
+    /// UpdateAsync and by KntKAttributesDeleteAsyncCommand's "can't delete while in use" business
+    /// rule - takes an already-open context so it can run inside UpdateAsync's TransactionScope.
+    /// </summary>
+    private static async Task<int> CountNoteUsagesAsync(KntDbContext ctx, Guid kattributeId)
+    {
+        var noteKAttributes = new GenericRepositoryEF<KntDbContext, NoteKAttribute>(ctx);
+        var usages = await noteKAttributes.GetAllAsync(n => n.KAttributeId == kattributeId);
+        return usages.Entity?.Count ?? 0;
+    }
 
     private async Task DeleteNoContainsTabulateValueAsync(KntDbContext ctx, Guid attributeId, List<Guid> guids)
     {

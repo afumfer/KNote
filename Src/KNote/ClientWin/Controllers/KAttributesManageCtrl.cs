@@ -6,25 +6,26 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Controllers;
 
 /// <summary>
-/// Note types tab of the repository administration screen (RepositoryEditorCtrl): lists the note
-/// types of the repository being managed and delegates add/edit to the NoteTypeEditorCtrl popup.
+/// Attributes tab of the repository administration screen (RepositoryEditorCtrl): lists the custom
+/// attributes of the repository being managed (across all note types, like the Blazor admin panel's
+/// flat Attributes grid) and delegates add/edit to the AttributeEditorCtrl popup.
 /// </summary>
-public class NoteTypesManageCtrl : CtrlManageListBase<IViewManageList<NoteTypeDto>, NoteTypeDto>
+public class KAttributesManageCtrl : CtrlManageListBase<IViewManageList<KAttributeInfoDto>, KAttributeInfoDto>
 {
     #region Constructor
 
-    public NoteTypesManageCtrl(Store store) : base(store)
+    public KAttributesManageCtrl(Store store) : base(store)
     {
-        ControllerName = "Note types management";
+        ControllerName = "Attributes management";
     }
 
     #endregion
 
     #region CtrlManageListBase implementation
 
-    protected override IViewManageList<NoteTypeDto> CreateView()
+    protected override IViewManageList<KAttributeInfoDto> CreateView()
     {
-        return Store.FactoryViews.Registry.Resolve<NoteTypesManageCtrl, IViewManageList<NoteTypeDto>>(this);
+        return Store.FactoryViews.Registry.Resolve<KAttributesManageCtrl, IViewManageList<KAttributeInfoDto>>(this);
     }
 
     public override async Task<bool> LoadEntitiesAsync(IKntService service, bool refreshView = true)
@@ -33,7 +34,7 @@ public class NoteTypesManageCtrl : CtrlManageListBase<IViewManageList<NoteTypeDt
         {
             Service = service;
 
-            var response = await Service.NoteTypes.GetAllAsync();
+            var response = await Service.KAttributes.GetAllAsync();
 
             if (response.IsValid)
             {
@@ -59,7 +60,7 @@ public class NoteTypesManageCtrl : CtrlManageListBase<IViewManageList<NoteTypeDt
 
     public override async Task<bool> AddItemAsync()
     {
-        var editorCtrl = new NoteTypeEditorCtrl(Store);
+        var editorCtrl = new AttributeEditorCtrl(Store);
         await editorCtrl.NewModel(Service);
 
         var res = editorCtrl.RunModal();
@@ -67,41 +68,38 @@ public class NoteTypesManageCtrl : CtrlManageListBase<IViewManageList<NoteTypeDt
         {
             ListEntities.Add(editorCtrl.Model);
             View.AddItem(editorCtrl.Model);
-            OnListChanged();
             return true;
         }
         return false;
     }
 
-    public override async Task<bool> EditItemAsync(NoteTypeDto item)
+    public override async Task<bool> EditItemAsync(KAttributeInfoDto item)
     {
-        var editorCtrl = new NoteTypeEditorCtrl(Store);
-        await editorCtrl.LoadModelById(Service, item.NoteTypeId, false);
+        var editorCtrl = new AttributeEditorCtrl(Store);
+        await editorCtrl.LoadModelById(Service, item.KAttributeId, false);
 
         var res = editorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {
-            var index = ListEntities.FindIndex(_ => _.NoteTypeId == item.NoteTypeId);
+            var index = ListEntities.FindIndex(_ => _.KAttributeId == item.KAttributeId);
             if (index >= 0)
                 ListEntities[index] = editorCtrl.Model;
 
             View.UpdateItem(editorCtrl.Model);
-            OnListChanged();
             return true;
         }
         return false;
     }
 
-    public override async Task<bool> DeleteItemAsync(NoteTypeDto item)
+    public override async Task<bool> DeleteItemAsync(KAttributeInfoDto item)
     {
-        var editorCtrl = new NoteTypeEditorCtrl(Store);
-        var deleted = await editorCtrl.DeleteModel(Service, item.NoteTypeId);
+        var editorCtrl = new AttributeEditorCtrl(Store);
+        var deleted = await editorCtrl.DeleteModel(Service, item.KAttributeId);
 
         if (deleted)
         {
-            ListEntities.RemoveAll(_ => _.NoteTypeId == item.NoteTypeId);
+            ListEntities.RemoveAll(_ => _.KAttributeId == item.KAttributeId);
             View.RemoveItem(item);
-            OnListChanged();
         }
         return deleted;
     }

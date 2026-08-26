@@ -233,6 +233,18 @@ abstract public class CtrlManageListBase<TView, TEntity> : CtrlViewEmbeddableBas
     public abstract Task<bool> DeleteItemAsync(TEntity item);
 
     #endregion
+
+    #region Controller events
+
+    /// <summary>
+    /// Fired after AddItemAsync/EditItemAsync/DeleteItemAsync successfully changes ListEntities.
+    /// Lets a sibling tab react to the change - e.g. RepositoryEditorCtrl reloads the Attributes
+    /// tab's list when a Note types rename could have made its "Note type" column stale.
+    /// </summary>
+    public event EventHandler ListChanged;
+    protected virtual void OnListChanged() => ListChanged?.Invoke(this, EventArgs.Empty);
+
+    #endregion
 }
 
 abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>

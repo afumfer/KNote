@@ -14,7 +14,14 @@ public abstract class ResultBase
     private List<string> _listErrorMessage;
     public List<string> ListErrorMessage
     {
-        get { return  _listErrorMessage.Select( err => err).ToList(); }            
+        get { return  _listErrorMessage.Select( err => err).ToList(); }
+        // A setter (not just AddErrorMessage/AddListErrorMessage) is what makes this round-trip
+        // through System.Text.Json: a getter-only property is skipped on deserialization, so a
+        // Result read back from an HTTP response body always had an empty _listErrorMessage - IsValid
+        // came back true regardless of what the server actually sent. ErrorMessage/IsValid stay
+        // getter-only and derived, so they're automatically correct on whichever side (server after
+        // AddErrorMessage, or client after this setter runs) reads them.
+        set { _listErrorMessage = value ?? new List<string>(); }
     }
     
     public string ErrorMessage {

@@ -90,6 +90,10 @@
 
         if (resultDialog == true)
         {
+            // No explicit error notification here on failure: store.KAttributes.DeleteAsync already
+            // shows one via BaseService.ProcessResultFromHttpResponse -> AppState.NotifyError (a
+            // global mechanism every WebApiService call goes through) - adding another here would
+            // just duplicate it.
             var result = await store.KAttributes.DeleteAsync(item.KAttributeId);
             if (result.IsValid)
             {

@@ -27,6 +27,8 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<MessageEditorCtrl, IViewEditor<KMessageDto>>(c => new MessageEditorForm(c));
         Registry.Register<ResourceEditorCtrl, IViewEditor<ResourceDto>>(c => new ResourceEditorForm(c));
         Registry.Register<AttributeEditorCtrl, IViewEditor<KAttributeDto>>(c => new AttributeEditorForm(c));
+        Registry.Register<KAttributeTabulatedValueEditorCtrl, IViewEditor<KAttributeTabulatedValueDto>>(c => new KAttributeTabulatedValueEditorForm(c));
+        Registry.Register<KAttributesManageCtrl, IViewManageList<KAttributeInfoDto>>(c => new KAttributesManageForm(c));
         Registry.Register<TaskEditorCtrl, IViewEditor<NoteTaskDto>>(c => new TaskEditorForm(c));
         Registry.Register<NoteTypesSelectorCtrl, IViewSelector<NoteTypeDto>>(c => new NoteTypesSelectorForm(c));
         Registry.Register<NoteTypeEditorCtrl, IViewEditor<NoteTypeDto>>(c => new NoteTypeEditorForm(c));
