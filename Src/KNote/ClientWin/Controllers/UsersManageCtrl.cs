@@ -6,25 +6,26 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Controllers;
 
 /// <summary>
-/// Note types tab of the repository administration screen (RepositoryEditorCtrl): lists the note
-/// types of the repository being managed and delegates add/edit to the NoteTypeEditorCtrl popup.
+/// Users tab of the repository administration screen (RepositoryEditorCtrl): lists the users of the
+/// repository being managed and delegates add/edit to the UserEditorCtrl popup. No "can't delete the
+/// last Admin" guard - matches the Blazor admin panel today (UsersIndex.razor has none either).
 /// </summary>
-public class NoteTypesManageCtrl : CtrlManageListBase<IViewManageList<NoteTypeDto>, NoteTypeDto>
+public class UsersManageCtrl : CtrlManageListBase<IViewManageList<UserDto>, UserDto>
 {
     #region Constructor
 
-    public NoteTypesManageCtrl(Store store) : base(store)
+    public UsersManageCtrl(Store store) : base(store)
     {
-        ControllerName = "Note types management";
+        ControllerName = "Users management";
     }
 
     #endregion
 
     #region CtrlManageListBase implementation
 
-    protected override IViewManageList<NoteTypeDto> CreateView()
+    protected override IViewManageList<UserDto> CreateView()
     {
-        return Store.FactoryViews.Registry.Resolve<NoteTypesManageCtrl, IViewManageList<NoteTypeDto>>(this);
+        return Store.FactoryViews.Registry.Resolve<UsersManageCtrl, IViewManageList<UserDto>>(this);
     }
 
     public override async Task<bool> LoadEntitiesAsync(IKntService service, bool refreshView = true)
@@ -33,7 +34,7 @@ public class NoteTypesManageCtrl : CtrlManageListBase<IViewManageList<NoteTypeDt
         {
             Service = service;
 
-            var response = await Service.NoteTypes.GetAllAsync();
+            var response = await Service.Users.GetAllAsync();
 
             if (response.IsValid)
             {
@@ -59,7 +60,7 @@ public class NoteTypesManageCtrl : CtrlManageListBase<IViewManageList<NoteTypeDt
 
     public override async Task<bool> AddItemAsync()
     {
-        var editorCtrl = new NoteTypeEditorCtrl(Store);
+        var editorCtrl = new UserEditorCtrl(Store);
         await editorCtrl.NewModel(Service);
 
         var res = editorCtrl.RunModal();
@@ -67,44 +68,41 @@ public class NoteTypesManageCtrl : CtrlManageListBase<IViewManageList<NoteTypeDt
         {
             ListEntities.Add(editorCtrl.Model);
             View.AddItem(editorCtrl.Model);
-            OnListChanged();
             return true;
         }
         return false;
     }
 
-    public override async Task<bool> EditItemAsync(NoteTypeDto item)
+    public override async Task<bool> EditItemAsync(UserDto item)
     {
-        var editorCtrl = new NoteTypeEditorCtrl(Store);
+        var editorCtrl = new UserEditorCtrl(Store);
         // refreshView must stay true here: unlike embedded-only forms, this popup is shown via
         // RunModal() right after, and there is no Form_Load wiring to populate it later - without
         // this, the dialog opens with the fields blank even though Model has the loaded entity.
-        await editorCtrl.LoadModelById(Service, item.NoteTypeId, true);
+        await editorCtrl.LoadModelById(Service, item.UserId, true);
 
         var res = editorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {
-            var index = ListEntities.FindIndex(_ => _.NoteTypeId == item.NoteTypeId);
+            var index = ListEntities.FindIndex(_ => _.UserId == item.UserId);
             if (index >= 0)
                 ListEntities[index] = editorCtrl.Model;
 
             View.UpdateItem(editorCtrl.Model);
-            OnListChanged();
             return true;
         }
         return false;
     }
 
-    public override async Task<bool> DeleteItemAsync(NoteTypeDto item)
+    public override async Task<bool> DeleteItemAsync(UserDto item)
     {
-        var editorCtrl = new NoteTypeEditorCtrl(Store);
-        var deleted = await editorCtrl.DeleteModel(Service, item.NoteTypeId);
+        var editorCtrl = new UserEditorCtrl(Store);
+        var deleted = await editorCtrl.DeleteModel(Service, item.UserId);
 
         if (deleted)
         {
-            ListEntities.RemoveAll(_ => _.NoteTypeId == item.NoteTypeId);
+            ListEntities.RemoveAll(_ => _.UserId == item.UserId);
             View.RemoveItem(item);
-            OnListChanged();
         }
         return deleted;
     }

@@ -190,11 +190,21 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         return await DeleteModel(Service, Model.NoteId);
     }
 
-    public override async Task<bool> DeleteModel(IKntService service, Guid noteId) 
+    public override async Task<bool> DeleteModel(IKntService service, Guid noteId)
     {
+        // A note that has not been persisted yet (NoteId == Guid.Empty) has nothing to delete
+        // in the database. If the user has not changed anything either, just close the editor
+        // without asking or showing any message.
+        var isNew = (noteId == Guid.Empty);
+        if (isNew && !Model.IsDirty())
+            return true;
+
         var result = View.ShowInfo("Are you sure you want to delete this note?", "Delete note", MessageBoxButtons.YesNo);
         if (result == DialogResult.Yes || result == DialogResult.Yes)
         {
+            if (isNew)
+                return true;
+
             try
             {
                 var response = await service.Notes.DeleteExtendedAsync(noteId);

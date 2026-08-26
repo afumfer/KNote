@@ -36,7 +36,6 @@ namespace KNote.ClientWin.Views
             tabControlMain = new TabControl();
             tabPageGeneral = new TabPage();
             tabPageUsers = new TabPage();
-            labelUsersPlaceholder = new Label();
             tabPageNoteTypes = new TabPage();
             tabPageAttributes = new TabPage();
             panelForm = new Panel();
@@ -128,7 +127,6 @@ namespace KNote.ClientWin.Views
             //
             // tabPageUsers
             //
-            tabPageUsers.Controls.Add(labelUsersPlaceholder);
             tabPageUsers.Location = new Point(4, 34);
             tabPageUsers.Margin = new Padding(4, 5, 4, 5);
             tabPageUsers.Name = "tabPageUsers";
@@ -137,16 +135,6 @@ namespace KNote.ClientWin.Views
             tabPageUsers.TabIndex = 1;
             tabPageUsers.Text = "Users";
             tabPageUsers.UseVisualStyleBackColor = true;
-            //
-            // labelUsersPlaceholder
-            //
-            labelUsersPlaceholder.AutoSize = true;
-            labelUsersPlaceholder.Location = new Point(14, 16);
-            labelUsersPlaceholder.Margin = new Padding(4, 0, 4, 0);
-            labelUsersPlaceholder.Name = "labelUsersPlaceholder";
-            labelUsersPlaceholder.Size = new Size(240, 25);
-            labelUsersPlaceholder.TabIndex = 0;
-            labelUsersPlaceholder.Text = "User management (coming soon).";
             //
             // tabPageNoteTypes
             //
@@ -503,7 +491,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TabControl tabControlMain;
         private System.Windows.Forms.TabPage tabPageGeneral;
         private System.Windows.Forms.TabPage tabPageUsers;
-        private System.Windows.Forms.Label labelUsersPlaceholder;
         private System.Windows.Forms.TabPage tabPageNoteTypes;
         private System.Windows.Forms.TabPage tabPageAttributes;
         private System.Windows.Forms.Panel panelForm;

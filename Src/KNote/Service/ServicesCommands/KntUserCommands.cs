@@ -81,18 +81,41 @@ public class KntUsersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<Use
 
         var resGetEntity = await Repository.Users.GetAsync(Param);
 
-        if (resGetEntity.IsValid)
-        {
-            var resDelEntity = await Repository.Users.DeleteAsync(Param);
-            if (resDelEntity.IsValid)
-                result.Entity = resGetEntity.Entity;
-            else
-                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
-        }
-        else
+        if (!resGetEntity.IsValid)
         {
             result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+            return result;
         }
+
+        // Business rule, checked here instead of letting it surface as a raw FK-constraint DB
+        // error: a user still referenced by alarms/messages, post-it windows or tasks can't be
+        // deleted. Living in the command (not in a caller like ClientWin's UserEditorCtrl) means
+        // every consumer of this service - ClientWin and Server/Blazor's UsersController alike -
+        // gets the same clear message. Mirrors KntNoteTypeDeleteAsyncCommand/
+        // KntKAttributesDeleteAsyncCommand's in-use check.
+        var messagesCount = await Repository.Notes.CountMessagesByUserAsync(Param);
+        var windowsCount = await Repository.Notes.CountWindowsByUserAsync(Param);
+        var tasksCount = await Repository.Notes.CountTasksByUserAsync(Param);
+
+        var inUseReasons = new List<string>();
+        if (messagesCount.IsValid && messagesCount.Entity > 0)
+            inUseReasons.Add($"{messagesCount.Entity} alarm/message(s)");
+        if (windowsCount.IsValid && windowsCount.Entity > 0)
+            inUseReasons.Add($"{windowsCount.Entity} open note window(s)");
+        if (tasksCount.IsValid && tasksCount.Entity > 0)
+            inUseReasons.Add($"{tasksCount.Entity} task(s)");
+
+        if (inUseReasons.Count > 0)
+        {
+            result.AddErrorMessage($"Can't delete this user: still referenced by {string.Join(", ", inUseReasons)}.");
+            return result;
+        }
+
+        var resDelEntity = await Repository.Users.DeleteAsync(Param);
+        if (resDelEntity.IsValid)
+            result.Entity = resGetEntity.Entity;
+        else
+            result.AddListErrorMessage(resDelEntity.ListErrorMessage);
 
         return result;
     }
@@ -197,7 +220,9 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
         return resService;
     }
 
-    private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+    // Not private: reused by KntUsersSetPasswordAsyncCommand below (same file/namespace) so a
+    // "reset password" action for an existing user hashes exactly the same way as account creation.
+    internal static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
         if (password == null) throw new ArgumentNullException("password");
         if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
@@ -213,5 +238,45 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
         }
     }
 
+}
+
+/// <summary>
+/// Sets/resets an existing user's password - the counterpart missing for the "New user" flow
+/// (KntUsersCreateAsyncCommand), which is the only place that has ever hashed a password: SaveAsync/
+/// KntUsersSaveAsyncCommand's plain UserDto has no Password field, so a user created via the Admin
+/// panel had no way to log in until either this command or the create flow set one explicitly.
+/// </summary>
+public class KntUsersSetPasswordAsyncCommand : KntCommandServiceBase<(Guid UserId, string NewPassword), Result<UserDto>>
+{
+    public KntUsersSetPasswordAsyncCommand(IKntService service, Guid userId, string newPassword)
+        : base(service, (userId, newPassword))
+    {
+
+    }
+
+    public override async Task<Result<UserDto>> Execute()
+    {
+        var result = new Result<UserDto>();
+
+        if (string.IsNullOrWhiteSpace(Param.NewPassword))
+            throw new Exception("Password is required");
+
+        var resGetEntity = await Repository.Users.GetAsync(Param.UserId);
+        if (!resGetEntity.IsValid)
+        {
+            result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+            return result;
+        }
+
+        KntUsersCreateAsyncCommand.CreatePasswordHash(Param.NewPassword, out var passwordHash, out var passwordSalt);
+
+        var resRep = await Repository.Users.UpdatePasswordAsync(Param.UserId, passwordHash, passwordSalt);
+        if (resRep.IsValid)
+            result.Entity = resGetEntity.Entity;
+        else
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+        return result;
+    }
 }
 

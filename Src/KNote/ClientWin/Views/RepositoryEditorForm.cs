@@ -26,6 +26,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
 
         tabPageNoteTypes.Controls.Add(_ctrl.NoteTypesManageCtrl.View.PanelView());
         tabPageAttributes.Controls.Add(_ctrl.KAttributesManageCtrl.View.PanelView());
+        tabPageUsers.Controls.Add(_ctrl.UsersManageCtrl.View.PanelView());
     }
 
     #endregion 
@@ -241,16 +242,10 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         var adminTabsHint = _ctrl.EditorMode != EnumRepositoryEditorMode.Managment
             ? "Available once the repository is linked."
             : (_ctrl.CurrentUserIsAdmin ? "" : "Requires the Admin role in this repository.");
-        if (!string.IsNullOrEmpty(adminTabsHint))
-        {
-            labelUsersPlaceholder.Text = $"User management (coming soon). {adminTabsHint}";
-        }
 
-        // The tab's content gets disabled along with the tab (see above), so a placeholder label
-        // inside it (Users, still pending its own phase) is invisible/unreadable once grayed out -
-        // and Note types/Attributes have no such label at all, just a disabled ListView. A ToolTip
-        // on the TabPage itself still works when hovering the tab header, since that belongs to the
-        // TabControl (which stays enabled), not to the disabled page content.
+        // The tab's content gets disabled along with the tab (see above), so a ToolTip on the
+        // TabPage itself is what explains why - it still works when hovering the tab header, since
+        // that belongs to the TabControl (which stays enabled), not to the disabled page content.
         toolTipAdminTabs.SetToolTip(tabPageUsers, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageNoteTypes, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageAttributes, adminTabsHint);

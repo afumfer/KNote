@@ -838,6 +838,72 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<int>> CountMessagesByUserAsync(Guid userId)
+    {
+        try
+        {
+            var result = new Result<int>();
+
+            var ctx = GetOpenConnection();
+            var messages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
+
+            var count = await messages.DbSet.CountAsync(_ => _.UserId == userId);
+            result.Entity = count;
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<int>> CountWindowsByUserAsync(Guid userId)
+    {
+        try
+        {
+            var result = new Result<int>();
+
+            var ctx = GetOpenConnection();
+            var windows = new GenericRepositoryEF<KntDbContext, Window>(ctx);
+
+            var count = await windows.DbSet.CountAsync(_ => _.UserId == userId);
+            result.Entity = count;
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<int>> CountTasksByUserAsync(Guid userId)
+    {
+        try
+        {
+            var result = new Result<int>();
+
+            var ctx = GetOpenConnection();
+            var tasks = new GenericRepositoryEF<KntDbContext, NoteTask>(ctx);
+
+            var count = await tasks.DbSet.CountAsync(_ => _.UserId == userId);
+            result.Entity = count;
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId)
     {
         try

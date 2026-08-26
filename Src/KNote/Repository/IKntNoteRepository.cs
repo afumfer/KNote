@@ -39,6 +39,9 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity);
     Task<Result> DeleteMessageAsync(Guid messageId);
     Task<Result<int>> CountNotesInFolderAsync(Guid folderId);
+    Task<Result<int>> CountMessagesByUserAsync(Guid userId);
+    Task<Result<int>> CountWindowsByUserAsync(Guid userId);
+    Task<Result<int>> CountTasksByUserAsync(Guid userId);
     Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId);
     Task<Result<WindowDto>> AddWindowAsync(WindowDto entity);
     Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity);

@@ -52,6 +52,12 @@ public class KntUserService : KntServiceBase, IKntUserService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<UserDto>> SetPasswordAsync(Guid userId, string newPassword)
+    {
+        var command = new KntUsersSetPasswordAsyncCommand(Service, userId, newPassword);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<UserDto>> AuthenticateAsync(UserCredentialsDto userCredentials)   // string username, string password
     {
         var command = new KntUsersAuthenticateAsyncCommand(Service, userCredentials);

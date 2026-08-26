@@ -253,6 +253,32 @@ public class KntUserRepository : KntRepositoryDapperBase, IKntUserRepository
         }
     }
 
+    public async Task<Result> UpdatePasswordAsync(Guid userId, byte[] passwordHash, byte[] passwordSalt)
+    {
+        try
+        {
+            var result = new Result();
+
+            var db = GetOpenConnection();
+
+            var sql = @"UPDATE Users SET PasswordHash = @PasswordHash, PasswordSalt = @PasswordSalt WHERE UserId = @UserId";
+
+            var r = await db.ExecuteAsync(sql.ToString(),
+                new { UserId = userId, PasswordHash = passwordHash, PasswordSalt = passwordSalt });
+
+            if (r == 0)
+                result.AddErrorMessage("Entity not updated");
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto entity)
     {
         try

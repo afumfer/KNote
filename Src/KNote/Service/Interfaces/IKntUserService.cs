@@ -13,6 +13,7 @@ public interface IKntUserService
     Task<Result<UserDto>> GetByUserNameAsync(string userName);
     Task<Result<UserDto>> SaveAsync(UserDto user);
     Task<Result<UserDto>> DeleteAsync(Guid userId);
+    Task<Result<UserDto>> SetPasswordAsync(Guid userId, string newPassword);
     Task<Result<UserDto>> AuthenticateAsync(UserCredentialsDto userCredentials);
     Task<Result<UserDto>> CreateAsync(UserRegisterDto userRegisterInfoDto);
 }

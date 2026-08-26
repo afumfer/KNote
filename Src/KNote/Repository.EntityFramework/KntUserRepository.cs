@@ -183,6 +183,40 @@ public class KntUserRepository : KntRepositoryEFBase, IKntUserRepository
         return result;
     }
 
+    public async Task<Result> UpdatePasswordAsync(Guid userId, byte[] passwordHash, byte[] passwordSalt)
+    {
+        var result = new Result();
+
+        try
+        {
+            var ctx = GetOpenConnection();
+            var users = new GenericRepositoryEF<KntDbContext, User>(ctx);
+
+            var resGenRepGet = await users.GetAsync(userId);
+            if (resGenRepGet.IsValid)
+            {
+                var entityForUpdate = resGenRepGet.Entity;
+                entityForUpdate.PasswordHash = passwordHash;
+                entityForUpdate.PasswordSalt = passwordSalt;
+
+                var resRep = await users.UpdateAsync(entityForUpdate);
+                result.AddListErrorMessage(resRep.ListErrorMessage);
+            }
+            else
+            {
+                result.AddErrorMessage("Can't find entity for update.");
+            }
+
+            await CloseIsTempConnection(ctx);
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+
+        return result;
+    }
+
     public async Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto entity)
     {
         var result = new Result<UserInternalDto>();

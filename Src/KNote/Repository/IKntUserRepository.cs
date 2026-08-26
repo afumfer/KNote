@@ -13,6 +13,7 @@ public interface IKntUserRepository : IDisposable
     Task<Result<UserDto>> AddAsync(UserDto userEntity);
     Task<Result<UserDto>> UpdateAsync(UserDto userEntity);
     Task<Result<UserInternalDto>> AddInternalAsync(UserInternalDto userEntity);
+    Task<Result> UpdatePasswordAsync(Guid userId, byte[] passwordHash, byte[] passwordSalt);
     Task<Result> DeleteAsync(Guid userId);
     Task<Result<long>> GetCount();
 }

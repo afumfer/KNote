@@ -76,7 +76,10 @@ public class KAttributesManageCtrl : CtrlManageListBase<IViewManageList<KAttribu
     public override async Task<bool> EditItemAsync(KAttributeInfoDto item)
     {
         var editorCtrl = new AttributeEditorCtrl(Store);
-        await editorCtrl.LoadModelById(Service, item.KAttributeId, false);
+        // refreshView must stay true here: unlike embedded-only forms, this popup is shown via
+        // RunModal() right after, and there is no Form_Load wiring to populate it later - without
+        // this, the dialog opens with the fields blank even though Model has the loaded entity.
+        await editorCtrl.LoadModelById(Service, item.KAttributeId, true);
 
         var res = editorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)

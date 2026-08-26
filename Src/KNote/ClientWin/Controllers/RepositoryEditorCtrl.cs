@@ -42,6 +42,9 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
     private KAttributesManageCtrl _kAttributesManageCtrl;
     public KAttributesManageCtrl KAttributesManageCtrl => _kAttributesManageCtrl ??= new KAttributesManageCtrl(Store);
 
+    private UsersManageCtrl _usersManageCtrl;
+    public UsersManageCtrl UsersManageCtrl => _usersManageCtrl ??= new UsersManageCtrl(Store);
+
     #endregion
 
     #region Constructor 
@@ -85,6 +88,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             {
                 await NoteTypesManageCtrl.LoadEntitiesAsync(service);
                 await KAttributesManageCtrl.LoadEntitiesAsync(service);
+                await UsersManageCtrl.LoadEntitiesAsync(service);
             }
 
             if (refreshView)
