@@ -313,7 +313,30 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
-    #endregion 
+    // KNoteAIAssistant plan (Phase 2): collection of configured AI providers (provider, model,
+    // API key, host for Ollama). Replaces ChatGPTApiKey/ChatGPTDefaultModel for the new
+    // KNoteAIAssistant use case; those two fields are kept as-is for the legacy KntChatGPT one
+    // until it is retired.
+    private List<AiProviderRef> _aiProviderRefs;
+    public List<AiProviderRef> AiProviderRefs
+    {
+        get
+        {
+            if (_aiProviderRefs == null)
+                _aiProviderRefs = new List<AiProviderRef>();
+            return _aiProviderRefs;
+        }
+        set
+        {
+            if (_aiProviderRefs != value)
+            {
+                _aiProviderRefs = value;
+                OnPropertyChanged("AiProviderRefs");
+            }
+        }
+    }
+
+    #endregion
 
     #region TODO: ... other params
 
