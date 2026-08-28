@@ -176,7 +176,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
             throw new ArgumentNullException(nameof(providerRef));
 
         _currentProviderRef = providerRef;
-        _chatClient = AiChatClientFactory.Create(providerRef);
+        _chatClient = AiChatClientFactory.Create(providerRef, ServiceRef);
         RestartAIAssistant();
     }
 
@@ -201,7 +201,18 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
         _chatMessages.Add(new ChatMessage(ChatRole.User, prompt));
 
-        ChatResponse response = await _chatClient.GetResponseAsync(_chatMessages);
+        ChatResponse response;
+        try
+        {
+            response = await _chatClient.GetResponseAsync(_chatMessages);
+        }
+        catch
+        {
+            // Roll back the unanswered turn so a retry (or a provider/model switch) doesn't send
+            // an orphaned user message with no matching assistant reply.
+            _chatMessages.RemoveAt(_chatMessages.Count - 1);
+            throw;
+        }
 
         _chatMessages.Add(new ChatMessage(ChatRole.Assistant, response.Text));
 
@@ -249,13 +260,26 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
         _chatMessages.Add(new ChatMessage(ChatRole.User, prompt));
 
-        await foreach (ChatResponseUpdate update in _chatClient.GetStreamingResponseAsync(_chatMessages))
+        try
         {
-            var res = update.Text?.Replace("\n", "\r\n");
-            if (string.IsNullOrEmpty(res))
-                continue;
-            resAssistant.Append(res);
-            StreamToken?.Invoke(this, new ControllerEventArgs<string>(res));
+            await foreach (ChatResponseUpdate update in _chatClient.GetStreamingResponseAsync(_chatMessages))
+            {
+                var res = update.Text?.Replace("\n", "\r\n");
+                if (string.IsNullOrEmpty(res))
+                    continue;
+                resAssistant.Append(res);
+                StreamToken?.Invoke(this, new ControllerEventArgs<string>(res));
+            }
+        }
+        catch
+        {
+            // Roll back the unanswered turn - both the message sent to the provider and the
+            // transcript's dangling intro - so a retry doesn't pile up orphaned turns. Whatever
+            // partial text already reached the view via StreamToken is left as-is; only the
+            // canonical history (resent to the provider, and persisted on save) is rolled back.
+            _chatMessages.RemoveAt(_chatMessages.Count - 1);
+            _chatTextMessasges.Length -= intro.Length;
+            throw;
         }
 
         stopwatch.Stop();
