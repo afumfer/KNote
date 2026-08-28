@@ -71,6 +71,15 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public string RootSystemChat { get; set; }
 
+    // KNoteAIAssistant plan (Phase 3): the configured provider/model collection and the one
+    // currently active. AiProviderRefs is exposed live from AppConfig so the view's picker
+    // always reflects whatever is currently in KNoteData.config (Phase 4 will add a maintenance
+    // UI for it; for now entries are added by hand to the config file).
+    public List<AiProviderRef> AiProviderRefs => Store.AppConfig.AiProviderRefs;
+
+    private AiProviderRef _currentProviderRef;
+    public AiProviderRef CurrentProviderRef => _currentProviderRef;
+
     #endregion
 
     #region Constructor
@@ -96,20 +105,15 @@ public class KNoteAIAssistantCtrl : CtrlBase
     {
         try
         {
-            var apiKey = Store.AppConfig.ChatGPTApiKey;
-
-            if (string.IsNullOrEmpty(apiKey))
-                apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-
-            if (string.IsNullOrEmpty(apiKey))
+            if (AiProviderRefs.Count == 0)
             {
-                var message = "It does not have an ApiKey of the OpenAI API defined. You must configure these values (ChatGPTApiKey) in the program settings.";
+                var message = "No AI providers are configured yet (AppConfig.AiProviderRefs is empty). " +
+                    "Add at least one entry to the <AiProviderRefs> section of KNoteData.config " +
+                    "(a maintenance screen for this is planned for a later phase).";
                 throw new Exception(message);
             }
 
-            _chatClient = new OpenAI.Chat.ChatClient(model: Store.AppConfig.ChatGPTDefaultModel, apiKey ?? "--").AsIChatClient();
-
-            RestartAIAssistant();
+            SetProvider(AiProviderRefs[0]);
 
             return new Result<EControllerResult>(EControllerResult.Executed);
         }
@@ -162,6 +166,19 @@ public class KNoteAIAssistantCtrl : CtrlBase
     #endregion
 
     #region Public Methods
+
+    // Switching provider mid-session invalidates the in-flight conversation (a different
+    // provider/model can't continue the same message history), so this always resets it.
+    // The view is responsible for confirming with the user first if there is one in progress.
+    public void SetProvider(AiProviderRef providerRef)
+    {
+        if (providerRef is null)
+            throw new ArgumentNullException(nameof(providerRef));
+
+        _currentProviderRef = providerRef;
+        _chatClient = AiChatClientFactory.Create(providerRef);
+        RestartAIAssistant();
+    }
 
     public void RestartAIAssistant()
     {

@@ -53,6 +53,7 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
     public void ShowView()
     {
         toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Alias}";
+        PopulateProviders();
         MarkDownView();
         this.Show();
     }
@@ -158,6 +159,27 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         ShowInfo($"System: {_ctrl.RootSystemChat}", $"{KntConst.AppName} - root system chat ");
     }
 
+    private void comboProviders_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (comboProviders.SelectedItem is not AiProviderRef providerRef || providerRef == _ctrl.CurrentProviderRef)
+            return;
+
+        if (!string.IsNullOrEmpty(_ctrl.ChatTextMessasges.ToString()))
+        {
+            var result = ShowInfo("Switching the AI provider resets the current conversation. Continue?",
+                "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result != DialogResult.Yes)
+            {
+                SelectProviderInCombo(_ctrl.CurrentProviderRef);
+                return;
+            }
+        }
+
+        _ctrl.SetProvider(providerRef);
+        RestartAIAssistantView();
+        Text = ViewCaptionText;
+    }
+
     private void buttonMarkDown_Click(object sender, EventArgs e)
     {
         MarkDownView();
@@ -171,6 +193,26 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
     #endregion
 
     #region Private methods
+
+    private void PopulateProviders()
+    {
+        // Detach first: setting DataSource auto-selects an item and would otherwise fire
+        // comboProviders_SelectedIndexChanged (which resets the session) during startup.
+        comboProviders.SelectedIndexChanged -= comboProviders_SelectedIndexChanged;
+
+        comboProviders.DataSource = null;
+        comboProviders.DisplayMember = nameof(AiProviderRef.Alias);
+        comboProviders.DataSource = _ctrl.AiProviderRefs;
+        SelectProviderInCombo(_ctrl.CurrentProviderRef);
+
+        comboProviders.SelectedIndexChanged += comboProviders_SelectedIndexChanged;
+    }
+
+    private void SelectProviderInCombo(AiProviderRef providerRef)
+    {
+        comboProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
+        comboProviders.SelectedItem = providerRef;
+    }
 
     private async Task SaveChatMessages()
     {
@@ -207,6 +249,7 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
             MarkDownView();
             toolStripStatusLabelProcessing.Text = " Processing ...";
             textPrompt.Enabled = false;
+            comboProviders.Enabled = false;
             buttonSend.Enabled = false;
             buttonRestart.Enabled = false;
             radioGetCompletion.Enabled = false;
@@ -220,7 +263,8 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         {
             toolStripStatusLabelProcessing.Text = " ";
             textPrompt.Enabled = true;
-            buttonSend.Enabled = true;
+            comboProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
+            buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
             buttonRestart.Enabled = true;
             radioGetCompletion.Enabled = true;
             radioGetStream.Enabled = true;

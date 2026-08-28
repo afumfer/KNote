@@ -48,6 +48,7 @@ namespace KNote.ClientWin.Views
             buttonCatalogPrompts = new Button();
             buttonRestart = new Button();
             labelPrompt = new Label();
+            comboProviders = new ComboBox();
             textPrompt = new TextBox();
             buttonSend = new Button();
             panelResultHeader = new Panel();
@@ -211,6 +212,7 @@ namespace KNote.ClientWin.Views
             // panelPromptHeader
             //
             panelPromptHeader.Controls.Add(labelPrompt);
+            panelPromptHeader.Controls.Add(comboProviders);
             panelPromptHeader.Controls.Add(buttonSend);
             panelPromptHeader.Controls.Add(buttonRestart);
             panelPromptHeader.Controls.Add(panelSeparator);
@@ -272,6 +274,17 @@ namespace KNote.ClientWin.Views
             labelPrompt.Size = new Size(54, 17);
             labelPrompt.TabIndex = 24;
             labelPrompt.Text = "Prompt:";
+            //
+            // comboProviders
+            //
+            comboProviders.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboProviders.Font = new Font("Segoe UI", 8.25F);
+            comboProviders.FormattingEnabled = true;
+            comboProviders.Location = new Point(68, 5);
+            comboProviders.Name = "comboProviders";
+            comboProviders.Size = new Size(220, 23);
+            comboProviders.TabIndex = 1;
+            comboProviders.SelectedIndexChanged += comboProviders_SelectedIndexChanged;
             //
             // textPrompt
             //
@@ -335,6 +348,7 @@ namespace KNote.ClientWin.Views
         private Label labelResult;
         private Button buttonRestart;
         private Label labelPrompt;
+        private ComboBox comboProviders;
         private TextBox textPrompt;
         private Button buttonSend;
         private Button buttonCatalogPrompts;
