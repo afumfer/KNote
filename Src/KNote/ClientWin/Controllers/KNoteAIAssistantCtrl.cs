@@ -4,23 +4,22 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
-using Microsoft.IdentityModel.Tokens;
-using OpenAI.Chat;
-using System.ClientModel;
+using Microsoft.Extensions.AI;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
 namespace KNote.ClientWin.Controllers;
 
-// Phase 0 (KNoteAIAssistant plan): plain copy of KntChatGPTCtrl under the new name/menu entry,
-// still on the OpenAI.Chat.ChatClient SDK. Behavior must stay identical to KntChatGPTCtrl until
-// Phase 1 migrates it to Microsoft.Extensions.AI.
+// Phase 1 (KNoteAIAssistant plan): migrated off the OpenAI.Chat SDK onto Microsoft.Extensions.AI's
+// IChatClient abstraction, still backed by the OpenAI provider only (same visible behavior as
+// KntChatGPTCtrl). The provider/model collection and the other providers (Anthropic, Ollama) land
+// in later phases.
 public class KNoteAIAssistantCtrl : CtrlBase
 {
     #region Private fields
 
-    private ChatClient _chatClient;
+    private IChatClient _chatClient;
 
     #endregion
 
@@ -108,7 +107,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
                 throw new Exception(message);
             }
 
-            _chatClient = new(model: Store.AppConfig.ChatGPTDefaultModel, apiKey ?? "--");
+            _chatClient = new OpenAI.Chat.ChatClient(model: Store.AppConfig.ChatGPTDefaultModel, apiKey ?? "--").AsIChatClient();
 
             RestartAIAssistant();
 
@@ -170,7 +169,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _result = "";
 
         _chatMessages.Clear();
-        _chatMessages.Add(new SystemChatMessage(RootSystemChat));
+        _chatMessages.Add(new ChatMessage(ChatRole.System, RootSystemChat));
 
         _chatTextMessasges.Clear();
         _totalTokens = 0;
@@ -183,15 +182,15 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
         stopwatch.Start();
 
-        _chatMessages.Add(new UserChatMessage(prompt));
+        _chatMessages.Add(new ChatMessage(ChatRole.User, prompt));
 
-        ChatCompletion completion = await _chatClient.CompleteChatAsync(_chatMessages);
+        ChatResponse response = await _chatClient.GetResponseAsync(_chatMessages);
 
-        _chatMessages.Add(new AssistantChatMessage(completion.Content[0].Text));
+        _chatMessages.Add(new ChatMessage(ChatRole.Assistant, response.Text));
 
         _prompt = prompt;
-        _result = completion.Content[0].Text.Replace("\n", "\r\n");
-        _totalTokens += completion.Usage.TotalTokenCount;
+        _result = response.Text.Replace("\n", "\r\n");
+        _totalTokens += (int)(response.Usage?.TotalTokenCount ?? 0);
         _totalProcessingTime += stopwatch.Elapsed;
 
         _chatTextMessasges.Append($"\r\n");
@@ -201,9 +200,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _chatTextMessasges.Append($"**Assistant:** \r\n");
         _chatTextMessasges.Append(_result);
         _chatTextMessasges.Append($"\r\n\r\n\r\n");
-        _chatTextMessasges.Append($"(Tokens: {completion.Usage.InputTokenCount} tokens.\r\n");
-        _chatTextMessasges.Append($"(Tokens: {completion.Usage.OutputTokenCount} tokens.\r\n");
-        _chatTextMessasges.Append($"(Tokens: {completion.Usage.TotalTokenCount} tokens.\r\n");
+        _chatTextMessasges.Append($"(Tokens: {response.Usage?.InputTokenCount ?? 0} tokens.\r\n");
+        _chatTextMessasges.Append($"(Tokens: {response.Usage?.OutputTokenCount ?? 0} tokens.\r\n");
+        _chatTextMessasges.Append($"(Tokens: {response.Usage?.TotalTokenCount ?? 0} tokens.\r\n");
         _chatTextMessasges.Append($"(Processing time: {stopwatch.Elapsed})\r\n");
         _chatTextMessasges.Append($"\r\n");
         _chatTextMessasges.Append($"\r\n");
@@ -231,23 +230,20 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _chatTextMessasges.Append(intro);
         StreamToken?.Invoke(this, new ControllerEventArgs<string>(intro));
 
-        _chatMessages.Add(new UserChatMessage(prompt));
+        _chatMessages.Add(new ChatMessage(ChatRole.User, prompt));
 
-        AsyncCollectionResult<StreamingChatCompletionUpdate> updates
-                    = _chatClient.CompleteChatStreamingAsync(_chatMessages);
-        await foreach (StreamingChatCompletionUpdate update in updates)
+        await foreach (ChatResponseUpdate update in _chatClient.GetStreamingResponseAsync(_chatMessages))
         {
-            foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
-            {
-                var res = updatePart.Text?.Replace("\n", "\r\n");
-                resAssistant.Append(res);
-                StreamToken?.Invoke(this, new ControllerEventArgs<string>(res));
-            }
+            var res = update.Text?.Replace("\n", "\r\n");
+            if (string.IsNullOrEmpty(res))
+                continue;
+            resAssistant.Append(res);
+            StreamToken?.Invoke(this, new ControllerEventArgs<string>(res));
         }
 
         stopwatch.Stop();
 
-        _chatMessages.Add(new AssistantChatMessage(resAssistant.ToString()));
+        _chatMessages.Add(new ChatMessage(ChatRole.Assistant, resAssistant.ToString()));
         _prompt = prompt;
         _result = resAssistant.ToString();
         _totalTokens += (prompt.Length + resAssistant.Length) / 4;    // TODO: hack, refactor this

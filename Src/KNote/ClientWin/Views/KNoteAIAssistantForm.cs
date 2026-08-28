@@ -242,18 +242,27 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
 
     private async Task GoStreamCompletion(string prompt)
     {
+        _sbResult.Clear();
         _countNRres = 0;
         _ctrl.StreamToken += _com_StreamToken;
 
-        await _ctrl.StreamCompletionAsync(prompt);
+        try
+        {
+            await _ctrl.StreamCompletionAsync(prompt);
+        }
+        finally
+        {
+            // Must run even if the stream throws mid-way (e.g. a transient SDK error on the
+            // trailing chunk): otherwise this handler stays subscribed and the next attempt
+            // fires two handlers at once, interleaving garbled text into the result view.
+            _ctrl.StreamToken -= _com_StreamToken;
+        }
 
         RefreshStreamResult();
 
         textPrompt.Text = "";
         toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens}";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_ctrl.TotalProcessingTime}";
-
-        _ctrl.StreamToken -= _com_StreamToken;
     }
 
     private void _com_StreamToken(object sender, ControllerEventArgs<string> e)
