@@ -49,6 +49,7 @@ namespace KNote.ClientWin.Views
             buttonRestart = new Button();
             labelPrompt = new Label();
             comboProviders = new ComboBox();
+            buttonManageProviders = new Button();
             textPrompt = new TextBox();
             buttonSend = new Button();
             panelResultHeader = new Panel();
@@ -213,6 +214,7 @@ namespace KNote.ClientWin.Views
             //
             panelPromptHeader.Controls.Add(labelPrompt);
             panelPromptHeader.Controls.Add(comboProviders);
+            panelPromptHeader.Controls.Add(buttonManageProviders);
             panelPromptHeader.Controls.Add(buttonSend);
             panelPromptHeader.Controls.Add(buttonRestart);
             panelPromptHeader.Controls.Add(panelSeparator);
@@ -280,11 +282,22 @@ namespace KNote.ClientWin.Views
             comboProviders.DropDownStyle = ComboBoxStyle.DropDownList;
             comboProviders.Font = new Font("Segoe UI", 8.25F);
             comboProviders.FormattingEnabled = true;
-            comboProviders.Location = new Point(68, 5);
+            comboProviders.Location = new Point(184, 7);
             comboProviders.Name = "comboProviders";
-            comboProviders.Size = new Size(220, 23);
+            comboProviders.Size = new Size(180, 23);
             comboProviders.TabIndex = 1;
             comboProviders.SelectedIndexChanged += comboProviders_SelectedIndexChanged;
+            //
+            // buttonManageProviders
+            //
+            buttonManageProviders.Font = new Font("Segoe UI", 8.25F);
+            buttonManageProviders.Location = new Point(370, 4);
+            buttonManageProviders.Name = "buttonManageProviders";
+            buttonManageProviders.Size = new Size(70, 26);
+            buttonManageProviders.TabIndex = 4;
+            buttonManageProviders.Text = "&Manage...";
+            buttonManageProviders.UseVisualStyleBackColor = true;
+            buttonManageProviders.Click += buttonManageProviders_Click;
             //
             // textPrompt
             //
@@ -349,6 +362,7 @@ namespace KNote.ClientWin.Views
         private Button buttonRestart;
         private Label labelPrompt;
         private ComboBox comboProviders;
+        private Button buttonManageProviders;
         private TextBox textPrompt;
         private Button buttonSend;
         private Button buttonCatalogPrompts;

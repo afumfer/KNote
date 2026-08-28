@@ -78,6 +78,7 @@
             menuChat = new ToolStripMenuItem();
             menuChatGPT = new ToolStripMenuItem();
             menuAIAssistant = new ToolStripMenuItem();
+            menuAIProviders = new ToolStripMenuItem();
             menuCOMPortServer = new ToolStripMenuItem();
             menuKNoteLab = new ToolStripMenuItem();
             menuToolsS2 = new ToolStripSeparator();
@@ -423,7 +424,7 @@
             // 
             // menuTools
             // 
-            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuChatGPT, menuAIAssistant, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuOptions });
+            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuChatGPT, menuAIAssistant, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuAIProviders, menuOptions });
             menuTools.Name = "menuTools";
             menuTools.Size = new Size(46, 20);
             menuTools.Text = "&Tools";
@@ -470,6 +471,13 @@
             menuAIAssistant.Size = new Size(185, 22);
             menuAIAssistant.Text = "AI Assistant ...";
             menuAIAssistant.Click += menu_Click;
+            //
+            // menuAIProviders
+            //
+            menuAIProviders.Name = "menuAIProviders";
+            menuAIProviders.Size = new Size(185, 22);
+            menuAIProviders.Text = "Manage AI providers ...";
+            menuAIProviders.Click += menu_Click;
             //
             // menuCOMPortServer
             // 
@@ -921,6 +929,7 @@
         private ToolStripMenuItem menuChat;
         private ToolStripMenuItem menuChatGPT;
         private ToolStripMenuItem menuAIAssistant;
+        private ToolStripMenuItem menuAIProviders;
         private ToolStripProgressBar progressBar;
         private ToolStripMenuItem menuCOMPortServer;
         private Label labelReResources;

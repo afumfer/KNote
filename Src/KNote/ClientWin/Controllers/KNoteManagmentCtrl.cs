@@ -600,6 +600,15 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         kNoteAIAssistantCtrl.ShowAIAssistantView(true, true);
     }
 
+    // KNoteAIAssistant plan (Phase 4): maintenance screen for the AI provider/model collection
+    // consumed by KNoteAIAssistantCtrl's picker.
+    public async Task ManageAiProviders()
+    {
+        var aiProvidersManageCtrl = new AiProvidersManageCtrl(Store);
+        await aiProvidersManageCtrl.LoadEntitiesAsync(null, false);
+        aiProvidersManageCtrl.RunModal();
+    }
+
     public void ShowKntCOMPortServerConsole()
     {
         var kntServerCOMCtrl = new KntServerCOMCtrl(Store);

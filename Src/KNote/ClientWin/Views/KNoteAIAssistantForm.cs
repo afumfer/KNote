@@ -32,7 +32,7 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         panelResultHeader.Resize += (s, e) => AlignControlsRight(panelResultHeader, 8, 8,
             radioGetStream, radioGetCompletion, buttonMarkDown, buttonNavigate);
         panelPromptHeader.Resize += (s, e) => AlignControlsRight(panelPromptHeader, 6, 6,
-            buttonSend, buttonRestart, panelSeparator, buttonCatalogPrompts, buttonViewSystem);
+            comboProviders, buttonManageProviders, buttonSend, buttonRestart, panelSeparator, buttonCatalogPrompts, buttonViewSystem);
     }
 
     private static void AlignControlsRight(Control header, int rightMargin, int spacing, params Control[] controlsLeftToRight)
@@ -159,6 +159,17 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         ShowInfo($"System: {_ctrl.RootSystemChat}", $"{KntConst.AppName} - root system chat ");
     }
 
+    private async void buttonManageProviders_Click(object sender, EventArgs e)
+    {
+        var manageCtrl = new AiProvidersManageCtrl(_ctrl.Store);
+        await manageCtrl.LoadEntitiesAsync(null, false);
+        manageCtrl.RunModal();
+
+        // Providers may have been added/edited/removed: refresh the picker in place instead of
+        // requiring the user to close and reopen the assistant.
+        PopulateProviders();
+    }
+
     private void comboProviders_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (comboProviders.SelectedItem is not AiProviderRef providerRef || providerRef == _ctrl.CurrentProviderRef)
@@ -178,6 +189,9 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         _ctrl.SetProvider(providerRef);
         RestartAIAssistantView();
         Text = ViewCaptionText;
+        // Covers the case where the assistant opened with zero providers configured (Send stays
+        // disabled until one is picked): SetProvider just succeeded, so it's safe to re-enable now.
+        buttonSend.Enabled = true;
     }
 
     private void buttonMarkDown_Click(object sender, EventArgs e)
@@ -250,6 +264,7 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
             toolStripStatusLabelProcessing.Text = " Processing ...";
             textPrompt.Enabled = false;
             comboProviders.Enabled = false;
+            buttonManageProviders.Enabled = false;
             buttonSend.Enabled = false;
             buttonRestart.Enabled = false;
             radioGetCompletion.Enabled = false;
@@ -264,6 +279,7 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
             toolStripStatusLabelProcessing.Text = " ";
             textPrompt.Enabled = true;
             comboProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
+            buttonManageProviders.Enabled = true;
             buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
             buttonRestart.Enabled = true;
             radioGetCompletion.Enabled = true;

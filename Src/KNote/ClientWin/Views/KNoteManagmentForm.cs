@@ -318,6 +318,10 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             _ctrl.ShowKNoteAIAssistantConsole();
         }
+        else if (menuSel == menuAIProviders)
+        {
+            await _ctrl.ManageAiProviders();
+        }
         else if (menuSel == menuCOMPortServer)
         {
             _ctrl.ShowKntCOMPortServerConsole();
