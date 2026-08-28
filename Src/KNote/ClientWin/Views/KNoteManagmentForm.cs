@@ -314,6 +314,10 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             _ctrl.ShowKntChatGPTConsole();
         }
+        else if (menuSel == menuAIAssistant)
+        {
+            _ctrl.ShowKNoteAIAssistantConsole();
+        }
         else if (menuSel == menuCOMPortServer)
         {
             _ctrl.ShowKntCOMPortServerConsole();

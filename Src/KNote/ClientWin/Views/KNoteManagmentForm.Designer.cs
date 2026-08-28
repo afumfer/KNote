@@ -77,6 +77,7 @@
             menuKntScriptConsole = new ToolStripMenuItem();
             menuChat = new ToolStripMenuItem();
             menuChatGPT = new ToolStripMenuItem();
+            menuAIAssistant = new ToolStripMenuItem();
             menuCOMPortServer = new ToolStripMenuItem();
             menuKNoteLab = new ToolStripMenuItem();
             menuToolsS2 = new ToolStripSeparator();
@@ -422,7 +423,7 @@
             // 
             // menuTools
             // 
-            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuChatGPT, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuOptions });
+            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuChatGPT, menuAIAssistant, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuOptions });
             menuTools.Name = "menuTools";
             menuTools.Size = new Size(46, 20);
             menuTools.Text = "&Tools";
@@ -455,13 +456,21 @@
             menuChat.Click += menu_Click;
             // 
             // menuChatGPT
-            // 
+            //
             menuChatGPT.Name = "menuChatGPT";
             menuChatGPT.ShortcutKeys = Keys.F7;
             menuChatGPT.Size = new Size(185, 22);
             menuChatGPT.Text = "ChatGPT ...";
             menuChatGPT.Click += menu_Click;
-            // 
+            //
+            // menuAIAssistant
+            //
+            menuAIAssistant.Name = "menuAIAssistant";
+            menuAIAssistant.ShortcutKeys = Keys.F8;
+            menuAIAssistant.Size = new Size(185, 22);
+            menuAIAssistant.Text = "AI Assistant ...";
+            menuAIAssistant.Click += menu_Click;
+            //
             // menuCOMPortServer
             // 
             menuCOMPortServer.Name = "menuCOMPortServer";
@@ -911,6 +920,7 @@
         private ToolStripMenuItem menuToolbarVisible;
         private ToolStripMenuItem menuChat;
         private ToolStripMenuItem menuChatGPT;
+        private ToolStripMenuItem menuAIAssistant;
         private ToolStripProgressBar progressBar;
         private ToolStripMenuItem menuCOMPortServer;
         private Label labelReResources;
