@@ -32,12 +32,15 @@ public abstract class KntRepositoryDapperBase : KntRepositoryBase, IDisposable
         }
         else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
         {
-            // SqlMapper is static, this is a problem (to study in the future ) 
+            // SqlMapper is static, this is a problem (to study in the future )
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
             SqlMapper.AddTypeHandler(new GuidHandler());
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
             // ---
-            return new SqliteConnection(_repositoryRef.ConnectionString);
+            var connection = new SqliteConnection(_repositoryRef.ConnectionString);
+            connection.Open();
+            KntSqliteAccentFunctions.Register(connection);
+            return connection;
         }
         else
             throw new Exception("Data provider not suported (KntEx)");

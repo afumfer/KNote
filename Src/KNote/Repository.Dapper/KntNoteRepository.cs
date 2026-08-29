@@ -1498,47 +1498,56 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 FROM Notes ";
     }
 
-    private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter)
+    // SQL Server's built-in accent-insensitive collation. SQLite has no equivalent collation, so
+    // there LIKE is instead made accent-insensitive by overriding SQLite's "like" function
+    // (see KntSqliteAccentFunctions), and this suffix must stay empty on that connection.
+    private const string AccentInsensitiveCollate = " COLLATE Latin1_General_100_CI_AI_SC";
+
+    private static string GetAccentInsensitiveCollateSuffix(DbConnection db) =>
+        db.GetType().Name == "SqliteConnection" ? "" : AccentInsensitiveCollate;
+
+    private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter, DbConnection db)
     {
         string strWhere = "" ;
+        var collate = GetAccentInsensitiveCollateSuffix(db);
 
         if (notesFilter.FolderId != null)
         {
             strWhere = AddAndToStringSQL(strWhere);
             strWhere += "FolderId = '" + notesFilter.FolderId.ToString().ToUpper() + "' ";
         }
-            
+
         if (notesFilter.NoteTypeId != null)
         {
             strWhere = AddAndToStringSQL(strWhere);
             strWhere += "NoteTypeId = '" + notesFilter.NoteTypeId.ToString().ToUpper() + "' ";
         }
-           
+
         if (!string.IsNullOrEmpty(notesFilter.Topic))
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += "Topic LIKE '%" + notesFilter.Topic.ToString() + "%' ";                
+            strWhere += $"Topic{collate} LIKE '%" + notesFilter.Topic.ToString() + "%' ";
         }
 
         if (!string.IsNullOrEmpty(notesFilter.Tags))
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += "Tags LIKE '%" + notesFilter.Tags.ToString() + "%' ";                
+            strWhere += $"Tags{collate} LIKE '%" + notesFilter.Tags.ToString() + "%' ";
         }
 
         if (!string.IsNullOrEmpty(notesFilter.Description))
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += "Description LIKE '%" + notesFilter.Description.ToString() + "%' ";                
+            strWhere += $"Description{collate} LIKE '%" + notesFilter.Description.ToString() + "%' ";
         }
 
         foreach (var f in notesFilter.AttributesFilter)
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += $@" Notes.NoteId in (SELECT [NoteKAttributes].NoteId FROM NoteKAttributes 
-                                WHERE [NoteKAttributes].NoteId = [Notes].NoteId  
-                                    AND NoteKAttributes.KAttributeId = '{f.AtrId.ToString().ToUpper()}' 
-                                    AND NoteKAttributes.Value like '%{f.Value}%' ) ";
+            strWhere += $@" Notes.NoteId in (SELECT [NoteKAttributes].NoteId FROM NoteKAttributes
+                                WHERE [NoteKAttributes].NoteId = [Notes].NoteId
+                                    AND NoteKAttributes.KAttributeId = '{f.AtrId.ToString().ToUpper()}'
+                                    AND NoteKAttributes.Value{collate} like '%{f.Value}%' ) ";
         }
 
         if (!string.IsNullOrEmpty(strWhere))
@@ -1677,7 +1686,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             else
                 sql = GetMinimalSelectNotes();
 
-            var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter);
+            var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter, db);
 
             result.TotalCount = GetCountNotes(db, sqlWhere);
 
@@ -1724,9 +1733,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             IEnumerable<T> entity;
 
             var db = GetOpenConnection();
+            var collate = GetAccentInsensitiveCollateSuffix(db);
 
             searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
-            
+
             if (typeof(T).GetProperty("Description", BindingFlags.Public | BindingFlags.Instance) != null)
                 sql = GetSelectNotes();
             else
@@ -1758,13 +1768,13 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                             if (token[0] != '!')
                             {
                                 sqlWhere = AddAndToStringSQL(sqlWhere);
-                                sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' ) ";
+                                sqlWhere += $" (Topic{collate} LIKE '%{token}%' OR Tags{collate} LIKE '%{token}%' ) ";
                             }
                             else
                             {
                                 var tokenNot = token.Substring(1, token.Length - 1);
                                 sqlWhere = AddAndToStringSQL(sqlWhere);
-                                sqlWhere += $" (Topic NOT LIKE '%{tokenNot}%' AND Tags NOT LIKE '%{tokenNot}%')";
+                                sqlWhere += $" (Topic{collate} NOT LIKE '%{tokenNot}%' AND Tags{collate} NOT LIKE '%{tokenNot}%')";
                             }
                         }
                     }
@@ -1778,13 +1788,13 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                             if (token[0] != '!')
                             {
                                 sqlWhere = AddAndToStringSQL(sqlWhere);
-                                sqlWhere += $" (Topic LIKE '%{token}%' OR Tags LIKE '%{token}%' OR Description LIKE '%{token}%') ";
+                                sqlWhere += $" (Topic{collate} LIKE '%{token}%' OR Tags{collate} LIKE '%{token}%' OR Description{collate} LIKE '%{token}%') ";
                             }
                             else
                             {
                                 var tokenNot = token.Substring(1, token.Length - 1);
                                 sqlWhere = AddAndToStringSQL(sqlWhere);
-                                sqlWhere += $" (Topic NOT LIKE '%{tokenNot}%' AND Tags NOT LIKE '%{tokenNot}%' AND Description NOT LIKE '%{tokenNot}%') ";
+                                sqlWhere += $" (Topic{collate} NOT LIKE '%{tokenNot}%' AND Tags{collate} NOT LIKE '%{tokenNot}%' AND Description{collate} NOT LIKE '%{tokenNot}%') ";
                             }
                         }
                     }

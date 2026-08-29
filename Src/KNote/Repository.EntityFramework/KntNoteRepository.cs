@@ -14,6 +14,12 @@ namespace KNote.Repository.EntityFramework;
 
 public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 {
+    // SQL Server's built-in accent-insensitive collation. SQLite has no equivalent collation, so
+    // there LIKE is instead made accent-insensitive by overriding SQLite's "like" function
+    // (see KntSqliteAccentInterceptor); EF.Functions.Like is used there instead of Contains()
+    // because EF's SQLite provider translates string.Contains to instr(...), not LIKE.
+    private const string AccentInsensitiveCollation = "Latin1_General_100_CI_AI_SC";
+
     #region Constructor
 
     public KntNoteRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
@@ -1313,8 +1319,9 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
             var query = notes.Queryable;
+            var isSqlServer = _repositoryRef.Provider == "Microsoft.Data.SqlClient";
 
-            // Filters 
+            // Filters
             if (notesFilter.FolderId != null)
                 query = query.Where(n => n.FolderId == notesFilter.FolderId);
 
@@ -1322,13 +1329,19 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                 query = query.Where(n => n.NoteTypeId == notesFilter.NoteTypeId);
 
             if (!string.IsNullOrEmpty(notesFilter.Topic))
-                query = query.Where(n => n.Topic.ToLower().Contains(notesFilter.Topic.ToLower()));
+                query = isSqlServer
+                    ? query.Where(n => EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(notesFilter.Topic))
+                    : query.Where(n => EF.Functions.Like(n.Topic, $"%{notesFilter.Topic}%"));
 
             if (!string.IsNullOrEmpty(notesFilter.Tags))
-                query = query.Where(n => n.Tags.ToLower().Contains(notesFilter.Tags.ToLower()));
+                query = isSqlServer
+                    ? query.Where(n => EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(notesFilter.Tags))
+                    : query.Where(n => EF.Functions.Like(n.Tags, $"%{notesFilter.Tags}%"));
 
             if (!string.IsNullOrEmpty(notesFilter.Description))
-                query = query.Where(n => n.Description.ToLower().Contains(notesFilter.Description.ToLower()));
+                query = isSqlServer
+                    ? query.Where(n => EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(notesFilter.Description))
+                    : query.Where(n => EF.Functions.Like(n.Description, $"%{notesFilter.Description}%"));
 
             foreach (var f in notesFilter.AttributesFilter)
             {
@@ -1368,6 +1381,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
             var query = notes.Queryable;
+            var isSqlServer = _repositoryRef.Provider == "Microsoft.Data.SqlClient";
 
             searchNumber = ExtractNoteNumberSearch(notesSearch.TextSearch);
 
@@ -1391,11 +1405,21 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                         if (!string.IsNullOrEmpty(token))
                         {
                             if (token[0] != '!')
-                                query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Tags.ToLower().Contains(token.ToLower()));
+                            {
+                                var pattern = $"%{token}%";
+                                query = isSqlServer
+                                    ? query.Where(n => EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(token)
+                                                     || EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(token))
+                                    : query.Where(n => EF.Functions.Like(n.Topic, pattern) || EF.Functions.Like(n.Tags, pattern));
+                            }
                             else
                             {
                                 var tokenNot = token.Substring(1, token.Length - 1);
-                                query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Tags.ToLower().Contains(tokenNot.ToLower()));
+                                var patternNot = $"%{tokenNot}%";
+                                query = isSqlServer
+                                    ? query.Where(n => !EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(tokenNot)
+                                                     && !EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(tokenNot))
+                                    : query.Where(n => !EF.Functions.Like(n.Topic, patternNot) && !EF.Functions.Like(n.Tags, patternNot));
                             }
                         }
                     }
@@ -1407,11 +1431,23 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                         if (!string.IsNullOrEmpty(token))
                         {
                             if (token[0] != '!')
-                                query = query.Where(n => n.Topic.ToLower().Contains(token.ToLower()) || n.Tags.ToLower().Contains(token.ToLower()) || n.Description.ToLower().Contains(token.ToLower()));
+                            {
+                                var pattern = $"%{token}%";
+                                query = isSqlServer
+                                    ? query.Where(n => EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(token)
+                                                     || EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(token)
+                                                     || EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(token))
+                                    : query.Where(n => EF.Functions.Like(n.Topic, pattern) || EF.Functions.Like(n.Tags, pattern) || EF.Functions.Like(n.Description, pattern));
+                            }
                             else
                             {
                                 var tokenNot = token.Substring(1, token.Length - 1);
-                                query = query.Where(n => !n.Topic.ToLower().Contains(tokenNot.ToLower()) && !n.Tags.ToLower().Contains(tokenNot.ToLower()) && !n.Description.ToLower().Contains(tokenNot.ToLower()));
+                                var patternNot = $"%{tokenNot}%";
+                                query = isSqlServer
+                                    ? query.Where(n => !EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(tokenNot)
+                                                     && !EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(tokenNot)
+                                                     && !EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(tokenNot))
+                                    : query.Where(n => !EF.Functions.Like(n.Topic, patternNot) && !EF.Functions.Like(n.Tags, patternNot) && !EF.Functions.Like(n.Description, patternNot));
                             }
                         }
                     }

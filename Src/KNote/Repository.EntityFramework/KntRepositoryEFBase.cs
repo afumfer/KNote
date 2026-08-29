@@ -35,6 +35,7 @@ public abstract class KntRepositoryEFBase : KntRepositoryBase, IDisposable
             optionsBuilder.UseSqlite(_repositoryRef.ConnectionString);
             // Entity framework core for Sqlite no support AmbientTransaction
             optionsBuilder.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+            optionsBuilder.AddInterceptors(new KntSqliteAccentInterceptor());
         }
         else
             throw new Exception("Data provider not suported (KntEx)");

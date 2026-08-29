@@ -105,6 +105,65 @@ public class NotesQueryParityTests
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
+    public async Task GetFilterMinimalAsync_MatchesTopicIgnoringAccents(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+
+        var folderRes = await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Accent Filter Parity Folder" });
+        Assert.IsTrue(folderRes.IsValid, folderRes.ErrorMessage);
+
+        string uniqueToken = $"PARITYACCENT{Guid.NewGuid():N}";
+        var noteRes = await repo.Notes.AddAsync(new NoteDto
+        {
+            NoteId = Guid.NewGuid(),
+            Topic = $"José {uniqueToken}",
+            FolderId = folderRes.Entity.FolderId,
+            CreationDateTime = DateTime.Now,
+            ModificationDateTime = DateTime.Now
+        });
+        Assert.IsTrue(noteRes.IsValid, noteRes.ErrorMessage);
+
+        // Search without the accent must still match "José" - accent-insensitive search
+        // (SQLite: overridden "like" function; SQL Server: COLLATE ..._AI in production).
+        var filter = new NotesFilterDto { Topic = $"jose {uniqueToken}", PageIdentifier = new PageIdentifier() };
+        var filterRes = await repo.Notes.GetFilterMinimalAsync(filter);
+
+        Assert.IsTrue(filterRes.IsValid, filterRes.ErrorMessage);
+        Assert.IsTrue(filterRes.Entity.Any(n => n.NoteId == noteRes.Entity.NoteId));
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task GetSearchMinimalAsync_FindsNoteByTopicTokenIgnoringAccents(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+
+        var folderRes = await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Accent Search Parity Folder" });
+        Assert.IsTrue(folderRes.IsValid, folderRes.ErrorMessage);
+
+        string uniqueToken = $"PARITYSEARCHACCENT{Guid.NewGuid():N}";
+        var noteRes = await repo.Notes.AddAsync(new NoteDto
+        {
+            NoteId = Guid.NewGuid(),
+            Topic = $"Café {uniqueToken}",
+            FolderId = folderRes.Entity.FolderId,
+            CreationDateTime = DateTime.Now,
+            ModificationDateTime = DateTime.Now
+        });
+        Assert.IsTrue(noteRes.IsValid, noteRes.ErrorMessage);
+
+        var searchRes = await repo.Notes.GetSearchMinimalAsync(new NotesSearchDto { TextSearch = $"cafe {uniqueToken}" });
+
+        Assert.IsTrue(searchRes.IsValid, searchRes.ErrorMessage);
+        Assert.IsTrue(searchRes.Entity.Any(n => n.NoteId == noteRes.Entity.NoteId));
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
     public async Task GetSearchMinimalAsync_FindsNoteByTopicToken(string orm)
     {
         using var db = new RepositoryTestDatabase();
