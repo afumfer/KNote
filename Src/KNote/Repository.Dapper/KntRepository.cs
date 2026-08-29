@@ -206,29 +206,47 @@ public class KntRepository : IKntRepository
 
 #region Sqlite personalization 
 
-abstract class SqliteTypeHandler<T> : SqlMapper.TypeHandler<T>
+public abstract class SqliteTypeHandler<T> : SqlMapper.TypeHandler<T>
 {
     // Parameters are converted by Microsoft.Data.Sqlite
     public override void SetValue(IDbDataParameter parameter, T value)
         => parameter.Value = value;
 }
 
-class DateTimeOffsetHandler : SqliteTypeHandler<DateTimeOffset>
+// SqlMapper.AddTypeHandler(...) registers these process-wide, not per-connection, so once a Sqlite
+// repository has registered them they also run for SQL Server queries in the same process, which
+// return the CLR type natively instead of as a Sqlite-stored string - hence the type check below
+// instead of assuming the value is always a string. Public so DapperGlobalTypeHandlerTests can
+// exercise them directly without needing a live SQL Server connection.
+
+public class DateTimeOffsetHandler : SqliteTypeHandler<DateTimeOffset>
 {
-    public override DateTimeOffset Parse(object value)
-        => DateTimeOffset.Parse((string)value);
+    public override DateTimeOffset Parse(object value) => value switch
+    {
+        DateTimeOffset dateTimeOffset => dateTimeOffset,
+        string text => DateTimeOffset.Parse(text),
+        _ => throw new NotSupportedException($"Unsupported DateTimeOffset value type: {value?.GetType()}")
+    };
 }
 
-class GuidHandler : SqliteTypeHandler<Guid>
+public class GuidHandler : SqliteTypeHandler<Guid>
 {
-    public override Guid Parse(object value)
-        => Guid.Parse((string)value);
+    public override Guid Parse(object value) => value switch
+    {
+        Guid guid => guid,
+        string text => Guid.Parse(text),
+        _ => throw new NotSupportedException($"Unsupported Guid value type: {value?.GetType()}")
+    };
 }
 
-class TimeSpanHandler : SqliteTypeHandler<TimeSpan>
+public class TimeSpanHandler : SqliteTypeHandler<TimeSpan>
 {
-    public override TimeSpan Parse(object value)
-        => TimeSpan.Parse((string)value);
+    public override TimeSpan Parse(object value) => value switch
+    {
+        TimeSpan timeSpan => timeSpan,
+        string text => TimeSpan.Parse(text),
+        _ => throw new NotSupportedException($"Unsupported TimeSpan value type: {value?.GetType()}")
+    };
 }
 
 #endregion 
