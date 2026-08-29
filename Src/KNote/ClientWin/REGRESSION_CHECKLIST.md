@@ -60,4 +60,5 @@ buena.
 
 - [ ] Opciones de la aplicación (`OptionsEditorCtrl`) se guardan y se recargan correctamente al
       reiniciar la app.
-- [ ] Integración con ChatGPT (`KntChatGPTCtrl`), si está configurada, sigue funcionando.
+- [ ] KNoteAIAssistant (`KNoteAIAssistantCtrl`), con al menos un proveedor de IA configurado, sigue
+      funcionando (streaming/completion, catálogo de prompts, gestión de proveedores).

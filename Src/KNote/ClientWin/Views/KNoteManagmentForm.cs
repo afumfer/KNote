@@ -310,10 +310,6 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             _ctrl.ShowKntChatConsole();
         }
-        else if (menuSel == menuChatGPT)
-        {
-            _ctrl.ShowKntChatGPTConsole();
-        }
         else if (menuSel == menuAIAssistant)
         {
             _ctrl.ShowKNoteAIAssistantConsole();

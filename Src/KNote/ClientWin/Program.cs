@@ -202,8 +202,6 @@ static class Program
 
         store.AppConfig.LastDateTimeStart = DateTime.Now;
         store.AppConfig.RunCounter += 1;
-        if (string.IsNullOrEmpty(store.AppConfig.ChatGPTDefaultModel))
-            store.AppConfig.ChatGPTDefaultModel = "gpt-4o-mini";
 
         store.SaveConfig(appFileConfig);
 

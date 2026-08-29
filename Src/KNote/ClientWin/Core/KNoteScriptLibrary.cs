@@ -81,17 +81,17 @@ public class KNoteScriptLibrary: Library
         return new KntScriptConsoleCtrl(_store);
     }
 
-    public KntChatGPTCtrl GetKntChatGPTCtrl()
+    public KNoteAIAssistantCtrl GetKNoteAIAssistantCtrl()
     {
-        return new KntChatGPTCtrl(_store);
+        return new KNoteAIAssistantCtrl(_store);
     }
 
-    public string GetKntChatGPTMessage(string prompt)
+    public string GetKNoteAIAssistantMessage(string prompt)
     {
-        var chatGPT =  new KntChatGPTCtrl(_store);
-        chatGPT.Run();
-        Task.Run(() => chatGPT.GetCompletionAsync(prompt)).Wait();        
-        return chatGPT.ChatTextMessasges.ToString();
+        var aiAssistant = new KNoteAIAssistantCtrl(_store);
+        aiAssistant.Run();
+        Task.Run(() => aiAssistant.GetCompletionAsync(prompt)).Wait();
+        return aiAssistant.ChatTextMessasges.ToString();
     }
 
     public KntChatCtrl GetKntChatCtrl()

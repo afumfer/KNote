@@ -233,34 +233,6 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
-    private string _chatGPTApiKey;
-    public string ChatGPTApiKey
-    {
-        get { return _chatGPTApiKey; }
-        set
-        {
-            if (_chatGPTApiKey != value)
-            {
-                _chatGPTApiKey = value;
-                OnPropertyChanged("ChatGPTApiKey");
-            }
-        }
-    }
-
-    private string _chatGPTDefaultModel;
-    public string ChatGPTDefaultModel
-    {
-        get { return _chatGPTDefaultModel; }
-        set
-        {
-            if (_chatGPTDefaultModel != value)
-            {
-                _chatGPTDefaultModel = value;
-                OnPropertyChanged("ChatGPTDefaultModel");
-            }
-        }
-    }
-
     private bool _activateMessageBroker;
     public bool ActivateMessageBroker
     {
@@ -313,10 +285,8 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
-    // KNoteAIAssistant plan (Phase 2): collection of configured AI providers (provider, model,
-    // API key, host for Ollama). Replaces ChatGPTApiKey/ChatGPTDefaultModel for the new
-    // KNoteAIAssistant use case; those two fields are kept as-is for the legacy KntChatGPT one
-    // until it is retired.
+    // Collection of configured AI providers (provider, model, API key, host for Ollama) consumed
+    // by KNoteAIAssistantCtrl's provider picker.
     private List<AiProviderRef> _aiProviderRefs;
     public List<AiProviderRef> AiProviderRefs
     {

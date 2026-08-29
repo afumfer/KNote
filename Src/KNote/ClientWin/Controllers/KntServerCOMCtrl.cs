@@ -12,7 +12,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     private SerialPort _serialPort;
     private Queue _messageQueue;
-    private readonly KntChatGPTCtrl _chatGPT;
+    private readonly KNoteAIAssistantCtrl _chatGPT;
 
     private CancellationTokenSource _cancellationTokenSource;    
     private bool _showViewMessage;
@@ -106,8 +106,9 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
                 
         _convTable = LoadQDOSCharacterSetTable();
 
-        // ChatGPT included controller
-        _chatGPT = new KntChatGPTCtrl(store);
+        // AI Assistant included controller (formerly KntChatGPTCtrl; the "#chatgpt"/"#restartchatgpt"
+        // wire commands below are unchanged, an external client's protocol contract)
+        _chatGPT = new KNoteAIAssistantCtrl(store);
         _chatGPT.Run();
     }
 
@@ -209,7 +210,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         _serialPort.Open();   
         
         _messageQueue = new Queue();
-        _chatGPT.RestartChatGPT();
+        _chatGPT.RestartAIAssistant();
 
         _statusInfo = "Com started ...";
 
@@ -406,7 +407,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     private void ExecuteRestartChatGptRequest()
     {
-        _chatGPT.RestartChatGPT();
+        _chatGPT.RestartAIAssistant();
         _messageQueue.Enqueue((char)EofByte);
     }
 

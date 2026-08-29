@@ -584,15 +584,6 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    public void ShowKntChatGPTConsole()
-    {
-        var kntChatGPTCtrl = new KntChatGPTCtrl(Store);
-        kntChatGPTCtrl.Run();
-        kntChatGPTCtrl.ShowChatGPTView(true, true);
-    }
-
-    // KNoteAIAssistant plan (Phase 0): parallel entry point next to KntChatGPT so both can be
-    // exercised side by side until KNoteAIAssistant is validated and KntChatGPT is retired.
     public void ShowKNoteAIAssistantConsole()
     {
         var kNoteAIAssistantCtrl = new KNoteAIAssistantCtrl(Store);

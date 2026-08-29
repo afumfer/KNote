@@ -38,7 +38,6 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<NoteAttributeEditorCtrl, IViewEditor<NoteKAttributeDto>>(c => new NoteAttributeEditorForm(c));
         Registry.Register<FiltersSelectorCtrl, IViewSelector<SelectedNotesInServiceRef>>(c => new FiltersSelectorForm(c));
         Registry.Register<OptionsEditorCtrl, IViewEditor<AppConfig>>(c => new OptionsEditorForm(c));
-        Registry.Register<KntChatGPTCtrl, IViewBase>(c => new KntChatGPTForm(c));
         Registry.Register<KNoteAIAssistantCtrl, IViewBase>(c => new KNoteAIAssistantForm(c));
         Registry.Register<AiProviderEditorCtrl, IViewEditor<AiProviderRef>>(c => new AiProviderEditorForm(c));
         Registry.Register<AiProvidersManageCtrl, IViewManageList<AiProviderRef>>(c => new AiProvidersManageForm(c));

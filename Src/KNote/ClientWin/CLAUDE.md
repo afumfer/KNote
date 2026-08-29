@@ -90,7 +90,7 @@ CtrlBase
   descendiente: **`NoteEditorCtrl`**, el caso de uso principal de la app.
 
 Algunos controladores no encajan en editor/selector y heredan directamente de `CtrlBase`
-(`HeavyProcessCtrl`, `KntChatCtrl`, `KntChatGPTCtrl`, `KntHttpClientCtrl`, `KntLabCtrl`,
+(`HeavyProcessCtrl`, `KntChatCtrl`, `KNoteAIAssistantCtrl`, `KntHttpClientCtrl`, `KntLabCtrl`,
 `KntServerCOMCtrl`, `MessagesManagmentCtrl`), gestionando su vista manualmente si la necesitan.
 
 Al crear un nuevo caso de uso: elige la clase base según la familia (editor/selector/nota) — no repliques

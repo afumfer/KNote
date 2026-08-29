@@ -11,10 +11,9 @@ using System.Text.Json;
 
 namespace KNote.ClientWin.Controllers;
 
-// Phase 1 (KNoteAIAssistant plan): migrated off the OpenAI.Chat SDK onto Microsoft.Extensions.AI's
-// IChatClient abstraction, still backed by the OpenAI provider only (same visible behavior as
-// KntChatGPTCtrl). The provider/model collection and the other providers (Anthropic, Ollama) land
-// in later phases.
+// Built on Microsoft.Extensions.AI's IChatClient abstraction (provider-agnostic: OpenAI, Anthropic,
+// Ollama - see AiChatClientFactory). Replaces the retired KntChatGPTCtrl (OpenAI-only, built
+// directly on the OpenAI.Chat SDK).
 public class KNoteAIAssistantCtrl : CtrlBase
 {
     #region Private fields

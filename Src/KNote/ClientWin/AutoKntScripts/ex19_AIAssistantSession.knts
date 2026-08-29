@@ -1,6 +1,6 @@
-﻿' ChatGPT example 2, use controller with chat conversation
+' AI Assistant example 2, use controller with chat conversation
 
-var chat = GetKntChatGPTCtrl();
+var chat = GetKNoteAIAssistantCtrl();
 chat.Run();
 
 chat.GetCompletion("Hola.");

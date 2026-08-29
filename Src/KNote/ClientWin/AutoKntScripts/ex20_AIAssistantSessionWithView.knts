@@ -1,7 +1,7 @@
-﻿' ChatGPT example 3, use chat controller view
+' AI Assistant example 3, use chat controller view
 
-var chat = GetKntChatGPTCtrl();
+var chat = GetKNoteAIAssistantCtrl();
 chat.Run();
-chat.ShowChatGPTView();
+chat.ShowAIAssistantView();
 
 printline "-- END --";
