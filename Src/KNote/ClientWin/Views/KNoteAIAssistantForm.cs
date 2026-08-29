@@ -286,7 +286,10 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
             radioGetStream.Enabled = true;
             buttonCatalogPrompts.Enabled = true;
             buttonViewSystem.Enabled = true;
-            buttonMarkDown.Enabled = true;
+            // Every send leaves the result view in markdown mode (GoGetCompletion/GoStreamCompletion
+            // never navigate to the rendered HTML view), so Markdown must stay disabled here - matching
+            // what MarkDownView() already set - not force-reenabled like the rest of the controls.
+            buttonMarkDown.Enabled = false;
             buttonNavigate.Enabled = true;
             kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
             kntEditViewResult.MarkdownContentControl.ScrollToCaret();
