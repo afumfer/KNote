@@ -38,6 +38,11 @@ dotnet run --project ClientWin/KNote.ClientWin.csproj
 dotnet test KNoteTest.slnx
 # test individual:
 dotnet test KNoteTest.slnx --filter "FullyQualifiedName~NotesTests.SomeTestMethod"
+
+# Tests unitarios de ClientWin (parte de KNote.slnx, no necesitan Server ni BD real)
+dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj
+# excluyendo los smoke tests de proveedores de IA reales (ver ClientWin.Tests/CLAUDE.md):
+dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "TestCategory!=RequiresRealAiProvider"
 ```
 
 No hay ningún workflow de CI configurado (`.github/workflows/` está vacío) ni linter más allá de la única
@@ -46,13 +51,23 @@ llaves están permitidos y son habituales en este código.
 
 ## Tests
 
-`Tests/WebApiIntegrationTests/*.cs` (`ChatGPTTests`, `FoldersTests`, `KAttributesTests`, `NoteTypesTests`,
-`NotesTests`, `UsersTests`) son **tests de integración HTTP reales**, no tests unitarios.
-`Tests/Helpers/WebApiTestBase.cs` inicia sesión vía `POST {testsWebApiUrlBase}api/users/login` contra una
-instancia real de `Server` en ejecución y reutiliza el JWT en las siguientes peticiones. Configura
-`testsUserName`, `testsUserPwd`, `testsWebApiUrlBase` en `Tests/appsettings.json` o en user-secrets (id de
-secretos `f25fed7b-9b03-406c-8e4a-b98eb14f5579`) — **debe haber una instancia de `Server` en ejecución y
-accesible en esa URL antes de correr el proyecto de tests.**
+Hay dos suites de test independientes, en dos `.slnx` distintos, con propósitos distintos:
+
+- **`Tests/` (vía `KNoteTest.slnx`)** — backend (`Server`/`Model`/`Service`/`Repository*`).
+  `Tests/WebApiIntegrationTests/*.cs` (`ChatGPTTests`, `FoldersTests`, `KAttributesTests`, `NoteTypesTests`,
+  `NotesTests`, `UsersTests`) son **tests de integración HTTP reales**, no tests unitarios.
+  `Tests/Helpers/WebApiTestBase.cs` inicia sesión vía `POST {testsWebApiUrlBase}api/users/login` contra una
+  instancia real de `Server` en ejecución y reutiliza el JWT en las siguientes peticiones. Configura
+  `testsUserName`, `testsUserPwd`, `testsWebApiUrlBase` en `Tests/appsettings.json` o en user-secrets (id de
+  secretos `f25fed7b-9b03-406c-8e4a-b98eb14f5579`) — **debe haber una instancia de `Server` en ejecución y
+  accesible en esa URL antes de correr el proyecto de tests.** `Tests/InProcessIntegrationTests/*.cs` es la
+  variante que no necesita un `Server` externo (usa `WebApplicationFactory` en el mismo proceso, ver
+  `Tests/Helpers/KNoteWebApplicationFactory.cs`).
+
+- **`ClientWin.Tests/` (parte de `KNote.slnx`)** — `ClientWin` (MSTest, fakes hechos a mano en `Fakes/`, no
+  frameworks de mocking; ver `ClientWin.Tests/CLAUDE.md` para la convención y para las guías de
+  configuración de la suite `RequiresRealAiProvider`, que hace llamadas reales a OpenAI/Anthropic/Ollama
+  para detectar roturas tras actualizar los paquetes NuGet de IA — no corre por defecto.
 
 ## Arquitectura
 

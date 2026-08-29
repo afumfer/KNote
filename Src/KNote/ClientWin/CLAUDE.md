@@ -281,3 +281,21 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
 - **Modo embebido**: si el nuevo caso de uso necesita mostrarse tanto en ventana flotante como embebido en
   un panel, hereda de `CtrlViewEmbeddableBase`/`CtrlNoteEditorEmbeddableBase` e implementa
   `IViewEmbeddable` en el `Form` (`PanelView()`, `ConfigureEmbededMode()`, `ConfigureWindowMode()`).
+
+## Tests (`ClientWin.Tests`)
+
+Proyecto MSTest hermano (parte de `KNote.slnx`, referencia `ClientWin.csproj` directamente), con su propio
+`ClientWin.Tests/CLAUDE.md` — léelo antes de tocar o añadir tests aquí, especialmente la convención de
+"fakes hechos a mano" (`Fakes/`, sin Moq/NSubstitute) y la suite `RequiresRealAiProvider` (smoke tests
+reales contra OpenAI/Anthropic/Ollama, pensada para detectar roturas tras actualizar los paquetes NuGet de
+IA — no se ejecuta por defecto).
+
+Dos detalles de `ClientWin` motivados exclusivamente por esa suite de tests, a tener en cuenta si tocas
+código de IA:
+- `ClientWin/Properties/AssemblyInfo.cs` declara `[assembly: InternalsVisibleTo("KNote.ClientWin.Tests")]`
+  — `AiChatClientFactory.ResolveApiKey`/`IsReasoningModel` y `KNoteAIAssistantCtrl.SetChatClientForTesting`
+  son `internal` en vez de `private` únicamente para que los tests los ejerciten sin red real.
+- `KNoteAiTools` recibe `IKntService` en el constructor, no `ServiceRef` — así se puede testear contra los
+  fakes de servicio ya existentes (`Fakes/FakeKntService.cs`) en vez de necesitar una base de datos real.
+  `AiChatClientFactory.Create` sigue recibiendo `ServiceRef` (lo necesita para otras cosas) y le pasa
+  `serviceRef.Service` a `KNoteAiTools`.

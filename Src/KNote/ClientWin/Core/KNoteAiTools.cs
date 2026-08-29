@@ -10,17 +10,19 @@ namespace KNote.ClientWin.Core;
 // KNoteAIAssistant plan (Phase 5): function-calling surface exposed to the assistant's IChatClient
 // (wired in AiChatClientFactory.Create). Wraps the Service layer - never Repository directly, per
 // ClientWin convention - so the model can act on the user's active KNote repository (the same
-// ServiceRef the assistant was opened against, not the separate "assistant" repository used for
-// the prompt/system-prompt catalog).
+// service the assistant was opened against, not the separate "assistant" repository used for
+// the prompt/system-prompt catalog). Takes IKntService directly (not ServiceRef) so it can be
+// exercised in ClientWin.Tests against the existing FakeKntService/FakeKntNoteService test doubles
+// without a real database.
 public class KNoteAiTools
 {
     private const int MaxResults = 20;
 
-    private readonly ServiceRef _serviceRef;
+    private readonly IKntService _service;
 
-    public KNoteAiTools(ServiceRef serviceRef)
+    public KNoteAiTools(IKntService service)
     {
-        _serviceRef = serviceRef ?? throw new ArgumentNullException(nameof(serviceRef));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     public IEnumerable<AITool> GetTools()
@@ -72,7 +74,7 @@ public class KNoteAiTools
             SearchInDescription = includeContent
         };
 
-        var response = await _serviceRef.Service.Notes.GetSearchMinimalAsync(search);
+        var response = await _service.Notes.GetSearchMinimalAsync(search);
 
         if (!response.IsValid)
             return $"Error searching notes: {response.ErrorMessage}";
@@ -105,9 +107,9 @@ public class KNoteAiTools
 
         var response = !string.IsNullOrEmpty(noteId)
             ? Guid.TryParse(noteId, out var id)
-                ? await _serviceRef.Service.Notes.GetAsync(id)
+                ? await _service.Notes.GetAsync(id)
                 : null
-            : await _serviceRef.Service.Notes.GetAsync(noteNumber.Value);
+            : await _service.Notes.GetAsync(noteNumber.Value);
 
         if (response == null)
             return $"Error: '{noteId}' is not a valid noteId (expected a GUID).";

@@ -179,6 +179,15 @@ public class KNoteAIAssistantCtrl : CtrlBase
         RestartAIAssistant();
     }
 
+    // Test seam (ClientWin.Tests): sets the chat client directly, bypassing AiChatClientFactory, so
+    // unit tests can exercise GetCompletionAsync/StreamCompletionAsync/RestartAIAssistant against a
+    // fake IChatClient with no real network call or API key.
+    internal void SetChatClientForTesting(IChatClient chatClient, AiProviderRef providerRef = null)
+    {
+        _chatClient = chatClient;
+        _currentProviderRef = providerRef;
+    }
+
     public void RestartAIAssistant()
     {
         _prompt = "";

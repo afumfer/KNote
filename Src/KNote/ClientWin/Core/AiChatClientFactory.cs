@@ -36,7 +36,7 @@ public static class AiChatClientFactory
             _ => throw new ArgumentException($"Unknown AI provider: {providerRef.Provider}", nameof(providerRef))
         };
 
-        var tools = new KNoteAiTools(serviceRef);
+        var tools = new KNoteAiTools(serviceRef.Service);
 
         return baseClient.AsBuilder()
             .ConfigureOptions(o =>
@@ -46,10 +46,13 @@ public static class AiChatClientFactory
                 if (providerRef.Provider == EnumAiProvider.Anthropic)
                     o.ModelId = providerRef.Model;
 
-                // OpenAI's reasoning models (e.g. gpt-5.x) reject function tools on
+                // OpenAI's reasoning models (o1/o3/o4/gpt-5.x) reject function tools on
                 // /v1/chat/completions unless reasoning_effort is explicitly "none" (HTTP 400
-                // invalid_request_error otherwise). Non-reasoning OpenAI models ignore this.
-                if (providerRef.Provider == EnumAiProvider.OpenAI)
+                // invalid_request_error otherwise) - but older/non-reasoning models (gpt-4o,
+                // gpt-4o-mini, ...) reject the reasoning_effort argument outright as unrecognized
+                // (a different HTTP 400). Confirmed by ClientWin.Tests/OpenAiProviderSmokeTests -
+                // only set this for models that actually need it.
+                if (providerRef.Provider == EnumAiProvider.OpenAI && IsReasoningModel(providerRef.Model))
                     o.Reasoning = new ReasoningOptions { Effort = ReasoningEffort.None };
 
                 o.Tools = [.. tools.GetTools()];
@@ -58,10 +61,23 @@ public static class AiChatClientFactory
             .Build();
     }
 
+    // There's no API to ask "does this model support reasoning_effort", so this is a name-based
+    // heuristic - update it if OpenAI (or a compatible gateway/proxy exposing custom model
+    // aliases) ships a new reasoning-model family name.
+    // Internal so ClientWin.Tests can verify the heuristic directly for known model names.
+    internal static bool IsReasoningModel(string model) =>
+        !string.IsNullOrEmpty(model) &&
+        (model.StartsWith("o1", StringComparison.OrdinalIgnoreCase) ||
+         model.StartsWith("o3", StringComparison.OrdinalIgnoreCase) ||
+         model.StartsWith("o4", StringComparison.OrdinalIgnoreCase) ||
+         model.Contains("gpt-5", StringComparison.OrdinalIgnoreCase));
+
     // KNoteData.config (AiProviderRef.ApiKey) takes precedence; the environment variable is only
     // a fallback for local/manual testing when the config hasn't been filled in yet. Not used for
     // Ollama, which authenticates the local/remote server by host instead of an API key.
-    private static string ResolveApiKey(AiProviderRef providerRef, string environmentVariableName)
+    // Internal (not private) so ClientWin.Tests/AiChatClientFactoryTests.cs can exercise the
+    // precedence logic directly, without a real network call.
+    internal static string ResolveApiKey(AiProviderRef providerRef, string environmentVariableName)
     {
         if (!string.IsNullOrEmpty(providerRef.ApiKey))
             return providerRef.ApiKey;
