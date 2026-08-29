@@ -34,8 +34,9 @@ buena.
 - [ ] Crear/editar/eliminar una carpeta (`FolderEditorCtrl`).
 - [ ] Seleccionar una carpeta (`FoldersSelectorCtrl`) actualiza `Store.ActiveFolderWithServiceRef` y
       el listado de notas mostrado.
-- [ ] Aplicar un filtro de notas (`FiltersSelectorCtrl`, `NotesSelectorCtrl`) devuelve los resultados
-      esperados.
+- [ ] En el tab "Search", conmutar entre búsqueda rápida (`NotesSearchParamCtrl`) y filtro estructurado
+      (`NotesFilterParamCtrl`) muestra el panel correcto y ambos devuelven, vía `NotesSelectorCtrl`, los
+      resultados esperados.
 
 ## Post-its
 

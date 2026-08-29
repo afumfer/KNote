@@ -1,7 +1,7 @@
 ﻿
 namespace KNote.ClientWin.Views
 {
-    partial class FiltersSelectorForm
+    partial class NotesSearchParamForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,8 +29,9 @@ namespace KNote.ClientWin.Views
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FiltersSelectorForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NotesSearchParamForm));
             this.panelForm = new System.Windows.Forms.Panel();
+            this.labelHelp = new System.Windows.Forms.Label();
             this.checkSearchInDescription = new System.Windows.Forms.CheckBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.buttonClean = new System.Windows.Forms.Button();
@@ -51,6 +52,7 @@ namespace KNote.ClientWin.Views
             // 
             this.panelForm.Controls.Add(this.checkSearchInDescription);
             this.panelForm.Controls.Add(this.pictureBox1);
+            this.panelForm.Controls.Add(this.labelHelp);
             this.panelForm.Controls.Add(this.buttonClean);
             this.panelForm.Controls.Add(this.label2);
             this.panelForm.Controls.Add(this.buttonSearch);
@@ -60,24 +62,35 @@ namespace KNote.ClientWin.Views
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(437, 280);
+            this.panelForm.Size = new System.Drawing.Size(437, 314);
             this.panelForm.TabIndex = 8;
-            // 
+            //
+            // labelHelp
+            //
+            this.labelHelp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelHelp.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.labelHelp.Location = new System.Drawing.Point(7, 49);
+            this.labelHelp.Name = "labelHelp";
+            this.labelHelp.Size = new System.Drawing.Size(423, 32);
+            this.labelHelp.TabIndex = 7;
+            this.labelHelp.Text = "Free-text search across the note topic (and description, if checked below).";
+            //
             // checkSearchInDescription
-            // 
+            //
             this.checkSearchInDescription.AutoSize = true;
             this.checkSearchInDescription.Checked = true;
             this.checkSearchInDescription.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkSearchInDescription.Location = new System.Drawing.Point(7, 147);
+            this.checkSearchInDescription.Location = new System.Drawing.Point(7, 181);
             this.checkSearchInDescription.Name = "checkSearchInDescription";
             this.checkSearchInDescription.Size = new System.Drawing.Size(163, 19);
             this.checkSearchInDescription.TabIndex = 1;
             this.checkSearchInDescription.Text = "Search in note description";
             this.checkSearchInDescription.UseVisualStyleBackColor = true;
-            // 
+            //
             // pictureBox1
-            // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            //
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox1.Location = new System.Drawing.Point(5, 40);
@@ -85,7 +98,7 @@ namespace KNote.ClientWin.Views
             this.pictureBox1.Size = new System.Drawing.Size(425, 1);
             this.pictureBox1.TabIndex = 6;
             this.pictureBox1.TabStop = false;
-            // 
+            //
             // buttonClean
             // 
             this.buttonClean.Location = new System.Drawing.Point(7, 9);
@@ -99,7 +112,7 @@ namespace KNote.ClientWin.Views
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 49);
+            this.label2.Location = new System.Drawing.Point(7, 83);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(66, 15);
             this.label2.TabIndex = 4;
@@ -110,11 +123,11 @@ namespace KNote.ClientWin.Views
             this.buttonSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonSearch.Image = ((System.Drawing.Image)(resources.GetObject("buttonSearch.Image")));
             this.buttonSearch.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonSearch.Location = new System.Drawing.Point(332, 9);
+            this.buttonSearch.Location = new System.Drawing.Point(301, 9);
             this.buttonSearch.Name = "buttonSearch";
-            this.buttonSearch.Size = new System.Drawing.Size(99, 27);
+            this.buttonSearch.Size = new System.Drawing.Size(130, 27);
             this.buttonSearch.TabIndex = 4;
-            this.buttonSearch.Text = "&Search";
+            this.buttonSearch.Text = "&Apply search";
             this.buttonSearch.UseVisualStyleBackColor = true;
             this.buttonSearch.Click += new System.EventHandler(this.buttonSearch_Click);
             // 
@@ -124,7 +137,7 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboRepositories.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboRepositories.FormattingEnabled = true;
-            this.comboRepositories.Location = new System.Drawing.Point(5, 67);
+            this.comboRepositories.Location = new System.Drawing.Point(5, 101);
             this.comboRepositories.Name = "comboRepositories";
             this.comboRepositories.Size = new System.Drawing.Size(424, 23);
             this.comboRepositories.TabIndex = 2;
@@ -133,7 +146,7 @@ namespace KNote.ClientWin.Views
             // 
             this.textTextSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTextSearch.Location = new System.Drawing.Point(7, 118);
+            this.textTextSearch.Location = new System.Drawing.Point(7, 152);
             this.textTextSearch.Name = "textTextSearch";
             this.textTextSearch.Size = new System.Drawing.Size(422, 23);
             this.textTextSearch.TabIndex = 0;
@@ -142,7 +155,7 @@ namespace KNote.ClientWin.Views
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 100);
+            this.label1.Location = new System.Drawing.Point(7, 134);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(68, 15);
             this.label1.TabIndex = 0;
@@ -153,7 +166,7 @@ namespace KNote.ClientWin.Views
             this.panelBottom.Controls.Add(this.buttonCancel);
             this.panelBottom.Controls.Add(this.buttonAccept);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 280);
+            this.panelBottom.Location = new System.Drawing.Point(0, 314);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(437, 50);
             this.panelBottom.TabIndex = 11;
@@ -180,19 +193,19 @@ namespace KNote.ClientWin.Views
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
             // 
-            // FiltersSelectorForm
-            // 
+            // NotesSearchParamForm
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(437, 330);
+            this.ClientSize = new System.Drawing.Size(437, 364);
             this.Controls.Add(this.panelForm);
             this.Controls.Add(this.panelBottom);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "FiltersSelectorForm";
-            this.Text = "Filter parameters";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FilterParamForm_FormClosing);
+            this.Name = "NotesSearchParamForm";
+            this.Text = "Search parameters";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NotesSearchParamForm_FormClosing);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -203,6 +216,7 @@ namespace KNote.ClientWin.Views
 
         #endregion
         private System.Windows.Forms.Panel panelForm;
+        private System.Windows.Forms.Label labelHelp;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button buttonClean;
         private System.Windows.Forms.Label label2;

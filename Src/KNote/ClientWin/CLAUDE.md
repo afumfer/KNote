@@ -73,11 +73,16 @@ CtrlBase
   es el punto donde cada Ctrl concreto resuelve su vista contra `Store.FactoryViews.Registry`. `Run()` llama a
   `View.ShowView()`; `RunModal()` a `View.ShowModalView()`.
 - **`CtrlViewEmbeddableBase<TView>`**: para vistas que pueden mostrarse como ventana flotante o embebidas en
-  un panel (`ConfigureWindowMode()`/`ConfigureEmbededMode()` según `EmbededMode`).
+  un panel (`ConfigureWindowMode()`/`ConfigureEmbededMode()` según `EmbededMode`). Úsala directamente (con
+  `TView = IViewEmbeddable`) para paneles que solo capturan datos y notifican al padre con un evento propio
+  — no repliques la semántica de "seleccionar un elemento de una colección" de `CtrlSelectorBase` si el
+  caso de uso no es eso. Ejemplos: `NotesSearchParamCtrl` (búsqueda rápida), `NotesFilterParamCtrl`
+  (filtro estructurado) — ambos con evento propio (`SearchApplied`/`FilterApplied`) en vez de
+  `EntitySelection`.
 - **`CtrlSelectorBase<TView, TEntity>`** — familia "seleccionar entidad": `SelectedEntity`,
   `ListEntities`, abstractos `LoadEntities`/`SelectItem`/`RefreshItem`/`AddItem`/`DeleteItem`, eventos
   `EntitySelection`/`EntitySelectionDoubleClick`/`EntitySelectionCanceled`. Ejemplos:
-  `NotesSelectorCtrl`, `FoldersSelectorCtrl`, `NoteTypesSelectorCtrl`, `FiltersSelectorCtrl`.
+  `NotesSelectorCtrl`, `FoldersSelectorCtrl`, `NoteTypesSelectorCtrl`.
 - **`CtrlEditorBase<TView, TEntity>`** — familia "editar entidad": `Model` (perezoso, `new()`),
   `IKntService Service`, `ServiceRef` (resuelto vía `Store.GetServiceRef(...)`), abstractos
   `LoadModelById`/`NewModel`/`SaveModel`/`DeleteModel`, eventos

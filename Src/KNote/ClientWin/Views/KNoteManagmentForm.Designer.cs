@@ -111,6 +111,10 @@
             imageTabExplorer = new ImageList(components);
             splitContainer2 = new SplitContainer();
             menuExecuteCodeInNewTask = new ToolStripMenuItem();
+            panelSearchToggle = new Panel();
+            buttonQuickSearchMode = new Button();
+            buttonFilterMode = new Button();
+            panelSearchContent = new Panel();
             menuMangment.SuspendLayout();
             statusBarManagment.SuspendLayout();
             toolBarManagment.SuspendLayout();
@@ -121,6 +125,8 @@
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
             tabExplorers.SuspendLayout();
+            tabSearch.SuspendLayout();
+            panelSearchToggle.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
             splitContainer2.SuspendLayout();
             SuspendLayout();
@@ -757,7 +763,9 @@
             tabTreeFolders.UseVisualStyleBackColor = true;
             // 
             // tabSearch
-            // 
+            //
+            tabSearch.Controls.Add(panelSearchContent);
+            tabSearch.Controls.Add(panelSearchToggle);
             tabSearch.ImageIndex = 1;
             tabSearch.Location = new Point(4, 30);
             tabSearch.Margin = new Padding(4, 3, 4, 3);
@@ -768,7 +776,49 @@
             tabSearch.Text = "Search  ";
             tabSearch.ToolTipText = "Search panel";
             tabSearch.UseVisualStyleBackColor = true;
-            // 
+            //
+            // panelSearchToggle
+            //
+            panelSearchToggle.Controls.Add(buttonQuickSearchMode);
+            panelSearchToggle.Controls.Add(buttonFilterMode);
+            panelSearchToggle.Dock = DockStyle.Top;
+            panelSearchToggle.Location = new Point(4, 4);
+            panelSearchToggle.Name = "panelSearchToggle";
+            panelSearchToggle.Size = new Size(270, 35);
+            panelSearchToggle.TabIndex = 0;
+            //
+            // buttonQuickSearchMode
+            //
+            buttonQuickSearchMode.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            buttonQuickSearchMode.FlatStyle = FlatStyle.Flat;
+            buttonQuickSearchMode.Location = new Point(3, 3);
+            buttonQuickSearchMode.Name = "buttonQuickSearchMode";
+            buttonQuickSearchMode.Size = new Size(130, 28);
+            buttonQuickSearchMode.TabIndex = 0;
+            buttonQuickSearchMode.Text = "Quick search";
+            buttonQuickSearchMode.UseVisualStyleBackColor = true;
+            buttonQuickSearchMode.Click += buttonQuickSearchMode_Click;
+            //
+            // buttonFilterMode
+            //
+            buttonFilterMode.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonFilterMode.FlatStyle = FlatStyle.Flat;
+            buttonFilterMode.Location = new Point(137, 3);
+            buttonFilterMode.Name = "buttonFilterMode";
+            buttonFilterMode.Size = new Size(130, 28);
+            buttonFilterMode.TabIndex = 1;
+            buttonFilterMode.Text = "Filter";
+            buttonFilterMode.UseVisualStyleBackColor = true;
+            buttonFilterMode.Click += buttonFilterMode_Click;
+            //
+            // panelSearchContent
+            //
+            panelSearchContent.Dock = DockStyle.Fill;
+            panelSearchContent.Location = new Point(4, 39);
+            panelSearchContent.Name = "panelSearchContent";
+            panelSearchContent.Size = new Size(270, 483);
+            panelSearchContent.TabIndex = 1;
+            //
             // imageTabExplorer
             // 
             imageTabExplorer.ColorDepth = ColorDepth.Depth8Bit;
@@ -836,6 +886,8 @@
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
             tabExplorers.ResumeLayout(false);
+            tabSearch.ResumeLayout(false);
+            panelSearchToggle.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
             ResumeLayout(false);
@@ -907,6 +959,10 @@
         private TabControl tabExplorers;
         private TabPage tabTreeFolders;
         private TabPage tabSearch;
+        private Panel panelSearchToggle;
+        private Button buttonQuickSearchMode;
+        private Button buttonFilterMode;
+        private Panel panelSearchContent;
         private ImageList imageTabExplorer;
         #endregion
 

@@ -379,12 +379,43 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         }
     }
 
+    private Control _quickSearchPanel;
+    private Control _filterPanel;
+
     private void LinkComponents()
     {
         tabTreeFolders.Controls.Add(_ctrl.FoldersSelectorCtrl.View.PanelView());
-        tabSearch.Controls.Add(_ctrl.FilterParamCtrl.View.PanelView());
+
+        _quickSearchPanel = _ctrl.NotesSearchParamCtrl.View.PanelView();
+        _filterPanel = _ctrl.NotesFilterParamCtrl.View.PanelView();
+        _quickSearchPanel.Dock = DockStyle.Fill;
+        _filterPanel.Dock = DockStyle.Fill;
+        panelSearchContent.Controls.Add(_filterPanel);
+        panelSearchContent.Controls.Add(_quickSearchPanel);
+        SetSearchModePanel(quickSearch: true);
+
         splitContainer2.Panel1.Controls.Add(_ctrl.NotesSelectorCtrl.View.PanelView());
         splitContainer2.Panel2.Controls.Add(_ctrl.NoteEditorCtrl.View.PanelView());
+    }
+
+    private void SetSearchModePanel(bool quickSearch)
+    {
+        _quickSearchPanel.Visible = quickSearch;
+        _filterPanel.Visible = !quickSearch;
+        (quickSearch ? _quickSearchPanel : _filterPanel).BringToFront();
+
+        buttonQuickSearchMode.BackColor = quickSearch ? SystemColors.ControlLight : SystemColors.Control;
+        buttonFilterMode.BackColor = quickSearch ? SystemColors.Control : SystemColors.ControlLight;
+    }
+
+    private void buttonQuickSearchMode_Click(object sender, EventArgs e)
+    {
+        SetSearchModePanel(quickSearch: true);
+    }
+
+    private void buttonFilterMode_Click(object sender, EventArgs e)
+    {
+        SetSearchModePanel(quickSearch: false);
     }
 
     private void SaveViewSizeAndPosition()

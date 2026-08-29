@@ -131,19 +131,46 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
         SelectMode = EnumSelectMode.Filters;
 
-        NotifyMessage($"Loading notes filter: {selectedNotesInServiceRef?.NotesSearch?.TextSearch}");
-        
-        FolderPath = $"Notes filter: {selectedNotesInServiceRef?.NotesSearch?.TextSearch}";
+        var isFilter = selectedNotesInServiceRef?.NotesFilter != null;
+        var description = isFilter
+            ? BuildFilterDescription(selectedNotesInServiceRef.NotesFilter)
+            : selectedNotesInServiceRef?.NotesSearch?.TextSearch;
+
+        NotifyMessage($"Loading notes filter: {description}");
+
+        FolderPath = $"Notes filter: {description}";
 
         _selectedNoteInfo = null;
         NoteEditorCtrl.View.CleanView();
-        await NotesSelectorCtrl.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, selectedNotesInServiceRef?.NotesSearch);
+        if (isFilter)
+            await NotesSelectorCtrl.LoadFilteredEntities(selectedNotesInServiceRef.ServiceRef?.Service, selectedNotesInServiceRef.NotesFilter);
+        else
+            await NotesSelectorCtrl.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, selectedNotesInServiceRef?.NotesSearch);
         CountNotes = NotesSelectorCtrl.ListEntities?.Count;
 
         View.ShowInfo(null);
-        NotifyMessage($"Loaded notes filter {selectedNotesInServiceRef?.NotesSearch?.TextSearch}");
+        NotifyMessage($"Loaded notes filter {description}");
 
         View.DeactivateWaitState();
+    }
+
+    private static string BuildFilterDescription(NotesFilterDto notesFilter)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(notesFilter.Topic))
+            parts.Add($"Topic={notesFilter.Topic}");
+        if (!string.IsNullOrWhiteSpace(notesFilter.Description))
+            parts.Add($"Description={notesFilter.Description}");
+        if (!string.IsNullOrWhiteSpace(notesFilter.Tags))
+            parts.Add($"Tags={notesFilter.Tags}");
+        if (notesFilter.NoteTypeId != null)
+            parts.Add("NoteType");
+        if (notesFilter.FolderId != null)
+            parts.Add("Folder");
+        if (notesFilter.AttributesFilter?.Count > 0)
+            parts.Add($"Attributes={notesFilter.AttributesFilter.Count}");
+
+        return parts.Count > 0 ? string.Join(", ", parts) : "(no criteria)";
     }
 
     public override void Dispose()
@@ -218,7 +245,8 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             {
                 NotesSelectorCtrl.Run();
                 FoldersSelectorCtrl.Run();
-                FilterParamCtrl.Run();
+                NotesSearchParamCtrl.Run();
+                NotesFilterParamCtrl.Run();
                 NoteEditorCtrl.Run();
                 MessagesManagmentCtrl.Run();
 
@@ -465,31 +493,55 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #endregion
 
-    #region FilterParam controller
+    #region NotesSearchParam controller
 
-    private FiltersSelectorCtrl _filterParamCtrl;
-    public FiltersSelectorCtrl FilterParamCtrl
+    private NotesSearchParamCtrl _notesSearchParamCtrl;
+    public NotesSearchParamCtrl NotesSearchParamCtrl
     {
         get
         {
-            if (_filterParamCtrl == null)
+            if (_notesSearchParamCtrl == null)
             {
-                _filterParamCtrl = new FiltersSelectorCtrl(Store);
-                _filterParamCtrl.EmbededMode = true;
-                _filterParamCtrl.EntitySelection += _filterParamCtrl_EntitySelection;                    
+                _notesSearchParamCtrl = new NotesSearchParamCtrl(Store);
+                _notesSearchParamCtrl.EmbededMode = true;
+                _notesSearchParamCtrl.SearchApplied += _notesSearchParamCtrl_SearchApplied;
             }
-            return _filterParamCtrl;
+            return _notesSearchParamCtrl;
         }
     }
 
-    private void _filterParamCtrl_EntitySelection(object sender, ControllerEventArgs<SelectedNotesInServiceRef> e)
-    {            
+    private void _notesSearchParamCtrl_SearchApplied(object sender, ControllerEventArgs<SelectedNotesInServiceRef> e)
+    {
         SelectedNotesInServiceRef = e.Entity;
     }
 
     #endregion
 
-    #region KntChat controller 
+    #region NotesFilterParam controller
+
+    private NotesFilterParamCtrl _notesFilterParamCtrl;
+    public NotesFilterParamCtrl NotesFilterParamCtrl
+    {
+        get
+        {
+            if (_notesFilterParamCtrl == null)
+            {
+                _notesFilterParamCtrl = new NotesFilterParamCtrl(Store);
+                _notesFilterParamCtrl.EmbededMode = true;
+                _notesFilterParamCtrl.FilterApplied += _notesFilterParamCtrl_FilterApplied;
+            }
+            return _notesFilterParamCtrl;
+        }
+    }
+
+    private void _notesFilterParamCtrl_FilterApplied(object sender, ControllerEventArgs<SelectedNotesInServiceRef> e)
+    {
+        SelectedNotesInServiceRef = e.Entity;
+    }
+
+    #endregion
+
+    #region KntChat controller
     
     private KntChatCtrl _kntChatCtrl;
     public KntChatCtrl KntChatCtrl

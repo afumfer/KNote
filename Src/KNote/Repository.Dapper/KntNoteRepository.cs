@@ -1547,7 +1547,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             strWhere += $@" Notes.NoteId in (SELECT [NoteKAttributes].NoteId FROM NoteKAttributes
                                 WHERE [NoteKAttributes].NoteId = [Notes].NoteId
                                     AND NoteKAttributes.KAttributeId = '{f.AtrId.ToString().ToUpper()}'
-                                    AND NoteKAttributes.Value{collate} like '%{f.Value}%' ) ";
+                                    AND NoteKAttributes.Value = '{f.Value}' ) ";
         }
 
         if (!string.IsNullOrEmpty(strWhere))
