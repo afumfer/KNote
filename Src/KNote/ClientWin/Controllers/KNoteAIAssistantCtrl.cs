@@ -175,7 +175,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
             throw new ArgumentNullException(nameof(providerRef));
 
         _currentProviderRef = providerRef;
-        _chatClient = AiChatClientFactory.Create(providerRef, ServiceRef);
+        _chatClient = AiChatClientFactory.Create(providerRef, ServiceRef, Store);
         RestartAIAssistant();
     }
 

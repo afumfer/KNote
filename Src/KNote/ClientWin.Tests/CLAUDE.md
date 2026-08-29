@@ -40,10 +40,20 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
 - `AiChatClientFactoryTests.cs` — `ResolveApiKey` (precedencia `AiProviderRef.ApiKey` > variable de
   entorno), `IsReasoningModel` (heurística por nombre de modelo, ver más abajo), `Create` para los 3
   proveedores (sin red real: la construcción del cliente es perezosa).
-- `KNoteAiToolsTests.cs` — `search_notes`/`get_note_details` contra `FakeKntService`/`FakeKntNoteService`
-  (sin base de datos real). Como esos dos métodos son `private` en `KNoteAiTools` (solo pensados para
-  llegar a través del `AITool` que construye `AIFunctionFactory.Create` en `GetTools()`), los tests los
-  invocan por reflexión en vez de ensanchar su visibilidad solo para testear.
+- `KNoteAiToolsTests.cs` — `search_notes`/`get_note_details`/`create_task` contra
+  `FakeKntService`/`FakeKntNoteService` (sin base de datos real). Como esos métodos son `private` en
+  `KNoteAiTools` (solo pensados para llegar a través del `AITool` que construye `AIFunctionFactory.Create`
+  en `GetTools()`), los tests los invocan por reflexión en vez de ensanchar su visibilidad solo para
+  testear. `create_task` persiste vía `Service.Notes.NewExtendedAsync()`/`SaveExtendedAsync(...)` — capa
+  Service pura, igual que las otras dos tools — así que su lógica de negocio (Topic/Description/FolderId
+  correctos, propagación de errores de `NewExtendedAsync`/`SaveExtendedAsync`) está totalmente cubierta
+  con fakes; solo su cola final (abrir la nota ya guardada con `NoteEditorCtrl.LoadModelById`+`.Run()`,
+  que muestra una `Form` real) queda sin cubrir aquí — no hay forma de automatizar esa UI desde este
+  proyecto de test; verifícalo a mano si tocas esa parte.
+  Para simular `Store.DefaultFolderWithServiceRef.ServiceRef.Service` como un fake sin abrir una base de
+  datos real, usa `TestServiceRefFactory.CreateWithFakeService(fakeService)` — explota que
+  `ServiceRef._service` es un campo público (no solo la propiedad `Service`), así que se puede sustituir
+  el `KntService` real que el propio constructor de `ServiceRef` ya construyó de forma perezosa.
 - `KNoteAIAssistantCtrlTests.cs` — `RestartAIAssistant`, y sobre todo el **rollback de turno huérfano**: si
   `IChatClient` lanza una excepción, `GetCompletionAsync`/`StreamCompletionAsync` no deben dejar un mensaje
   de usuario sin respuesta en `ChatMessages`/`ChatTextMessasges` (bug real que se coló y arregló en

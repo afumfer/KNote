@@ -295,7 +295,25 @@ código de IA:
 - `ClientWin/Properties/AssemblyInfo.cs` declara `[assembly: InternalsVisibleTo("KNote.ClientWin.Tests")]`
   — `AiChatClientFactory.ResolveApiKey`/`IsReasoningModel` y `KNoteAIAssistantCtrl.SetChatClientForTesting`
   son `internal` en vez de `private` únicamente para que los tests los ejerciten sin red real.
-- `KNoteAiTools` recibe `IKntService` en el constructor, no `ServiceRef` — así se puede testear contra los
-  fakes de servicio ya existentes (`Fakes/FakeKntService.cs`) en vez de necesitar una base de datos real.
-  `AiChatClientFactory.Create` sigue recibiendo `ServiceRef` (lo necesita para otras cosas) y le pasa
-  `serviceRef.Service` a `KNoteAiTools`.
+- `KNoteAiTools` recibe `IKntService` en el constructor (no `ServiceRef`) para las tools de solo lectura
+  (`search_notes`/`get_note_details`) — así se pueden testear contra los fakes de servicio ya existentes
+  (`Fakes/FakeKntService.cs`) sin base de datos real. `AiChatClientFactory.Create` sigue recibiendo
+  `ServiceRef` (lo necesita para otras cosas) y le pasa `serviceRef.Service`. La tool `create_task`
+  necesita además un `Store` completo — para leer `Store.DefaultFolderWithServiceRef` — por eso
+  `KNoteAiTools` también recibe `Store`.
+  - `create_task` persiste la nota **solo por la capa Service** (`Service.Notes.NewExtendedAsync()` +
+    `SaveExtendedAsync(...)` contra el `IKntService` de `Store.DefaultFolderWithServiceRef`, el mismo
+    patrón que `search_notes`/`get_note_details`, no algo especial) y luego abre esa nota **ya
+    persistida** con el mismo camino "editar nota existente" que usa el resto de la app:
+    `NoteEditorCtrl.LoadModelById(service, noteId)` + `.Run()`. No modifica `NoteEditorCtrl` ni accede a
+    su `View` directamente — usa su API pública tal cual está, sin trucos de precarga de `Model`. Queda
+    bajo responsabilidad del usuario modificarla y volver a guardarla, salir sin más, o borrarla.
+  - Como la llamada a la tool ocurre dentro de la propia pipeline async del SDK de IA
+    (OpenAI/Anthropic/Ollama), que puede perder el `SynchronizationContext` de UI a mitad de camino,
+    `KNoteAiTools` captura `SynchronizationContext.Current` en el constructor (siempre el hilo de UI, ya
+    que `AiChatClientFactory.Create` solo se llama desde manejadores de eventos de UI) y usa
+    `_uiContext.Post(...)` para volver a él antes de construir el `NoteEditorCtrl`/`Form` — sin este
+    marshaling, mostrar el editor desde un hilo de fondo lanzaría una excepción de WinForms de acceso
+    entre hilos. Esta es la única parte de `create_task` con dependencia a `KNote.ClientWin.Controllers`
+    desde `Core` (la dirección opuesta a la habitual en este proyecto), justificada por necesitar lanzar
+    un `Ctrl` completo, no solo llamar a un método de servicio.

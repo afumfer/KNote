@@ -71,7 +71,7 @@ public class AiChatClientFactoryTests
     [TestMethod]
     public void Create_NullProviderRef_ThrowsArgumentNullException()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() => AiChatClientFactory.Create(null, null));
+        Assert.ThrowsExactly<ArgumentNullException>(() => AiChatClientFactory.Create(null, null, null));
     }
 
     [TestMethod]
@@ -79,7 +79,7 @@ public class AiChatClientFactoryTests
     {
         var providerRef = new AiProviderRef { Provider = "NotARealProvider", Model = "x" };
 
-        Assert.ThrowsExactly<ArgumentException>(() => AiChatClientFactory.Create(providerRef, null));
+        Assert.ThrowsExactly<ArgumentException>(() => AiChatClientFactory.Create(providerRef, null, null));
     }
 
     [TestMethod]
@@ -90,6 +90,7 @@ public class AiChatClientFactoryTests
         // GetResponseAsync/GetStreamingResponseAsync call - so a placeholder key/host is enough to
         // catch build-breaking API changes from a NuGet bump without needing real credentials.
         var serviceRef = TestServiceRefFactory.CreateInMemorySqlite();
+        var store = TestStoreFactory.CreateEmpty();
 
         foreach (var provider in EnumAiProvider.All)
         {
@@ -102,7 +103,7 @@ public class AiChatClientFactoryTests
                 Host = "http://localhost:11434"
             };
 
-            var client = AiChatClientFactory.Create(providerRef, serviceRef);
+            var client = AiChatClientFactory.Create(providerRef, serviceRef, store);
 
             Assert.IsNotNull(client, $"Create({provider}) returned null.");
         }

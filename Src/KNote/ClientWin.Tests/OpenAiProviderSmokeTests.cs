@@ -27,7 +27,7 @@ public class OpenAiProviderSmokeTests
             return;
         }
 
-        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite());
+        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite(), TestStoreFactory.CreateEmpty());
         var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "Reply with exactly one word: OK.")]);
 
         Assert.IsFalse(string.IsNullOrWhiteSpace(response.Text), "Expected a non-empty response from OpenAI.");
@@ -43,7 +43,7 @@ public class OpenAiProviderSmokeTests
             return;
         }
 
-        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite());
+        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite(), TestStoreFactory.CreateEmpty());
         var text = new System.Text.StringBuilder();
         await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "Reply with exactly one word: OK.")]))
             text.Append(update.Text);
@@ -64,7 +64,7 @@ public class OpenAiProviderSmokeTests
         // AiChatClientFactory.Create always attaches KNoteAiTools' tools (search_notes/get_note_details)
         // and enables function invocation, exactly like production - this is the request shape that
         // triggered the "reasoning_effort" HTTP 400 with gpt-5.x models when it wasn't yet handled.
-        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite());
+        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite(), TestStoreFactory.CreateEmpty());
         var response = await client.GetResponseAsync([
             new ChatMessage(ChatRole.User, "Use the search_notes tool to search for the word \"test\", then summarize in one sentence what you found (even if nothing was found).")
         ]);

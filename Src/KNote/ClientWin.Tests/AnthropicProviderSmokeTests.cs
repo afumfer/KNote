@@ -25,7 +25,7 @@ public class AnthropicProviderSmokeTests
             return;
         }
 
-        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite());
+        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite(), TestStoreFactory.CreateEmpty());
         var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "Reply with exactly one word: OK.")]);
 
         Assert.IsFalse(string.IsNullOrWhiteSpace(response.Text), "Expected a non-empty response from Anthropic.");
@@ -41,7 +41,7 @@ public class AnthropicProviderSmokeTests
             return;
         }
 
-        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite());
+        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite(), TestStoreFactory.CreateEmpty());
         var text = new System.Text.StringBuilder();
         await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "Reply with exactly one word: OK.")]))
             text.Append(update.Text);
@@ -59,7 +59,7 @@ public class AnthropicProviderSmokeTests
             return;
         }
 
-        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite());
+        var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite(), TestStoreFactory.CreateEmpty());
         var response = await client.GetResponseAsync([
             new ChatMessage(ChatRole.User, "Use the search_notes tool to search for the word \"test\", then summarize in one sentence what you found (even if nothing was found).")
         ]);

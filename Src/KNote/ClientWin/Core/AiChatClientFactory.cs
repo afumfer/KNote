@@ -14,7 +14,7 @@ namespace KNote.ClientWin.Core;
 // wiring (e.g. it requires an Ollama model that supports function calling).
 public static class AiChatClientFactory
 {
-    public static IChatClient Create(AiProviderRef providerRef, ServiceRef serviceRef)
+    public static IChatClient Create(AiProviderRef providerRef, ServiceRef serviceRef, Store store)
     {
         if (providerRef is null)
             throw new ArgumentNullException(nameof(providerRef));
@@ -36,7 +36,7 @@ public static class AiChatClientFactory
             _ => throw new ArgumentException($"Unknown AI provider: {providerRef.Provider}", nameof(providerRef))
         };
 
-        var tools = new KNoteAiTools(serviceRef.Service);
+        var tools = new KNoteAiTools(serviceRef.Service, store);
 
         return baseClient.AsBuilder()
             .ConfigureOptions(o =>
