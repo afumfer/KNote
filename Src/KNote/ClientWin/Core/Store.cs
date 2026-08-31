@@ -532,7 +532,7 @@ public class Store
 
     #region KntScript and C# code execution
 
-    public async Task RunCode(NoteDto note, bool runInNewTask = true)
+    public async Task RunCode(NoteDto note, bool runInNewTask = true, CtrlBase caller = null)
     {
         var ct = note.GetContentTypeExt();
         if (ct == null || string.IsNullOrEmpty(ct.ForScript))
@@ -540,55 +540,79 @@ public class Store
 
         var code = note?.Script ?? "";
 
-        switch (ct.ForScript)
+        // Minor UX indicator that a script is running (Fase A+B: wait cursor, always reliable even
+        // when the engine below blocks the UI thread synchronously; status bar message via the
+        // existing ControllerNotification "toast" channel, shown by KNoteManagmentForm when visible -
+        // best-effort only for the "knt" + runInNewTask=true case, which fires the script on its own
+        // thread and returns immediately, so the indicator only covers the hand-off, not the full run).
+        Cursor.Current = Cursors.WaitCursor;
+        OnControllerNotification(caller, $"Running {ScriptEngineLabel(ct.ForScript)}...");
+        try
         {
-            case "cs":
-                // Experimental hack, insert global include
-                code += await GetIncludeGlobalCode("cs");
+            switch (ct.ForScript)
+            {
+                case "cs":
+                    // Experimental hack, insert global include
+                    code += await GetIncludeGlobalCode("cs");
 
-                if (runInNewTask)
-                    var (result, error) = await RunCSCodeInNewTask(code, false);
-                else
-                    var (result, error) = RunCSCode(code, false);
-                break;
+                    if (runInNewTask)
+                        var (result, error) = await RunCSCodeInNewTask(code, false);
+                    else
+                        var (result, error) = RunCSCode(code, false);
+                    break;
 
-            case "py":
-                // Experimental hack, insert global include
-                code += await GetIncludeGlobalCode("py");
+                case "py":
+                    // Experimental hack, insert global include
+                    code += await GetIncludeGlobalCode("py");
 
-                if (runInNewTask)
-                    var (resultPy, errorPy) = await RunPyCodeInNewTask(code, false);
-                else
-                    var (resultPy, errorPy) = RunPyCode(code, false);
-                break;
+                    if (runInNewTask)
+                        var (resultPy, errorPy) = await RunPyCodeInNewTask(code, false);
+                    else
+                        var (resultPy, errorPy) = RunPyCode(code, false);
+                    break;
 
-            case "js":
-                // Experimental hack, insert global include
-                code += await GetIncludeGlobalCode("js");
+                case "js":
+                    // Experimental hack, insert global include
+                    code += await GetIncludeGlobalCode("js");
 
-                if (runInNewTask)
-                    var (resultJs, errorJs) = await RunJsCodeInNewTask(code, false);
-                else
-                    var (resultJs, errorJs) = RunJsCode(code, false);
-                break;
+                    if (runInNewTask)
+                        var (resultJs, errorJs) = await RunJsCodeInNewTask(code, false);
+                    else
+                        var (resultJs, errorJs) = RunJsCode(code, false);
+                    break;
 
-            case "ln":
-                // Unlike cs/py/js there's no Process.WaitForExit() to move off the UI thread here -
-                // GetCompletionAsync is already non-blocking async I/O - so runInNewTask doesn't apply.
-                await RunNaturalLanguageCode(code);
-                break;
+                case "ln":
+                    // Unlike cs/py/js there's no Process.WaitForExit() to move off the UI thread here -
+                    // GetCompletionAsync is already non-blocking async I/O - so runInNewTask doesn't apply.
+                    await RunNaturalLanguageCode(code);
+                    break;
 
-            default:
-                // Experimental hack, insert global include
-                code += await GetIncludeGlobalCode("knt");
+                default:
+                    // Experimental hack, insert global include
+                    code += await GetIncludeGlobalCode("knt");
 
-                if (runInNewTask)
-                    RunKntSCodeInNewThread(code);
-                else
-                    RunKntSCode(code);
-                break;
+                    if (runInNewTask)
+                        RunKntSCodeInNewThread(code);
+                    else
+                        RunKntSCode(code);
+                    break;
+            }
+        }
+        finally
+        {
+            Cursor.Current = Cursors.Default;
+            OnControllerNotification(caller, "");
         }
     }
+
+    private static string ScriptEngineLabel(string forScript) => forScript switch
+    {
+        "cs" => "C# script",
+        "py" => "Python script",
+        "js" => "JavaScript script",
+        "ln" => "natural-language prompt",
+        _ => "KntScript",
+    };
 
     public void RunKntSCodeInNewThread(string code)
     {
@@ -619,6 +643,7 @@ public class Store
             return;
 
         var assistantCtrl = new KNoteAIAssistantCtrl(this);
+        assistantCtrl.ResponseMode = EAiResponseMode.Completion;
         var runResult = assistantCtrl.Run();
         if (!runResult.IsValid)
             return;

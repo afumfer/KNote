@@ -566,9 +566,9 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
     }
 
     public async Task RunCode(bool runInNewTask = true)
-    {        
+    {
         var m = (NoteDto)Model;
-        await Store.RunCode(m, runInNewTask);
+        await Store.RunCode(m, runInNewTask, this);
     }
 
     public async Task<NoteDto> GetCatalogTemplate()

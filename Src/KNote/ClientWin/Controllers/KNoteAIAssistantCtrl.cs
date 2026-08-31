@@ -70,6 +70,13 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public string RootSystemChat { get; set; }
 
+    // Default response mode the view should preselect (Get Stream / Get Completion radios) when
+    // it's shown - Stream matches the pre-existing manual-use default (KNoteManagment menu). A
+    // caller that drives the ctrl itself before ever showing the view (e.g. the "ln" script engine,
+    // which always calls GetCompletionAsync) sets this to Completion first so the view reflects how
+    // the already-obtained result was actually produced, without changing the default for normal use.
+    public EAiResponseMode ResponseMode { get; set; } = EAiResponseMode.Stream;
+
     // KNoteAIAssistant plan (Phase 3): the configured provider/model collection and the one
     // currently active. AiProviderRefs is exposed live from AppConfig so the view's picker
     // always reflects whatever is currently in KNoteData.config (Phase 4 will add a maintenance
@@ -397,4 +404,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
     }
 
     #endregion
+}
+
+public enum EAiResponseMode
+{
+    Stream,
+    Completion
 }

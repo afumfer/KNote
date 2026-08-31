@@ -55,6 +55,12 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Alias}";
         PopulateProviders();
         MarkDownView();
+        radioGetCompletion.Checked = _ctrl.ResponseMode == EAiResponseMode.Completion;
+        radioGetStream.Checked = !radioGetCompletion.Checked;
+        // The ctrl may already carry a completed conversation by the time the view is shown
+        // (e.g. the "ln" script engine calls GetCompletionAsync before ever showing this view) -
+        // sync the display to it instead of assuming a fresh, empty ctrl.
+        RefreshView();
         this.Show();
     }
 

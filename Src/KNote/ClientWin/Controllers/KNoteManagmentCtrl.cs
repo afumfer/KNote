@@ -461,8 +461,8 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     {
         var service = e.Entity.Service;
         var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
-        
-        await Store.RunCode(note);
+
+        await Store.RunCode(note, caller: this);
     }
 
     private void _messagesManagment_AppAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
@@ -1115,7 +1115,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         foreach (var note in selectedNotes)
         {            
             var noteDto = (await NotesSelectorCtrl.Service.Notes.GetAsync(note.NoteId)).Entity;
-            await Store.RunCode(noteDto, runInNewTask);
+            await Store.RunCode(noteDto, runInNewTask, this);
         }
     }
 
