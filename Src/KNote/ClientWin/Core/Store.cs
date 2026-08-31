@@ -544,41 +544,31 @@ public class Store
         // when the engine below blocks the UI thread synchronously; status bar message via the
         // existing ControllerNotification "toast" channel, shown by KNoteManagmentForm when visible -
         // best-effort only for the "knt" + runInNewTask=true case, which fires the script on its own
-        // thread and returns immediately, so the indicator only covers the hand-off, not the full run).
+        // thread and returns immediately, and for cs/py/js/ln below, which just open their own
+        // window and return - the indicator only covers the hand-off, not the full run, for those).
         Cursor.Current = Cursors.WaitCursor;
         OnControllerNotification(caller, $"Running {ScriptEngineLabel(ct.ForScript)}...");
         try
         {
             switch (ct.ForScript)
             {
+                // runInNewTask repurposed for cs/py/js: it already meant "F5 vs Ctrl+F5" /
+                // "the primary run vs the alternate one" for every engine before the interactive
+                // console existed - false picks KNote's own embedded console (captures output,
+                // accepts input, same as KntScriptConsole's plain "Run" menu), true picks a
+                // standalone OS console window (same as its "...in stdout console" entries),
+                // fired off on a background task so it doesn't block the caller either way. A
+                // dedicated Shift+F5 ("...in stdout console", RunCodeInStdOutConsole below) also
+                // reaches the OS-console path explicitly regardless of this flag.
                 case "cs":
-                    // Experimental hack, insert global include
-                    code += await GetIncludeGlobalCode("cs");
-
-                    if (runInNewTask)
-                        var (result, error) = await RunCSCodeInNewTask(code, false);
-                    else
-                        var (result, error) = RunCSCode(code, false);
-                    break;
-
                 case "py":
-                    // Experimental hack, insert global include
-                    code += await GetIncludeGlobalCode("py");
-
-                    if (runInNewTask)
-                        var (resultPy, errorPy) = await RunPyCodeInNewTask(code, false);
-                    else
-                        var (resultPy, errorPy) = RunPyCode(code, false);
-                    break;
-
                 case "js":
                     // Experimental hack, insert global include
-                    code += await GetIncludeGlobalCode("js");
-
+                    code += await GetIncludeGlobalCode(ct.ForScript);
                     if (runInNewTask)
-                        var (resultJs, errorJs) = await RunJsCodeInNewTask(code, false);
+                        RunScriptInOsConsole(ct.ForScript, code);
                     else
-                        var (resultJs, errorJs) = RunJsCode(code, false);
+                        ShowInteractiveScriptConsole(code, ct.ForScript);
                     break;
 
                 case "ln":
@@ -614,6 +604,22 @@ public class Store
         _ => "KntScript",
     };
 
+    // cs/py/js are the only engines that shell out to a real OS process, so they're the only ones
+    // a standalone "stdout console" window makes sense for - knt runs in-process (KntSEngine) and
+    // ln has no process/console at all. Used both by RunCodeInStdOutConsole's own guard and by the
+    // UI (NoteEditorForm) to enable/disable its "...in stdout console" menu item per script type.
+    public static bool SupportsStdOutConsole(string forScript) =>
+        forScript == "cs" || forScript == "py" || forScript == "js";
+
+    // "...in new task" (runInNewTask=true through RunCode) only means something distinct from the
+    // primary run (F5) for "knt": RunKntSCodeInNewThread really does move it off the UI thread.
+    // For cs/py/js, F5 already opens the (always non-blocking) embedded console, so "in new task"
+    // there is now just an alternate name for what "...in stdout console" already does explicitly -
+    // redundant, not a real alternative - and for "ln" RunCode ignores runInNewTask entirely. Used
+    // by the UI (NoteEditorForm, KNoteManagmentCtrl) to disable/skip that option everywhere it no
+    // longer adds anything.
+    public static bool SupportsNewTaskMode(string forScript) => forScript == "knt";
+
     public void RunKntSCodeInNewThread(string code)
     {
         var t = new Thread(() => RunKntSCode(code));        
@@ -621,15 +627,22 @@ public class Store
         t.Start();
     }
 
+    // Only ever reached from a note/alarm/KNoteManagment-triggered "knt" run (F5/Ctrl+F5 or an
+    // alarm) - the manually-opened KntScript console (Tools menu) has its own separate, embedded
+    // KntSEngine/InOutDeviceForm (KntScriptConsoleCtrl's _kntSEngine) and never calls this. So,
+    // same as cs/py/js's auto-run console, this window is always a single unattended run: closing
+    // it once KntSEngine.Run() returns (which only happens once the script - including any
+    // interactive ReadVars prompt, itself a blocking modal dialog - has fully finished) matches
+    // that, instead of leaving it sitting there for the user to close by hand.
     public void RunKntSCode(string code)
     {
         if (string.IsNullOrEmpty(code))
             return;
 
-
-
-        var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this), false);
+        var inOutDevice = new InOutDeviceForm();
+        var kntScript = new KntSEngine(inOutDevice, new KNoteScriptLibrary(this), false);
         kntScript.Run(code);
+        inOutDevice.Close();
     }
 
     // "Natural language" script engine: the note's Script field is sent as a prompt to
@@ -652,26 +665,64 @@ public class Store
         assistantCtrl.ShowAIAssistantView(autoCloseCtrlOnViewExit: true, autoSaveChatMessagesOnViewExit: false);
     }
 
-    public Task<(string, string)> RunCSCodeInNewTask(string code, bool redirectStandardOut)
+    // cs/py/js script engine: opens KntScriptConsole pre-loaded with the note's code and running
+    // it immediately (ConfigureAutoRun), instead of shelling out to a bare, non-capturing process
+    // the way this used to. Gives scripts triggered from a note/alarm/KNoteManagment the same
+    // live output + stdin interaction already available from the console's own "Run" menu. A
+    // fresh Ctrl per execution, same as the other engines - none of them carry state between runs.
+    private void ShowInteractiveScriptConsole(string code, string forScript)
     {
-        return Task.Run(() => RunCSCode(code, redirectStandardOut));
+        var consoleCtrl = new KntScriptConsoleCtrl(this);
+        consoleCtrl.ConfigureAutoRun(code, forScript);
+        consoleCtrl.Run();
+    }
+
+    // Fire-and-forget on a background task so the caller (RunCode/RunCodeInStdOutConsole) is never
+    // blocked by the external process - same as KntScriptConsoleCtrl.RunCSCodeStdOut/RunPyCodeStdOut/
+    // RunJsCodeStdOut, which launch the very same "own OS console" mode from its "Run" menu.
+    private void RunScriptInOsConsole(string forScript, string code)
+    {
+        switch (forScript)
+        {
+            case "cs": _ = Task.Run(() => RunCSCode(code, false)); break;
+            case "py": _ = Task.Run(() => RunPyCode(code, false)); break;
+            case "js": _ = Task.Run(() => RunJsCode(code, false)); break;
+        }
+    }
+
+    // Explicit "Shift+F5" entry point (NoteEditor/KNoteManagment): always runs in a standalone OS
+    // console, regardless of runInNewTask - unlike RunCode, which only takes that path when
+    // runInNewTask happens to be true. Returns false (does nothing) for engines with no OS-process
+    // console to speak of (knt, ln) - SupportsStdOutConsole - so the caller can tell the user this
+    // note's script type doesn't support it instead of silently doing nothing.
+    public async Task<bool> RunCodeInStdOutConsole(NoteDto note, CtrlBase caller = null)
+    {
+        var ct = note.GetContentTypeExt();
+        if (ct == null || !SupportsStdOutConsole(ct.ForScript))
+            return false;
+
+        var code = (note?.Script ?? "") + await GetIncludeGlobalCode(ct.ForScript);
+
+        Cursor.Current = Cursors.WaitCursor;
+        OnControllerNotification(caller, $"Running {ScriptEngineLabel(ct.ForScript)} in stdout console...");
+        try
+        {
+            RunScriptInOsConsole(ct.ForScript, code);
+        }
+        finally
+        {
+            Cursor.Current = Cursors.Default;
+            OnControllerNotification(caller, "");
+        }
+
+        return true;
     }
 
     public (string, string) RunCSCode(string code, bool redirectStandardOut)
         => RunScriptCode(code, "cs", "dotnet run {0}", redirectStandardOut);
 
-    public Task<(string, string)> RunPyCodeInNewTask(string code, bool redirectStandardOut)
-    {
-        return Task.Run(() => RunPyCode(code, redirectStandardOut));
-    }
-
     public (string, string) RunPyCode(string code, bool redirectStandardOut)
         => RunScriptCode(code, "py", "python {0}", redirectStandardOut);
-
-    public Task<(string, string)> RunJsCodeInNewTask(string code, bool redirectStandardOut)
-    {
-        return Task.Run(() => RunJsCode(code, redirectStandardOut));
-    }
 
     public (string, string) RunJsCode(string code, bool redirectStandardOut)
         => RunScriptCode(code, "js", "node {0}", redirectStandardOut);

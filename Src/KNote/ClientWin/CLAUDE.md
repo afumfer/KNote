@@ -277,9 +277,10 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   `Ctrl` nuevo, sigue el patrón ya usado en `NotesSelectorCtrl`/`NoteTypesSelectorCtrl`: `if
   (response.IsValid) { ...; return true; } else { View.ShowInfo(response.ErrorMessage); return false; }`.
 - **Async**: todo lo que toca `IKntService` es `async Task`/`async Task<T>`; los handlers de UI son
-  `async void`. Para trabajo largo se usan hilos/tasks explícitos (`Store.RunKntSCodeInNewThread`,
-  `Store.RunCSCodeInNewTask`) en vez de un patrón `async`/`await` puro — no hay disciplina de
-  `ConfigureAwait`, se depende del `SynchronizationContext` de WinForms para volver al hilo de UI.
+  `async void`. Para trabajo largo se usan hilos/tasks explícitos (`Store.RunKntSCodeInNewThread`) o
+  E/S asíncrona basada en eventos (`InteractiveScriptSession`, para los motores cs/py/js) en vez de
+  un patrón `async`/`await` puro — no hay disciplina de `ConfigureAwait`, se depende del
+  `SynchronizationContext` de WinForms para volver al hilo de UI.
 - **Múltiples servicios/BDs simultáneas**: no asumas un único servicio ambiente — los métodos de
   editor/selector (`NewModel`, `LoadModelById`, `LoadEntities`) reciben explícitamente el `IKntService` a
   usar.

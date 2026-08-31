@@ -1112,11 +1112,54 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             return;
         }
 
+        // "...in new task" (runInNewTask=true, Ctrl+F5) only means something distinct from the
+        // plain run for "knt" - see Store.SupportsNewTaskMode. With multiple notes of mixed script
+        // types selected, the unsupported ones are skipped rather than aborting the whole batch,
+        // same pattern as RunCodeSelectedNotesInStdOutConsole below.
+        var unsupportedNotes = new List<string>();
         foreach (var note in selectedNotes)
-        {            
+        {
             var noteDto = (await NotesSelectorCtrl.Service.Notes.GetAsync(note.NoteId)).Entity;
+
+            if (runInNewTask && !Store.SupportsNewTaskMode(noteDto.GetContentTypeExt()?.ForScript))
+            {
+                unsupportedNotes.Add($"#{note.NoteNumber}");
+                continue;
+            }
+
             await Store.RunCode(noteDto, runInNewTask, this);
         }
+
+        if (unsupportedNotes.Count > 0)
+            View.ShowInfo($"\"Run in new task\" is not supported for the script type of the following note(s) - they were skipped: {string.Join(", ", unsupportedNotes)}.");
+    }
+
+    // "...in stdout console" (Shift+F5): unlike RunCodeSelectedNotes, this always forces the OS
+    // console regardless of engine - which not every script type supports (knt, ln have no OS
+    // process/console). With multiple notes of mixed script types selected, the unsupported ones
+    // are skipped rather than aborting the whole batch, and reported together at the end instead
+    // of one message box per note.
+    public async Task RunCodeSelectedNotesInStdOutConsole()
+    {
+        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal();
+
+        if (selectedNotes == null || selectedNotes?.Count == 0)
+        {
+            View.ShowInfo("You have not selected notes for run scripts .");
+            return;
+        }
+
+        var unsupportedNotes = new List<string>();
+        foreach (var note in selectedNotes)
+        {
+            var noteDto = (await NotesSelectorCtrl.Service.Notes.GetAsync(note.NoteId)).Entity;
+            var executed = await Store.RunCodeInStdOutConsole(noteDto, this);
+            if (!executed)
+                unsupportedNotes.Add($"#{note.NoteNumber}");
+        }
+
+        if (unsupportedNotes.Count > 0)
+            View.ShowInfo($"The stdout console mode is not supported for the script type of the following note(s) - they were skipped: {string.Join(", ", unsupportedNotes)}.");
     }
 
     public void Options()

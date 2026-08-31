@@ -111,6 +111,7 @@
             imageTabExplorer = new ImageList(components);
             splitContainer2 = new SplitContainer();
             menuExecuteCodeInNewTask = new ToolStripMenuItem();
+            menuExecuteCodeStdOutConsole = new ToolStripMenuItem();
             panelSearchToggle = new Panel();
             buttonQuickSearchMode = new Button();
             buttonFilterMode = new Button();
@@ -344,7 +345,7 @@
             // 
             // menuMoreOptions
             // 
-            menuMoreOptions.DropDownItems.AddRange(new ToolStripItem[] { menuExecuteCode, menuExecuteCodeInNewTask });
+            menuMoreOptions.DropDownItems.AddRange(new ToolStripItem[] { menuExecuteCode, menuExecuteCodeInNewTask, menuExecuteCodeStdOutConsole });
             menuMoreOptions.Name = "menuMoreOptions";
             menuMoreOptions.Size = new Size(261, 22);
             menuMoreOptions.Text = "More note options";
@@ -855,7 +856,15 @@
             menuExecuteCodeInNewTask.Size = new Size(348, 22);
             menuExecuteCodeInNewTask.Text = "Execute code for selected notes in new task";
             menuExecuteCodeInNewTask.Click += menu_Click;
-            // 
+            //
+            // menuExecuteCodeStdOutConsole
+            //
+            menuExecuteCodeStdOutConsole.Name = "menuExecuteCodeStdOutConsole";
+            menuExecuteCodeStdOutConsole.ShortcutKeys = Keys.Shift | Keys.F5;
+            menuExecuteCodeStdOutConsole.Size = new Size(348, 22);
+            menuExecuteCodeStdOutConsole.Text = "Execute code for selected notes in stdout console";
+            menuExecuteCodeStdOutConsole.Click += menu_Click;
+            //
             // KNoteManagmentForm
             //
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -981,5 +990,6 @@
         private Label labelReResources;
         private Label labelRepAliasCon;
         private ToolStripMenuItem menuExecuteCodeInNewTask;
+        private ToolStripMenuItem menuExecuteCodeStdOutConsole;
     }
 }

@@ -50,6 +50,7 @@
             buttonKNoteAssistant = new ToolStripMenuItem();
             buttonExecuteKntScript = new ToolStripMenuItem();
             buttonExecuteKntScriptInNewTask = new ToolStripMenuItem();
+            buttonExecuteKntScriptStdOutConsole = new ToolStripMenuItem();
             buttonInsertCode = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
             buttonLockFormat = new ToolStripMenuItem();
@@ -299,7 +300,7 @@
             // buttonTools
             // 
             buttonTools.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonTextSearch, buttonTextSearchNext, buttonAddTaskSelectedText, buttonInsertTemplate, toolStripToolS1, buttonKNoteAssistant, buttonExecuteKntScript, buttonExecuteKntScriptInNewTask, buttonInsertCode, toolStripSeparator1, buttonLockFormat });
+            buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonTextSearch, buttonTextSearchNext, buttonAddTaskSelectedText, buttonInsertTemplate, toolStripToolS1, buttonKNoteAssistant, buttonExecuteKntScript, buttonExecuteKntScriptInNewTask, buttonExecuteKntScriptStdOutConsole, buttonInsertCode, toolStripSeparator1, buttonLockFormat });
             buttonTools.Image = (Image)resources.GetObject("buttonTools.Image");
             buttonTools.ImageScaling = ToolStripItemImageScaling.None;
             buttonTools.ImageTransparentColor = Color.Magenta;
@@ -363,12 +364,22 @@
             // 
             // buttonExecuteKntScriptInNewTask
             // 
+            buttonExecuteKntScriptInNewTask.Enabled = false;
             buttonExecuteKntScriptInNewTask.Name = "buttonExecuteKntScriptInNewTask";
             buttonExecuteKntScriptInNewTask.ShortcutKeys = Keys.Control | Keys.F5;
             buttonExecuteKntScriptInNewTask.Size = new Size(325, 22);
             buttonExecuteKntScriptInNewTask.Text = "Run script note in new task";
             buttonExecuteKntScriptInNewTask.Click += buttonToolBar_Click;
-            // 
+            //
+            // buttonExecuteKntScriptStdOutConsole
+            //
+            buttonExecuteKntScriptStdOutConsole.Enabled = false;
+            buttonExecuteKntScriptStdOutConsole.Name = "buttonExecuteKntScriptStdOutConsole";
+            buttonExecuteKntScriptStdOutConsole.ShortcutKeys = Keys.Shift | Keys.F5;
+            buttonExecuteKntScriptStdOutConsole.Size = new Size(325, 22);
+            buttonExecuteKntScriptStdOutConsole.Text = "Run script note in stdout console";
+            buttonExecuteKntScriptStdOutConsole.Click += buttonToolBar_Click;
+            //
             // buttonInsertCode
             // 
             buttonInsertCode.Name = "buttonInsertCode";
@@ -1876,6 +1887,7 @@
         private Label labelCodeType;
         private ComboBox comboScriptType;
         private ToolStripMenuItem buttonExecuteKntScriptInNewTask;
+        private ToolStripMenuItem buttonExecuteKntScriptStdOutConsole;
         private ProgressBar progressStatus;
     }
 }

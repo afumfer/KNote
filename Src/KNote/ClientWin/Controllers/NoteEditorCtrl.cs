@@ -571,6 +571,14 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         await Store.RunCode(m, runInNewTask, this);
     }
 
+    public async Task RunCodeInStdOutConsole()
+    {
+        var m = (NoteDto)Model;
+        var executed = await Store.RunCodeInStdOutConsole(m, this);
+        if (!executed)
+            View.ShowInfo("This note's script type does not support running in a stdout console.");
+    }
+
     public async Task<NoteDto> GetCatalogTemplate()
     {        
         var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;

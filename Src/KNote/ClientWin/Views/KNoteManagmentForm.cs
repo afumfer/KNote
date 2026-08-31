@@ -256,6 +256,10 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             await _ctrl.RunCodeSelectedNotes(true);
         }
+        else if (menuSel == menuExecuteCodeStdOutConsole)
+        {
+            await _ctrl.RunCodeSelectedNotesInStdOutConsole();
+        }
         else if (menuSel == menuOptions)
         {
             _ctrl.Options();

@@ -233,6 +233,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             _ctrl.Model.Script = textScriptCode.Text;
             await _ctrl.RunCode(true);
         }
+        else if (menuSel == buttonExecuteKntScriptStdOutConsole)
+        {
+            _ctrl.Model.Script = textScriptCode.Text;
+            await _ctrl.RunCodeInStdOutConsole();
+        }
         else if (menuSel == buttonLockFormat)
         {
             var ct = _ctrl.Model.GetContentTypeExt();
@@ -564,11 +569,25 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private void comboScriptType_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (comboScriptType.SelectedIndex < 0)
+        {
+            buttonExecuteKntScriptInNewTask.Enabled = false;
+            buttonExecuteKntScriptStdOutConsole.Enabled = false;
             return;
+        }
+
+        var forScript = ScriptTypes[comboScriptType.SelectedIndex].Code;
 
         var ct = _ctrl.Model.GetContentTypeExt();
-        ct.ForScript = ScriptTypes[comboScriptType.SelectedIndex].Code;
+        ct.ForScript = forScript;
         _ctrl.Model.SetContentTypeExt(ct);
+
+        // "...in new task" only means something distinct from the plain run (F5) for "knt" - for
+        // cs/py/js it's now just another name for "...in stdout console", and "ln" ignores it
+        // entirely - so it's disabled everywhere it wouldn't do anything new.
+        buttonExecuteKntScriptInNewTask.Enabled = Store.SupportsNewTaskMode(forScript);
+        // "...in stdout console" only makes sense for engines that shell out to a real OS process
+        // (cs/py/js) - disabled for knt/ln, which have no OS console to speak of.
+        buttonExecuteKntScriptStdOutConsole.Enabled = Store.SupportsStdOutConsole(forScript);
     }
 
     private void SetScriptTypeCombo(string forScript)

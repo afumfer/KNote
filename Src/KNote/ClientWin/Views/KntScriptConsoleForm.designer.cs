@@ -49,6 +49,10 @@
             panel1 = new Panel();
             splitContainer1 = new SplitContainer();
             textSourceCode = new TextBox();
+            panelInput = new Panel();
+            textInput = new TextBox();
+            buttonCloseInput = new Button();
+            labelInput = new Label();
             openFileDialogScript = new OpenFileDialog();
             saveFileDialogScript = new SaveFileDialog();
             toolStripConsole.SuspendLayout();
@@ -56,7 +60,9 @@
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            panelInput.SuspendLayout();
             SuspendLayout();
             // 
             // toolStripConsole
@@ -210,8 +216,12 @@
             splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
-            // 
+            //
             splitContainer1.Panel1.Controls.Add(textSourceCode);
+            //
+            // splitContainer1.Panel2
+            //
+            splitContainer1.Panel2.Controls.Add(panelInput);
             splitContainer1.Size = new Size(1111, 622);
             splitContainer1.SplitterDistance = 569;
             splitContainer1.SplitterWidth = 5;
@@ -230,7 +240,53 @@
             textSourceCode.Size = new Size(569, 622);
             textSourceCode.TabIndex = 3;
             textSourceCode.WordWrap = false;
-            // 
+            //
+            // panelInput
+            //
+            panelInput.Controls.Add(textInput);
+            panelInput.Controls.Add(buttonCloseInput);
+            panelInput.Controls.Add(labelInput);
+            panelInput.Dock = DockStyle.Bottom;
+            panelInput.Location = new Point(0, 590);
+            panelInput.Name = "panelInput";
+            panelInput.Padding = new Padding(3);
+            panelInput.Size = new Size(533, 32);
+            panelInput.TabIndex = 0;
+            //
+            // labelInput
+            //
+            labelInput.AutoSize = true;
+            labelInput.Dock = DockStyle.Left;
+            labelInput.Location = new Point(3, 7);
+            labelInput.Margin = new Padding(4, 6, 4, 0);
+            labelInput.Name = "labelInput";
+            labelInput.Size = new Size(38, 15);
+            labelInput.TabIndex = 0;
+            labelInput.Text = "Input:";
+            labelInput.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // buttonCloseInput
+            //
+            buttonCloseInput.Dock = DockStyle.Right;
+            buttonCloseInput.Enabled = false;
+            buttonCloseInput.Location = new Point(433, 3);
+            buttonCloseInput.Name = "buttonCloseInput";
+            buttonCloseInput.Size = new Size(97, 26);
+            buttonCloseInput.TabIndex = 2;
+            buttonCloseInput.Text = "Close stdin";
+            buttonCloseInput.UseVisualStyleBackColor = true;
+            buttonCloseInput.Click += buttonCloseInput_Click;
+            //
+            // textInput
+            //
+            textInput.Dock = DockStyle.Fill;
+            textInput.Enabled = false;
+            textInput.Location = new Point(41, 3);
+            textInput.Name = "textInput";
+            textInput.Size = new Size(392, 23);
+            textInput.TabIndex = 1;
+            textInput.KeyDown += textInput_KeyDown;
+            //
             // openFileDialogScript
             // 
             openFileDialogScript.FileName = "KntScript";
@@ -259,8 +315,11 @@
             panel1.ResumeLayout(false);
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel1.PerformLayout();
+            splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            panelInput.ResumeLayout(false);
+            panelInput.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
 
@@ -273,6 +332,10 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TextBox textSourceCode;
+        private System.Windows.Forms.Panel panelInput;
+        private System.Windows.Forms.TextBox textInput;
+        private System.Windows.Forms.Button buttonCloseInput;
+        private System.Windows.Forms.Label labelInput;
         private System.Windows.Forms.ToolStripButton buttonNew;
         private System.Windows.Forms.ToolStripButton buttonOpen;
         private System.Windows.Forms.ToolStripButton buttonSave;
