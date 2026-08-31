@@ -38,6 +38,11 @@
             buttonRunKntScript = new ToolStripMenuItem();
             buttonRunCSCode = new ToolStripMenuItem();
             buttonRunCSCodeStdOut = new ToolStripMenuItem();
+            buttonRunPyCode = new ToolStripMenuItem();
+            buttonRunPyCodeStdOut = new ToolStripMenuItem();
+            buttonRunJsCode = new ToolStripMenuItem();
+            buttonRunJsCodeStdOut = new ToolStripMenuItem();
+            buttonRunNaturalLanguage = new ToolStripMenuItem();
             statusStripKntConsole = new StatusStrip();
             statusAction = new ToolStripStatusLabel();
             statusFileName = new ToolStripStatusLabel();
@@ -99,35 +104,70 @@
             toolStripSeparator1.Size = new Size(6, 25);
             // 
             // buttonRun
-            // 
-            buttonRun.DropDownItems.AddRange(new ToolStripItem[] { buttonRunKntScript, buttonRunCSCode, buttonRunCSCodeStdOut });
+            //
+            buttonRun.DropDownItems.AddRange(new ToolStripItem[] { buttonRunKntScript, buttonRunCSCode, buttonRunCSCodeStdOut, buttonRunPyCode, buttonRunPyCodeStdOut, buttonRunJsCode, buttonRunJsCodeStdOut, buttonRunNaturalLanguage });
             buttonRun.Image = (Image)resources.GetObject("buttonRun.Image");
             buttonRun.ImageTransparentColor = Color.Magenta;
             buttonRun.Name = "buttonRun";
             buttonRun.Size = new Size(57, 22);
             buttonRun.Text = "Run";
-            // 
+            //
             // buttonRunKntScript
-            // 
+            //
             buttonRunKntScript.Name = "buttonRunKntScript";
             buttonRunKntScript.Size = new Size(212, 22);
             buttonRunKntScript.Text = "KntScript code";
             buttonRunKntScript.Click += buttonRunKntSCode_Click;
-            // 
+            //
             // buttonRunCSCode
-            // 
+            //
             buttonRunCSCode.Name = "buttonRunCSCode";
             buttonRunCSCode.Size = new Size(212, 22);
             buttonRunCSCode.Text = "C# code";
             buttonRunCSCode.Click += buttonRunCSCode_Click;
-            // 
+            //
             // buttonRunCSCodeStdOut
-            // 
+            //
             buttonRunCSCodeStdOut.Name = "buttonRunCSCodeStdOut";
             buttonRunCSCodeStdOut.Size = new Size(212, 22);
             buttonRunCSCodeStdOut.Text = "C# code in stdout console";
             buttonRunCSCodeStdOut.Click += buttonRunCSCodeStdOut_Click;
-            // 
+            //
+            // buttonRunPyCode
+            //
+            buttonRunPyCode.Name = "buttonRunPyCode";
+            buttonRunPyCode.Size = new Size(212, 22);
+            buttonRunPyCode.Text = "Python code";
+            buttonRunPyCode.Click += buttonRunPyCode_Click;
+            //
+            // buttonRunPyCodeStdOut
+            //
+            buttonRunPyCodeStdOut.Name = "buttonRunPyCodeStdOut";
+            buttonRunPyCodeStdOut.Size = new Size(212, 22);
+            buttonRunPyCodeStdOut.Text = "Python code in stdout console";
+            buttonRunPyCodeStdOut.Click += buttonRunPyCodeStdOut_Click;
+            //
+            // buttonRunJsCode
+            //
+            buttonRunJsCode.Name = "buttonRunJsCode";
+            buttonRunJsCode.Size = new Size(212, 22);
+            buttonRunJsCode.Text = "JavaScript code";
+            buttonRunJsCode.Click += buttonRunJsCode_Click;
+            //
+            // buttonRunJsCodeStdOut
+            //
+            buttonRunJsCodeStdOut.Name = "buttonRunJsCodeStdOut";
+            buttonRunJsCodeStdOut.Size = new Size(212, 22);
+            buttonRunJsCodeStdOut.Text = "JavaScript code in stdout console";
+            buttonRunJsCodeStdOut.Click += buttonRunJsCodeStdOut_Click;
+            //
+            // buttonRunNaturalLanguage
+            //
+            buttonRunNaturalLanguage.Name = "buttonRunNaturalLanguage";
+            buttonRunNaturalLanguage.Size = new Size(212, 22);
+            buttonRunNaturalLanguage.Text = "Natural language";
+            buttonRunNaturalLanguage.Click += buttonRunNaturalLanguage_Click;
+            //
             // statusStripKntConsole
             // 
             statusStripKntConsole.Items.AddRange(new ToolStripItem[] { statusAction, statusFileName });
@@ -246,5 +286,10 @@
         private ToolStripMenuItem cCodeToolStripMenuItem;
         private ToolStripMenuItem buttonRunCSCodeStdOut;
         private ToolStripMenuItem buttonRunCSCode;
+        private ToolStripMenuItem buttonRunPyCode;
+        private ToolStripMenuItem buttonRunPyCodeStdOut;
+        private ToolStripMenuItem buttonRunJsCode;
+        private ToolStripMenuItem buttonRunJsCodeStdOut;
+        private ToolStripMenuItem buttonRunNaturalLanguage;
     }
 }

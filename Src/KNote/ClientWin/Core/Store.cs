@@ -533,32 +533,60 @@ public class Store
     #region KntScript and C# code execution
 
     public async Task RunCode(NoteDto note, bool runInNewTask = true)
-    {        
+    {
         var ct = note.GetContentTypeExt();
         if (ct == null || string.IsNullOrEmpty(ct.ForScript))
             return;
-        
+
         var code = note?.Script ?? "";
 
-        if (ct.ForScript == "cs")
+        switch (ct.ForScript)
         {
-            // Experimental hack, insert global include
-            code += await GetIncludeGlobalCode("cs");
+            case "cs":
+                // Experimental hack, insert global include
+                code += await GetIncludeGlobalCode("cs");
 
-            if (runInNewTask)
-                var (result, error) = await RunCSCodeInNewTask(code, false);
-            else
-                var (result, error) = RunCSCode(code, false);
-        }
-        else
-        {
-            // Experimental hack, insert global include
-            code += await GetIncludeGlobalCode("knt");
+                if (runInNewTask)
+                    var (result, error) = await RunCSCodeInNewTask(code, false);
+                else
+                    var (result, error) = RunCSCode(code, false);
+                break;
 
-            if (runInNewTask)
-                RunKntSCodeInNewThread(code);
-            else
-                RunKntSCode(code);
+            case "py":
+                // Experimental hack, insert global include
+                code += await GetIncludeGlobalCode("py");
+
+                if (runInNewTask)
+                    var (resultPy, errorPy) = await RunPyCodeInNewTask(code, false);
+                else
+                    var (resultPy, errorPy) = RunPyCode(code, false);
+                break;
+
+            case "js":
+                // Experimental hack, insert global include
+                code += await GetIncludeGlobalCode("js");
+
+                if (runInNewTask)
+                    var (resultJs, errorJs) = await RunJsCodeInNewTask(code, false);
+                else
+                    var (resultJs, errorJs) = RunJsCode(code, false);
+                break;
+
+            case "ln":
+                // Unlike cs/py/js there's no Process.WaitForExit() to move off the UI thread here -
+                // GetCompletionAsync is already non-blocking async I/O - so runInNewTask doesn't apply.
+                await RunNaturalLanguageCode(code);
+                break;
+
+            default:
+                // Experimental hack, insert global include
+                code += await GetIncludeGlobalCode("knt");
+
+                if (runInNewTask)
+                    RunKntSCodeInNewThread(code);
+                else
+                    RunKntSCode(code);
+                break;
         }
     }
 
@@ -574,26 +602,68 @@ public class Store
         if (string.IsNullOrEmpty(code))
             return;
 
-        
+
 
         var kntScript = new KntSEngine(new InOutDeviceForm(), new KNoteScriptLibrary(this), false);
         kntScript.Run(code);
+    }
+
+    // "Natural language" script engine: the note's Script field is sent as a prompt to
+    // KNoteAIAssistantCtrl (same completion path used by the AI assistant UI/KntScript's
+    // GetKNoteAIAssistantMessage), and the reply is shown in its own view. A fresh Ctrl per
+    // execution, closed on view exit, so each run starts a clean conversation - same as
+    // cs/py/js/knt, none of which carry state between executions either.
+    public async Task RunNaturalLanguageCode(string prompt)
+    {
+        if (string.IsNullOrEmpty(prompt))
+            return;
+
+        var assistantCtrl = new KNoteAIAssistantCtrl(this);
+        var runResult = assistantCtrl.Run();
+        if (!runResult.IsValid)
+            return;
+
+        await assistantCtrl.GetCompletionAsync(prompt);
+        assistantCtrl.ShowAIAssistantView(autoCloseCtrlOnViewExit: true, autoSaveChatMessagesOnViewExit: false);
     }
 
     public Task<(string, string)> RunCSCodeInNewTask(string code, bool redirectStandardOut)
     {
         return Task.Run(() => RunCSCode(code, redirectStandardOut));
     }
-    
+
     public (string, string) RunCSCode(string code, bool redirectStandardOut)
+        => RunScriptCode(code, "cs", "dotnet run {0}", redirectStandardOut);
+
+    public Task<(string, string)> RunPyCodeInNewTask(string code, bool redirectStandardOut)
     {
-        string tempDir = Path.GetTempPath();        
-        string nameFile = $"kntTmpCodeFile_{Guid.NewGuid().ToString()}.cs";
+        return Task.Run(() => RunPyCode(code, redirectStandardOut));
+    }
+
+    public (string, string) RunPyCode(string code, bool redirectStandardOut)
+        => RunScriptCode(code, "py", "python {0}", redirectStandardOut);
+
+    public Task<(string, string)> RunJsCodeInNewTask(string code, bool redirectStandardOut)
+    {
+        return Task.Run(() => RunJsCode(code, redirectStandardOut));
+    }
+
+    public (string, string) RunJsCode(string code, bool redirectStandardOut)
+        => RunScriptCode(code, "js", "node {0}", redirectStandardOut);
+
+    // Shared by every "write to a temp file, then shell out to an interpreter/compiler" script
+    // engine (C#, Python, JavaScript, and future ones) - only the file extension and the launch
+    // command differ.
+    // runCommandTemplate gets the generated file name via {0} (e.g. "dotnet run {0}", "python {0}").
+    private (string, string) RunScriptCode(string code, string fileExtension, string runCommandTemplate, bool redirectStandardOut)
+    {
+        string tempDir = Path.GetTempPath();
+        string nameFile = $"kntTmpCodeFile_{Guid.NewGuid().ToString()}.{fileExtension}";
         string tempFullFileName = Path.Combine(tempDir, nameFile);
 
         File.WriteAllText(tempFullFileName, code);
 
-        (var result, var error) = ExecuteCommand($"dotnet run {nameFile}", tempDir, redirectStandardOut);
+        (var result, var error) = ExecuteCommand(string.Format(runCommandTemplate, nameFile), tempDir, redirectStandardOut);
 
         File.Delete(tempFullFileName);
 

@@ -121,6 +121,121 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
     }
 
+    private void buttonRunPyCode_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+        {
+            MessageBox.Show("No code found to run", "KntScript");
+            return;
+        }
+
+        try
+        {
+            RefreshStatusAction(true);
+            _ctrl.RunPyCode(textSourceCode.Text);
+        }
+        catch (Exception err)
+        {
+            MessageBox.Show(err.Message);
+        }
+        finally
+        {
+            RefreshStatusAction(false);
+        }
+    }
+
+    private void buttonRunPyCodeStdOut_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+        {
+            MessageBox.Show("No code found to run", "KntScript");
+            return;
+        }
+
+        try
+        {
+            RefreshStatusAction(true);
+            _ctrl.RunPyCodeStdOut(textSourceCode.Text);
+        }
+        catch (Exception err)
+        {
+            MessageBox.Show(err.Message);
+        }
+        finally
+        {
+            RefreshStatusAction(false);
+        }
+    }
+
+    private void buttonRunJsCode_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+        {
+            MessageBox.Show("No code found to run", "KntScript");
+            return;
+        }
+
+        try
+        {
+            RefreshStatusAction(true);
+            _ctrl.RunJsCode(textSourceCode.Text);
+        }
+        catch (Exception err)
+        {
+            MessageBox.Show(err.Message);
+        }
+        finally
+        {
+            RefreshStatusAction(false);
+        }
+    }
+
+    private void buttonRunJsCodeStdOut_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+        {
+            MessageBox.Show("No code found to run", "KntScript");
+            return;
+        }
+
+        try
+        {
+            RefreshStatusAction(true);
+            _ctrl.RunJsCodeStdOut(textSourceCode.Text);
+        }
+        catch (Exception err)
+        {
+            MessageBox.Show(err.Message);
+        }
+        finally
+        {
+            RefreshStatusAction(false);
+        }
+    }
+
+    private async void buttonRunNaturalLanguage_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+        {
+            MessageBox.Show("No code found to run", "KntScript");
+            return;
+        }
+
+        try
+        {
+            RefreshStatusAction(true);
+            await _ctrl.RunNaturalLanguageCode(textSourceCode.Text);
+        }
+        catch (Exception err)
+        {
+            MessageBox.Show(err.Message);
+        }
+        finally
+        {
+            RefreshStatusAction(false);
+        }
+    }
+
     private void buttonNew_Click(object sender, EventArgs e)
     {
         _ctrl.CodeFile = "";

@@ -150,8 +150,7 @@
             buttonAddAlarm = new Button();
             label4 = new Label();
             tabCode = new TabPage();
-            radioCsScript = new RadioButton();
-            radioKntScript = new RadioButton();
+            comboScriptType = new ComboBox();
             labelCodeType = new Label();
             textScriptCode = new TextBox();
             labelScriptCode = new Label();
@@ -1451,9 +1450,8 @@
             label4.Text = "Alarms:";
             // 
             // tabCode
-            // 
-            tabCode.Controls.Add(radioCsScript);
-            tabCode.Controls.Add(radioKntScript);
+            //
+            tabCode.Controls.Add(comboScriptType);
             tabCode.Controls.Add(labelCodeType);
             tabCode.Controls.Add(textScriptCode);
             tabCode.Controls.Add(labelScriptCode);
@@ -1465,44 +1463,29 @@
             tabCode.TabIndex = 6;
             tabCode.Text = "Code   ";
             tabCode.UseVisualStyleBackColor = true;
-            // 
-            // radioCsScript
-            // 
-            radioCsScript.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            radioCsScript.AutoSize = true;
-            radioCsScript.Location = new Point(715, 14);
-            radioCsScript.Name = "radioCsScript";
-            radioCsScript.Size = new Size(73, 19);
-            radioCsScript.TabIndex = 9;
-            radioCsScript.TabStop = true;
-            radioCsScript.Text = "C# Script";
-            radioCsScript.UseVisualStyleBackColor = true;
-            radioCsScript.CheckedChanged += radioCsScript_CheckedChanged;
-            // 
-            // radioKntScript
-            // 
-            radioKntScript.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            radioKntScript.AutoSize = true;
-            radioKntScript.Location = new Point(618, 14);
-            radioKntScript.Name = "radioKntScript";
-            radioKntScript.Size = new Size(91, 19);
-            radioKntScript.TabIndex = 8;
-            radioKntScript.TabStop = true;
-            radioKntScript.Text = "KNote Script";
-            radioKntScript.UseVisualStyleBackColor = true;
-            radioKntScript.CheckedChanged += radioKntScript_CheckedChanged;
-            // 
+            //
+            // comboScriptType
+            //
+            comboScriptType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            comboScriptType.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboScriptType.FormattingEnabled = true;
+            comboScriptType.Location = new Point(628, 10);
+            comboScriptType.Name = "comboScriptType";
+            comboScriptType.Size = new Size(160, 23);
+            comboScriptType.TabIndex = 8;
+            comboScriptType.SelectedIndexChanged += comboScriptType_SelectedIndexChanged;
+            //
             // labelCodeType
-            // 
+            //
             labelCodeType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelCodeType.AutoSize = true;
-            labelCodeType.Location = new Point(547, 16);
+            labelCodeType.Location = new Point(556, 14);
             labelCodeType.Margin = new Padding(4, 0, 4, 0);
             labelCodeType.Name = "labelCodeType";
             labelCodeType.Size = new Size(64, 15);
             labelCodeType.TabIndex = 7;
             labelCodeType.Text = "Code type:";
-            // 
+            //
             // textScriptCode
             // 
             textScriptCode.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -1519,7 +1502,7 @@
             // labelScriptCode
             // 
             labelScriptCode.AutoSize = true;
-            labelScriptCode.Location = new Point(6, 16);
+            labelScriptCode.Location = new Point(6, 13);
             labelScriptCode.Margin = new Padding(4, 0, 4, 0);
             labelScriptCode.Name = "labelScriptCode";
             labelScriptCode.Size = new Size(69, 15);
@@ -1891,8 +1874,7 @@
         private KntWebView.KntEditView kntEditViewTask;
         private Label label16;
         private Label labelCodeType;
-        private RadioButton radioCsScript;
-        private RadioButton radioKntScript;
+        private ComboBox comboScriptType;
         private ToolStripMenuItem buttonExecuteKntScriptInNewTask;
         private ProgressBar progressStatus;
     }

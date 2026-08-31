@@ -35,6 +35,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         _ctrl = ctrl;
 
+        foreach (var scriptType in ScriptTypes)
+            comboScriptType.Items.Add(scriptType.Text);
+
         // TODO: options for new versión
         buttonPrint.Visible = false;
         buttonCheck.Visible = false;
@@ -548,24 +551,30 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         labelExpandContent.Text = panelHeaderData.Visible ? "▲" : "▼";
     }
 
-    private void radioKntScript_CheckedChanged(object sender, EventArgs e)
+    // Display text -> ContentTypeExt.ForScript code, in the order shown in comboScriptType.
+    private static readonly (string Code, string Text)[] ScriptTypes =
     {
+        ("knt", "KNote Script"),
+        ("cs", "C# Script"),
+        ("py", "Python Script"),
+        ("js", "JavaScript Script"),
+        ("ln", "Natural Language"),
+    };
+
+    private void comboScriptType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (comboScriptType.SelectedIndex < 0)
+            return;
+
         var ct = _ctrl.Model.GetContentTypeExt();
-        if (radioKntScript.Checked)
-            ct.ForScript = "knt";
-        else
-            ct.ForScript = "cs";
+        ct.ForScript = ScriptTypes[comboScriptType.SelectedIndex].Code;
         _ctrl.Model.SetContentTypeExt(ct);
     }
 
-    private void radioCsScript_CheckedChanged(object sender, EventArgs e)
+    private void SetScriptTypeCombo(string forScript)
     {
-        var ct = _ctrl.Model.GetContentTypeExt();
-        if (radioCsScript.Checked)
-            ct.ForScript = "cs";
-        else
-            ct.ForScript = "knt";
-        _ctrl.Model.SetContentTypeExt(ct);
+        var index = Array.FindIndex(ScriptTypes, t => t.Code == forScript);
+        comboScriptType.SelectedIndex = index >= 0 ? index : 0;
     }
 
     #region Messages managment
@@ -929,12 +938,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         // Alarms     
         ModelToControlsAlarms();
 
-        // Script             
+        // Script
         textScriptCode.Text = _ctrl.Model.Script;
-        if (ct.ForScript == "cs")
-            radioCsScript.Checked = true;
-        else
-            radioKntScript.Checked = true;
+        SetScriptTypeCombo(ct.ForScript);
 
         this.Update();
         this.Refresh();
@@ -1547,11 +1553,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
         tabNoteData.SelectedIndex = 5;
 
-        var ct = codeTemplate.GetContentTypeExt();        
-        if (ct?.ForScript == "cs")
-            radioCsScript.Checked = true;
-        else
-            radioKntScript.Checked = true;
+        var ct = codeTemplate.GetContentTypeExt();
+        SetScriptTypeCombo(ct?.ForScript);
 
         var selStart = textScriptCode.SelectionStart;
         textScriptCode.Text = textScriptCode.Text.Insert(selStart, codeTemplate.Script);
