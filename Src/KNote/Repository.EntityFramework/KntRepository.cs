@@ -134,6 +134,20 @@ public class KntRepository : IKntRepository
         }
     }
 
+    private IKntTraceNoteRepository _traceNotes;
+    public IKntTraceNoteRepository TraceNotes
+    {
+        get
+        {
+            if (_traceNotes == null)
+                if (_context != null)
+                    _traceNotes = new KntTraceNoteRepository(Context, _repositoryRef);
+                else
+                    _traceNotes = new KntTraceNoteRepository(_repositoryRef);
+            return _traceNotes;
+        }
+    }
+
     public RepositoryRef RespositoryRef
     {
         get { return _repositoryRef; }
@@ -188,9 +202,9 @@ public class KntRepository : IKntRepository
             _systemValues.Dispose();
         if (_noteTypes != null)
             _noteTypes.Dispose();
+        if (_traceNotes != null)
+            _traceNotes.Dispose();
 
-        //if (_traceNotes != null)
-        //    _traceNotes.Dispose();
         //if (_kEvents != null)
         //    _kEvents.Dispose();
         //if (_kMessages != null)
@@ -199,8 +213,6 @@ public class KntRepository : IKntRepository
         //    _windows.Dispose();
         //if (_kLogs != null)
         //    _kLogs.Dispose();
-        //if (_traceNoteTypes != null)
-        //    _traceNoteTypes.Dispose();
 
         _users = null;
         _folders = null;
@@ -208,6 +220,7 @@ public class KntRepository : IKntRepository
         _attributes = null;
         _systemValues = null;
         _noteTypes = null;
+        _traceNotes = null;
 
         if (Context != null)
             Context.Dispose();

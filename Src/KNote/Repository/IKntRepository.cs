@@ -8,8 +8,9 @@ public interface IKntRepository: IDisposable
     IKntSystemValuesRepository SystemValues { get; }        
     IKntFolderRepository Folders { get; }
     IKntKAttributeRepository KAttributes { get; }
-    IKntNoteRepository Notes { get; }              
+    IKntNoteRepository Notes { get; }
     IKntUserRepository Users { get; }
+    IKntTraceNoteRepository TraceNotes { get; }
     Task<bool> TestDbConnection();
     RepositoryRef RespositoryRef { get;  }
 }
