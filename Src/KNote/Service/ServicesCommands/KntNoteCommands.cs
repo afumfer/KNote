@@ -88,6 +88,8 @@ public class KntNotesGetExtendedAsyncCommand : KntCommandServiceBase<Guid, Resul
         entity.Resources = (await Service.Notes.GetResourcesAsync(Param)).Entity;
         entity.Tasks = (await Service.Notes.GetNoteTasksAsync(Param)).Entity;
         entity.Messages = (await Service.Notes.GetMessagesAsync(Param)).Entity;
+        entity.TraceNotesFrom = (await Service.Notes.GetTraceNotesFromAsync(Param)).Entity;
+        entity.TraceNotesTo = (await Service.Notes.GetTraceNotesToAsync(Param)).Entity;
 
         result.Entity = entity;
         return result;
@@ -336,9 +338,55 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
         }
         Param.Tasks.RemoveAll(t => t.IsDeleted());
 
+        foreach (var item in Param.TraceNotesFrom) // incoming relations: this note is ToId
+        {
+            if (item.IsDeleted())
+            {
+                var res = await Service.Notes.DeleteTraceNoteAsync(item.TraceNoteId);
+                if (!res.IsValid)
+                    result.AddListErrorMessage(res.ListErrorMessage);
+            }
+            else if (item.IsDirty())
+            {
+                if (item.ToId == Guid.Empty)
+                    item.ToId = noteEdited.NoteId;
+                var res = await Service.Notes.SaveTraceNoteAsync(item, true);
+                if (!res.IsValid)
+                    result.AddListErrorMessage(res.ListErrorMessage);
+                else
+                    result.Entity.TraceNotesFrom.Add(res.Entity);
+            }
+            else
+                result.Entity.TraceNotesFrom.Add(item);
+        }
+        Param.TraceNotesFrom.RemoveAll(t => t.IsDeleted());
+
+        foreach (var item in Param.TraceNotesTo) // outgoing relations: this note is FromId
+        {
+            if (item.IsDeleted())
+            {
+                var res = await Service.Notes.DeleteTraceNoteAsync(item.TraceNoteId);
+                if (!res.IsValid)
+                    result.AddListErrorMessage(res.ListErrorMessage);
+            }
+            else if (item.IsDirty())
+            {
+                if (item.FromId == Guid.Empty)
+                    item.FromId = noteEdited.NoteId;
+                var res = await Service.Notes.SaveTraceNoteAsync(item, true);
+                if (!res.IsValid)
+                    result.AddListErrorMessage(res.ListErrorMessage);
+                else
+                    result.Entity.TraceNotesTo.Add(res.Entity);
+            }
+            else
+                result.Entity.TraceNotesTo.Add(item);
+        }
+        Param.TraceNotesTo.RemoveAll(t => t.IsDeleted());
+
         // Send note to message Broker
 
-        if (Param.Tags.Contains(KntConst.TagForMerging))
+        if (Param.Tags?.Contains(KntConst.TagForMerging) == true)
         {
             Service.PublishNoteInMessageBroker(Param);
         }
@@ -405,6 +453,22 @@ public class KntNotesDeleteExtendedAsyncCommand : KntCommandServiceBase<Guid, Re
         foreach (var item in neForDelete.Tasks)
         {
             var res = await Service.Notes.DeleteNoteTaskAsync(item.NoteTaskId);
+            if (!res.IsValid)
+                result.AddListErrorMessage(res.ListErrorMessage);
+        }
+        // TraceNotes' FromId/ToId FKs use DeleteBehavior.Restrict (see ModelBuilderExtensions),
+        // deliberately - not Cascade, because both FKs reference the same Notes table and EF Core/
+        // SQL Server disallow cascading both. So this note's trace relations - in both directions -
+        // must be deleted explicitly here before the note itself, or the FK would reject the delete.
+        foreach (var item in neForDelete.TraceNotesFrom)
+        {
+            var res = await Service.Notes.DeleteTraceNoteAsync(item.TraceNoteId);
+            if (!res.IsValid)
+                result.AddListErrorMessage(res.ListErrorMessage);
+        }
+        foreach (var item in neForDelete.TraceNotesTo)
+        {
+            var res = await Service.Notes.DeleteTraceNoteAsync(item.TraceNoteId);
             if (!res.IsValid)
                 result.AddListErrorMessage(res.ListErrorMessage);
         }
@@ -836,6 +900,96 @@ public class KntNotesDeleteMessageAsyncCommand : KntCommandServiceBase<Guid, Res
         if (resGetEntity.IsValid)
         {
             var resDelEntity = await Repository.Notes.DeleteMessageAsync(Param);
+            if (resDelEntity.IsValid)
+                result.Entity = resGetEntity.Entity;
+            else
+                result.AddListErrorMessage(resDelEntity.ListErrorMessage);
+        }
+        else
+        {
+            result.AddListErrorMessage(resGetEntity.ListErrorMessage);
+        }
+
+        return result;
+    }
+}
+
+public class KntNotesGetTraceNotesFromAsyncCommand : KntCommandServiceBase<Guid, Result<List<TraceNoteDto>>>
+{
+    public KntNotesGetTraceNotesFromAsyncCommand(IKntService service, Guid id) : base(service, id)
+    {
+
+    }
+
+    // "From" list (incoming relations, ToId == Param) - Fase 0, decision 4.
+    public override async Task<Result<List<TraceNoteDto>>> Execute()
+    {
+        return await Repository.TraceNotes.GetAllByToIdAsync(Param);
+    }
+}
+
+public class KntNotesGetTraceNotesToAsyncCommand : KntCommandServiceBase<Guid, Result<List<TraceNoteDto>>>
+{
+    public KntNotesGetTraceNotesToAsyncCommand(IKntService service, Guid id) : base(service, id)
+    {
+
+    }
+
+    // "To" list (outgoing relations, FromId == Param) - Fase 0, decision 4.
+    public override async Task<Result<List<TraceNoteDto>>> Execute()
+    {
+        return await Repository.TraceNotes.GetAllByFromIdAsync(Param);
+    }
+}
+
+public class KntNotesSaveTraceNoteAsyncCommand : KntCommandSaveServiceBase<TraceNoteDto, Result<TraceNoteDto>>
+{
+    private readonly bool forceNew;
+    public KntNotesSaveTraceNoteAsyncCommand(IKntService service, TraceNoteDto entity, bool forceNew = false) : base(service, entity)
+    {
+        this.forceNew = forceNew;
+    }
+
+    public override async Task<Result<TraceNoteDto>> Execute()
+    {
+        if (Param.TraceNoteId == Guid.Empty)
+        {
+            Param.TraceNoteId = Guid.NewGuid();
+            return await Repository.TraceNotes.AddAsync(Param);
+        }
+        else
+        {
+            if (!forceNew)
+            {
+                return await Repository.TraceNotes.UpdateAsync(Param);
+            }
+            else
+            {
+                var checkExist = await Repository.TraceNotes.GetAsync(Param.TraceNoteId);
+                if (checkExist.IsValid)
+                    return await Repository.TraceNotes.UpdateAsync(Param);
+                else
+                    return await Repository.TraceNotes.AddAsync(Param);
+            }
+        }
+    }
+}
+
+public class KntNotesDeleteTraceNoteAsyncCommand : KntCommandServiceBase<Guid, Result<TraceNoteDto>>
+{
+    public KntNotesDeleteTraceNoteAsyncCommand(IKntService service, Guid id) : base(service, id)
+    {
+
+    }
+
+    public override async Task<Result<TraceNoteDto>> Execute()
+    {
+        var result = new Result<TraceNoteDto>();
+
+        var resGetEntity = await Repository.TraceNotes.GetAsync(Param);
+        if (resGetEntity.IsValid)
+        {
+            var resDelEntity = await Repository.TraceNotes.DeleteAsync(Param);
             if (resDelEntity.IsValid)
                 result.Entity = resGetEntity.Entity;
             else

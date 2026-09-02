@@ -238,6 +238,30 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<List<TraceNoteDto>>> GetTraceNotesFromAsync(Guid noteId)
+    {
+        var command = new KntNotesGetTraceNotesFromAsyncCommand(Service, noteId);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<List<TraceNoteDto>>> GetTraceNotesToAsync(Guid noteId)
+    {
+        var command = new KntNotesGetTraceNotesToAsyncCommand(Service, noteId);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entity, bool forceNew = false)
+    {
+        var command = new KntNotesSaveTraceNoteAsyncCommand(Service, entity, forceNew);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId)
+    {
+        var command = new KntNotesDeleteTraceNoteAsyncCommand(Service, traceNoteId);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId)
     {     
         var command = new KntNotesGetWindowAsyncCommand(Service, noteId, userId);

@@ -53,4 +53,36 @@ public class NoteExtendedDto : NoteDto
             _messages = value;
         }
     }
+
+    // Incoming relations (ToId == this note - "who points to me"). Fase 0, decision 4.
+    private List<TraceNoteDto> _traceNotesFrom;
+    public List<TraceNoteDto> TraceNotesFrom
+    {
+        get
+        {
+            if (_traceNotesFrom == null)
+                _traceNotesFrom = new List<TraceNoteDto>();
+            return _traceNotesFrom;
+        }
+        set
+        {
+            _traceNotesFrom = value;
+        }
+    }
+
+    // Outgoing relations (FromId == this note - "who I point to"). Fase 0, decision 4.
+    private List<TraceNoteDto> _traceNotesTo;
+    public List<TraceNoteDto> TraceNotesTo
+    {
+        get
+        {
+            if (_traceNotesTo == null)
+                _traceNotesTo = new List<TraceNoteDto>();
+            return _traceNotesTo;
+        }
+        set
+        {
+            _traceNotesTo = value;
+        }
+    }
 }

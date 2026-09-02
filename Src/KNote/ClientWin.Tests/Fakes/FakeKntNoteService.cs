@@ -69,6 +69,10 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<KMessageDto>> GetMessageAsync(Guid messageId) => throw new NotSupportedException();
     public Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false) => throw new NotSupportedException();
     public Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId) => throw new NotSupportedException();
+    public Task<Result<List<TraceNoteDto>>> GetTraceNotesFromAsync(Guid noteId) => throw new NotSupportedException();
+    public Task<Result<List<TraceNoteDto>>> GetTraceNotesToAsync(Guid noteId) => throw new NotSupportedException();
+    public Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entity, bool forceNew = false) => throw new NotSupportedException();
+    public Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId) => throw new NotSupportedException();
     public Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId) => throw new NotSupportedException();
     public Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false) => throw new NotSupportedException();
     public Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName) => throw new NotSupportedException();

@@ -44,6 +44,10 @@ public interface IKntNoteService
     Task<Result<KMessageDto>> GetMessageAsync(Guid messageId);
     Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false);
     Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId);
+    Task<Result<List<TraceNoteDto>>> GetTraceNotesFromAsync(Guid noteId);
+    Task<Result<List<TraceNoteDto>>> GetTraceNotesToAsync(Guid noteId);
+    Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entity, bool forceNew = false);
+    Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId);
     Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId);
     Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false);
     Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName);

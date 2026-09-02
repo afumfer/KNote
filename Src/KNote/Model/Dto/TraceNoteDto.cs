@@ -115,17 +115,19 @@ public class TraceNoteDto : SmartModelDtoBase
         // Specific validations
         //----
 
-        // ---- Ejemplo
-        //if (ModificationDateTime < CreationDateTime)
-        //{
-        //    results.Add(new ValidationResult
-        //     ("KMSG: The modification date cannot be greater than the creation date "
-        //     , new[] { "ModificationDateTime", "CreationDateTime" }));
-        //}
+        // Fase 0, decision 2: a note cannot be traced to itself. Enforced here (rather than in the
+        // database) so it applies uniformly regardless of ORM - KntCommandSaveServiceBase.ValidateParam()
+        // calls this before KntNotesSaveTraceNoteAsyncCommand ever touches the repository.
+        if (FromId == ToId)
+        {
+            results.Add(new ValidationResult
+             ("KMSG: A note cannot be traced to itself (FromId and ToId are the same note)."
+             , new[] { "FromId", "ToId" }));
+        }
 
         // ---
         // Return List<ValidationResult>()
-        // ---           
+        // ---
 
         return results;
     }
