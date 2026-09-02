@@ -98,7 +98,11 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<NoteKAttribute>().HasIndex(_ => new { _.KAttributeId, _.NoteId }).IsUnique(true);
         modelBuilder.Entity<NoteType>().HasIndex(_ => _.Name).IsUnique(true);
         modelBuilder.Entity<SystemValue>().HasIndex(_ => new { _.Scope, _.Key }).IsUnique(true);
-        modelBuilder.Entity<TraceNote>().HasIndex(_ => new { _.FromId, _.ToId }).IsUnique(true);
+        // Allows several relations of different TraceNoteTypeId between the same pair of notes.
+        // Duplicate relations of the same type (including untyped, TraceNoteTypeId == null) are
+        // enforced in KntTraceNoteService instead of the database, because SQL Server/Sqlite treat
+        // NULLs as distinct values in a unique index and would not block duplicate untyped relations.
+        modelBuilder.Entity<TraceNote>().HasIndex(_ => new { _.FromId, _.ToId, _.TraceNoteTypeId }).IsUnique(true);
         modelBuilder.Entity<TraceNoteType>().HasIndex(_ => _.Name).IsUnique(true);
         modelBuilder.Entity<User>().HasIndex(_ => _.UserName).IsUnique(true);
         modelBuilder.Entity<User>().HasIndex(u => u.EMail).IsUnique(true);
@@ -107,9 +111,15 @@ public static class ModelBuilderExtensions
 
     public static void Seed(this ModelBuilder modelBuilder)
     {
+        // APP_VERSION used to be seeded here too, but nothing in the codebase ever read it (checked
+        // with a full-repo search) - it was dead data from the start. Dropped; KntSchemaUpdater's
+        // revision 2 step also deletes it from any pre-existing database for the same reason.
         modelBuilder.Entity<SystemValue>().HasData(
-            new SystemValue { SystemValueId = Guid.NewGuid(), Scope = "SYSTEM", Key = "APP_VERSION", Value = "0.0.5.9" },
-            new SystemValue { SystemValueId = Guid.NewGuid(), Scope = "SYSTEM", Key = "DB_VERSION", Value = "0.0.5.9" }
+            // DB_VERSION is a plain integer schema revision counter (see KntSchemaUpdater). Must be
+            // seeded at KntSchemaUpdater.CurrentSchemaRevision so a brand-new database (created here,
+            // via EnsureCreated) already has every table KntSchemaUpdater would otherwise add to an
+            // older, pre-existing database.
+            new SystemValue { SystemValueId = Guid.NewGuid(), Scope = "SYSTEM", Key = "DB_VERSION", Value = KntSchemaUpdater.CurrentSchemaRevision.ToString() }
         );
 
         var idUser0 = Guid.NewGuid();

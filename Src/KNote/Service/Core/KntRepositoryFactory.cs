@@ -7,10 +7,18 @@ namespace KNote.Service.Core;
 
 public static class KntRepositoryFactory
 {
-    public static IKntRepository Create(RepositoryRef repositoryRef) => repositoryRef.Orm switch
+    // EF is the single point of database/schema creation and update, regardless of which
+    // ORM is configured to serve queries afterwards (Dapper is a query-only, auxiliary engine
+    // with no schema-creation logic of its own).
+    public static IKntRepository Create(RepositoryRef repositoryRef)
     {
-        "Dapper" => new DP.KntRepository(repositoryRef),
-        "EntityFramework" => new EF.KntRepository(repositoryRef),
-        _ => throw new KntServiceException($"Unsupported RepositoryRef.Orm value: '{repositoryRef.Orm}'.")
-    };
+        EF.KntSchemaUpdater.EnsureUpToDate(repositoryRef);
+
+        return repositoryRef.Orm switch
+        {
+            "Dapper" => new DP.KntRepository(repositoryRef),
+            "EntityFramework" => new EF.KntRepository(repositoryRef),
+            _ => throw new KntServiceException($"Unsupported RepositoryRef.Orm value: '{repositoryRef.Orm}'.")
+        };
+    }
 }
