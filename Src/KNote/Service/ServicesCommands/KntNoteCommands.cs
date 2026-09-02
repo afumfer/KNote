@@ -84,12 +84,27 @@ public class KntNotesGetExtendedAsyncCommand : KntCommandServiceBase<Guid, Resul
     {
         var result = new Result<NoteExtendedDto>();
 
-        var entity = (await Service.Notes.GetAsync(Param)).Entity.GetSimpleDto<NoteExtendedDto>();
-        entity.Resources = (await Service.Notes.GetResourcesAsync(Param)).Entity;
-        entity.Tasks = (await Service.Notes.GetNoteTasksAsync(Param)).Entity;
-        entity.Messages = (await Service.Notes.GetMessagesAsync(Param)).Entity;
-        entity.TraceNotesFrom = (await Service.Notes.GetTraceNotesFromAsync(Param)).Entity;
-        entity.TraceNotesTo = (await Service.Notes.GetTraceNotesToAsync(Param)).Entity;
+        // None of these six depend on each other's result - each only needs Param (the note id) -
+        // so they run concurrently instead of one round trip at a time. Safe because every
+        // repository call opens (and closes) its own connection/DbContext: KntRepositoryFactory.Create
+        // is the only place IKntRepository is constructed anywhere in the app, and it never uses the
+        // singleton-connection constructor, so there is no shared mutable connection/context across
+        // these calls to race on.
+        var noteTask = Service.Notes.GetAsync(Param);
+        var resourcesTask = Service.Notes.GetResourcesAsync(Param);
+        var tasksTask = Service.Notes.GetNoteTasksAsync(Param);
+        var messagesTask = Service.Notes.GetMessagesAsync(Param);
+        var traceNotesFromTask = Service.Notes.GetTraceNotesFromAsync(Param);
+        var traceNotesToTask = Service.Notes.GetTraceNotesToAsync(Param);
+
+        await Task.WhenAll(noteTask, resourcesTask, tasksTask, messagesTask, traceNotesFromTask, traceNotesToTask);
+
+        var entity = noteTask.Result.Entity.GetSimpleDto<NoteExtendedDto>();
+        entity.Resources = resourcesTask.Result.Entity;
+        entity.Tasks = tasksTask.Result.Entity;
+        entity.Messages = messagesTask.Result.Entity;
+        entity.TraceNotesFrom = traceNotesFromTask.Result.Entity;
+        entity.TraceNotesTo = traceNotesToTask.Result.Entity;
 
         result.Entity = entity;
         return result;

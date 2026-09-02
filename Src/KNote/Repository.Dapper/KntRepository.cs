@@ -148,9 +148,7 @@ public class KntRepository : IKntRepository
             }                    
             else if (_repositoryRef.Provider == "Microsoft.Data.Sqlite")
             {
-                SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
-                SqlMapper.AddTypeHandler(new GuidHandler());
-                SqlMapper.AddTypeHandler(new TimeSpanHandler());
+                KntRepositoryDapperBase.EnsureSqliteTypeHandlersRegistered();
                 var db = new SqliteConnection(_repositoryRef.ConnectionString);
 
                 var systemValues = new KntSystemValuesRepository(db, _repositoryRef);
