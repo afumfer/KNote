@@ -53,6 +53,10 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             buttonResourceAdd, buttonResourceDelete, buttonResourceEdit, buttonInsertLink, buttonSaveResource);
         panelTasksHeader.Resize += (s, e) => AlignButtonsRight(panelTasksHeader, 4, 1,
             buttonTaskAdd, buttonTaskDelete, buttonTaskEdit);
+        panelTraceFromHeader.Resize += (s, e) => AlignButtonsRight(panelTraceFromHeader, 3, 3,
+            buttonTraceFromAdd, buttonTraceFromRemove, buttonTraceFromEdit);
+        panelTraceToHeader.Resize += (s, e) => AlignButtonsRight(panelTraceToHeader, 3, 3,
+            buttonTraceToAdd, buttonTraceToRemove, buttonTraceToEdit);
     }
 
     private static void AlignButtonsRight(Control header, int rightMargin, int spacing, params Control[] buttonsLeftToRight)
@@ -115,6 +119,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listViewResources.Clear();
         listViewTasks.Clear();
         listViewAlarms.Clear();
+        listViewTraceNoteFrom.Clear();
+        listViewTraceNoteTo.Clear();
     }
 
     public void RefreshView()
@@ -400,6 +406,19 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     private void listView_Resize(object sender, EventArgs e)
     {
         SizeLastColumn((ListView)sender);
+    }
+
+    private void listViewTraceNote_Resize(object sender, EventArgs e)
+    {
+        // Topic absorbs the extra width; Number/Tags/Order/Weight keep their fixed size.
+        var lv = (ListView)sender;
+        if (lv.Columns.Count < 5)
+            return;
+
+        int otherColumnsWidth = lv.Columns[0].Width + lv.Columns[2].Width + lv.Columns[3].Width + lv.Columns[4].Width;
+        int topicWidth = lv.ClientSize.Width - otherColumnsWidth;
+        if (topicWidth > 100)
+            lv.Columns[1].Width = topicWidth;
     }
 
     private void listViewResources_Resize(object sender, EventArgs e)
@@ -833,6 +852,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
             buttonResourceEdit.Visible = false;
             buttonInsertLink.Visible = false;
             buttonSaveResource.Visible = false;
+            buttonTraceFromAdd.Visible = false;
+            buttonTraceFromRemove.Visible = false;
+            buttonTraceFromEdit.Visible = false;
+            buttonTraceToAdd.Visible = false;
+            buttonTraceToRemove.Visible = false;
+            buttonTraceToEdit.Visible = false;
         }
 
         panelDescription.Visible = true;
@@ -851,9 +876,8 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         PersonalizeListView(listViewResources);
         PersonalizeListView(listViewTasks);
         PersonalizeListView(listViewAlarms);
-
-        // TODO: remove in this version
-        tabNoteData.TabPages.Remove(tabTraceNotes);
+        PersonalizeListView(listViewTraceNoteFrom);
+        PersonalizeListView(listViewTraceNoteTo);
 
         kntEditView.NavigationStart += KntEditView_NavigationStart;
         kntEditView.NavigationEnd += KntEditView_NavigationEnd; 
@@ -954,8 +978,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         else
             await kntEditViewTask.ClearWebView();
 
-        // Alarms     
+        // Alarms
         ModelToControlsAlarms();
+
+        // Trace notes
+        await ModelToControlsTraceNotes();
 
         // Script
         textScriptCode.Text = _ctrl.Model.Script;
@@ -1044,6 +1071,51 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listViewAlarms.Columns.Add("Min", 50, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Notification type", 120, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);
+    }
+
+    private async Task ModelToControlsTraceNotes()
+    {
+        listViewTraceNoteFrom.Clear();
+        listViewTraceNoteTo.Clear();
+
+        foreach (var traceNote in _ctrl.Model.TraceNotesFrom)
+            if (!traceNote.IsDeleted())
+                listViewTraceNoteFrom.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.FromId));
+
+        foreach (var traceNote in _ctrl.Model.TraceNotesTo)
+            if (!traceNote.IsDeleted())
+                listViewTraceNoteTo.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.ToId));
+
+        listViewTraceNoteFrom.Columns.Add("Number", 60, HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Topic", 300, HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Tags", 250, HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Order", 55, HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Weight", 55, HorizontalAlignment.Left);
+
+        listViewTraceNoteTo.Columns.Add("Number", 60, HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Topic", 300, HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Tags", 250, HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Order", 55, HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Weight", 55, HorizontalAlignment.Left);
+
+        listViewTraceNote_Resize(listViewTraceNoteFrom, EventArgs.Empty);
+        listViewTraceNote_Resize(listViewTraceNoteTo, EventArgs.Empty);
+    }
+
+    // Each row shows the OTHER note in the relation (Number/Topic/Tags), not the TraceNoteDto's own
+    // fields - resolved with one lookup per row (trace lists are small, per-note; not worth a batch
+    // endpoint yet) - plus Order/Weight, which DO belong to the TraceNoteDto itself.
+    private async Task<ListViewItem> TraceNoteDtoToListViewItemAsync(TraceNoteDto traceNote, Guid relatedNoteId)
+    {
+        var relatedNote = (await _ctrl.Service.Notes.GetAsync(relatedNoteId)).Entity;
+
+        var itemList = new ListViewItem(relatedNote != null ? "#" + relatedNote.NoteNumber : "?");
+        itemList.Name = traceNote.TraceNoteId.ToString();
+        itemList.SubItems.Add(relatedNote?.Topic);
+        itemList.SubItems.Add(relatedNote?.Tags);
+        itemList.SubItems.Add(traceNote.Order.ToString());
+        itemList.SubItems.Add(traceNote.Weight.ToString());
+        return itemList;
     }
 
     private async void UpdatePreviewResource(ResourceDto resource)

@@ -156,19 +156,19 @@
             textScriptCode = new TextBox();
             labelScriptCode = new Label();
             tabTraceNotes = new TabPage();
-            listViewTraceNoteTo = new ListView();
+            splitContainerTraceNotes = new SplitContainer();
             listViewTraceNoteFrom = new ListView();
-            textTraceNodeType = new TextBox();
-            buttonTraceNodeTypes = new Button();
-            label5 = new Label();
-            buttonTraceToEdit = new Button();
-            buttonTraceToRemove = new Button();
-            buttonTraceToAdd = new Button();
+            panelTraceFromHeader = new Panel();
+            label14 = new Label();
             buttonTraceFromEdit = new Button();
             buttonTraceFromRemove = new Button();
             buttonTraceFromAdd = new Button();
+            listViewTraceNoteTo = new ListView();
+            panelTraceToHeader = new Panel();
             label13 = new Label();
-            label14 = new Label();
+            buttonTraceToEdit = new Button();
+            buttonTraceToRemove = new Button();
+            buttonTraceToAdd = new Button();
             toolTipHelps = new ToolTip(components);
             saveFileDialog = new SaveFileDialog();
             toolBarNoteEditor.SuspendLayout();
@@ -198,6 +198,12 @@
             tabAlarms.SuspendLayout();
             tabCode.SuspendLayout();
             tabTraceNotes.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainerTraceNotes).BeginInit();
+            splitContainerTraceNotes.Panel1.SuspendLayout();
+            splitContainerTraceNotes.Panel2.SuspendLayout();
+            splitContainerTraceNotes.SuspendLayout();
+            panelTraceFromHeader.SuspendLayout();
+            panelTraceToHeader.SuspendLayout();
             SuspendLayout();
             // 
             // toolBarNoteEditor
@@ -1519,22 +1525,10 @@
             labelScriptCode.Size = new Size(69, 15);
             labelScriptCode.TabIndex = 4;
             labelScriptCode.Text = "Script code:";
-            // 
+            //
             // tabTraceNotes
-            // 
-            tabTraceNotes.Controls.Add(listViewTraceNoteTo);
-            tabTraceNotes.Controls.Add(listViewTraceNoteFrom);
-            tabTraceNotes.Controls.Add(textTraceNodeType);
-            tabTraceNotes.Controls.Add(buttonTraceNodeTypes);
-            tabTraceNotes.Controls.Add(label5);
-            tabTraceNotes.Controls.Add(buttonTraceToEdit);
-            tabTraceNotes.Controls.Add(buttonTraceToRemove);
-            tabTraceNotes.Controls.Add(buttonTraceToAdd);
-            tabTraceNotes.Controls.Add(buttonTraceFromEdit);
-            tabTraceNotes.Controls.Add(buttonTraceFromRemove);
-            tabTraceNotes.Controls.Add(buttonTraceFromAdd);
-            tabTraceNotes.Controls.Add(label13);
-            tabTraceNotes.Controls.Add(label14);
+            //
+            tabTraceNotes.Controls.Add(splitContainerTraceNotes);
             tabTraceNotes.ImageIndex = 2;
             tabTraceNotes.Location = new Point(4, 30);
             tabTraceNotes.Margin = new Padding(4, 3, 4, 3);
@@ -1543,147 +1537,159 @@
             tabTraceNotes.TabIndex = 5;
             tabTraceNotes.Text = "Trace notes  ";
             tabTraceNotes.UseVisualStyleBackColor = true;
-            // 
-            // listViewTraceNoteTo
-            // 
-            listViewTraceNoteTo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            listViewTraceNoteTo.Location = new Point(406, 71);
-            listViewTraceNoteTo.Name = "listViewTraceNoteTo";
-            listViewTraceNoteTo.Size = new Size(383, 488);
-            listViewTraceNoteTo.TabIndex = 44;
-            listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
-            // 
+            //
+            // splitContainerTraceNotes
+            //
+            splitContainerTraceNotes.Dock = DockStyle.Fill;
+            splitContainerTraceNotes.Location = new Point(0, 0);
+            splitContainerTraceNotes.Name = "splitContainerTraceNotes";
+            splitContainerTraceNotes.Orientation = Orientation.Horizontal;
+            //
+            // splitContainerTraceNotes.Panel1
+            //
+            splitContainerTraceNotes.Panel1.Controls.Add(listViewTraceNoteFrom);
+            splitContainerTraceNotes.Panel1.Controls.Add(panelTraceFromHeader);
+            //
+            // splitContainerTraceNotes.Panel2
+            //
+            splitContainerTraceNotes.Panel2.Controls.Add(listViewTraceNoteTo);
+            splitContainerTraceNotes.Panel2.Controls.Add(panelTraceToHeader);
+            splitContainerTraceNotes.Size = new Size(797, 567);
+            splitContainerTraceNotes.SplitterDistance = 280;
+            splitContainerTraceNotes.TabIndex = 45;
+            //
             // listViewTraceNoteFrom
-            // 
-            listViewTraceNoteFrom.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            listViewTraceNoteFrom.Location = new Point(6, 71);
+            //
+            listViewTraceNoteFrom.Dock = DockStyle.Fill;
+            listViewTraceNoteFrom.Location = new Point(0, 34);
             listViewTraceNoteFrom.MultiSelect = false;
             listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
-            listViewTraceNoteFrom.Size = new Size(383, 488);
+            listViewTraceNoteFrom.Size = new Size(797, 246);
             listViewTraceNoteFrom.TabIndex = 43;
             listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
-            // 
-            // textTraceNodeType
-            // 
-            textTraceNodeType.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textTraceNodeType.Enabled = false;
-            textTraceNodeType.Location = new Point(136, 12);
-            textTraceNodeType.Margin = new Padding(4, 3, 4, 3);
-            textTraceNodeType.MaxLength = 255;
-            textTraceNodeType.Name = "textTraceNodeType";
-            textTraceNodeType.Size = new Size(618, 23);
-            textTraceNodeType.TabIndex = 41;
-            // 
-            // buttonTraceNodeTypes
-            // 
-            buttonTraceNodeTypes.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonTraceNodeTypes.BackColor = SystemColors.Control;
-            buttonTraceNodeTypes.FlatStyle = FlatStyle.System;
-            buttonTraceNodeTypes.Font = new Font("Segoe UI", 8.25F);
-            buttonTraceNodeTypes.Location = new Point(757, 9);
-            buttonTraceNodeTypes.Margin = new Padding(4, 3, 4, 3);
-            buttonTraceNodeTypes.Name = "buttonTraceNodeTypes";
-            buttonTraceNodeTypes.Size = new Size(27, 26);
-            buttonTraceNodeTypes.TabIndex = 42;
-            buttonTraceNodeTypes.Text = "...";
-            buttonTraceNodeTypes.UseVisualStyleBackColor = false;
-            // 
-            // label5
-            // 
-            label5.Location = new Point(11, 12);
-            label5.Margin = new Padding(4, 0, 4, 0);
-            label5.Name = "label5";
-            label5.Size = new Size(122, 18);
-            label5.TabIndex = 40;
-            label5.Text = "Trace node types:";
-            label5.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // buttonTraceToEdit
-            // 
-            buttonTraceToEdit.Font = new Font("Segoe UI", 8.25F);
-            buttonTraceToEdit.Location = new Point(757, 42);
-            buttonTraceToEdit.Margin = new Padding(4, 3, 4, 3);
-            buttonTraceToEdit.Name = "buttonTraceToEdit";
-            buttonTraceToEdit.Size = new Size(27, 26);
-            buttonTraceToEdit.TabIndex = 15;
-            buttonTraceToEdit.Text = "...";
-            buttonTraceToEdit.UseVisualStyleBackColor = true;
-            // 
-            // buttonTraceToRemove
-            // 
-            buttonTraceToRemove.Font = new Font("Segoe UI", 8.25F);
-            buttonTraceToRemove.Location = new Point(722, 42);
-            buttonTraceToRemove.Margin = new Padding(4, 3, 4, 3);
-            buttonTraceToRemove.Name = "buttonTraceToRemove";
-            buttonTraceToRemove.Size = new Size(27, 26);
-            buttonTraceToRemove.TabIndex = 14;
-            buttonTraceToRemove.Text = "-";
-            buttonTraceToRemove.UseVisualStyleBackColor = true;
-            // 
-            // buttonTraceToAdd
-            // 
-            buttonTraceToAdd.Font = new Font("Segoe UI", 8.25F);
-            buttonTraceToAdd.Location = new Point(687, 42);
-            buttonTraceToAdd.Margin = new Padding(4, 3, 4, 3);
-            buttonTraceToAdd.Name = "buttonTraceToAdd";
-            buttonTraceToAdd.Size = new Size(27, 26);
-            buttonTraceToAdd.TabIndex = 13;
-            buttonTraceToAdd.Text = "+";
-            buttonTraceToAdd.UseVisualStyleBackColor = true;
-            // 
-            // buttonTraceFromEdit
-            // 
-            buttonTraceFromEdit.Font = new Font("Segoe UI", 8.25F);
-            buttonTraceFromEdit.Location = new Point(362, 42);
-            buttonTraceFromEdit.Margin = new Padding(4, 3, 4, 3);
-            buttonTraceFromEdit.Name = "buttonTraceFromEdit";
-            buttonTraceFromEdit.Size = new Size(27, 26);
-            buttonTraceFromEdit.TabIndex = 12;
-            buttonTraceFromEdit.Text = "...";
-            buttonTraceFromEdit.UseVisualStyleBackColor = true;
-            // 
-            // buttonTraceFromRemove
-            // 
-            buttonTraceFromRemove.Font = new Font("Segoe UI", 8.25F);
-            buttonTraceFromRemove.Location = new Point(327, 42);
-            buttonTraceFromRemove.Margin = new Padding(4, 3, 4, 3);
-            buttonTraceFromRemove.Name = "buttonTraceFromRemove";
-            buttonTraceFromRemove.Size = new Size(27, 26);
-            buttonTraceFromRemove.TabIndex = 11;
-            buttonTraceFromRemove.Text = "-";
-            buttonTraceFromRemove.UseVisualStyleBackColor = true;
-            // 
+            listViewTraceNoteFrom.Resize += listViewTraceNote_Resize;
+            //
+            // panelTraceFromHeader
+            //
+            panelTraceFromHeader.Controls.Add(label14);
+            panelTraceFromHeader.Controls.Add(buttonTraceFromAdd);
+            panelTraceFromHeader.Controls.Add(buttonTraceFromRemove);
+            panelTraceFromHeader.Controls.Add(buttonTraceFromEdit);
+            panelTraceFromHeader.Dock = DockStyle.Top;
+            panelTraceFromHeader.Location = new Point(0, 0);
+            panelTraceFromHeader.Name = "panelTraceFromHeader";
+            panelTraceFromHeader.Size = new Size(797, 34);
+            panelTraceFromHeader.TabIndex = 46;
+            //
+            // label14
+            //
+            label14.AutoSize = true;
+            label14.Location = new Point(5, 12);
+            label14.Margin = new Padding(4, 0, 4, 0);
+            label14.Name = "label14";
+            label14.Size = new Size(100, 15);
+            label14.TabIndex = 4;
+            label14.Text = "Trace node from:";
+            //
             // buttonTraceFromAdd
-            // 
+            //
             buttonTraceFromAdd.Font = new Font("Segoe UI", 8.25F);
-            buttonTraceFromAdd.Location = new Point(292, 42);
+            buttonTraceFromAdd.Location = new Point(707, 4);
             buttonTraceFromAdd.Margin = new Padding(4, 3, 4, 3);
             buttonTraceFromAdd.Name = "buttonTraceFromAdd";
             buttonTraceFromAdd.Size = new Size(27, 26);
             buttonTraceFromAdd.TabIndex = 10;
             buttonTraceFromAdd.Text = "+";
             buttonTraceFromAdd.UseVisualStyleBackColor = true;
-            // 
+            //
+            // buttonTraceFromRemove
+            //
+            buttonTraceFromRemove.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceFromRemove.Location = new Point(737, 4);
+            buttonTraceFromRemove.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceFromRemove.Name = "buttonTraceFromRemove";
+            buttonTraceFromRemove.Size = new Size(27, 26);
+            buttonTraceFromRemove.TabIndex = 11;
+            buttonTraceFromRemove.Text = "-";
+            buttonTraceFromRemove.UseVisualStyleBackColor = true;
+            //
+            // buttonTraceFromEdit
+            //
+            buttonTraceFromEdit.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceFromEdit.Location = new Point(767, 4);
+            buttonTraceFromEdit.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceFromEdit.Name = "buttonTraceFromEdit";
+            buttonTraceFromEdit.Size = new Size(27, 26);
+            buttonTraceFromEdit.TabIndex = 12;
+            buttonTraceFromEdit.Text = "...";
+            buttonTraceFromEdit.UseVisualStyleBackColor = true;
+            //
+            // listViewTraceNoteTo
+            //
+            listViewTraceNoteTo.Dock = DockStyle.Fill;
+            listViewTraceNoteTo.Location = new Point(0, 34);
+            listViewTraceNoteTo.MultiSelect = false;
+            listViewTraceNoteTo.Name = "listViewTraceNoteTo";
+            listViewTraceNoteTo.Size = new Size(797, 249);
+            listViewTraceNoteTo.TabIndex = 44;
+            listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
+            listViewTraceNoteTo.Resize += listViewTraceNote_Resize;
+            //
+            // panelTraceToHeader
+            //
+            panelTraceToHeader.Controls.Add(label13);
+            panelTraceToHeader.Controls.Add(buttonTraceToAdd);
+            panelTraceToHeader.Controls.Add(buttonTraceToRemove);
+            panelTraceToHeader.Controls.Add(buttonTraceToEdit);
+            panelTraceToHeader.Dock = DockStyle.Top;
+            panelTraceToHeader.Location = new Point(0, 0);
+            panelTraceToHeader.Name = "panelTraceToHeader";
+            panelTraceToHeader.Size = new Size(797, 34);
+            panelTraceToHeader.TabIndex = 47;
+            //
             // label13
-            // 
+            //
             label13.AutoSize = true;
-            label13.Location = new Point(406, 48);
+            label13.Location = new Point(5, 12);
             label13.Margin = new Padding(4, 0, 4, 0);
             label13.Name = "label13";
             label13.Size = new Size(82, 15);
             label13.TabIndex = 5;
             label13.Text = "Trace node to:";
-            // 
-            // label14
-            // 
-            label14.AutoSize = true;
-            label14.Location = new Point(6, 48);
-            label14.Margin = new Padding(4, 0, 4, 0);
-            label14.Name = "label14";
-            label14.Size = new Size(100, 15);
-            label14.TabIndex = 4;
-            label14.Text = "Trace node from :";
-            // 
+            //
+            // buttonTraceToAdd
+            //
+            buttonTraceToAdd.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceToAdd.Location = new Point(707, 4);
+            buttonTraceToAdd.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceToAdd.Name = "buttonTraceToAdd";
+            buttonTraceToAdd.Size = new Size(27, 26);
+            buttonTraceToAdd.TabIndex = 13;
+            buttonTraceToAdd.Text = "+";
+            buttonTraceToAdd.UseVisualStyleBackColor = true;
+            //
+            // buttonTraceToRemove
+            //
+            buttonTraceToRemove.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceToRemove.Location = new Point(737, 4);
+            buttonTraceToRemove.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceToRemove.Name = "buttonTraceToRemove";
+            buttonTraceToRemove.Size = new Size(27, 26);
+            buttonTraceToRemove.TabIndex = 14;
+            buttonTraceToRemove.Text = "-";
+            buttonTraceToRemove.UseVisualStyleBackColor = true;
+            //
+            // buttonTraceToEdit
+            //
+            buttonTraceToEdit.Font = new Font("Segoe UI", 8.25F);
+            buttonTraceToEdit.Location = new Point(767, 4);
+            buttonTraceToEdit.Margin = new Padding(4, 3, 4, 3);
+            buttonTraceToEdit.Name = "buttonTraceToEdit";
+            buttonTraceToEdit.Size = new Size(27, 26);
+            buttonTraceToEdit.TabIndex = 15;
+            buttonTraceToEdit.Text = "...";
+            buttonTraceToEdit.UseVisualStyleBackColor = true;
+            //
             // NoteEditorForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1740,6 +1746,14 @@
             tabAlarms.PerformLayout();
             tabCode.ResumeLayout(false);
             tabCode.PerformLayout();
+            splitContainerTraceNotes.Panel1.ResumeLayout(false);
+            splitContainerTraceNotes.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainerTraceNotes).EndInit();
+            splitContainerTraceNotes.ResumeLayout(false);
+            panelTraceFromHeader.ResumeLayout(false);
+            panelTraceFromHeader.PerformLayout();
+            panelTraceToHeader.ResumeLayout(false);
+            panelTraceToHeader.PerformLayout();
             tabTraceNotes.ResumeLayout(false);
             tabTraceNotes.PerformLayout();
             ResumeLayout(false);
@@ -1799,12 +1813,12 @@
         internal TextBox textNoteType;
         private Button buttonNoteType;
         private Label label15;
-        internal TextBox textTraceNodeType;
-        private Button buttonTraceNodeTypes;
-        private Label label5;
         private ListView listViewAttributes;
         private ListView listViewResources;
         private ListView listViewAlarms;
+        private SplitContainer splitContainerTraceNotes;
+        private Panel panelTraceFromHeader;
+        private Panel panelTraceToHeader;
         private ListView listViewTraceNoteTo;
         private ListView listViewTraceNoteFrom;
         private Panel panelDescription;
