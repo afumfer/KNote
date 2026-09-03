@@ -11,7 +11,4 @@ public interface IKntTraceNoteRepository : IDisposable
     Task<Result<TraceNoteDto>> AddAsync(TraceNoteDto entity);
     Task<Result<TraceNoteDto>> UpdateAsync(TraceNoteDto entity);
     Task<Result> DeleteAsync(Guid id);
-
-    // Read-only: maintaining TraceNoteTypes is out of scope, this only populates a type picker.
-    Task<Result<List<TraceNoteTypeDto>>> GetAllTraceNoteTypesAsync();
 }

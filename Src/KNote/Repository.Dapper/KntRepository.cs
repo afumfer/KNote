@@ -131,6 +131,20 @@ public class KntRepository : IKntRepository
         }
     }
 
+    private IKntTraceNoteTypeRepository _traceNoteTypes;
+    public IKntTraceNoteTypeRepository TraceNoteTypes
+    {
+        get
+        {
+            if (_traceNoteTypes == null)
+                if (_db != null)
+                    _traceNoteTypes = new KntTraceNoteTypeRepository(_db, _repositoryRef);
+                else
+                    _traceNoteTypes = new KntTraceNoteTypeRepository(_repositoryRef);
+            return _traceNoteTypes;
+        }
+    }
+
     public RepositoryRef RespositoryRef
     {
         get { return _repositoryRef; }
@@ -189,6 +203,8 @@ public class KntRepository : IKntRepository
             _noteTypes.Dispose();
         if (_traceNotes != null)
             _traceNotes.Dispose();
+        if (_traceNoteTypes != null)
+            _traceNoteTypes.Dispose();
 
         //if (_kEvents != null)
         //    _kEvents.Dispose();
@@ -206,6 +222,7 @@ public class KntRepository : IKntRepository
         _systemValues = null;
         _noteTypes = null;
         _traceNotes = null;
+        _traceNoteTypes = null;
 
         if (_db != null)
             _db.Dispose();

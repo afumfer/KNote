@@ -1,4 +1,3 @@
-using System.Linq;
 using KNote.Model.Dto;
 using KNote.Repository;
 using KNote.Tests.Helpers;
@@ -36,9 +35,8 @@ public class TraceNotesParityTests
         return noteId;
     }
 
-    // Inserted directly via SQL, bypassing the repository: maintaining TraceNoteTypes is out of
-    // scope for this feature, so IKntTraceNoteRepository has no write method for it (only the
-    // read-only GetAllTraceNoteTypesAsync, used to populate a picker).
+    // Inserted directly via SQL, bypassing IKntTraceNoteTypeRepository (covered separately in
+    // CrudRoundTripParityTests), just to have a type id to reference from a TraceNoteDto here.
     //
     // The id parameter is passed as a Guid, not a pre-formatted string: Microsoft.Data.Sqlite gives
     // a raw Guid parameter a different physical storage than an explicit ToString(), and Dapper's/
@@ -165,26 +163,5 @@ public class TraceNotesParityTests
 
         var getRes = await repo.TraceNotes.GetAsync(addRes.Entity.TraceNoteId);
         Assert.IsFalse(getRes.IsValid);
-    }
-
-    [TestMethod]
-    [DataRow("Dapper")]
-    [DataRow("EntityFramework")]
-    public async Task GetAllTraceNoteTypesAsync_ReturnsThemOrderedByName(string orm)
-    {
-        using var db = new RepositoryTestDatabase();
-        using var repo = db.CreateRepository(orm);
-
-        var suffix = Guid.NewGuid().ToString("N")[..8];
-        InsertTraceNoteTypeDirectly(db, Guid.NewGuid(), $"Zeta-{suffix}");
-        InsertTraceNoteTypeDirectly(db, Guid.NewGuid(), $"Alpha-{suffix}");
-
-        var res = await repo.TraceNotes.GetAllTraceNoteTypesAsync();
-
-        Assert.IsTrue(res.IsValid, res.ErrorMessage);
-        var names = res.Entity.Select(t => t.Name).Where(n => n.EndsWith(suffix)).ToList();
-        Assert.HasCount(2, names);
-        Assert.AreEqual($"Alpha-{suffix}", names[0]);
-        Assert.AreEqual($"Zeta-{suffix}", names[1]);
     }
 }

@@ -1601,6 +1601,7 @@
             buttonTraceFromAdd.TabIndex = 10;
             buttonTraceFromAdd.Text = "+";
             buttonTraceFromAdd.UseVisualStyleBackColor = true;
+            buttonTraceFromAdd.Click += buttonTraceFromAdd_Click;
             //
             // buttonTraceFromRemove
             //
@@ -1612,6 +1613,7 @@
             buttonTraceFromRemove.TabIndex = 11;
             buttonTraceFromRemove.Text = "-";
             buttonTraceFromRemove.UseVisualStyleBackColor = true;
+            buttonTraceFromRemove.Click += buttonTraceFromRemove_Click;
             //
             // buttonTraceFromEdit
             //
@@ -1623,6 +1625,7 @@
             buttonTraceFromEdit.TabIndex = 12;
             buttonTraceFromEdit.Text = "...";
             buttonTraceFromEdit.UseVisualStyleBackColor = true;
+            buttonTraceFromEdit.Click += buttonTraceFromEdit_Click;
             //
             // listViewTraceNoteTo
             //
@@ -1667,6 +1670,7 @@
             buttonTraceToAdd.TabIndex = 13;
             buttonTraceToAdd.Text = "+";
             buttonTraceToAdd.UseVisualStyleBackColor = true;
+            buttonTraceToAdd.Click += buttonTraceToAdd_Click;
             //
             // buttonTraceToRemove
             //
@@ -1678,6 +1682,7 @@
             buttonTraceToRemove.TabIndex = 14;
             buttonTraceToRemove.Text = "-";
             buttonTraceToRemove.UseVisualStyleBackColor = true;
+            buttonTraceToRemove.Click += buttonTraceToRemove_Click;
             //
             // buttonTraceToEdit
             //
@@ -1689,6 +1694,7 @@
             buttonTraceToEdit.TabIndex = 15;
             buttonTraceToEdit.Text = "...";
             buttonTraceToEdit.UseVisualStyleBackColor = true;
+            buttonTraceToEdit.Click += buttonTraceToEdit_Click;
             //
             // NoteEditorForm
             // 

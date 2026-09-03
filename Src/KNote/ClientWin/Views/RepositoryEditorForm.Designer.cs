@@ -37,6 +37,7 @@ namespace KNote.ClientWin.Views
             tabPageGeneral = new TabPage();
             tabPageUsers = new TabPage();
             tabPageNoteTypes = new TabPage();
+            tabPageTraceNoteTypes = new TabPage();
             tabPageAttributes = new TabPage();
             panelForm = new Panel();
             checkResourceContentInDB = new CheckBox();
@@ -68,6 +69,7 @@ namespace KNote.ClientWin.Views
             tabPageGeneral.SuspendLayout();
             tabPageUsers.SuspendLayout();
             tabPageNoteTypes.SuspendLayout();
+            tabPageTraceNoteTypes.SuspendLayout();
             tabPageAttributes.SuspendLayout();
             panelForm.SuspendLayout();
             panelMSSqlServer.SuspendLayout();
@@ -104,6 +106,7 @@ namespace KNote.ClientWin.Views
             tabControlMain.Controls.Add(tabPageGeneral);
             tabControlMain.Controls.Add(tabPageUsers);
             tabControlMain.Controls.Add(tabPageNoteTypes);
+            tabControlMain.Controls.Add(tabPageTraceNoteTypes);
             tabControlMain.Controls.Add(tabPageAttributes);
             tabControlMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControlMain.Location = new Point(0, 0);
@@ -147,6 +150,17 @@ namespace KNote.ClientWin.Views
             tabPageNoteTypes.Text = "Note types";
             tabPageNoteTypes.UseVisualStyleBackColor = true;
             //
+            // tabPageTraceNoteTypes
+            //
+            tabPageTraceNoteTypes.Location = new Point(4, 34);
+            tabPageTraceNoteTypes.Margin = new Padding(4, 5, 4, 5);
+            tabPageTraceNoteTypes.Name = "tabPageTraceNoteTypes";
+            tabPageTraceNoteTypes.Padding = new Padding(4, 5, 4, 5);
+            tabPageTraceNoteTypes.Size = new Size(905, 940);
+            tabPageTraceNoteTypes.TabIndex = 3;
+            tabPageTraceNoteTypes.Text = "Trace note types";
+            tabPageTraceNoteTypes.UseVisualStyleBackColor = true;
+            //
             // tabPageAttributes
             //
             tabPageAttributes.Location = new Point(4, 34);
@@ -154,7 +168,7 @@ namespace KNote.ClientWin.Views
             tabPageAttributes.Name = "tabPageAttributes";
             tabPageAttributes.Padding = new Padding(4, 5, 4, 5);
             tabPageAttributes.Size = new Size(905, 940);
-            tabPageAttributes.TabIndex = 3;
+            tabPageAttributes.TabIndex = 4;
             tabPageAttributes.Text = "Attributes";
             tabPageAttributes.UseVisualStyleBackColor = true;
             //
@@ -470,6 +484,8 @@ namespace KNote.ClientWin.Views
             tabPageUsers.PerformLayout();
             tabPageNoteTypes.ResumeLayout(false);
             tabPageNoteTypes.PerformLayout();
+            tabPageTraceNoteTypes.ResumeLayout(false);
+            tabPageTraceNoteTypes.PerformLayout();
             tabPageAttributes.ResumeLayout(false);
             tabPageAttributes.PerformLayout();
             panelForm.ResumeLayout(false);
@@ -492,6 +508,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TabPage tabPageGeneral;
         private System.Windows.Forms.TabPage tabPageUsers;
         private System.Windows.Forms.TabPage tabPageNoteTypes;
+        private System.Windows.Forms.TabPage tabPageTraceNoteTypes;
         private System.Windows.Forms.TabPage tabPageAttributes;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Button buttonFolderSearch;

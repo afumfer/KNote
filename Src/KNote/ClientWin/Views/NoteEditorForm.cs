@@ -410,12 +410,16 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     private void listViewTraceNote_Resize(object sender, EventArgs e)
     {
-        // Topic absorbs the extra width; Number/Tags/Order/Weight keep their fixed size.
+        // Topic (column 1) absorbs the extra width; every other column keeps its fixed size.
         var lv = (ListView)sender;
         if (lv.Columns.Count < 5)
             return;
 
-        int otherColumnsWidth = lv.Columns[0].Width + lv.Columns[2].Width + lv.Columns[3].Width + lv.Columns[4].Width;
+        int otherColumnsWidth = 0;
+        for (int i = 0; i < lv.Columns.Count; i++)
+            if (i != 1)
+                otherColumnsWidth += lv.Columns[i].Width;
+
         int topicWidth = lv.ClientSize.Width - otherColumnsWidth;
         if (topicWidth > 100)
             lv.Columns[1].Width = topicWidth;
@@ -1078,23 +1082,37 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         listViewTraceNoteFrom.Clear();
         listViewTraceNoteTo.Clear();
 
+        // _ctrl.Service can be null the first time ModelToControls() runs (see the same "?."
+        // treatment a few lines up, on _ctrl.ServiceRef/_ctrl.Service around textFolder/kntEditView
+        // setup) - unlike the Resources/Tasks sections below, this line isn't inside a foreach over
+        // an existing collection, so it can't rely on an empty list to skip touching Service.
+        if (_ctrl.Service == null)
+            return;
+
+        // Fetched once and reused for every row - avoids re-fetching the (small, catalog-like)
+        // TraceNoteTypes list once per trace note.
+        var traceNoteTypeNames = (await _ctrl.Service.Repository.TraceNoteTypes.GetAllAsync()).Entity?
+            .ToDictionary(t => t.TraceNoteTypeId, t => t.Name) ?? new Dictionary<Guid, string>();
+
         foreach (var traceNote in _ctrl.Model.TraceNotesFrom)
             if (!traceNote.IsDeleted())
-                listViewTraceNoteFrom.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.FromId));
+                listViewTraceNoteFrom.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.FromId, traceNoteTypeNames));
 
         foreach (var traceNote in _ctrl.Model.TraceNotesTo)
             if (!traceNote.IsDeleted())
-                listViewTraceNoteTo.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.ToId));
+                listViewTraceNoteTo.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.ToId, traceNoteTypeNames));
 
         listViewTraceNoteFrom.Columns.Add("Number", 60, HorizontalAlignment.Left);
         listViewTraceNoteFrom.Columns.Add("Topic", 300, HorizontalAlignment.Left);
-        listViewTraceNoteFrom.Columns.Add("Tags", 250, HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Tags", 150, HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Type", 110, HorizontalAlignment.Left);
         listViewTraceNoteFrom.Columns.Add("Order", 55, HorizontalAlignment.Left);
         listViewTraceNoteFrom.Columns.Add("Weight", 55, HorizontalAlignment.Left);
 
         listViewTraceNoteTo.Columns.Add("Number", 60, HorizontalAlignment.Left);
         listViewTraceNoteTo.Columns.Add("Topic", 300, HorizontalAlignment.Left);
-        listViewTraceNoteTo.Columns.Add("Tags", 250, HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Tags", 150, HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Type", 110, HorizontalAlignment.Left);
         listViewTraceNoteTo.Columns.Add("Order", 55, HorizontalAlignment.Left);
         listViewTraceNoteTo.Columns.Add("Weight", 55, HorizontalAlignment.Left);
 
@@ -1104,8 +1122,9 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
 
     // Each row shows the OTHER note in the relation (Number/Topic/Tags), not the TraceNoteDto's own
     // fields - resolved with one lookup per row (trace lists are small, per-note; not worth a batch
-    // endpoint yet) - plus Order/Weight, which DO belong to the TraceNoteDto itself.
-    private async Task<ListViewItem> TraceNoteDtoToListViewItemAsync(TraceNoteDto traceNote, Guid relatedNoteId)
+    // endpoint yet) - plus Order/Weight/Type, which DO belong to the TraceNoteDto itself (Type only
+    // shown when TraceNoteTypeId actually has a value - untyped relations are a valid, common case).
+    private async Task<ListViewItem> TraceNoteDtoToListViewItemAsync(TraceNoteDto traceNote, Guid relatedNoteId, Dictionary<Guid, string> traceNoteTypeNames)
     {
         var relatedNote = (await _ctrl.Service.Notes.GetAsync(relatedNoteId)).Entity;
 
@@ -1113,10 +1132,75 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         itemList.Name = traceNote.TraceNoteId.ToString();
         itemList.SubItems.Add(relatedNote?.Topic);
         itemList.SubItems.Add(relatedNote?.Tags);
+        itemList.SubItems.Add(traceNote.TraceNoteTypeId.HasValue && traceNoteTypeNames.TryGetValue(traceNote.TraceNoteTypeId.Value, out var typeName) ? typeName : "");
         itemList.SubItems.Add(traceNote.Order.ToString());
         itemList.SubItems.Add(traceNote.Weight.ToString());
         return itemList;
     }
+
+    #region Trace notes management
+
+    private async void buttonTraceFromAdd_Click(object sender, EventArgs e)
+    {
+        var added = await _ctrl.NewTraceNote(ownerIsFromSide: false);
+        if (added != null)
+            await ModelToControlsTraceNotes();
+    }
+
+    private async void buttonTraceFromEdit_Click(object sender, EventArgs e)
+    {
+        await EditTraceNote(listViewTraceNoteFrom, ownerIsFromSide: false);
+    }
+
+    private async void buttonTraceFromRemove_Click(object sender, EventArgs e)
+    {
+        await RemoveTraceNote(listViewTraceNoteFrom, ownerIsFromSide: false);
+    }
+
+    private async void buttonTraceToAdd_Click(object sender, EventArgs e)
+    {
+        var added = await _ctrl.NewTraceNote(ownerIsFromSide: true);
+        if (added != null)
+            await ModelToControlsTraceNotes();
+    }
+
+    private async void buttonTraceToEdit_Click(object sender, EventArgs e)
+    {
+        await EditTraceNote(listViewTraceNoteTo, ownerIsFromSide: true);
+    }
+
+    private async void buttonTraceToRemove_Click(object sender, EventArgs e)
+    {
+        await RemoveTraceNote(listViewTraceNoteTo, ownerIsFromSide: true);
+    }
+
+    private async Task EditTraceNote(ListView listView, bool ownerIsFromSide)
+    {
+        if (listView.SelectedItems.Count == 0)
+        {
+            MessageBox.Show("There is no trace note selected.", KntConst.AppName);
+            return;
+        }
+        var traceNoteId = Guid.Parse(listView.SelectedItems[0].Name);
+        var edited = await _ctrl.EditTraceNote(traceNoteId, ownerIsFromSide);
+        if (edited != null)
+            await ModelToControlsTraceNotes();
+    }
+
+    private async Task RemoveTraceNote(ListView listView, bool ownerIsFromSide)
+    {
+        if (listView.SelectedItems.Count == 0)
+        {
+            MessageBox.Show("There is no trace note selected.", KntConst.AppName);
+            return;
+        }
+        var traceNoteId = Guid.Parse(listView.SelectedItems[0].Name);
+        var res = _ctrl.DeleteTraceNote(traceNoteId, ownerIsFromSide);
+        if (res)
+            await ModelToControlsTraceNotes();
+    }
+
+    #endregion
 
     private async void UpdatePreviewResource(ResourceDto resource)
     {

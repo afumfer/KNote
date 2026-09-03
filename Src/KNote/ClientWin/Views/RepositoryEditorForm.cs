@@ -25,6 +25,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         panelSqLite.Resize += panelSqLite_Resize;
 
         tabPageNoteTypes.Controls.Add(_ctrl.NoteTypesManageCtrl.View.PanelView());
+        tabPageTraceNoteTypes.Controls.Add(_ctrl.TraceNoteTypesManageCtrl.View.PanelView());
         tabPageAttributes.Controls.Add(_ctrl.KAttributesManageCtrl.View.PanelView());
         tabPageUsers.Controls.Add(_ctrl.UsersManageCtrl.View.PanelView());
     }
@@ -233,10 +234,11 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
                 break;
         }
 
-        // Users/Note types/Attributes administration only makes sense for an already-linked
-        // repository (Managment mode) and only for a repository user with the Admin role.
+        // Users/Note types/Trace note types/Attributes administration only makes sense for an
+        // already-linked repository (Managment mode) and only for a repository user with the Admin role.
         tabPageUsers.Enabled = _ctrl.CurrentUserIsAdmin;
         tabPageNoteTypes.Enabled = _ctrl.CurrentUserIsAdmin;
+        tabPageTraceNoteTypes.Enabled = _ctrl.CurrentUserIsAdmin;
         tabPageAttributes.Enabled = _ctrl.CurrentUserIsAdmin;
 
         var adminTabsHint = _ctrl.EditorMode != EnumRepositoryEditorMode.Managment
@@ -248,6 +250,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
         // that belongs to the TabControl (which stays enabled), not to the disabled page content.
         toolTipAdminTabs.SetToolTip(tabPageUsers, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageNoteTypes, adminTabsHint);
+        toolTipAdminTabs.SetToolTip(tabPageTraceNoteTypes, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageAttributes, adminTabsHint);
 
         textAliasName.Text = _ctrl.Model.Alias;

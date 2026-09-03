@@ -32,9 +32,12 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<KAttributeTabulatedValueEditorCtrl, IViewEditor<KAttributeTabulatedValueDto>>(c => new KAttributeTabulatedValueEditorForm(c));
         Registry.Register<KAttributesManageCtrl, IViewManageList<KAttributeInfoDto>>(c => new KAttributesManageForm(c));
         Registry.Register<TaskEditorCtrl, IViewEditor<NoteTaskDto>>(c => new TaskEditorForm(c));
+        Registry.Register<TraceNoteEditorCtrl, IViewEditor<TraceNoteDto>>(c => new TraceNoteEditorForm(c));
         Registry.Register<NoteTypesSelectorCtrl, IViewSelector<NoteTypeDto>>(c => new NoteTypesSelectorForm(c));
         Registry.Register<NoteTypeEditorCtrl, IViewEditor<NoteTypeDto>>(c => new NoteTypeEditorForm(c));
         Registry.Register<NoteTypesManageCtrl, IViewManageList<NoteTypeDto>>(c => new NoteTypesManageForm(c));
+        Registry.Register<TraceNoteTypeEditorCtrl, IViewEditor<TraceNoteTypeDto>>(c => new TraceNoteTypeEditorForm(c));
+        Registry.Register<TraceNoteTypesManageCtrl, IViewManageList<TraceNoteTypeDto>>(c => new TraceNoteTypesManageForm(c));
         Registry.Register<NoteAttributeEditorCtrl, IViewEditor<NoteKAttributeDto>>(c => new NoteAttributeEditorForm(c));
         Registry.Register<NotesSearchParamCtrl, IViewEmbeddable>(c => new NotesSearchParamForm(c));
         Registry.Register<NotesFilterParamCtrl, IViewEmbeddable>(c => new NotesFilterParamForm(c));

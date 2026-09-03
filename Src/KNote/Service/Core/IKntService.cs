@@ -26,6 +26,7 @@ public interface IKntService : IDisposable
     IKntFolderService Folders { get; }
     IKntNoteService Notes { get; }
     IKntNoteTypeService NoteTypes { get; }
+    IKntTraceNoteTypeService TraceNoteTypes { get; }
     IKntMessageBroker MessageBroker { get; }
 
     string GetSystemVariable(string scope, string variable);

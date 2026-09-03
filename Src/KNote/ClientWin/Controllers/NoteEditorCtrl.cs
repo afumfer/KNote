@@ -433,6 +433,89 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
         return res;
     }
 
+    // ownerIsFromSide = true: this note is the FromId side (an outgoing relation), staged into
+    // Model.TraceNotesTo - matches the "Trace node to:" list. False: this note is the ToId side
+    // (an incoming relation), staged into Model.TraceNotesFrom - the "Trace node from:" list.
+    // See KntNotesSaveExtendedAsyncCommand's matching comments for the same convention.
+    public async Task<TraceNoteDto> NewTraceNote(bool ownerIsFromSide)
+    {
+        var traceEditor = new TraceNoteEditorCtrl(Store);
+
+        traceEditor.AutoDBSave = false;  // don't save automatically
+
+        await traceEditor.NewModel(Service);
+        traceEditor.OwnerIsFromSide = ownerIsFromSide;
+        if (ownerIsFromSide)
+            traceEditor.Model.FromId = Model.NoteId;
+        else
+            traceEditor.Model.ToId = Model.NoteId;
+        traceEditor.Model.SetIsNew(true);
+        await traceEditor.LoadTraceNoteTypeOptionsAsync();
+
+        var res = traceEditor.RunModal();
+        if (res.Entity == EControllerResult.Executed)
+        {
+            if (ownerIsFromSide)
+                Model.TraceNotesTo.Add(traceEditor.Model);
+            else
+                Model.TraceNotesFrom.Add(traceEditor.Model);
+            return traceEditor.Model;
+        }
+        else
+            return null;
+    }
+
+    public async Task<TraceNoteDto> EditTraceNote(Guid traceNoteId, bool ownerIsFromSide)
+    {
+        var traceEditor = new TraceNoteEditorCtrl(Store);
+
+        traceEditor.AutoDBSave = false;  // don't save automatically
+
+        var list = ownerIsFromSide ? Model.TraceNotesTo : Model.TraceNotesFrom;
+        var traceNote = list.Where(_ => _.TraceNoteId == traceNoteId).SingleOrDefault();
+        if (traceNote == null)
+            return null;
+
+        traceEditor.OwnerIsFromSide = ownerIsFromSide;
+        traceEditor.LoadModel(Service, traceNote, false);
+        await traceEditor.LoadRelatedNoteInfoAsync();
+        await traceEditor.LoadTraceNoteTypeOptionsAsync();
+
+        var res = traceEditor.RunModal();
+        if (res.Entity == EControllerResult.Executed)
+            return traceEditor.Model;
+        else
+            return null;
+    }
+
+    public bool DeleteTraceNote(Guid traceNoteId, bool ownerIsFromSide)
+    {
+        bool res = false;
+
+        var list = ownerIsFromSide ? Model.TraceNotesTo : Model.TraceNotesFrom;
+
+        TraceNoteDto tnDel = null;
+        foreach (var item in list)
+        {
+            if (item.TraceNoteId == traceNoteId)
+            {
+                tnDel = item;
+                break;
+            }
+        }
+
+        if (tnDel != null)
+        {
+            if (tnDel.IsNew())
+                list.Remove(tnDel);
+            else
+                tnDel.SetIsDeleted(true);
+            res = true;
+        }
+
+        return res;
+    }
+
     public async Task<ResourceDto> NewResource()
     {
         var resource = new ResourceEditorCtrl(Store);

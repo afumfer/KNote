@@ -114,9 +114,20 @@ public class KntService : IKntService, IDisposable
     {
         get
         {
-            if (_noteTypes == null)                    
+            if (_noteTypes == null)
                 _noteTypes = new KntNoteTypeService(this);
             return _noteTypes;
+        }
+    }
+
+    private IKntTraceNoteTypeService _traceNoteTypes;
+    public IKntTraceNoteTypeService TraceNoteTypes
+    {
+        get
+        {
+            if (_traceNoteTypes == null)
+                _traceNoteTypes = new KntTraceNoteTypeService(this);
+            return _traceNoteTypes;
         }
     }
 

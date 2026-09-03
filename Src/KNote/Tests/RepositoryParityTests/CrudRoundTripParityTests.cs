@@ -68,6 +68,28 @@ public class CrudRoundTripParityTests
     [TestMethod]
     [DataRow("Dapper", "EntityFramework")]
     [DataRow("EntityFramework", "Dapper")]
+    public async Task TraceNoteType_WrittenByOneOrm_IsReadableByTheOther(string writerOrm, string readerOrm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var writer = db.CreateRepository(writerOrm);
+        using var reader = db.CreateRepository(readerOrm);
+
+        var traceNoteTypeId = Guid.NewGuid();
+        var traceNoteType = new TraceNoteTypeDto { TraceNoteTypeId = traceNoteTypeId, Name = "Parity TraceNoteType", Description = "Parity description" };
+
+        var addRes = await writer.TraceNoteTypes.AddAsync(traceNoteType);
+        Assert.IsTrue(addRes.IsValid, addRes.ErrorMessage);
+        Assert.AreEqual(traceNoteTypeId, addRes.Entity.TraceNoteTypeId);
+
+        var getRes = await reader.TraceNoteTypes.GetAsync(traceNoteTypeId);
+        Assert.IsTrue(getRes.IsValid, getRes.ErrorMessage);
+        Assert.AreEqual(addRes.Entity.Name, getRes.Entity.Name);
+        Assert.AreEqual(addRes.Entity.Description, getRes.Entity.Description);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper", "EntityFramework")]
+    [DataRow("EntityFramework", "Dapper")]
     public async Task KAttribute_WrittenByOneOrm_IsReadableByTheOther(string writerOrm, string readerOrm)
     {
         using var db = new RepositoryTestDatabase();

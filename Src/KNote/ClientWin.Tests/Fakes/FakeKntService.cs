@@ -17,6 +17,7 @@ internal class FakeKntService : IKntService
     public FakeKntNoteService NotesFake { get; } = new();
     public FakeKntUserService UsersFake { get; } = new();
     public FakeKntNoteTypeService NoteTypesFake { get; } = new();
+    public FakeKntTraceNoteTypeService TraceNoteTypesFake { get; } = new();
     public FakeKntKAttributeService KAttributesFake { get; } = new();
 
     public ILogger Logger { get; set; }
@@ -31,6 +32,7 @@ internal class FakeKntService : IKntService
     public IKntFolderService Folders => throw new NotSupportedException();
     public IKntNoteService Notes => NotesFake;
     public IKntNoteTypeService NoteTypes => NoteTypesFake;
+    public IKntTraceNoteTypeService TraceNoteTypes => TraceNoteTypesFake;
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();

@@ -9,31 +9,31 @@ using System.Threading.Tasks;
 
 namespace KNote.Repository.EntityFramework;
 
-public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteRepository
+public class KntTraceNoteTypeRepository : KntRepositoryEFBase, IKntTraceNoteTypeRepository
 {
-    public KntTraceNoteRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
+    public KntTraceNoteTypeRepository(KntDbContext singletonContext, RepositoryRef repositoryRef)
         : base(singletonContext, repositoryRef)
     {
     }
 
-    public KntTraceNoteRepository(RepositoryRef repositoryRef)
+    public KntTraceNoteTypeRepository(RepositoryRef repositoryRef)
         : base(repositoryRef)
     {
     }
 
-    public async Task<Result<List<TraceNoteDto>>> GetAllByFromIdAsync(Guid fromId)
+    public async Task<Result<List<TraceNoteTypeDto>>> GetAllAsync()
     {
-        var result = new Result<List<TraceNoteDto>>();
+        var result = new Result<List<TraceNoteTypeDto>>();
 
         try
         {
             var ctx = GetOpenConnection();
-            var traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(ctx);
+            var traceNoteTypes = new GenericRepositoryEF<KntDbContext, TraceNoteType>(ctx);
 
-            var resGenRep = await traceNotes.GetAllAsync(t => t.FromId == fromId);
+            var resGenRep = await traceNoteTypes.GetAllAsync();
             result.Entity = resGenRep.Entity?
-                .Select(t => t.GetSimpleDto<TraceNoteDto>())
-                .OrderBy(t => t.Order)
+                .Select(t => t.GetSimpleDto<TraceNoteTypeDto>())
+                .OrderBy(t => t.Name)
                 .ToList();
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
@@ -47,20 +47,18 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
         return result;
     }
 
-    public async Task<Result<List<TraceNoteDto>>> GetAllByToIdAsync(Guid toId)
+    public async Task<Result<TraceNoteTypeDto>> GetAsync(Guid id)
     {
-        var result = new Result<List<TraceNoteDto>>();
+        var result = new Result<TraceNoteTypeDto>();
 
         try
         {
             var ctx = GetOpenConnection();
-            var traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(ctx);
+            var traceNoteTypes = new GenericRepositoryEF<KntDbContext, TraceNoteType>(ctx);
 
-            var resGenRep = await traceNotes.GetAllAsync(t => t.ToId == toId);
-            result.Entity = resGenRep.Entity?
-                .Select(t => t.GetSimpleDto<TraceNoteDto>())
-                .OrderBy(t => t.Order)
-                .ToList();
+            var resGenRep = await traceNoteTypes.GetAsync((object)id);
+
+            result.Entity = resGenRep.Entity?.GetSimpleDto<TraceNoteTypeDto>();
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
@@ -73,45 +71,21 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
         return result;
     }
 
-    public async Task<Result<TraceNoteDto>> GetAsync(Guid id)
+    public async Task<Result<TraceNoteTypeDto>> AddAsync(TraceNoteTypeDto entity)
     {
-        var result = new Result<TraceNoteDto>();
+        var result = new Result<TraceNoteTypeDto>();
 
         try
         {
             var ctx = GetOpenConnection();
-            var traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(ctx);
+            var traceNoteTypes = new GenericRepositoryEF<KntDbContext, TraceNoteType>(ctx);
 
-            var resGenRep = await traceNotes.GetAsync((object)id);
-
-            result.Entity = resGenRep.Entity?.GetSimpleDto<TraceNoteDto>();
-            result.AddListErrorMessage(resGenRep.ListErrorMessage);
-
-            await CloseIsTempConnection(ctx);
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
-
-        return result;
-    }
-
-    public async Task<Result<TraceNoteDto>> AddAsync(TraceNoteDto entity)
-    {
-        var result = new Result<TraceNoteDto>();
-
-        try
-        {
-            var ctx = GetOpenConnection();
-            var traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(ctx);
-
-            var newEntity = new TraceNote();
+            var newEntity = new TraceNoteType();
             newEntity.SetSimpleDto(entity);
 
-            var resGenRep = await traceNotes.AddAsync(newEntity);
+            var resGenRep = await traceNoteTypes.AddAsync(newEntity);
 
-            result.Entity = resGenRep.Entity?.GetSimpleDto<TraceNoteDto>();
+            result.Entity = resGenRep.Entity?.GetSimpleDto<TraceNoteTypeDto>();
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
@@ -124,24 +98,24 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
         return result;
     }
 
-    public async Task<Result<TraceNoteDto>> UpdateAsync(TraceNoteDto entity)
+    public async Task<Result<TraceNoteTypeDto>> UpdateAsync(TraceNoteTypeDto entity)
     {
-        var result = new Result<TraceNoteDto>();
-        var resGenRep = new Result<TraceNote>();
+        var result = new Result<TraceNoteTypeDto>();
+        var resGenRep = new Result<TraceNoteType>();
 
         try
         {
             var ctx = GetOpenConnection();
-            var traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(ctx);
+            var traceNoteTypes = new GenericRepositoryEF<KntDbContext, TraceNoteType>(ctx);
 
-            var resGenRepGet = await traceNotes.GetAsync(entity.TraceNoteId);
-            TraceNote entityForUpdate;
+            var resGenRepGet = await traceNoteTypes.GetAsync(entity.TraceNoteTypeId);
+            TraceNoteType entityForUpdate;
 
             if (resGenRepGet.IsValid)
             {
                 entityForUpdate = resGenRepGet.Entity;
                 entityForUpdate.SetSimpleDto(entity);
-                resGenRep = await traceNotes.UpdateAsync(entityForUpdate);
+                resGenRep = await traceNoteTypes.UpdateAsync(entityForUpdate);
             }
             else
             {
@@ -149,7 +123,7 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
                 resGenRep.AddErrorMessage("Can't find entity for update.");
             }
 
-            result.Entity = resGenRep.Entity?.GetSimpleDto<TraceNoteDto>();
+            result.Entity = resGenRep.Entity?.GetSimpleDto<TraceNoteTypeDto>();
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
@@ -169,9 +143,9 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
         try
         {
             var ctx = GetOpenConnection();
-            var traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(ctx);
+            var traceNoteTypes = new GenericRepositoryEF<KntDbContext, TraceNoteType>(ctx);
 
-            var resGenRep = await traceNotes.DeleteAsync(id);
+            var resGenRep = await traceNoteTypes.DeleteAsync(id);
             if (!resGenRep.IsValid)
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 

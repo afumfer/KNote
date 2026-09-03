@@ -168,26 +168,4 @@ public class KntTraceNoteRepository : KntRepositoryDapperBase, IKntTraceNoteRepo
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
     }
-
-    public async Task<Result<List<TraceNoteTypeDto>>> GetAllTraceNoteTypesAsync()
-    {
-        try
-        {
-            var result = new Result<List<TraceNoteTypeDto>>();
-
-            var db = GetOpenConnection();
-
-            var sql = @"SELECT TraceNoteTypeId, Name, Description FROM TraceNoteTypes ORDER BY Name";
-            var entity = await db.QueryAsync<TraceNoteTypeDto>(sql.ToString(), new { });
-            result.Entity = entity.ToList();
-
-            await CloseIsTempConnection(db);
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
-    }
 }
