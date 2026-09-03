@@ -53,4 +53,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\undo_16.png" />
+    <EmbeddedResource Include="Resources\undo_16.png" />
+  </ItemGroup>
 </Project>

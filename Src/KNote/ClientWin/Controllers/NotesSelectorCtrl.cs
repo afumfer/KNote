@@ -37,6 +37,16 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteMinimalDto>,
         get; set;
     }
 
+    // Opt-in: shows a text box above the list that filters the already-loaded ListEntities in
+    // memory (by #number, Topic or Tags), plus an "Undo" button that clears it back to the
+    // original collection set by Load*Entities. Off by default so existing callers (the shared
+    // Store.NotesSelector used by "Insert template text"/"Insert code snippet"/prompt/assistant
+    // catalogs, and KNoteManagmentCtrl's embedded main panel) are unaffected.
+    public bool EnableTextFilter
+    {
+        get; set;
+    }
+
     #endregion
 
     #region Constructor

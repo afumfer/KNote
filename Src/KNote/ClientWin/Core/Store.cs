@@ -451,7 +451,10 @@ public class Store
             {
                 _notesSelector = new NotesSelectorCtrl(this);
                 _notesSelector.EmbededMode = false;
-                _notesSelector.HiddenColumns = "NoteNumber, Priority, Tags, InternalTags, ModificationDateTime, CreationDateTime";
+                // NoteNumber and Tags stay visible: EnableTextFilter's second filter is applied
+                // against those columns, so hiding them would make the filter hard to reason about.
+                _notesSelector.HiddenColumns = "Priority, InternalTags, ModificationDateTime, CreationDateTime";
+                _notesSelector.EnableTextFilter = true;
             }
             return _notesSelector;
         }
@@ -476,18 +479,35 @@ public class Store
 
     #region Utils public methods
 
+    // "item" is a NoteType name (e.g. KntConst.TemplateTag/CodeTag/PromptTag/AssistantTag - kept as
+    // the same "@..." identifiers, just now naming a NoteType instead of a Tags value): catalog notes
+    // (templates, code snippets, prompts, assistants) are classified by NoteTypeId, resolved here by
+    // name, rather than by a tag on Tags. The 5 callers (NoteEditorCtrl.GetCatalogTemplate/GetCatalogCode/
+    // ExecKNoteAssistant, KNoteAIAssistantCtrl.GetCatalogPrompt/ExecChatAssistant) are unaffected by
+    // this - they still just pass the same KntConst string.
     public async Task<NoteDto> GetCatalogItem(ServiceRef serviceRef, string item, string viewTitle)
     {
-        await NotesSelector.LoadFilteredEntities(serviceRef.Service, new NotesFilterDto { Tags = item }, false);
+        var noteTypesRes = await serviceRef.Service.NoteTypes.GetAllAsync();
+        var noteType = noteTypesRes.Entity?.FirstOrDefault(nt => nt.Name == item);
+
+        if (noteType == null)
+        {
+            MessageBox.Show(
+                $"No note type named \"{item}\" was found. Create one with that exact name first (open the repository and go to its \"NoteTypes\" tab).",
+                "KNote", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return null;
+        }
+
+        await NotesSelector.LoadFilteredEntities(serviceRef.Service, new NotesFilterDto { NoteTypeId = noteType.NoteTypeId }, false);
         NotesSelector.ViewTitle = viewTitle;
-        
+
         var res = NotesSelector.RunModal();
 
-        if (res.Entity == EControllerResult.Executed) 
+        if (res.Entity == EControllerResult.Executed)
         {
-            //return NotesSelector.SelectedEntity;            
+            //return NotesSelector.SelectedEntity;
             return NotesSelector.Service.Notes.GetAsync(NotesSelector.SelectedEntity.NoteId).Result.Entity;
-        }        
+        }
         else
             return null;
     }

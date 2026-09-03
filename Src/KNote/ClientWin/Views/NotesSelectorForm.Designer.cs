@@ -31,6 +31,9 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NotesSelectorForm));
             panelForm = new Panel();
+            panelTextFilter = new Panel();
+            textFilter = new TextBox();
+            buttonUndoFilter = new Button();
             panelDataGridNotes = new Panel();
             dataGridNotes = new DataGridView();
             contextMenu = new ContextMenuStrip(components);
@@ -38,30 +41,66 @@
             buttonCancel = new Button();
             buttonAccept = new Button();
             panelForm.SuspendLayout();
+            panelTextFilter.SuspendLayout();
             panelDataGridNotes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridNotes).BeginInit();
             panelBottom.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // panelForm
-            // 
+            //
             panelForm.Controls.Add(panelDataGridNotes);
+            panelForm.Controls.Add(panelTextFilter);
             panelForm.Controls.Add(panelBottom);
             panelForm.Dock = DockStyle.Fill;
             panelForm.Location = new Point(0, 0);
             panelForm.Margin = new Padding(3, 4, 3, 4);
             panelForm.Name = "panelForm";
-            panelForm.Size = new Size(667, 615);
+            panelForm.Size = new Size(760, 615);
             panelForm.TabIndex = 0;
-            // 
+            //
+            // panelTextFilter
+            //
+            panelTextFilter.Controls.Add(textFilter);
+            panelTextFilter.Controls.Add(buttonUndoFilter);
+            panelTextFilter.Dock = DockStyle.Top;
+            panelTextFilter.Location = new Point(0, 0);
+            panelTextFilter.Margin = new Padding(3, 4, 3, 4);
+            panelTextFilter.Name = "panelTextFilter";
+            panelTextFilter.Size = new Size(760, 40);
+            panelTextFilter.TabIndex = 3;
+            panelTextFilter.Visible = false;
+            //
+            // textFilter
+            //
+            textFilter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textFilter.Location = new Point(8, 8);
+            textFilter.Margin = new Padding(3, 4, 3, 4);
+            textFilter.Name = "textFilter";
+            textFilter.PlaceholderText = "Filter by #number, Topic or Tags... (Enter to apply)";
+            textFilter.Size = new Size(702, 27);
+            textFilter.TabIndex = 0;
+            textFilter.KeyDown += textFilter_KeyDown;
+            //
+            // buttonUndoFilter
+            //
+            buttonUndoFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonUndoFilter.Location = new Point(718, 8);
+            buttonUndoFilter.Margin = new Padding(3, 4, 3, 4);
+            buttonUndoFilter.Name = "buttonUndoFilter";
+            buttonUndoFilter.Size = new Size(32, 30);
+            buttonUndoFilter.TabIndex = 1;
+            buttonUndoFilter.UseVisualStyleBackColor = true;
+            buttonUndoFilter.Click += buttonUndoFilter_Click;
+            //
             // panelDataGridNotes
-            // 
+            //
             panelDataGridNotes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panelDataGridNotes.Controls.Add(dataGridNotes);
             panelDataGridNotes.Location = new Point(1, 1);
             panelDataGridNotes.Margin = new Padding(3, 4, 3, 4);
             panelDataGridNotes.Name = "panelDataGridNotes";
-            panelDataGridNotes.Size = new Size(666, 557);
+            panelDataGridNotes.Size = new Size(759, 557);
             panelDataGridNotes.TabIndex = 2;
             // 
             // dataGridNotes
@@ -82,7 +121,7 @@
             dataGridNotes.RowHeadersVisible = false;
             dataGridNotes.RowHeadersWidth = 25;
             dataGridNotes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridNotes.Size = new Size(665, 555);
+            dataGridNotes.Size = new Size(758, 555);
             dataGridNotes.TabIndex = 0;
             dataGridNotes.Text = "dataGridView1";
             dataGridNotes.ColumnHeaderMouseClick += dataGridNotes_ColumnHeaderMouseClick;
@@ -105,14 +144,14 @@
             panelBottom.Location = new Point(0, 556);
             panelBottom.Margin = new Padding(3, 4, 3, 4);
             panelBottom.Name = "panelBottom";
-            panelBottom.Size = new Size(667, 59);
+            panelBottom.Size = new Size(760, 59);
             panelBottom.TabIndex = 1;
             // 
             // buttonCancel
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(567, 13);
+            buttonCancel.Location = new Point(660, 13);
             buttonCancel.Margin = new Padding(3, 4, 3, 4);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(90, 34);
@@ -125,7 +164,7 @@
             // 
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonAccept.DialogResult = DialogResult.OK;
-            buttonAccept.Location = new Point(471, 13);
+            buttonAccept.Location = new Point(564, 13);
             buttonAccept.Margin = new Padding(3, 4, 3, 4);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(90, 34);
@@ -138,7 +177,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(667, 615);
+            ClientSize = new Size(760, 615);
             Controls.Add(panelForm);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(3, 4, 3, 4);
@@ -146,6 +185,8 @@
             Text = "Notes selector";
             FormClosing += NotesSelectorForm_FormClosing;
             panelForm.ResumeLayout(false);
+            panelTextFilter.ResumeLayout(false);
+            panelTextFilter.PerformLayout();
             panelDataGridNotes.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridNotes).EndInit();
             panelBottom.ResumeLayout(false);
@@ -156,6 +197,9 @@
         #endregion
 
         private System.Windows.Forms.Panel panelForm;
+        private System.Windows.Forms.Panel panelTextFilter;
+        private System.Windows.Forms.TextBox textFilter;
+        private System.Windows.Forms.Button buttonUndoFilter;
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonAccept;

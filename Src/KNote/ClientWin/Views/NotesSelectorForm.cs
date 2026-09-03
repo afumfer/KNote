@@ -14,8 +14,9 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
     private bool _viewFinalized = false;        
     private UInt32 _countRepetition = 0;
     private bool _skipSelectionChanged = false;        
-    private BindingSource _source = new BindingSource();   
+    private BindingSource _source = new BindingSource();
     private SortOrder _sortOrder;
+    private string _textFilter = "";
 
     #endregion
 
@@ -41,7 +42,33 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
     {
         InitializeComponent();
 
-        _ctrl = ctrl;                
+        _ctrl = ctrl;
+
+        SetUndoFilterButtonIcon();
+    }
+
+    // Resources\undo_16.png embedded as a resource (KNote.ClientWin.KNote.ClientWin.csproj) rather
+    // than wired through the Designer's .resx machinery, since this button is built by hand here,
+    // not via the Forms Designer. Falls back to "X" if the resource can't be found/loaded, so a
+    // packaging mistake degrades gracefully instead of leaving the button unlabeled.
+    private void SetUndoFilterButtonIcon()
+    {
+        try
+        {
+            using var iconStream = System.Reflection.Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("KNote.ClientWin.Resources.undo_16.png");
+            if (iconStream != null)
+            {
+                buttonUndoFilter.Image = Image.FromStream(iconStream);
+                buttonUndoFilter.Text = "";
+                return;
+            }
+        }
+        catch (Exception)
+        {
+            // fall through to the text fallback below
+        }
+        buttonUndoFilter.Text = "X";
     }
 
     #endregion 
@@ -71,6 +98,13 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         if (_ctrl.ListEntities == null)
             return;
 
+        // A fresh load (this is only reached from NotesSelectorCtrl's Load*Entities, not from
+        // sort/AddItem/DeleteItem refreshes) starts from the caller's collection - any leftover
+        // second filter from a previous open would otherwise silently hide rows.
+        panelTextFilter.Visible = _ctrl.EnableTextFilter;
+        _textFilter = "";
+        textFilter.Text = "";
+
         CoonfigureGridStd();
 
         if (OrderColNumber == 0)
@@ -99,8 +133,9 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         FormBorderStyle = FormBorderStyle.None;
         panelBottom.Visible = false;
         panelDataGridNotes.Dock = DockStyle.Fill;
+        panelDataGridNotes.Padding = new Padding(0);
         dataGridNotes.BorderStyle = BorderStyle.None;
-        dataGridNotes.Dock = DockStyle.Fill;        
+        dataGridNotes.Dock = DockStyle.Fill;
     }
 
     public void ConfigureWindowMode()
@@ -110,6 +145,8 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         FormBorderStyle = FormBorderStyle.Sizable;
         panelBottom.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
+        panelDataGridNotes.Dock = DockStyle.Fill;
+        panelDataGridNotes.Padding = new Padding(3); // independent/modal selector only
         dataGridNotes.Dock = DockStyle.Fill;
     }
 
@@ -202,6 +239,23 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         RefreshDataGridNotes();
     }
 
+    private void textFilter_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode != Keys.Enter)
+            return;
+
+        e.SuppressKeyPress = true; // avoid the "ding" (Enter is not a normal input char here)
+        _textFilter = textFilter.Text;
+        RefreshDataGridNotes();
+    }
+
+    private void buttonUndoFilter_Click(object sender, EventArgs e)
+    {
+        textFilter.Text = "";
+        _textFilter = "";
+        RefreshDataGridNotes();
+    }
+
     private void buttonAccept_Click(object sender, EventArgs e)
     {
         _ctrl.Accept();
@@ -219,21 +273,43 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
     private void RefreshDataGridNotes()
     {
         _skipSelectionChanged = true;
-        
+
+        var entities = GetFilteredEntities();
+
         if (_sortOrder == SortOrder.Descending)
-            _source.DataSource = _ctrl.ListEntities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
+            _source.DataSource = entities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
         else if (_sortOrder == SortOrder.Ascending)
-            _source.DataSource = _ctrl.ListEntities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
+            _source.DataSource = entities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
 
         // DataSource has changed, so we need to refresh the grid definition
         CoonfigureGridStd();
 
         dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
 
-        if (_ctrl.ListEntities.Count > 0)            
+        // Checks the grid's actual row count, not _ctrl.ListEntities.Count: with a second filter
+        // applied, the two can differ, and ActiveCurrentRow() would throw on an empty grid.
+        if (dataGridNotes.Rows.Count > 0)
             ActiveCurrentRow();
-            
-        _skipSelectionChanged = false;            
+
+        _skipSelectionChanged = false;
+    }
+
+    // Second, in-memory filter over the already-loaded ListEntities (NotesSelectorCtrl.EnableTextFilter) -
+    // never re-queries the repository. A leading '#' followed by digits matches NoteNumber exactly;
+    // anything else is matched as a case-insensitive substring of Topic or Tags.
+    private IEnumerable<NoteMinimalDto> GetFilteredEntities()
+    {
+        if (string.IsNullOrWhiteSpace(_textFilter))
+            return _ctrl.ListEntities;
+
+        var filter = _textFilter.Trim();
+
+        if (filter.StartsWith('#') && int.TryParse(filter.AsSpan(1), out var noteNumber))
+            return _ctrl.ListEntities.Where(n => n.NoteNumber == noteNumber);
+
+        return _ctrl.ListEntities.Where(n =>
+            (n.Topic?.Contains(filter, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (n.Tags?.Contains(filter, StringComparison.OrdinalIgnoreCase) ?? false));
     }
 
     private void OnSelectedNoteItemChanged()
@@ -279,14 +355,14 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[0].Visible = false;
         
         dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
-        dataGridNotes.Columns[1].Width = 80;
+        dataGridNotes.Columns[1].Width = 80; // room for the sort glyph next to right-aligned numbers
         dataGridNotes.Columns[1].HeaderText = "Number";        
         dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if(_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("NoteNumber"))
+        if(_ctrl.Store.AppConfig.CompactViewNoteslist || IsColumnHidden("NoteNumber"))
             dataGridNotes.Columns[1].Visible = false;
 
-        dataGridNotes.Columns[2].DataPropertyName = "Topic";        
-        dataGridNotes.Columns[2].MinimumWidth = 450;
+        dataGridNotes.Columns[2].DataPropertyName = "Topic";
+        dataGridNotes.Columns[2].MinimumWidth = 380;
 
         if(_ctrl.EmbededMode == false) // ### Hack for selector view
             dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
@@ -297,19 +373,19 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[3].Width = 70;
         dataGridNotes.Columns[3].HeaderText = "Priority";
         dataGridNotes.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if (_ctrl.HiddenColumns.Contains("Priority"))
+        if (IsColumnHidden("Priority"))
             dataGridNotes.Columns[3].Visible = false;
 
         dataGridNotes.Columns[4].DataPropertyName = "Tags";
-        dataGridNotes.Columns[4].Width = 160;
+        dataGridNotes.Columns[4].Width = 140;
         dataGridNotes.Columns[4].HeaderText = "Tags";
-        if (_ctrl.HiddenColumns.Contains("Tags"))
+        if (IsColumnHidden("Tags"))
             dataGridNotes.Columns[4].Visible = false;
 
         dataGridNotes.Columns[5].DataPropertyName = "InternalTags";
         dataGridNotes.Columns[5].Width = 150;
         dataGridNotes.Columns[5].HeaderText = "Status";
-        if (_ctrl.HiddenColumns.Contains("InternalTags"))
+        if (IsColumnHidden("InternalTags"))
             dataGridNotes.Columns[5].Visible = false;
 
         dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
@@ -321,7 +397,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         // are), so the header text was wrapping to two lines at 150%+. AllCells sizes the column
         // to whatever the header/cell text actually needs at the current DPI, so it never wraps.
         dataGridNotes.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-        if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("ModificationDateTime"))
+        if (_ctrl.Store.AppConfig.CompactViewNoteslist || IsColumnHidden("ModificationDateTime"))
             dataGridNotes.Columns[6].Visible = false;
 
         dataGridNotes.Columns[7].DataPropertyName = "CreationDateTime";
@@ -329,7 +405,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[7].HeaderText = "Creation date";
         dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         dataGridNotes.Columns[7].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-        if (_ctrl.Store.AppConfig.CompactViewNoteslist || _ctrl.HiddenColumns.Contains("CreationDateTime"))
+        if (_ctrl.Store.AppConfig.CompactViewNoteslist || IsColumnHidden("CreationDateTime"))
             dataGridNotes.Columns[7].Visible = false;
 
         dataGridNotes.Columns[8].DataPropertyName = "FolderId";
@@ -342,6 +418,17 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             }
         }
+    }
+
+    // _ctrl.HiddenColumns is a free-form comma-separated string (e.g. "Priority, InternalTags,
+    // ModificationDateTime"); a plain HiddenColumns.Contains("Tags") also matches inside
+    // "InternalTags", incorrectly hiding the Tags column whenever InternalTags is hidden. Tokenizes
+    // and compares whole entries instead.
+    private bool IsColumnHidden(string columnName)
+    {
+        return _ctrl.HiddenColumns
+            .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Contains(columnName, StringComparer.OrdinalIgnoreCase);
     }
 
     private NoteMinimalDto DataGridViewRowToNoteInfo(DataGridViewRow dgr)
