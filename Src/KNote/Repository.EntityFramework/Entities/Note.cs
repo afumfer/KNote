@@ -35,12 +35,12 @@ namespace KNote.Repository.EntityFramework.Entities
         
         public string Description { get; set; }
         
-        [MaxLength(64)]
+        [MaxLength(1024)]
         public string ContentType { get; set; }
-        
+
         public string Script { get; set; }
-        
-        [MaxLength(256)]        
+
+        [MaxLength(1024)]
         public string InternalTags { get; set; }
         
         [MaxLength(1024)]

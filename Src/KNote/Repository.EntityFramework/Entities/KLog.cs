@@ -32,6 +32,9 @@ namespace KNote.Repository.EntityFramework.Entities
         [Required(ErrorMessage = "KMSG: El mensaje de registro es requerido")]
         public string RegistryMessage { get; set; }
 
+        [MaxLength(64)]
+        public string ActionType { get; set; }
+
         #endregion
 
         #region Validations

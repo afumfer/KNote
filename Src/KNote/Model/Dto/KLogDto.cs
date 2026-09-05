@@ -86,6 +86,21 @@ public class KLogDto : SmartModelDtoBase
         }
     }
 
+    private string _actionType;
+    [MaxLength(64)]
+    public string ActionType
+    {
+        get { return _actionType; }
+        set
+        {
+            if (_actionType != value)
+            {
+                _actionType = value;
+                OnPropertyChanged("ActionType");
+            }
+        }
+    }
+
     #endregion
 
     #region Validations

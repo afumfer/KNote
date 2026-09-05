@@ -85,7 +85,7 @@ public class NoteMinimalDto : SmartModelDtoBase
     }
 
     private string _internalTags;
-    [MaxLength(256)]
+    [MaxLength(1024)]
     public string InternalTags
     {
         get { return _internalTags; }

@@ -92,7 +92,12 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<Note>().HasIndex(_ => _.Topic).IsUnique(false);
         modelBuilder.Entity<Note>().HasIndex(_ => new {_.Priority, _.Topic }).IsUnique(false);
         modelBuilder.Entity<Note>().HasIndex(_ => _.InternalTags).IsUnique(false);
-        modelBuilder.Entity<KAttribute>().HasIndex(_ => _.Name).IsUnique(true);
+        // Allows the same Name to be reused across different NoteTypeId (an attribute scoped to one
+        // note type doesn't collide with an equally-named one scoped to another). Duplicate Names
+        // among *global* attributes (NoteTypeId == null) are enforced in
+        // KntKAttributesSaveAsyncCommand instead of the database, because SQL Server/Sqlite treat
+        // NULLs as distinct values in a unique index and would not block duplicates there.
+        modelBuilder.Entity<KAttribute>().HasIndex(_ => new { _.Name, _.NoteTypeId }).IsUnique(true);
         modelBuilder.Entity<KAttribute>().HasIndex(_ => new { _.Order, _.Name }).IsUnique(false);
         modelBuilder.Entity<KAttributeTabulatedValue>().HasIndex(_ => new { _.KAttributeId, _.Value }).IsUnique(true);
         modelBuilder.Entity<NoteKAttribute>().HasIndex(_ => new { _.KAttributeId, _.NoteId }).IsUnique(true);

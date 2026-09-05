@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
@@ -55,6 +56,24 @@ public class KntKAttributesSaveAsyncCommand : KntCommandSaveServiceBase<KAttribu
 
     public override async Task<Result<KAttributeDto>> Execute()
     {
+        // The DB unique index covers (Name, NoteTypeId) - see ModelBuilderExtensions and
+        // KntSchemaUpdater revision 3 - which no longer blocks duplicate Names among *global*
+        // attributes (NoteTypeId == null): SQL Server/Sqlite treat each NULL as distinct in a unique
+        // index. Checked here instead, only for that one case - attributes scoped to a NoteTypeId
+        // stay covered by the DB index.
+        if (Param.NoteTypeId == null)
+        {
+            var resGlobal = await Repository.KAttributes.GetAllIncludeNullTypeAsync(null);
+            if (resGlobal.IsValid && resGlobal.Entity.Any(a =>
+                    a.KAttributeId != Param.KAttributeId &&
+                    string.Equals(a.Name, Param.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                var result = new Result<KAttributeDto>();
+                result.AddErrorMessage($"An attribute named \"{Param.Name}\" already exists.");
+                return result;
+            }
+        }
+
         if (Param.KAttributeId == Guid.Empty)
         {
             Param.KAttributeId = Guid.NewGuid();

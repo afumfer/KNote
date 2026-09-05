@@ -24,7 +24,6 @@ public class KntDbContext: DbContext
     public DbSet<Window> Windows { get; set; }
     public DbSet<TraceNote> TraceNotes { get; set; }
     public DbSet<KMessage> KMessages { get; set; }
-    public DbSet<KEvent> KEvents { get; set; }        
     public DbSet<KAttributeTabulatedValue> KAttributeTabulatedValues { get; set; }
     public DbSet<KLog> KLogs { get; set; }        
     public DbSet<NoteType> NoteTypes { get; set; }

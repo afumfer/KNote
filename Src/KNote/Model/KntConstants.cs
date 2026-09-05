@@ -161,19 +161,5 @@ public enum EnumActionType
     ScriptExecution
 }
 
-public enum EnumEventType
-{
-    OnCreateActionDefault,
-    OnSaveActionDefault,
-    OnDeleteActionDefault,
-    OnPropertyGetValueActionDefault,
-    OnPropertyChangeActionDefault,
-    OnCreateScriptExec,
-    OnSaveScriptExec,
-    OnDeleteScriptExec,
-    OnPropertyGetValueScriptExec,
-    OnPropertyChangeScriptExec
-}
-
 
 #endregion 

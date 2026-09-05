@@ -25,11 +25,12 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 2;
+    public const int CurrentSchemaRevision = 3;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
-        (2, AddTraceNotes)
+        (2, AddTraceNotes),
+        (3, UpdateSchemaV3)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -228,5 +229,80 @@ DROP INDEX IF EXISTS ""IX_TraceNotes_FromId_ToId"";
 CREATE UNIQUE INDEX IF NOT EXISTS ""IX_TraceNotes_FromId_ToId_TraceNoteTypeId"" ON ""TraceNotes"" (""FromId"", ""ToId"", ""TraceNoteTypeId"");
 CREATE INDEX IF NOT EXISTS ""IX_TraceNotes_ToId"" ON ""TraceNotes"" (""ToId"");
 CREATE INDEX IF NOT EXISTS ""IX_TraceNotes_TraceNoteTypeId"" ON ""TraceNotes"" (""TraceNoteTypeId"");
+";
+
+    // Revision 3:
+    //  - KAttributes: replaces the unique index on (Name) with (Name, NoteTypeId) - see
+    //    ModelBuilderExtensions and KntKAttributesSaveAsyncCommand's matching duplicate-Name check
+    //    for global (NoteTypeId == null) attributes, which the new composite index can no longer
+    //    catch by itself.
+    //  - KEvents: drops the table - dead code, never had a repository/service/UI consumer.
+    //  - KLogs: adds ActionType (nvarchar(64)/TEXT), to tag what kind of action produced each entry.
+    //  - Notes: widens ContentType (64 -> 1024, matching NoteInfoDto's existing [MaxLength(1024)] -
+    //    the entity was already narrower than what the DTO accepts) and InternalTags (256 -> 1024) to
+    //    nvarchar(1024) on SQL Server. Sqlite needs no DDL for this part: its TEXT columns have no
+    //    enforced length regardless of the declared VARCHAR(n)/CHAR(n) size (SQLite type affinity),
+    //    so every existing Sqlite database already accepts values of any length in these columns.
+    //
+    // KLogs.ActionType is the first ADD COLUMN this updater has ever needed (revision 2 only added
+    // new tables/indexes). Sqlite has no "ALTER TABLE ... ADD COLUMN IF NOT EXISTS", so unlike every
+    // other step here it can't be a single idempotent SQL string for that one statement - see
+    // AddKLogsActionTypeColumnIfMissingSqlite, which checks via PRAGMA table_info first. This matters
+    // for a brand-new database too: EnsureCreated() already creates KLogs with ActionType from the
+    // current model, so a blind ALTER would fail there with "duplicate column name".
+    private static void UpdateSchemaV3(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        if (repositoryRef.Provider == "Microsoft.Data.SqlClient")
+        {
+            ctx.Database.ExecuteSqlRaw(UpdateSchemaV3SqlServer);
+        }
+        else
+        {
+            ctx.Database.ExecuteSqlRaw(UpdateSchemaV3Sqlite);
+            AddKLogsActionTypeColumnIfMissingSqlite(ctx);
+        }
+    }
+
+    private static void AddKLogsActionTypeColumnIfMissingSqlite(KntDbContext ctx)
+    {
+        var connection = ctx.Database.GetDbConnection();
+
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "PRAGMA table_info(\"KLogs\")";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                // PRAGMA table_info columns, in order: cid, name, type, notnull, dflt_value, pk.
+                if (string.Equals(reader.GetString(1), "ActionType", StringComparison.OrdinalIgnoreCase))
+                    return;
+            }
+        }
+
+        ctx.Database.ExecuteSqlRaw(@"ALTER TABLE ""KLogs"" ADD COLUMN ""ActionType"" TEXT NULL;");
+    }
+
+    private const string UpdateSchemaV3SqlServer = @"
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_KAttributes_Name')
+    DROP INDEX [IX_KAttributes_Name] ON [KAttributes];
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_KAttributes_Name_NoteTypeId')
+    CREATE UNIQUE INDEX [IX_KAttributes_Name_NoteTypeId] ON [KAttributes] ([Name], [NoteTypeId]);
+
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'KEvents')
+    DROP TABLE [KEvents];
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('KLogs') AND name = 'ActionType')
+    ALTER TABLE [KLogs] ADD [ActionType] nvarchar(64) NULL;
+
+ALTER TABLE [Notes] ALTER COLUMN [ContentType] nvarchar(1024) NULL;
+ALTER TABLE [Notes] ALTER COLUMN [InternalTags] nvarchar(1024) NULL;
+";
+
+    private const string UpdateSchemaV3Sqlite = @"
+DROP INDEX IF EXISTS ""IX_KAttributes_Name"";
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_KAttributes_Name_NoteTypeId"" ON ""KAttributes"" (""Name"", ""NoteTypeId"");
+
+DROP TABLE IF EXISTS ""KEvents"";
 ";
 }
