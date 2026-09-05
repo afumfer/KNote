@@ -101,6 +101,7 @@ namespace KNote.ClientWin.Views
             this.comboOrderDirection.Size = new System.Drawing.Size(120, 23);
             this.comboOrderDirection.TabIndex = 2;
             this.comboOrderDirection.SelectedIndexChanged += new System.EventHandler(this.comboOrder_SelectedIndexChanged);
+            this.comboOrderDirection.SelectionChangeCommitted += new System.EventHandler(this.comboOrder_SelectionChangeCommitted);
             //
             // comboOrderColumn
             //
@@ -110,6 +111,7 @@ namespace KNote.ClientWin.Views
             this.comboOrderColumn.Size = new System.Drawing.Size(140, 23);
             this.comboOrderColumn.TabIndex = 1;
             this.comboOrderColumn.SelectedIndexChanged += new System.EventHandler(this.comboOrder_SelectedIndexChanged);
+            this.comboOrderColumn.SelectionChangeCommitted += new System.EventHandler(this.comboOrder_SelectionChangeCommitted);
             //
             // comboOrderMode
             //
@@ -119,6 +121,7 @@ namespace KNote.ClientWin.Views
             this.comboOrderMode.Size = new System.Drawing.Size(300, 23);
             this.comboOrderMode.TabIndex = 0;
             this.comboOrderMode.SelectedIndexChanged += new System.EventHandler(this.comboOrderMode_SelectedIndexChanged);
+            this.comboOrderMode.SelectionChangeCommitted += new System.EventHandler(this.comboOrder_SelectionChangeCommitted);
             //
             // label5
             //

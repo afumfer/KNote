@@ -171,12 +171,18 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
         comboOrderColumn.Enabled = isFixed;
         comboOrderDirection.Enabled = isFixed;
         UpdateOrderNotesInfoLabel();
-        _formIsDisty = true;
     }
 
     private void comboOrder_SelectedIndexChanged(object sender, EventArgs e)
     {
         UpdateOrderNotesInfoLabel();
+    }
+
+    // SelectedIndexChanged also fires for the programmatic SelectedIndex assignments in
+    // SetOrderNotesControls (called from ModelToControls on load), so it must not mark the form as
+    // modified. SelectionChangeCommitted fires only for an actual user-driven selection.
+    private void comboOrder_SelectionChangeCommitted(object sender, EventArgs e)
+    {
         _formIsDisty = true;
     }
 
