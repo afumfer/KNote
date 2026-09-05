@@ -19,6 +19,7 @@ internal class FakeKntService : IKntService
     public FakeKntNoteTypeService NoteTypesFake { get; } = new();
     public FakeKntTraceNoteTypeService TraceNoteTypesFake { get; } = new();
     public FakeKntKAttributeService KAttributesFake { get; } = new();
+    public FakeKntFolderService FoldersFake { get; } = new();
 
     public ILogger Logger { get; set; }
     public Guid IdServiceRef { get; } = Guid.NewGuid();
@@ -29,7 +30,7 @@ internal class FakeKntService : IKntService
     public IKntUserService Users => UsersFake;
     public IKntKAttributeService KAttributes => KAttributesFake;
     public IKntSystemValuesService SystemValues => throw new NotSupportedException();
-    public IKntFolderService Folders => throw new NotSupportedException();
+    public IKntFolderService Folders => FoldersFake;
     public IKntNoteService Notes => NotesFake;
     public IKntNoteTypeService NoteTypes => NoteTypesFake;
     public IKntTraceNoteTypeService TraceNoteTypes => TraceNoteTypesFake;

@@ -1296,7 +1296,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
             var resRep = await notes.GetAllAsync(n => n.FolderId == folderId);
-            result.Entity = resRep.Entity?.Select(n => n.GetSimpleDto<T>()).ToList();
+            result.Entity = resRep.Entity?.Select(n => n.GetSimpleDto<T>()).OrderBy(n => n.NoteNumber).ToList();
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);

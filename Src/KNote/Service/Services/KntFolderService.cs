@@ -58,6 +58,12 @@ public class KntFolderService : KntServiceBase, IKntFolderService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes)
+    {
+        var command = new KntFoldersUpdateOrderNotesAsyncCommand(Service, folderId, orderNotes);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<FolderDto>> DeleteAsync(Guid id)
     {
         var command = new KntFoldersDeleteAsyncCommand(Service, id);

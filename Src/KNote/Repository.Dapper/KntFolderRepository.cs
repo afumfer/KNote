@@ -247,6 +247,31 @@ public class KntFolderRepository : KntRepositoryDapperBase, IKntFolderRepository
         }
     }
 
+    public async Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes)
+    {
+        try
+        {
+            var result = new Result();
+
+            var db = GetOpenConnection();
+
+            var sql = @"UPDATE Folders SET OrderNotes = @OrderNotes WHERE FolderId = @FolderId";
+
+            var r = await db.ExecuteAsync(sql.ToString(), new { FolderId = folderId, OrderNotes = orderNotes });
+
+            if (r == 0)
+                result.AddErrorMessage("Entity not updated");
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> DeleteAsync(Guid id)
     {
         try

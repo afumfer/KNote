@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using System.Data;
 
@@ -107,11 +108,24 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
 
         CoonfigureGridStd();
 
-        if (OrderColNumber == 0)
+        // Folder mode (a specific folder selected in the tree) applies that folder's own default
+        // order every time it's opened, taking precedence over the global last-clicked-column state
+        // used by Filters/Search mode. Those other modes are untouched (Folder == null there).
+        if (_ctrl.Folder != null)
+        {
+            var criteria = NoteOrderCriteria.Parse(_ctrl.Folder.OrderNotes);
+            var colIndex = FindColumnIndex(criteria.EffectiveColumn);
+            if (colIndex < 0)
+                colIndex = FindColumnIndex(NoteOrderCriteria.DefaultColumn);
+
+            OrderColNumber = colIndex >= 0 ? colIndex : 1;
+            AscendigOrderNotes = criteria.Ascending;
+        }
+        else if (OrderColNumber == 0)
         {
             OrderColNumber = 1;
-            AscendigOrderNotes = true;                    
-        }                
+            AscendigOrderNotes = true;
+        }
         _sortOrder = getDefaultSortOrder();
 
         RefreshDataGridNotes();
@@ -235,8 +249,18 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
     private void dataGridNotes_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
     {
         OrderColNumber = e.ColumnIndex;
-        _sortOrder = getSortOrder(OrderColNumber);            
+        _sortOrder = getSortOrder(OrderColNumber);
         RefreshDataGridNotes();
+
+        // Only in Folder mode, and only when the folder is set to "follow my last order in the
+        // selector" (Auto), does a header click get persisted back to Folder.OrderNotes. Fixed and
+        // Default folders, and Filters/Search mode (Folder == null), only get the visual re-sort above.
+        if (_ctrl.Folder != null && NoteOrderCriteria.Parse(_ctrl.Folder.OrderNotes).Mode == NoteOrderMode.Auto)
+        {
+            var columnName = dataGridNotes.Columns[OrderColNumber].Name;
+            var newCriteria = new NoteOrderCriteria(NoteOrderMode.Auto, columnName, _sortOrder == SortOrder.Ascending);
+            _ = _ctrl.PersistFolderOrderNotesAsync(newCriteria.Format());
+        }
     }
 
     private void textFilter_KeyDown(object sender, KeyEventArgs e)
@@ -468,6 +492,14 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         dataGridNotes.ClearSelection();         
         dataGridNotes.Rows[0].Selected = true;
         _skipSelectionChanged = false;           
+    }
+
+    private int FindColumnIndex(string columnName)
+    {
+        for (int i = 0; i < dataGridNotes.Columns.Count; i++)
+            if (dataGridNotes.Columns[i].Name == columnName)
+                return i;
+        return -1;
     }
 
     private SortOrder getDefaultSortOrder()

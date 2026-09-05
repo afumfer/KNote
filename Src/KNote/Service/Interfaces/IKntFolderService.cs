@@ -14,5 +14,6 @@ public interface IKntFolderService
     Task<Result<FolderDto>> GetAsync(Guid folderId);
     Task<Result<FolderDto>> GetAsync(int folderNumber);
     Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo);
+    Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes);
     Task<Result<FolderDto>> DeleteAsync(Guid id);
 }

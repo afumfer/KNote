@@ -12,6 +12,7 @@ public interface IKntFolderRepository : IDisposable
     Task<Result<FolderDto>> GetHomeAsync();        
     Task<Result<FolderDto>> AddAsync(FolderDto entityInfo);
     Task<Result<FolderDto>> UpdateAsync(FolderDto entityInfo);
+    Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes);
     Task<Result> DeleteAsync(Guid id);
     Task<Result<int>> GetNextFolderNumber();
 }

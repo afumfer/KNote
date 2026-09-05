@@ -1655,7 +1655,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             else
                 sql = GetMinimalSelectNotes();
 
-            sql += @" WHERE FolderId = @folderId ORDER BY [Priority], Topic ;";
+            sql += @" WHERE FolderId = @folderId ORDER BY NoteNumber ;";
             var entity = await db.QueryAsync<T>(sql.ToString(), new { folderId });
             result.Entity = entity.ToList();
 

@@ -454,6 +454,20 @@ public class KNoteScriptLibrary: Library
         return result.Entity;            
     }
 
+    public bool SetFolderOrderNotes(string repositoryAlias, int folderNumber, string orderNotes)
+    {
+        ServiceRef serviceRef = GetServiceRef(repositoryAlias);
+
+        var folder = GetFolderByNum(repositoryAlias, folderNumber);
+        if (folder == null)
+            return false;
+
+        Task<Result> task = serviceRef.Service.Folders.UpdateOrderNotesAsync(folder.FolderId, orderNotes);
+        task.Wait();
+
+        return task.Result.IsValid;
+    }
+
     public NoteDto GetNoteByNum(string repositoryAlias, int noteNumber)
     {
         ServiceRef serviceRef = GetServiceRef(repositoryAlias);

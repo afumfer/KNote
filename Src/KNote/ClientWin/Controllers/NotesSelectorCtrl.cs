@@ -289,7 +289,25 @@ public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteMinimalDto>,
     #endregion
 
     #region Extra methods
-    
+
+    // Fire-and-forget from the grid's header-click handler: a failure to persist the folder's
+    // remembered sort order must never disrupt browsing, so exceptions are swallowed here.
+    public async Task PersistFolderOrderNotesAsync(string orderNotes)
+    {
+        if (Folder == null || Service == null)
+            return;
+
+        try
+        {
+            var res = await Service.Folders.UpdateOrderNotesAsync(Folder.FolderId, orderNotes);
+            if (res.IsValid)
+                Folder.OrderNotes = orderNotes;
+        }
+        catch (Exception)
+        {
+        }
+    }
+
     public List<NoteMinimalDto> GetSelectedListNotesMinimal()
     {
         return View.GetSelectedListItem();

@@ -220,6 +220,37 @@ public class KntFolderRepository: KntRepositoryEFBase, IKntFolderRepository
         }
     }
 
+    public async Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes)
+    {
+        try
+        {
+            var result = new Result();
+
+            var ctx = GetOpenConnection();
+            var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
+
+            var resGenRepGet = await folders.GetAsync((object)folderId);
+            if (!resGenRepGet.IsValid)
+            {
+                result.AddListErrorMessage(resGenRepGet.ListErrorMessage);
+                await CloseIsTempConnection(ctx);
+                return result;
+            }
+
+            resGenRepGet.Entity.OrderNotes = orderNotes;
+            var resGenRep = await folders.UpdateAsync(resGenRepGet.Entity);
+            result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> DeleteAsync(Guid id)
     {
         try
@@ -227,7 +258,7 @@ public class KntFolderRepository: KntRepositoryEFBase, IKntFolderRepository
             var result = new Result();
 
             var ctx = GetOpenConnection();
-     
+
             var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
 
             var resGenRep = await folders.DeleteAsync(id);

@@ -95,6 +95,20 @@ public class KntFoldersSaveAsyncCommand : KntCommandSaveServiceBase<FolderDto, R
     }
 }
 
+public class KntFoldersUpdateOrderNotesAsyncCommand : KntCommandServiceBase<(Guid FolderId, string OrderNotes), Result>
+{
+    public KntFoldersUpdateOrderNotesAsyncCommand(IKntService service, Guid folderId, string orderNotes)
+        : base(service, (folderId, orderNotes))
+    {
+
+    }
+
+    public override async Task<Result> Execute()
+    {
+        return await Repository.Folders.UpdateOrderNotesAsync(Param.FolderId, Param.OrderNotes);
+    }
+}
+
 public class KntFoldersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<FolderDto>>
 {
     public KntFoldersDeleteAsyncCommand(IKntService service, Guid id) : base(service, id)
