@@ -1572,6 +1572,45 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         return str;
     }
 
+    // Positive (non-negated) match for one search token: Topic/Tags, optionally Description, and
+    // optionally any related NoteTasks row (1-to-n) whose own Tags/Description matches too.
+    private string BuildSearchTokenCondition(string token, string collate, bool searchDescription, bool searchInNoteTasks)
+    {
+        var parts = new List<string>
+        {
+            $"Topic{collate} LIKE '%{token}%'",
+            $"Tags{collate} LIKE '%{token}%'"
+        };
+
+        if (searchDescription)
+            parts.Add($"Description{collate} LIKE '%{token}%'");
+
+        if (searchInNoteTasks)
+            parts.Add($@"EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
+                            AND ([NoteTasks].Tags{collate} LIKE '%{token}%' OR [NoteTasks].Description{collate} LIKE '%{token}%'))");
+
+        return "(" + string.Join(" OR ", parts) + ")";
+    }
+
+    // Negated match (a "!token") for one search token: every field checked above must NOT match.
+    private string BuildSearchTokenNotCondition(string tokenNot, string collate, bool searchDescription, bool searchInNoteTasks)
+    {
+        var parts = new List<string>
+        {
+            $"Topic{collate} NOT LIKE '%{tokenNot}%'",
+            $"Tags{collate} NOT LIKE '%{tokenNot}%'"
+        };
+
+        if (searchDescription)
+            parts.Add($"Description{collate} NOT LIKE '%{tokenNot}%'");
+
+        if (searchInNoteTasks)
+            parts.Add($@"NOT EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
+                            AND ([NoteTasks].Tags{collate} LIKE '%{tokenNot}%' OR [NoteTasks].Description{collate} LIKE '%{tokenNot}%'))");
+
+        return "(" + string.Join(" AND ", parts) + ")";
+    }
+
     // Root folder id plus every descendant in its subtree, computed in-memory (same "load all
     // folders, walk ParentId in C#" approach already used by IKntFolderRepository.GetTreeAsync -
     // the folder table is never large enough to justify a recursive CTE per SQL engine).
@@ -1800,45 +1839,15 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
                 // --------------------------------------------------
 
-                if (!flagSearchDescription)
+                foreach (var token in listTokens)
                 {
-                    foreach (var token in listTokens)
-                    {
-                        if (!string.IsNullOrEmpty(token))
-                        {
-                            if (token[0] != '!')
-                            {
-                                sqlWhere = AddAndToStringSQL(sqlWhere);
-                                sqlWhere += $" (Topic{collate} LIKE '%{token}%' OR Tags{collate} LIKE '%{token}%' ) ";
-                            }
-                            else
-                            {
-                                var tokenNot = token.Substring(1, token.Length - 1);
-                                sqlWhere = AddAndToStringSQL(sqlWhere);
-                                sqlWhere += $" (Topic{collate} NOT LIKE '%{tokenNot}%' AND Tags{collate} NOT LIKE '%{tokenNot}%')";
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var token in listTokens)
-                    {
-                        if (!string.IsNullOrEmpty(token))
-                        {
-                            if (token[0] != '!')
-                            {
-                                sqlWhere = AddAndToStringSQL(sqlWhere);
-                                sqlWhere += $" (Topic{collate} LIKE '%{token}%' OR Tags{collate} LIKE '%{token}%' OR Description{collate} LIKE '%{token}%') ";
-                            }
-                            else
-                            {
-                                var tokenNot = token.Substring(1, token.Length - 1);
-                                sqlWhere = AddAndToStringSQL(sqlWhere);
-                                sqlWhere += $" (Topic{collate} NOT LIKE '%{tokenNot}%' AND Tags{collate} NOT LIKE '%{tokenNot}%' AND Description{collate} NOT LIKE '%{tokenNot}%') ";
-                            }
-                        }
-                    }
+                    if (string.IsNullOrEmpty(token))
+                        continue;
+
+                    sqlWhere = AddAndToStringSQL(sqlWhere);
+                    sqlWhere += token[0] != '!'
+                        ? BuildSearchTokenCondition(token, collate, flagSearchDescription, notesSearch.SearchInNoteTasks) + " "
+                        : BuildSearchTokenNotCondition(token.Substring(1, token.Length - 1), collate, flagSearchDescription, notesSearch.SearchInNoteTasks) + " ";
                 }
                 if (sqlWhere != "")
                     sqlWhere = " WHERE " + sqlWhere;

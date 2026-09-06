@@ -1442,58 +1442,41 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                 bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
                 // --------------------------------------------------
 
-                if (!flagSearchDescription)
+                var searchInNoteTasks = notesSearch.SearchInNoteTasks;
+
+                foreach (var token in listTokens)
                 {
-                    foreach (var token in listTokens)
+                    if (string.IsNullOrEmpty(token))
+                        continue;
+
+                    if (token[0] != '!')
                     {
-                        if (!string.IsNullOrEmpty(token))
-                        {
-                            if (token[0] != '!')
-                            {
-                                var pattern = $"%{token}%";
-                                query = isSqlServer
-                                    ? query.Where(n => EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(token)
-                                                     || EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(token))
-                                    : query.Where(n => EF.Functions.Like(n.Topic, pattern) || EF.Functions.Like(n.Tags, pattern));
-                            }
-                            else
-                            {
-                                var tokenNot = token.Substring(1, token.Length - 1);
-                                var patternNot = $"%{tokenNot}%";
-                                query = isSqlServer
-                                    ? query.Where(n => !EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(tokenNot)
-                                                     && !EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(tokenNot))
-                                    : query.Where(n => !EF.Functions.Like(n.Topic, patternNot) && !EF.Functions.Like(n.Tags, patternNot));
-                            }
-                        }
+                        var pattern = $"%{token}%";
+                        query = isSqlServer
+                            ? query.Where(n => EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(token)
+                                             || EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(token)
+                                             || (flagSearchDescription && EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(token))
+                                             || (searchInNoteTasks && n.NoteTasks.Any(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(token)
+                                                                                         || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(token))))
+                            : query.Where(n => EF.Functions.Like(n.Topic, pattern)
+                                             || EF.Functions.Like(n.Tags, pattern)
+                                             || (flagSearchDescription && EF.Functions.Like(n.Description, pattern))
+                                             || (searchInNoteTasks && n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, pattern) || EF.Functions.Like(t.Description, pattern))));
                     }
-                }
-                else
-                {
-                    foreach (var token in listTokens)
+                    else
                     {
-                        if (!string.IsNullOrEmpty(token))
-                        {
-                            if (token[0] != '!')
-                            {
-                                var pattern = $"%{token}%";
-                                query = isSqlServer
-                                    ? query.Where(n => EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(token)
-                                                     || EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(token)
-                                                     || EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(token))
-                                    : query.Where(n => EF.Functions.Like(n.Topic, pattern) || EF.Functions.Like(n.Tags, pattern) || EF.Functions.Like(n.Description, pattern));
-                            }
-                            else
-                            {
-                                var tokenNot = token.Substring(1, token.Length - 1);
-                                var patternNot = $"%{tokenNot}%";
-                                query = isSqlServer
-                                    ? query.Where(n => !EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(tokenNot)
-                                                     && !EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(tokenNot)
-                                                     && !EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(tokenNot))
-                                    : query.Where(n => !EF.Functions.Like(n.Topic, patternNot) && !EF.Functions.Like(n.Tags, patternNot) && !EF.Functions.Like(n.Description, patternNot));
-                            }
-                        }
+                        var tokenNot = token.Substring(1, token.Length - 1);
+                        var patternNot = $"%{tokenNot}%";
+                        query = isSqlServer
+                            ? query.Where(n => !EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(tokenNot)
+                                             && !EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(tokenNot)
+                                             && (!flagSearchDescription || !EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(tokenNot))
+                                             && (!searchInNoteTasks || !n.NoteTasks.Any(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(tokenNot)
+                                                                                           || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(tokenNot))))
+                            : query.Where(n => !EF.Functions.Like(n.Topic, patternNot)
+                                             && !EF.Functions.Like(n.Tags, patternNot)
+                                             && (!flagSearchDescription || !EF.Functions.Like(n.Description, patternNot))
+                                             && (!searchInNoteTasks || !n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, patternNot) || EF.Functions.Like(t.Description, patternNot))));
                     }
                 }
             }

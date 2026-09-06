@@ -98,7 +98,12 @@ public partial class NotesSearchParamForm : Form, IViewEmbeddable
         var search = new SelectedNotesInServiceRef
         {
             ServiceRef = (ServiceRef)comboRepositories.SelectedItem,
-            NotesSearch = new NotesSearchDto { TextSearch = textTextSearch.Text, SearchInDescription = checkSearchInDescription.Checked }
+            NotesSearch = new NotesSearchDto
+            {
+                TextSearch = textTextSearch.Text,
+                SearchInDescription = checkSearchInDescription.Checked,
+                SearchInNoteTasks = checkSearchInNoteTasks.Checked
+            }
         };
 
         _ctrl.NotifySearchApplied(search);
@@ -132,6 +137,7 @@ public partial class NotesSearchParamForm : Form, IViewEmbeddable
     {
         textTextSearch.Text = "";
         checkSearchInDescription.Checked = true;
+        checkSearchInNoteTasks.Checked = false;
     }
 
     private void textTextSearch_KeyUp(object sender, KeyEventArgs e)

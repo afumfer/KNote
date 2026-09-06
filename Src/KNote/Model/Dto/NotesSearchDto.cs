@@ -11,6 +11,10 @@ public class NotesSearchDto : SmartModelDtoBase
 
     public bool SearchInDescription { get; set; }
 
+    // Also matches each search token against the Tags/Description of the note's related
+    // NoteTasks (1-to-n), not just the note's own Topic/Tags/Description.
+    public bool SearchInNoteTasks { get; set; }
+
     public PageIdentifier PageIdentifier { get; set; } = new PageIdentifier();
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

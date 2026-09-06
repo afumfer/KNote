@@ -33,6 +33,7 @@ namespace KNote.ClientWin.Views
             this.panelForm = new System.Windows.Forms.Panel();
             this.labelHelp = new System.Windows.Forms.Label();
             this.checkSearchInDescription = new System.Windows.Forms.CheckBox();
+            this.checkSearchInNoteTasks = new System.Windows.Forms.CheckBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.buttonClean = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
@@ -51,6 +52,7 @@ namespace KNote.ClientWin.Views
             // panelForm
             // 
             this.panelForm.Controls.Add(this.checkSearchInDescription);
+            this.panelForm.Controls.Add(this.checkSearchInNoteTasks);
             this.panelForm.Controls.Add(this.pictureBox1);
             this.panelForm.Controls.Add(this.labelHelp);
             this.panelForm.Controls.Add(this.buttonClean);
@@ -62,7 +64,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(437, 314);
+            this.panelForm.Size = new System.Drawing.Size(437, 338);
             this.panelForm.TabIndex = 8;
             //
             // labelHelp
@@ -87,6 +89,16 @@ namespace KNote.ClientWin.Views
             this.checkSearchInDescription.TabIndex = 1;
             this.checkSearchInDescription.Text = "Search in note description";
             this.checkSearchInDescription.UseVisualStyleBackColor = true;
+            //
+            // checkSearchInNoteTasks
+            //
+            this.checkSearchInNoteTasks.AutoSize = true;
+            this.checkSearchInNoteTasks.Location = new System.Drawing.Point(7, 205);
+            this.checkSearchInNoteTasks.Name = "checkSearchInNoteTasks";
+            this.checkSearchInNoteTasks.Size = new System.Drawing.Size(133, 19);
+            this.checkSearchInNoteTasks.TabIndex = 8;
+            this.checkSearchInNoteTasks.Text = "Search in note tasks";
+            this.checkSearchInNoteTasks.UseVisualStyleBackColor = true;
             //
             // pictureBox1
             //
@@ -166,7 +178,7 @@ namespace KNote.ClientWin.Views
             this.panelBottom.Controls.Add(this.buttonCancel);
             this.panelBottom.Controls.Add(this.buttonAccept);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 314);
+            this.panelBottom.Location = new System.Drawing.Point(0, 338);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(437, 50);
             this.panelBottom.TabIndex = 11;
@@ -197,7 +209,7 @@ namespace KNote.ClientWin.Views
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(437, 364);
+            this.ClientSize = new System.Drawing.Size(437, 388);
             this.Controls.Add(this.panelForm);
             this.Controls.Add(this.panelBottom);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -225,6 +237,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textTextSearch;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkSearchInDescription;
+        private System.Windows.Forms.CheckBox checkSearchInNoteTasks;
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonAccept;
