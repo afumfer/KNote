@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 
 namespace KNote.ClientWin.Core;
 
@@ -58,6 +59,13 @@ public class InteractiveScriptSession : IDisposable
     // something else (a timer, a server, another readline interface, ...). Scripts that read stdin
     // without readline (raw process.stdin.on('data', ...)) aren't covered - CloseInput remains the
     // fallback for those.
+    // Plain Encoding.UTF8 emits a BOM preamble on the first write - StandardInputEncoding would
+    // then have .NET write those 3 BOM bytes as the very first thing on the child's stdin, which
+    // shows up as a stray U+FEFF character in whatever the script's first input()/readline() call
+    // reads back (e.g. "Hello, ﻿Armando!" instead of "Hello, Armando!"). This variant never
+    // emits one, on any of the three streams it's used for below.
+    private static readonly Encoding Utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
     private const string NodeReadlineStdinReleaseShim =
         "(function(){var rl=require('node:readline');var c=rl.createInterface;" +
         "rl.createInterface=function(){var i=c.apply(rl,arguments);" +
@@ -82,12 +90,26 @@ public class InteractiveScriptSession : IDisposable
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                // Without these, Process reads the child's stdout/stderr using the parent's
+                // Console.OutputEncoding (this WinForms app's - typically the system's OEM/ANSI
+                // codepage). dotnet run (cs) and node (js) always write UTF-8 to a redirected
+                // stream regardless of that codepage, so any non-ASCII byte they emit (accented
+                // text, dotnet's own build-progress glyphs) gets misdecoded - garbled characters
+                // in KntScriptConsole even for scripts that never print anything themselves.
+                // Forcing UTF-8 on the read side, plus PYTHONIOENCODING below so Python's own
+                // write side matches it too, keeps all three engines consistent.
+                StandardOutputEncoding = Utf8NoBom,
+                StandardErrorEncoding = Utf8NoBom,
+                StandardInputEncoding = Utf8NoBom,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = workingDir
             },
             EnableRaisingEvents = true
         };
+
+        if (fileExtension == "py")
+            process.StartInfo.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
 
         return new InteractiveScriptSession(process, tempFullFileName);
     }

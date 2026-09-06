@@ -27,14 +27,14 @@ namespace KNote.ClientWin.Tests;
 [TestClass]
 public class StoreRunCodeInteractiveConsoleTests
 {
-    // GetIncludeGlobalCode (the pre-existing "experimental hack" every engine runs through) needs
-    // a working assistant ServiceRef - a fake with an empty result is enough to reach the dispatch
-    // under test without touching a real database.
+    // GetIncludeCode (every engine runs through it) needs a working assistant ServiceRef - a
+    // fake with no "IncludeCode" TraceNoteType is enough to reach the dispatch under test without
+    // touching a real database (it short-circuits before ever calling GetTraceNotesFromAsync).
     private static Store CreateStoreWithEmptyGlobalIncludes()
     {
         var store = TestStoreFactory.CreateEmpty();
         var fakeService = new FakeKntService();
-        fakeService.NotesFake.GetFilterAsyncImpl = _ => Task.FromResult(new Result<List<NoteInfoDto>>(new List<NoteInfoDto>()));
+        fakeService.TraceNoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<TraceNoteTypeDto>>(new List<TraceNoteTypeDto>()));
         store.SetAssistantServiceRef(TestServiceRefFactory.CreateWithFakeService(fakeService));
         return store;
     }

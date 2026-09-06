@@ -583,8 +583,7 @@ public class Store
                 case "cs":
                 case "py":
                 case "js":
-                    // Experimental hack, insert global include
-                    code += await GetIncludeGlobalCode(ct.ForScript);
+                    code = AppendIncludeCode(code, await GetIncludeCode(note.NoteId, ct.ForScript));
                     if (runInNewTask)
                         RunScriptInOsConsole(ct.ForScript, code);
                     else
@@ -598,8 +597,7 @@ public class Store
                     break;
 
                 default:
-                    // Experimental hack, insert global include
-                    code += await GetIncludeGlobalCode("knt");
+                    code = AppendIncludeCode(code, await GetIncludeCode(note.NoteId, "knt"));
 
                     if (runInNewTask)
                         RunKntSCodeInNewThread(code);
@@ -721,7 +719,7 @@ public class Store
         if (ct == null || !SupportsStdOutConsole(ct.ForScript))
             return false;
 
-        var code = (note?.Script ?? "") + await GetIncludeGlobalCode(ct.ForScript);
+        var code = AppendIncludeCode(note?.Script ?? "", await GetIncludeCode(note.NoteId, ct.ForScript));
 
         Cursor.Current = Cursors.WaitCursor;
         OnControllerNotification(caller, $"Running {ScriptEngineLabel(ct.ForScript)} in stdout console...");
@@ -804,23 +802,41 @@ public class Store
         }
     }
     
-    public async Task<string> GetIncludeGlobalCode(string codeType)
+    // Includes are only pulled from notes explicitly linked to noteId via a TraceNote of type
+    // "IncludeCode" (FromId = note providing the code, ToId = noteId, the note being run) - not
+    // from every note in the database anymore. Several such TraceNotes are followed in TraceNote.Order.
+    public async Task<string> GetIncludeCode(Guid noteId, string codeType)
     {
         string codeResult = string.Empty;
 
         var assistantServiceRef = GetAssistantServiceRef();
-        var includes = await assistantServiceRef.Service.Notes.GetFilterAsync(new NotesFilterDto { Tags = KntConst.IncludeGlobalCodeTag });
 
-        foreach (var inc in includes.Entity)
+        var traceNoteTypes = await assistantServiceRef.Service.TraceNoteTypes.GetAllAsync();
+        var includeType = traceNoteTypes.Entity?.FirstOrDefault(t => t.Name == KntConst.IncludeCode);
+        if (includeType == null)
+            return codeResult;
+
+        var incomingTraces = await assistantServiceRef.Service.Notes.GetTraceNotesFromAsync(noteId);
+        var orderedIncludes = incomingTraces.Entity
+            .Where(t => t.TraceNoteTypeId == includeType.TraceNoteTypeId)
+            .OrderBy(t => t.Order);
+
+        foreach (var trace in orderedIncludes)
         {
-            var ct = inc.GetContentTypeExt();
+            var inc = await assistantServiceRef.Service.Notes.GetAsync(trace.FromId);
+            var ct = inc.Entity?.GetContentTypeExt();
             if (ct != null && ct.ForScript == codeType)
-                codeResult += $"\r\n\r\n{inc.Script}";
+                codeResult += $"\r\n\r\n{inc.Entity.Script}";
         }
 
         return codeResult;
     }
 
-    #endregion 
+    // Not a real #include: plain text concatenation, one script after another, main note first -
+    // the combined text is what actually gets run as a single script.
+    private static string AppendIncludeCode(string code, string includeCode) =>
+        string.IsNullOrEmpty(includeCode) ? code : $"{code}\r\n\r\n{includeCode}";
+
+    #endregion
 }
   
