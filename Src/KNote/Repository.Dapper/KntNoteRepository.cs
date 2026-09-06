@@ -29,16 +29,40 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
     #region IKntNoteRepository
 
     public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
-    {        
-        using var db = GetOpenConnection();
-        var folders = new KntFolderRepository(db, _repositoryRef);
-           
-        var idHomeFolder = (await folders.GetHomeAsync()).Entity?.FolderId;
-          
-        if (idHomeFolder != null)
-            return await GetByFolderAsync((Guid)idHomeFolder);
-        else
-            return null;            
+    {
+        try
+        {
+            var result = new Result<List<NoteInfoDto>>();
+
+            var db = GetOpenConnection();
+            var folders = new KntFolderRepository(db, _repositoryRef);
+
+            var idHomeFolder = (await folders.GetHomeAsync()).Entity?.FolderId;
+
+            if (idHomeFolder == null)
+            {
+                await CloseIsTempConnection(db);
+                return null;
+            }
+
+            // Dedicated query - not a delegation to GetByFolderAsync - so the Home page keeps its
+            // own Priority/Topic ordering regardless of GetByFolderPrivateAsync's NoteNumber
+            // default (see the per-folder OrderNotes feature), matching
+            // Repository.EntityFramework's HomeNotesAsync.
+            var sql = GetSelectNotes() + @" WHERE FolderId = @FolderId ORDER BY [Priority], Topic ";
+            sql += (db.GetType().Name == "SqliteConnection") ? " LIMIT 25 ;" : " OFFSET 0 ROWS FETCH NEXT 25 ROWS ONLY;";
+
+            var entity = await db.QueryAsync<NoteInfoDto>(sql.ToString(), new { FolderId = idHomeFolder });
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
     }
 
     public async Task<Result<List<NoteInfoDto>>> GetAllAsync()
@@ -1472,14 +1496,14 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         return result + 1;
     }
 
-    private long GetCountNotes(DbConnection db, string filter)
+    private long GetCountNotes(DbConnection db, string filter, DynamicParameters parameters)
     {
         var sql =
-            @"SELECT count(*) 
+            @"SELECT count(*)
             FROM Notes "
             + filter;
 
-        var result = db.ExecuteScalar(sql);
+        var result = db.ExecuteScalar(sql, parameters);
 
         return (result == null) ? 0 : Convert.ToInt64(result);
     }
@@ -1506,10 +1530,11 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
     private static string GetAccentInsensitiveCollateSuffix(DbConnection db) =>
         db.GetType().Name == "SqliteConnection" ? "" : AccentInsensitiveCollate;
 
-    private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter, DbConnection db)
+    private string GetWhereFilterNotesInfoDto(NotesFilterDto notesFilter, DbConnection db, DynamicParameters parameters)
     {
         string strWhere = "" ;
         var collate = GetAccentInsensitiveCollateSuffix(db);
+        int paramIndex = 0;
 
         if (notesFilter.FolderId != null)
         {
@@ -1517,46 +1542,61 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             if (notesFilter.IncludeChildFolders)
             {
                 var folderIds = GetDescendantFolderIds(db, notesFilter.FolderId.Value);
-                var idList = string.Join(",", folderIds.Select(id => $"'{id.ToString().ToUpper()}'"));
-                strWhere += $"FolderId IN ({idList}) ";
+                var folderIdsParam = $"wFolderIds{paramIndex++}";
+                parameters.Add(folderIdsParam, folderIds);
+                strWhere += $"FolderId IN @{folderIdsParam} ";
             }
             else
             {
-                strWhere += "FolderId = '" + notesFilter.FolderId.ToString().ToUpper() + "' ";
+                var folderIdParam = $"wFolderId{paramIndex++}";
+                parameters.Add(folderIdParam, notesFilter.FolderId.Value);
+                strWhere += $"FolderId = @{folderIdParam} ";
             }
         }
 
         if (notesFilter.NoteTypeId != null)
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += "NoteTypeId = '" + notesFilter.NoteTypeId.ToString().ToUpper() + "' ";
+            var noteTypeIdParam = $"wNoteTypeId{paramIndex++}";
+            parameters.Add(noteTypeIdParam, notesFilter.NoteTypeId.Value);
+            strWhere += $"NoteTypeId = @{noteTypeIdParam} ";
         }
 
         if (!string.IsNullOrEmpty(notesFilter.Topic))
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += $"Topic{collate} LIKE '%" + notesFilter.Topic.ToString() + "%' ";
+            var topicParam = $"wTopic{paramIndex++}";
+            parameters.Add(topicParam, $"%{notesFilter.Topic}%");
+            strWhere += $"Topic{collate} LIKE @{topicParam} ";
         }
 
         if (!string.IsNullOrEmpty(notesFilter.Tags))
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += $"Tags{collate} LIKE '%" + notesFilter.Tags.ToString() + "%' ";
+            var tagsParam = $"wTags{paramIndex++}";
+            parameters.Add(tagsParam, $"%{notesFilter.Tags}%");
+            strWhere += $"Tags{collate} LIKE @{tagsParam} ";
         }
 
         if (!string.IsNullOrEmpty(notesFilter.Description))
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += $"Description{collate} LIKE '%" + notesFilter.Description.ToString() + "%' ";
+            var descriptionParam = $"wDescription{paramIndex++}";
+            parameters.Add(descriptionParam, $"%{notesFilter.Description}%");
+            strWhere += $"Description{collate} LIKE @{descriptionParam} ";
         }
 
         foreach (var f in notesFilter.AttributesFilter)
         {
             strWhere = AddAndToStringSQL(strWhere);
+            var atrIdParam = $"wAtrId{paramIndex++}";
+            var atrValueParam = $"wAtrValue{paramIndex++}";
+            parameters.Add(atrIdParam, f.AtrId);
+            parameters.Add(atrValueParam, f.Value);
             strWhere += $@" Notes.NoteId in (SELECT [NoteKAttributes].NoteId FROM NoteKAttributes
                                 WHERE [NoteKAttributes].NoteId = [Notes].NoteId
-                                    AND NoteKAttributes.KAttributeId = '{f.AtrId.ToString().ToUpper()}'
-                                    AND NoteKAttributes.Value = '{f.Value}' ) ";
+                                    AND NoteKAttributes.KAttributeId = @{atrIdParam}
+                                    AND NoteKAttributes.Value = @{atrValueParam} ) ";
         }
 
         if (!string.IsNullOrEmpty(strWhere))
@@ -1574,39 +1614,45 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
     // Positive (non-negated) match for one search token: Topic/Tags, optionally Description, and
     // optionally any related NoteTasks row (1-to-n) whose own Tags/Description matches too.
-    private string BuildSearchTokenCondition(string token, string collate, bool searchDescription, bool searchInNoteTasks)
+    private string BuildSearchTokenCondition(string token, string collate, bool searchDescription, bool searchInNoteTasks, DynamicParameters parameters, ref int paramIndex)
     {
+        var tokenParam = $"tok{paramIndex++}";
+        parameters.Add(tokenParam, $"%{token}%");
+
         var parts = new List<string>
         {
-            $"Topic{collate} LIKE '%{token}%'",
-            $"Tags{collate} LIKE '%{token}%'"
+            $"Topic{collate} LIKE @{tokenParam}",
+            $"Tags{collate} LIKE @{tokenParam}"
         };
 
         if (searchDescription)
-            parts.Add($"Description{collate} LIKE '%{token}%'");
+            parts.Add($"Description{collate} LIKE @{tokenParam}");
 
         if (searchInNoteTasks)
             parts.Add($@"EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
-                            AND ([NoteTasks].Tags{collate} LIKE '%{token}%' OR [NoteTasks].Description{collate} LIKE '%{token}%'))");
+                            AND ([NoteTasks].Tags{collate} LIKE @{tokenParam} OR [NoteTasks].Description{collate} LIKE @{tokenParam}))");
 
         return "(" + string.Join(" OR ", parts) + ")";
     }
 
     // Negated match (a "!token") for one search token: every field checked above must NOT match.
-    private string BuildSearchTokenNotCondition(string tokenNot, string collate, bool searchDescription, bool searchInNoteTasks)
+    private string BuildSearchTokenNotCondition(string tokenNot, string collate, bool searchDescription, bool searchInNoteTasks, DynamicParameters parameters, ref int paramIndex)
     {
+        var tokenParam = $"tokNot{paramIndex++}";
+        parameters.Add(tokenParam, $"%{tokenNot}%");
+
         var parts = new List<string>
         {
-            $"Topic{collate} NOT LIKE '%{tokenNot}%'",
-            $"Tags{collate} NOT LIKE '%{tokenNot}%'"
+            $"Topic{collate} NOT LIKE @{tokenParam}",
+            $"Tags{collate} NOT LIKE @{tokenParam}"
         };
 
         if (searchDescription)
-            parts.Add($"Description{collate} NOT LIKE '%{tokenNot}%'");
+            parts.Add($"Description{collate} NOT LIKE @{tokenParam}");
 
         if (searchInNoteTasks)
             parts.Add($@"NOT EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
-                            AND ([NoteTasks].Tags{collate} LIKE '%{tokenNot}%' OR [NoteTasks].Description{collate} LIKE '%{tokenNot}%'))");
+                            AND ([NoteTasks].Tags{collate} LIKE @{tokenParam} OR [NoteTasks].Description{collate} LIKE @{tokenParam}))");
 
         return "(" + string.Join(" AND ", parts) + ")";
     }
@@ -1766,9 +1812,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             else
                 sql = GetMinimalSelectNotes();
 
-            var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter, db);
+            var parameters = new DynamicParameters();
+            var sqlWhere = GetWhereFilterNotesInfoDto(notesFilter, db, parameters);
 
-            result.TotalCount = GetCountNotes(db, sqlWhere);
+            result.TotalCount = GetCountNotes(db, sqlWhere, parameters);
 
             sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
 
@@ -1782,12 +1829,11 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 else
                     sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
-                entity = await db.QueryAsync<T>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
+                parameters.Add("Offset", pagination.Offset);
+                parameters.Add("NumRecords", pagination.PageSize);
             }
-            else
-            {
-                entity = await db.QueryAsync<T>(sql.ToString(), new { });
-            }
+
+            entity = await db.QueryAsync<T>(sql.ToString(), parameters);
 
             result.Entity = entity.ToList();
 
@@ -1824,10 +1870,13 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             sqlWhere = "";
             sqlOrder = @" ORDER BY Topic ";
+            var parameters = new DynamicParameters();
+            var paramIndex = 0;
 
             if (searchNumber > 0)
             {
-                sqlWhere = " WHERE NoteNumber = " + searchNumber.ToString() + " ";
+                sqlWhere = " WHERE NoteNumber = @searchNumber ";
+                parameters.Add("searchNumber", searchNumber);
             }
             else
             {
@@ -1846,8 +1895,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
                     sqlWhere = AddAndToStringSQL(sqlWhere);
                     sqlWhere += token[0] != '!'
-                        ? BuildSearchTokenCondition(token, collate, flagSearchDescription, notesSearch.SearchInNoteTasks) + " "
-                        : BuildSearchTokenNotCondition(token.Substring(1, token.Length - 1), collate, flagSearchDescription, notesSearch.SearchInNoteTasks) + " ";
+                        ? BuildSearchTokenCondition(token, collate, flagSearchDescription, notesSearch.SearchInNoteTasks, parameters, ref paramIndex) + " "
+                        : BuildSearchTokenNotCondition(token.Substring(1, token.Length - 1), collate, flagSearchDescription, notesSearch.SearchInNoteTasks, parameters, ref paramIndex) + " ";
                 }
                 if (sqlWhere != "")
                     sqlWhere = " WHERE " + sqlWhere;
@@ -1855,7 +1904,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             sql = sql + sqlWhere + sqlOrder;
 
-            result.TotalCount = GetCountNotes(db, sqlWhere);
+            result.TotalCount = GetCountNotes(db, sqlWhere, parameters);
 
             if (db.GetType().Name == "SqliteConnection")
                 sql += " LIMIT @NumRecords OFFSET @Offset ;";
@@ -1863,7 +1912,9 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 sql += " OFFSET @Offset ROWS FETCH NEXT @NumRecords ROWS ONLY;";
 
             var pagination = notesSearch.PageIdentifier;
-            entity = await db.QueryAsync<T>(sql.ToString(), new { Offset = pagination.Offset, NumRecords = pagination.PageSize });
+            parameters.Add("Offset", pagination.Offset);
+            parameters.Add("NumRecords", pagination.PageSize);
+            entity = await db.QueryAsync<T>(sql.ToString(), parameters);
 
             result.Entity = entity.ToList();
 

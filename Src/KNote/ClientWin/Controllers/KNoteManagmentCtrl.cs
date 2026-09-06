@@ -255,16 +255,23 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 // TODO: Experimental ---------------------------------
                 if (!string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
                 {
-                    RunKntChatCtrl(false);
+                    if (!Store.AppConfig.ChatHubAutoConnectDisabled)
+                    {
+                        RunKntChatCtrl(false);
+                    }
+                    else
+                    {
+                        NotifyMessage($"Chat auto-connect is disabled because the last connection to '{Store.AppConfig.ChatHubUrl}' failed. Fix the url and test it from Options to re-enable it.");
+                    }
                 }
                 //-----------------------------------------------------
             }
         }
         catch (Exception ex)
         {
-            result.AddErrorMessage(ex.Message);                
+            result.AddErrorMessage(ex.Message);
         }
-        
+
         return result;
     }
 

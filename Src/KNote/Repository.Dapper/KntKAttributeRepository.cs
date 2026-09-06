@@ -348,7 +348,7 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
         try
         {                
             var result = new Result<List<KAttributeTabulatedValueDto>>();
-            var idsTabValues = "";
+            var idsTabValues = new List<Guid>();
             string sql;
             string sqlInsert = @"INSERT INTO [KAttributeTabulatedValues] (KAttributeTabulatedValueId, KAttributeId, [Value], [Description], [Order]) 
                                     VALUES (@KAttributeTabulatedValueId, @KAttributeId, @Value, @Description, @Order);";
@@ -384,17 +384,15 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
                     if (r == 0)
                         result.AddErrorMessage($"Entity tabulated value - {tv.KAttributeTabulatedValueId} - not updated.");
 
-                    if (!string.IsNullOrEmpty(idsTabValues))
-                        idsTabValues += ", ";
-                    idsTabValues += "'" + tv.KAttributeTabulatedValueId + "'";
+                    idsTabValues.Add(tv.KAttributeTabulatedValueId);
                 }
             }
 
-            if (!string.IsNullOrEmpty(idsTabValues))
+            if (idsTabValues.Count > 0)
             {
-                sql = $"DELETE FROM [KAttributeTabulatedValues]  WHERE KAttributeId = '{kattributeId.ToString().ToUpper()}' AND KAttributeTabulatedValueId NOT IN ( {idsTabValues.ToString().ToUpper()} )";
+                sql = "DELETE FROM [KAttributeTabulatedValues] WHERE KAttributeId = @KAttributeId AND KAttributeTabulatedValueId NOT IN @IdsTabValues";
                 r = await db.ExecuteAsync(sql.ToString(),
-                            new { });
+                            new { KAttributeId = kattributeId, IdsTabValues = idsTabValues });
             }
 
             result.Entity = tabulatedValues;                

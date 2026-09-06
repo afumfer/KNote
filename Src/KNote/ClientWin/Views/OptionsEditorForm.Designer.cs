@@ -48,6 +48,7 @@ namespace KNote.ClientWin.Views
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.label1 = new System.Windows.Forms.Label();
             this.textChatHubUrl = new System.Windows.Forms.TextBox();
+            this.buttonTestChatHubUrl = new System.Windows.Forms.Button();
             this.panelForm.SuspendLayout();
             this.tabOptions.SuspendLayout();
             this.tabGlobalOptions.SuspendLayout();
@@ -96,6 +97,7 @@ namespace KNote.ClientWin.Views
             // tabGlobalOptions
             // 
             this.tabGlobalOptions.Controls.Add(this.textChatHubUrl);
+            this.tabGlobalOptions.Controls.Add(this.buttonTestChatHubUrl);
             this.tabGlobalOptions.Controls.Add(this.label1);
             this.tabGlobalOptions.Controls.Add(this.labelInfo);
             this.tabGlobalOptions.Controls.Add(this.checkCompactViewNotesList);
@@ -220,12 +222,22 @@ namespace KNote.ClientWin.Views
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textChatHubUrl
-            // 
+            //
             this.textChatHubUrl.Location = new System.Drawing.Point(95, 125);
             this.textChatHubUrl.Name = "textChatHubUrl";
-            this.textChatHubUrl.Size = new System.Drawing.Size(367, 23);
+            this.textChatHubUrl.Size = new System.Drawing.Size(295, 23);
             this.textChatHubUrl.TabIndex = 27;
-            // 
+            //
+            // buttonTestChatHubUrl
+            //
+            this.buttonTestChatHubUrl.Location = new System.Drawing.Point(396, 124);
+            this.buttonTestChatHubUrl.Name = "buttonTestChatHubUrl";
+            this.buttonTestChatHubUrl.Size = new System.Drawing.Size(66, 25);
+            this.buttonTestChatHubUrl.TabIndex = 28;
+            this.buttonTestChatHubUrl.Text = "&Test";
+            this.buttonTestChatHubUrl.UseVisualStyleBackColor = true;
+            this.buttonTestChatHubUrl.Click += new System.EventHandler(this.buttonTestChatHubUrl_Click);
+            //
             // OptionsEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -273,5 +285,6 @@ namespace KNote.ClientWin.Views
         private OpenFileDialog openFileDialog;
         private TextBox textChatHubUrl;
         private Label label1;
+        private Button buttonTestChatHubUrl;
     }
 }

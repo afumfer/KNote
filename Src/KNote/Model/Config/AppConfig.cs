@@ -233,6 +233,22 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    // Set automatically when a connection attempt to ChatHubUrl fails, so the app stops retrying
+    // (and freezing) on every startup until the user fixes the URL or retests it from Options.
+    private bool _chatHubAutoConnectDisabled;
+    public bool ChatHubAutoConnectDisabled
+    {
+        get { return _chatHubAutoConnectDisabled; }
+        set
+        {
+            if (_chatHubAutoConnectDisabled != value)
+            {
+                _chatHubAutoConnectDisabled = value;
+                OnPropertyChanged("ChatHubAutoConnectDisabled");
+            }
+        }
+    }
+
     private bool _activateMessageBroker;
     public bool ActivateMessageBroker
     {

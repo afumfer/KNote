@@ -83,6 +83,37 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
         OnCancelEdition();
     }
 
+    private async void buttonTestChatHubUrl_Click(object sender, EventArgs e)
+    {
+        var url = textChatHubUrl.Text?.Trim();
+        if (string.IsNullOrEmpty(url))
+        {
+            ShowInfo("Enter a chat hub url first.");
+            return;
+        }
+
+        buttonTestChatHubUrl.Enabled = false;
+        this.Cursor = Cursors.WaitCursor;
+        try
+        {
+            var testResult = await KntChatCtrl.TestConnectionAsync(url);
+            if (testResult.IsValid)
+            {
+                _ctrl.Model.ChatHubAutoConnectDisabled = false;
+                ShowInfo("Connection successful.");
+            }
+            else
+            {
+                ShowInfo($"The connection could not be established. Error: {testResult.ErrorMessage}");
+            }
+        }
+        finally
+        {
+            this.Cursor = Cursors.Default;
+            buttonTestChatHubUrl.Enabled = true;
+        }
+    }
+
     private void OptionsEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!_viewFinalized)

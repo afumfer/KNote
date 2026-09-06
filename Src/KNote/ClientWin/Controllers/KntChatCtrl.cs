@@ -10,6 +10,10 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     private HubConnection _hubConnection;
 
+    // Bounds how long a connection attempt can block the caller before giving up - an unreachable
+    // ChatHubUrl must never be allowed to hang the app (see HandleConnectionFailure).
+    private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(8);
+
     #endregion
 
     #region Properties 
@@ -59,17 +63,21 @@ public class KntChatCtrl : CtrlBase, IDisposable
                 ReceiveMessage?.Invoke(this, new ControllerEventArgs<string>(encodeMessage));
             });
 
-            StartHubConnection();
+            _hubConnection.Closed += OnHubConnectionClosedAsync;
+
+            // Fire-and-forget: connecting must never block startup. Relies on the WinForms
+            // SynchronizationContext (captured here, on the UI thread) to bring the continuation
+            // - including HandleConnectionFailure - back to the UI thread, same as the rest of
+            // this codebase's async/await usage.
+            _ = ConnectWithTimeoutAsync();
 
             return new Result<EControllerResult>(EControllerResult.Executed);
         }
         catch (Exception ex)
         {
             var res = new Result<EControllerResult>(EControllerResult.Error);
-            var resMessage = $"KntChat controller. The connection could not be started. Error: {ex.Message}.";
-            res.AddErrorMessage(resMessage);
-            if(ShowErrorMessagesOnInitialize)
-                ChatView.ShowInfo(resMessage, KntConst.AppName);
+            res.AddErrorMessage($"KntChat controller. The connection could not be started. Error: {ex.Message}.");
+            HandleConnectionFailure(ex);
             return res;
         }
     }
@@ -106,33 +114,101 @@ public class KntChatCtrl : CtrlBase, IDisposable
     }
     // --------------------------------------------------------------------------
 
+    // Standalone connection attempt against a candidate url, bounded by the same timeout used at
+    // startup. Used by OptionsEditorForm's "Test connection" button so the user can verify a fix
+    // and re-enable auto-connect (AppConfig.ChatHubAutoConnectDisabled) without restarting the app.
+    public static async Task<Result> TestConnectionAsync(string url)
+    {
+        var result = new Result();
+        HubConnection connection = null;
+        try
+        {
+            connection = new HubConnectionBuilder().WithUrl(url).Build();
+            using var cts = new CancellationTokenSource(ConnectTimeout);
+            await connection.StartAsync(cts.Token);
+        }
+        catch (Exception ex)
+        {
+            result.AddErrorMessage(ex.Message);
+        }
+        finally
+        {
+            if (connection != null)
+                await connection.DisposeAsync();
+        }
+        return result;
+    }
+
     #endregion
 
     #region Private methods
 
-    private async Task StartHubConnectionAsync()
+    private async Task ConnectWithTimeoutAsync()
     {
-        _hubConnection.Closed += async (error) =>
+        try
         {
-            Thread.Sleep(5000);
-            await _hubConnection.StartAsync();
-        };
-
-        await _hubConnection.StartAsync();
+            using var cts = new CancellationTokenSource(ConnectTimeout);
+            await _hubConnection.StartAsync(cts.Token);
+            HandleConnectionSuccess();
+        }
+        catch (Exception ex)
+        {
+            HandleConnectionFailure(ex);
+        }
     }
 
-    // --------------------------------------------------------------------------
-    // Warning: this method can cause a deadlock in single-threaded environments
-    // (for example, Windows Forms or WPF applications) or ASP.NET applications.
-    // It is recommended to use the asynchronous version of this method.
-    // Use only in KntScript
-    private void StartHubConnection()
+    private async Task OnHubConnectionClosedAsync(Exception error)
     {
-        Task.Run(() => StartHubConnectionAsync()).Wait();
-    }  
-    // --------------------------------------------------------------------------
+        try
+        {
+            await Task.Delay(5000);
+            using var cts = new CancellationTokenSource(ConnectTimeout);
+            await _hubConnection.StartAsync(cts.Token);
+            HandleConnectionSuccess();
+        }
+        catch (Exception ex)
+        {
+            HandleConnectionFailure(ex);
+        }
+    }
 
-    #endregion 
+    // A connection that succeeds - whether from the automatic startup attempt or from the user
+    // manually reopening chat - proves the url works again, so any previous auto-disable no longer
+    // applies.
+    private void HandleConnectionSuccess()
+    {
+        if (Store.AppConfig.ChatHubAutoConnectDisabled)
+        {
+            Store.AppConfig.ChatHubAutoConnectDisabled = false;
+            Store.SaveConfig();
+        }
+    }
+
+    // Startup (ShowErrorMessagesOnInitialize == false) must never freeze or interrupt the user
+    // again for a chat hub that is known to be unreachable: the failure is reported through the
+    // non-blocking notification channel and auto-connect is disabled in AppConfig so the next
+    // startup does not retry it - the user re-enables it from Options once the url is fixed (see
+    // OptionsEditorForm's "Test connection" button, which clears ChatHubAutoConnectDisabled on
+    // success). Opening the chat manually (ShowErrorMessagesOnInitialize == true) keeps showing
+    // the error directly, since the user is actively waiting on that action.
+    private void HandleConnectionFailure(Exception ex)
+    {
+        var resMessage = $"KntChat controller. The connection could not be started. Error: {ex.Message}.";
+
+        if (ShowErrorMessagesOnInitialize)
+        {
+            ChatView.ShowInfo(resMessage, KntConst.AppName);
+        }
+        else
+        {
+            Store.AppConfig.ChatHubAutoConnectDisabled = true;
+            Store.SaveConfig();
+
+            NotifyMessage($"{resMessage} Chat auto-connect has been disabled; fix the chat hub url and test it from Options to re-enable it.");
+        }
+    }
+
+    #endregion
 
     #region View
 
