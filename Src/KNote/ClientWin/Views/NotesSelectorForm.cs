@@ -537,7 +537,14 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
 
     #region Extensions
 
-    // TODO: Esto es más código repetido, hay que pasar a una clase base 
+    // Well-known extension label recognized below to keep its context-menu item's Checked state in
+    // sync with _ctrl.EnableTextFilter - the generic Extensions mechanism only supports fire-and-forget
+    // clicks, so this is the one entry that also needs its checkmark refreshed each time the menu opens.
+    public const string ToggleTextFilterMenuText = "Show list filter";
+
+    private ToolStripMenuItem _menuToggleTextFilter;
+
+    // TODO: Esto es más código repetido, hay que pasar a una clase base
     protected override void OnLoad(EventArgs e)
     {
         base.OnLoad(e);
@@ -549,9 +556,21 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
                 if (s.StartsWith("--"))
                     contextMenu.Items.Add("-", null, extension_Click);
                 else
-                    contextMenu.Items.Add(s, null, extension_Click);
+                {
+                    var item = (ToolStripMenuItem)contextMenu.Items.Add(s, null, extension_Click);
+                    if (s == ToggleTextFilterMenuText)
+                        _menuToggleTextFilter = item;
+                }
+
+        if (_menuToggleTextFilter != null)
+            contextMenu.Opening += contextMenu_Opening;
 
         this.ResumeLayout();
+    }
+
+    private void contextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        _menuToggleTextFilter.Checked = _ctrl.EnableTextFilter;
     }
 
     private void extension_Click(object sender, EventArgs e)

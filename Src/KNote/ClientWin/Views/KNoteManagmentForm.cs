@@ -305,6 +305,11 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
                 menuVerticalPanelForNotes.Checked = false;
             }
         }
+        else if (menuSel == menuListFilterVisible)
+        {
+            _ctrl.ToggleNotesListFilter();
+            menuListFilterVisible.Checked = _ctrl.NotesSelectorCtrl.EnableTextFilter;
+        }
         else if (menuSel == menuExit)
         {
             SaveViewSizeAndPosition();
@@ -328,6 +333,12 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         }
         else
             MessageBox.Show("In construction ... ");
+    }
+
+    private void menuView_DropDownOpening(object sender, EventArgs e)
+    {
+        // Kept in sync with the notes grid's own context menu entry (same toggle, two entry points).
+        menuListFilterVisible.Checked = _ctrl.NotesSelectorCtrl.EnableTextFilter;
     }
 
     private async void buttonToolBar_Click(object sender, EventArgs e)

@@ -341,6 +341,8 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 _notesSelectorCtrl.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendMoveSelectedNotes));
                 _notesSelectorCtrl.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendAddTagSelectedNotes));
                 _notesSelectorCtrl.Extensions.Add("Remove tag from selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendRemoveTagSelectedNotes));
+                _notesSelectorCtrl.Extensions.Add("--2", new ExtensionsEventHandler<NoteMinimalDto>(ExtendNull));
+                _notesSelectorCtrl.Extensions.Add(NotesSelectorForm.ToggleTextFilterMenuText, new ExtensionsEventHandler<NoteMinimalDto>(ExtendToggleTextFilter));
             }
             return _notesSelectorCtrl;
         }
@@ -413,8 +415,21 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
     }
 
     private async void ExtendRemoveTagSelectedNotes(object sender, ControllerEventArgs<NoteMinimalDto> e)
-    {            
+    {
         await ChangeTags(EnumChangeTag.Remove);
+    }
+
+    private void ExtendToggleTextFilter(object sender, ControllerEventArgs<NoteMinimalDto> e)
+    {
+        ToggleNotesListFilter();
+    }
+
+    // Shared by the notes grid's context menu entry and the main menu's View > "Show list filter"
+    // entry - both toggle the same underlying state, so they stay in sync with each other.
+    public void ToggleNotesListFilter()
+    {
+        NotesSelectorCtrl.EnableTextFilter = !NotesSelectorCtrl.EnableTextFilter;
+        NotesSelectorCtrl.View.RefreshView();
     }
 
     #endregion

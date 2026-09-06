@@ -71,6 +71,8 @@
             menuHeaderPanelVisible = new ToolStripMenuItem();
             menuToolbarVisible = new ToolStripMenuItem();
             menuMainVisible = new ToolStripMenuItem();
+            menuViewS2 = new ToolStripSeparator();
+            menuListFilterVisible = new ToolStripMenuItem();
             menuTools = new ToolStripMenuItem();
             menuReports = new ToolStripMenuItem();
             menuToolsS1 = new ToolStripSeparator();
@@ -360,10 +362,11 @@
             // 
             // menuView
             // 
-            menuView.DropDownItems.AddRange(new ToolStripItem[] { menuFoldersExplorer, menuSearchPanel, menuViewS1, menuVerticalPanelForNotes, menuHeaderPanelVisible, menuToolbarVisible, menuMainVisible });
+            menuView.DropDownItems.AddRange(new ToolStripItem[] { menuFoldersExplorer, menuSearchPanel, menuViewS1, menuVerticalPanelForNotes, menuHeaderPanelVisible, menuToolbarVisible, menuMainVisible, menuViewS2, menuListFilterVisible });
             menuView.Name = "menuView";
             menuView.Size = new Size(44, 20);
             menuView.Text = "&View";
+            menuView.DropDownOpening += menuView_DropDownOpening;
             // 
             // menuFoldersExplorer
             // 
@@ -395,7 +398,7 @@
             menuVerticalPanelForNotes.Size = new Size(237, 22);
             menuVerticalPanelForNotes.Text = "Vertical panel for list notes";
             menuVerticalPanelForNotes.Click += menu_Click;
-            // 
+            //
             // menuHeaderPanelVisible
             // 
             menuHeaderPanelVisible.Checked = true;
@@ -427,7 +430,19 @@
             menuMainVisible.Size = new Size(237, 22);
             menuMainVisible.Text = "Show main menu";
             menuMainVisible.Click += menu_Click;
-            // 
+            //
+            // menuViewS2
+            //
+            menuViewS2.Name = "menuViewS2";
+            menuViewS2.Size = new Size(234, 6);
+            //
+            // menuListFilterVisible
+            //
+            menuListFilterVisible.Name = "menuListFilterVisible";
+            menuListFilterVisible.Size = new Size(237, 22);
+            menuListFilterVisible.Text = "Show list filter";
+            menuListFilterVisible.Click += menu_Click;
+            //
             // menuTools
             // 
             menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuAIAssistant, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuAIProviders, menuOptions });
@@ -980,7 +995,9 @@
         private ToolStripMenuItem menuHeaderPanelVisible;
         private ToolStripMenuItem menuMainVisible;
         private ToolStripMenuItem menuVerticalPanelForNotes;
+        private ToolStripMenuItem menuListFilterVisible;
         private ToolStripSeparator menuViewS1;
+        private ToolStripSeparator menuViewS2;
         private ToolStripMenuItem menuToolbarVisible;
         private ToolStripMenuItem menuChat;
         private ToolStripMenuItem menuAIAssistant;
