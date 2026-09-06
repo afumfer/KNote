@@ -114,7 +114,7 @@ try
     app.MapHub<ChatHub>("/chathub");
     app.MapFallbackToFile("index.html");
 
-    app.KntConfigureMessageBroker(appSettings, repositoryRef);
+    await app.KntConfigureMessageBroker(appSettings, repositoryRef);
 
     app.Run();
 }

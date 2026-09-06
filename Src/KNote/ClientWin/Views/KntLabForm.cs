@@ -1085,7 +1085,7 @@ window.chrome.webview.postMessage(retValue);";
 
     #region MessageBroker
 
-    private void buttonConfigureMessageBroker_Click(object sender, EventArgs e)
+    private async void buttonConfigureMessageBroker_Click(object sender, EventArgs e)
     {
         if (_service is null)
         {
@@ -1094,7 +1094,7 @@ window.chrome.webview.postMessage(retValue);";
         }
 
         _service.MessageBroker.ConsumerReceived += MessageBroker_ConsumerReceived;
-        _service.MessageBroker.BasicConsume("cola.Armando3");
+        await _service.MessageBroker.BasicConsumeAsync("cola.Armando3");
     }
 
     private void MessageBroker_ConsumerReceived(object sender, MessageBroker.MessageBusEventArgs<string> e)

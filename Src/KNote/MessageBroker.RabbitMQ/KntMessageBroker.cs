@@ -1,19 +1,17 @@
-﻿
-using System.Diagnostics;
+
 using System.Text;
-using System.Threading.Channels;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace KNote.MessageBroker.RabbitMQ;
 
-public class KntMessageBroker : IKntMessageBroker, IDisposable
+public class KntMessageBroker : IKntMessageBroker, IAsyncDisposable, IDisposable
 {
-    #region Private fields 
+    #region Private fields
 
     private IConnection? _conn;
-    private IModel? _channel;
-    private EventingBasicConsumer? _consumer = null!;
+    private IChannel? _channel;
+    private AsyncEventingBasicConsumer? _consumer;
 
     #endregion
 
@@ -26,34 +24,20 @@ public class KntMessageBroker : IKntMessageBroker, IDisposable
     public string? ConsumerInfo { get { return _consumerInfo; } }
 
     public List<string> QueuesConsume { get; } = new List<string>();
-    
+
     public bool Enabled { get; set; }
-    
+
     public string? StatusInfo { get; set; }
 
     #endregion
 
-    #region Constructor
-
-    public KntMessageBroker()
-    {
-        
-    }
-
-    public KntMessageBroker(string hostName, string virtualHost, int port, string userName, string password)
-    {
-        CreateConnection(hostName, virtualHost, port, userName, password);
-    }
-
-    #endregion 
-
     #region IKntMessageBroker implementation
 
-    public void CreateConnection(string hostName, string virtualHost, int port, string userName, string password)
+    public async Task CreateConnectionAsync(string hostName, string virtualHost, int port, string userName, string password)
     {
         if((_conn != null && _channel != null) && (_conn.IsOpen && _channel.IsOpen))
         {
-            CloseConnection();
+            await CloseConnectionAsync();
         }
 
         ConnectionFactory factory = new ConnectionFactory
@@ -65,71 +49,86 @@ public class KntMessageBroker : IKntMessageBroker, IDisposable
             Password = password
         };
 
-        _conn = factory.CreateConnection();
-        _channel = _conn.CreateModel();
+        _conn = await factory.CreateConnectionAsync();
+        _channel = await _conn.CreateChannelAsync();
 
-        _consumer = new EventingBasicConsumer(_channel);
+        _consumer = new AsyncEventingBasicConsumer(_channel);
 
-        _consumer.Received += Consumer_Received;
+        _consumer.ReceivedAsync += Consumer_ReceivedAsync;
     }
 
-    public void PublishDeclare(string publisher)
+    public async Task PublishDeclareAsync(string publisher)
     {
         var publishValues = publisher.Split(';');
         _publisherName = publishValues[0];
-        _channel?.ExchangeDeclare(_publisherName, publishValues[1], true, false, null);
+        if (_channel != null)
+            await _channel.ExchangeDeclareAsync(_publisherName, publishValues[1], true, false);
     }
 
-    public void BasicPublish(string body = "", string routingKey = "")
+    public async Task BasicPublishAsync(string body = "", string routingKey = "")
     {
-        if(!string.IsNullOrEmpty(_publisherName))
-            _channel?.BasicPublish(_publisherName, routingKey, null, Encoding.UTF8.GetBytes(body));
+        if (!string.IsNullOrEmpty(_publisherName) && _channel != null)
+            await _channel.BasicPublishAsync(_publisherName, routingKey, Encoding.UTF8.GetBytes(body));
     }
 
-    public void QueuesBind(List<string> queuesInfo)
+    public async Task QueuesBindAsync(List<string> queuesInfo)
     {
         foreach (var queueInfo in queuesInfo)
         {
             var queueInfoValues = queueInfo.Split(';');
             QueuesConsume.Add(queueInfoValues[0]);
 
-            _channel?.QueueDeclare(queueInfoValues[0], true, false, false, null);
-            _channel?.ExchangeDeclare(queueInfoValues[1], "fanout", true, false, null);
-            _channel?.QueueBind(queueInfoValues[0], queueInfoValues[1], queueInfoValues[2], null);
-        }     
+            if (_channel == null)
+                continue;
+
+            await _channel.QueueDeclareAsync(queueInfoValues[0], true, false, false);
+            await _channel.ExchangeDeclareAsync(queueInfoValues[1], "fanout", true, false);
+            await _channel.QueueBindAsync(queueInfoValues[0], queueInfoValues[1], queueInfoValues[2]);
+        }
     }
 
     public event EventHandler<MessageBusEventArgs<string>>? ConsumerReceived;
-    private void Consumer_Received(object? sender, BasicDeliverEventArgs e)
+    private Task Consumer_ReceivedAsync(object sender, BasicDeliverEventArgs e)
     {
         string message = Encoding.UTF8.GetString(e.Body.Span);
-        // TODO: Capture aditional info in sender ... 
+        // TODO: Capture aditional info in sender ...
         ConsumerReceived?.Invoke(this, new MessageBusEventArgs<string>(message));
+        return Task.CompletedTask;
     }
 
-    public void BasicConsume(string queueName)
+    public async Task BasicConsumeAsync(string queueName)
     {
-        _consumerInfo = _channel.BasicConsume(queueName, true, _consumer);
+        if (_channel == null || _consumer == null)
+            return;
+        _consumerInfo = await _channel.BasicConsumeAsync(queueName, true, _consumer);
     }
 
-
-    public void CloseConnection()
+    public async Task CloseConnectionAsync()
     {
         if(_consumer != null)
-            _consumer.Received -= Consumer_Received;
-        _channel?.Close();
-        _conn?.Close();
+            _consumer.ReceivedAsync -= Consumer_ReceivedAsync;
+        if (_channel != null)
+            await _channel.CloseAsync();
+        if (_conn != null)
+            await _conn.CloseAsync();
     }
 
     #endregion
 
-    #region IDisposable 
+    #region IDisposable / IAsyncDisposable
 
     public void Dispose()
     {
-        _channel?.Close();
-        _conn?.Close();
+        DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
 
-    #endregion 
+    public async ValueTask DisposeAsync()
+    {
+        if (_channel != null)
+            await _channel.CloseAsync();
+        if (_conn != null)
+            await _conn.CloseAsync();
+    }
+
+    #endregion
 }

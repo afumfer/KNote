@@ -30,15 +30,16 @@ public class KntService : IKntService, IDisposable
     {
         _repository = repository;
         IdServiceRef = Guid.NewGuid();
-        
+
         // Experimental ------------
-        if(activateMessageBroker)
-            InitMessageBroker();
-        else
+        if(!activateMessageBroker)
         {
             _messageBroker.Enabled = false;
             _messageBroker.StatusInfo = $"{KntConst.AppName} message bus in not activated.";
         }
+        // Callers that pass activateMessageBroker: true must also await
+        // InitMessageBrokerAsync() - a constructor cannot await the
+        // RabbitMQ.Client 7.x async connection handshake.
         //--------------------------
     }
 
@@ -221,7 +222,7 @@ public class KntService : IKntService, IDisposable
         if (_messageBroker.Enabled)
         {
             var noteSerialized = JsonSerializer.Serialize(noteInfo);
-            _messageBroker.BasicPublish(noteSerialized, "");
+            Task.Run(() => _messageBroker.BasicPublishAsync(noteSerialized, "")).GetAwaiter().GetResult();
         }
     }
 
@@ -268,11 +269,12 @@ public class KntService : IKntService, IDisposable
 
     #endregion
 
-    #region Private methods
+    #region Message broker, experimental ....
 
-    #region Message broker, experimental .... 
-
-    private void InitMessageBroker()
+    // Public and async because the RabbitMQ.Client 7.x handshake is Task-based and a
+    // constructor cannot await it - callers passing activateMessageBroker: true to the
+    // constructor must call this explicitly afterwards (see KntExtensions.KntConfigureMessageBroker).
+    public async Task InitMessageBrokerAsync()
     {
         try
         {
@@ -303,25 +305,25 @@ public class KntService : IKntService, IDisposable
             string publisher = GetSystemVariable("KNT_MESSAGEBROKER_CONFIG_PUBLISH", "EXCHANGE_PUBLISH");  // Echange;Type        
             var queuesConsume = GetSystemVariables("KNT_MESSAGEBROKER_CONFIG_CONSUME");  // queue;bind-echange;routing            
 
-            // KntMessageBroker configuration            
-            _messageBroker.CreateConnection(hostName, virtualHost, port, userName, password);
-            
+            // KntMessageBroker configuration
+            await _messageBroker.CreateConnectionAsync(hostName, virtualHost, port, userName, password);
+
             if(!string.IsNullOrEmpty(publisher))
-                _messageBroker.PublishDeclare(publisher);
+                await _messageBroker.PublishDeclareAsync(publisher);
 
             //if (!string.IsNullOrEmpty(queueConsume))
             if (queuesConsume.Count > 0)
             {
-                _messageBroker.QueuesBind(queuesConsume);            
+                await _messageBroker.QueuesBindAsync(queuesConsume);
 
                 _messageBroker.ConsumerReceived += (sender, e) =>
                 {
                     // Important, this method must be synchronous
-                    OnSaveNoteEventBus(e.Entity);                
+                    OnSaveNoteEventBus(e.Entity);
                 };
-            
+
                 foreach (var queue in _messageBroker.QueuesConsume)
-                    _messageBroker.BasicConsume(queue);
+                    await _messageBroker.BasicConsumeAsync(queue);
             }
                        
             _messageBroker.Enabled = bool.Parse(enabledValue);
@@ -369,8 +371,6 @@ public class KntService : IKntService, IDisposable
         
         Task.Run(() => Notes.SaveExtendedAsync(noteInput)).Wait();
     }
-
-    #endregion 
 
     #endregion
 

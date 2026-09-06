@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
@@ -64,7 +65,7 @@ public static class KntExtensions
         }
     }
     
-    public static void KntConfigureMessageBroker(this IApplicationBuilder app, AppSettings appSettings, RepositoryRef repositoryRef)
+    public static async Task KntConfigureMessageBroker(this IApplicationBuilder app, AppSettings appSettings, RepositoryRef repositoryRef)
     {
         if (appSettings == null)
         {
@@ -81,10 +82,11 @@ public static class KntExtensions
         // level with the use of the enable activeMessageBroker parameter in its constructor.
         // (No use: "var kntServiceForMessageBroker = app.Services.GetRequiredService<KntService>();")
         //
-        
+
         if (appSettings.ActivateMessageBroker)
         {
             _kntServiceForMessageBroker = new KntService(KntRepositoryFactory.Create(repositoryRef), true);
+            await _kntServiceForMessageBroker.InitMessageBrokerAsync();
         }
         // -------------------------------------------------------------------------------------
     }
