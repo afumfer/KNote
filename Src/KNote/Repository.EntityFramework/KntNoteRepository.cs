@@ -1323,7 +1323,17 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
             // Filters
             if (notesFilter.FolderId != null)
-                query = query.Where(n => n.FolderId == notesFilter.FolderId);
+            {
+                if (notesFilter.IncludeChildFolders)
+                {
+                    var folderIds = await GetDescendantFolderIdsAsync(ctx, notesFilter.FolderId.Value);
+                    query = query.Where(n => folderIds.Contains(n.FolderId));
+                }
+                else
+                {
+                    query = query.Where(n => n.FolderId == notesFilter.FolderId);
+                }
+            }
 
             if (notesFilter.NoteTypeId != null)
                 query = query.Where(n => n.NoteTypeId == notesFilter.NoteTypeId);
@@ -1368,6 +1378,40 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         {
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
+    }
+
+    // Root folder id plus every descendant in its subtree, computed in-memory (same "load all
+    // folders, walk ParentId in C#" approach already used by IKntFolderRepository.GetTreeAsync -
+    // the folder table is never large enough to justify a recursive query per SQL engine).
+    private static async Task<List<Guid>> GetDescendantFolderIdsAsync(KntDbContext ctx, Guid rootFolderId)
+    {
+        var allFolders = await ctx.Folders
+            .Select(f => new { f.FolderId, f.ParentId })
+            .ToListAsync();
+
+        var childrenByParent = allFolders
+            .Where(f => f.ParentId != null)
+            .GroupBy(f => f.ParentId.Value)
+            .ToDictionary(g => g.Key, g => g.Select(f => f.FolderId).ToList());
+
+        var result = new List<Guid> { rootFolderId };
+        var pending = new Queue<Guid>();
+        pending.Enqueue(rootFolderId);
+
+        while (pending.Count > 0)
+        {
+            var current = pending.Dequeue();
+            if (!childrenByParent.TryGetValue(current, out var children))
+                continue;
+
+            foreach (var childId in children)
+            {
+                result.Add(childId);
+                pending.Enqueue(childId);
+            }
+        }
+
+        return result;
     }
 
     private async Task<Result<List<T>>> GetSearchPrivateAsync<T>(NotesSearchDto notesSearch) where T : NoteMinimalDto, new()

@@ -1514,7 +1514,16 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         if (notesFilter.FolderId != null)
         {
             strWhere = AddAndToStringSQL(strWhere);
-            strWhere += "FolderId = '" + notesFilter.FolderId.ToString().ToUpper() + "' ";
+            if (notesFilter.IncludeChildFolders)
+            {
+                var folderIds = GetDescendantFolderIds(db, notesFilter.FolderId.Value);
+                var idList = string.Join(",", folderIds.Select(id => $"'{id.ToString().ToUpper()}'"));
+                strWhere += $"FolderId IN ({idList}) ";
+            }
+            else
+            {
+                strWhere += "FolderId = '" + notesFilter.FolderId.ToString().ToUpper() + "' ";
+            }
         }
 
         if (notesFilter.NoteTypeId != null)
@@ -1561,6 +1570,38 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         if (!string.IsNullOrEmpty(str))
             str += " AND ";
         return str;
+    }
+
+    // Root folder id plus every descendant in its subtree, computed in-memory (same "load all
+    // folders, walk ParentId in C#" approach already used by IKntFolderRepository.GetTreeAsync -
+    // the folder table is never large enough to justify a recursive CTE per SQL engine).
+    private List<Guid> GetDescendantFolderIds(DbConnection db, Guid rootFolderId)
+    {
+        var allFolders = db.Query<FolderDto>("SELECT FolderId, ParentId FROM Folders").ToList();
+
+        var childrenByParent = allFolders
+            .Where(f => f.ParentId != null)
+            .GroupBy(f => f.ParentId.Value)
+            .ToDictionary(g => g.Key, g => g.Select(f => f.FolderId).ToList());
+
+        var result = new List<Guid> { rootFolderId };
+        var pending = new Queue<Guid>();
+        pending.Enqueue(rootFolderId);
+
+        while (pending.Count > 0)
+        {
+            var current = pending.Dequeue();
+            if (!childrenByParent.TryGetValue(current, out var children))
+                continue;
+
+            foreach (var childId in children)
+            {
+                result.Add(childId);
+                pending.Enqueue(childId);
+            }
+        }
+
+        return result;
     }
 
     public async Task<List<NoteKAttributeDto>> CompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null)

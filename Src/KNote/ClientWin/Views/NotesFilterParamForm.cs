@@ -110,6 +110,7 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
             Tags = string.IsNullOrWhiteSpace(textTags.Text) ? null : textTags.Text,
             NoteTypeId = selectedNoteType == null || selectedNoteType.NoteTypeId == Guid.Empty ? null : selectedNoteType.NoteTypeId,
             FolderId = _folderId,
+            IncludeChildFolders = _folderId != null && checkIncludeChildFolders.Checked,
             AttributesFilter = new List<AtrFilterDto>(_attributesFilter)
         };
 
@@ -131,8 +132,7 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
 
         PopulateNoteTypes();
 
-        _folderId = null;
-        textFolder.Text = "";
+        ClearFolderSelection();
         _attributesFilter.Clear();
         listViewAttributes.Items.Clear();
     }
@@ -150,13 +150,13 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
         {
             _folderId = folderSelector.SelectedEntity.FolderInfo.FolderId;
             textFolder.Text = folderSelector.SelectedEntity.FolderInfo.Name;
+            checkIncludeChildFolders.Enabled = true;
         }
     }
 
     private void buttonFolderClear_Click(object sender, EventArgs e)
     {
-        _folderId = null;
-        textFolder.Text = "";
+        ClearFolderSelection();
     }
 
     private void buttonAddAttribute_Click(object sender, EventArgs e)
@@ -228,10 +228,19 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
         textDescription.Text = "";
         textTags.Text = "";
         comboNoteType.SelectedIndex = comboNoteType.Items.Count > 0 ? 0 : -1;
-        _folderId = null;
-        textFolder.Text = "";
+        ClearFolderSelection();
         _attributesFilter.Clear();
         listViewAttributes.Items.Clear();
+    }
+
+    // Include-subfolders only makes sense once a folder is actually selected, so it's cleared and
+    // disabled whenever the folder selection itself is cleared (repository change, "X", "Clean").
+    private void ClearFolderSelection()
+    {
+        _folderId = null;
+        textFolder.Text = "";
+        checkIncludeChildFolders.Checked = false;
+        checkIncludeChildFolders.Enabled = false;
     }
 
     #endregion

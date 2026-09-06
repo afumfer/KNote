@@ -8,6 +8,11 @@ namespace KNote.Model.Dto;
 public class NotesFilterDto : SmartModelDtoBase // NotesSearchDto
 {                     
     public Guid? FolderId { get; set; }
+
+    // Only meaningful when FolderId is set: also matches notes in the folder's descendant subtree,
+    // not just the selected folder itself.
+    public bool IncludeChildFolders { get; set; }
+
     public string Topic { get; set; }
     public Guid? NoteTypeId { get; set; }
     public string Tags { get; set; }        

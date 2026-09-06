@@ -40,6 +40,7 @@ namespace KNote.ClientWin.Views
             this.buttonFolderClear = new System.Windows.Forms.Button();
             this.textFolder = new System.Windows.Forms.TextBox();
             this.labelFolder = new System.Windows.Forms.Label();
+            this.checkIncludeChildFolders = new System.Windows.Forms.CheckBox();
             this.comboNoteType = new System.Windows.Forms.ComboBox();
             this.labelNoteType = new System.Windows.Forms.Label();
             this.textTags = new System.Windows.Forms.TextBox();
@@ -72,6 +73,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.buttonFolderClear);
             this.panelForm.Controls.Add(this.textFolder);
             this.panelForm.Controls.Add(this.labelFolder);
+            this.panelForm.Controls.Add(this.checkIncludeChildFolders);
             this.panelForm.Controls.Add(this.comboNoteType);
             this.panelForm.Controls.Add(this.labelNoteType);
             this.panelForm.Controls.Add(this.textTags);
@@ -89,7 +91,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(437, 600);
+            this.panelForm.Size = new System.Drawing.Size(437, 630);
             this.panelForm.TabIndex = 0;
             //
             // listViewAttributes
@@ -102,7 +104,7 @@ namespace KNote.ClientWin.Views
             this.columnValue});
             this.listViewAttributes.FullRowSelect = true;
             this.listViewAttributes.HideSelection = false;
-            this.listViewAttributes.Location = new System.Drawing.Point(7, 404);
+            this.listViewAttributes.Location = new System.Drawing.Point(7, 434);
             this.listViewAttributes.MultiSelect = false;
             this.listViewAttributes.Name = "listViewAttributes";
             this.listViewAttributes.Size = new System.Drawing.Size(424, 175);
@@ -123,7 +125,7 @@ namespace KNote.ClientWin.Views
             // buttonRemoveAttribute
             //
             this.buttonRemoveAttribute.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRemoveAttribute.Location = new System.Drawing.Point(401, 377);
+            this.buttonRemoveAttribute.Location = new System.Drawing.Point(401, 407);
             this.buttonRemoveAttribute.Name = "buttonRemoveAttribute";
             this.buttonRemoveAttribute.Size = new System.Drawing.Size(27, 23);
             this.buttonRemoveAttribute.TabIndex = 20;
@@ -134,7 +136,7 @@ namespace KNote.ClientWin.Views
             // buttonAddAttribute
             //
             this.buttonAddAttribute.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAttribute.Location = new System.Drawing.Point(373, 377);
+            this.buttonAddAttribute.Location = new System.Drawing.Point(373, 407);
             this.buttonAddAttribute.Name = "buttonAddAttribute";
             this.buttonAddAttribute.Size = new System.Drawing.Size(27, 23);
             this.buttonAddAttribute.TabIndex = 19;
@@ -145,7 +147,7 @@ namespace KNote.ClientWin.Views
             // labelAttributes
             //
             this.labelAttributes.AutoSize = true;
-            this.labelAttributes.Location = new System.Drawing.Point(7, 381);
+            this.labelAttributes.Location = new System.Drawing.Point(7, 411);
             this.labelAttributes.Name = "labelAttributes";
             this.labelAttributes.Size = new System.Drawing.Size(67, 15);
             this.labelAttributes.TabIndex = 18;
@@ -182,6 +184,17 @@ namespace KNote.ClientWin.Views
             this.textFolder.Name = "textFolder";
             this.textFolder.Size = new System.Drawing.Size(363, 23);
             this.textFolder.TabIndex = 15;
+            //
+            // checkIncludeChildFolders
+            //
+            this.checkIncludeChildFolders.AutoSize = true;
+            this.checkIncludeChildFolders.Enabled = false;
+            this.checkIncludeChildFolders.Location = new System.Drawing.Point(7, 377);
+            this.checkIncludeChildFolders.Name = "checkIncludeChildFolders";
+            this.checkIncludeChildFolders.Size = new System.Drawing.Size(105, 19);
+            this.checkIncludeChildFolders.TabIndex = 22;
+            this.checkIncludeChildFolders.Text = "Include subfolders";
+            this.checkIncludeChildFolders.UseVisualStyleBackColor = true;
             //
             // labelFolder
             //
@@ -336,7 +349,7 @@ namespace KNote.ClientWin.Views
             this.panelBottom.Controls.Add(this.buttonCancel);
             this.panelBottom.Controls.Add(this.buttonAccept);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 600);
+            this.panelBottom.Location = new System.Drawing.Point(0, 630);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(437, 50);
             this.panelBottom.TabIndex = 1;
@@ -367,7 +380,7 @@ namespace KNote.ClientWin.Views
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(437, 650);
+            this.ClientSize = new System.Drawing.Size(437, 680);
             this.Controls.Add(this.panelForm);
             this.Controls.Add(this.panelBottom);
             this.MaximizeBox = false;
@@ -404,6 +417,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textFolder;
         private System.Windows.Forms.Button buttonFolderClear;
         private System.Windows.Forms.Button buttonFolderSelect;
+        private System.Windows.Forms.CheckBox checkIncludeChildFolders;
         private System.Windows.Forms.Label labelAttributes;
         private System.Windows.Forms.Button buttonAddAttribute;
         private System.Windows.Forms.Button buttonRemoveAttribute;
