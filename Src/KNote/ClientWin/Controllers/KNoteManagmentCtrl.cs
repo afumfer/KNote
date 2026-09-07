@@ -244,6 +244,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             using (new WaitCursor())
             {
                 NotesSelectorCtrl.Run();
+                FoldersSelectorCtrl.SelectedFolderId = Store.AppConfig.LastActiveFolderId;
                 FoldersSelectorCtrl.Run();
                 NotesSearchParamCtrl.Run();
                 NotesFilterParamCtrl.Run();

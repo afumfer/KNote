@@ -120,6 +120,15 @@ public class Store
         {
             _activeFolderWithServiceRef = activeFolderWithServiceRef;
             Logger?.LogTrace("ChangeActiveFolderWithServiceRef {message}", activeFolderWithServiceRef?.ToString());
+
+            // Remembered so the next startup can reactivate the same repository/folder (see
+            // KNoteManagmentCtrl.OnInitialized). Actually written to disk by the next SaveConfig().
+            if (activeFolderWithServiceRef?.FolderInfo != null && activeFolderWithServiceRef.ServiceRef != null)
+            {
+                AppConfig.LastActiveRepositoryAlias = activeFolderWithServiceRef.ServiceRef.Alias;
+                AppConfig.LastActiveFolderId = activeFolderWithServiceRef.FolderInfo.FolderId;
+            }
+
             ChangedActiveFolderWithServiceRef?.Invoke(this, new ControllerEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
         }
     }

@@ -71,7 +71,13 @@ public interface IViewKNoteManagment : IViewBase
     void ActivateWaitState();
     void DeactivateWaitState();
     void ReportProgressKNoteManagment(int porcentaje);
-    void SetVisibleProgressBar(bool visible);    
+    void SetVisibleProgressBar(bool visible);
+
+    // Raised once this view is actually visible under a running message loop. The app bootstrap
+    // (Program.cs) needs this to defer KNoteManagmentCtrl.Run() until Application.Run's loop is
+    // truly pumping (some notes need it, e.g. WebView2 content), without knowing this view is a
+    // WinForms Form or anything about its native Shown event.
+    event EventHandler ViewShown;
 }
 
 public interface IViewPostIt<T> : IViewBase

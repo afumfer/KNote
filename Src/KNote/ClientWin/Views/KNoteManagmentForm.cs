@@ -6,10 +6,16 @@ namespace KNote.ClientWin.Views;
 
 public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 {
-    #region Private methods 
+    #region Private methods
 
     private readonly KNoteManagmentCtrl _ctrl;
     private bool _viewFinalized = false;
+
+    #endregion
+
+    #region IViewKNoteManagment events
+
+    public event EventHandler ViewShown;
 
     #endregion
 
@@ -26,6 +32,8 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         _ctrl = ctrl;
 
         _ctrl.Store.ControllerNotification += Store_ComponentNotification;
+
+        Shown += (s, e) => ViewShown?.Invoke(this, e);
 
         // TODO: options ... for next version
         menuReports.Visible = false;

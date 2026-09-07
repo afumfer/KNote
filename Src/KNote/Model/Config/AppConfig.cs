@@ -301,6 +301,36 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    // Repository/folder the user had active when the application was last closed, so
+    // KNoteManagmentCtrl can reactivate it on the next startup instead of showing no selection.
+    private string _lastActiveRepositoryAlias;
+    public string LastActiveRepositoryAlias
+    {
+        get { return _lastActiveRepositoryAlias; }
+        set
+        {
+            if (_lastActiveRepositoryAlias != value)
+            {
+                _lastActiveRepositoryAlias = value;
+                OnPropertyChanged("LastActiveRepositoryAlias");
+            }
+        }
+    }
+
+    private Guid? _lastActiveFolderId;
+    public Guid? LastActiveFolderId
+    {
+        get { return _lastActiveFolderId; }
+        set
+        {
+            if (_lastActiveFolderId != value)
+            {
+                _lastActiveFolderId = value;
+                OnPropertyChanged("LastActiveFolderId");
+            }
+        }
+    }
+
     // Collection of configured AI providers (provider, model, API key, host for Ollama) consumed
     // by KNoteAIAssistantCtrl's provider picker.
     private List<AiProviderRef> _aiProviderRefs;
@@ -329,8 +359,6 @@ public class AppConfig : SmartModelDtoBase
     // KNoteManagmentForm: minimized (?), maximized (?), visible (?), hide note number (?)
 
     // PostIts: always top, style, ....
-
-    // Path initial treefolder 
 
     #endregion
 

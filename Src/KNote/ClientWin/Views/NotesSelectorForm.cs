@@ -310,6 +310,27 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
 
         dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
 
+        // Setting SortGlyphDirection here doesn't reliably paint the glyph the very first time a
+        // folder's notes are shown: at that point dataGridNotes is still mid-layout (this Ctrl's
+        // OnInitialized() runs before KNoteManagmentForm.LinkComponents() has finished docking/
+        // resizing this grid's panel into its final container), so the header paints once more with
+        // the sort state it had before this assignment. The data itself sorts correctly regardless -
+        // only the glyph is affected. Reapplying it once the message queue goes idle - i.e. once all
+        // of that startup layout work has actually finished - fixes the first-time-only glyph.
+        var colAtIdle = OrderColNumber;
+        var orderAtIdle = _sortOrder;
+        EventHandler onIdle = null;
+        onIdle = (s, e) =>
+        {
+            Application.Idle -= onIdle;
+            if (!dataGridNotes.IsDisposed && colAtIdle < dataGridNotes.Columns.Count)
+            {
+                dataGridNotes.Columns[colAtIdle].HeaderCell.SortGlyphDirection = orderAtIdle;
+                dataGridNotes.Refresh();
+            }
+        };
+        Application.Idle += onIdle;
+
         // Checks the grid's actual row count, not _ctrl.ListEntities.Count: with a second filter
         // applied, the two can differ, and ActiveCurrentRow() would throw on an empty grid.
         if (dataGridNotes.Rows.Count > 0)

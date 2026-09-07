@@ -70,8 +70,17 @@ static class Program
             if (loadException != null)
                 ExceptionDispatchInfo.Capture(loadException).Throw();
 
+            // knoteManagment.Run() can end up displaying a note whose content uses WebView2 (e.g. it
+            // now reactivates the last active folder, see Store.ChangeActiveFolderWithServiceRef): if
+            // its first note uses the WebView2 content mode, CoreWebView2Environment.CreateAsync needs
+            // a real message loop already pumping on this thread. Called here, before Application.Run
+            // below starts one, WebView2's own marshaling can complete off the UI thread, so every
+            // await further up the call chain (up to NoteEditorForm.ModelToControls) then resumes
+            // off-thread too and throws a cross-thread InvalidOperationException. Deferring to
+            // IViewKNoteManagment.ViewShown, raised once that loop is running, is the same fix already
+            // applied to LoadAppStore/SplashForm above, for the same reason.
             var knoteManagment = new KNoteManagmentCtrl(appStore);
-            knoteManagment.Run();
+            knoteManagment.View.ViewShown += (s, e) => knoteManagment.Run();
 
             Application.Run((Form)knoteManagment.View);
 
