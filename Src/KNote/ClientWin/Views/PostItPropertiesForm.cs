@@ -73,7 +73,7 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
         throw new NotImplementedException();
     }
 
-    #endregion 
+    #endregion
 
     #region Form events handlers
 

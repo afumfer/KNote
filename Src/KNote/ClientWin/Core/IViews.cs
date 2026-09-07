@@ -39,6 +39,27 @@ public interface IViewEditorEmbeddable<T> : IViewEmbeddable
     void RefreshViewOnlyRequiredCtrl();
 }
 
+// Small, standalone capability - not every editor shows a folder/repository (e.g.
+// PostItPropertiesForm edits window styling, not note content), so this stays out of the generic
+// IViewEditorEmbeddable<T>/IViewPostIt<T> contracts and is combined into the narrower view
+// interfaces below, only for the Ctrls that actually need it.
+public interface IFolderAndRepositoryDisplay
+{
+    // Re-renders only the folder path / repository alias display, without touching the rest of the
+    // view (a full RefreshView() would reset scroll position, selected list item, active tab, etc.)
+    // - used when a folder or repository gets renamed elsewhere while this note/post-it is open, see
+    // NoteEditorCtrl/PostItEditorCtrl's Store.Events subscriptions.
+    Task RefreshFolderAndRepositoryDisplayAsync();
+}
+
+// NoteEditorCtrl's own view contract: IViewEditorEmbeddable<T> plus the folder/repository display
+// capability. Kept as its own interface (rather than widening IViewEditorEmbeddable<T> itself) so
+// other, unrelated IViewEditorEmbeddable<T> implementers aren't forced to implement a member they
+// have no use for.
+public interface IViewNoteEditorEmbeddable<T> : IViewEditorEmbeddable<T>, IFolderAndRepositoryDisplay
+{
+}
+
 public interface IViewSelector<TItem> : IViewEmbeddable
 {
     void RefreshItem(TItem item);
@@ -81,11 +102,19 @@ public interface IViewKNoteManagment : IViewBase
 }
 
 public interface IViewPostIt<T> : IViewBase
-{    
+{
     void CleanView();
     void RefreshModel();
     void HideView();
     void ActivateView();
+}
+
+// PostItEditorCtrl's own view contract: IViewPostIt<T> plus the folder/repository display
+// capability (see IFolderAndRepositoryDisplay). Kept separate so other IViewPostIt<T> implementers
+// with nothing to do with folders/repositories (e.g. PostItPropertiesForm, which edits window
+// styling) aren't forced to implement a member they have no use for.
+public interface IViewPostItEditor<T> : IViewPostIt<T>, IFolderAndRepositoryDisplay
+{
 }
 
 public interface IViewChat : IViewBase

@@ -6,7 +6,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto>
+public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, NoteDto>
 {
     #region Private fields
 
@@ -30,11 +30,15 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
     {
         ControllerName = "PostIt editor";
         Store.Events.Subscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
+        Store.Events.Subscribe<EntitySaved<FolderDto>>(OnFolderSavedElsewhere);
+        Store.Events.Subscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
     }
 
     public override void Dispose()
     {
         Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
+        Store.Events.Unsubscribe<EntitySaved<FolderDto>>(OnFolderSavedElsewhere);
+        Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
         base.Dispose();
     }
 
@@ -46,6 +50,24 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
     {
         if (e.Entity.NoteId == this.Model.NoteId)
             this.Finalize();
+    }
+
+    // The renamed folder may be an ancestor of this post-it's own folder (the displayed path
+    // includes every ancestor's name), so there's no cheap way to tell in advance whether it's
+    // actually relevant - always recomputing the path is simple and cheap enough (one interactive
+    // rename at a time, never a hot path).
+    private async void OnFolderSavedElsewhere(EntitySaved<FolderDto> e)
+    {
+        if (Service == null)
+            return;
+        await View.RefreshFolderAndRepositoryDisplayAsync();
+    }
+
+    private async void OnRepositorySavedElsewhere(EntitySaved<RepositoryRef> e)
+    {
+        if (Service == null)
+            return;
+        await View.RefreshFolderAndRepositoryDisplayAsync();
     }
 
     #endregion
@@ -64,9 +86,9 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostIt<NoteDto>, NoteDto
 
     #region IEditorView implementation
 
-    protected override IViewPostIt<NoteDto> CreateView()
+    protected override IViewPostItEditor<NoteDto> CreateView()
     {
-        return Store.FactoryViews.Registry.Resolve<PostItEditorCtrl, IViewPostIt<NoteDto>>(this);
+        return Store.FactoryViews.Registry.Resolve<PostItEditorCtrl, IViewPostItEditor<NoteDto>>(this);
     }
 
     #endregion 

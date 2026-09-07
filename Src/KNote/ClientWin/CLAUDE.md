@@ -143,7 +143,7 @@ fábricas existentes en su constructor y no expone ya ningún método `View(...)
 
 ```csharp
 // Constructor de FactoryViewsWinForms — todo lo que queda de la fábrica
-Registry.Register<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(c => new NoteEditorForm(c));
+Registry.Register<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(c => new NoteEditorForm(c));
 Registry.Register<KNoteManagmentCtrl, IViewBase>(c => new NotifyForm(c), key: "Notify");
 ...
 ```
@@ -153,9 +153,17 @@ su propiedad de vista perezosa, en los pocos controladores como `KntChatCtrl`/`H
 heredan de `CtrlViewBase<TView>`):
 
 ```csharp
-protected override IViewEditorEmbeddable<NoteExtendedDto> CreateView()
-    => Store.FactoryViews.Registry.Resolve<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(this);
+protected override IViewNoteEditorEmbeddable<NoteExtendedDto> CreateView()
+    => Store.FactoryViews.Registry.Resolve<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(this);
 ```
+
+`IViewNoteEditorEmbeddable<T>`/`IViewPostItEditor<T>` (`Core/IViews.cs`) son así: `IViewEditorEmbeddable<T>`/
+`IViewPostIt<T>` combinadas con `IFolderAndRepositoryDisplay` (un único método,
+`RefreshFolderAndRepositoryDisplayAsync()`, para repintar solo la ruta de carpeta/alias de repositorio sin
+disparar un `RefreshView()` completo). Esa capacidad se mantiene fuera de `IViewEditorEmbeddable<T>`/
+`IViewPostIt<T>` a propósito — son contratos genéricos con más implementaciones (p. ej.
+`PostItPropertiesForm : IViewPostIt<WindowDto>`, que edita el estilo de la ventana, no una nota) que no
+tienen carpeta/repositorio que mostrar y no deberían verse obligadas a implementar ese miembro.
 
 **Un `Ctrl` nuevo no toca `IFactoryViews`** — nunca ha hecho falta desde que se retiraron todas las
 sobrecargas: solo hay que registrar su fábrica (típicamente en el constructor de `FactoryViewsWinForms`)

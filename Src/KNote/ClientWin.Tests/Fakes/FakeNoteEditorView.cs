@@ -4,8 +4,8 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Tests.Fakes;
 
-/// <summary>IViewEditorEmbeddable&lt;NoteExtendedDto&gt; test double for NoteEditorCtrl tests.</summary>
-internal class FakeNoteEditorView : IViewEditorEmbeddable<NoteExtendedDto>
+/// <summary>IViewNoteEditorEmbeddable&lt;NoteExtendedDto&gt; test double for NoteEditorCtrl tests.</summary>
+internal class FakeNoteEditorView : IViewNoteEditorEmbeddable<NoteExtendedDto>
 {
     public string LastShownInfo { get; private set; }
     public DialogResult ConfirmationResult { get; set; } = DialogResult.Yes;
@@ -27,4 +27,8 @@ internal class FakeNoteEditorView : IViewEditorEmbeddable<NoteExtendedDto>
     public void CleanView() { }
     public void RefreshModel() { }
     public void RefreshViewOnlyRequiredCtrl() { }
+
+    public Func<Task>? RefreshFolderAndRepositoryDisplayAsyncImpl { get; set; }
+    public Task RefreshFolderAndRepositoryDisplayAsync() =>
+        (RefreshFolderAndRepositoryDisplayAsyncImpl ?? throw new NotSupportedException($"{nameof(RefreshFolderAndRepositoryDisplayAsync)} not configured for this test"))();
 }

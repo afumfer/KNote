@@ -7,7 +7,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace KNote.ClientWin.Views;
 
-public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
+public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
 {
     #region Private fields
 
@@ -95,6 +95,12 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
     public void RefreshModel()
     {
         ControlsToModel();
+    }
+
+    public Task RefreshFolderAndRepositoryDisplayAsync()
+    {
+        RefreshStatus();
+        return Task.CompletedTask;
     }
 
     public void CleanView()

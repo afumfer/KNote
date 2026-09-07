@@ -89,6 +89,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         Store.Events.Subscribe<EntitySaved<NoteExtendedDto>>(NoteEditorCtrl_SavedEntity);
         Store.Events.Subscribe<EntityDeleted<NoteExtendedDto>>(NoteEditorCtrl_DeletedEntity);
         Store.Events.Subscribe<PostItEditRequested>(NoteEditorCtrl_PostItEdit);
+
+        Store.Events.Subscribe<EntitySaved<FolderDto>>(FolderEditorCtrl_SavedEntity);
+        Store.Events.Subscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
     }
 
     private async void Store_ChangedActiveFolderWithServiceRef(object sender, ControllerEventArgs<FolderWithServiceRef> e)
@@ -173,6 +176,29 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         return parts.Count > 0 ? string.Join(", ", parts) : "(no criteria)";
     }
 
+    // The renamed folder may be an ancestor of the active folder (the displayed path includes every
+    // ancestor's name), so there's no cheap way to tell in advance whether it's actually relevant to
+    // the header - always recomputing the active folder's path is simple and cheap enough (one
+    // interactive rename at a time, never a hot path). Only applies in Folders mode: in Filters mode
+    // FolderPath instead holds the filter description text, which a folder rename has nothing to do
+    // with.
+    private async void FolderEditorCtrl_SavedEntity(EntitySaved<FolderDto> e)
+    {
+        if (SelectMode != EnumSelectMode.Folders || SelectedFolderInfo == null)
+            return;
+
+        if (SelectedFolderInfo.FolderId == e.Entity.FolderId)
+            SelectedFolderWithServiceRef.FolderInfo = e.Entity.GetSimpleDto<FolderInfoDto>();
+
+        FolderPath = await Store.GetKNoteFolerPath(SelectedFolderWithServiceRef.ServiceRef, SelectedFolderInfo.FolderId);
+        View.ShowInfo(null);
+    }
+
+    private void RepositoryEditorCtrl_SavedEntity(EntitySaved<RepositoryRef> e)
+    {
+        View.ShowInfo(null);
+    }
+
     public override void Dispose()
     {
         Store.ChangedActiveFolderWithServiceRef -= Store_ChangedActiveFolderWithServiceRef;
@@ -187,6 +213,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         Store.Events.Unsubscribe<EntitySaved<NoteExtendedDto>>(NoteEditorCtrl_SavedEntity);
         Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(NoteEditorCtrl_DeletedEntity);
         Store.Events.Unsubscribe<PostItEditRequested>(NoteEditorCtrl_PostItEdit);
+
+        Store.Events.Unsubscribe<EntitySaved<FolderDto>>(FolderEditorCtrl_SavedEntity);
+        Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
 
         base.Dispose();
     }
@@ -929,20 +958,41 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    public void RefreshRepositoryAndFolderTree()
+    public async void RefreshRepositoryAndFolderTree()
     {
         View.ActivateWaitState();
         NotifyMessage("Refreshing tree folder ...");
+
+        // Captured before any of the resets below can change SelectMode/SelectedFolderWithServiceRef.
+        // FoldersSelectorCtrl.SelectedFolderId re-highlights this folder in the tree once it reloads
+        // below, but that reselect doesn't reliably retrigger the embedded NotesSelectorCtrl's own
+        // reload in turn (e.g. after editing a repository's alias, the tree correctly kept the right
+        // folder highlighted but its notes list stayed stale until switching away and back) - so
+        // ForceRefreshListNotes() is called explicitly further down instead of relying on that
+        // indirect chain.
+        var activeFolder = SelectMode == EnumSelectMode.Folders ? SelectedFolderWithServiceRef : null;
+
         SelectedNotesInServiceRef = null;
-        SelectedFolderWithServiceRef = null;
         SelectedNoteInfo = null;
-        FolderPath = "";
-        CountNotes = 0;
+        FoldersSelectorCtrl.SelectedFolderId = activeFolder?.FolderInfo?.FolderId;
         FoldersSelectorCtrl.ServicesRef = null;  // force get repostiroy list form store
         FoldersSelectorCtrl.Refresh();
         NoteEditorCtrl.CleanView();
-        NotesSelectorCtrl.CleanView();
-        View.ShowInfo(null);
+
+        if (activeFolder != null)
+        {
+            SelectMode = EnumSelectMode.Folders;
+            await ForceRefreshListNotes();
+        }
+        else
+        {
+            SelectedFolderWithServiceRef = null;
+            FolderPath = "";
+            CountNotes = 0;
+            NotesSelectorCtrl.CleanView();
+            View.ShowInfo(null);
+        }
+
         NotifyMessage("Refreshed tree folder ...");
         View.DeactivateWaitState();
     }

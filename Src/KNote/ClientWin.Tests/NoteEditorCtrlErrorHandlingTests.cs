@@ -20,7 +20,7 @@ public class NoteEditorCtrlErrorHandlingTests
     {
         var factoryViews = new TestFactoryViews();
         var view = new FakeNoteEditorView();
-        factoryViews.Registry.Register<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(c => view);
+        factoryViews.Registry.Register<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(c => view);
 
         var store = new Store(factoryViews);
         var ctrl = new NoteEditorCtrl(store);

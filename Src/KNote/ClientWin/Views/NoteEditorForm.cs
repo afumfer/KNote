@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDto>
+public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtendedDto>
 {
     #region Private fields
 
@@ -131,6 +131,12 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     public void RefreshViewOnlyRequiredCtrl()
     {
         ModelToControlsOnlyRequiredComponents();
+    }
+
+    public async Task RefreshFolderAndRepositoryDisplayAsync()
+    {
+        Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
+        textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
     }
 
     public async void RefreshModel()
@@ -912,12 +918,11 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
     {
         var ct = _ctrl.Model.GetContentTypeExt();
 
-        // Basic data            
-        Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
+        // Basic data
         textTopic.Text = _ctrl.Model.Topic;
         textNoteNumber.Text = "#" + _ctrl.Model.NoteNumber.ToString();
 
-        textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
+        await RefreshFolderAndRepositoryDisplayAsync();
 
         textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
         textTags.Text = _ctrl.Model.Tags;

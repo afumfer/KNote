@@ -16,8 +16,8 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<FoldersSelectorCtrl, IViewSelector<FolderWithServiceRef>>(c => new FoldersSelectorForm(c));
         Registry.Register<NotesSelectorCtrl, IViewSelector<NoteMinimalDto>>(c => new NotesSelectorForm(c));
         Registry.Register<KNoteManagmentCtrl, IViewKNoteManagment>(c => new KNoteManagmentForm(c));
-        Registry.Register<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(c => new NoteEditorForm(c));
-        Registry.Register<PostItEditorCtrl, IViewPostIt<NoteDto>>(c => new PostItEditorForm(c));
+        Registry.Register<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(c => new NoteEditorForm(c));
+        Registry.Register<PostItEditorCtrl, IViewPostItEditor<NoteDto>>(c => new PostItEditorForm(c));
         Registry.Register<PostItPropertiesCtrl, IViewPostIt<WindowDto>>(c => new PostItPropertiesForm(c));
         Registry.Register<FolderEditorCtrl, IViewEditor<FolderDto>>(c => new FolderEditorForm(c));
         Registry.Register<RepositoryEditorCtrl, IViewEditor<RepositoryRef>>(c => new RepositoryEditorForm(c));

@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace KNote.ClientWin.Controllers;
 
-public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable<NoteExtendedDto>, NoteExtendedDto>
+public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbeddable<NoteExtendedDto>, NoteExtendedDto>
 {
     #region Properties
        
@@ -24,11 +24,15 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
     {
         ControllerName = "Note editor";
         Store.Events.Subscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
+        Store.Events.Subscribe<EntitySaved<FolderDto>>(OnFolderSavedElsewhere);
+        Store.Events.Subscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
     }
 
     public override void Dispose()
     {
         Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
+        Store.Events.Unsubscribe<EntitySaved<FolderDto>>(OnFolderSavedElsewhere);
+        Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
         base.Dispose();
     }
 
@@ -42,6 +46,24 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
             return;
         if (e.Entity.NoteId == Model.NoteId)
             Finalize();
+    }
+
+    // The renamed folder may be an ancestor of this note's own folder (the displayed path includes
+    // every ancestor's name), so there's no cheap way to tell in advance whether it's actually
+    // relevant - always recomputing the path is simple and cheap enough (one interactive rename at a
+    // time, never a hot path).
+    private async void OnFolderSavedElsewhere(EntitySaved<FolderDto> e)
+    {
+        if (Service == null)
+            return;
+        await View.RefreshFolderAndRepositoryDisplayAsync();
+    }
+
+    private async void OnRepositorySavedElsewhere(EntitySaved<RepositoryRef> e)
+    {
+        if (Service == null)
+            return;
+        await View.RefreshFolderAndRepositoryDisplayAsync();
     }
 
     #endregion
@@ -60,9 +82,9 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewEditorEmbeddable
 
     #region IViewEditorEmbeddable implementation
 
-    protected override IViewEditorEmbeddable<NoteExtendedDto> CreateView()
+    protected override IViewNoteEditorEmbeddable<NoteExtendedDto> CreateView()
     {
-        return Store.FactoryViews.Registry.Resolve<NoteEditorCtrl, IViewEditorEmbeddable<NoteExtendedDto>>(this);
+        return Store.FactoryViews.Registry.Resolve<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(this);
     }
 
     #endregion
