@@ -91,6 +91,7 @@
             statusLabel1 = new ToolStripStatusLabel();
             statusS1 = new ToolStripStatusLabel();
             statusLabel2 = new ToolStripStatusLabel();
+            statusLabelMenuHint = new ToolStripStatusLabel();
             progressBar = new ToolStripProgressBar();
             toolBarManagment = new ToolStrip();
             toolNewNote = new ToolStripButton();
@@ -260,6 +261,7 @@
             // menuExit
             // 
             menuExit.Name = "menuExit";
+            menuExit.ShortcutKeys = Keys.Control | Keys.Shift | Keys.Q;
             menuExit.Size = new Size(203, 22);
             menuExit.Text = "&Exit";
             menuExit.Click += menu_Click;
@@ -394,7 +396,7 @@
             // menuVerticalPanelForNotes
             // 
             menuVerticalPanelForNotes.Name = "menuVerticalPanelForNotes";
-            menuVerticalPanelForNotes.ShortcutKeys = Keys.F12;
+            menuVerticalPanelForNotes.ShortcutKeys = Keys.Control | Keys.Shift | Keys.F12;
             menuVerticalPanelForNotes.Size = new Size(237, 22);
             menuVerticalPanelForNotes.Text = "Vertical panel for list notes";
             menuVerticalPanelForNotes.Click += menu_Click;
@@ -439,6 +441,7 @@
             // menuListFilterVisible
             //
             menuListFilterVisible.Name = "menuListFilterVisible";
+            menuListFilterVisible.ShortcutKeys = Keys.F12;
             menuListFilterVisible.Size = new Size(237, 22);
             menuListFilterVisible.Text = "Show list filter";
             menuListFilterVisible.Click += menu_Click;
@@ -542,7 +545,7 @@
             // 
             // statusBarManagment
             // 
-            statusBarManagment.Items.AddRange(new ToolStripItem[] { statusLabel1, statusS1, statusLabel2, progressBar });
+            statusBarManagment.Items.AddRange(new ToolStripItem[] { statusLabel1, statusS1, statusLabel2, statusLabelMenuHint, progressBar });
             statusBarManagment.Location = new Point(0, 668);
             statusBarManagment.Name = "statusBarManagment";
             statusBarManagment.Padding = new Padding(1, 0, 16, 0);
@@ -571,7 +574,16 @@
             statusLabel2.Size = new Size(19, 17);
             statusLabel2.Text = "....";
             statusLabel2.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
+            // statusLabelMenuHint
+            //
+            statusLabelMenuHint.BorderStyle = Border3DStyle.RaisedOuter;
+            statusLabelMenuHint.Name = "statusLabelMenuHint";
+            statusLabelMenuHint.Size = new Size(199, 17);
+            statusLabelMenuHint.Text = "Press Shift+F12 to show the menu";
+            statusLabelMenuHint.TextAlign = ContentAlignment.MiddleLeft;
+            statusLabelMenuHint.Visible = false;
+            //
             // progressBar
             // 
             progressBar.Name = "progressBar";
@@ -966,6 +978,7 @@
         private ToolStripStatusLabel statusLabel1;
         private ToolStripStatusLabel statusS1;
         private ToolStripStatusLabel statusLabel2;
+        private ToolStripStatusLabel statusLabelMenuHint;
         private ToolStrip toolBarManagment;
         private ToolStripButton toolNewNote;
         private ToolStripButton toolEditNote;

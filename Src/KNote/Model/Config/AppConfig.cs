@@ -219,6 +219,95 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    // Management window's View menu toggles, persisted so panel visibility survives a restart
+    // exactly as the user left it (see KNoteManagmentForm.ApplyViewPanelSettings/menu handlers).
+    // Backed by bool? rather than bool so that a config file saved before these fields existed
+    // (where XML deserialization leaves them unset) falls back to the panel being shown - matching
+    // the Designer's original default - instead of silently hiding it after an upgrade.
+    private bool? _showFoldersExplorerTab;
+    public bool ShowFoldersExplorerTab
+    {
+        get { return _showFoldersExplorerTab ?? true; }
+        set
+        {
+            if (_showFoldersExplorerTab != value)
+            {
+                _showFoldersExplorerTab = value;
+                OnPropertyChanged("ShowFoldersExplorerTab");
+            }
+        }
+    }
+
+    private bool _verticalPanelForNotes;
+    public bool VerticalPanelForNotes
+    {
+        get { return _verticalPanelForNotes; }
+        set
+        {
+            if (_verticalPanelForNotes != value)
+            {
+                _verticalPanelForNotes = value;
+                OnPropertyChanged("VerticalPanelForNotes");
+            }
+        }
+    }
+
+    private bool? _showHeaderPanel;
+    public bool ShowHeaderPanel
+    {
+        get { return _showHeaderPanel ?? true; }
+        set
+        {
+            if (_showHeaderPanel != value)
+            {
+                _showHeaderPanel = value;
+                OnPropertyChanged("ShowHeaderPanel");
+            }
+        }
+    }
+
+    private bool? _showToolbar;
+    public bool ShowToolbar
+    {
+        get { return _showToolbar ?? true; }
+        set
+        {
+            if (_showToolbar != value)
+            {
+                _showToolbar = value;
+                OnPropertyChanged("ShowToolbar");
+            }
+        }
+    }
+
+    private bool? _showMainMenu;
+    public bool ShowMainMenu
+    {
+        get { return _showMainMenu ?? true; }
+        set
+        {
+            if (_showMainMenu != value)
+            {
+                _showMainMenu = value;
+                OnPropertyChanged("ShowMainMenu");
+            }
+        }
+    }
+
+    private bool _showListFilter;
+    public bool ShowListFilter
+    {
+        get { return _showListFilter; }
+        set
+        {
+            if (_showListFilter != value)
+            {
+                _showListFilter = value;
+                OnPropertyChanged("ShowListFilter");
+            }
+        }
+    }
+
     private string _chatHubUrl;
     public string ChatHubUrl
     {

@@ -109,11 +109,11 @@ namespace KNote.ClientWin.Views
             tabControlMain.Controls.Add(tabPageTraceNoteTypes);
             tabControlMain.Controls.Add(tabPageAttributes);
             tabControlMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tabControlMain.Location = new Point(0, 0);
+            tabControlMain.Location = new Point(4, 4);
             tabControlMain.Margin = new Padding(4, 5, 4, 5);
             tabControlMain.Name = "tabControlMain";
             tabControlMain.SelectedIndex = 0;
-            tabControlMain.Size = new Size(913, 978);
+            tabControlMain.Size = new Size(905, 970);
             tabControlMain.TabIndex = 16;
             //
             // tabPageGeneral

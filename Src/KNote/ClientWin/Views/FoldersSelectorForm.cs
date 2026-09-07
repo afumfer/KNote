@@ -91,6 +91,7 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
         Dock = DockStyle.Fill;
         FormBorderStyle = FormBorderStyle.None;
         panelBottom.Visible = false;
+        panelForm.Padding = new Padding(0);
     }
 
     public void ConfigureWindowMode()
@@ -100,6 +101,10 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
         FormBorderStyle = FormBorderStyle.Sizable;
         panelBottom.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
+        // Only give the treeview some breathing room as a standalone/modal window - when embedded
+        // (e.g. KNoteManagmentForm's "Tree folders" tab) it should keep touching its container's
+        // edges exactly as before, matching the rest of that host form's layout.
+        panelForm.Padding = new Padding(4);
     }
   
     public object SelectItem(FolderWithServiceRef item)

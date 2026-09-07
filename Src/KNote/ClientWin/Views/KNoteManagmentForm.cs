@@ -52,6 +52,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
     public void ShowView()
     {
         LinkComponents();
+        ApplyNotesFilterSetting();
         Application.DoEvents();
         this.Show();
     }
@@ -147,6 +148,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
     private void KNoteManagmentForm_Load(object sender, EventArgs e)
     {
         SetViewPositionAndSize();
+        ApplyStartupPanelVisibility();
     }
 
     private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -289,34 +291,30 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             if (!panelSupManagment.Visible)
                 Text = $"{KntConst.AppName} Managment";
             panelSupManagment.Visible = !panelSupManagment.Visible;
+            _ctrl.Store.AppConfig.ShowHeaderPanel = panelSupManagment.Visible;
         }
         else if (menuSel == menuMainVisible)
         {
             menuMangment.Visible = !menuMangment.Visible;
-            menuMainVisible.Checked = !menuMainVisible.Checked;
+            menuMainVisible.Checked = menuMangment.Visible;
+            _ctrl.Store.AppConfig.ShowMainMenu = menuMangment.Visible;
+            UpdateMenuHintVisibility();
         }
         else if (menuSel == menuToolbarVisible)
         {
             menuToolbarVisible.Checked = !menuToolbarVisible.Checked;
             toolBarManagment.Visible = menuToolbarVisible.Checked;
+            _ctrl.Store.AppConfig.ShowToolbar = menuToolbarVisible.Checked;
         }
         else if (menuSel == menuVerticalPanelForNotes)
         {
-            if (splitContainer2.Orientation == Orientation.Horizontal)
-            {
-                splitContainer2.Orientation = Orientation.Vertical;
-                menuVerticalPanelForNotes.Checked = true;
-            }
-            else
-            {
-                splitContainer2.Orientation = Orientation.Horizontal;
-                menuVerticalPanelForNotes.Checked = false;
-            }
+            SetVerticalPanelForNotes(splitContainer2.Orientation == Orientation.Horizontal);
         }
         else if (menuSel == menuListFilterVisible)
         {
             _ctrl.ToggleNotesListFilter();
             menuListFilterVisible.Checked = _ctrl.NotesSelectorCtrl.EnableTextFilter;
+            _ctrl.Store.AppConfig.ShowListFilter = menuListFilterVisible.Checked;
         }
         else if (menuSel == menuExit)
         {
@@ -384,6 +382,82 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
     #region Private methods
 
+    // Applies the View menu's persisted state (Store.AppConfig) as early as possible - Form.Load,
+    // before this window is ever shown - so panels don't visibly flash from their Designer defaults
+    // to their configured state right after startup. Everything here touches only this Form's own
+    // native controls (menu items, toolbar, header panel, tab selection, splitter orientation), none
+    // of which need _ctrl's sub-controllers to exist yet. Only the visible tab itself is restored
+    // here: the actual "active folder" content is already handled independently via
+    // Store.AppConfig.LastActiveFolderId (see KNoteManagmentCtrl.OnInitialized), and there is no
+    // persisted "active filter" state to restore for the other tab.
+    // See ApplyNotesFilterSetting() for the one View menu setting that does need a sub-controller.
+    private void ApplyStartupPanelVisibility()
+    {
+        var cfg = _ctrl.Store.AppConfig;
+
+        tabExplorers.SelectedTab = cfg.ShowFoldersExplorerTab ? tabExplorers.TabPages[0] : tabExplorers.TabPages[1];
+        menuFoldersExplorer.Checked = cfg.ShowFoldersExplorerTab;
+        menuSearchPanel.Checked = !cfg.ShowFoldersExplorerTab;
+
+        panelSupManagment.Visible = cfg.ShowHeaderPanel;
+        menuHeaderPanelVisible.Checked = cfg.ShowHeaderPanel;
+
+        toolBarManagment.Visible = cfg.ShowToolbar;
+        menuToolbarVisible.Checked = cfg.ShowToolbar;
+
+        menuMangment.Visible = cfg.ShowMainMenu;
+        menuMainVisible.Checked = cfg.ShowMainMenu;
+        UpdateMenuHintVisibility();
+
+        SetVerticalPanelForNotes(cfg.VerticalPanelForNotes);
+    }
+
+    // The one View menu setting that needs _ctrl.NotesSelectorCtrl to already exist (created by
+    // KNoteManagmentCtrl.OnInitialized()) - called from ShowView(), after LinkComponents() has docked
+    // it. See ApplyStartupPanelVisibility() for everything else, applied earlier from Form.Load.
+    private void ApplyNotesFilterSetting()
+    {
+        var cfg = _ctrl.Store.AppConfig;
+
+        // EnableTextFilter alone only takes visible effect the next time NotesSelectorCtrl's View
+        // actually refreshes with real data (see NotesSelectorForm.RefreshView) - which, depending on
+        // how far the LastActiveFolderId restoration has already gotten by the time this method runs,
+        // may have already happened (with the panel's previous, pre-restore visibility) rather than
+        // happening afterwards. Calling RefreshView() here covers both orderings: it's a no-op while
+        // ListEntities is still null (not loaded yet - the later real refresh applies it then), and
+        // immediately re-applies the correct visibility if the notes have already loaded.
+        _ctrl.NotesSelectorCtrl.EnableTextFilter = cfg.ShowListFilter;
+        menuListFilterVisible.Checked = cfg.ShowListFilter;
+        _ctrl.NotesSelectorCtrl.View.RefreshView();
+    }
+
+    // Shared by the menu handler and ApplyStartupPanelVisibility (startup restore). Switching TO vertical
+    // gives the folder tree/notes list/note detail a fixed 15%/35%/50% split of the total width, per
+    // request; switching back to horizontal (list on top, detail below) leaves whatever sizes are
+    // already there untouched.
+    private void SetVerticalPanelForNotes(bool vertical)
+    {
+        splitContainer2.Orientation = vertical ? Orientation.Vertical : Orientation.Horizontal;
+
+        if (vertical)
+        {
+            splitContainer1.SplitterDistance = (int)(splitContainer1.Width * 0.15);
+            splitContainer2.SplitterDistance = (int)(splitContainer2.Width * (35.0 / 85.0));
+        }
+
+        menuVerticalPanelForNotes.Checked = vertical;
+        _ctrl.Store.AppConfig.VerticalPanelForNotes = vertical;
+    }
+
+    // Reminder shown in the status bar while the main menu is hidden, so Shift+F12 (the only way to
+    // bring it back) isn't forgotten - a status bar hint was chosen over decorating the window
+    // caption, since the caption is meant to identify the window, not carry usage hints, and a
+    // status bar message is the more conventional place for this kind of transient reminder.
+    private void UpdateMenuHintVisibility()
+    {
+        statusLabelMenuHint.Visible = !menuMangment.Visible;
+    }
+
     private async Task SelectTab(int tabIndex)
     {
         if (tabIndex == 0)
@@ -391,6 +465,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             tabExplorers.SelectedTab = tabExplorers.TabPages[0];
             menuFoldersExplorer.Checked = true;
             menuSearchPanel.Checked = false;
+            _ctrl.Store.AppConfig.ShowFoldersExplorerTab = true;
             await _ctrl.GoActiveFolder();
         }
         else if (tabIndex == 1)
@@ -398,6 +473,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             tabExplorers.SelectedTab = tabExplorers.TabPages[1];
             menuFoldersExplorer.Checked = false;
             menuSearchPanel.Checked = true;
+            _ctrl.Store.AppConfig.ShowFoldersExplorerTab = false;
             await _ctrl.GoActiveFilter();
         }
     }
