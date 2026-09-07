@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Pandoc" Version="3.1.0" />
-    <PackageReference Include="redmine-api" Version="4.6.5" />
+    <PackageReference Include="redmine-api" Version="4.65.0" />
   </ItemGroup>
 
   <ItemGroup>
