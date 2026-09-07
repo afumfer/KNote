@@ -63,9 +63,19 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
                 LoadNodes(rootRepNode, serviceRef, await _ctrl.LoadEntities(serviceRef));
                 rootRepNode.Expand();
                 treeViewFolders.Refresh();
-                
+
             }
-            _ctrl.NotifyMessage("");            
+            _ctrl.NotifyMessage("");
+
+            if (_ctrl.SelectedFolderId != null)
+            {
+                var preselectNodes = treeViewFolders.Nodes.Find(_ctrl.SelectedFolderId.ToString(), true);
+                if (preselectNodes.Length > 0)
+                {
+                    preselectNodes[0].EnsureVisible();
+                    treeViewFolders.SelectedNode = preselectNodes[0];
+                }
+            }
         }
     }
 

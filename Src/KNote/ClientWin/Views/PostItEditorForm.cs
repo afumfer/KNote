@@ -318,7 +318,7 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         TopMost = false;
         Refresh();
 
-        var folder = _ctrl.GetFolder();
+        var folder = _ctrl.GetFolder(_selectedFolderId);
         if (folder != null)
         {
             _selectedFolderId = folder.FolderId;
@@ -609,10 +609,11 @@ public partial class PostItEditorForm : Form, IViewPostIt<NoteDto>
         grfx.DrawRectangle(pn, 0, 0, this.Width - 1, this.Height - 1);
     }
 
-    private void RefreshStatus()
+    private async void RefreshStatus()
     {
         var status = string.IsNullOrEmpty(_ctrl.Model.InternalTags) ? "" : $" - ({_ctrl.Model.InternalTags})";
-        labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{_ctrl.Model.FolderDto.Name}] {status}";
+        var folderPath = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
+        labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{folderPath}] {status}";
     }
 
     #endregion

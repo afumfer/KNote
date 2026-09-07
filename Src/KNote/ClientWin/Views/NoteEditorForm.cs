@@ -522,13 +522,13 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         kntEditView.MarkdownContentControl.BeginInvoke(new Action(() => kntEditView.MarkdownContentControl.ScrollToCaret()));
     }
 
-    private void buttonFolderSearch_Click(object sender, EventArgs e)
+    private async void buttonFolderSearch_Click(object sender, EventArgs e)
     {
-        var folder = _ctrl.GetFolder();
+        var folder = _ctrl.GetFolder(_changedFolder?.FolderId ?? _ctrl.Model.FolderId);
         if (folder != null)
         {
             _changedFolder = folder;
-            textFolder.Text = _changedFolder?.Name;
+            textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _changedFolder.FolderId);
             textFolderNumber.Text = "#" + _changedFolder.FolderNumber.ToString();
 
             buttonUndo.Enabled = true;
@@ -917,8 +917,7 @@ public partial class NoteEditorForm : Form, IViewEditorEmbeddable<NoteExtendedDt
         textTopic.Text = _ctrl.Model.Topic;
         textNoteNumber.Text = "#" + _ctrl.Model.NoteNumber.ToString();
 
-        textFolder.Text = _ctrl.Model.FolderDto?.Name;
-        //textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);  // TODO: ### Experimental
+        textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
 
         textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
         textTags.Text = _ctrl.Model.Tags;

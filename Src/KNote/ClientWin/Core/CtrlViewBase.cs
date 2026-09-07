@@ -385,12 +385,13 @@ abstract public class CtrlNoteEditorBase<TView, TEntity> : CtrlEditorBase<TView,
 
     #endregion 
 
-    public virtual FolderInfoDto GetFolder()
+    public virtual FolderInfoDto GetFolder(Guid? currentFolderId = null)
     {
         var folderSelector = new FoldersSelectorCtrl(Store);
         var services = new List<ServiceRef>();
         services.Add(Store.GetServiceRef(Service.IdServiceRef));
         folderSelector.ServicesRef = services;
+        folderSelector.SelectedFolderId = currentFolderId;
         var res = folderSelector.RunModal();
         if (res.Entity == EControllerResult.Executed)
             return folderSelector.SelectedEntity?.FolderInfo;

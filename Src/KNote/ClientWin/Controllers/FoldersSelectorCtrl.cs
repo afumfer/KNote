@@ -28,6 +28,9 @@ public class FoldersSelectorCtrl : CtrlSelectorBase<IViewSelector<FolderWithServ
 
     public Guid? OldParent { get; set; }
 
+    // Folder to preselect in the treeview once loaded, e.g. the folder the note/post-it currently belongs to.
+    public Guid? SelectedFolderId { get; set; }
+
     #endregion 
 
     #region Constructor

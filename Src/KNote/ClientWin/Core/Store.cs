@@ -512,7 +512,6 @@ public class Store
             return null;
     }
 
-    // TODO: (Experimental ###)
     public async Task<string> GetKNoteFolerPath(ServiceRef serviceRef, Guid folderId)
     {
         string folderPath = string.Empty;
