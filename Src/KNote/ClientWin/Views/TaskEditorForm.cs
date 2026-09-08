@@ -60,22 +60,6 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textUser.Text = "";
-        textTags.Text = "";
-        textPriority.Text = "";
-        textEstimatedTime.Text = "";
-        textSpendTime.Text = "";
-        textExStartDate.Text = "";
-        textExEndDate.Text = "";
-        textDificultyLevel.Text = "";
-        textStartDate.Text = "";
-        textEndDate.Text = "";
-        checkResolved.Checked = false;
-        textDescription.Text = "";
-    }
-
     #endregion
 
     #region Form event handelrs

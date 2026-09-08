@@ -49,31 +49,9 @@ public partial class NoteAttributeEditorForm : Form, IViewEditor<NoteKAttributeD
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textValue.Text = "";
-        labelDescription.Text = "";
-        labelAttribute.Text = "";
-    }
-
     public void RefreshView()
     {
         ModelToControls();
-    }
-
-    public void ConfigureEmbededMode()
-    {
-        
-    }
-
-    public void ConfigureWindowMode()
-    {
-        
-    }
-
-    public Control PanelView()
-    {
-        return panelForm;
     }
 
     public void OnClosingView()

@@ -114,11 +114,6 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
         return Task.CompletedTask;
     }
 
-    public void CleanView()
-    {
-
-    }
-
     public void OnClosingView()
     {
         _viewFinalized = true;

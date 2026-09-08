@@ -4,7 +4,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class NoteTypesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteTypeDto>, NoteTypeDto>
+public class NoteTypesSelectorCtrl : CtrlSelectorBase<IViewEmbeddable, NoteTypeDto>
 {
     #region Constructor 
 
@@ -17,9 +17,9 @@ public class NoteTypesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteTypeDto>
 
     #region ISelectorView
 
-    protected override IViewSelector<NoteTypeDto> CreateView()
+    protected override IViewEmbeddable CreateView()
     {
-        return Store.FactoryViews.Registry.Resolve<NoteTypesSelectorCtrl, IViewSelector<NoteTypeDto>>(this);
+        return Store.FactoryViews.Registry.Resolve<NoteTypesSelectorCtrl, IViewEmbeddable>(this);
     }
 
     #endregion
@@ -61,26 +61,6 @@ public class NoteTypesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteTypeDto>
         }
 
         return true;
-    }
-
-    public override void AddItem(NoteTypeDto item)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void DeleteItem(NoteTypeDto item)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void RefreshItem(NoteTypeDto item)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void SelectItem(NoteTypeDto item)
-    {
-        throw new NotImplementedException();
     }
 
     #endregion

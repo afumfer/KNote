@@ -68,11 +68,6 @@ public partial class PostItPropertiesForm : Form, IViewPostIt<WindowDto>
         throw new NotImplementedException();
     }
 
-    public void CleanView()
-    {
-        throw new NotImplementedException();
-    }
-
     #endregion
 
     #region Form events handlers

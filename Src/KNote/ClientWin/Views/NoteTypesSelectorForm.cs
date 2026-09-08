@@ -7,7 +7,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
+public partial class NoteTypesSelectorForm : Form, IViewEmbeddable
 {
     #region Private fields
 
@@ -81,39 +81,16 @@ public partial class NoteTypesSelectorForm : Form, IViewSelector<NoteTypeDto>
         return panelForm;
     }
 
+    // NoteTypesSelectorCtrl only ever runs in window mode (a modal RunModal() picker, e.g. from
+    // NoteEditorCtrl.RequestChangeNoteType); EmbededMode is never set true for it, so
+    // ConfigureEmbededMode() never actually executes. ConfigureWindowMode() does run on every open
+    // but has nothing to configure here. Kept empty only to satisfy IViewEmbeddable.
     public void ConfigureEmbededMode()
     {
-        
     }
 
     public void ConfigureWindowMode()
     {
-        
-    }
-
-    public object SelectItem(NoteTypeDto item)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void AddItem(NoteTypeDto item)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void DeleteItem(NoteTypeDto item)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void RefreshItem(NoteTypeDto item)
-    {
-        throw new NotImplementedException();
-    }
-
-    public List<NoteTypeDto> GetSelectedListItem()
-    {
-        throw new NotImplementedException();
     }
 
     #endregion

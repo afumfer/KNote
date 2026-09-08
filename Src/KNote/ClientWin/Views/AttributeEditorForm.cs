@@ -61,14 +61,6 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textName.Text = "";
-        textDescription.Text = "";
-        checkRequiredValue.Checked = false;
-        numericOrder.Value = 0;
-    }
-
     public void OnClosingView()
     {
         _viewFinalized = true;

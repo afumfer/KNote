@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class FoldersSelectorCtrl : CtrlSelectorBase<IViewSelector<FolderWithServiceRef>, FolderWithServiceRef>
+public class FoldersSelectorCtrl : CtrlSyncableSelectorBase<IViewSelector<FolderWithServiceRef>, FolderWithServiceRef>
 {
     #region Properties
 

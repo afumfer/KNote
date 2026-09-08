@@ -59,14 +59,6 @@ public partial class ResourceEditorForm : Form, IViewEditor<ResourceDto>
         ControlsToModel();
     }
 
-    public async void CleanView()
-    {
-        textDescription.Text = "";
-        textOrder.Text = "";
-        await kntView.ClearWebView();
-        textFileName.Text = "";
-    }
-
     public void OnClosingView()
     {
         _viewFinalized = true;

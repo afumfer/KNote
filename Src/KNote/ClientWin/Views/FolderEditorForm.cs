@@ -88,16 +88,6 @@ public partial class FolderEditorForm : Form, IViewEditor<FolderDto>
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textName.Text = "";
-        textNumber.Text = "";
-        textTags.Text = "";
-        textOrder.Text = "";
-        SetOrderNotesControls(new NoteOrderCriteria(NoteOrderMode.Default, NoteOrderCriteria.DefaultColumn, true));
-        textParentFolder.Text = "";
-    }
-
     public void OnClosingView()
     {
         _viewFinalized = true;

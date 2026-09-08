@@ -38,6 +38,10 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
         return panelForm;
     }
 
+    // AiProvidersManageCtrl only ever runs in window mode (Tools menu -> RunModal()); EmbededMode is
+    // never set true for it, so ConfigureEmbededMode() never actually executes. ConfigureWindowMode()
+    // does run on every open but has nothing to configure here. Kept empty only to satisfy
+    // IViewEmbeddable (pulled in via IViewManageList<T>).
     public void ConfigureEmbededMode()
     {
     }

@@ -27,8 +27,7 @@ public interface IViewEmbeddable : IViewBase
 #region Generals views
 
 public interface IViewEditor<T> : IViewBase
-{    
-    void CleanView();
+{
     void RefreshModel();
 }
 
@@ -60,6 +59,13 @@ public interface IViewNoteEditorEmbeddable<T> : IViewEditorEmbeddable<T>, IFolde
 {
 }
 
+/// <summary>
+/// View for a selector whose list is kept in sync in place (CtrlSyncableSelectorBase) - AddItem/
+/// DeleteItem/RefreshItem/SelectItem exist for a list that keeps updating while the selector stays
+/// open (e.g. FoldersSelectorForm/NotesSelectorForm). A "pick one from a fixed, load-once list"
+/// selector (e.g. NoteTypesSelectorForm/NoteTypesSelectorCtrl : CtrlSelectorBase) has no use for any
+/// of that and implements plain IViewEmbeddable instead, not this interface.
+/// </summary>
 public interface IViewSelector<TItem> : IViewEmbeddable
 {
     void RefreshItem(TItem item);
@@ -94,6 +100,11 @@ public interface IViewKNoteManagment : IViewBase
     void ReportProgressKNoteManagment(int porcentaje);
     void SetVisibleProgressBar(bool visible);
 
+    // Single-value input prompt (backed by ReadVarForm), used by KNoteManagmentCtrl.ChangeTags so the
+    // controller doesn't have to reference a concrete WinForms Form to ask the user for the tag text.
+    // Returns the value the user typed, or null if the dialog was canceled.
+    string PromptForValue(string label, string caption);
+
     // Raised once this view is actually visible under a running message loop. The app bootstrap
     // (Program.cs) needs this to defer KNoteManagmentCtrl.Run() until Application.Run's loop is
     // truly pumping (some notes need it, e.g. WebView2 content), without knowing this view is a
@@ -103,7 +114,6 @@ public interface IViewKNoteManagment : IViewBase
 
 public interface IViewPostIt<T> : IViewBase
 {
-    void CleanView();
     void RefreshModel();
     void HideView();
     void ActivateView();

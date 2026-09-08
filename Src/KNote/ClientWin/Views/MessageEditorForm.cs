@@ -50,16 +50,6 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
         ModelToControls();
     }
 
-    public void CleanView()
-    {
-        textUserFullName.Text = "";
-        textAlarmDateTime.Text = "";
-        comboAlarmPeriodicity.SelectedIndex = 0;
-        comboNotificationType.SelectedIndex = 0;
-        textContent.Text = "";
-        checkAlarmActivated.Checked = true;
-    }
-
     public void RefreshModel()
     {
         ControlsToModel();

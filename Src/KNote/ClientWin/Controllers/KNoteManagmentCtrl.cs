@@ -1101,31 +1101,18 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         else
             labelInput = "Tag for remove:";
 
-        var listVars = new List<ReadVarItem> {new ReadVarItem
-        {
-            Label = labelInput,
-            VarIdent = "Tag",
-            VarValue = "",
-            VarNewValueText = ""
-        }};
+        var caption = action == EnumChangeTag.Add
+            ? "New tags for selected notes"
+            : "Remove tags in selected notes";
 
-        var formReadVar = new ReadVarForm(listVars);
-        if (action == EnumChangeTag.Add)
-            formReadVar.Text = "New tags for selected notes";
-        else
-            formReadVar.Text = "Remove tags in selected notes";
-        formReadVar.Size = new Size(500, 150);
+        var tag = View.PromptForValue(labelInput, caption);
 
-        var result = formReadVar.ShowDialog();
-
-        if (result == DialogResult.Cancel)
+        if (tag == null)
             return;
         else
         {
             try
             {
-                var tag = listVars[0].VarNewValueText;
-
                 // --- Heavy process instance model
                 using var heavyProcessCtrl = new HeavyProcessCtrl(Store);
                 heavyProcessCtrl.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);

@@ -51,15 +51,6 @@ public partial class AiProviderEditorForm : Form, IViewEditor<AiProviderRef>
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textAlias.Text = "";
-        comboProvider.SelectedIndex = -1;
-        textModelName.Text = "";
-        textApiKey.Text = "";
-        textHost.Text = "";
-    }
-
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);

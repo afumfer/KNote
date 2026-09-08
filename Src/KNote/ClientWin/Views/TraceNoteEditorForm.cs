@@ -53,14 +53,6 @@ public partial class TraceNoteEditorForm : Form, IViewEditor<TraceNoteDto>
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textRelatedNote.Text = "";
-        comboTraceNoteType.Items.Clear();
-        textOrder.Text = "";
-        textWeight.Text = "";
-    }
-
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);

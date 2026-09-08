@@ -48,13 +48,6 @@ public partial class KAttributeTabulatedValueEditorForm : Form, IViewEditor<KAtt
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textValue.Text = "";
-        textDescription.Text = "";
-        numericOrder.Value = 0;
-    }
-
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);

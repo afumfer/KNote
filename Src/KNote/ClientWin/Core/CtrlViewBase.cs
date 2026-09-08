@@ -157,21 +157,13 @@ abstract public class CtrlSelectorBase<TView, TEntity> : CtrlViewEmbeddableBase<
     }
 
     public virtual void NotifySelectedEntityDoubleClick()
-    {            
+    {
         OnEntitySelectionDoubleClick(SelectedEntity);
     }
 
-    public abstract void SelectItem(TEntity item);
+    #endregion
 
-    public abstract void RefreshItem(TEntity item);
-    
-    public abstract void AddItem(TEntity item);
-
-    public abstract void DeleteItem(TEntity item);
-
-    #endregion 
-
-    #region Controller events 
+    #region Controller events
 
     public event EventHandler<ControllerEventArgs<TEntity>> EntitySelection;
     protected virtual void OnEntitySelection(TEntity entity)
@@ -191,7 +183,40 @@ abstract public class CtrlSelectorBase<TView, TEntity> : CtrlViewEmbeddableBase<
         EntitySelectionCanceled?.Invoke(this, new ControllerEventArgs<TEntity>(entity));
     }
 
-    #endregion 
+    #endregion
+}
+
+/// <summary>
+/// CtrlSelectorBase for selectors whose list is kept in sync in place with adds/edits/deletes that
+/// happen elsewhere while the selector stays open (e.g. FoldersSelectorCtrl/NotesSelectorCtrl - a note
+/// or folder can be added/renamed/removed in another window while their selector is visible). Kept
+/// separate from CtrlSelectorBase so a "pick one from a fixed, load-once list" selector (e.g.
+/// NoteTypesSelectorCtrl) isn't forced to implement AddItem/DeleteItem/RefreshItem/SelectItem it
+/// structurally has no use for - see IViewSelector&lt;TItem&gt;'s own doc comment.
+/// </summary>
+abstract public class CtrlSyncableSelectorBase<TView, TEntity> : CtrlSelectorBase<TView, TEntity>
+    where TView : IViewSelector<TEntity>
+{
+    #region Constructor
+
+    public CtrlSyncableSelectorBase(Store store) : base(store)
+    {
+
+    }
+
+    #endregion
+
+    #region Controller abstract methods
+
+    public abstract void SelectItem(TEntity item);
+
+    public abstract void RefreshItem(TEntity item);
+
+    public abstract void AddItem(TEntity item);
+
+    public abstract void DeleteItem(TEntity item);
+
+    #endregion
 }
 
 /// <summary>

@@ -56,7 +56,9 @@ sobre el tipo de entidad/DTO). Viven en `Core/CtrlBase.cs` y `Core/CtrlViewBase.
 CtrlBase
  └─ CtrlViewBase<TView>
      ├─ CtrlViewEmbeddableBase<TView>                    (TView : IViewEmbeddable)
-     │    └─ CtrlSelectorBase<TView, TEntity>
+     │    ├─ CtrlSelectorBase<TView, TEntity>
+     │    │    └─ CtrlSyncableSelectorBase<TView, TEntity>     (TView : IViewSelector<TEntity>)
+     │    └─ CtrlManageListBase<TView, TEntity>
      └─ CtrlEditorBase<TView, TEntity>                   (TEntity : SmartModelDtoBase, new())
          └─ CtrlNoteEditorBase<TView, TEntity>
              └─ CtrlNoteEditorEmbeddableBase<TView, TEntity>   (TView : IViewEmbeddable)
@@ -80,9 +82,17 @@ CtrlBase
   (filtro estructurado) — ambos con evento propio (`SearchApplied`/`FilterApplied`) en vez de
   `EntitySelection`.
 - **`CtrlSelectorBase<TView, TEntity>`** — familia "seleccionar entidad": `SelectedEntity`,
-  `ListEntities`, abstractos `LoadEntities`/`SelectItem`/`RefreshItem`/`AddItem`/`DeleteItem`, eventos
-  `EntitySelection`/`EntitySelectionDoubleClick`/`EntitySelectionCanceled`. Ejemplos:
-  `NotesSelectorCtrl`, `FoldersSelectorCtrl`, `NoteTypesSelectorCtrl`.
+  `ListEntities`, abstracto `LoadEntities`, eventos
+  `EntitySelection`/`EntitySelectionDoubleClick`/`EntitySelectionCanceled`. Por sí sola sirve para un
+  selector de lista fija cargada una vez (`TView` puede ser el propio `IViewEmbeddable`, sin más).
+  Ejemplo: `NoteTypesSelectorCtrl`.
+- **`CtrlSyncableSelectorBase<TView, TEntity>`** (`TView : IViewSelector<TEntity>`) — añade los
+  abstractos `SelectItem`/`RefreshItem`/`AddItem`/`DeleteItem`, para selectores cuya lista se mantiene
+  sincronizada en caliente con altas/bajas que ocurren en otra ventana mientras el selector sigue
+  abierto. Ejemplos: `NotesSelectorCtrl`, `FoldersSelectorCtrl`. Mantenla separada de
+  `CtrlSelectorBase`: un selector de lista fija (`NoteTypesSelectorCtrl`) no tiene forma de implementar
+  estos cuatro miembros con sentido — antes de este split los tenía como `throw new
+  NotImplementedException()`, un contrato que no encajaba con el caso de uso real.
 - **`CtrlEditorBase<TView, TEntity>`** — familia "editar entidad": `Model` (perezoso, `new()`),
   `IKntService Service`, `ServiceRef` (resuelto vía `Store.GetServiceRef(...)`), abstractos
   `LoadModelById`/`NewModel`/`SaveModel`/`DeleteModel`, eventos

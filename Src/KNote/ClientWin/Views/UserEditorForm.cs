@@ -48,18 +48,6 @@ public partial class UserEditorForm : Form, IViewEditor<UserDto>
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textUserName.Text = "";
-        textEMail.Text = "";
-        textFullName.Text = "";
-        textPassword.Text = "";
-        checkPublic.Checked = false;
-        checkStaff.Checked = false;
-        checkProjectManager.Checked = false;
-        checkAdmin.Checked = false;
-    }
-
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);

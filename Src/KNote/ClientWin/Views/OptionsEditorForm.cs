@@ -48,11 +48,6 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        // clear controls 
-    }
-
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
     {
         return MessageBox.Show(info, caption, buttons, icon);

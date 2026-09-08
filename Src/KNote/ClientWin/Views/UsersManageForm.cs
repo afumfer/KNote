@@ -40,6 +40,9 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
         return panelForm;
     }
 
+    // UsersManageCtrl is embedded into RepositoryEditorForm's tab via View.PanelView() directly;
+    // Run()/RunModal() is never called on it, so neither of these two ever actually executes. Kept
+    // empty only to satisfy IViewEmbeddable (pulled in via IViewManageList<T>).
     public void ConfigureEmbededMode()
     {
     }

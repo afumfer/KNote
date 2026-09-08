@@ -43,6 +43,9 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
         return panelForm;
     }
 
+    // TraceNoteTypesManageCtrl is embedded into RepositoryEditorForm's tab via View.PanelView()
+    // directly; Run()/RunModal() is never called on it, so neither of these two ever actually
+    // executes. Kept empty only to satisfy IViewEmbeddable (pulled in via IViewManageList<T>).
     public void ConfigureEmbededMode()
     {
     }

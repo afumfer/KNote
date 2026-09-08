@@ -5,7 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class NotesSelectorCtrl : CtrlSelectorBase<IViewSelector<NoteMinimalDto>, NoteMinimalDto>
+public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewSelector<NoteMinimalDto>, NoteMinimalDto>
 {
     #region Properties
 

@@ -48,12 +48,6 @@ public partial class TraceNoteTypeEditorForm : Form, IViewEditor<TraceNoteTypeDt
         ControlsToModel();
     }
 
-    public void CleanView()
-    {
-        textName.Text = "";
-        textDescription.Text = "";
-    }
-
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         return MessageBox.Show(info, caption, buttons, icon);

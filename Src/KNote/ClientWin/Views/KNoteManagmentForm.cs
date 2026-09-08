@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.ClientWin.Controllers;
 using KNote.Model;
+using KntScript;
 
 namespace KNote.ClientWin.Views;
 
@@ -139,6 +140,23 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
     public void SetVisibleProgressBar(bool visible)
     {
         progressBar.Visible = visible;
+    }
+
+    public string PromptForValue(string label, string caption)
+    {
+        var listVars = new List<ReadVarItem> { new ReadVarItem
+        {
+            Label = label,
+            VarIdent = "Value",
+            VarValue = "",
+            VarNewValueText = ""
+        }};
+
+        var formReadVar = new ReadVarForm(listVars);
+        formReadVar.Text = caption;
+        formReadVar.Size = new Size(500, 150);
+
+        return formReadVar.ShowDialog() == DialogResult.OK ? listVars[0].VarNewValueText : null;
     }
 
     #endregion
