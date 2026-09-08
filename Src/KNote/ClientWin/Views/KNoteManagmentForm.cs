@@ -32,7 +32,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
 
         _ctrl = ctrl;
 
-        _ctrl.Store.ControllerNotification += Store_ComponentNotification;
+        _ctrl.Store.Events.Subscribe<ControllerNotification>(Store_ComponentNotification);
 
         Shown += (s, e) => ViewShown?.Invoke(this, e);
 
@@ -385,14 +385,14 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         await SelectTab(tabExplorers.SelectedIndex);
     }
 
-    private void Store_ComponentNotification(object sender, ControllerEventArgs<string> e)
+    private void Store_ComponentNotification(ControllerNotification e)
     {
         string comName;
-        if (!string.IsNullOrEmpty(e?.Entity.ToString()))
-            comName = ((CtrlBase)sender)?.ControllerName + ": ";
+        if (!string.IsNullOrEmpty(e?.Message))
+            comName = e.Controller?.ControllerName + ": ";
         else
             comName = "";
-        statusLabel2.Text = $" {comName} {e?.Entity.ToString()}";
+        statusLabel2.Text = $" {comName} {e?.Message}";
         statusBarManagment.Refresh();
     }
 

@@ -144,16 +144,27 @@ public class Store
         }
     }
   
-    public event EventHandler<ControllerEventArgs<ServiceRef>> AddedServiceRef;
     public void AddServiceRef(ServiceRef serviceRef)
     {
         if(serviceRef is null)
             throw new ArgumentNullException(nameof(serviceRef));
 
+        serviceRef.Service.CommandExecuting += ServiceRef_CommandExecuting;
+        serviceRef.Service.CommandExecuted += ServiceRef_CommandExecuted;
+
         _serviceRefRegistry.Add(serviceRef);
         Logger?.LogInformation("Added ServiceRef {component}", serviceRef.ToString());
-        AddedServiceRef?.Invoke(this, new ControllerEventArgs<ServiceRef>(serviceRef));
+        Events.Publish(new ServiceRefAdded(serviceRef));
     }
+
+    // Republishes every IKntService.CommandExecuting/CommandExecuted from every ServiceRef Store
+    // manages onto Store.Events - see DomainEvents.cs's ServiceCommandExecuting/ServiceCommandExecuted
+    // doc comment and MonitorCtrl for a reference subscriber.
+    private void ServiceRef_CommandExecuting(object sender, CommandExecutingEventArgs e)
+        => Events.Publish(new ServiceCommandExecuting(e));
+
+    private void ServiceRef_CommandExecuted(object sender, CommandExecutedEventArgs e)
+        => Events.Publish(new ServiceCommandExecuted(e));
 
     public void AddServiceRefInAppConfig(ServiceRef serviceRef)
     {
@@ -163,16 +174,18 @@ public class Store
         AppConfig.RespositoryRefs.Add(serviceRef.RepositoryRef);
     }
 
-    public event EventHandler<ControllerEventArgs<ServiceRef>> RemovedServiceRef;
     public void RemoveServiceRef(ServiceRef serviceRef)
     {
         if (serviceRef is null)
             throw new ArgumentNullException(nameof(serviceRef));
 
+        serviceRef.Service.CommandExecuting -= ServiceRef_CommandExecuting;
+        serviceRef.Service.CommandExecuted -= ServiceRef_CommandExecuted;
+
         _serviceRefRegistry.Remove(serviceRef);
         Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
-        AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);            
-        RemovedServiceRef?.Invoke(this, new ControllerEventArgs<ServiceRef>(serviceRef));
+        AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);
+        Events.Publish(new ServiceRefRemoved(serviceRef));
     }
 
     public List<ServiceRef> GetAllServiceRef()
@@ -221,25 +234,22 @@ public class Store
         return _assistantServiceRef ;
     }
 
-    public event EventHandler<ControllerEventArgs<CtrlBase>> AddedController;
-    public event EventHandler<ControllerEventArgs<EControllerState>> ControllerStateChanged;
     public void AddController(CtrlBase controller)
     {
         controller.StateControllerChanged += Controller_StateCtrlChanged;
 
         _controllerRegistry.Add(controller);
         Logger?.LogInformation("Added Component {component}", controller.ToString());
-        AddedController?.Invoke(this, new ControllerEventArgs<CtrlBase>(controller));
+        Events.Publish(new ControllerAdded(controller));
     }
 
-    public event EventHandler<ControllerEventArgs<CtrlBase>> RemovedController;
     public void RemoveController(CtrlBase controller)
     {
         controller.StateControllerChanged -= Controller_StateCtrlChanged;
 
         _controllerRegistry.Remove(controller);
         Logger?.LogInformation("Removed Component {component}", controller.ToString());
-        RemovedController?.Invoke(this, new ControllerEventArgs<CtrlBase>(controller));
+        Events.Publish(new ControllerRemoved(controller));
     }
 
     public void SaveConfig(string configFile = null)
@@ -475,13 +485,12 @@ public class Store
 
     private void Controller_StateCtrlChanged(object sender, ControllerEventArgs<EControllerState> e)
     {
-        ControllerStateChanged?.Invoke(sender, e);
+        Events.Publish(new ControllerStateChanged((CtrlBase)sender, e.Entity));
     }
 
-    public event EventHandler<ControllerEventArgs<string>> ControllerNotification;
     internal void OnControllerNotification(CtrlBase controller, string message)
     {
-        ControllerNotification?.Invoke(controller, new ControllerEventArgs<string>(message));
+        Events.Publish(new ControllerNotification(controller, message));
     }
 
     #endregion

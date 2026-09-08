@@ -269,6 +269,37 @@ public class KntService : IKntService, IDisposable
 
     #endregion
 
+    #region Command execution events
+
+    public event EventHandler<CommandExecutingEventArgs> CommandExecuting;
+    public event EventHandler<CommandExecutedEventArgs> CommandExecuted;
+
+    public void NotifyCommandExecuting(CommandExecutingEventArgs e) => RaiseSafely(CommandExecuting, e);
+
+    public void NotifyCommandExecuted(CommandExecutedEventArgs e) => RaiseSafely(CommandExecuted, e);
+
+    // Invokes each subscriber individually so one throwing handler (e.g. a buggy audit/telemetry
+    // listener) can never abort the command whose execution is being reported.
+    private void RaiseSafely<TArgs>(EventHandler<TArgs> handler, TArgs e) where TArgs : EventArgs
+    {
+        if (handler == null)
+            return;
+
+        foreach (var single in handler.GetInvocationList())
+        {
+            try
+            {
+                ((EventHandler<TArgs>)single).Invoke(this, e);
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogError(ex, "Command execution event subscriber threw for {eventArgs}", typeof(TArgs).Name);
+            }
+        }
+    }
+
+    #endregion
+
     #region Message broker, experimental ....
 
     // Public and async because the RabbitMQ.Client 7.x handshake is Task-based and a

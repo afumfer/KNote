@@ -27,6 +27,8 @@ public abstract class KntCommandServiceBase<TParam, TResult> : KntCommandService
     {
         Param = param;
     }
+
+    public override object ParamObject => Param;
 }
 
 
@@ -62,6 +64,14 @@ public abstract class KntCommandServiceBase<TResult>
     {
         return new Result();
     }
+
+    /// <summary>
+    /// Boxed access to this command's Param, without every one of the ~80 concrete command classes
+    /// needing to know about it - overridden by KntCommandServiceBase&lt;TParam, TResult&gt; to
+    /// return its own Param. Used by KntServiceBase.ExecuteCommand to fill CommandEventArgsBase.Param
+    /// uniformly regardless of which ExecuteCommand overload was called.
+    /// </summary>
+    public virtual object ParamObject => null;
 
     public abstract Task<TResult> Execute();
 

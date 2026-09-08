@@ -231,12 +231,23 @@ ellas y manteniendo su API pública sin cambios para el resto del código:
   ahora se suscriben directamente a `Store.Events`. Un controlador nuevo que quiera difundir sus cambios
   no necesita tocar `Store`: le basta con heredar de `CtrlEditorBase` (para Saved/Added/Deleted) o publicar
   sus propios mensajes en `Store.Events` (para eventos específicos de su dominio).
+  `IKntService.CommandExecuting`/`CommandExecuted` (`Service/Core/IKntService.cs` — disparados por
+  `KntServiceBase.ExecuteCommand` alrededor de cada uno de los ~80 comandos de
+  `Service/ServicesCommands/`, sirve por igual a `Server`) se republican también en `Store.Events` como
+  `ServiceCommandExecuting`/`ServiceCommandExecuted`: `Store.AddServiceRef`/`RemoveServiceRef` se
+  suscriben/desuscriben por cada `ServiceRef` que gestionan. Ver `MonitorCtrl` como suscriptor de
+  referencia de ambos tipos de evento.
+  Los propios eventos de coordinación de `Store` (ciclo de vida de controladores/`ServiceRef`, el canal
+  de "toast") también pasan por aquí en vez de por `event EventHandler<T>` propios de `Store`:
+  `ControllerAdded`/`ControllerRemoved`/`ControllerStateChanged` (`Store.AddController`/`RemoveController`
+  más el relé `Controller_StateCtrlChanged` de cada `CtrlBase.StateControllerChanged`),
+  `ServiceRefAdded`/`ServiceRefRemoved` (`Store.AddServiceRef`/`RemoveServiceRef`) y
+  `ControllerNotification` (canal genérico de "toast" que cualquier Ctrl puede disparar vía
+  `CtrlBase.NotifyMessage` → `Store.OnControllerNotification`).
 - `FolderWithServiceRef ActiveFolderWithServiceRef` / `SelectedNotesInServiceRef
   ActiveFilterWithServiceRef` — selección activa compartida (carpeta/filtro actuales), cambiada vía
-  `ChangeActiveFolderWithServiceRef(...)` con sus eventos `ChangedActiveFolderWithServiceRef`.
-- Eventos de coordinación restantes: `AddedController`/`RemovedController`/`ControllerStateChanged`, más
-  `ControllerNotification` (canal genérico de "toast" que cualquier Ctrl puede disparar vía
-  `CtrlBase.NotifyMessage`).
+  `ChangeActiveFolderWithServiceRef(...)` con sus eventos `ChangedActiveFolderWithServiceRef`. Estos dos
+  siguen siendo `event EventHandler<T>` propios de `Store` (no migrados a `Store.Events`).
 - `AppConfig` (serializado a `KNoteData.config`), `Logger` (NLog), helpers de scripting (`RunKntSCode`,
   `RunCSCode`, `ExecuteCommand`) para el motor KntScript.
 - Constructor: `Store(IFactoryViews factoryViews)` — la factory se inyecta aquí, no vía DI.

@@ -19,7 +19,7 @@ public partial class SplashForm : Form
         InitializeComponent();
         this.labelANotas.Text = KntConst.AppName;
 
-        appContext.AddedServiceRef += AppContext_AddedServiceRef;
+        appContext.Events.Subscribe<ServiceRefAdded>(AppContext_AddedServiceRef);
         _appContext = appContext;
 
         // Program.cs's own Shown handler (subscribed after this constructor runs, so it fires after
@@ -35,9 +35,9 @@ public partial class SplashForm : Form
 
     #region Form events handlers
 
-    private void AppContext_AddedServiceRef(object sender, ControllerEventArgs<ServiceRef> e)
+    private void AppContext_AddedServiceRef(ServiceRefAdded e)
     {
-        labelMessage.Text = "Loading " + e.Entity.Alias + "...";
+        labelMessage.Text = "Loading " + e.ServiceRef.Alias + "...";
         labelMessage.Refresh();
         Application.DoEvents();
     }

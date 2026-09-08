@@ -1,3 +1,5 @@
+using KNote.Service.Core;
+
 namespace KNote.ClientWin.Core;
 
 /// <summary>
@@ -23,3 +25,33 @@ public record PostItEditRequested(ServiceWithNoteId Target);
 /// to the full note editor. Previously only reachable via Store's PostItEditorCtrl special-casing.
 /// </summary>
 public record ExtendedEditRequested(ServiceWithNoteId Target);
+
+/// <summary>
+/// Republished on Store.Events by Store.AddServiceRef/RemoveServiceRef's subscription to every
+/// IKntService.CommandExecuting/CommandExecuted it manages - lets any controller observe every
+/// service command run against any repository the app has open, without knowing about ServiceRef
+/// internals. Args.Service.IdServiceRef + Store.GetServiceRef(id) resolves the owning ServiceRef
+/// (alias, RepositoryRef) for a subscriber that needs it. See MonitorCtrl for a reference subscriber.
+/// </summary>
+public record ServiceCommandExecuting(CommandExecutingEventArgs Args);
+
+public record ServiceCommandExecuted(CommandExecutedEventArgs Args);
+
+/// <summary>
+/// Republished on Store.Events by Store.AddController/RemoveController/AddServiceRef/RemoveServiceRef/
+/// OnControllerNotification - migrated from Store's own dedicated EventHandler&lt;T&gt; fields
+/// (AddedController/RemovedController/ControllerStateChanged/AddedServiceRef/RemovedServiceRef/
+/// ControllerNotification) to the same Store.Events mechanism used for domain and command events, for
+/// consistency. See MonitorCtrl for a subscriber.
+/// </summary>
+public record ControllerAdded(CtrlBase Controller);
+
+public record ControllerRemoved(CtrlBase Controller);
+
+public record ControllerStateChanged(CtrlBase Controller, EControllerState State);
+
+public record ControllerNotification(CtrlBase Controller, string Message);
+
+public record ServiceRefAdded(ServiceRef ServiceRef);
+
+public record ServiceRefRemoved(ServiceRef ServiceRef);

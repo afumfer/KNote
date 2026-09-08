@@ -55,7 +55,8 @@ buena.
 
 - [ ] Guardar una nota desde una ventana flotante actualiza el listado de notas visible en otra
       ventana/panel abierto simultáneamente (verifica el relé de eventos de `Store`).
-- [ ] Las notificaciones tipo "toast" (`Store.ControllerNotification`) se muestran correctamente.
+- [ ] Las notificaciones tipo "toast" (`Store.Events`, mensaje `ControllerNotification`) se muestran
+      correctamente.
 
 ## Otros
 

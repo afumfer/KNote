@@ -43,5 +43,12 @@ internal class FakeKntService : IKntService
     public void PublishNoteInMessageBroker(NoteExtendedDto noteInfo) => throw new NotSupportedException();
     public string ReplaceSpecialCharacters(string text) => throw new NotSupportedException();
 
+    // No test exercises these today - trivial no-op implementations rather than throw, so nothing
+    // that merely constructs/disposes a FakeKntService starts failing.
+    public event EventHandler<CommandExecutingEventArgs> CommandExecuting;
+    public event EventHandler<CommandExecutedEventArgs> CommandExecuted;
+    public void NotifyCommandExecuting(CommandExecutingEventArgs e) => CommandExecuting?.Invoke(this, e);
+    public void NotifyCommandExecuted(CommandExecutedEventArgs e) => CommandExecuted?.Invoke(this, e);
+
     public void Dispose() { }
 }

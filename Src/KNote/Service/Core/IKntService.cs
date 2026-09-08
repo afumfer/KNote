@@ -33,4 +33,22 @@ public interface IKntService : IDisposable
     void SaveSystemVariable(string scope, string key, string value);
     void PublishNoteInMessageBroker(NoteExtendedDto noteInfo);
     string ReplaceSpecialCharacters(string text);
+
+    /// <summary>
+    /// Raised by KntServiceBase.ExecuteCommand around every command run through this IKntService
+    /// (~80 concrete commands across Users/KAttributes/SystemValues/Folders/Notes/NoteTypes/
+    /// TraceNoteTypes) - CommandExecuting fires once before, CommandExecuted exactly once after
+    /// (success, validation failure, authorization failure, or exception), correlated by
+    /// CommandEventArgsBase.ExecutionId. A subscriber's exception here is caught and logged by the
+    /// implementation - it can never abort the command itself.
+    /// </summary>
+    event EventHandler<CommandExecutingEventArgs> CommandExecuting;
+    event EventHandler<CommandExecutedEventArgs> CommandExecuted;
+
+    /// <summary>
+    /// Raises CommandExecuting/CommandExecuted. Called by KntServiceBase.ExecuteCommand - not meant to
+    /// be called from anywhere else.
+    /// </summary>
+    void NotifyCommandExecuting(CommandExecutingEventArgs e);
+    void NotifyCommandExecuted(CommandExecutedEventArgs e);
 }

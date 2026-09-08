@@ -33,11 +33,16 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
         // TODO: pending check result correctrly
 
         try
-        {                                                
-            Store.ControllerStateChanged += Store_CtrlStateChanged;
-            Store.AddedServiceRef += Store_AddedServiceRef;                
-            Store.RemovedServiceRef += Store_RemovedServiceRef;
-            Store.ControllerNotification += Store_ControllerNotification;
+        {
+            // All of Store's own coordination events (controller lifecycle/state, ServiceRef
+            // add/remove, the "toast" notification channel) and the service command events go
+            // through the same Store.Events bus - see DomainEvents.cs.
+            Store.Events.Subscribe<ControllerStateChanged>(Store_CtrlStateChanged);
+            Store.Events.Subscribe<ServiceRefAdded>(Store_AddedServiceRef);
+            Store.Events.Subscribe<ServiceRefRemoved>(Store_RemovedServiceRef);
+            Store.Events.Subscribe<ControllerNotification>(Store_ControllerNotification);
+            Store.Events.Subscribe<ServiceCommandExecuting>(Store_ServiceCommandExecuting);
+            Store.Events.Subscribe<ServiceCommandExecuted>(Store_ServiceCommandExecuted);
         }
         catch (Exception ex)
         {                
@@ -54,9 +59,12 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
         try
         {
             result = base.OnFinalized();
-            Store.ControllerStateChanged -= Store_CtrlStateChanged;
-            Store.AddedServiceRef -= Store_AddedServiceRef;                
-            Store.RemovedServiceRef -= Store_RemovedServiceRef;                
+            Store.Events.Unsubscribe<ControllerStateChanged>(Store_CtrlStateChanged);
+            Store.Events.Unsubscribe<ServiceRefAdded>(Store_AddedServiceRef);
+            Store.Events.Unsubscribe<ServiceRefRemoved>(Store_RemovedServiceRef);
+            // ControllerNotification was never unsubscribed even before this migration - kept as-is.
+            Store.Events.Unsubscribe<ServiceCommandExecuting>(Store_ServiceCommandExecuting);
+            Store.Events.Unsubscribe<ServiceCommandExecuted>(Store_ServiceCommandExecuted);
         }
         catch (Exception ex)
         {
@@ -71,31 +79,45 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
     #region Store events handlers
 
-    private void Store_ControllerNotification(object sender, ControllerEventArgs<string> e)
+    private void Store_ControllerNotification(ControllerNotification e)
     {
-        var info = $"{((CtrlBase)sender).ControllerName} - {e.Entity.ToString()}";
+        var info = $"{e.Controller.ControllerName} - {e.Message}";
         OnShowLog(info);
     }
 
-    private void Store_CtrlStateChanged(object sender, ControllerEventArgs<EControllerState> e)
+    private void Store_CtrlStateChanged(ControllerStateChanged e)
     {
-        var info = $"{DateTime.Now} - [ControllersStateChanged] - {sender.ToString()} - {e.Entity.ToString()} - {((CtrlBase)sender).ControllerId}";
-        OnShowLog(info);
-    }
-   
-    private void Store_RemovedServiceRef(object sender, ControllerEventArgs<ServiceRef> e)
-    {
-        var info = $"{DateTime.Now} - [RemovedServiceRef] - {sender.ToString()} - {e.Entity.Alias.ToString()}";
+        var info = $"{DateTime.Now} - [ControllersStateChanged] - {e.Controller} - {e.State} - {e.Controller.ControllerId}";
         OnShowLog(info);
     }
 
-    private void Store_AddedServiceRef(object sender, ControllerEventArgs<ServiceRef> e)
+    private void Store_RemovedServiceRef(ServiceRefRemoved e)
     {
-        var info = $"{DateTime.Now} - [AddedServiceRef] - {sender.ToString()} - {e.Entity.Alias.ToString()}";
+        var info = $"{DateTime.Now} - [RemovedServiceRef] - {e.ServiceRef.Alias}";
         OnShowLog(info);
     }
 
-    #endregion 
+    private void Store_AddedServiceRef(ServiceRefAdded e)
+    {
+        var info = $"{DateTime.Now} - [AddedServiceRef] - {e.ServiceRef.Alias}";
+        OnShowLog(info);
+    }
+
+    private void Store_ServiceCommandExecuting(ServiceCommandExecuting e)
+    {
+        var alias = Store.GetServiceRef(e.Args.Service.IdServiceRef)?.Alias;
+        var info = $"{DateTime.Now} - [CommandExecuting] - {e.Args.CommandName} - {alias}";
+        OnShowLog(info);
+    }
+
+    private void Store_ServiceCommandExecuted(ServiceCommandExecuted e)
+    {
+        var alias = Store.GetServiceRef(e.Args.Service.IdServiceRef)?.Alias;
+        var info = $"{DateTime.Now} - [CommandExecuted] - {e.Args.CommandName} - {alias} - {e.Args.Outcome} - {e.Args.Duration.TotalMilliseconds:N0}ms";
+        OnShowLog(info);
+    }
+
+    #endregion
 
     #region Private methods
 
