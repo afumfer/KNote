@@ -57,6 +57,19 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
             buttonTraceFromAdd, buttonTraceFromRemove, buttonTraceFromEdit);
         panelTraceToHeader.Resize += (s, e) => AlignButtonsRight(panelTraceToHeader, 3, 3,
             buttonTraceToAdd, buttonTraceToRemove, buttonTraceToEdit);
+
+        // Drag & drop a file onto the form or the description editor uploads it as a resource,
+        // the same way the "upload"/"paste from clipboard" toolbar buttons already do. WinForms
+        // drag&drop does not bubble to parent controls, so each real drop surface needs its own
+        // AllowDrop + handlers; kntEditView's WebView2 sub-control additionally needs
+        // AllowExternalDrop = false (set in KntEditView itself) or the browser would intercept
+        // the OS drop before this event ever fires.
+        foreach (Control dropTarget in new Control[] { this, kntEditView, kntEditView.MarkdownContentControl, kntEditView.HtmlContentControl, kntEditView.WebViewControl })
+        {
+            dropTarget.AllowDrop = true;
+            dropTarget.DragEnter += Content_DragEnter;
+            dropTarget.DragDrop += Content_DragDrop;
+        }
     }
 
     private static void AlignButtonsRight(Control header, int rightMargin, int spacing, params Control[] buttonsLeftToRight)
@@ -1572,6 +1585,38 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         return resource;
     }
 
+    private ResourceDto AddResourceFromFile(string filePath)
+    {
+        var resource = _ctrl.NewResourceFromFile(filePath);
+        if (resource != null)
+        {
+            AddItemToListViewResources(resource);
+        }
+        return resource;
+    }
+
+    private void Content_DragEnter(object sender, DragEventArgs e)
+    {
+        // ConfigureEmbededMode() (e.g. the note shown inside KNoteManagment) sets EditMode = false
+        // and makes the description read-only - dropping a file there would silently attach a
+        // resource nobody could reference into the text, so reject the drop outright.
+        e.Effect = (_ctrl.EditMode && e.Data.GetDataPresent(DataFormats.FileDrop)) ? DragDropEffects.Copy : DragDropEffects.None;
+    }
+
+    private void Content_DragDrop(object sender, DragEventArgs e)
+    {
+        if (!_ctrl.EditMode || !e.Data.GetDataPresent(DataFormats.FileDrop))
+            return;
+
+        var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+        for (int i = 0; i < files.Length; i++)
+        {
+            var resource = AddResourceFromFile(files[i]);
+            if (resource != null)
+                InsertLinkSelectedResource(prependSeparator: i > 0);
+        }
+    }
+
     private void AddItemToListViewResources(ResourceDto resource)
     {
         listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
@@ -1579,7 +1624,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         listViewResources.Items[resource.ResourceId.ToString()].Selected = true;
     }
 
-    private void InsertLinkSelectedResource()
+    private void InsertLinkSelectedResource(bool prependSeparator = false)
     {
         // If navigate mode then msgbox and return
         if (!buttonNavigate.Enabled)
@@ -1604,6 +1649,12 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         {
             string strLink = (_selectedResource.FileType.Contains("image")) ?
                 $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
+            // Dropping several files at once inserts them one after another at the same caret
+            // position (each insertion advances it) - a blank line between them (not just after
+            // the first) keeps the list readable instead of running the links together. A plain
+            // "\n" is not enough here: a WinForms TextBox only renders a line break for "\r\n".
+            if (prependSeparator)
+                strLink = "\r\n\r\n" + strLink;
             var selStart = kntEditView.MarkdownContentControl.SelectionStart;
             kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, strLink);
             kntEditView.MarkdownContentControl.SelectionStart = selStart + strLink.Length;

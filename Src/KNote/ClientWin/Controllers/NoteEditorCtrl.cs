@@ -610,6 +610,42 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
     }
 
+    public ResourceDto NewResourceFromFile(string filePath, bool contentInDB = false)
+    {
+        try
+        {
+            if (!File.Exists(filePath))
+            {
+                View.ShowInfo($"The file '{filePath}' does not exist.", KntConst.AppName);
+                return null;
+            }
+
+            var fileName = Service.ReplaceSpecialCharacters(Path.GetFileName(filePath));
+
+            var newResource = new ResourceDto();
+            newResource.SetIsNew(true);
+            newResource.ResourceId = Guid.NewGuid();
+            newResource.NoteId = Model.NoteId;
+            newResource.ContentInDB = contentInDB;
+            newResource.Description = fileName;
+            newResource.Order = 0;
+            newResource.Name = newResource.ResourceId.ToString() + "_" + fileName;
+            newResource.FileType = Store.KntTextUtils.ExtensionFileToFileType(Path.GetExtension(filePath));
+            newResource.Container = Service.Notes.UtilGetDefaultNewResourceContainer();
+            newResource.ContentArrayBytes = File.ReadAllBytes(filePath);
+
+            Service.Notes.UtilManageResourceContent(newResource);
+
+            Model.Resources.Add(newResource);
+            return newResource;
+        }
+        catch (Exception ex)
+        {
+            View.ShowInfo($"Error: {ex.Message}");
+            return null;
+        }
+    }
+
     public Task<ResourceDto> EditResource(Guid resourceId)
     {
         var resourceEditor = new ResourceEditorCtrl(Store);

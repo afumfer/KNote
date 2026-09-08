@@ -12,6 +12,13 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
 
     private Guid _userId = Guid.Empty;
 
+    // NoteDto (this controller's Model type) has no Resources collection, unlike NoteExtendedDto
+    // - so, unlike NoteEditorCtrl, resources dropped onto the PostIt can't be staged on the DTO
+    // itself. They're staged here instead and flushed (with NoteId resolved, since a brand new
+    // PostIt's Model.NoteId is still Guid.Empty at drop time) from SaveModel(), mirroring what
+    // KntNotesSaveExtendedAsyncCommand does for a note's own Resources list.
+    private readonly List<ResourceDto> _pendingResources = new List<ResourceDto>();
+
     #endregion
 
     #region Public properties
@@ -166,6 +173,65 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
         return false;
     }
 
+    public ResourceDto NewResourceFromFile(string filePath, bool contentInDB = false)
+    {
+        try
+        {
+            if (!File.Exists(filePath))
+            {
+                View.ShowInfo($"The file '{filePath}' does not exist.", KntConst.AppName);
+                return null;
+            }
+
+            var fileName = Service.ReplaceSpecialCharacters(Path.GetFileName(filePath));
+
+            var newResource = new ResourceDto();
+            newResource.SetIsNew(true);
+            newResource.ResourceId = Guid.NewGuid();
+            newResource.NoteId = Model.NoteId;
+            newResource.ContentInDB = contentInDB;
+            newResource.Description = fileName;
+            newResource.Order = 0;
+            newResource.Name = newResource.ResourceId.ToString() + "_" + fileName;
+            newResource.FileType = Store.KntTextUtils.ExtensionFileToFileType(Path.GetExtension(filePath));
+            newResource.Container = Service.Notes.UtilGetDefaultNewResourceContainer();
+            newResource.ContentArrayBytes = File.ReadAllBytes(filePath);
+
+            Service.Notes.UtilManageResourceContent(newResource);
+
+            _pendingResources.Add(newResource);
+            // Model.Resources (NoteExtendedDto) would make this happen automatically via
+            // IsDirty()'s child-check (SmartModelDtoBase.GetChilds); NoteDto has no such
+            // collection to pick this new resource up, so it's forced explicitly here to make
+            // sure SaveModel()'s early "nothing changed" return doesn't skip flushing it.
+            Model.SetIsDirty(true);
+
+            return newResource;
+        }
+        catch (Exception ex)
+        {
+            View.ShowInfo($"Error: {ex.Message}");
+            return null;
+        }
+    }
+
+    private async Task FlushPendingResources()
+    {
+        if (_pendingResources.Count == 0)
+            return;
+
+        foreach (var resource in _pendingResources)
+        {
+            if (resource.NoteId == Guid.Empty)
+                resource.NoteId = Model.NoteId;
+
+            var res = await Service.Notes.SaveResourceAsync(resource, true);
+            if (!res.IsValid)
+                View.ShowInfo(res.ErrorMessage);
+        }
+        _pendingResources.Clear();
+    }
+
     public async override Task<bool> SaveModel()
     {
         View.RefreshModel();
@@ -199,6 +265,8 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
                     OnSavedEntity(response.Entity);
                 else
                     OnAddedEntity(response.Entity);
+
+                await FlushPendingResources();
             }
             else
             {

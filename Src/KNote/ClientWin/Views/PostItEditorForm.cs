@@ -56,9 +56,20 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
         }
         else
             ConfigurePostItView(false);
+
+        // Drag & drop a file onto the post-it or its description editor uploads it as a
+        // resource. Unlike NoteEditorForm there is no resource list to fall back on here, so
+        // Content_DragDrop rejects the drop while in read-only "navigation" content (see
+        // ModelToControls) instead of attaching a resource the user could never find again.
+        foreach (Control dropTarget in new Control[] { this, kntEditView, kntEditView.MarkdownContentControl, kntEditView.HtmlContentControl, kntEditView.WebViewControl })
+        {
+            dropTarget.AllowDrop = true;
+            dropTarget.DragEnter += Content_DragEnter;
+            dropTarget.DragDrop += Content_DragDrop;
+        }
     }
 
-    #endregion 
+    #endregion
 
     #region IView interface
 
@@ -470,6 +481,63 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
         }
 
         _ctrl.WindowPostIt.AlwaysOnTop = menuAlwaysFront.Checked;
+    }
+
+    private void Content_DragEnter(object sender, DragEventArgs e)
+    {
+        e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+    }
+
+    private void Content_DragDrop(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            return;
+
+        // "navigation" content shows a read-only rendered URL/webpage - there is no caret to
+        // insert a link into and, with no resource list in this window, an attached-but-unlinked
+        // resource would be effectively invisible to the user.
+        if (_ctrl.Model.GetContentTypeExt().ForDescription == "navigation")
+        {
+            ShowInfo("Switch this post-it to edit mode before dropping a file onto it.", KntConst.AppName);
+            return;
+        }
+
+        var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+        for (int i = 0; i < files.Length; i++)
+        {
+            var resource = _ctrl.NewResourceFromFile(files[i]);
+            if (resource != null)
+                InsertResourceLink(resource, prependSeparator: i > 0);
+        }
+    }
+
+    private void InsertResourceLink(ResourceDto resource, bool prependSeparator = false)
+    {
+        var tmpFile = _ctrl.Service.Notes.UtilGetResourceFileUrl(resource.Container, resource.Name);
+
+        if (kntEditView.ContentType == "html")
+        {
+            string strLink = resource.FileType.Contains("image") ?
+                $"<img src='{tmpFile}' alt='{resource.Description}'/>" :
+                $"<a href='{tmpFile}' target='_blank'>{resource.NameOut}</a>";
+            kntEditView.HtmlContentControl.SelectedHtml = strLink;
+            kntEditView.HtmlContentControl.Focus();
+        }
+        else
+        {
+            string strLink = resource.FileType.Contains("image") ?
+                $"![alt text]({tmpFile} '{resource.Description}')" : $"[{resource.NameOut}]({tmpFile} '{resource.Description}')";
+            // Same rationale as NoteEditorForm.InsertLinkSelectedResource: several files dropped
+            // at once insert one after another at the same caret, so a blank line between them
+            // keeps the list readable.
+            // A plain "\n" is not enough here: a WinForms TextBox only renders a line break for "\r\n".
+            if (prependSeparator)
+                strLink = "\r\n\r\n" + strLink;
+            var selStart = kntEditView.MarkdownContentControl.SelectionStart;
+            kntEditView.MarkdownContentControl.Text = kntEditView.MarkdownContentControl.Text.Insert(selStart, strLink);
+            kntEditView.MarkdownContentControl.SelectionStart = selStart + strLink.Length;
+            kntEditView.MarkdownContentControl.Focus();
+        }
     }
 
     private void PostItPropertiesEdit()
