@@ -40,9 +40,11 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         return panelForm;
     }
 
-    // KAttributesManageCtrl is embedded into RepositoryEditorForm's tab via View.PanelView() directly;
-    // Run()/RunModal() is never called on it, so neither of these two ever actually executes. Kept
-    // empty only to satisfy IViewEmbeddable (pulled in via IViewManageList<T>).
+    // Empty by design, not by omission: as the class doc above explains, only panelForm gets
+    // reparented into RepositoryEditorForm's TabPage - this Form itself is never Show()n, so there is
+    // no TopLevel/Dock/FormBorderStyle switch to make here (contrast with FoldersSelectorForm/
+    // NoteEditorForm, which embed by making the whole Form non-TopLevel instead). Kept only to
+    // satisfy IViewEmbeddable (pulled in via IViewManageList<T>).
     public void ConfigureEmbededMode()
     {
     }
