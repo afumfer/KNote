@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Globalization;
 
 namespace KNote.ClientWin.Utils;
 
@@ -6,9 +7,12 @@ namespace KNote.ClientWin.Utils;
 /// IComparer used as a ListView's ListViewItemSorter to sort its rows by one column, ascending or
 /// descending. Column/order state (which column, which direction) is owned by this instance so
 /// ListViewSortHelper can flip it on each header click and simply call ListView.Sort() again.
-/// By default columns are compared as case-insensitive text (SubItems[column].Text); pass
-/// customComparers for columns that need a different ordering - numeric ("Order", "Min"), date, etc. -
-/// where comparing the displayed text would sort "10" before "2".
+///
+/// By default a column is compared numerically when both values parse as a number (so "Order"/"Min"/
+/// "Priority" style columns sort 2 before 10, not the reverse a text compare would give), then as a
+/// date/time when both parse as one (so "Start"/"Ex end"/... columns sort chronologically, not by the
+/// formatted string), and otherwise as case-insensitive text. Pass customComparers only for the rare
+/// column that needs something this default can't express (e.g. a custom enum ordering).
 /// </summary>
 public class ListViewColumnSorter : IComparer
 {
@@ -30,9 +34,22 @@ public class ListViewColumnSorter : IComparer
 
         int result = _customComparers != null && _customComparers.TryGetValue(SortColumn, out var comparer)
             ? comparer(itemX, itemY)
-            : string.Compare(GetColumnText(itemX, SortColumn), GetColumnText(itemY, SortColumn), StringComparison.CurrentCultureIgnoreCase);
+            : CompareDefault(GetColumnText(itemX, SortColumn), GetColumnText(itemY, SortColumn));
 
         return Order == SortOrder.Descending ? -result : result;
+    }
+
+    private static int CompareDefault(string textX, string textY)
+    {
+        if (double.TryParse(textX, NumberStyles.Number, CultureInfo.CurrentCulture, out var numberX) &&
+            double.TryParse(textY, NumberStyles.Number, CultureInfo.CurrentCulture, out var numberY))
+            return numberX.CompareTo(numberY);
+
+        if (DateTime.TryParse(textX, CultureInfo.CurrentCulture, DateTimeStyles.None, out var dateX) &&
+            DateTime.TryParse(textY, CultureInfo.CurrentCulture, DateTimeStyles.None, out var dateY))
+            return dateX.CompareTo(dateY);
+
+        return string.Compare(textX, textY, StringComparison.CurrentCultureIgnoreCase);
     }
 
     private static string GetColumnText(ListViewItem item, int columnIndex)

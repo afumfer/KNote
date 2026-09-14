@@ -38,12 +38,9 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
 
         PersonalizeListView(listViewAttributes);
 
-        // "Order" (column 2) is numeric - comparing it as text would sort "10" before "2".
-        var customComparers = new Dictionary<int, Comparison<ListViewItem>>
-        {
-            [2] = (a, b) => int.Parse(a.SubItems[2].Text).CompareTo(int.Parse(b.SubItems[2].Text))
-        };
-        _sorter = ListViewSortHelper.Attach(listViewAttributes, customComparers);
+        // "Order" (column 2) sorts correctly with no custom comparer - ListViewColumnSorter's default
+        // already compares numeric-looking columns numerically, not as text.
+        _sorter = ListViewSortHelper.Attach(listViewAttributes);
     }
 
     #endregion
