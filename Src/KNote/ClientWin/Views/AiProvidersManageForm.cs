@@ -1,5 +1,6 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 
 namespace KNote.ClientWin.Views;
@@ -16,6 +17,12 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
 
     private readonly AiProvidersManageCtrl _ctrl;
 
+    // Primary/growing column for ListViewColumnResizer - "Model" is the most variable-length column
+    // (model ids can be long); "Alias"/"Provider" stay at their designer width.
+    private const int PrimaryColumnIndex = 2;
+
+    private ListViewColumnSorter _sorter;
+
     #endregion
 
     #region Constructor
@@ -27,6 +34,7 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
         _ctrl = ctrl;
 
         PersonalizeListView(listViewProviders);
+        _sorter = ListViewSortHelper.Attach(listViewProviders);
     }
 
     #endregion
@@ -74,20 +82,36 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
         listViewProviders.Columns.Add("Provider", 100, HorizontalAlignment.Left);
         listViewProviders.Columns.Add("Model", -2, HorizontalAlignment.Left);
 
-        if (_ctrl.ListEntities == null)
-            return;
+        if (_ctrl.ListEntities != null)
+        {
+            foreach (var item in _ctrl.ListEntities)
+                listViewProviders.Items.Add(AiProviderRefToListViewItem(item));
+        }
 
-        foreach (var item in _ctrl.ListEntities)
-            listViewProviders.Items.Add(AiProviderRefToListViewItem(item));
+        // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
+        // time the panel becomes visible, so size the primary column explicitly right after populating.
+        ListViewColumnResizer.Resize(listViewProviders, PrimaryColumnIndex);
     }
 
     // The list is small and Alias (the ListViewItem key) can change on edit, so every mutation
     // just rebuilds the whole view instead of patching a single row in place.
-    public void AddItem(AiProviderRef item) => RefreshView();
+    public void AddItem(AiProviderRef item)
+    {
+        RefreshView();
+        ListViewSelectionHelper.SelectByKey(listViewProviders, item.Alias, _sorter);
+    }
 
-    public void UpdateItem(AiProviderRef item) => RefreshView();
+    public void UpdateItem(AiProviderRef item)
+    {
+        RefreshView();
+        ListViewSelectionHelper.SelectByKey(listViewProviders, item.Alias, _sorter);
+    }
 
-    public void RemoveItem(AiProviderRef item) => RefreshView();
+    public void RemoveItem(AiProviderRef item)
+    {
+        RefreshView();
+        ListViewSelectionHelper.SelectFirst(listViewProviders, _sorter);
+    }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
@@ -126,7 +150,7 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
 
     private void listViewProviders_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn(listViewProviders);
+        ListViewColumnResizer.Resize(listViewProviders, PrimaryColumnIndex);
     }
 
     #endregion
@@ -159,16 +183,6 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
         item.SubItems.Add(providerRef.Provider);
         item.SubItems.Add(providerRef.Model);
         return item;
-    }
-
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error (same as NoteTypesManageForm/NoteTypesSelectorForm).
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
     }
 
     private void PersonalizeListView(ListView listView)

@@ -1,5 +1,6 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 
@@ -17,6 +18,12 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
 
     private readonly NoteTypesManageCtrl _ctrl;
 
+    // Primary/growing column for ListViewColumnResizer - "Description" is the entity's descriptive,
+    // most variable-length column; "Name" stays at its designer width.
+    private const int PrimaryColumnIndex = 1;
+
+    private ListViewColumnSorter _sorter;
+
     #endregion
 
     #region Constructor
@@ -32,6 +39,7 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
         // Form entirely). Personalizing the ListView here instead - a plain property setter, safe
         // before the control's window handle exists - is what actually makes it apply.
         PersonalizeListView(listViewNoteTypes);
+        _sorter = ListViewSortHelper.Attach(listViewNoteTypes);
     }
 
     #endregion
@@ -78,16 +86,21 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
         listViewNoteTypes.Columns.Add("Name", 200, HorizontalAlignment.Left);
         listViewNoteTypes.Columns.Add("Description", -2, HorizontalAlignment.Left);
 
-        if (_ctrl.ListEntities == null)
-            return;
+        if (_ctrl.ListEntities != null)
+        {
+            foreach (var item in _ctrl.ListEntities)
+                listViewNoteTypes.Items.Add(NoteTypeDtoToListViewItem(item));
+        }
 
-        foreach (var item in _ctrl.ListEntities)
-            listViewNoteTypes.Items.Add(NoteTypeDtoToListViewItem(item));
+        // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
+        // time the panel becomes visible, so size the primary column explicitly right after populating.
+        ListViewColumnResizer.Resize(listViewNoteTypes, PrimaryColumnIndex);
     }
 
     public void AddItem(NoteTypeDto item)
     {
         listViewNoteTypes.Items.Add(NoteTypeDtoToListViewItem(item));
+        ListViewSelectionHelper.SelectByKey(listViewNoteTypes, item.NoteTypeId.ToString(), _sorter);
     }
 
     public void UpdateItem(NoteTypeDto item)
@@ -98,11 +111,14 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
 
         listItem.Text = item.Name;
         listItem.SubItems[1].Text = item.Description;
+
+        ListViewSelectionHelper.SelectByKey(listViewNoteTypes, item.NoteTypeId.ToString(), _sorter);
     }
 
     public void RemoveItem(NoteTypeDto item)
     {
         listViewNoteTypes.Items[item.NoteTypeId.ToString()]?.Remove();
+        ListViewSelectionHelper.SelectFirst(listViewNoteTypes, _sorter);
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -142,7 +158,7 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
 
     private void listViewNoteTypes_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn(listViewNoteTypes);
+        ListViewColumnResizer.Resize(listViewNoteTypes, PrimaryColumnIndex);
     }
 
     #endregion
@@ -174,16 +190,6 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
         var item = new ListViewItem(type.Name) { Name = type.NoteTypeId.ToString() };
         item.SubItems.Add(type.Description);
         return item;
-    }
-
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error (same as NoteTypesSelectorForm).
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
     }
 
     private void PersonalizeListView(ListView listView)

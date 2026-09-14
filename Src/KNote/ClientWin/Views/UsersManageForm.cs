@@ -1,5 +1,6 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 
@@ -18,6 +19,12 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
 
     private readonly UsersManageCtrl _ctrl;
 
+    // Primary/growing column for ListViewColumnResizer - "Full name" is the entity's identifying,
+    // most variable-length column; the others (User name/Email/Roles) stay at their designer width.
+    private const int PrimaryColumnIndex = 1;
+
+    private ListViewColumnSorter _sorter;
+
     #endregion
 
     #region Constructor
@@ -29,6 +36,7 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
         _ctrl = ctrl;
 
         PersonalizeListView(listViewUsers);
+        _sorter = ListViewSortHelper.Attach(listViewUsers);
     }
 
     #endregion
@@ -77,16 +85,21 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
         listViewUsers.Columns.Add("Email", 180, HorizontalAlignment.Left);
         listViewUsers.Columns.Add("Roles", -2, HorizontalAlignment.Left);
 
-        if (_ctrl.ListEntities == null)
-            return;
+        if (_ctrl.ListEntities != null)
+        {
+            foreach (var item in _ctrl.ListEntities)
+                listViewUsers.Items.Add(UserToListViewItem(item));
+        }
 
-        foreach (var item in _ctrl.ListEntities)
-            listViewUsers.Items.Add(UserToListViewItem(item));
+        // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
+        // time the panel becomes visible, so size the primary column explicitly right after populating.
+        ListViewColumnResizer.Resize(listViewUsers, PrimaryColumnIndex);
     }
 
     public void AddItem(UserDto item)
     {
         listViewUsers.Items.Add(UserToListViewItem(item));
+        ListViewSelectionHelper.SelectByKey(listViewUsers, item.UserId.ToString(), _sorter);
     }
 
     public void UpdateItem(UserDto item)
@@ -99,11 +112,14 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
         listItem.SubItems[1].Text = item.FullName;
         listItem.SubItems[2].Text = item.EMail;
         listItem.SubItems[3].Text = item.RoleDefinition;
+
+        ListViewSelectionHelper.SelectByKey(listViewUsers, item.UserId.ToString(), _sorter);
     }
 
     public void RemoveItem(UserDto item)
     {
         listViewUsers.Items[item.UserId.ToString()]?.Remove();
+        ListViewSelectionHelper.SelectFirst(listViewUsers, _sorter);
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -143,7 +159,7 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
 
     private void listViewUsers_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn(listViewUsers);
+        ListViewColumnResizer.Resize(listViewUsers, PrimaryColumnIndex);
     }
 
     #endregion
@@ -177,16 +193,6 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
         listItem.SubItems.Add(item.EMail);
         listItem.SubItems.Add(item.RoleDefinition);
         return listItem;
-    }
-
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error (same as NoteTypesManageForm).
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
     }
 
     private void PersonalizeListView(ListView listView)

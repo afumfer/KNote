@@ -1,5 +1,6 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 
@@ -17,6 +18,12 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
 
     private readonly TraceNoteTypesManageCtrl _ctrl;
 
+    // Primary/growing column for ListViewColumnResizer - "Description" is the entity's descriptive,
+    // most variable-length column; "Name" stays at its designer width.
+    private const int PrimaryColumnIndex = 1;
+
+    private ListViewColumnSorter _sorter;
+
     #endregion
 
     #region Constructor
@@ -32,6 +39,7 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
         // Form entirely). Personalizing the ListView here instead - a plain property setter, safe
         // before the control's window handle exists - is what actually makes it apply.
         PersonalizeListView(listViewTraceNoteTypes);
+        _sorter = ListViewSortHelper.Attach(listViewTraceNoteTypes);
     }
 
     #endregion
@@ -78,16 +86,21 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
         listViewTraceNoteTypes.Columns.Add("Name", 200, HorizontalAlignment.Left);
         listViewTraceNoteTypes.Columns.Add("Description", -2, HorizontalAlignment.Left);
 
-        if (_ctrl.ListEntities == null)
-            return;
+        if (_ctrl.ListEntities != null)
+        {
+            foreach (var item in _ctrl.ListEntities)
+                listViewTraceNoteTypes.Items.Add(TraceNoteTypeDtoToListViewItem(item));
+        }
 
-        foreach (var item in _ctrl.ListEntities)
-            listViewTraceNoteTypes.Items.Add(TraceNoteTypeDtoToListViewItem(item));
+        // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
+        // time the panel becomes visible, so size the primary column explicitly right after populating.
+        ListViewColumnResizer.Resize(listViewTraceNoteTypes, PrimaryColumnIndex);
     }
 
     public void AddItem(TraceNoteTypeDto item)
     {
         listViewTraceNoteTypes.Items.Add(TraceNoteTypeDtoToListViewItem(item));
+        ListViewSelectionHelper.SelectByKey(listViewTraceNoteTypes, item.TraceNoteTypeId.ToString(), _sorter);
     }
 
     public void UpdateItem(TraceNoteTypeDto item)
@@ -98,11 +111,14 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
 
         listItem.Text = item.Name;
         listItem.SubItems[1].Text = item.Description;
+
+        ListViewSelectionHelper.SelectByKey(listViewTraceNoteTypes, item.TraceNoteTypeId.ToString(), _sorter);
     }
 
     public void RemoveItem(TraceNoteTypeDto item)
     {
         listViewTraceNoteTypes.Items[item.TraceNoteTypeId.ToString()]?.Remove();
+        ListViewSelectionHelper.SelectFirst(listViewTraceNoteTypes, _sorter);
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -142,7 +158,7 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
 
     private void listViewTraceNoteTypes_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn(listViewTraceNoteTypes);
+        ListViewColumnResizer.Resize(listViewTraceNoteTypes, PrimaryColumnIndex);
     }
 
     #endregion
@@ -174,16 +190,6 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
         var item = new ListViewItem(type.Name) { Name = type.TraceNoteTypeId.ToString() };
         item.SubItems.Add(type.Description);
         return item;
-    }
-
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error (same as NoteTypesManageForm/NoteTypesSelectorForm).
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
     }
 
     private void PersonalizeListView(ListView listView)

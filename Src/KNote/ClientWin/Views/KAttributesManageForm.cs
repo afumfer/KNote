@@ -1,5 +1,6 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 
@@ -18,6 +19,13 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
 
     private readonly KAttributesManageCtrl _ctrl;
 
+    // Primary/growing column for ListViewColumnResizer - "Name" is the attribute's own identifying
+    // column (the example the functional request itself calls out); the others stay at their
+    // designer width.
+    private const int PrimaryColumnIndex = 1;
+
+    private ListViewColumnSorter _sorter;
+
     #endregion
 
     #region Constructor
@@ -29,6 +37,13 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         _ctrl = ctrl;
 
         PersonalizeListView(listViewAttributes);
+
+        // "Order" (column 2) is numeric - comparing it as text would sort "10" before "2".
+        var customComparers = new Dictionary<int, Comparison<ListViewItem>>
+        {
+            [2] = (a, b) => int.Parse(a.SubItems[2].Text).CompareTo(int.Parse(b.SubItems[2].Text))
+        };
+        _sorter = ListViewSortHelper.Attach(listViewAttributes, customComparers);
     }
 
     #endregion
@@ -78,6 +93,7 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         // Rebuild (not a targeted Items.Add) so the new row lands in the right sorted position -
         // see RebuildList's sort order (Note type, Order, Name), matching the column order.
         RebuildList();
+        ListViewSelectionHelper.SelectByKey(listViewAttributes, item.KAttributeId.ToString(), _sorter);
     }
 
     public void UpdateItem(KAttributeInfoDto item)
@@ -85,11 +101,13 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         // Rebuild rather than patching the row in place: editing Order or Note type can move this
         // item to a different position in the sorted list, not just change its own text.
         RebuildList();
+        ListViewSelectionHelper.SelectByKey(listViewAttributes, item.KAttributeId.ToString(), _sorter);
     }
 
     public void RemoveItem(KAttributeInfoDto item)
     {
         RebuildList();
+        ListViewSelectionHelper.SelectFirst(listViewAttributes, _sorter);
     }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -129,7 +147,7 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
 
     private void listViewAttributes_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn(listViewAttributes);
+        ListViewColumnResizer.Resize(listViewAttributes, PrimaryColumnIndex);
     }
 
     #endregion
@@ -168,11 +186,15 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         listViewAttributes.Columns.Add("Data type", 100, HorizontalAlignment.Left);
         listViewAttributes.Columns.Add("Required", -2, HorizontalAlignment.Left);
 
-        if (_ctrl.ListEntities == null)
-            return;
+        if (_ctrl.ListEntities != null)
+        {
+            foreach (var item in SortedEntities(_ctrl.ListEntities))
+                listViewAttributes.Items.Add(AttributeToListViewItem(item));
+        }
 
-        foreach (var item in SortedEntities(_ctrl.ListEntities))
-            listViewAttributes.Items.Add(AttributeToListViewItem(item));
+        // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
+        // time the panel becomes visible, so size the primary column explicitly right after populating.
+        ListViewColumnResizer.Resize(listViewAttributes, PrimaryColumnIndex);
     }
 
     private static IEnumerable<KAttributeInfoDto> SortedEntities(IEnumerable<KAttributeInfoDto> entities)
@@ -191,16 +213,6 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         listItem.SubItems.Add(KntConst.KAttributes[item.KAttributeDataType]);
         listItem.SubItems.Add(item.RequiredValueYesNo);
         return listItem;
-    }
-
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error (same as NoteTypesManageForm).
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
     }
 
     private void PersonalizeListView(ListView listView)
