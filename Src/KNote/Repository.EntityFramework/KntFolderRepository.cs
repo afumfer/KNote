@@ -157,23 +157,51 @@ public class KntFolderRepository: KntRepositoryEFBase, IKntFolderRepository
         {
             var result = new Result<FolderDto>();
 
-            var ctx = GetOpenConnection();
-            var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
+            // FolderNumber is generated from an ORDER BY FolderNumber DESC query, which is not
+            // atomic: two concurrent inserts can compute the same number. The unique index on
+            // FolderNumber turns that into a constraint-violation exception instead of silent
+            // corruption, so on that specific failure we regenerate the number and retry, bounded
+            // to a few attempts.
+            const int maxAttempts = 10;
+            Exception lastConflict = null;
 
-            var newEntity = new Folder();
-            newEntity.SetSimpleDto(entity);
-            newEntity.FolderNumber = GetNextFolderNumber(folders);
-            newEntity.CreationDateTime = DateTime.Now;
-            newEntity.ModificationDateTime = DateTime.Now;
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                var ctx = GetOpenConnection();
+                var folders = new GenericRepositoryEF<KntDbContext, Folder>(ctx);
+                var newEntity = new Folder();
 
-            var resGenRep = await folders.AddAsync(newEntity);
+                try
+                {
+                    newEntity.SetSimpleDto(entity);
+                    newEntity.FolderNumber = GetNextFolderNumber(folders);
+                    newEntity.CreationDateTime = DateTime.Now;
+                    newEntity.ModificationDateTime = DateTime.Now;
 
-            result.Entity = resGenRep.Entity?.GetSimpleDto<FolderDto>();
-            result.AddListErrorMessage(resGenRep.ListErrorMessage);
+                    var resGenRep = await folders.AddAsync(newEntity);
 
-            await CloseIsTempConnection(ctx);
-    
-            return result;
+                    result.Entity = resGenRep.Entity?.GetSimpleDto<FolderDto>();
+                    result.AddListErrorMessage(resGenRep.ListErrorMessage);
+
+                    return result;
+                }
+                catch (Exception ex) when (ex.IsUniqueConstraintViolation())
+                {
+                    // Lost the race for this FolderNumber. Detach the failed entity so it is not
+                    // resubmitted alongside the next attempt when ctx is a long-lived singleton
+                    // context. Caught even on the last attempt so the loop always falls through to
+                    // the descriptive exception below instead of letting the raw provider exception
+                    // escape uncaught. Retry with a freshly computed number.
+                    ctx.Entry(newEntity).State = EntityState.Detached;
+                    lastConflict = ex;
+                }
+                finally
+                {
+                    await CloseIsTempConnection(ctx);
+                }
+            }
+
+            throw new KntRepositoryException($"KNote repository error. Could not generate a unique FolderNumber after {maxAttempts} attempts due to concurrent inserts.", lastConflict);
         }
         catch (Exception ex)
         {

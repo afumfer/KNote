@@ -25,6 +25,14 @@ internal class GenericRepositoryEF<TContext, TEntity> : IGenericRepositoryEF<TCo
 
     protected bool ExceptionHasHappened = false;
 
+    // The original exception that set ExceptionHasHappened, kept so ResultDomainAction can
+    // preserve it as an InnerException instead of degrading it to plain text (see
+    // AddExecptionsMessagesToResult / ResultDomainAction below). Callers that need to tell apart
+    // specific failures (e.g. a unique-constraint violation, for the NoteNumber/FolderNumber
+    // retry-on-conflict in KntNoteRepository/KntFolderRepository.AddAsync) unwrap
+    // KntRepositoryException.InnerException instead of matching on ErrorMessage text.
+    private Exception _lastException;
+
     #endregion
 
     #region Constructor
@@ -664,6 +672,7 @@ internal class GenericRepositoryEF<TContext, TEntity> : IGenericRepositoryEF<TCo
         string tmpStr = "";
 
         ExceptionHasHappened = true;
+        _lastException = ex;
 
         while (tmpEx != null)
         {
@@ -681,7 +690,9 @@ internal class GenericRepositoryEF<TContext, TEntity> : IGenericRepositoryEF<TCo
         if (ExceptionHasHappened)
         {
             ExceptionHasHappened = false;
-            throw new KntRepositoryException(resultDomainAction.ErrorMessage);
+            var inner = _lastException;
+            _lastException = null;
+            throw new KntRepositoryException(resultDomainAction.ErrorMessage, inner);
         }
         return resultDomainAction;
     }
@@ -691,7 +702,9 @@ internal class GenericRepositoryEF<TContext, TEntity> : IGenericRepositoryEF<TCo
         if (ExceptionHasHappened)
         {
             ExceptionHasHappened = false;
-            throw new KntRepositoryException(resultDomainAction.ErrorMessage);
+            var inner = _lastException;
+            _lastException = null;
+            throw new KntRepositoryException(resultDomainAction.ErrorMessage, inner);
         }
         return resultDomainAction;
     }

@@ -153,40 +153,65 @@ public class KntFolderRepository : KntRepositoryDapperBase, IKntFolderRepository
         {
             var result = new Result<FolderDto>();
 
-            var db = GetOpenConnection();
+            // FolderNumber is generated from SELECT MAX(FolderNumber)+1, which is not atomic: two
+            // concurrent inserts can compute the same number. The unique index on FolderNumber turns
+            // that into a constraint-violation exception instead of silent corruption, so on that
+            // specific failure we regenerate the number and retry, bounded to a few attempts.
+            const int maxAttempts = 10;
+            Exception lastConflict = null;
 
-            entity.CreationDateTime = DateTime.Now;
-            entity.ModificationDateTime = DateTime.Now;
-            entity.FolderNumber = GetNextFolderNumber(db);
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                var db = GetOpenConnection();
 
-            var sql = @"INSERT INTO Folders (FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags, 
-                            PathFolder, [Order], OrderNotes, Script, ParentId )
-                        VALUES (@FolderId, @FolderNumber, @CreationDateTime, @ModificationDateTime, @Name, @Tags, 
-                                @PathFolder, @Order, @OrderNotes, @Script, @ParentId)";
+                try
+                {
+                    entity.CreationDateTime = DateTime.Now;
+                    entity.ModificationDateTime = DateTime.Now;
+                    entity.FolderNumber = GetNextFolderNumber(db);
 
-            var r = await db.ExecuteAsync(sql.ToString(),
-                new {
-                    entity.FolderId,
-                    entity.FolderNumber,
-                    entity.CreationDateTime,
-                    entity.ModificationDateTime,
-                    entity.Name,
-                    entity.Tags,
-                    entity.PathFolder,
-                    entity.Order,
-                    entity.OrderNotes,
-                    entity.Script,
-                    entity.ParentId
-                });
+                    var sql = @"INSERT INTO Folders (FolderId, FolderNumber, CreationDateTime, ModificationDateTime, [Name], Tags,
+                                    PathFolder, [Order], OrderNotes, Script, ParentId )
+                                VALUES (@FolderId, @FolderNumber, @CreationDateTime, @ModificationDateTime, @Name, @Tags,
+                                        @PathFolder, @Order, @OrderNotes, @Script, @ParentId)";
 
-            if (r == 0)
-                result.AddErrorMessage("Entity not inserted");
+                    var r = await db.ExecuteAsync(sql.ToString(),
+                        new {
+                            entity.FolderId,
+                            entity.FolderNumber,
+                            entity.CreationDateTime,
+                            entity.ModificationDateTime,
+                            entity.Name,
+                            entity.Tags,
+                            entity.PathFolder,
+                            entity.Order,
+                            entity.OrderNotes,
+                            entity.Script,
+                            entity.ParentId
+                        });
 
-            result.Entity = entity;
-                
-            await CloseIsTempConnection(db);
-        
-            return result;
+                    if (r == 0)
+                        result.AddErrorMessage("Entity not inserted");
+
+                    result.Entity = entity;
+
+                    return result;
+                }
+                catch (Exception ex) when (ex.IsUniqueConstraintViolation())
+                {
+                    // Lost the race for this FolderNumber; caught even on the last attempt so the
+                    // loop always falls through to the descriptive exception below instead of
+                    // letting the raw provider exception escape uncaught. Retry with a freshly
+                    // computed number.
+                    lastConflict = ex;
+                }
+                finally
+                {
+                    await CloseIsTempConnection(db);
+                }
+            }
+
+            throw new KntRepositoryException($"KNote repository error. Could not generate a unique FolderNumber after {maxAttempts} attempts due to concurrent inserts.", lastConflict);
         }
         catch (Exception ex)
         {

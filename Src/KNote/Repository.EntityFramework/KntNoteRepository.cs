@@ -143,49 +143,78 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
     }
 
     public async Task<Result<NoteDto>> AddAsync(NoteDto entity)
-    {            
+    {
         try
         {
             var result = new Result<NoteDto>();
-            Result<Note> resRep = null;
 
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            // NoteNumber is generated from an ORDER BY NoteNumber DESC query, which is not atomic:
+            // two concurrent inserts can compute the same number. EF Core's Sqlite provider does not
+            // even support the ambient TransactionScope below (see the comment in
+            // KntRepositoryEFBase.GetOpenConnection), so the unique index on NoteNumber is the real
+            // guard; on that specific failure we regenerate the number and retry, bounded to a few
+            // attempts.
+            var autoNumber = entity.NoteNumber == 0;
+            const int maxAttempts = 10;
+            Exception lastConflict = null;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
+                using TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 var ctx = GetOpenConnection();
                 var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
-
                 var newEntity = new Note();
-                UpdateStandardValuesToNewEntity(notes, entity);
-                newEntity.SetSimpleDto(entity);
-            
-                resRep = await notes.AddAsync(newEntity);
-                if (!resRep.IsValid)
+
+                try
                 {
-                    throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})");                    
+                    UpdateStandardValuesToNewEntity(notes, entity);
+                    newEntity.SetSimpleDto(entity);
+
+                    var resRep = await notes.AddAsync(newEntity);
+                    if (!resRep.IsValid)
+                    {
+                        throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})");
+                    }
+
+                    foreach (NoteKAttributeDto atr in entity.KAttributesDto)
+                    {
+                        atr.NoteId = entity.NoteId;
+                        var res = (await SaveAttrtibuteAsync(ctx, atr)).Entity;
+                        // TODO: Importante, pendiente de capturar y volcar errores de res en resService
+                        atr.KAttributeId = res.KAttributeId;
+                        atr.NoteKAttributeId = res.NoteKAttributeId;
+                    }
+
+                    result.Entity = entity;
+                    result.AddListErrorMessage(resRep.ListErrorMessage);
+
+                    scope.Complete();
+
+                    return result;
                 }
-            
-                foreach (NoteKAttributeDto atr in entity.KAttributesDto)
+                catch (Exception ex) when (autoNumber && ex.IsUniqueConstraintViolation())
                 {
-                    atr.NoteId = entity.NoteId;
-                    var res = (await SaveAttrtibuteAsync(ctx, atr)).Entity;
-                    // TODO: Importante, pendiente de capturar y volcar errores de res en resService
-                    atr.KAttributeId = res.KAttributeId;
-                    atr.NoteKAttributeId = res.NoteKAttributeId;
+                    // Lost the race for this NoteNumber. Detach the failed entity so it is not
+                    // resubmitted alongside the next attempt when ctx is a long-lived singleton
+                    // context. Caught even on the last attempt so the loop always falls through to
+                    // the descriptive exception below instead of letting the raw provider exception
+                    // escape uncaught. Retry with a freshly generated number.
+                    ctx.Entry(newEntity).State = EntityState.Detached;
+                    entity.NoteNumber = 0;
+                    lastConflict = ex;
                 }
-
-                result.Entity = entity;
-                result.AddListErrorMessage(resRep.ListErrorMessage);                    
-
-                scope.Complete();
-
-                await CloseIsTempConnection(ctx);
+                finally
+                {
+                    await CloseIsTempConnection(ctx);
+                }
             }
-            return result;
+
+            throw new KntRepositoryException($"KNote repository error. Could not generate a unique NoteNumber after {maxAttempts} attempts due to concurrent inserts.", lastConflict);
         }
         catch (Exception ex)
         {
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }        
+        }
     }
 
     public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity)

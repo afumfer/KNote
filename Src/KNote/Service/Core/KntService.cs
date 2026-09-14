@@ -226,24 +226,6 @@ public class KntService : IKntService, IDisposable
         }
     }
 
-    // TODO: In the future, implement an alternative to get the notes counter. This is a possibility.
-    public int GetNextNoteNumber()
-    {
-        var scope = "SYSTEM";
-        var key = "NOTES_COUNTER";
-        Guid id = Guid.Empty;
-        var resNextNoteNumber = 0;
-
-        var valueDto = Task.Run(() => SystemValues.GetAsync(new KeyValuePair<string, string>(scope, key))).Result;
-        if (valueDto.IsValid)
-        {
-            resNextNoteNumber = int.Parse(valueDto.Entity.Value) + 1;
-        }
-        var res = Task.Run(() => SystemValues.SaveAsync(new SystemValueDto { SystemValueId = id, Scope = scope, Key = key, Value = resNextNoteNumber.ToString() }));
-        return resNextNoteNumber;
-
-    }
-
     public string ReplaceSpecialCharacters(string text)
     {
         // Normalize and remove accents
@@ -382,7 +364,7 @@ public class KntService : IKntService, IDisposable
         var resExisting = (Task.Run(() => Notes.GetAsync(noteInput.NoteId)).Result);
 
         if (resExisting.Entity == null)
-            noteInput.NoteNumber = 0;  //GetNextNoteNumber();
+            noteInput.NoteNumber = 0;
         else
             noteInput.NoteNumber = resExisting.Entity.NoteNumber;        
         var f = (Task.Run(() => Folders.GetHomeAsync()).Result);

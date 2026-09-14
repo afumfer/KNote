@@ -233,84 +233,109 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         {
             var result = new Result<NoteDto>();
 
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            // NoteNumber is generated from SELECT MAX(NoteNumber)+1, which is not atomic: two
+            // concurrent inserts can compute the same number. The unique index on NoteNumber turns
+            // that into a constraint-violation exception instead of silent corruption, so on that
+            // specific failure we regenerate the number and retry, bounded to a few attempts.
+            var autoNumber = entity.NoteNumber == 0;
+            const int maxAttempts = 10;
+            Exception lastConflict = null;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
+                using TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 var db = GetOpenConnection();
 
-                entity.CreationDateTime = DateTime.Now;
-                entity.ModificationDateTime = DateTime.Now;
-                if(entity.NoteNumber == 0)
-                    entity.NoteNumber = GetNextNoteNumber(db);
-
-                var sql = @"INSERT INTO [Notes] 
-                                (NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime, 
-                                [Description], ContentType, Script, InternalTags, Tags, 
-                                [Priority], FolderId, NoteTypeId)
-                            VALUES
-                                (@NoteId, @NoteNumber, @Topic, @CreationDateTime, @ModificationDateTime, 
-                                @Description, @ContentType, @Script, @InternalTags, @Tags, 
-                                @Priority, @FolderId, @NoteTypeId)";
-                var r = await db.ExecuteAsync(sql.ToString(),
-                    new
-                    {
-                        entity.NoteId,
-                        entity.NoteNumber,
-                        entity.Topic,
-                        entity.CreationDateTime,
-                        entity.ModificationDateTime,
-                        entity.Description,
-                        entity.ContentType,
-                        entity.Script,
-                        entity.InternalTags,
-                        entity.Tags,
-                        entity.Priority,
-                        entity.FolderId,
-                        entity.NoteTypeId
-                    });
-
-                if (r == 0)
+                try
                 {
-                    //result.AddErrorMessage("Note entity not inserted");
-                    //ExceptionHasHappened = true;
-                    //return ResultDomainAction(result);
-                    throw new KntRepositoryException($"KNote repository error. Note '{entity.Topic}' not inserted. ({MethodBase.GetCurrentMethod().DeclaringType})");
-                }
+                    entity.CreationDateTime = DateTime.Now;
+                    entity.ModificationDateTime = DateTime.Now;
+                    if (autoNumber)
+                        entity.NoteNumber = GetNextNoteNumber(db);
 
-                foreach (var atr in entity.KAttributesDto)
-                {
-                    if (!string.IsNullOrEmpty(atr.Value))
-                    {
-                        atr.NoteKAttributeId = Guid.NewGuid();
-                        atr.NoteId = entity.NoteId;
-
-                        sql = @"INSERT INTO [NoteKAttributes] 
-                                    (NoteKAttributeId, NoteId, KAttributeId, [Value])
+                    var sql = @"INSERT INTO [Notes]
+                                    (NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,
+                                    [Description], ContentType, Script, InternalTags, Tags,
+                                    [Priority], FolderId, NoteTypeId)
                                 VALUES
-                                    ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
-                        var rA = await db.ExecuteAsync(sql.ToString(),
-                            new
-                            {
-                                atr.NoteKAttributeId,
-                                atr.NoteId,
-                                atr.KAttributeId,
-                                atr.Value
-                            });
-
-                        if (rA == 0)
+                                    (@NoteId, @NoteNumber, @Topic, @CreationDateTime, @ModificationDateTime,
+                                    @Description, @ContentType, @Script, @InternalTags, @Tags,
+                                    @Priority, @FolderId, @NoteTypeId)";
+                    var r = await db.ExecuteAsync(sql.ToString(),
+                        new
                         {
-                            result.AddErrorMessage("Atribute-value note entity not inserted");                        
+                            entity.NoteId,
+                            entity.NoteNumber,
+                            entity.Topic,
+                            entity.CreationDateTime,
+                            entity.ModificationDateTime,
+                            entity.Description,
+                            entity.ContentType,
+                            entity.Script,
+                            entity.InternalTags,
+                            entity.Tags,
+                            entity.Priority,
+                            entity.FolderId,
+                            entity.NoteTypeId
+                        });
+
+                    if (r == 0)
+                    {
+                        //result.AddErrorMessage("Note entity not inserted");
+                        //ExceptionHasHappened = true;
+                        //return ResultDomainAction(result);
+                        throw new KntRepositoryException($"KNote repository error. Note '{entity.Topic}' not inserted. ({MethodBase.GetCurrentMethod().DeclaringType})");
+                    }
+
+                    foreach (var atr in entity.KAttributesDto)
+                    {
+                        if (!string.IsNullOrEmpty(atr.Value))
+                        {
+                            atr.NoteKAttributeId = Guid.NewGuid();
+                            atr.NoteId = entity.NoteId;
+
+                            sql = @"INSERT INTO [NoteKAttributes]
+                                        (NoteKAttributeId, NoteId, KAttributeId, [Value])
+                                    VALUES
+                                        ( @NoteKAttributeId, @NoteId, @KAttributeId, @Value )";
+                            var rA = await db.ExecuteAsync(sql.ToString(),
+                                new
+                                {
+                                    atr.NoteKAttributeId,
+                                    atr.NoteId,
+                                    atr.KAttributeId,
+                                    atr.Value
+                                });
+
+                            if (rA == 0)
+                            {
+                                result.AddErrorMessage("Atribute-value note entity not inserted");
+                            }
                         }
                     }
+
+                    result.Entity = entity;
+
+                    scope.Complete();
+
+                    return result;
                 }
-
-                result.Entity = entity;
-
-                scope.Complete();
-
-                await CloseIsTempConnection(db);
+                catch (Exception ex) when (autoNumber && ex.IsUniqueConstraintViolation())
+                {
+                    // Lost the race for this NoteNumber; the TransactionScope above rolls back on
+                    // dispose (Complete() was never called). Record the conflict and retry with a
+                    // fresh number, up to maxAttempts - caught here even on the last attempt so the
+                    // loop always falls through to the descriptive exception below instead of
+                    // letting the raw provider exception escape uncaught.
+                    lastConflict = ex;
+                }
+                finally
+                {
+                    await CloseIsTempConnection(db);
+                }
             }
 
-            return result;
+            throw new KntRepositoryException($"KNote repository error. Could not generate a unique NoteNumber after {maxAttempts} attempts due to concurrent inserts.", lastConflict);
         }
         catch (Exception ex)
         {
