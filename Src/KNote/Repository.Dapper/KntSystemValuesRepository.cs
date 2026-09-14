@@ -107,8 +107,15 @@ public class KntSystemValuesRepository : KntRepositoryDapperBase, IKntSystemValu
             result.Entity = entity;
 
             await CloseIsTempConnection(db);
-            
+
             return result;
+        }
+        catch (Exception ex) when (ex.IsUniqueConstraintViolation())
+        {
+            // Scope+Key has a unique index; a concurrent caller inserted this key first. Let
+            // callers (e.g. KntService.SaveSystemVariable) tell this apart from other failures and
+            // retry as an update instead of a generic, unactionable KntRepositoryException.
+            throw new KntUniqueConstraintViolationException($"KNote repository error. A system value already exists for scope '{entity.Scope}', key '{entity.Key}'. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
         catch (Exception ex)
         {

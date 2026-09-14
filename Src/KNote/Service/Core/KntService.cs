@@ -208,13 +208,57 @@ public class KntService : IKntService, IDisposable
             return result;
     }
 
+    // Concurrency notes: this used to decide insert-vs-update from a stale read (two concurrent
+    // callers could both see "no row yet" and both try to insert, racing on the unique index over
+    // Scope+Key) and discarded the save's result/exceptions via an unawaited Task. Fixed to retry
+    // as an update when a concurrent caller creates the row first - detected via
+    // KntUniqueConstraintViolationException, a provider-agnostic marker Repository.Dapper/
+    // Repository.EntityFramework throw specifically for this case (see
+    // KntSystemValuesRepository.AddAsync in each), rather than matching on exception message text.
+    // Two callers reading the same existing row and both updating it (a lost update) is not
+    // detected here, since UpdateAsync has no optimistic concurrency check - fixing that would need
+    // a concurrency token on SystemValues, out of proportion for what is otherwise a plain
+    // key/value setting.
     public void SaveSystemVariable(string scope, string key, string value)
     {
-        Guid id = Guid.Empty;
-        var valueDto = Task.Run(() => SystemValues.GetAsync(new KeyValuePair<string, string>(scope, key))).Result;
-        if (valueDto.IsValid)
-            id = valueDto.Entity.SystemValueId;
-        var res = Task.Run(() => SystemValues.SaveAsync(new SystemValueDto { SystemValueId = id, Scope = scope, Key = key, Value = value }));
+        const int maxAttempts = 5;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            var valueDto = Task.Run(() => SystemValues.GetAsync(new KeyValuePair<string, string>(scope, key))).Result;
+
+            var saveDto = valueDto.IsValid
+                ? new SystemValueDto { SystemValueId = valueDto.Entity.SystemValueId, Scope = scope, Key = key, Value = value }
+                : new SystemValueDto { SystemValueId = Guid.Empty, Scope = scope, Key = key, Value = value };
+
+            try
+            {
+                var saveResult = Task.Run(() => SystemValues.SaveAsync(saveDto)).Result;
+
+                if (!saveResult.IsValid)
+                    throw new KntServiceException($"Could not save system variable '{scope}/{key}': {saveResult.ErrorMessage}");
+
+                return;
+            }
+            catch (Exception ex) when (attempt < maxAttempts && ContainsUniqueConstraintViolation(ex))
+            {
+                // A concurrent caller inserted this Scope+Key row first; retry, this time reading
+                // and updating it instead of inserting.
+            }
+        }
+
+        throw new KntServiceException($"Could not save system variable '{scope}/{key}' after {maxAttempts} attempts due to concurrent writes.");
+    }
+
+    private static bool ContainsUniqueConstraintViolation(Exception ex)
+    {
+        for (var current = ex; current != null; current = current.InnerException)
+        {
+            if (current is KntUniqueConstraintViolationException)
+                return true;
+        }
+
+        return false;
     }
 
     public void PublishNoteInMessageBroker(NoteExtendedDto noteInfo)
