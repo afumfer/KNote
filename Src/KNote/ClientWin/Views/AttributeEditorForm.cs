@@ -1,5 +1,6 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 
@@ -18,6 +19,12 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
     // explicit Name so NoteTypeDto's own "(Enter new type note name)" placeholder default (for a
     // null Name) never shows up here.
     private static readonly NoteTypeDto NoNoteTypeItem = new() { NoteTypeId = Guid.Empty, Name = "(none)" };
+
+    // Primary/growing column for ListViewColumnResizer - "Description" is the tabulated value's
+    // descriptive, most variable-length column; "Value"/"Order" stay at their designer width.
+    private const int PrimaryColumnIndex = 1;
+
+    private ListViewColumnSorter _sorter;
 
     #endregion
 
@@ -116,7 +123,10 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
     {
         var value = await _ctrl.NewTabulatedValue();
         if (value != null)
+        {
             listViewTabulatedValues.Items.Add(TabulatedValueToListViewItem(value));
+            ListViewSelectionHelper.SelectByKey(listViewTabulatedValues, value.KAttributeTabulatedValueId.ToString(), _sorter);
+        }
     }
 
     private void buttonDeleteTabValue_Click(object sender, EventArgs e)
@@ -128,7 +138,10 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
             return;
         }
         if (_ctrl.DeleteTabulatedValue(selected))
+        {
             listViewTabulatedValues.Items[selected.ToString()]?.Remove();
+            ListViewSelectionHelper.SelectFirst(listViewTabulatedValues, _sorter);
+        }
     }
 
     private void buttonEditTabValue_Click(object sender, EventArgs e)
@@ -143,7 +156,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
 
     private void listViewTabulatedValues_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn(listViewTabulatedValues);
+        ListViewColumnResizer.Resize(listViewTabulatedValues, PrimaryColumnIndex);
     }
 
     #endregion
@@ -198,6 +211,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
         listViewTabulatedValues.FullRowSelect = true;
         listViewTabulatedValues.GridLines = true;
         listViewTabulatedValues.Sorting = SortOrder.None;
+        _sorter = ListViewSortHelper.Attach(listViewTabulatedValues);
     }
 
     private void ModelToControls()
@@ -226,6 +240,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
         listViewTabulatedValues.Columns.Add("Order", -2, HorizontalAlignment.Left);
         foreach (var value in _ctrl.Model.KAttributeValues)
             listViewTabulatedValues.Items.Add(TabulatedValueToListViewItem(value));
+        ListViewColumnResizer.Resize(listViewTabulatedValues, PrimaryColumnIndex);
 
         RefreshTabulatedValuesVisibility();
     }
@@ -279,15 +294,8 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
         listItem.Text = value.Value;
         listItem.SubItems[1].Text = value.Description;
         listItem.SubItems[2].Text = value.Order.ToString();
-    }
 
-    private void SizeLastColumn(ListView lv)
-    {
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
+        ListViewSelectionHelper.SelectByKey(listViewTabulatedValues, value.KAttributeTabulatedValueId.ToString(), _sorter);
     }
 
     #endregion

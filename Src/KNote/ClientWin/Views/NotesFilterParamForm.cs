@@ -1,5 +1,6 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
@@ -20,6 +21,12 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
     private Guid? _folderId;
     private readonly List<AtrFilterDto> _attributesFilter = new();
 
+    // Primary/growing column for ListViewColumnResizer - "Value" is the more variable-length
+    // column; "Attribute" (a name picked from a fixed selector) stays at its designer width.
+    private const int PrimaryColumnIndex = 1;
+
+    private ListViewColumnSorter _sorter;
+
     #endregion
 
     #region Constructor
@@ -29,6 +36,9 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
         InitializeComponent();
 
         _ctrl = ctrl;
+
+        _sorter = ListViewSortHelper.Attach(listViewAttributes);
+        listViewAttributes.Resize += (s, e) => ListViewColumnResizer.Resize(listViewAttributes, PrimaryColumnIndex);
     }
 
     #endregion
@@ -179,6 +189,7 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
             _attributesFilter.Remove(atr);
 
         listViewAttributes.Items.Remove(item);
+        ListViewSelectionHelper.SelectFirst(listViewAttributes, _sorter);
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)
@@ -203,6 +214,8 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
         comboRepositories.ValueMember = "IdServiceRef";
         comboRepositories.DisplayMember = "Alias";
         comboRepositories.SelectedIndex = comboRepositories.Items.Count > 0 ? 0 : -1;
+
+        ListViewColumnResizer.Resize(listViewAttributes, PrimaryColumnIndex);
     }
 
     private void PopulateNoteTypes()
@@ -217,9 +230,12 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
 
     private void AddAttributeRow(AtrFilterDto atr)
     {
-        var item = new ListViewItem(atr.AtrName) { Tag = atr };
+        // AtrFilterDto is a transient filter criterion, not a persisted entity with its own id, so a
+        // synthetic key is generated here purely so ListViewSelectionHelper can select this row back.
+        var item = new ListViewItem(atr.AtrName) { Name = Guid.NewGuid().ToString(), Tag = atr };
         item.SubItems.Add(atr.Value);
         listViewAttributes.Items.Add(item);
+        ListViewSelectionHelper.SelectByKey(listViewAttributes, item.Name, _sorter);
     }
 
     private void CleanView()
